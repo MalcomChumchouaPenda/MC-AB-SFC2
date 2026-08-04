@@ -2,38 +2,30 @@ import math
 import pytest
 import agentpy as ap
 from unittest.mock import Mock
-from mcabsfc.agents import HouseholdAgent
+from mcabsfc.agents import HouseholdAgent, EcoAgent
 
 # ---------------------------------------------------
 # ARCHITECTURAL TESTS
 # ----------------------------------------------------
 
 
-@pytest.fixture
-def model1():
-    # Given an empty model
-    return ap.Model()
+def test_is_eco_agent():
+    # Given
+    model = ap.Model()
 
-
-def test_is_agent(model1):
     # When
-    household = HouseholdAgent(model1)
+    household = HouseholdAgent(model)
 
     # Then
-    assert isinstance(household, ap.Agent)
+    assert isinstance(household, EcoAgent)
 
 
-def test_has_roles_dict(model1):
+def test_has_unit_labor_supply():
+    # Given
+    model = ap.Model()
+
     # When
-    household = HouseholdAgent(model1)
-
-    # Then
-    assert household.roles == {}
-
-
-def test_has_unit_labor_supply(model1):
-    # When
-    household = HouseholdAgent(model1)
+    household = HouseholdAgent(model)
 
     # Then
     assert household.labor_supply == 1.0
@@ -43,6 +35,10 @@ def test_has_unit_labor_supply(model1):
 # BEHAVIORAL TESTS
 # ----------------------------------------------------
 
+
+@pytest.fixture
+def model1():
+    return ap.Model()
 
 @pytest.fixture
 def worker_role():

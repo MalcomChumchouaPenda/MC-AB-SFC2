@@ -2,14 +2,22 @@ import math
 import agentpy as ap
 
 
+class EcoAgent(ap.Agent):
+
+    def __init__(self, model, *args, **kwargs):
+        super().__init__(model, *args, **kwargs)
+        self.roles = {}
+        self.stocks = {}
+        self.flows = {}
+
+
 class FirmAgent(ap.Agent):
     pass
 
 
-class HouseholdAgent(ap.Agent):
+class HouseholdAgent(EcoAgent):
 
     def setup(self):
-        self.roles = {}
         self.labor_supply = 1.0
 
     def revise_reservation_wage(self):

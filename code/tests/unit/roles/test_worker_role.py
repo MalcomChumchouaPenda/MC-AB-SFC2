@@ -1,15 +1,40 @@
 import pytest
 import agentpy as ap
 from unittest.mock import Mock
-from mcabsfc.roles import WorkerRole
+from mcabsfc.roles import WorkerRole, Role
 
 # ---------------------------------------------------
 # ARCHITECTURAL TESTS
 # ----------------------------------------------------
 
 
-def test_is_agent_node():
-    assert issubclass(WorkerRole, ap.AgentNode)
+def test_is_role():
+    # Given
+    market = Mock()
+    owner = Mock(id=1)
+
+    # When
+    worker = WorkerRole(owner, market)
+
+    # Then
+    assert isinstance(worker, Role)
+
+
+def test_has_market():
+    # Given
+    market = Mock()
+    owner = Mock(id=1)
+
+    # When
+    worker = WorkerRole(owner, market)
+
+    # Then
+    assert worker.market == market
+
+
+# ---------------------------------------------------
+# BEHAVIORAL TESTS
+# ----------------------------------------------------
 
 
 @pytest.fixture
@@ -20,23 +45,6 @@ def market():
 @pytest.fixture
 def owner():
     return Mock(id=1)
-
-
-def test_has_owner_and_market(owner, market):
-    role = WorkerRole(owner, market)
-    assert role.owner == owner
-    assert role.market == market
-    assert role.label == owner.id
-
-
-def test_has_label_generated_from_owner_id(owner, market):
-    role = WorkerRole(owner, market)
-    assert role.label == owner.id
-
-
-# ---------------------------------------------------
-# BEHAVIORAL TESTS
-# ----------------------------------------------------
 
 
 @pytest.fixture

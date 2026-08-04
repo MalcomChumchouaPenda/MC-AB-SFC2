@@ -2,22 +2,29 @@ from dataclasses import dataclass
 import agentpy as ap
 
 
-@dataclass(frozen=True)
-class JobOffer:
-    employer: object
-    wage: float
-    vacancy: float
+class Role(ap.AgentNode):
 
+    def __init__(self, owner):
+        super().__init__(owner.id)
+        self.owner = owner
+
+    def get_stock(self, name):
+        return self.owner.stocks[name]
+
+    def get_flow(self, name):
+        return self.owner.flows[name]
+
+
+    
 
 class EmployerRole:
     pass
 
 
-class WorkerRole(ap.AgentNode):
+class WorkerRole(Role):
 
     def __init__(self, owner, market):
-        super().__init__(owner.id)
-        self.owner = owner
+        super().__init__(owner)
         self.market = market
 
     def find_employers(self, size):
@@ -35,9 +42,8 @@ class WorkerRole(ap.AgentNode):
         return self.market.unemployment_rate
 
 
-class ConsumerRole(ap.AgentNode):
+class ConsumerRole(Role):
 
     def __init__(self, owner, market):
-        super().__init__(owner.id)
-        self.owner = owner
+        super().__init__(owner)
         self.market = market
