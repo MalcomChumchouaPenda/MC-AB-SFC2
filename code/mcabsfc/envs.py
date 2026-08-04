@@ -15,7 +15,7 @@ class LaborMarket(ap.Network):
         return worker
 
     def create_job(self, worker, employer, quantity):
-        print('create', worker, employer)
+        print("create", worker, employer)
         self.graph.add_edge(worker, employer, wage=employer.wage, quantity=quantity)
 
     def find_employers(self, search_size=1):

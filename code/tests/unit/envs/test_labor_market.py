@@ -13,9 +13,11 @@ from mcabsfc.envs import LaborMarket
 def test_is_network():
     assert issubclass(LaborMarket, ap.Network)
 
+
 def test_has_directed_graph():
     market = LaborMarket(ap.Model())
     assert isinstance(market.graph, DiGraph)
+
 
 # ---------------------------------------------------
 # BEHAVIORAL TESTS

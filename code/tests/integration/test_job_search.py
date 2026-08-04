@@ -47,7 +47,7 @@ def test_household_finds_jobs_on_labor_market(monkeypatch, household, market):
     edges = list(market.graph.edges)
     assert len(edges) == 2
     for source, target in edges:
-        assert source is household.roles['worker']
+        assert source is household.roles["worker"]
         assert isinstance(source, WorkerRole)
         assert isinstance(target, FakeEmployerRole)
 

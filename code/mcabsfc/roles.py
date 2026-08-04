@@ -41,7 +41,3 @@ class ConsumerRole(ap.AgentNode):
         super().__init__(owner.id)
         self.owner = owner
         self.market = market
-
-
-
-

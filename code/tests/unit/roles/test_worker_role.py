@@ -90,4 +90,3 @@ def test_gets_unemployment_rate_from_market(worker, market):
 
     # Then
     assert unemployment == 0.15
-    
