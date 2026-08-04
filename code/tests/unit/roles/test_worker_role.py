@@ -1,7 +1,7 @@
 import pytest
 import agentpy as ap
 from unittest.mock import Mock
-from mcabsfc.roles import WorkerRole, Role
+from mcabsfc.roles import WorkerRole
 
 # ---------------------------------------------------
 # ARCHITECTURAL TESTS
@@ -17,10 +17,10 @@ def test_is_role():
     worker = WorkerRole(owner, market)
 
     # Then
-    assert isinstance(worker, Role)
+    assert isinstance(worker, ap.AgentNode)
 
 
-def test_has_market():
+def test_has_owner_and_market():
     # Given
     market = Mock()
     owner = Mock(id=1)
@@ -30,6 +30,8 @@ def test_has_market():
 
     # Then
     assert worker.market == market
+    assert worker.owner == owner
+    assert worker.label == owner.id
 
 
 # ---------------------------------------------------
