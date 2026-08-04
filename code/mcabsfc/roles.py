@@ -15,8 +15,6 @@ class Role(ap.AgentNode):
         return self.owner.flows[name]
 
 
-    
-
 class EmployerRole:
     pass
 

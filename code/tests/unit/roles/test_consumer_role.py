@@ -20,7 +20,6 @@ def test_is_role():
     assert isinstance(consumer, Role)
 
 
-
 def test_has_market():
     # Given
     market = Mock()

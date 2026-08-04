@@ -40,6 +40,7 @@ def test_has_unit_labor_supply():
 def model1():
     return ap.Model()
 
+
 @pytest.fixture
 def worker_role():
     role = Mock()

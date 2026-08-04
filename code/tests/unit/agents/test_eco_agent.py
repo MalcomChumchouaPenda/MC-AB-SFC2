@@ -1,8 +1,6 @@
-
 import pytest
 import agentpy as ap
 from mcabsfc.agents import EcoAgent
-
 
 # ---------------------------------------------------
 # ARCHITECTURAL TESTS
@@ -10,7 +8,7 @@ from mcabsfc.agents import EcoAgent
 
 
 def test_is_agent():
-    # Given 
+    # Given
     model = ap.Model()
 
     # When
@@ -18,7 +16,6 @@ def test_is_agent():
 
     # Then
     assert isinstance(agent, ap.Agent)
-    
 
 
 def test_has_roles_dict():
@@ -41,7 +38,7 @@ def test_has_stocks_dict():
 
     # Then
     assert agent.stocks == {}
-    
+
 
 def test_has_flows_dict():
     # Given
@@ -52,5 +49,3 @@ def test_has_flows_dict():
 
     # Then
     assert agent.flows == {}
-
-
