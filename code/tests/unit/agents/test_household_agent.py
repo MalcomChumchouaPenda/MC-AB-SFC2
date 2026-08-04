@@ -2,22 +2,34 @@ import math
 import pytest
 import agentpy as ap
 from unittest.mock import Mock
-from mcabsfc.agents import HouseholdAgent, EcoAgent
+from mcabsfc.agents import HouseholdAgent
 
 # ---------------------------------------------------
 # ARCHITECTURAL TESTS
 # ----------------------------------------------------
 
 
-def test_is_eco_agent():
+def test_is_agent():
     # Given
     model = ap.Model()
 
     # When
-    household = HouseholdAgent(model)
+    agent = HouseholdAgent(model)
 
     # Then
-    assert isinstance(household, EcoAgent)
+    assert isinstance(agent, ap.Agent)
+
+
+def test_has_roles_dict():
+    # Given
+    model = ap.Model()
+
+    # When
+    agent = HouseholdAgent(model)
+
+    # Then
+    assert agent.roles == {}
+
 
 
 def test_has_unit_labor_supply():
