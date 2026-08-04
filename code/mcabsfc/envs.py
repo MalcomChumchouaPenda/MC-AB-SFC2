@@ -8,6 +8,12 @@ class LaborMarket(ap.Network):
     def __init__(self, model, **kwargs):
         super().__init__(model, graph=DiGraph(), **kwargs)
 
+    def add_employer(self, firm):
+        employer = EmployerRole(firm, self)
+        firm.roles["employer"] = employer
+        self.graph.add_node(employer)
+        return employer
+
     def add_worker(self, household):
         worker = WorkerRole(household, self)
         household.roles["worker"] = worker

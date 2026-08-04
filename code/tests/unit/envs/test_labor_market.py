@@ -11,11 +11,24 @@ from mcabsfc.envs import LaborMarket
 
 
 def test_is_network():
-    assert issubclass(LaborMarket, ap.Network)
+    # Given
+    model = ap.Model()
+
+    # When
+    market = LaborMarket(model)
+
+    # Then
+    assert isinstance(market, ap.Network)
 
 
 def test_has_directed_graph():
-    market = LaborMarket(ap.Model())
+    # Given
+    model = ap.Model()
+
+    # When
+    market = LaborMarket(model)
+
+    # Then
     assert isinstance(market.graph, DiGraph)
 
 
@@ -25,27 +38,37 @@ def test_has_directed_graph():
 
 
 @dataclass(frozen=True)
+class FakeWorkerRole:
+    owner: object = None
+    market: object = None
+    label: int = 1
+
+
+@dataclass(frozen=True)
 class FakeEmployerRole:
-    label: str
+    owner: object = None
+    market: object = None
+    label: int = 2
 
 
 @pytest.fixture
-def market():
+def market(monkeypatch):
     model = ap.Model()
     market = LaborMarket(model)
+    monkeypatch.setattr("mcabsfc.envs.WorkerRole", FakeWorkerRole)
+    monkeypatch.setattr("mcabsfc.envs.EmployerRole", FakeEmployerRole)
     return market
 
 
-def test_find_employers_returns_exact_number_of_employers(market, monkeypatch):
+def test_find_employers_returns_exact_number_of_employers(market):
     # Given
-    monkeypatch.setattr("mcabsfc.envs.EmployerRole", FakeEmployerRole)
     market.graph.add_nodes_from(
         [
-            FakeEmployerRole("F1"),
-            FakeEmployerRole("F2"),
-            FakeEmployerRole("F3"),
-            FakeEmployerRole("F4"),
-            FakeEmployerRole("F5"),
+            FakeEmployerRole(label="F1"),
+            FakeEmployerRole(label="F2"),
+            FakeEmployerRole(label="F3"),
+            FakeEmployerRole(label="F4"),
+            FakeEmployerRole(label="F5"),
         ]
     )
 
@@ -56,14 +79,13 @@ def test_find_employers_returns_exact_number_of_employers(market, monkeypatch):
     assert len(sample) == 3
 
 
-def test_find_employers_returns_non_redundant_employers(market, monkeypatch):
+def test_find_employers_returns_non_redundant_employers(market):
     # Given
-    monkeypatch.setattr("mcabsfc.envs.EmployerRole", FakeEmployerRole)
     market.graph.add_nodes_from(
         [
-            FakeEmployerRole("F1"),
-            FakeEmployerRole("F2"),
-            FakeEmployerRole("F3"),
+            FakeEmployerRole(label="F1"),
+            FakeEmployerRole(label="F2"),
+            FakeEmployerRole(label="F3"),
         ]
     )
 
@@ -109,15 +131,8 @@ def test_compute_labor_sold_by_worker(market):
     assert labor_sold == 0.4
 
 
-@dataclass(frozen=True)
-class FakeWorkerRole:
-    owner: object
-    market: object
-
-
-def test_add_worker_creates_and_registers_worker_role(market, monkeypatch):
+def test_add_worker_creates_and_registers_worker_role(market):
     # Given
-    monkeypatch.setattr("mcabsfc.envs.WorkerRole", FakeWorkerRole)
     household = Mock(id=1, roles={})
 
     # When
@@ -129,3 +144,18 @@ def test_add_worker_creates_and_registers_worker_role(market, monkeypatch):
     assert worker.market is market
     assert worker in market.nodes
     assert worker is household.roles["worker"]
+
+
+def test_add_employer_creates_and_registers_employer_role(market):
+    # Given
+    firm = Mock(id=1, roles={})
+
+    # When
+    employer = market.add_employer(firm)
+
+    # Then
+    assert isinstance(employer, FakeEmployerRole)
+    assert employer.owner is firm
+    assert employer.market is market
+    assert employer in market.nodes
+    assert employer is firm.roles["employer"]
