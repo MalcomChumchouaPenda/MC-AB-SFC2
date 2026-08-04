@@ -24,6 +24,16 @@ class Role(ap.AgentNode):
     def get_flow(self, name):
         return self.owner.flows[name]
 
+    def credit_flow(self, name, amount):
+        if name not in self.owner.flows:
+            self.owner.flows[name] = 0
+        self.owner.flows[name] += amount
+
+    def debit_flow(self, name, amount):
+        if name not in self.owner.flows:
+            self.owner.flows[name] = 0
+        self.owner.flows[name] -= amount
+
 
 class EmployerRole:
     pass

@@ -51,6 +51,7 @@ def test_access_owner_stocks_and_flows():
     assert stock == 100
     assert flow == 50
 
+
 def test_role_can_credit_and_debit_stock():
     # Given
     agent = Mock()
@@ -64,4 +65,16 @@ def test_role_can_credit_and_debit_stock():
     # Then
     assert agent.stocks["deposit"] == 130
 
-    
+
+def test_role_can_credit_and_debit_flow():
+    # Given
+    agent = Mock()
+    agent.flows = {"wage_income": 100}
+    role = Role(agent)
+
+    # When
+    role.credit_flow("wage_income", 50)
+    role.debit_flow("wage_income", 20)
+
+    # Then
+    assert agent.flows["wage_income"] == 130
