@@ -11,6 +11,16 @@ class Role(ap.AgentNode):
     def get_stock(self, name):
         return self.owner.stocks[name]
 
+    def credit_stock(self, name, amount):
+        if name not in self.owner.stocks:
+            self.owner.stocks[name] = 0
+        self.owner.stocks[name] += amount
+
+    def debit_stock(self, name, amount):
+        if name not in self.owner.stocks:
+            self.owner.stocks[name] = 0
+        self.owner.stocks[name] -= amount
+
     def get_flow(self, name):
         return self.owner.flows[name]
 
