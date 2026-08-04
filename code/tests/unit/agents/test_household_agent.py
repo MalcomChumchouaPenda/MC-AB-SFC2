@@ -258,7 +258,7 @@ def test_dont_decreases_reservation_wage_when_chooses_not_to_revise(household4, 
 def test_downward_wage_revision_probability_when_partially_employed(household4, model2):
     # Given
     household4.roles["worker"].unemployment_rate = 0.10
-    model2.nprandom.choice.return_value = 0
+    model2.nprandom.choice.return_value = 1
     model2.nprandom.uniform.return_value = 0.05
 
     # When
@@ -268,55 +268,3 @@ def test_downward_wage_revision_probability_when_partially_employed(household4, 
     p = model2.p
     prob = p.upsilon_h * math.exp(-p.upsilon * 0.10)
     model2.nprandom.choice.assert_called_with([0, 1], p=[prob, 1 - prob])
-
-
-# def test_reservation_wage_never_becomes_negative(monkeypatch):
-
-#     household, market = create_household()
-
-#     household.reservation_wage = 1
-#     household.employed_labor = 0
-#     market.unemployment_rate = 0.90
-
-#     monkeypatch.setattr(
-#         household.model.random,
-#         "random",
-#         lambda: 0.0,
-#         raising=False,
-#     )
-
-#     monkeypatch.setattr(
-#         household.model.random,
-#         "uniform",
-#         lambda a, b: 1.0,
-#         raising=False,
-#     )
-
-#     household.revise_reservation_wage()
-
-#     assert household.reservation_wage >= 0
-
-
-# def test_household_gets_unemployment_rate_from_worker_role():
-
-#     household, market = create_household()
-
-#     market.unemployment_rate = 0.42
-
-#     assert household.roles["worker"].get_unemployment_rate() == 0.42
-
-
-# def test_probability_formula():
-
-#     household, market = create_household()
-
-#     market.unemployment_rate = 0.10
-
-#     expected = household.model.p.upsilon_h * math.exp(
-#         -household.model.p.upsilon * market.unemployment_rate
-#     )
-
-#     assert (
-#         pytest.approx(household.roles["worker"].upward_revision_probability())
-#         == expected
-#     )
