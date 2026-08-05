@@ -106,6 +106,12 @@ def test_accounting_methods_use_existing_attributes_only():
     role = EcoRole(agent, space)
 
     # Assert
-    expected = "has no attribute 'unknown_stock'"
+    expected = "has no attribute 'unknown'"
     with pytest.raises(AttributeError, match=expected):
-        role.credit_stock("unknown_stock", 10)
+        role.credit_stock("unknown", 10)
+    with pytest.raises(AttributeError, match=expected):
+        role.debit_stock("unknown", 10)
+    with pytest.raises(AttributeError, match=expected):
+        role.credit_flow("unknown", 10)
+    with pytest.raises(AttributeError, match=expected):
+        role.debit_flow("unknown", 10)
