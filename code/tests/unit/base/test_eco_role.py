@@ -27,7 +27,6 @@ def test_has_owner_and_space_reference():
     assert role.space is space
 
 
-
 def test_has_generated_label():
     # Given
     agent = Mock(id=1)
@@ -36,3 +35,77 @@ def test_has_generated_label():
 
     # Assert
     assert role.label == agent.id
+
+
+class DummyAgent:
+    def __init__(self):
+        self.id = 1
+        self.deposits = 100
+        self.equity = 50
+        self.labor_income = 0
+        self.interest_income = 0
+
+
+def test_credit_stock_increases_agent_stock():
+    # Given
+    space = Mock()
+    agent = DummyAgent()
+    role = EcoRole(agent, space)
+
+    # When
+    role.credit_stock("deposits", 25)
+
+    # Then
+    assert agent.deposits == 125
+
+
+def test_debit_stock_decreases_agent_stock():
+    # Given
+    space = Mock()
+    agent = DummyAgent()
+    role = EcoRole(agent, space)
+
+    # When
+    role.debit_stock("deposits", 40)
+
+    # Then
+    assert agent.deposits == 60
+
+
+def test_credit_flow_increases_agent_flow():
+    # Given
+    space = Mock()
+    agent = DummyAgent()
+    role = EcoRole(agent, space)
+
+    # When
+    role.credit_flow("labor_income", 100)
+
+    # Then
+    assert agent.labor_income == 100
+
+
+def test_debit_flow_decreases_agent_flow():
+    # Given
+    space = Mock()
+    agent = DummyAgent()
+    role = EcoRole(agent, space)
+
+    # When
+    role.credit_flow("labor_income", 100)
+    role.debit_flow("labor_income", 30)
+
+    # Then
+    assert agent.labor_income == 70
+
+
+def test_accounting_methods_use_existing_attributes_only():
+    # Given
+    space = Mock()
+    agent = DummyAgent()
+    role = EcoRole(agent, space)
+
+    # Assert
+    expected = "has no attribute 'unknown_stock'"
+    with pytest.raises(AttributeError, match=expected):
+        role.credit_stock("unknown_stock", 10)

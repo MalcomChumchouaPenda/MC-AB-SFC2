@@ -26,6 +26,26 @@ class EcoRole(ap.AgentNode):
         self.owner = owner
         self.space = space
 
+    def credit_stock(self, stock_name, amount):
+        owner = self.owner
+        value = getattr(owner, stock_name)
+        setattr(owner, stock_name, value + amount)
+
+    def debit_stock(self, stock_name, amount):
+        owner = self.owner
+        value = getattr(owner, stock_name)
+        setattr(owner, stock_name, value - amount)
+
+    def credit_flow(self, flow_name, amount):
+        owner = self.owner
+        value = getattr(owner, flow_name)
+        setattr(owner, flow_name, value + amount)
+
+    def debit_flow(self, flow_name, amount):
+        owner = self.owner
+        value = getattr(owner, flow_name)
+        setattr(owner, flow_name, value - amount)
+
 
 class EcoSpace(ap.Network):
     """
