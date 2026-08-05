@@ -8,7 +8,6 @@ class FirmAgent(ap.Agent):
         self.roles = {}
 
 
-
 class HouseholdAgent(ap.Agent):
 
     def setup(self):

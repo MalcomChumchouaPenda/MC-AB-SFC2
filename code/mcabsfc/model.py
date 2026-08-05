@@ -12,5 +12,3 @@ class EcoModel(ap.Model):
         super().__init__(parameters, _run_id, **kwargs)
         self.agents = {}
         self.spaces = {}
-
-

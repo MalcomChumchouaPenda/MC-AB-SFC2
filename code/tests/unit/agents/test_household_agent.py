@@ -31,7 +31,6 @@ def test_has_roles_dict():
     assert agent.roles == {}
 
 
-
 def test_has_unit_labor_supply():
     # Given
     model = ap.Model()

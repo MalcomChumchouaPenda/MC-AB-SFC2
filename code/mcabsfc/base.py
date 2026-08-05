@@ -38,4 +38,3 @@ class EcoSpace(ap.Network):
     def __init__(self, model, graph=None, **kwargs):
         super().__init__(model, graph, **kwargs)
         self.roles = {}
-

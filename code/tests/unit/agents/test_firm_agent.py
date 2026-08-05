@@ -26,4 +26,3 @@ def test_has_roles_dict():
 
     # Then
     assert agent.roles == {}
-
