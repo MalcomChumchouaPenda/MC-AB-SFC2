@@ -4,7 +4,7 @@ from unittest.mock import Mock
 from dataclasses import dataclass
 from mcabsfc.agents import HouseholdAgent
 from mcabsfc.roles import WorkerRole
-from mcabsfc.envs import LaborMarket
+from mcabsfc.spaces import LaborMarket
 
 
 @dataclass(frozen=True)

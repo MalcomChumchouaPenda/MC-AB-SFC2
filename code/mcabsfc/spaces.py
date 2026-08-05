@@ -1,9 +1,32 @@
 import agentpy as ap
 from networkx import DiGraph
+from .base import EcoSpace
 from .roles import EmployerRole, WorkerRole
 
 
-class LaborMarket(ap.Network):
+class MonetaryUnionSpace(EcoSpace):
+
+    def setup(self):
+        super().setup()
+        self.countries = {}
+        self.markets = {}
+
+
+class CountrySpace(EcoSpace):
+
+    def setup(self):
+        super().setup()
+        self.markets = {}
+
+
+class GoodsMarket(EcoSpace):
+
+    def __init__(self, model, tradable=True, **kwargs):
+        super().__init__(model, graph=None, **kwargs)
+        self.tradable = tradable
+
+
+class LaborMarket(EcoSpace):
 
     def __init__(self, model, **kwargs):
         super().__init__(model, graph=DiGraph(), **kwargs)
@@ -36,5 +59,18 @@ class LaborMarket(ap.Network):
         )
 
 
-class GoodsMarket(ap.Network):
+class CreditMarket(EcoSpace):
     pass
+
+
+class DepositMarket(EcoSpace):
+    pass
+
+
+class BondMarket(EcoSpace):
+    pass
+
+
+class EquityMarket(EcoSpace):
+    pass
+

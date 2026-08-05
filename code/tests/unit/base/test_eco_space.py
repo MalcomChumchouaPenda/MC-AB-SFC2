@@ -10,7 +10,7 @@ def test_is_agentpy_network():
 
 
 def test_contains_roles_collection():
-    # Arrange
+    # Given
     model = Mock()
     space = EcoSpace(model)
 

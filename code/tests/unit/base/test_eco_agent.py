@@ -10,7 +10,7 @@ def test_is_agentpy_agent():
 
 
 def test_contains_roles_collection():
-    # Arrange
+    # Given
     model = Mock()
     agent = EcoAgent(model)
 

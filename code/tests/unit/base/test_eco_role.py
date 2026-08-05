@@ -10,7 +10,7 @@ def test_is_agentnode():
 
 
 def test_has_owner_reference():
-    # Arrange
+    # Given
     agent = Mock(id=1)
     role = EcoRole(agent)
 
@@ -19,7 +19,7 @@ def test_has_owner_reference():
 
 
 def test_has_space_reference():
-    # Arrange
+    # Given
     agent = Mock(id=1)
     role = EcoRole(agent)
 
@@ -28,7 +28,7 @@ def test_has_space_reference():
 
 
 def test_has_generated_label():
-    # Arrange
+    # Given
     agent = Mock(id=1)
     role = EcoRole(agent)
 

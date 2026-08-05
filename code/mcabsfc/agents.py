@@ -1,14 +1,10 @@
 import math
 import agentpy as ap
+from .base import EcoAgent
 
 
-class FirmAgent(ap.Agent):
 
-    def setup(self):
-        self.roles = {}
-
-
-class HouseholdAgent(ap.Agent):
+class HouseholdAgent(EcoAgent):
 
     def setup(self):
         self.roles = {}
@@ -40,3 +36,22 @@ class HouseholdAgent(ap.Agent):
             if quantity > 0:
                 role.accept_job(employer, quantity)
                 remaining -= quantity
+
+
+class FirmAgent(EcoAgent):
+
+    def setup(self):
+        self.roles = {}
+
+
+class BankAgent(EcoAgent):
+    pass
+
+
+class GovernmentAgent(EcoAgent):
+    pass
+
+
+class CentralBankAgent(EcoAgent):
+    pass
+

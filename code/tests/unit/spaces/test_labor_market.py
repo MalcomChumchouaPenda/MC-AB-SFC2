@@ -3,22 +3,19 @@ import agentpy as ap
 from unittest.mock import Mock
 from networkx import DiGraph
 from dataclasses import dataclass
-from mcabsfc.envs import LaborMarket
+from mcabsfc.spaces import LaborMarket
 
 # ---------------------------------------------------
 # ARCHITECTURAL TESTS
 # ----------------------------------------------------
 
 
-def test_is_network():
+def test_is_ecospace():
     # Given
-    model = ap.Model()
+    from mcabsfc.base import EcoSpace
 
-    # When
-    market = LaborMarket(model)
-
-    # Then
-    assert isinstance(market, ap.Network)
+    # Assert
+    assert issubclass(LaborMarket, EcoSpace)
 
 
 def test_has_directed_graph():
@@ -55,8 +52,8 @@ class FakeEmployerRole:
 def market(monkeypatch):
     model = ap.Model()
     market = LaborMarket(model)
-    monkeypatch.setattr("mcabsfc.envs.WorkerRole", FakeWorkerRole)
-    monkeypatch.setattr("mcabsfc.envs.EmployerRole", FakeEmployerRole)
+    monkeypatch.setattr("mcabsfc.spaces.WorkerRole", FakeWorkerRole)
+    monkeypatch.setattr("mcabsfc.spaces.EmployerRole", FakeEmployerRole)
     return market
 
 

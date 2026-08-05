@@ -8,7 +8,7 @@ def test_is_agentpy_model():
     assert issubclass(EcoModel, ap.Model)
 
 
-# Arrange
+# Given
 @pytest.fixture
 def model():
     return EcoModel()

@@ -9,26 +9,12 @@ from mcabsfc.agents import HouseholdAgent
 # ----------------------------------------------------
 
 
-def test_is_agent():
+def test_is_ecoagent():
     # Given
-    model = ap.Model()
+    from mcabsfc.base import EcoAgent
 
-    # When
-    agent = HouseholdAgent(model)
-
-    # Then
-    assert isinstance(agent, ap.Agent)
-
-
-def test_has_roles_dict():
-    # Given
-    model = ap.Model()
-
-    # When
-    agent = HouseholdAgent(model)
-
-    # Then
-    assert agent.roles == {}
+    # Assert
+    assert issubclass(HouseholdAgent, EcoAgent)
 
 
 def test_has_unit_labor_supply():
