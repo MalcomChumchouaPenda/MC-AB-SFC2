@@ -1,31 +1,24 @@
-from dataclasses import dataclass
 import agentpy as ap
+from .base import EcoRole
 
 
-class EmployerRole:
+class EmployerRole(EcoRole):
     pass
 
 
-class WorkerRole(ap.AgentNode):
+class WorkerRole(EcoRole):
 
-    def __init__(self, owner, market):
-        super().__init__(owner.id)
-        self.owner = owner
-        self.market = market
+    def search_employers(self, psi):
+        return self.space.search_employers(psi)
 
-    def find_employers(self, size):
-        return self.market.find_employers(size)
+    def create_job(self, employer, quantity):
+        self.space.create_job(self, employer, quantity)
 
-    def accept_job(self, employer, quantity):
-        self.market.create_job(self, employer, quantity)
+    def get_labor_sold(self):
+        return self.space.get_labor_sold(self)
 
-    @property
-    def labor_sold(self):
-        return self.market.labor_sold(self)
-
-    @property
-    def unemployment_rate(self):
-        return self.market.unemployment_rate
+    def get_unemployment_rate(self):
+        return self.space.unemployment_rate
 
 
 class ConsumerRole(ap.AgentNode):

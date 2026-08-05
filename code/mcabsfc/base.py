@@ -21,10 +21,10 @@ class EcoRole(ap.AgentNode):
     et un adaptateur vers un espace d'interaction.
     """
 
-    def __init__(self, owner):
+    def __init__(self, owner, space):
         super().__init__(owner.id)
         self.owner = owner
-        self.space = None
+        self.space = space
 
 
 class EcoSpace(ap.Network):

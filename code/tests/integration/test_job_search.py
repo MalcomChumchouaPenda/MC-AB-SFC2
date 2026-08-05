@@ -15,7 +15,7 @@ class FakeEmployerRole:
 
 @pytest.fixture
 def model():
-    return Model()
+    return Model({"psi": 2})
 
 
 @pytest.fixture
@@ -27,11 +27,10 @@ def market(model):
 def household(model):
     household = HouseholdAgent(model)
     household.reservation_wage = 10
-    household.search_size = 2
     return household
 
 
-def test_household_finds_jobs_on_labor_market(monkeypatch, household, market):
+def test_household_search_jobs_on_labor_market(monkeypatch, household, market):
     # Given
     monkeypatch.setattr("mcabsfc.spaces.EmployerRole", FakeEmployerRole)
     employer1 = FakeEmployerRole("F1", wage=20, demand=0.4)

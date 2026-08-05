@@ -9,28 +9,30 @@ def test_is_agentnode():
     assert issubclass(EcoRole, ap.AgentNode)
 
 
-def test_has_owner_reference():
+def test_requires_owner_and_space():
+    # Assert
+    expected = "required positional arguments: 'owner' and 'space'"
+    with pytest.raises(TypeError, match=expected):
+        EcoRole()
+
+
+def test_has_owner_and_space_reference():
     # Given
     agent = Mock(id=1)
-    role = EcoRole(agent)
+    space = Mock()
+    role = EcoRole(agent, space)
 
     # Assert
     assert role.owner is agent
+    assert role.space is space
 
-
-def test_has_space_reference():
-    # Given
-    agent = Mock(id=1)
-    role = EcoRole(agent)
-
-    # Assert
-    assert role.space is None
 
 
 def test_has_generated_label():
     # Given
     agent = Mock(id=1)
-    role = EcoRole(agent)
+    space = Mock()
+    role = EcoRole(agent, space)
 
     # Assert
     assert role.label == agent.id

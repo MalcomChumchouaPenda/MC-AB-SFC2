@@ -30,4 +30,3 @@ def test_goods_market_can_be_non_tradable():
 
     # Assert
     assert market.tradable is False
-

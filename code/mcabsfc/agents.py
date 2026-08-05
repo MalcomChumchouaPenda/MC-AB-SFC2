@@ -3,38 +3,42 @@ import agentpy as ap
 from .base import EcoAgent
 
 
-
 class HouseholdAgent(EcoAgent):
 
     def setup(self):
         self.roles = {}
         self.labor_supply = 1.0
 
-    def revise_reservation_wage(self):
-        p = self.model.p
+    def calc_revision_probability(self):
+        p = self.p
         role = self.roles["worker"]
-        choice = self.model.nprandom.choice
-        uniform = self.model.nprandom.uniform
-        prob = p.upsilon_h * math.exp(-p.upsilon * role.unemployment_rate)
+        unemployment = role.get_unemployment_rate()
+        return p.upsilon_h * math.exp(-p.upsilon * unemployment)
+
+    def revise_reservation_wage(self):
+        p = self.p
+        random = self.model.nprandom
+        prob = self.calc_revision_probability()
         if self.employed_labor == self.labor_supply:
-            if choice([0, 1], p=[1 - prob, prob]):
-                self.reservation_wage *= 1 + uniform(0, p.delta)
+            if random.choice([0, 1], p=[1 - prob, prob]):
+                self.reservation_wage *= 1 + random.uniform(0, p.delta)
         else:
-            if choice([0, 1], p=[prob, 1 - prob]):
-                self.reservation_wage *= 1 - uniform(0, p.delta)
+            if random.choice([0, 1], p=[prob, 1 - prob]):
+                self.reservation_wage *= 1 - random.uniform(0, p.delta)
 
     def search_jobs(self):
+        p = self.p
         role = self.roles["worker"]
-        employers = role.find_employers(self.search_size)
+        employers = role.search_employers(p.psi)
         accepted = [e for e in employers if e.wage >= self.reservation_wage]
         accepted.sort(key=lambda employer: employer.wage, reverse=True)
-        remaining = self.labor_supply - role.labor_sold
+        remaining = self.labor_supply - role.get_labor_sold()
         for employer in accepted:
             if remaining <= 0:
                 break
             quantity = min(remaining, employer.demand)
             if quantity > 0:
-                role.accept_job(employer, quantity)
+                role.create_job(employer, quantity)
                 remaining -= quantity
 
 
@@ -54,4 +58,3 @@ class GovernmentAgent(EcoAgent):
 
 class CentralBankAgent(EcoAgent):
     pass
-
