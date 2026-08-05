@@ -334,7 +334,7 @@ def test_calc_consumption_total():
 
     # Then
     assert consumption == 850
-    assert household.CD == 850
+    assert household.desired_consumption == 850
 
 
 def test_calc_consumption_composition():
@@ -351,5 +351,5 @@ def test_calc_consumption_composition():
     household.calc_consumption()
 
     # Then
-    assert household.CDT == 510
-    assert household.CDNT == 340
+    assert household.desired_trad_cons == 510
+    assert household.desired_non_trad_cons == 340
