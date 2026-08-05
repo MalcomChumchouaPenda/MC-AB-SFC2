@@ -27,7 +27,7 @@ def test_has_unit_labor_supply():
 
 
 # ---------------------------------------------------
-# BEHAVIORAL TESTS
+# WORKER BEHAVIORS TESTS
 # ----------------------------------------------------
 
 
@@ -257,3 +257,58 @@ def test_can_choose_to_not_decreases_reservation_wage(part_employed_before):
     # Then
     random.uniform.assert_not_called()
     assert household.reservation_wage == 10.0
+
+
+# ---------------------------------------------------
+# INCOME COMPUTATION TESTS
+# ----------------------------------------------------
+
+
+def test_calc_gross_income():
+    # Given
+    model = Mock()
+    household = HouseholdAgent(model)
+    household.labor_income = 100
+    household.interest_income = 20
+    household.dividend_income = 30
+    household.rnd_income = 10
+
+    # When
+    income = household.calc_gross_income()
+
+    # Then
+    assert income == 160
+    assert household.gross_income == 160
+
+
+def test_calc_disposable_income():
+    # Given
+    model = Mock()
+    citizen_role = Mock()
+    citizen_role.get_tax_rate.return_value = 0.2
+    household = HouseholdAgent(model)
+    household.gross_income = 200
+    household.public_transfer = 50
+    household.roles["citizen"] = citizen_role
+
+    # When
+    income = household.calc_disposable_income()
+
+    # Then
+    assert income == 210
+    assert household.disposable_income == 210
+
+
+def test_calc_expected_net_worth():
+    # Given
+    model = Mock()
+    household = HouseholdAgent(model)
+    household.net_worth = 1000
+    household.disposable_income = 300
+    household.expected_consumption = 200
+
+    # When
+    expected_worth = household.calc_expected_net_worth()
+
+    # Then
+    assert expected_worth == 1100

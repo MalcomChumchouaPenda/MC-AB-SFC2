@@ -41,6 +41,26 @@ class HouseholdAgent(EcoAgent):
                 role.create_job(employer, quantity)
                 remaining -= quantity
 
+    def calc_gross_income(self):
+        self.gross_income = (
+            self.labor_income
+            + self.interest_income
+            + self.dividend_income
+            + self.rnd_income
+        )
+        return self.gross_income
+
+    def calc_disposable_income(self):
+        role = self.roles["citizen"]
+        tax_rate = role.get_tax_rate()
+        self.disposable_income = (
+            1 - tax_rate
+        ) * self.gross_income + self.public_transfer
+        return self.disposable_income
+
+    def calc_expected_net_worth(self):
+        return self.net_worth + self.disposable_income - self.expected_consumption
+
 
 class FirmAgent(EcoAgent):
 

@@ -2,6 +2,12 @@ import agentpy as ap
 from .base import EcoRole
 
 
+class CitizenRole(EcoRole):
+
+    def get_tax_rate(self):
+        return self.space.tax_rate
+
+
 class EmployerRole(EcoRole):
     pass
 
