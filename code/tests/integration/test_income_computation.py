@@ -45,5 +45,3 @@ def test_household_computes_incomes_and_wealth(household, country):
     assert household.gross_income == pytest.approx(160)
     assert household.disposable_income == pytest.approx(160)
     assert expected_wealth == pytest.approx(1110)
-
-

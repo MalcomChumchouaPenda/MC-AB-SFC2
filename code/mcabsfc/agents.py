@@ -61,6 +61,13 @@ class HouseholdAgent(EcoAgent):
     def calc_expected_net_worth(self):
         return self.net_worth + self.disposable_income - self.expected_consumption
 
+    def calc_consumption(self):
+        p = self.p
+        self.CD = p.cy * self.disposable_income + p.cd * self.deposits
+        self.CDT = p.cT * self.CD
+        self.CDNT = (1 - self.p.cT) * self.CD
+        return self.CD
+
 
 class FirmAgent(EcoAgent):
 

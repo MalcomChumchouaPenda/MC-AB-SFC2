@@ -312,3 +312,44 @@ def test_calc_expected_net_worth():
 
     # Then
     assert expected_worth == 1100
+
+
+# ---------------------------------------------------
+# CONSUMPTION BEHAVIOR TESTS
+# ----------------------------------------------------
+
+
+def test_calc_consumption_total():
+    # Given
+    model = Mock()
+    model.p.cy = 0.8
+    model.p.cd = 0.1
+    model.p.cT = 0.6
+    household = HouseholdAgent(model)
+    household.disposable_income = 1000
+    household.deposits = 500
+
+    # When
+    consumption = household.calc_consumption()
+
+    # Then
+    assert consumption == 850
+    assert household.CD == 850
+
+
+def test_calc_consumption_composition():
+    # Given
+    model = Mock()
+    model.p.cy = 0.8
+    model.p.cd = 0.1
+    model.p.cT = 0.6
+    household = HouseholdAgent(model)
+    household.disposable_income = 1000
+    household.deposits = 500
+
+    # When
+    household.calc_consumption()
+
+    # Then
+    assert household.CDT == 510
+    assert household.CDNT == 340

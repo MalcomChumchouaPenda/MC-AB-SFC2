@@ -20,7 +20,7 @@ class CountrySpace(EcoSpace):
 
     def add_citizen(self, household):
         citizen = CitizenRole(household, self)
-        household.roles['citizen'] = citizen
+        household.roles["citizen"] = citizen
         self.graph.add_node(citizen)
         return citizen
 
