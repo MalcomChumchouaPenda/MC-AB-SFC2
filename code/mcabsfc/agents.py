@@ -70,11 +70,18 @@ class HouseholdAgent(EcoAgent):
         return self.desired_consumption
 
     def consume(self):
-        role = self.roles["consumer"]
-        avg_price = role.get_average_price()
-        suppliers = self.search_suppliers()
-        ranked = self.rank_suppliers(suppliers, avg_price=avg_price)
-        self.buy_goods(ranked)
+        p = self.p
+        random = self.model.random
+        consumer_roles = [
+            self.roles["consumer_tradable"],
+            self.roles["consumer_non_tradable"],
+        ]
+        random.shuffle(consumer_roles)
+        for role in consumer_roles:
+            avg_price = role.get_average_price()
+            suppliers = role.search_suppliers(p.psi)
+            ranked = self.rank_suppliers(suppliers, avg_price=avg_price)
+            role.buy_goods(ranked)
 
     def search_suppliers(self):
         p = self.p
@@ -87,27 +94,11 @@ class HouseholdAgent(EcoAgent):
 
     def calc_supplier_score(self, producer, avg_price):
         p = self.p
-        distance = abs(self.location - producer.location)
+        price = producer.get_price()
+        prod_location = producer.get_location()
+        distance = abs(self.location - prod_location)
         distance = min(distance, 1 - distance)
-        return (1 / distance**p.beta) * (avg_price / producer.price)
-
-    def buy_goods(self, suppliers):
-        cash = self.cash
-        demand = self.desired_consumption
-        role = self.roles["consumer"]
-        for supplier in suppliers:
-            price = supplier.get_price()
-            available = supplier.get_available_quantity()
-            residual = demand / price
-            affordable = cash / price
-            quantity = min(residual, available, affordable)
-            role.buy_goods(supplier, quantity)
-            print(supplier, quantity)
-            demand -= quantity * price
-            cash -= quantity * price
-            if demand <= 0 or cash <= 0:
-                print("break", demand, cash)
-                break
+        return (1 / distance**p.beta) * (avg_price / price)
 
 
 class FirmAgent(EcoAgent):

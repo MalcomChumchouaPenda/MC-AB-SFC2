@@ -355,37 +355,23 @@ def test_calc_consumption_composition():
 
 
 @pytest.fixture
-def household_with_consumer_role():
+def household_with_consumer_roles():
     # Given
     model = Mock()
-    consumer_role = Mock()
     household = HouseholdAgent(model)
-    household.roles["consumer"] = consumer_role
+    household.roles["consumer_tradable"] = Mock()
+    household.roles["consumer_non_tradable"] = Mock()
     return household
 
 
-def test_search_suppliers(household_with_consumer_role):
+def test_calc_supplier_score_with_salop_formula(household_with_consumer_roles):
     # Given
-    household = household_with_consumer_role
-    household.model.p.psi = 5
-    suppliers = [Mock() for _ in range(5)]
-    consumer_role = household.roles["consumer"]
-    consumer_role.search_suppliers.return_value = suppliers
-
-    # When
-    result = household.search_suppliers()
-
-    # Then
-    consumer_role.search_suppliers.assert_called_with(5)
-    assert result == suppliers
-
-
-def test_calc_supplier_score_with_salop_formula(household_with_consumer_role):
-    # Given
-    household = household_with_consumer_role
+    household = household_with_consumer_roles
     household.model.p.beta = 1
     household.location = 0
-    supplier = Mock(price=10, location=0.5)
+    supplier = Mock()
+    supplier.get_price.return_value = 10
+    supplier.get_location.return_value = 0.5
 
     # When
     score = household.calc_supplier_score(supplier, avg_price=20)
@@ -394,10 +380,10 @@ def test_calc_supplier_score_with_salop_formula(household_with_consumer_role):
     assert score == (1 / 0.5) * (20 / 10)
 
 
-def test_rank_suppliers_using_supplier_score(household_with_consumer_role):
+def test_rank_suppliers_using_supplier_score(household_with_consumer_roles):
     # Given
     method = lambda supplier, avg_price: avg_price / supplier.price
-    household = household_with_consumer_role
+    household = household_with_consumer_roles
     household.calc_supplier_score = method
     suppliers = [Mock(id=i, price=i) for i in range(1, 3)]
 
@@ -409,78 +395,57 @@ def test_rank_suppliers_using_supplier_score(household_with_consumer_role):
     assert ranked[1].id == 2
 
 
-def test_buy_goods_respects_desired_consumption(household_with_consumer_role):
+def test_consume_tradable_goods_with_steps(household_with_consumer_roles):
     # Given
-    household = household_with_consumer_role
-    household.cash = 1000
-    household.desired_consumption = 500
-    suppliers = [Mock() for _ in range(3)]
-    for supplier in suppliers:
-        supplier.get_price.return_value = 10
-        supplier.get_available_quantity.return_value = 25
-
-    # When
-    household.buy_goods(suppliers)
-
-    # Then
-    consumer_role = household.roles["consumer"]
-    consumer_role.buy_goods.assert_any_call(suppliers[0], pytest.approx(25))
-    consumer_role.buy_goods.assert_any_call(suppliers[1], pytest.approx(25))
-    assert consumer_role.buy_goods.call_count == 2
-
-
-def test_buy_goods_respects_supply_constraints(household_with_consumer_role):
-    # Given
-    household = household_with_consumer_role
-    household.cash = 1000
-    household.desired_consumption = 1000
-    suppliers = [Mock() for _ in range(2)]
-    for supplier in suppliers:
-        supplier.get_price.return_value = 10
-        supplier.get_available_quantity.return_value = 25
-
-    # When
-    household.buy_goods(suppliers)
-
-    # Then
-    consumer_role = household.roles["consumer"]
-    consumer_role.buy_goods.assert_any_call(suppliers[0], pytest.approx(25))
-    consumer_role.buy_goods.assert_any_call(suppliers[1], pytest.approx(25))
-
-
-def test_buy_goods_respects_monetary_constraints(household_with_consumer_role):
-    # Given
-    household = household_with_consumer_role
-    household.cash = 300
-    household.desired_consumption = 500
-    suppliers = [Mock() for _ in range(2)]
-    for supplier in suppliers:
-        supplier.get_price.return_value = 10
-        supplier.get_available_quantity.return_value = 25
-
-    # When
-    household.buy_goods(suppliers)
-
-    # Then
-    consumer_role = household.roles["consumer"]
-    consumer_role.buy_goods.assert_any_call(suppliers[0], pytest.approx(25))
-    consumer_role.buy_goods.assert_any_call(suppliers[1], pytest.approx(5))
-    assert consumer_role.buy_goods.call_count == 2
-
-
-def test_consume_with_multiple_steps(household_with_consumer_role):
-    # Given
-    suppliers = [Mock() for _ in range(5)]
-    household = household_with_consumer_role
-    household.roles["consumer"].get_average_price.return_value = 20
-    household.search_suppliers = Mock(return_value=suppliers)
-    household.rank_suppliers = Mock(return_value=suppliers)
-    household.buy_goods = Mock()
+    trad_suppliers = [Mock() for _ in range(5)]
+    ranked_suppliers = [Mock() for _ in range(5)]
+    household = household_with_consumer_roles
+    household.model.p.psi = 5
+    household.rank_suppliers = Mock(return_value=ranked_suppliers)
+    trad_role = household.roles["consumer_tradable"]
+    trad_role.get_average_price.return_value = 20
+    trad_role.search_suppliers.return_value = trad_suppliers
 
     # When
     household.consume()
 
     # Then
-    household.search_suppliers.assert_called_with()
-    household.rank_suppliers.assert_called_with(suppliers, avg_price=20)
-    household.buy_goods.assert_called_once_with(suppliers)
+    trad_role.search_suppliers.assert_called_with(5)
+    household.rank_suppliers.assert_any_call(trad_suppliers, avg_price=20)
+    trad_role.buy_goods.assert_called_once_with(ranked_suppliers)
+
+
+def test_consume_non_tradable_goods_with_steps(household_with_consumer_roles):
+    # Given
+    ranked_suppliers = [Mock() for _ in range(5)]
+    household = household_with_consumer_roles
+    household.model.p.psi = 5
+    household.rank_suppliers = Mock(return_value=ranked_suppliers)
+    non_trad_suppliers = [Mock() for _ in range(5)]
+    non_trad_role = household.roles["consumer_non_tradable"]
+    non_trad_role.get_average_price.return_value = 10
+    non_trad_role.search_suppliers.return_value = non_trad_suppliers
+
+    # When
+    household.consume()
+
+    # Then
+    non_trad_role.search_suppliers.assert_called_with(5)
+    household.rank_suppliers.assert_any_call(non_trad_suppliers, avg_price=10)
+    non_trad_role.buy_goods.assert_called_once_with(ranked_suppliers)
+
+
+def test_consume_randomizes_market_order(household_with_consumer_roles):
+    # Given
+    household = household_with_consumer_roles
+    trad_role = household.roles["consumer_tradable"]
+    trad_role.search_suppliers.return_value = []
+    non_trad_role = household.roles["consumer_non_tradable"]
+    non_trad_role.search_suppliers.return_value = []
+    random = household.model.random
+
+    # When
+    household.consume()
+
+    # Then
+    random.shuffle.assert_called_with([trad_role, non_trad_role])

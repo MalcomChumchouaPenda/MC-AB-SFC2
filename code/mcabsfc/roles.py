@@ -41,11 +41,27 @@ class ConsumerRole(EcoRole):
     def get_average_price(self):
         return self.space.avg_price
 
-    def buy_goods(self, supplier, quantity):
-        self.space.buy_goods(self, supplier, quantity)
+    def buy_goods(self, suppliers):
+        cash = self.owner.cash
+        demand = self.demand
+        market = self.space
+        for supplier in suppliers:
+            price = supplier.get_price()
+            available = supplier.get_available_quantity()
+            residual = demand / price
+            affordable = cash / price
+            quantity = min(residual, available, affordable)
+            market.buy_goods(self, supplier, quantity)
+            demand -= quantity * price
+            cash -= quantity * price
+            if demand <= 0 or cash <= 0:
+                break
 
 
 class ProducerRole(EcoRole):
+
+    def get_location(self):
+        return self.owner.location
 
     def get_price(self):
         return self.owner.price

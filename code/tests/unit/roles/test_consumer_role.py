@@ -1,5 +1,5 @@
 import pytest
-from unittest.mock import Mock
+from unittest.mock import Mock, PropertyMock, patch
 from mcabsfc.roles import ConsumerRole
 
 # ---------------------------------------------------
@@ -78,13 +78,70 @@ def test_get_non_tradable_demand(consumer):
     assert consumer.demand == 60
 
 
-def test_buy_goods_calls_market(consumer):
+@pytest.fixture
+def consumer_with_demand(monkeypatch):
     # Given
-    market = consumer.space
-    producer = Mock()
+    demand = PropertyMock(return_value=500)
+    monkeypatch.setattr(ConsumerRole, "demand", demand)
+    market = Mock()
+    household = Mock(id=1)
+    return ConsumerRole(household, market)
+
+
+def test_buy_goods_respects_desired_consumption(consumer_with_demand):
+    # Given
+    consumer = consumer_with_demand
+    household = consumer.owner
+    household.cash = 1000
+    suppliers = [Mock() for _ in range(3)]
+    for supplier in suppliers:
+        supplier.get_price.return_value = 10
+        supplier.get_available_quantity.return_value = 25
 
     # When
-    consumer.buy_goods(producer, quantity=10)
+    consumer.buy_goods(suppliers)
 
     # Then
-    market.buy_goods.assert_called_once_with(consumer, producer, 10)
+    market = consumer.space
+    market.buy_goods.assert_any_call(consumer, suppliers[0], pytest.approx(25))
+    market.buy_goods.assert_any_call(consumer, suppliers[1], pytest.approx(25))
+    assert market.buy_goods.call_count == 2
+
+
+def test_buy_goods_respects_supply_constraints(consumer_with_demand):
+    # Given
+    consumer = consumer_with_demand
+    household = consumer.owner
+    household.cash = 1000
+    suppliers = [Mock() for _ in range(2)]
+    for supplier in suppliers:
+        supplier.get_price.return_value = 10
+        supplier.get_available_quantity.return_value = 10
+
+    # When
+    consumer.buy_goods(suppliers)
+
+    # Then
+    market = consumer.space
+    market.buy_goods.assert_any_call(consumer, suppliers[0], pytest.approx(10))
+    market.buy_goods.assert_any_call(consumer, suppliers[1], pytest.approx(10))
+
+
+def test_buy_goods_respects_monetary_constraints(consumer_with_demand):
+    # Given
+    consumer = consumer_with_demand
+    household = consumer.owner
+    household.cash = 300
+    suppliers = [Mock() for _ in range(2)]
+    for supplier in suppliers:
+        supplier.get_price.return_value = 10
+        supplier.get_available_quantity.return_value = 25
+
+    # When
+    consumer.buy_goods(suppliers)
+
+    # Then
+    market = consumer.space
+    market.buy_goods.assert_any_call(consumer, suppliers[0], pytest.approx(25))
+    market.buy_goods.assert_any_call(consumer, suppliers[1], pytest.approx(5))
+    assert market.buy_goods.call_count == 2

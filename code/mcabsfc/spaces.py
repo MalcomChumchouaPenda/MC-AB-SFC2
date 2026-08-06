@@ -39,14 +39,14 @@ class GoodsMarket(EcoSpace):
 
     def add_consumer(self, household):
         consumer = ConsumerRole(household, self)
-        role_id = 'consumer_tradable' if self.tradable else 'consumer_non_tradable'
+        role_id = "consumer_tradable" if self.tradable else "consumer_non_tradable"
         household.roles[role_id] = consumer
         self.graph.add_node(consumer)
         return consumer
 
     def search_suppliers(self, psi):
         suppliers = [node for node in self.nodes if isinstance(node, ProducerRole)]
-        return self.model.random.sample(suppliers, k=psi)
+        return self.model.random.sample(suppliers, k=min(psi, len(suppliers)))
 
     def buy_goods(self, consumer, producer, quantity):
         price = producer.get_price()
@@ -80,7 +80,7 @@ class LaborMarket(EcoSpace):
 
     def search_employers(self, psi):
         employers = [n for n in self.nodes if isinstance(n, EmployerRole)]
-        return self.model.random.sample(employers, k=psi)
+        return self.model.random.sample(employers, k=min(psi, len(employers)))
 
     def get_labor_sold(self, worker):
         return sum(
