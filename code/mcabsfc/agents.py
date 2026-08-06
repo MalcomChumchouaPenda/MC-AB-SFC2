@@ -1,4 +1,5 @@
 import math
+from functools import partial
 import agentpy as ap
 from .base import EcoAgent
 
@@ -67,6 +68,28 @@ class HouseholdAgent(EcoAgent):
         self.desired_trad_cons = p.cT * self.desired_consumption
         self.desired_non_trad_cons = (1 - self.p.cT) * self.desired_consumption
         return self.desired_consumption
+
+    def consume(self):
+        role = self.roles["consumer"]
+        avg_price = role.get_average_price()
+        suppliers = self.search_suppliers()
+        ranked = self.rank_suppliers(suppliers, avg_price=avg_price)
+        self.buy_goods(ranked)
+
+    def search_suppliers(self):
+        p = self.p
+        role = self.roles["consumer"]
+        return role.search_suppliers(p.psi)
+
+    def rank_suppliers(self, suppliers, avg_price):
+        key = partial(self.calc_supplier_score, avg_price=avg_price)
+        return sorted(suppliers, key=key, reverse=True)
+
+    def calc_supplier_score(self, producer, avg_price):
+        p = self.p
+        distance = abs(self.location - producer.location)
+        distance = min(distance, 1 - distance)
+        return (1 / distance**p.beta) * (avg_price / producer.price)
 
 
 class FirmAgent(EcoAgent):

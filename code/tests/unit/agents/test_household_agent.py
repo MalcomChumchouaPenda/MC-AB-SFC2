@@ -353,3 +353,76 @@ def test_calc_consumption_composition():
     # Then
     assert household.desired_trad_cons == 510
     assert household.desired_non_trad_cons == 340
+
+
+@pytest.fixture
+def household_with_consumer_role():
+    # Given
+    model = Mock()
+    consumer_role = Mock()
+    household = HouseholdAgent(model)
+    household.roles["consumer"] = consumer_role
+    return household
+
+
+def test_search_suppliers(household_with_consumer_role):
+    # Given
+    household = household_with_consumer_role
+    household.model.p.psi = 5
+    suppliers = [Mock() for _ in range(5)]
+    consumer_role = household.roles["consumer"]
+    consumer_role.search_suppliers.return_value = suppliers
+
+    # When
+    result = household.search_suppliers()
+
+    # Then
+    consumer_role.search_suppliers.assert_called_with(5)
+    assert result == suppliers
+
+
+def test_calc_supplier_score_with_salop_formula(household_with_consumer_role):
+    # Given
+    household = household_with_consumer_role
+    household.model.p.beta = 1
+    household.location = 0
+    supplier = Mock(price=10, location=0.5)
+
+    # When
+    score = household.calc_supplier_score(supplier, avg_price=20)
+
+    # Then
+    assert score == (1 / 0.5) * (20 / 10)
+
+
+def test_rank_suppliers_using_supplier_score(household_with_consumer_role):
+    # Given
+    method = lambda supplier, avg_price: avg_price / supplier.price
+    household = household_with_consumer_role
+    household.calc_supplier_score = method
+    suppliers = [Mock(id=i, price=i) for i in range(1, 3)]
+
+    # When
+    ranked = household.rank_suppliers(suppliers, avg_price=10)
+
+    # Then
+    assert ranked[0].id == 1
+    assert ranked[1].id == 2
+
+
+def test_consume_with_multiple_steps(household_with_consumer_role):
+    # Given
+    suppliers = [Mock() for _ in range(5)]
+    household = household_with_consumer_role
+    household.roles["consumer"].get_average_price.return_value = 20
+    household.search_suppliers = Mock(return_value=suppliers)
+    household.rank_suppliers = Mock(return_value=suppliers)
+    household.buy_goods = Mock()
+
+    # When
+    household.consume()
+
+    # Then
+    household.search_suppliers.assert_called_with()
+    household.rank_suppliers.assert_called_with(suppliers, avg_price=20)
+    household.buy_goods.assert_called_once_with(suppliers)

@@ -27,9 +27,15 @@ class WorkerRole(EcoRole):
         return self.space.unemployment_rate
 
 
-class ConsumerRole(ap.AgentNode):
+class ConsumerRole(EcoRole):
 
-    def __init__(self, owner, market):
-        super().__init__(owner.id)
-        self.owner = owner
-        self.market = market
+    def search_suppliers(self, psi):
+        return self.space.search_suppliers(psi)
+
+    def get_average_price(self):
+        return self.space.avg_price
+
+
+class ProducerRole:
+    pass
+

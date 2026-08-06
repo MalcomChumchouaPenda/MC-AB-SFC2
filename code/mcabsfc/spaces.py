@@ -1,7 +1,7 @@
 import agentpy as ap
 from networkx import DiGraph
 from .base import EcoSpace
-from .roles import EmployerRole, WorkerRole, CitizenRole
+from .roles import EmployerRole, WorkerRole, CitizenRole, ConsumerRole, ProducerRole
 
 
 class MonetaryUnionSpace(EcoSpace):
@@ -30,6 +30,22 @@ class GoodsMarket(EcoSpace):
     def __init__(self, model, tradable=True, **kwargs):
         super().__init__(model, graph=None, **kwargs)
         self.tradable = tradable
+
+    def add_producer(self, firm):
+        producer = ProducerRole(firm, self)
+        firm.roles["producer"] = producer
+        self.graph.add_node(producer)
+        return producer
+
+    def add_consumer(self, household):
+        consumer = ConsumerRole(household, self)
+        household.roles["consumer"] = consumer
+        self.graph.add_node(consumer)
+        return consumer
+
+    def search_suppliers(self, psi):
+        suppliers = [node for node in self.nodes if isinstance(node, ProducerRole)]
+        return self.model.random.sample(suppliers, k=psi)
 
 
 class LaborMarket(EcoSpace):

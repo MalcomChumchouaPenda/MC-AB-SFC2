@@ -8,27 +8,48 @@ from mcabsfc.roles import ConsumerRole
 # ----------------------------------------------------
 
 
-def test_is_agent_node():
+def test_is_ecorole():
+    # Given
+    from mcabsfc.base import EcoRole
+
+    # Assert
+    assert issubclass(ConsumerRole, EcoRole)
+
+
+# ---------------------------------------------------
+# BEHAVIORAL TESTS
+# ----------------------------------------------------
+
+
+@pytest.fixture
+def consumer():
     # Given
     market = Mock()
     owner = Mock(id=1)
-
-    # When
-    consumer = ConsumerRole(owner, market)
-
-    # Then
-    assert isinstance(consumer, ap.AgentNode)
+    return ConsumerRole(owner, market)
 
 
-def test_has_owner_and_market():
+def test_search_suppliers(consumer):
     # Given
-    market = Mock()
-    owner = Mock(id=1)
+    suppliers = [Mock() for _ in range(2)]
+    market = consumer.space
+    market.search_suppliers.return_value = suppliers
 
     # When
-    consumer = ConsumerRole(owner, market)
+    result = consumer.search_suppliers(psi=3)
 
     # Then
-    assert consumer.market == market
-    assert consumer.owner == owner
-    assert consumer.label == owner.id
+    market.search_suppliers.assert_called_once_with(3)
+    assert result == suppliers
+
+
+def test_get_average_price(consumer):
+    # Given
+    market = consumer.space
+    market.avg_price = 25
+
+    # When
+    avg_price = consumer.get_average_price()
+
+    # Then
+    assert avg_price == 25
