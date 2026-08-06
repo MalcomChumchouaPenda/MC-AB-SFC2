@@ -1,3 +1,5 @@
+
+import math
 import pytest
 from unittest.mock import Mock
 from mc_ab_sfc.agents import FirmAgent
@@ -103,7 +105,7 @@ def pricing_firm():
     model = Mock()
     model.p.delta = 0.1
     firm = FirmAgent(model)
-    firm.wages = 10
+    firm.wage_bill= 10
     firm.productivity = 2
     firm.expected_sales = 100
     firm.price = 10
@@ -183,6 +185,141 @@ def test_price_cannot_be_below_unit_cost(pricing_firm):
     # Then
     assert firm.expected_sales == pytest.approx(95)
     assert firm.price == pytest.approx(5)
+
+
+# ---------------------------------------------------
+# WAGE REVISION TESTS
+# ----------------------------------------------------
+
+
+def test_calc_revision_probability():
+    # Given
+    model = Mock()
+    model.p.upsilon = 1.0
+    model.p.upsilon_f = 0.9
+    employer_role = Mock()
+    employer_role.get_unemployment_rate.return_value = 0.1
+    firm = FirmAgent(model)
+    firm.roles["employer"] = employer_role
+
+    # When
+    result = firm.calc_revision_probability()
+
+    # Then
+    assert result == 0.9 * math.exp(-1.0 * 0.1)
+
+
+@pytest.fixture
+def hiring_firm():
+    # Given
+    model = Mock()
+    model.p.delta = 0.9
+    firm = FirmAgent(model)
+    firm.wage_offer = 10.0
+    firm.calc_revision_probability = Mock(return_value=0)
+    return firm
+
+
+def test_increases_wage_when_labor_shortage(hiring_firm):
+    # Given
+    firm = hiring_firm
+    firm.prev_labor = 80
+    firm.prev_desired_labor = 100
+    random = firm.model.nprandom
+    random.choice.return_value = 1
+    random.uniform.return_value = 0.05
+
+    # When
+    firm.revise_wage()
+
+    # Then
+    random.uniform.assert_called_with(0, firm.p.delta)
+    assert firm.wage_offer > 10.0
+
+
+def test_increases_wage_with_upward_revision_prob(hiring_firm):
+    # Given
+    firm = hiring_firm
+    firm.prev_labor = 80
+    firm.prev_desired_labor = 100
+    firm.calc_revision_probability.return_value = 0.6
+    random = firm.model.nprandom
+    random.choice.return_value = 1
+    random.uniform.return_value = 0.05
+
+    # When
+    firm.revise_wage()
+
+    # Then
+    random.choice.assert_called_with([0, 1], p=[1 - 0.6, 0.6])
+
+
+def test_can_choose_to_not_increases_wage(hiring_firm):
+    # Given
+    firm = hiring_firm
+    firm.prev_labor = 80
+    firm.prev_desired_labor = 100
+    random = firm.model.nprandom
+    random.choice.return_value = 0
+    random.uniform.return_value = 0.05
+
+    # When
+    firm.revise_wage()
+
+    # Then
+    random.uniform.assert_not_called()
+    assert firm.wage_offer == 10.0
+
+
+def test_decreases_wage_when_all_positions_filled(hiring_firm):
+    # Given
+    firm = hiring_firm
+    firm.prev_labor = 100
+    firm.prev_desired_labor = 100
+    random = firm.model.nprandom
+    random.choice.return_value = 1
+    random.uniform.return_value = 0.05
+
+    # When
+    firm.revise_wage()
+
+    # Then
+    random.uniform.assert_called_with(0, firm.p.delta)
+    assert firm.wage_offer < 10.0
+
+
+def test_decreases_wage_with_downward_revision_prob(hiring_firm):
+    # Given
+    firm = hiring_firm
+    firm.prev_labor = 100
+    firm.prev_desired_labor = 100
+    firm.calc_revision_probability.return_value = 0.6
+    random = firm.model.nprandom
+    random.choice.return_value = 1
+    random.uniform.return_value = 0.05
+
+    # When
+    firm.revise_wage()
+
+    # Then
+    random.choice.assert_called_with([0, 1], p=[0.6, 1 - 0.6])
+
+
+def test_can_choose_to_not_decreases_wage(hiring_firm):
+    # Given
+    firm = hiring_firm
+    firm.prev_labor = 100
+    firm.prev_desired_labor = 100
+    random = firm.model.nprandom
+    random.choice.return_value = 0
+    random.uniform.return_value = 0.05
+
+    # When
+    firm.revise_wage()
+
+    # Then
+    random.uniform.assert_not_called()
+    assert firm.wage_offer == 10.0
 
 
 # ---------------------------------------------------

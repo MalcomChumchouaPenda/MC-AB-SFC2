@@ -10,12 +10,6 @@ class HouseholdAgent(EcoAgent):
         self.roles = {}
         self.labor_supply = 1.0
 
-    def calc_revision_probability(self):
-        p = self.p
-        role = self.roles["worker"]
-        unemployment = role.get_unemployment_rate()
-        return p.upsilon_h * math.exp(-p.upsilon * unemployment)
-
     def revise_reservation_wage(self):
         p = self.p
         random = self.model.nprandom
@@ -27,6 +21,14 @@ class HouseholdAgent(EcoAgent):
             if random.choice([0, 1], p=[prob, 1 - prob]):
                 self.reservation_wage *= 1 - random.uniform(0, p.delta)
 
+
+    def calc_revision_probability(self):
+        p = self.p
+        role = self.roles["worker"]
+        unemployment = role.get_unemployment_rate()
+        return p.upsilon_h * math.exp(-p.upsilon * unemployment)
+
+    
     def search_jobs(self):
         p = self.p
         role = self.roles["worker"]
@@ -145,8 +147,28 @@ class FirmAgent(EcoAgent):
         elif self.prev_output + self.prev_inventories > self.prev_sales:
             self.expected_sales *= 1 - random.uniform(0, delta)
             self.price *= 1 - random.uniform(0, delta)
-            self.price = max(self.wages / self.productivity, self.price)
+            self.price = max(self.wage_bill/ self.productivity, self.price)
 
+
+    def revise_wage(self):
+        p = self.p
+        random = self.model.nprandom
+        prob = self.calc_revision_probability()
+        if self.prev_desired_labor > self.prev_labor:
+            if random.choice([0, 1], p=[1 - prob, prob]):
+                self.wage_offer *= 1 + random.uniform(0, p.delta)
+        else:
+            if random.choice([0, 1], p=[prob, 1 - prob]):
+                self.wage_offer *= 1 - random.uniform(0, p.delta)
+
+
+    def calc_revision_probability(self):
+        p = self.p
+        role = self.roles["employer"]
+        unemployment = role.get_unemployment_rate()
+        return p.upsilon_f * math.exp(-p.upsilon * unemployment)
+
+    
     def update_history(self):
         super().update_history()
         self.prev_sales = self.sales
