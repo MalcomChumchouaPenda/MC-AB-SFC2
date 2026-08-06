@@ -1,5 +1,4 @@
 import pytest
-import agentpy as ap
 from unittest.mock import Mock
 from mcabsfc.roles import ConsumerRole
 
@@ -53,3 +52,15 @@ def test_get_average_price(consumer):
 
     # Then
     assert avg_price == 25
+
+
+def test_buy_goods_calls_market(consumer):
+    # Given
+    market = consumer.space
+    producer = Mock()
+
+    # When
+    consumer.buy_goods(producer, quantity=10)
+
+    # Then
+    market.buy_goods.assert_called_once_with(consumer, producer, 10)

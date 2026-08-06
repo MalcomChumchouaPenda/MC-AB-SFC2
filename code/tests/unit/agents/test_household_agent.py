@@ -410,6 +410,65 @@ def test_rank_suppliers_using_supplier_score(household_with_consumer_role):
     assert ranked[1].id == 2
 
 
+def test_buy_goods_respects_desired_consumption(household_with_consumer_role):
+    # Given
+    household = household_with_consumer_role
+    household.cash = 1000
+    household.desired_consumption = 500
+    suppliers = [Mock() for _ in range(3)]
+    for supplier in suppliers:
+        supplier.get_price.return_value = 10
+        supplier.get_available_quantity.return_value = 25
+
+    # When
+    household.buy_goods(suppliers)
+
+    # Then
+    consumer_role = household.roles["consumer"]
+    consumer_role.buy_goods.assert_any_call(suppliers[0], pytest.approx(25))
+    consumer_role.buy_goods.assert_any_call(suppliers[1], pytest.approx(25))
+    assert consumer_role.buy_goods.call_count == 2
+
+
+def test_buy_goods_respects_supply_constraints(household_with_consumer_role):
+    # Given
+    household = household_with_consumer_role
+    household.cash = 1000
+    household.desired_consumption = 1000
+    suppliers = [Mock() for _ in range(2)]
+    for supplier in suppliers:
+        supplier.get_price.return_value = 10
+        supplier.get_available_quantity.return_value = 25
+
+    # When
+    household.buy_goods(suppliers)
+
+    # Then
+    consumer_role = household.roles["consumer"]
+    consumer_role.buy_goods.assert_any_call(suppliers[0], pytest.approx(25))
+    consumer_role.buy_goods.assert_any_call(suppliers[1], pytest.approx(25))
+
+
+def test_buy_goods_respects_monetary_constraints(household_with_consumer_role):
+    # Given
+    household = household_with_consumer_role
+    household.cash = 300
+    household.desired_consumption = 500
+    suppliers = [Mock() for _ in range(2)]
+    for supplier in suppliers:
+        supplier.get_price.return_value = 10
+        supplier.get_available_quantity.return_value = 25
+
+    # When
+    household.buy_goods(suppliers)
+
+    # Then
+    consumer_role = household.roles["consumer"]
+    consumer_role.buy_goods.assert_any_call(suppliers[0], pytest.approx(25))
+    consumer_role.buy_goods.assert_any_call(suppliers[1], pytest.approx(5))
+    assert consumer_role.buy_goods.call_count == 2
+
+
 def test_consume_with_multiple_steps(household_with_consumer_role):
     # Given
     suppliers = [Mock() for _ in range(5)]

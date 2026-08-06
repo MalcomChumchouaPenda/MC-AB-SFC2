@@ -35,7 +35,14 @@ class ConsumerRole(EcoRole):
     def get_average_price(self):
         return self.space.avg_price
 
+    def buy_goods(self, supplier, quantity):
+        self.space.buy_goods(self, supplier, quantity)
 
-class ProducerRole:
-    pass
 
+class ProducerRole(EcoRole):
+
+    def get_price(self):
+        return self.owner.price
+
+    def get_available_quantity(self):
+        return self.owner.inventories

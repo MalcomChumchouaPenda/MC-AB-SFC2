@@ -105,3 +105,20 @@ def test_search_suppliers_returns_psi_producers(market):
     # Then
     market.model.random.sample.sample(producers, k=3)
     assert sample == producers[:3]
+
+
+def test_buy_goods_updates_accounts(market):
+    # Given
+    consumer = Mock(label=1)
+    producer = Mock(label=2)
+    producer.get_price.return_value = 10
+
+    # When
+    market.buy_goods(consumer, producer, quantity=5)
+
+    # Then
+    consumer.debit_stock("cash", 50)
+    consumer.credit_flow("consumption", 50)
+    producer.credit_stock("cash", 50)
+    producer.credit_flow("sales", 50)
+    producer.debit_stock("inventories", 5)

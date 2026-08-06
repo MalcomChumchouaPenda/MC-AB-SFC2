@@ -47,6 +47,15 @@ class GoodsMarket(EcoSpace):
         suppliers = [node for node in self.nodes if isinstance(node, ProducerRole)]
         return self.model.random.sample(suppliers, k=psi)
 
+    def buy_goods(self, consumer, producer, quantity):
+        price = producer.get_price()
+        amount = quantity * price
+        consumer.debit_stock("cash", amount)
+        consumer.credit_flow("consumption", amount)
+        producer.credit_stock("cash", amount)
+        producer.credit_flow("sales", amount)
+        producer.debit_stock("inventories", quantity)
+
 
 class LaborMarket(EcoSpace):
 
@@ -69,7 +78,7 @@ class LaborMarket(EcoSpace):
         self.graph.add_edge(worker, employer, wage=employer.wage, quantity=quantity)
 
     def search_employers(self, psi):
-        employers = [node for node in self.nodes if isinstance(node, EmployerRole)]
+        employers = [n for n in self.nodes if isinstance(n, EmployerRole)]
         return self.model.random.sample(employers, k=psi)
 
     def get_labor_sold(self, worker):

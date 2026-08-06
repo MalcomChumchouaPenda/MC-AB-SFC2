@@ -91,6 +91,24 @@ class HouseholdAgent(EcoAgent):
         distance = min(distance, 1 - distance)
         return (1 / distance**p.beta) * (avg_price / producer.price)
 
+    def buy_goods(self, suppliers):
+        cash = self.cash
+        demand = self.desired_consumption
+        role = self.roles["consumer"]
+        for supplier in suppliers:
+            price = supplier.get_price()
+            available = supplier.get_available_quantity()
+            residual = demand / price
+            affordable = cash / price
+            quantity = min(residual, available, affordable)
+            role.buy_goods(supplier, quantity)
+            print(supplier, quantity)
+            demand -= quantity * price
+            cash -= quantity * price
+            if demand <= 0 or cash <= 0:
+                print("break", demand, cash)
+                break
+
 
 class FirmAgent(EcoAgent):
 
