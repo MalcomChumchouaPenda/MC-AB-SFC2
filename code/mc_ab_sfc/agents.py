@@ -121,8 +121,19 @@ class HouseholdAgent(EcoAgent):
 
 class FirmAgent(EcoAgent):
 
-    def setup(self):
-        self.roles = {}
+    def plan_production(self):
+        self.calc_desired_output()
+        self.calc_labor_demand()
+
+    def calc_desired_output(self):
+        theta = self.p.theta
+        inv = self.inventories
+        self.desired_output = max(0, self.expected_sales * (1 + theta) - inv)
+        return self.desired_output
+
+    def calc_labor_demand(self):
+        self.desired_labor = self.desired_output / self.productivity
+        return self.desired_labor
 
 
 class BankAgent(EcoAgent):
