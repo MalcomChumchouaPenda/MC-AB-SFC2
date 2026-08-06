@@ -39,7 +39,7 @@ class ConsumerRole(EcoRole):
         return self.space.search_suppliers(psi)
 
     def get_average_price(self):
-        return self.space.avg_price
+        return self.space.average_price
 
     def buy_goods(self, suppliers):
         cash = self.owner.cash

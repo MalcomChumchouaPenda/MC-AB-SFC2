@@ -45,13 +45,13 @@ def test_search_suppliers(consumer):
 def test_get_average_price(consumer):
     # Given
     market = consumer.space
-    market.avg_price = 25
+    market.average_price = 25
 
     # When
-    avg_price = consumer.get_average_price()
+    average_price = consumer.get_average_price()
 
     # Then
-    assert avg_price == 25
+    assert average_price == 25
 
 
 def test_get_tradable_demand(consumer):

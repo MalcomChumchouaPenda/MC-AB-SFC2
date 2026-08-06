@@ -78,9 +78,9 @@ class HouseholdAgent(EcoAgent):
         ]
         random.shuffle(consumer_roles)
         for role in consumer_roles:
-            avg_price = role.get_average_price()
+            average_price = role.get_average_price()
             suppliers = role.search_suppliers(p.psi)
-            ranked = self.rank_suppliers(suppliers, avg_price=avg_price)
+            ranked = self.rank_suppliers(suppliers, average_price=average_price)
             role.buy_goods(ranked)
 
     def search_suppliers(self):
@@ -88,17 +88,17 @@ class HouseholdAgent(EcoAgent):
         role = self.roles["consumer"]
         return role.search_suppliers(p.psi)
 
-    def rank_suppliers(self, suppliers, avg_price):
-        key = partial(self.calc_supplier_score, avg_price=avg_price)
+    def rank_suppliers(self, suppliers, average_price):
+        key = partial(self.calc_supplier_score, average_price=average_price)
         return sorted(suppliers, key=key, reverse=True)
 
-    def calc_supplier_score(self, producer, avg_price):
+    def calc_supplier_score(self, supplier, average_price):
         p = self.p
-        price = producer.get_price()
-        prod_location = producer.get_location()
+        price = supplier.get_price()
+        prod_location = supplier.get_location()
         distance = abs(self.location - prod_location)
         distance = min(distance, 1 - distance)
-        return (1 / distance**p.beta) * (avg_price / price)
+        return (1 / distance**p.beta) * (average_price / price)
 
 
 class FirmAgent(EcoAgent):

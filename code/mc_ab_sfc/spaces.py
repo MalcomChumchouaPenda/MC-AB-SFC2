@@ -61,7 +61,6 @@ class GoodsMarket(EcoSpace):
             consumer.increase_flow("non_tradable_cons", amount)
 
 
-
 class LaborMarket(EcoSpace):
 
     def __init__(self, model, **kwargs):

@@ -374,7 +374,7 @@ def test_calc_supplier_score_with_salop_formula(household_with_consumer_roles):
     supplier.get_location.return_value = 0.5
 
     # When
-    score = household.calc_supplier_score(supplier, avg_price=20)
+    score = household.calc_supplier_score(supplier, average_price=20)
 
     # Then
     assert score == (1 / 0.5) * (20 / 10)
@@ -382,13 +382,13 @@ def test_calc_supplier_score_with_salop_formula(household_with_consumer_roles):
 
 def test_rank_suppliers_using_supplier_score(household_with_consumer_roles):
     # Given
-    method = lambda supplier, avg_price: avg_price / supplier.price
+    method = lambda supplier, average_price: average_price / supplier.price
     household = household_with_consumer_roles
     household.calc_supplier_score = method
     suppliers = [Mock(id=i, price=i) for i in range(1, 3)]
 
     # When
-    ranked = household.rank_suppliers(suppliers, avg_price=10)
+    ranked = household.rank_suppliers(suppliers, average_price=10)
 
     # Then
     assert ranked[0].id == 1
@@ -411,7 +411,7 @@ def test_consume_tradable_goods_with_steps(household_with_consumer_roles):
 
     # Then
     trad_role.search_suppliers.assert_called_with(5)
-    household.rank_suppliers.assert_any_call(trad_suppliers, avg_price=20)
+    household.rank_suppliers.assert_any_call(trad_suppliers, average_price=20)
     trad_role.buy_goods.assert_called_once_with(ranked_suppliers)
 
 
@@ -431,7 +431,7 @@ def test_consume_non_tradable_goods_with_steps(household_with_consumer_roles):
 
     # Then
     non_trad_role.search_suppliers.assert_called_with(5)
-    household.rank_suppliers.assert_any_call(non_trad_suppliers, avg_price=10)
+    household.rank_suppliers.assert_any_call(non_trad_suppliers, average_price=10)
     non_trad_role.buy_goods.assert_called_once_with(ranked_suppliers)
 
 
