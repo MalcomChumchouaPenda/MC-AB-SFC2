@@ -83,5 +83,10 @@ class EquityEntityRole:
 class DepositorRole(EcoRole):
 
     def get_deposit_rate(self):
-        return self.space.deposit_rate
+        return self.bank.get_deposit_rate()
 
+
+class DepositEntityRole(EcoRole):
+
+    def get_deposit_rate(self):
+        return self.owner.deposit_rate

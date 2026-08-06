@@ -1,7 +1,7 @@
 import math
 import pytest
 from agentpy import Model
-from mc_ab_sfc.agents import HouseholdAgent
+from mc_ab_sfc.agents import HouseholdAgent, BankAgent
 from mc_ab_sfc.spaces import EquitySpace, DepositMarket
 
 
@@ -23,20 +23,29 @@ def household(model):
     return household
 
 
-def test_household_portfolio_allocation(household, model):
+@pytest.fixture
+def bank(model):
+    # Given
+    bank = BankAgent(model)
+    bank.deposit_rate = 0.05
+    return bank
+
+
+def test_household_portfolio_allocation(household, bank, model):
     # Given
     equity_space = EquitySpace(model)
     equity_space.default_probability = 0.10
     equity_space.add_equity_holder(household)
     deposit_market = DepositMarket(model)
-    deposit_market.deposit_rate = 0.05
-    deposit_market.add_depositor(household)
+    bank_role = deposit_market.add_bank(bank)
+    depositor = deposit_market.add_depositor(household)
+    deposit_market.assign_bank(depositor, bank_role)
 
     # When
     household.calc_portfolio_allocation()
 
     # Then
-    lp = 0.8 * math.exp(-((10 * (1 - 0.10)) / 20 ) - 0.05)
+    lp = 0.8 * math.exp(-((10 * (1 - 0.10)) / 20) - 0.05)
     expected_equity = max(20, (1 - lp) * 100)
     expected_deposits = 100 - (expected_equity - 20)
     assert household.desired_equity == pytest.approx(expected_equity)

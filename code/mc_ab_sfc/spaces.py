@@ -10,6 +10,7 @@ from .roles import (
     EquityHolderRole,
     EquityEntityRole,
     DepositorRole,
+    DepositEntityRole,
 )
 
 
@@ -108,11 +109,24 @@ class CreditMarket(EcoSpace):
 
 class DepositMarket(EcoSpace):
 
+    def __init__(self, model, **kwargs):
+        super().__init__(model, graph=DiGraph(), **kwargs)
+
     def add_depositor(self, household):
         role = DepositorRole(household, self)
-        household.roles['depositor'] = role
+        household.roles["depositor"] = role
         self.graph.add_node(role)
         return role
+
+    def add_bank(self, bank):
+        role = DepositEntityRole(bank, self)
+        bank.roles["deposit_entity"] = role
+        self.graph.add_node(role)
+        return role
+
+    def assign_bank(self, client, bank_role):
+        client.bank = bank_role
+        self.graph.add_edge(client, bank_role)
 
 
 class BondMarket(EcoSpace):
