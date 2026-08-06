@@ -26,7 +26,7 @@ def test_has_unit_labor_supply():
 
 
 # ---------------------------------------------------
-# WORKER BEHAVIORS TESTS
+# JOB SEARCH TESTS
 # ----------------------------------------------------
 
 
@@ -121,6 +121,11 @@ def test_search_jobs_while_labor_supply_is_remaining(unemployed):
     # Then
     role.create_job.assert_any_call(employer1, pytest.approx(0.7))
     role.create_job.assert_any_call(employer2, pytest.approx(0.2))
+
+
+# ---------------------------------------------------
+# WAGE REVISION TESTS
+# ----------------------------------------------------
 
 
 def test_calc_revision_probability():
