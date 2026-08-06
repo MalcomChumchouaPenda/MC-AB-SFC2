@@ -1,9 +1,9 @@
 import pytest
 from agentpy import Model
 from dataclasses import dataclass
-from mcabsfc.agents import HouseholdAgent
-from mcabsfc.roles import WorkerRole
-from mcabsfc.spaces import LaborMarket
+from mc_ab_sfc.agents import HouseholdAgent
+from mc_ab_sfc.roles import WorkerRole
+from mc_ab_sfc.spaces import LaborMarket
 
 
 @dataclass(frozen=True)
@@ -32,7 +32,7 @@ def household(model):
 
 def test_household_search_jobs_on_labor_market(monkeypatch, household, market):
     # Given
-    monkeypatch.setattr("mcabsfc.spaces.EmployerRole", FakeEmployerRole)
+    monkeypatch.setattr("mc_ab_sfc.spaces.EmployerRole", FakeEmployerRole)
     employer1 = FakeEmployerRole("F1", wage=20, demand=0.4)
     employer2 = FakeEmployerRole("F2", wage=15, demand=0.8)
     employer3 = FakeEmployerRole("F3", wage=16, demand=0.8)
@@ -53,7 +53,7 @@ def test_household_search_jobs_on_labor_market(monkeypatch, household, market):
 
 def test_household_sells_total_labor_supply(monkeypatch, household, market):
     # Given
-    monkeypatch.setattr("mcabsfc.spaces.EmployerRole", FakeEmployerRole)
+    monkeypatch.setattr("mc_ab_sfc.spaces.EmployerRole", FakeEmployerRole)
     employer1 = FakeEmployerRole("F1", wage=20, demand=0.4)
     employer2 = FakeEmployerRole("F2", wage=15, demand=0.8)
     market.graph.add_nodes_from([employer1, employer2])

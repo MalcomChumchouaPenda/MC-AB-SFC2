@@ -1,7 +1,7 @@
 import pytest
 from agentpy import Model
-from mcabsfc.agents import HouseholdAgent
-from mcabsfc.spaces import CountrySpace
+from mc_ab_sfc.agents import HouseholdAgent
+from mc_ab_sfc.spaces import CountrySpace
 
 
 @pytest.fixture

@@ -1,5 +1,5 @@
 from unittest.mock import Mock
-from mcabsfc.spaces import EquityMarket
+from mc_ab_sfc.spaces import EquityMarket
 
 # ---------------------------------------------------
 # ARCHITECTURAL TESTS
@@ -8,7 +8,7 @@ from mcabsfc.spaces import EquityMarket
 
 def test_is_ecospace():
     # Given
-    from mcabsfc.base import EcoSpace
+    from mc_ab_sfc.base import EcoSpace
 
     # Assert
     assert issubclass(EquityMarket, EcoSpace)

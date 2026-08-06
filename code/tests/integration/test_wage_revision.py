@@ -2,9 +2,9 @@ import pytest
 from agentpy import Model
 from unittest.mock import Mock
 from dataclasses import dataclass
-from mcabsfc.agents import HouseholdAgent
-from mcabsfc.roles import WorkerRole
-from mcabsfc.spaces import LaborMarket
+from mc_ab_sfc.agents import HouseholdAgent
+from mc_ab_sfc.roles import WorkerRole
+from mc_ab_sfc.spaces import LaborMarket
 
 
 @dataclass(frozen=True)

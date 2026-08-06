@@ -1,4 +1,4 @@
-from mcabsfc.agents import CentralBankAgent
+from mc_ab_sfc.agents import CentralBankAgent
 
 # ---------------------------------------------------
 # ARCHITECTURAL TESTS
@@ -7,7 +7,7 @@ from mcabsfc.agents import CentralBankAgent
 
 def test_is_ecoagent():
     # Given
-    from mcabsfc.base import EcoAgent
+    from mc_ab_sfc.base import EcoAgent
 
     # Assert
     assert issubclass(CentralBankAgent, EcoAgent)

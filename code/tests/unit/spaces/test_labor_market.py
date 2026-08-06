@@ -3,7 +3,7 @@ import agentpy as ap
 from unittest.mock import Mock
 from networkx import DiGraph
 from dataclasses import dataclass
-from mcabsfc.spaces import LaborMarket
+from mc_ab_sfc.spaces import LaborMarket
 
 # ---------------------------------------------------
 # ARCHITECTURAL TESTS
@@ -12,7 +12,7 @@ from mcabsfc.spaces import LaborMarket
 
 def test_is_ecospace():
     # Given
-    from mcabsfc.base import EcoSpace
+    from mc_ab_sfc.base import EcoSpace
 
     # Assert
     assert issubclass(LaborMarket, EcoSpace)
@@ -51,8 +51,8 @@ def market(monkeypatch):
     # Given a market and fake role class
     model = Mock()
     market = LaborMarket(model)
-    monkeypatch.setattr("mcabsfc.spaces.WorkerRole", FakeWorkerRole)
-    monkeypatch.setattr("mcabsfc.spaces.EmployerRole", FakeEmployerRole)
+    monkeypatch.setattr("mc_ab_sfc.spaces.WorkerRole", FakeWorkerRole)
+    monkeypatch.setattr("mc_ab_sfc.spaces.EmployerRole", FakeEmployerRole)
     return market
 
 

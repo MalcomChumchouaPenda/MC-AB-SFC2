@@ -1,6 +1,6 @@
 import pytest
 import agentpy as ap
-from mcabsfc.model import EcoModel
+from mc_ab_sfc.model import EcoModel
 
 
 def test_is_agentpy_model():

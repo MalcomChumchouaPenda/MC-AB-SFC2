@@ -1,7 +1,7 @@
 import pytest
 import agentpy as ap
 from unittest.mock import Mock
-from mcabsfc.roles import CitizenRole
+from mc_ab_sfc.roles import CitizenRole
 
 # ---------------------------------------------------
 # ARCHITECTURAL TESTS
@@ -10,7 +10,7 @@ from mcabsfc.roles import CitizenRole
 
 def test_is_ecorole():
     # Given
-    from mcabsfc.base import EcoRole
+    from mc_ab_sfc.base import EcoRole
 
     # Assert
     assert issubclass(CitizenRole, EcoRole)

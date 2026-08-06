@@ -1,7 +1,7 @@
 import pytest
 import agentpy as ap
 from unittest.mock import Mock
-from mcabsfc.base import EcoSpace
+from mc_ab_sfc.base import EcoSpace
 
 
 def test_is_agentpy_network():

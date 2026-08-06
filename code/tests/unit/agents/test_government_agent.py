@@ -1,4 +1,4 @@
-from mcabsfc.agents import GovernmentAgent
+from mc_ab_sfc.agents import GovernmentAgent
 
 # ---------------------------------------------------
 # ARCHITECTURAL TESTS
@@ -7,7 +7,7 @@ from mcabsfc.agents import GovernmentAgent
 
 def test_is_ecoagent():
     # Given
-    from mcabsfc.base import EcoAgent
+    from mc_ab_sfc.base import EcoAgent
 
     # Assert
     assert issubclass(GovernmentAgent, EcoAgent)

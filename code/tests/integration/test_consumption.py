@@ -2,8 +2,8 @@
 from dataclasses import dataclass, field
 import pytest
 from agentpy import Model
-from mcabsfc.agents import HouseholdAgent
-from mcabsfc.spaces import GoodsMarket
+from mc_ab_sfc.agents import HouseholdAgent
+from mc_ab_sfc.spaces import GoodsMarket
 
 
 @pytest.fixture

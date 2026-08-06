@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import Mock
 from dataclasses import dataclass
-from mcabsfc.spaces import GoodsMarket
+from mc_ab_sfc.spaces import GoodsMarket
 
 # ---------------------------------------------------
 # ARCHITECTURAL TESTS
@@ -10,7 +10,7 @@ from mcabsfc.spaces import GoodsMarket
 
 def test_is_ecospace():
     # Given
-    from mcabsfc.base import EcoSpace
+    from mc_ab_sfc.base import EcoSpace
 
     # Assert
     assert issubclass(GoodsMarket, EcoSpace)
@@ -58,8 +58,8 @@ def market(monkeypatch):
     # Given a market and fake role class
     model = Mock()
     market = GoodsMarket(model)
-    monkeypatch.setattr("mcabsfc.spaces.ConsumerRole", FakeConsumerRole)
-    monkeypatch.setattr("mcabsfc.spaces.ProducerRole", FakeProducerRole)
+    monkeypatch.setattr("mc_ab_sfc.spaces.ConsumerRole", FakeConsumerRole)
+    monkeypatch.setattr("mc_ab_sfc.spaces.ProducerRole", FakeProducerRole)
     return market
 
 

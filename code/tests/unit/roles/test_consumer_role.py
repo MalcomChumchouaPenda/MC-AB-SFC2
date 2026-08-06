@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import Mock, PropertyMock, patch
-from mcabsfc.roles import ConsumerRole
+from mc_ab_sfc.roles import ConsumerRole
 
 # ---------------------------------------------------
 # ARCHITECTURAL TESTS
@@ -9,7 +9,7 @@ from mcabsfc.roles import ConsumerRole
 
 def test_is_ecorole():
     # Given
-    from mcabsfc.base import EcoRole
+    from mc_ab_sfc.base import EcoRole
 
     # Assert
     assert issubclass(ConsumerRole, EcoRole)

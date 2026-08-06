@@ -1,7 +1,7 @@
 import pytest
 from dataclasses import dataclass
 from unittest.mock import Mock
-from mcabsfc.spaces import CountrySpace
+from mc_ab_sfc.spaces import CountrySpace
 
 # ---------------------------------------------------
 # ARCHITECTURAL TESTS
@@ -10,7 +10,7 @@ from mcabsfc.spaces import CountrySpace
 
 def test_is_ecospace():
     # Given
-    from mcabsfc.base import EcoSpace
+    from mc_ab_sfc.base import EcoSpace
 
     # Assert
     assert issubclass(CountrySpace, EcoSpace)
@@ -38,7 +38,7 @@ def country(monkeypatch):
     # Given a market and fake role class
     model = Mock()
     space = CountrySpace(model)
-    monkeypatch.setattr("mcabsfc.spaces.CitizenRole", FakeCitizenRole)
+    monkeypatch.setattr("mc_ab_sfc.spaces.CitizenRole", FakeCitizenRole)
     return space
 
 
