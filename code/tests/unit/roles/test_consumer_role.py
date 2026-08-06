@@ -54,6 +54,30 @@ def test_get_average_price(consumer):
     assert avg_price == 25
 
 
+def test_get_tradable_demand(consumer):
+    # Given
+    market = consumer.space
+    market.tradable = True
+    household = consumer.owner
+    household.desired_trad_cons = 40
+    household.desired_non_trad_cons = 60
+
+    # Assert
+    assert consumer.demand == 40
+
+
+def test_get_non_tradable_demand(consumer):
+    # Given
+    market = consumer.space
+    market.tradable = False
+    household = consumer.owner
+    household.desired_trad_cons = 40
+    household.desired_non_trad_cons = 60
+
+    # Assert
+    assert consumer.demand == 60
+
+
 def test_buy_goods_calls_market(consumer):
     # Given
     market = consumer.space

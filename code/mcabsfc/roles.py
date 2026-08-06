@@ -29,6 +29,12 @@ class WorkerRole(EcoRole):
 
 class ConsumerRole(EcoRole):
 
+    @property
+    def demand(self):
+        if self.space.tradable:
+            return self.owner.desired_trad_cons
+        return self.owner.desired_non_trad_cons
+
     def search_suppliers(self, psi):
         return self.space.search_suppliers(psi)
 

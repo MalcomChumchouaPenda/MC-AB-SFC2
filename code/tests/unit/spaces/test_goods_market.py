@@ -63,7 +63,7 @@ def market(monkeypatch):
     return market
 
 
-def test_add_consumer_creates_and_registers_consumer_role(market):
+def test_add_consumer_creates_tradable_consumer_role(market):
     # Given
     household = Mock(id=1, roles={})
 
@@ -75,7 +75,23 @@ def test_add_consumer_creates_and_registers_consumer_role(market):
     assert consumer.owner is household
     assert consumer.space is market
     assert consumer in market.nodes
-    assert consumer is household.roles["consumer"]
+    assert consumer is household.roles["consumer_tradable"]
+
+
+def test_add_consumer_creates_non_tradable_consumer_role(market):
+    # Given
+    household = Mock(id=1, roles={})
+    market.tradable = False
+
+    # When
+    consumer = market.add_consumer(household)
+
+    # Then
+    assert isinstance(consumer, FakeConsumerRole)
+    assert consumer.owner is household
+    assert consumer.space is market
+    assert consumer in market.nodes
+    assert consumer is household.roles["consumer_non_tradable"]
 
 
 def test_add_producer_creates_and_registers_producer_role(market):

@@ -1,6 +1,5 @@
 import math
 import pytest
-import agentpy as ap
 from unittest.mock import Mock
 from mcabsfc.agents import HouseholdAgent
 

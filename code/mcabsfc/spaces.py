@@ -39,7 +39,8 @@ class GoodsMarket(EcoSpace):
 
     def add_consumer(self, household):
         consumer = ConsumerRole(household, self)
-        household.roles["consumer"] = consumer
+        role_id = 'consumer_tradable' if self.tradable else 'consumer_non_tradable'
+        household.roles[role_id] = consumer
         self.graph.add_node(consumer)
         return consumer
 
