@@ -123,8 +123,9 @@ def test_search_suppliers_returns_psi_producers(market):
     assert sample == producers[:3]
 
 
-def test_buy_goods_updates_accounts(market):
+def test_buy_goods_updates_tradable_flows(market):
     # Given
+    market.tradable = True
     consumer = Mock(label=1)
     producer = Mock(label=2)
     producer.get_price.return_value = 10
@@ -133,8 +134,26 @@ def test_buy_goods_updates_accounts(market):
     market.buy_goods(consumer, producer, quantity=5)
 
     # Then
-    consumer.decrease_stock("cash", 50)
-    consumer.increase_flow("consumption", 50)
-    producer.increase_stock("cash", 50)
-    producer.increase_flow("sales", 50)
-    producer.decrease_stock("inventories", 5)
+    consumer.decrease_stock.assert_called_with("cash", 50)
+    consumer.increase_flow.assert_called_with("tradable_cons", 50)
+    producer.increase_stock.assert_called_with("cash", 50)
+    producer.increase_flow.assert_called_with("sales", 50)
+    producer.decrease_stock.assert_called_with("inventories", 5)
+
+
+def test_buy_goods_updates_non_tradable_flows(market):
+    # Given
+    market.tradable = False
+    consumer = Mock(label=1)
+    producer = Mock(label=2)
+    producer.get_price.return_value = 10
+
+    # When
+    market.buy_goods(consumer, producer, quantity=5)
+
+    # Then
+    consumer.decrease_stock.assert_called_with("cash", 50)
+    consumer.increase_flow.assert_called_with("non_tradable_cons", 50)
+    producer.increase_stock.assert_called_with("cash", 50)
+    producer.increase_flow.assert_called_with("sales", 50)
+    producer.decrease_stock.assert_called_with("inventories", 5)

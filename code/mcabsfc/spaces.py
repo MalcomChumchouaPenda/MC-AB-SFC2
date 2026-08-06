@@ -51,11 +51,15 @@ class GoodsMarket(EcoSpace):
     def buy_goods(self, consumer, producer, quantity):
         price = producer.get_price()
         amount = quantity * price
-        consumer.decrease_stock("cash", amount)
-        consumer.increase_flow("consumption", amount)
         producer.increase_stock("cash", amount)
         producer.increase_flow("sales", amount)
         producer.decrease_stock("inventories", quantity)
+        consumer.decrease_stock("cash", amount)
+        if self.tradable:
+            consumer.increase_flow("tradable_cons", amount)
+        else:
+            consumer.increase_flow("non_tradable_cons", amount)
+
 
 
 class LaborMarket(EcoSpace):
