@@ -42,7 +42,7 @@ def market(monkeypatch):
     model = Mock()
     market = DepositMarket(model)
     monkeypatch.setattr("mc_ab_sfc.spaces.DepositHolderRole", FakeHolderRole)
-    monkeypatch.setattr("mc_ab_sfc.spaces.DepositProviderRole", FakeProviderRole)
+    monkeypatch.setattr("mc_ab_sfc.spaces.DepositBankRole", FakeProviderRole)
     return market
 
 
@@ -60,33 +60,33 @@ def test_add_client_creates_and_registers_deposit_holder_role(market):
     assert deposit_holder is household.roles["deposit_holder"]
 
 
-def test_add_bank_creates_and_registers_deposit_provider_role(market):
+def test_add_deposit_bank_creates_and_registers_deposit_deposit_bank(market):
     # Given
     bank = Mock(id=1, roles={})
 
     # When
-    bank_role = market.add_bank(bank)
+    deposit_bank = market.add_deposit_bank(bank)
 
     # Then
-    assert isinstance(bank_role, FakeProviderRole)
-    assert bank_role.owner is bank
-    assert bank_role.space is market
-    assert bank_role is bank.roles["deposit_provider"]
+    assert isinstance(deposit_bank, FakeProviderRole)
+    assert deposit_bank.owner is bank
+    assert deposit_bank.space is market
+    assert deposit_bank is bank.roles["deposit_bank"]
 
 
-def test_assign_bank_by_adding_graph_edge(market):
+def test_assign_deposit_bank_by_adding_graph_edge(market):
     # Given
     deposit_holder = Mock(label=1)
-    bank_role = Mock(label=2)
-    market.graph.add_nodes_from([deposit_holder, bank_role])
+    deposit_bank = Mock(label=2)
+    market.graph.add_nodes_from([deposit_holder, deposit_bank])
 
     # When
-    market.assign_bank(deposit_holder, bank_role)
+    market.assign_deposit_bank(deposit_holder, deposit_bank)
 
     # Then
     edges = list(market.graph.edges)
     source, target = edges[0]
     assert len(edges) == 1
     assert source is deposit_holder
-    assert target is bank_role
-    assert deposit_holder.bank is bank_role
+    assert target is deposit_bank
+    assert deposit_holder.deposit_bank is deposit_bank

@@ -93,12 +93,12 @@ def test_add_consumer_creates_non_tradable_consumer_role(market):
     assert consumer is household.roles["consumer_non_tradable"]
 
 
-def test_add_producer_creates_and_registers_producer_role(market):
+def test_add_supplier_creates_and_registers_producer_role(market):
     # Given
     firm = Mock(id=1, roles={})
 
     # When
-    producer = market.add_producer(firm)
+    producer = market.add_supplier(firm)
 
     # Then
     assert isinstance(producer, FakeProducerRole)

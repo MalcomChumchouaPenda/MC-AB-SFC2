@@ -45,7 +45,7 @@ def test_consumer_buy_tradable_goods(model, household):
     firm = FakeFirm(2)
     market = GoodsMarket(model, tradable=True)
     consumer = market.add_consumer(household)
-    producer = market.add_producer(firm)
+    producer = market.add_supplier(firm)
 
     # When
     consumer.buy_goods([producer])
@@ -64,7 +64,7 @@ def test_consumer_buy_non_tradable_goods(model, household):
     firm = FakeFirm(2)
     market = GoodsMarket(model, tradable=False)
     consumer = market.add_consumer(household)
-    producer = market.add_producer(firm)
+    producer = market.add_supplier(firm)
 
     # When
     consumer.buy_goods([producer])
@@ -83,11 +83,11 @@ def test_household_consumes_tradable_and_non_tradable_goods(model, household):
     firm1, firm2 = FakeFirm(2), FakeFirm(3)
     trad_market = GoodsMarket(model, tradable=True)
     trad_market.add_consumer(household)
-    trad_market.add_producer(firm1)
+    trad_market.add_supplier(firm1)
     trad_market.average_price = 10
     non_trad_market = GoodsMarket(model, tradable=False)
     non_trad_market.add_consumer(household)
-    non_trad_market.add_producer(firm2)
+    non_trad_market.add_supplier(firm2)
     non_trad_market.average_price = 15
 
     # When

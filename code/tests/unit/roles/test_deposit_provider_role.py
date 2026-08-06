@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import Mock
-from mc_ab_sfc.roles import DepositProviderRole
+from mc_ab_sfc.roles import DepositBankRole
 
 # ---------------------------------------------------
 # ARCHITECTURAL TESTS
@@ -12,7 +12,7 @@ def test_is_ecorole():
     from mc_ab_sfc.base import EcoRole
 
     # Assert
-    assert issubclass(DepositProviderRole, EcoRole)
+    assert issubclass(DepositBankRole, EcoRole)
 
 
 # ---------------------------------------------------
@@ -21,20 +21,20 @@ def test_is_ecorole():
 
 
 @pytest.fixture
-def deposit_provider():
+def deposit_bank():
     # Given
     space = Mock()
     owner = Mock(id=1)
-    return DepositProviderRole(owner, space)
+    return DepositBankRole(owner, space)
 
 
-def test_get_deposit_rate(deposit_provider):
+def test_get_deposit_rate(deposit_bank):
     # Given
-    bank = deposit_provider.owner
+    bank = deposit_bank.owner
     bank.deposit_rate = 0.05
 
     # When
-    deposit_rate = deposit_provider.get_deposit_rate()
+    deposit_rate = deposit_bank.get_deposit_rate()
 
     # Then
     assert deposit_rate == 0.05

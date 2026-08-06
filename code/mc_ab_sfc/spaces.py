@@ -8,9 +8,9 @@ from .roles import (
     ConsumerRole,
     ProducerRole,
     EquityHolderRole,
-    EquityEntityRole,
+    EquityIssuerRole,
     DepositHolderRole,
-    DepositProviderRole,
+    DepositBankRole,
 )
 
 
@@ -41,7 +41,7 @@ class GoodsMarket(EcoSpace):
         super().__init__(model, **kwargs)
         self.tradable = tradable
 
-    def add_producer(self, firm):
+    def add_supplier(self, firm):
         return self.add_role(ProducerRole, firm, 'producer')
 
     def add_consumer(self, household):
@@ -97,12 +97,12 @@ class DepositMarket(EcoSpace):
     def add_client(self, household):
         return self.add_role(DepositHolderRole, household, "deposit_holder")
 
-    def add_bank(self, bank):
-        return self.add_role(DepositProviderRole, bank, "deposit_provider")
+    def add_deposit_bank(self, bank):
+        return self.add_role(DepositBankRole, bank, "deposit_bank")
 
-    def assign_bank(self, client_role, bank_role):
-        client_role.bank = bank_role
-        self.graph.add_edge(client_role, bank_role)
+    def assign_deposit_bank(self, deposit_holder, deposit_bank):
+        deposit_holder.deposit_bank = deposit_bank
+        self.graph.add_edge(deposit_holder, deposit_bank)
 
 
 class BondMarket(EcoSpace):
@@ -112,7 +112,7 @@ class BondMarket(EcoSpace):
 class EquitySpace(EcoSpace):
 
     def add_equity_issuer(self, agent):
-        return self.add_role(EquityEntityRole, agent, 'equity_issuer')
+        return self.add_role(EquityIssuerRole, agent, 'equity_issuer')
 
     def add_equity_holder(self, household):
         return self.add_role(EquityHolderRole, household, 'equity_holder')

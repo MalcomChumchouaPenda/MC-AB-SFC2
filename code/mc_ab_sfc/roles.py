@@ -76,17 +76,17 @@ class EquityHolderRole(EcoRole):
         return self.space.default_probability
 
 
-class EquityEntityRole:
+class EquityIssuerRole:
     pass
 
 
 class DepositHolderRole(EcoRole):
 
     def get_deposit_rate(self):
-        return self.bank.get_deposit_rate()
+        return self.deposit_bank.get_deposit_rate()
 
 
-class DepositProviderRole(EcoRole):
+class DepositBankRole(EcoRole):
 
     def get_deposit_rate(self):
         return self.owner.deposit_rate

@@ -37,9 +37,9 @@ def test_household_portfolio_allocation(household, bank, model):
     equity_space.default_probability = 0.10
     equity_space.add_equity_holder(household)
     deposit_market = DepositMarket(model)
-    bank_role = deposit_market.add_bank(bank)
+    deposit_bank = deposit_market.add_deposit_bank(bank)
     deposit_holder = deposit_market.add_client(household)
-    deposit_market.assign_bank(deposit_holder, bank_role)
+    deposit_market.assign_deposit_bank(deposit_holder, deposit_bank)
 
     # When
     household.calc_portfolio_allocation()

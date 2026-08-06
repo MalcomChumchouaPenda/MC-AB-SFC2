@@ -41,7 +41,7 @@ def space(monkeypatch):
     model = Mock()
     space = EquitySpace(model)
     monkeypatch.setattr("mc_ab_sfc.spaces.EquityHolderRole", FakeHolderRole)
-    monkeypatch.setattr("mc_ab_sfc.spaces.EquityEntityRole", FakeEntityRole)
+    monkeypatch.setattr("mc_ab_sfc.spaces.EquityIssuerRole", FakeEntityRole)
     return space
 
 

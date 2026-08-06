@@ -30,9 +30,9 @@ def deposit_holder():
 
 def test_get_deposit_rate(deposit_holder):
     # Given
-    bank_role = Mock()
-    bank_role.get_deposit_rate.return_value = 0.02
-    deposit_holder.bank = bank_role
+    deposit_bank = Mock()
+    deposit_bank.get_deposit_rate.return_value = 0.02
+    deposit_holder.deposit_bank = deposit_bank
 
     # When
     deposit_rate = deposit_holder.get_deposit_rate()
