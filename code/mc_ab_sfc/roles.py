@@ -60,8 +60,8 @@ class ConsumerRole(EcoRole):
 
 class ProducerRole(EcoRole):
 
-    def get_location(self):
-        return self.owner.location
+    def get_position(self):
+        return self.owner.position
 
     def get_price(self):
         return self.owner.price

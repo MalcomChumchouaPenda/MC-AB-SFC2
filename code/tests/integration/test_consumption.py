@@ -20,7 +20,7 @@ def model():
 def household(model):
     # Given
     household = HouseholdAgent(model)
-    household.location = 0
+    household.position = 0
     household.cash = 100
     household.tradable_cons = 0
     household.non_tradable_cons = 0
@@ -32,7 +32,7 @@ def household(model):
 @dataclass
 class FakeFirm:
     id: int
-    location: float = 0.5
+    position: float = 0.5
     price: float = 10
     inventories: float = 10
     cash: float = 0

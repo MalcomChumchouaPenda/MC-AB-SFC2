@@ -368,16 +368,17 @@ def test_calc_supplier_score_with_salop_formula(household_with_consumer_roles):
     # Given
     household = household_with_consumer_roles
     household.model.p.beta = 1
-    household.location = 0
+    household.position = 0
     supplier = Mock()
     supplier.get_price.return_value = 10
-    supplier.get_location.return_value = 0.5
+    supplier.get_position.return_value = 0.5
 
     # When
     score = household.calc_supplier_score(supplier, average_price=20)
 
     # Then
-    assert score == (1 / 0.5) * (20 / 10)
+    expected_distance = math.sin(0.5 / 2)
+    assert score == (1 / expected_distance) * (20 / 10)
 
 
 def test_rank_suppliers_using_supplier_score(household_with_consumer_roles):

@@ -28,16 +28,16 @@ def producer():
     return ProducerRole(owner, market)
 
 
-def test_get_location(producer):
+def test_get_position(producer):
     # Given
     firm = producer.owner
-    firm.location = 0.9
+    firm.position = 0.9
 
     # When
-    location = producer.get_location()
+    position = producer.get_position()
 
     # Then
-    assert location == 0.9
+    assert position == 0.9
 
 
 def test_get_price(producer):

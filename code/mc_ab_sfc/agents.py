@@ -95,9 +95,10 @@ class HouseholdAgent(EcoAgent):
     def calc_supplier_score(self, supplier, average_price):
         p = self.p
         price = supplier.get_price()
-        prod_location = supplier.get_location()
-        distance = abs(self.location - prod_location)
-        distance = min(distance, 1 - distance)
+        prod_position = supplier.get_position()
+        diff = abs(self.position - prod_position)
+        diff = min(diff, 2 * math.pi - diff)
+        distance = math.sin(diff / 2)
         return (1 / distance**p.beta) * (average_price / price)
 
 
