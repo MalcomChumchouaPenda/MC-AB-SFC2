@@ -91,3 +91,145 @@ def test_plan_production_by_two_steps(firm):
 
     # Then
     assert firm.yD == 20
+
+
+# ---------------------------------------------------
+# PRICES AND EXPECTATIONS TESTS
+# ----------------------------------------------------
+
+
+@pytest.fixture
+def pricing_firm():
+    model = Mock()
+    model.p.delta = 0.1
+    firm = FirmAgent(model)
+    firm.wages = 10
+    firm.productivity = 2
+    firm.expected_sales = 100
+    firm.price = 10
+    return firm
+
+
+def test_increase_expectations_when_sales_exceed_expectations(pricing_firm):
+    # Given
+    firm = pricing_firm
+    firm.prev_sales = 120
+    firm.prev_output = 100
+    firm.prev_expected_sales = 100
+    firm.prev_inventories = 0
+    random = firm.model.random
+    random.uniform = Mock(side_effect=iter([0.05, 0.10, 0.15]))
+
+    # When
+    firm.adapt_expectations()
+
+    # Then
+    random.uniform.assert_called_with(0, 0.1)
+    assert firm.expected_sales == pytest.approx(105)
+    assert firm.price == pytest.approx(11.0)
+
+
+def test_decrease_expectations_when_unsold_goods_exist(pricing_firm):
+    # Given
+    firm = pricing_firm
+    firm.prev_sales = 80
+    firm.prev_output = 100
+    firm.prev_expected_sales = 100
+    firm.prev_inventories = 20
+    random = firm.model.random
+    random.uniform = Mock(side_effect=iter([0.05, 0.10, 0.15]))
+
+    # When
+    firm.adapt_expectations()
+
+    # Then
+    random.uniform.assert_called_with(0, 0.1)
+    assert firm.expected_sales == pytest.approx(95)
+    assert firm.price == pytest.approx(9.0)
+
+
+def test_keep_expectations_when_supply_constraint(pricing_firm):
+    # Given
+    firm = pricing_firm
+    firm.prev_sales = 80
+    firm.prev_output = 40
+    firm.prev_expected_sales = 100
+    firm.prev_inventories = 20
+    random = firm.model.random
+    random.uniform.return_value = 0.05
+
+    # When
+    firm.adapt_expectations()
+
+    # Then
+    assert firm.expected_sales == pytest.approx(100)
+    assert firm.price == pytest.approx(10)
+
+
+def test_price_cannot_be_below_unit_cost(pricing_firm):
+    # Given
+    firm = pricing_firm
+    firm.prev_sales = 80
+    firm.prev_output = 100
+    firm.prev_expected_sales = 100
+    firm.prev_inventories = 20
+    firm.price = 5
+    random = firm.model.random
+    random.uniform.return_value = 0.05
+
+    # When
+    firm.adapt_expectations()
+
+    # Then
+    assert firm.expected_sales == pytest.approx(95)
+    assert firm.price == pytest.approx(5)
+
+
+# ---------------------------------------------------
+# HISTORIC DATA STORAGE TESTS
+# ----------------------------------------------------
+
+
+@pytest.fixture
+def firm_with_history():
+    # Given
+    model = Mock()
+    firm = FirmAgent(model)
+    firm.prev_expected_sales = 100
+    firm.prev_output = 50
+    firm.prev_sales = 50
+    firm.prev_inventories = 20
+
+    firm.expected_sales = 120
+    firm.output = 100
+    firm.sales = 100
+    firm.inventories = 10
+    return firm
+
+
+def test_update_history_overwrites_previous_values(firm_with_history):
+    # Given
+    firm = firm_with_history
+
+    # When
+    firm.update_history()
+
+    # Then
+    assert firm.prev_expected_sales == 120
+    assert firm.prev_output == 100
+    assert firm.prev_sales == 100
+    assert firm.prev_inventories == 10
+
+
+def test_update_history_does_not_modify_current_values(firm_with_history):
+    # Given
+    firm = firm_with_history
+
+    # When
+    firm.update_history()
+
+    # Then
+    assert firm.expected_sales == 120
+    assert firm.output == 100
+    assert firm.sales == 100
+    assert firm.inventories == 10

@@ -4,7 +4,8 @@ from mc_ab_sfc.agents import FirmAgent
 
 def test_production_planning_pipeline():
     # Given
-    firm = FirmAgent()
+    model = Model({"theta": 0.20})
+    firm = FirmAgent(model)
     firm.expected_sales = 150
     firm.inventories = 30
     firm.productivity = 3

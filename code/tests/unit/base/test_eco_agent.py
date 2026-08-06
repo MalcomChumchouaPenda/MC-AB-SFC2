@@ -16,3 +16,12 @@ def test_contains_roles_collection():
 
     # Assert
     assert isinstance(agent.roles, dict)
+
+
+def test_has_update_history_method():
+    # Given
+    model = Mock()
+    agent = EcoAgent(model)
+
+    # Assert
+    assert callable(agent.update_history)

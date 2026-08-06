@@ -135,6 +135,25 @@ class FirmAgent(EcoAgent):
         self.desired_labor = self.desired_output / self.productivity
         return self.desired_labor
 
+    def adapt_expectations(self):
+        delta = self.p.delta
+        random = self.model.random
+        if self.prev_sales >= self.prev_expected_sales:
+            self.expected_sales *= 1 + random.uniform(0, delta)
+            self.price *= 1 + random.uniform(0, delta)
+
+        elif self.prev_output + self.prev_inventories > self.prev_sales:
+            self.expected_sales *= 1 - random.uniform(0, delta)
+            self.price *= 1 - random.uniform(0, delta)
+            self.price = max(self.wages / self.productivity, self.price)
+
+    def update_history(self):
+        super().update_history()
+        self.prev_sales = self.sales
+        self.prev_expected_sales = self.expected_sales
+        self.prev_inventories = self.inventories
+        self.prev_output = self.output
+
 
 class BankAgent(EcoAgent):
     pass
