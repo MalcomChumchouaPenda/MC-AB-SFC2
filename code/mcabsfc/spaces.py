@@ -50,11 +50,11 @@ class GoodsMarket(EcoSpace):
     def buy_goods(self, consumer, producer, quantity):
         price = producer.get_price()
         amount = quantity * price
-        consumer.debit_stock("cash", amount)
-        consumer.credit_flow("consumption", amount)
-        producer.credit_stock("cash", amount)
-        producer.credit_flow("sales", amount)
-        producer.debit_stock("inventories", quantity)
+        consumer.decrease_stock("cash", amount)
+        consumer.increase_flow("consumption", amount)
+        producer.increase_stock("cash", amount)
+        producer.increase_flow("sales", amount)
+        producer.decrease_stock("inventories", quantity)
 
 
 class LaborMarket(EcoSpace):

@@ -46,54 +46,54 @@ class DummyAgent:
         self.interest_income = 0
 
 
-def test_credit_stock_increases_agent_stock():
+def test_increase_stock_increases_agent_stock():
     # Given
     space = Mock()
     agent = DummyAgent()
     role = EcoRole(agent, space)
 
     # When
-    role.credit_stock("deposits", 25)
+    role.increase_stock("deposits", 25)
 
     # Then
     assert agent.deposits == 125
 
 
-def test_debit_stock_decreases_agent_stock():
+def test_decrease_stock_decreases_agent_stock():
     # Given
     space = Mock()
     agent = DummyAgent()
     role = EcoRole(agent, space)
 
     # When
-    role.debit_stock("deposits", 40)
+    role.decrease_stock("deposits", 40)
 
     # Then
     assert agent.deposits == 60
 
 
-def test_credit_flow_increases_agent_flow():
+def test_increase_flow_increases_agent_flow():
     # Given
     space = Mock()
     agent = DummyAgent()
     role = EcoRole(agent, space)
 
     # When
-    role.credit_flow("labor_income", 100)
+    role.increase_flow("labor_income", 100)
 
     # Then
     assert agent.labor_income == 100
 
 
-def test_debit_flow_decreases_agent_flow():
+def test_decrease_flow_decreases_agent_flow():
     # Given
     space = Mock()
     agent = DummyAgent()
     role = EcoRole(agent, space)
 
     # When
-    role.credit_flow("labor_income", 100)
-    role.debit_flow("labor_income", 30)
+    role.increase_flow("labor_income", 100)
+    role.decrease_flow("labor_income", 30)
 
     # Then
     assert agent.labor_income == 70
@@ -108,10 +108,10 @@ def test_accounting_methods_use_existing_attributes_only():
     # Assert
     expected = "has no attribute 'unknown'"
     with pytest.raises(AttributeError, match=expected):
-        role.credit_stock("unknown", 10)
+        role.increase_stock("unknown", 10)
     with pytest.raises(AttributeError, match=expected):
-        role.debit_stock("unknown", 10)
+        role.decrease_stock("unknown", 10)
     with pytest.raises(AttributeError, match=expected):
-        role.credit_flow("unknown", 10)
+        role.increase_flow("unknown", 10)
     with pytest.raises(AttributeError, match=expected):
-        role.debit_flow("unknown", 10)
+        role.decrease_flow("unknown", 10)

@@ -117,8 +117,8 @@ def test_buy_goods_updates_accounts(market):
     market.buy_goods(consumer, producer, quantity=5)
 
     # Then
-    consumer.debit_stock("cash", 50)
-    consumer.credit_flow("consumption", 50)
-    producer.credit_stock("cash", 50)
-    producer.credit_flow("sales", 50)
-    producer.debit_stock("inventories", 5)
+    consumer.decrease_stock("cash", 50)
+    consumer.increase_flow("consumption", 50)
+    producer.increase_stock("cash", 50)
+    producer.increase_flow("sales", 50)
+    producer.decrease_stock("inventories", 5)
