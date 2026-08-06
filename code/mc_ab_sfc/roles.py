@@ -80,13 +80,13 @@ class EquityEntityRole:
     pass
 
 
-class DepositorRole(EcoRole):
+class DepositHolderRole(EcoRole):
 
     def get_deposit_rate(self):
         return self.bank.get_deposit_rate()
 
 
-class DepositEntityRole(EcoRole):
+class DepositProviderRole(EcoRole):
 
     def get_deposit_rate(self):
         return self.owner.deposit_rate

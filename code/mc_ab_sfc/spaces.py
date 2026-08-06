@@ -9,8 +9,8 @@ from .roles import (
     ProducerRole,
     EquityHolderRole,
     EquityEntityRole,
-    DepositorRole,
-    DepositEntityRole,
+    DepositHolderRole,
+    DepositProviderRole,
 )
 
 
@@ -112,21 +112,21 @@ class DepositMarket(EcoSpace):
     def __init__(self, model, **kwargs):
         super().__init__(model, graph=DiGraph(), **kwargs)
 
-    def add_depositor(self, household):
-        role = DepositorRole(household, self)
-        household.roles["depositor"] = role
+    def add_client(self, household):
+        role = DepositHolderRole(household, self)
+        household.roles["deposit_holder"] = role
         self.graph.add_node(role)
         return role
 
     def add_bank(self, bank):
-        role = DepositEntityRole(bank, self)
-        bank.roles["deposit_entity"] = role
+        role = DepositProviderRole(bank, self)
+        bank.roles["deposit_provider"] = role
         self.graph.add_node(role)
         return role
 
-    def assign_bank(self, client, bank_role):
-        client.bank = bank_role
-        self.graph.add_edge(client, bank_role)
+    def assign_bank(self, client_role, bank_role):
+        client_role.bank = bank_role
+        self.graph.add_edge(client_role, bank_role)
 
 
 class BondMarket(EcoSpace):
@@ -135,11 +135,11 @@ class BondMarket(EcoSpace):
 
 class EquitySpace(EcoSpace):
 
-    def add_equity_entity(self, agent):
-        equity_entity = EquityEntityRole(agent, self)
-        agent.roles["equity_entity"] = equity_entity
-        self.graph.add_node(equity_entity)
-        return equity_entity
+    def add_equity_issuer(self, agent):
+        equity_issuer = EquityEntityRole(agent, self)
+        agent.roles["equity_issuer"] = equity_issuer
+        self.graph.add_node(equity_issuer)
+        return equity_issuer
 
     def add_equity_holder(self, household):
         equity_holder = EquityHolderRole(household, self)

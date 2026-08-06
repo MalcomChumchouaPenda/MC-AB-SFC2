@@ -463,7 +463,7 @@ def household_with_assets():
     model = Mock()
     household = HouseholdAgent(model)
     household.roles["equity_holder"] = Mock()
-    household.roles["depositor"] = Mock()
+    household.roles["deposit_holder"] = Mock()
     return household
 
 
@@ -475,7 +475,7 @@ def test_calc_liquidity_pref_when_equity_is_more_profitable(household_with_asset
     household.p.lambda_ = 0.6
     roles = household.roles
     roles["equity_holder"].get_default_probability.return_value = 0.10
-    roles["depositor"].get_deposit_rate.return_value = 0.05
+    roles["deposit_holder"].get_deposit_rate.return_value = 0.05
 
     # When
     lp = household.calc_liquidity_preference()
@@ -493,7 +493,7 @@ def test_calc_liquidity_pref_when_equity_is_less_profitable(household_with_asset
     household.p.lambda_ = 0.7
     roles = household.roles
     roles["equity_holder"].get_default_probability.return_value = 0.10
-    roles["depositor"].get_deposit_rate.return_value = 0.05
+    roles["deposit_holder"].get_deposit_rate.return_value = 0.05
 
     # When
     lp = household.calc_liquidity_preference()
@@ -510,7 +510,7 @@ def test_calc_liquidity_preference_when_no_equity(household_with_assets):
     household.p.lambda_ = 0.8
     roles = household.roles
     roles["equity_holder"].get_default_probability.return_value = 0.10
-    roles["depositor"].get_deposit_rate.return_value = 0.05
+    roles["deposit_holder"].get_deposit_rate.return_value = 0.05
 
     # When
     lp = household.calc_liquidity_preference()

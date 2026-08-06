@@ -109,7 +109,7 @@ class HouseholdAgent(EcoAgent):
         roles = self.roles
         equity = self.equity
         default_prob = roles["equity_holder"].get_default_probability()
-        deposit_rate = roles["depositor"].get_deposit_rate()
+        deposit_rate = roles["deposit_holder"].get_deposit_rate()
         profit_ratio = self.dividends / equity if equity else 0
         if profit_ratio < deposit_rate or self.equity <= 0:
             return p.lambda_

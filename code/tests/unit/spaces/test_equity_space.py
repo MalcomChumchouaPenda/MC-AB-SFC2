@@ -61,16 +61,16 @@ def test_add_equity_holder_creates_and_registers_appropriate_role(space):
     assert equity_holder is household.roles["equity_holder"]
 
 
-def test_add_equity_entity_creates_and_registers_appropriate_role(space):
+def test_add_equity_issuer_creates_and_registers_appropriate_role(space):
     # Given
     agent = Mock(id=1, roles={})
 
     # When
-    equity_entity = space.add_equity_entity(agent)
+    equity_issuer = space.add_equity_issuer(agent)
 
     # Then
-    assert isinstance(equity_entity, FakeEntityRole)
-    assert equity_entity.owner is agent
-    assert equity_entity.space is space
-    assert equity_entity in space.nodes
-    assert equity_entity is agent.roles["equity_entity"]
+    assert isinstance(equity_issuer, FakeEntityRole)
+    assert equity_issuer.owner is agent
+    assert equity_issuer.space is space
+    assert equity_issuer in space.nodes
+    assert equity_issuer is agent.roles["equity_issuer"]
