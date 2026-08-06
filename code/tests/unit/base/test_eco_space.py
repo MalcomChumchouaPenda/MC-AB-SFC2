@@ -5,7 +5,6 @@ from networkx import DiGraph
 import agentpy as ap
 from mc_ab_sfc.base import EcoSpace
 
-
 # ---------------------------------------------------
 # ARCHITECTURAL TESTS
 # ----------------------------------------------------
@@ -23,7 +22,6 @@ def test_contains_roles_collection():
 
     # Assert
     assert isinstance(space.roles, dict)
-
 
 
 def test_has_directed_graph():
@@ -62,7 +60,7 @@ class FakeRole:
 
 def test_add_role_creates_role(agent, space):
     # Given
-    key = 'fake_role'
+    key = "fake_role"
 
     # When
     role = space.add_role(FakeRole, agent, key)
@@ -75,23 +73,21 @@ def test_add_role_creates_role(agent, space):
 
 def test_add_role_creates_node(agent, space):
     # Given
-    key = 'fake_role'
+    key = "fake_role"
 
     # When
     role = space.add_role(FakeRole, agent, key)
 
     # Then
     assert role in space.nodes
-    
 
 
 def test_add_role_registers_role(agent, space):
     # Given
-    key = 'fake_role'
+    key = "fake_role"
 
     # When
     role = space.add_role(FakeRole, agent, key)
 
     # Then
     assert role is agent.roles["fake_role"]
-    

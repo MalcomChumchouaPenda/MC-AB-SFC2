@@ -42,7 +42,7 @@ class GoodsMarket(EcoSpace):
         self.tradable = tradable
 
     def add_supplier(self, firm):
-        return self.add_role(ProducerRole, firm, 'producer')
+        return self.add_role(ProducerRole, firm, "producer")
 
     def add_consumer(self, household):
         key = "consumer_tradable" if self.tradable else "consumer_non_tradable"
@@ -68,10 +68,10 @@ class GoodsMarket(EcoSpace):
 class LaborMarket(EcoSpace):
 
     def add_employer(self, firm):
-        return self.add_role(EmployerRole, firm, 'employer')
+        return self.add_role(EmployerRole, firm, "employer")
 
     def add_worker(self, household):
-        return self.add_role(WorkerRole, household, 'worker')
+        return self.add_role(WorkerRole, household, "worker")
 
     def create_job(self, worker, employer, quantity):
         self.graph.add_edge(worker, employer, wage=employer.wage, quantity=quantity)
@@ -112,9 +112,7 @@ class BondMarket(EcoSpace):
 class EquitySpace(EcoSpace):
 
     def add_equity_issuer(self, agent):
-        return self.add_role(EquityIssuerRole, agent, 'equity_issuer')
+        return self.add_role(EquityIssuerRole, agent, "equity_issuer")
 
     def add_equity_holder(self, household):
-        return self.add_role(EquityHolderRole, household, 'equity_holder')
-
-    
+        return self.add_role(EquityHolderRole, household, "equity_holder")
