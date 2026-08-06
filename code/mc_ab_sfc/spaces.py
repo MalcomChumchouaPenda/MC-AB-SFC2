@@ -1,7 +1,16 @@
 import agentpy as ap
 from networkx import DiGraph
 from .base import EcoSpace
-from .roles import EmployerRole, WorkerRole, CitizenRole, ConsumerRole, ProducerRole
+from .roles import (
+    EmployerRole,
+    WorkerRole,
+    CitizenRole,
+    ConsumerRole,
+    ProducerRole,
+    EquityHolderRole,
+    EquityEntityRole,
+    DepositorRole,
+)
 
 
 class MonetaryUnionSpace(EcoSpace):
@@ -98,12 +107,28 @@ class CreditMarket(EcoSpace):
 
 
 class DepositMarket(EcoSpace):
-    pass
+
+    def add_depositor(self, household):
+        role = DepositorRole(household, self)
+        household.roles['depositor'] = role
+        self.graph.add_node(role)
+        return role
 
 
 class BondMarket(EcoSpace):
     pass
 
 
-class EquityMarket(EcoSpace):
-    pass
+class EquitySpace(EcoSpace):
+
+    def add_equity_entity(self, agent):
+        equity_entity = EquityEntityRole(agent, self)
+        agent.roles["equity_entity"] = equity_entity
+        self.graph.add_node(equity_entity)
+        return equity_entity
+
+    def add_equity_holder(self, household):
+        equity_holder = EquityHolderRole(household, self)
+        household.roles["equity_holder"] = equity_holder
+        self.graph.add_node(equity_holder)
+        return equity_holder

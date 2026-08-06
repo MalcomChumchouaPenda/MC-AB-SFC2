@@ -68,3 +68,20 @@ class ProducerRole(EcoRole):
 
     def get_available_quantity(self):
         return self.owner.inventories
+
+
+class EquityHolderRole(EcoRole):
+
+    def get_default_probability(self):
+        return self.space.default_probability
+
+
+class EquityEntityRole:
+    pass
+
+
+class DepositorRole(EcoRole):
+
+    def get_deposit_rate(self):
+        return self.space.deposit_rate
+

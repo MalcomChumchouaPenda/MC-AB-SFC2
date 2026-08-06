@@ -59,9 +59,6 @@ class HouseholdAgent(EcoAgent):
         ) * self.gross_income + self.public_transfer
         return self.disposable_income
 
-    def calc_expected_net_worth(self):
-        return self.net_worth + self.disposable_income - self.expected_consumption
-
     def calc_consumption(self):
         p = self.p
         self.desired_consumption = p.cy * self.disposable_income + p.cd * self.deposits
@@ -100,6 +97,26 @@ class HouseholdAgent(EcoAgent):
         diff = min(diff, 2 * math.pi - diff)
         distance = math.sin(diff / 2)
         return (1 / distance**p.beta) * (average_price / price)
+
+    def calc_portfolio_allocation(self):
+        lp = self.calc_liquidity_preference()
+        expected_worth = self.calc_expected_net_worth()
+        self.desired_equity = max(self.equity, (1 - lp) * expected_worth)
+        self.desired_deposits = expected_worth - (self.desired_equity - self.equity)
+
+    def calc_liquidity_preference(self):
+        p = self.p
+        roles = self.roles
+        equity = self.equity
+        default_prob = roles["equity_holder"].get_default_probability()
+        deposit_rate = roles["depositor"].get_deposit_rate()
+        profit_ratio = self.dividends / equity if equity else 0
+        if profit_ratio < deposit_rate or self.equity <= 0:
+            return p.lambda_
+        return p.lambda_ * math.exp(-(profit_ratio * (1 - default_prob)) - deposit_rate)
+
+    def calc_expected_net_worth(self):
+        return self.net_worth + self.disposable_income - self.expected_consumption
 
 
 class FirmAgent(EcoAgent):

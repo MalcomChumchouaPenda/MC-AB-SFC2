@@ -450,3 +450,101 @@ def test_consume_randomizes_market_order(household_with_consumer_roles):
 
     # Then
     random.shuffle.assert_called_with([trad_role, non_trad_role])
+
+
+# ---------------------------------------------------
+# PORTFOLIO ALLOCATION TESTS
+# ----------------------------------------------------
+
+
+@pytest.fixture
+def household_with_assets():
+    # Given
+    model = Mock()
+    household = HouseholdAgent(model)
+    household.roles["equity_holder"] = Mock()
+    household.roles["depositor"] = Mock()
+    return household
+
+
+def test_calc_liquidity_pref_when_equity_is_more_profitable(household_with_assets):
+    # Given
+    household = household_with_assets
+    household.dividends = 10
+    household.equity = 100
+    household.p.lambda_ = 0.6
+    roles = household.roles
+    roles["equity_holder"].get_default_probability.return_value = 0.10
+    roles["depositor"].get_deposit_rate.return_value = 0.05
+
+    # When
+    lp = household.calc_liquidity_preference()
+
+    # Then
+    expected = 0.6 * math.exp(-((10 * (1 - 0.10)) / 100) - 0.05)
+    assert lp == pytest.approx(expected)
+
+
+def test_calc_liquidity_pref_when_equity_is_less_profitable(household_with_assets):
+    # Given
+    household = household_with_assets
+    household.dividends = 2
+    household.equity = 100
+    household.p.lambda_ = 0.7
+    roles = household.roles
+    roles["equity_holder"].get_default_probability.return_value = 0.10
+    roles["depositor"].get_deposit_rate.return_value = 0.05
+
+    # When
+    lp = household.calc_liquidity_preference()
+
+    # Then
+    assert lp == 0.7
+
+
+def test_calc_liquidity_preference_when_no_equity(household_with_assets):
+    # Given
+    household = household_with_assets
+    household.dividends = 0
+    household.equity = 0
+    household.p.lambda_ = 0.8
+    roles = household.roles
+    roles["equity_holder"].get_default_probability.return_value = 0.10
+    roles["depositor"].get_deposit_rate.return_value = 0.05
+
+    # When
+    lp = household.calc_liquidity_preference()
+
+    # Then
+    assert lp == 0.8
+
+
+def test_calc_portfolio_allocation_updates_desired_assets():
+    # Given
+    model = Mock()
+    household = HouseholdAgent(model)
+    household.equity = 20
+    household.calc_liquidity_preference = Mock(return_value=0.40)
+    household.calc_expected_net_worth = Mock(return_value=100)
+
+    # When
+    household.calc_portfolio_allocation()
+
+    # Then
+    assert household.desired_equity == 60
+    assert household.desired_deposits == 60
+
+
+def test_calc_portfolio_allocation_preserves_existing_equity():
+    # Given
+    model = Mock()
+    household = HouseholdAgent(model)
+    household.equity = 80
+    household.calc_liquidity_preference = Mock(return_value=0.80)
+    household.calc_expected_net_worth = Mock(return_value=100)
+
+    # When
+    household.calc_portfolio_allocation()
+
+    # Then
+    assert household.desired_equity == 80
