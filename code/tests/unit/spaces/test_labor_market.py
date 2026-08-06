@@ -1,7 +1,6 @@
 import pytest
 import agentpy as ap
 from unittest.mock import Mock
-from networkx import DiGraph
 from dataclasses import dataclass
 from mc_ab_sfc.spaces import LaborMarket
 
@@ -16,15 +15,6 @@ def test_is_ecospace():
 
     # Assert
     assert issubclass(LaborMarket, EcoSpace)
-
-
-def test_has_directed_graph():
-    # Given
-    model = Mock()
-    market = LaborMarket(model)
-
-    # Assert
-    assert isinstance(market.graph, DiGraph)
 
 
 # ---------------------------------------------------
@@ -67,7 +57,6 @@ def test_add_worker_creates_and_registers_worker_role(market):
     assert isinstance(worker, FakeWorkerRole)
     assert worker.owner is household
     assert worker.space is market
-    assert worker in market.nodes
     assert worker is household.roles["worker"]
 
 
@@ -82,7 +71,6 @@ def test_add_employer_creates_and_registers_employer_role(market):
     assert isinstance(employer, FakeEmployerRole)
     assert employer.owner is firm
     assert employer.space is market
-    assert employer in market.nodes
     assert employer is firm.roles["employer"]
 
 

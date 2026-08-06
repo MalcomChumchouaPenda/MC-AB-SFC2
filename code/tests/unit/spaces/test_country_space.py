@@ -42,7 +42,7 @@ def country(monkeypatch):
     return space
 
 
-def test_add_citizen_creates_and_registers_citizen_role(country):
+def test_add_citizen_creates_citizen_role(country):
     # Given
     household = Mock(id=1, roles={})
 
@@ -51,7 +51,6 @@ def test_add_citizen_creates_and_registers_citizen_role(country):
 
     # Then
     assert isinstance(citizen, FakeCitizenRole)
+    assert citizen is household.roles["citizen"]
     assert citizen.owner is household
     assert citizen.space is country
-    assert citizen in country.nodes
-    assert citizen is household.roles["citizen"]

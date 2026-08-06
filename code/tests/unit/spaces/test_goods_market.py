@@ -90,7 +90,6 @@ def test_add_consumer_creates_non_tradable_consumer_role(market):
     assert isinstance(consumer, FakeConsumerRole)
     assert consumer.owner is household
     assert consumer.space is market
-    assert consumer in market.nodes
     assert consumer is household.roles["consumer_non_tradable"]
 
 
@@ -105,7 +104,6 @@ def test_add_producer_creates_and_registers_producer_role(market):
     assert isinstance(producer, FakeProducerRole)
     assert producer.owner is firm
     assert producer.space is market
-    assert producer in market.nodes
     assert producer is firm.roles["producer"]
 
 

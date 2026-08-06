@@ -1,4 +1,5 @@
 import agentpy as ap
+from networkx import DiGraph
 
 
 class EcoAgent(ap.Agent):
@@ -55,6 +56,12 @@ class EcoSpace(ap.Network):
     à ses noeuds.
     """
 
-    def __init__(self, model, graph=None, **kwargs):
-        super().__init__(model, graph, **kwargs)
+    def __init__(self, model, **kwargs):
+        super().__init__(model, graph=DiGraph(), **kwargs)
         self.roles = {}
+
+    def add_role(self, kind, agent, key):
+        role = kind(agent, self)
+        agent.roles[key] = role
+        self.graph.add_node(role)
+        return role

@@ -38,21 +38,15 @@ class CountrySpace(EcoSpace):
 class GoodsMarket(EcoSpace):
 
     def __init__(self, model, tradable=True, **kwargs):
-        super().__init__(model, graph=None, **kwargs)
+        super().__init__(model, **kwargs)
         self.tradable = tradable
 
     def add_producer(self, firm):
-        producer = ProducerRole(firm, self)
-        firm.roles["producer"] = producer
-        self.graph.add_node(producer)
-        return producer
+        return self.add_role(ProducerRole, firm, 'producer')
 
     def add_consumer(self, household):
-        consumer = ConsumerRole(household, self)
-        role_id = "consumer_tradable" if self.tradable else "consumer_non_tradable"
-        household.roles[role_id] = consumer
-        self.graph.add_node(consumer)
-        return consumer
+        key = "consumer_tradable" if self.tradable else "consumer_non_tradable"
+        return self.add_role(ConsumerRole, household, key)
 
     def search_suppliers(self, psi):
         suppliers = [node for node in self.nodes if isinstance(node, ProducerRole)]
@@ -73,20 +67,11 @@ class GoodsMarket(EcoSpace):
 
 class LaborMarket(EcoSpace):
 
-    def __init__(self, model, **kwargs):
-        super().__init__(model, graph=DiGraph(), **kwargs)
-
     def add_employer(self, firm):
-        employer = EmployerRole(firm, self)
-        firm.roles["employer"] = employer
-        self.graph.add_node(employer)
-        return employer
+        return self.add_role(EmployerRole, firm, 'employer')
 
     def add_worker(self, household):
-        worker = WorkerRole(household, self)
-        household.roles["worker"] = worker
-        self.graph.add_node(worker)
-        return worker
+        return self.add_role(WorkerRole, household, 'worker')
 
     def create_job(self, worker, employer, quantity):
         self.graph.add_edge(worker, employer, wage=employer.wage, quantity=quantity)
@@ -109,20 +94,11 @@ class CreditMarket(EcoSpace):
 
 class DepositMarket(EcoSpace):
 
-    def __init__(self, model, **kwargs):
-        super().__init__(model, graph=DiGraph(), **kwargs)
-
     def add_client(self, household):
-        role = DepositHolderRole(household, self)
-        household.roles["deposit_holder"] = role
-        self.graph.add_node(role)
-        return role
+        return self.add_role(DepositHolderRole, household, "deposit_holder")
 
     def add_bank(self, bank):
-        role = DepositProviderRole(bank, self)
-        bank.roles["deposit_provider"] = role
-        self.graph.add_node(role)
-        return role
+        return self.add_role(DepositProviderRole, bank, "deposit_provider")
 
     def assign_bank(self, client_role, bank_role):
         client_role.bank = bank_role
@@ -136,13 +112,9 @@ class BondMarket(EcoSpace):
 class EquitySpace(EcoSpace):
 
     def add_equity_issuer(self, agent):
-        equity_issuer = EquityEntityRole(agent, self)
-        agent.roles["equity_issuer"] = equity_issuer
-        self.graph.add_node(equity_issuer)
-        return equity_issuer
+        return self.add_role(EquityEntityRole, agent, 'equity_issuer')
 
     def add_equity_holder(self, household):
-        equity_holder = EquityHolderRole(household, self)
-        household.roles["equity_holder"] = equity_holder
-        self.graph.add_node(equity_holder)
-        return equity_holder
+        return self.add_role(EquityHolderRole, household, 'equity_holder')
+
+    

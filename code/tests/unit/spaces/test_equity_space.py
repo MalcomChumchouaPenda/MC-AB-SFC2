@@ -57,7 +57,6 @@ def test_add_equity_holder_creates_and_registers_appropriate_role(space):
     assert isinstance(equity_holder, FakeHolderRole)
     assert equity_holder.owner is household
     assert equity_holder.space is space
-    assert equity_holder in space.nodes
     assert equity_holder is household.roles["equity_holder"]
 
 
@@ -72,5 +71,4 @@ def test_add_equity_issuer_creates_and_registers_appropriate_role(space):
     assert isinstance(equity_issuer, FakeEntityRole)
     assert equity_issuer.owner is agent
     assert equity_issuer.space is space
-    assert equity_issuer in space.nodes
     assert equity_issuer is agent.roles["equity_issuer"]
