@@ -1,5 +1,5 @@
 import pytest
-from agentpy import Model
+from unittest.mock import Mock
 from mc_ab_sfc.agents import HouseholdAgent, FirmAgent
 from mc_ab_sfc.spaces import LaborMarket
 
@@ -7,13 +7,16 @@ from mc_ab_sfc.spaces import LaborMarket
 @pytest.fixture
 def model():
     # Given
-    return Model({"psi": 2})
+    model = Mock()
+    model.p.psi = 2
+    return model
 
 
 @pytest.fixture
 def market(model):
     # Given
-    return LaborMarket(model)
+    market = LaborMarket(model)
+    return market
 
 
 @pytest.fixture
@@ -42,6 +45,8 @@ def employers(model, market):
 def test_household_search_jobs_on_labor_market(household, employers, market):
     # Given
     market.add_worker(household)
+    random = market.model.random
+    random.sample = Mock(side_effect=lambda pop, k: pop[:k])
 
     # When
     household.search_jobs()
@@ -57,6 +62,8 @@ def test_household_search_jobs_on_labor_market(household, employers, market):
 def test_household_sells_total_labor_supply(household, employers, market):
     # Given
     market.add_worker(household)
+    random = market.model.random
+    random.sample = Mock(side_effect=lambda pop, k: pop[:k])
 
     # When
     household.search_jobs()
