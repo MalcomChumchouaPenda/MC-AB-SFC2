@@ -1,5 +1,5 @@
 import pytest
-from agentpy import Model
+from unittest.mock import Mock
 from mc_ab_sfc.agents import HouseholdAgent
 from mc_ab_sfc.spaces import CountrySpace
 
@@ -7,7 +7,7 @@ from mc_ab_sfc.spaces import CountrySpace
 @pytest.fixture
 def model():
     # Given
-    return Model()
+    return Mock()
 
 
 @pytest.fixture
