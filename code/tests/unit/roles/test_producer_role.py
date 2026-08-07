@@ -62,3 +62,27 @@ def test_get_available_quantity(producer):
 
     # Then
     assert quantity == 100
+
+
+def test_get_average_price(producer):
+    # Given
+    market = producer.space
+    market.calc_average_price.return_value = 15
+
+    # When
+    average_price = producer.get_average_price()
+
+    # Then
+    assert average_price == 15
+
+
+def test_get_average_productivity(producer):
+    # Given
+    market = producer.space
+    market.calc_average_productivity.return_value = 2.5
+
+    # When
+    average_productiviy = producer.get_average_productivity()
+
+    # Then
+    assert average_productiviy == 2.5

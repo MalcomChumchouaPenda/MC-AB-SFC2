@@ -169,15 +169,19 @@ class FirmAgent(EcoAgent):
         self.execute_rd()
         if self.rd == 0:
             return self.productivity
+
         prob = self.calc_rd_success_probability()
         random = self.model.nprandom
         success = random.choice([0, 1], p=[1 - prob, prob])
         if success:
             delta = self.p.delta
-            self.productivity *= 1 + random.uniform(0, delta)
-            if self.productivity < self.average_productivity:
-                prod_diff = self.average_productivity - self.productivity
-                self.productivity += random.uniform(0, prod_diff)
+            self.productivity *= 1 + random.uniform(0, delta)  # innovation
+
+            producer_role = self.roles["producer"]
+            avg_productivity = producer_role.get_average_productivity()
+            prod_diff = avg_productivity - self.productivity
+            if prod_diff > 0:
+                self.productivity += random.uniform(0, prod_diff)  # imitation
 
     def calc_desired_rd(self):
         self.desired_wage_bill = self.wage_offer * self.desired_labor

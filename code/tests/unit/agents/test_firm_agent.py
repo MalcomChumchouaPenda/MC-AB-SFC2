@@ -444,6 +444,7 @@ def innovating_firm():
     firm.calc_desired_rd = Mock(side_effect=setattr(firm, "desired_rd", 100))
     firm.execute_rd = Mock(side_effect=setattr(firm, "rd", 100))
     firm.calc_rd_success_probability = Mock(return_value=0.6)
+    firm.roles["producer"] = Mock()
     return firm
 
 
@@ -451,10 +452,11 @@ def test_update_productivity_with_multi_steps(innovating_firm):
     # Given
     firm = innovating_firm
     firm.productivity = 10
-    firm.average_productivity = 10
     random = firm.model.nprandom
     random.choice.return_value = 1
     random.uniform.return_value = 0.05
+    producer_role = firm.roles["producer"]
+    producer_role.get_average_productivity.return_value = 10
 
     # When
     firm.update_productivity()
@@ -470,9 +472,10 @@ def test_update_productivity_without_success(innovating_firm):
     # Given
     firm = innovating_firm
     firm.productivity = 10
-    firm.average_productivity = 10
     random = firm.model.nprandom
     random.choice.return_value = 0
+    producer_role = firm.roles["producer"]
+    producer_role.get_average_productivity.return_value = 10
 
     # When
     firm.update_productivity()
@@ -485,10 +488,11 @@ def test_update_productivity_by_innovation(innovating_firm):
     # Given
     firm = innovating_firm
     firm.productivity = 10
-    firm.average_productivity = 10
     random = firm.model.nprandom
     random.choice.return_value = 1
     random.uniform = lambda a, b: b
+    producer_role = firm.roles["producer"]
+    producer_role.get_average_productivity.return_value = 10
 
     # When
     firm.update_productivity()
@@ -501,10 +505,11 @@ def test_update_productivity_by_imitation(innovating_firm):
     # Given
     firm = innovating_firm
     firm.productivity = 10
-    firm.average_productivity = 20
     random = firm.model.nprandom
     random.choice.return_value = 1
     random.uniform = lambda a, b: b
+    producer_role = firm.roles["producer"]
+    producer_role.get_average_productivity.return_value = 20
 
     # When
     firm.update_productivity()

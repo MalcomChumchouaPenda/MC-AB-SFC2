@@ -1,5 +1,5 @@
 import pytest
-from unittest.mock import Mock
+from unittest.mock import Mock, MagicMock
 from dataclasses import dataclass
 from mc_ab_sfc.spaces import GoodsMarket
 
@@ -39,79 +39,85 @@ def test_goods_market_can_be_non_tradable():
 # ----------------------------------------------------
 
 
-@dataclass(frozen=True)
-class FakeConsumerRole:
-    owner: object = None
-    space: object = None
-    label: int = 1
-
-
-@dataclass(frozen=True)
-class FakeProducerRole:
-    owner: object = None
-    space: object = None
-    label: int = 2
-
-
 @pytest.fixture
-def market(monkeypatch):
-    # Given a market and fake role class
+def market():
+    # Given
     model = Mock()
     market = GoodsMarket(model)
-    monkeypatch.setattr("mc_ab_sfc.spaces.ConsumerRole", FakeConsumerRole)
-    monkeypatch.setattr("mc_ab_sfc.spaces.ProducerRole", FakeProducerRole)
     return market
 
 
-def test_add_consumer_creates_tradable_consumer_role(market):
+class FakeConsumerRole:
+    pass
+
+
+def test_add_consumer_returns_created_role(market, monkeypatch):
     # Given
-    household = Mock(id=1, roles={})
+    household = Mock()
+    market.add_role = Mock()
+    monkeypatch.setattr("mc_ab_sfc.spaces.ConsumerRole", FakeConsumerRole)
 
     # When
     consumer = market.add_consumer(household)
 
     # Then
-    assert isinstance(consumer, FakeConsumerRole)
-    assert consumer.owner is household
-    assert consumer.space is market
-    assert consumer in market.nodes
-    assert consumer is household.roles["consumer_tradable"]
+    assert consumer is market.add_role.return_value
 
 
-def test_add_consumer_creates_non_tradable_consumer_role(market):
+def test_add_consumer_creates_tradable_consumer_role(market, monkeypatch):
     # Given
-    household = Mock(id=1, roles={})
+    household = Mock()
+    market.add_role = Mock()
+    monkeypatch.setattr("mc_ab_sfc.spaces.ConsumerRole", FakeConsumerRole)
+
+    # When
+    market.add_consumer(household)
+
+    # Then
+    market.add_role.assert_called_with(FakeConsumerRole, household, "consumer_tradable")
+
+
+def test_add_consumer_creates_non_tradable_consumer_role(market, monkeypatch):
+    # Given
+    household = Mock()
+    market.add_role = Mock()
     market.tradable = False
+    monkeypatch.setattr("mc_ab_sfc.spaces.ConsumerRole", FakeConsumerRole)
 
     # When
-    consumer = market.add_consumer(household)
+    market.add_consumer(household)
 
     # Then
-    assert isinstance(consumer, FakeConsumerRole)
-    assert consumer.owner is household
-    assert consumer.space is market
-    assert consumer is household.roles["consumer_non_tradable"]
+    market.add_role.assert_called_with(
+        FakeConsumerRole, household, "consumer_non_tradable"
+    )
 
 
-def test_add_supplier_creates_and_registers_producer_role(market):
+class FakeProducerRole:
+    pass
+
+
+def test_add_supplier_creates_and_returns_producer_role(market, monkeypatch):
     # Given
-    firm = Mock(id=1, roles={})
+    firm = Mock()
+    market.add_role = Mock()
+    monkeypatch.setattr("mc_ab_sfc.spaces.ProducerRole", FakeProducerRole)
 
     # When
     producer = market.add_supplier(firm)
 
     # Then
-    assert isinstance(producer, FakeProducerRole)
-    assert producer.owner is firm
-    assert producer.space is market
-    assert producer is firm.roles["producer"]
+    market.add_role.assert_called_with(FakeProducerRole, firm, "producer")
+    assert producer is market.add_role.return_value
 
 
-def test_search_suppliers_returns_psi_producers(market):
+def test_search_suppliers_returns_psi_producers(market, monkeypatch):
     # Given
-    producers = [FakeProducerRole(label=i) for i in range(5)]
+    not_producers = [Mock() for _ in range(5)]
+    producers = [FakeProducerRole() for _ in range(5)]
     market.model.random.sample.return_value = producers[:3]
-    market.graph.add_nodes_from(producers)
+    market.graph.add_nodes_from(not_producers + producers)
+    monkeypatch.setattr("mc_ab_sfc.spaces.ProducerRole", FakeProducerRole)
 
     # When
     sample = market.search_suppliers(psi=3)
@@ -124,8 +130,7 @@ def test_search_suppliers_returns_psi_producers(market):
 def test_buy_goods_updates_tradable_flows(market):
     # Given
     market.tradable = True
-    consumer = Mock(label=1)
-    producer = Mock(label=2)
+    consumer, producer = Mock(), Mock()
     producer.get_price.return_value = 10
 
     # When
@@ -142,8 +147,7 @@ def test_buy_goods_updates_tradable_flows(market):
 def test_buy_goods_updates_non_tradable_flows(market):
     # Given
     market.tradable = False
-    consumer = Mock(label=1)
-    producer = Mock(label=2)
+    consumer, producer = Mock(), Mock()
     producer.get_price.return_value = 10
 
     # When
@@ -155,3 +159,20 @@ def test_buy_goods_updates_non_tradable_flows(market):
     producer.increase_stock.assert_called_with("cash", 50)
     producer.increase_flow.assert_called_with("sales", 50)
     producer.decrease_stock.assert_called_with("inventories", 5)
+
+
+def test_calc_average_productivity(market, monkeypatch):
+    # Given
+    other = Mock(productivity=10)
+    producer1 = FakeProducerRole()
+    producer1.productivity = 10
+    producer2 = FakeProducerRole()
+    producer2.productivity = 20
+    market.graph.add_nodes_from([other, producer1, producer2])
+    monkeypatch.setattr("mc_ab_sfc.spaces.ProducerRole", FakeProducerRole)
+
+    # When
+    average_productivity = market.calc_average_productivity()
+
+    # Then
+    assert average_productivity == 15

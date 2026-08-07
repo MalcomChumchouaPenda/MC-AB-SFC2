@@ -49,7 +49,7 @@ class GoodsMarket(EcoSpace):
         return self.add_role(ConsumerRole, household, key)
 
     def search_suppliers(self, psi):
-        suppliers = [node for node in self.nodes if isinstance(node, ProducerRole)]
+        suppliers = [n for n in self.nodes if isinstance(n, ProducerRole)]
         return self.model.random.sample(suppliers, k=min(psi, len(suppliers)))
 
     def buy_goods(self, consumer, producer, quantity):
@@ -63,6 +63,11 @@ class GoodsMarket(EcoSpace):
             consumer.increase_flow("tradable_cons", amount)
         else:
             consumer.increase_flow("non_tradable_cons", amount)
+
+    def calc_average_productivity(self):
+        nodes = self.graph.nodes  # roles
+        values = [n.productivity for n in nodes if isinstance(n, ProducerRole)]
+        return sum(values) / max(1, len(values))
 
 
 class LaborMarket(EcoSpace):
@@ -81,11 +86,8 @@ class LaborMarket(EcoSpace):
         return self.model.random.sample(employers, k=min(psi, len(employers)))
 
     def get_labor_sold(self, worker):
-        return sum(
-            contract["quantity"]
-            for (w, e), contract in self.graph.edges.items()
-            if w == worker
-        )
+        edges = self.graph.edges  # contracts
+        return sum(data["quantity"] for (w, e), data in edges.items() if w == worker)
 
 
 class CreditMarket(EcoSpace):
