@@ -46,10 +46,10 @@ class ConsumerRole(EcoRole):
         demand = self.demand
         market = self.space
         for supplier in suppliers:
-            price = supplier.get_price()
-            available = supplier.get_available_quantity()
+            price = supplier.price
             residual = demand / price
             affordable = cash / price
+            available = supplier.available_quantity
             quantity = min(residual, available, affordable)
             market.buy_goods(self, supplier, quantity)
             demand -= quantity * price
@@ -60,13 +60,20 @@ class ConsumerRole(EcoRole):
 
 class ProducerRole(EcoRole):
 
-    def get_position(self):
+    def __init__(self, owner, space):
+        super().__init__(owner, space)
+        self.price = 0
+
+    @property
+    def productivity(self):
+        return self.owner.productivity
+
+    @property
+    def position(self):
         return self.owner.position
 
-    def get_price(self):
-        return self.owner.price
-
-    def get_available_quantity(self):
+    @property
+    def available_quantity(self):
         return self.owner.inventories
 
     def get_average_price(self):

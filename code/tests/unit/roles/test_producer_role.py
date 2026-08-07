@@ -15,11 +15,6 @@ def test_is_ecorole():
     assert issubclass(ProducerRole, EcoRole)
 
 
-# ---------------------------------------------------
-# BEHAVIORAL TESTS
-# ----------------------------------------------------
-
-
 @pytest.fixture
 def producer():
     # Given
@@ -27,41 +22,41 @@ def producer():
     owner = Mock(id=1)
     return ProducerRole(owner, market)
 
+def test_has_price(producer):
+    # Assert
+    assert producer.price == 0
 
-def test_get_position(producer):
+
+def test_exposes_position(producer):
     # Given
     firm = producer.owner
     firm.position = 0.9
 
-    # When
-    position = producer.get_position()
-
-    # Then
-    assert position == 0.9
+    # Assert
+    assert producer.position == 0.9
 
 
-def test_get_price(producer):
+def test_exposes_productivity(producer):
     # Given
     firm = producer.owner
-    firm.price = 15
+    firm.productivity = 0.9
 
-    # When
-    price = producer.get_price()
-
-    # Then
-    assert price == 15
+    # Assert
+    assert producer.productivity == 0.9
 
 
-def test_get_available_quantity(producer):
+def test_exposes_available_quantity(producer):
     # Given
     firm = producer.owner
     firm.inventories = 100
 
-    # When
-    quantity = producer.get_available_quantity()
+    # Assert
+    assert producer.available_quantity == 100
 
-    # Then
-    assert quantity == 100
+
+# ---------------------------------------------------
+# BEHAVIORAL TESTS
+# ----------------------------------------------------
 
 
 def test_get_average_price(producer):

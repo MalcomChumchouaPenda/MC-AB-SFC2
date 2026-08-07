@@ -50,8 +50,7 @@ class GoodsMarket(EcoSpace):
         return self.model.random.sample(suppliers, k=min(psi, len(suppliers)))
 
     def buy_goods(self, consumer, producer, quantity):
-        price = producer.get_price()
-        amount = quantity * price
+        amount = quantity * producer.price
         producer.increase_stock("cash", amount)
         producer.increase_flow("sales", amount)
         producer.decrease_stock("inventories", quantity)

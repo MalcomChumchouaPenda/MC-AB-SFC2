@@ -117,8 +117,8 @@ def test_search_suppliers_returns_psi_producers(market, monkeypatch):
 def test_buy_goods_updates_tradable_flows(market):
     # Given
     market.tradable = True
-    consumer, producer = Mock(), Mock()
-    producer.get_price.return_value = 10
+    consumer  = Mock()
+    producer = Mock(price=10)
 
     # When
     market.buy_goods(consumer, producer, quantity=5)
@@ -134,8 +134,8 @@ def test_buy_goods_updates_tradable_flows(market):
 def test_buy_goods_updates_non_tradable_flows(market):
     # Given
     market.tradable = False
-    consumer, producer = Mock(), Mock()
-    producer.get_price.return_value = 10
+    consumer = Mock()
+    producer = Mock(price=10)
 
     # When
     market.buy_goods(consumer, producer, quantity=5)

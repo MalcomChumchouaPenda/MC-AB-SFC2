@@ -93,10 +93,7 @@ def test_buy_goods_respects_desired_consumption(consumer_with_demand):
     consumer = consumer_with_demand
     household = consumer.owner
     household.cash = 1000
-    suppliers = [Mock() for _ in range(3)]
-    for supplier in suppliers:
-        supplier.get_price.return_value = 10
-        supplier.get_available_quantity.return_value = 25
+    suppliers = [Mock(price=10, available_quantity=25) for _ in range(3)]
 
     # When
     consumer.buy_goods(suppliers)
@@ -113,10 +110,7 @@ def test_buy_goods_respects_supply_constraints(consumer_with_demand):
     consumer = consumer_with_demand
     household = consumer.owner
     household.cash = 1000
-    suppliers = [Mock() for _ in range(2)]
-    for supplier in suppliers:
-        supplier.get_price.return_value = 10
-        supplier.get_available_quantity.return_value = 10
+    suppliers = [Mock(price=10, available_quantity=10) for _ in range(2)]
 
     # When
     consumer.buy_goods(suppliers)
@@ -132,10 +126,7 @@ def test_buy_goods_respects_monetary_constraints(consumer_with_demand):
     consumer = consumer_with_demand
     household = consumer.owner
     household.cash = 300
-    suppliers = [Mock() for _ in range(2)]
-    for supplier in suppliers:
-        supplier.get_price.return_value = 10
-        supplier.get_available_quantity.return_value = 25
+    suppliers = [Mock(price=10, available_quantity=25) for _ in range(2)]
 
     # When
     consumer.buy_goods(suppliers)

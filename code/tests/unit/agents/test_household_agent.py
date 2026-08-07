@@ -374,9 +374,7 @@ def test_calc_supplier_score_with_salop_formula(household_with_consumer_roles):
     household = household_with_consumer_roles
     household.model.p.beta = 1
     household.position = 0
-    supplier = Mock()
-    supplier.get_price.return_value = 10
-    supplier.get_position.return_value = 0.5
+    supplier = Mock(position=0.5,  price=10)
 
     # When
     score = household.calc_supplier_score(supplier, average_price=20)

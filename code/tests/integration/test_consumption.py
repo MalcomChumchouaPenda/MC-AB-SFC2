@@ -33,7 +33,6 @@ def household(model):
 class FakeFirm:
     id: int
     position: float = 0.5
-    price: float = 10
     inventories: float = 10
     cash: float = 0
     sales: float = 0
@@ -46,6 +45,7 @@ def test_consumer_buy_tradable_goods(model, household):
     market = GoodsMarket(model, tradable=True)
     consumer = market.add_consumer(household)
     producer = market.add_supplier(firm)
+    producer.price = 10
 
     # When
     consumer.buy_goods([producer])
@@ -65,6 +65,7 @@ def test_consumer_buy_non_tradable_goods(model, household):
     market = GoodsMarket(model, tradable=False)
     consumer = market.add_consumer(household)
     producer = market.add_supplier(firm)
+    producer.price = 10
 
     # When
     consumer.buy_goods([producer])
@@ -80,19 +81,19 @@ def test_consumer_buy_non_tradable_goods(model, household):
 
 def test_household_consumes_tradable_and_non_tradable_goods(model, household):
     # Given
-    firm1, firm2 = FakeFirm(2), FakeFirm(3)
-    trad_market = GoodsMarket(model, tradable=True)
-    trad_market.add_consumer(household)
-    trad_market.add_supplier(firm1)
-    trad_market.average_price = 10
-    non_trad_market = GoodsMarket(model, tradable=False)
-    non_trad_market.add_consumer(household)
-    non_trad_market.add_supplier(firm2)
-    non_trad_market.average_price = 15
+    firms = []
+    for i, tradable in enumerate([True, False]):
+        firm = FakeFirm(i + 2)
+        market = GoodsMarket(model, tradable=tradable)
+        market.add_consumer(household)
+        market.average_price = 10
+        supplier = market.add_supplier(firm)
+        supplier.price = 10
+        firms.append(firm)
 
     # When
     household.consume()
 
     # Then
-    assert firm1.sales > 0
-    assert firm2.sales > 0
+    assert firms[0].sales > 0
+    assert firms[1].sales > 0
