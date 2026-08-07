@@ -1,6 +1,5 @@
 import pytest
 from unittest.mock import Mock
-from agentpy import Model
 from mc_ab_sfc.agents import FirmAgent
 from mc_ab_sfc.spaces import GoodsMarket
 
