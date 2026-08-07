@@ -60,9 +60,9 @@ def test_search_jobs_with_limited_size(unemployed):
 
 def test_search_jobs_with_highest_wage(unemployed):
     # Given
-    employer1 = Mock(wage=15, demand=1.0)
-    employer2 = Mock(wage=20, demand=1.0)
-    employer3 = Mock(wage=10, demand=1.0)
+    employer1 = Mock(wage_offer=15, labor_demand=1.0)
+    employer2 = Mock(wage_offer=20, labor_demand=1.0)
+    employer3 = Mock(wage_offer=10, labor_demand=1.0)
     household = unemployed
     role = household.roles["worker"]
     role.search_employers.return_value = [employer1, employer2, employer3]
@@ -76,8 +76,8 @@ def test_search_jobs_with_highest_wage(unemployed):
 
 def test_search_jobs_with_wage_above_reservation_wage(unemployed):
     # Given
-    employer1 = Mock(wage=8, demand=1.0)
-    employer2 = Mock(wage=9, demand=1.0)
+    employer1 = Mock(wage_offer=8, labor_demand=1.0)
+    employer2 = Mock(wage_offer=9, labor_demand=1.0)
     household = unemployed
     role = household.roles["worker"]
     role.search_employers.return_value = [employer1, employer2]
@@ -91,8 +91,8 @@ def test_search_jobs_with_wage_above_reservation_wage(unemployed):
 
 def test_search_jobs_and_split_labor_between_employers(unemployed):
     # Given
-    employer1 = Mock(wage=20, demand=0.4)
-    employer2 = Mock(wage=15, demand=0.6)
+    employer1 = Mock(wage_offer=20, labor_demand=0.4)
+    employer2 = Mock(wage_offer=15, labor_demand=0.6)
     household = unemployed
     role = household.roles["worker"]
     role.search_employers.return_value = [employer1, employer2]
@@ -107,9 +107,9 @@ def test_search_jobs_and_split_labor_between_employers(unemployed):
 
 def test_search_jobs_while_labor_supply_is_remaining(unemployed):
     # Given
-    employer1 = Mock(wage=25, demand=0.7)
-    employer2 = Mock(wage=20, demand=0.7)
-    employer3 = Mock(wage=15, demand=0.7)
+    employer1 = Mock(wage_offer=25, labor_demand=0.7)
+    employer2 = Mock(wage_offer=20, labor_demand=0.7)
+    employer3 = Mock(wage_offer=15, labor_demand=0.7)
     household = unemployed
     role = household.roles["worker"]
     role.get_labor_sold.return_value = 0.1

@@ -22,7 +22,7 @@ def test_is_ecospace():
 
 @pytest.fixture
 def market():
-    # Given a market and fake role class
+    # Given
     model = Mock()
     market = LaborMarket(model)
     return market
@@ -94,7 +94,7 @@ def test_get_labor_sold_by_worker(market):
 def test_create_job_by_adding_graph_edge(market):
     # Given
     worker = Mock()
-    employer = Mock(wage=20)
+    employer = Mock(wage_offer=20, labor_demand=10)
     market.graph.add_nodes_from([employer, worker])
 
     # When
@@ -108,3 +108,16 @@ def test_create_job_by_adding_graph_edge(market):
     assert target is employer
     assert data["wage"] == 20
     assert data["quantity"] == 0.9
+
+
+def test_create_job_reduces_labor_demand(market):
+    # Given
+    worker = Mock()
+    employer = Mock(wage_offer=20, labor_demand=10)
+    market.graph.add_nodes_from([employer, worker])
+
+    # When
+    market.create_job(worker, employer, 0.9)
+
+    # Then
+    assert employer.labor_demand == pytest.approx(9.1)

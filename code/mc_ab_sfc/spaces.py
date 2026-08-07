@@ -82,7 +82,9 @@ class LaborMarket(EcoSpace):
         return self.add_role(WorkerRole, household, "worker")
 
     def create_job(self, worker, employer, quantity):
-        self.graph.add_edge(worker, employer, wage=employer.wage, quantity=quantity)
+        wage = employer.wage_offer
+        employer.labor_demand -= quantity
+        self.graph.add_edge(worker, employer, wage=wage, quantity=quantity)
 
     def search_employers(self, psi):
         employers = [n for n in self.nodes if isinstance(n, EmployerRole)]

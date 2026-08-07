@@ -1,4 +1,3 @@
-
 import pytest
 from agentpy import Model
 from mc_ab_sfc.agents import HouseholdAgent, FirmAgent
@@ -32,7 +31,7 @@ def household(model):
 @pytest.fixture
 def firm(model):
     # Given
-    firm = FirmAgent(model)    
+    firm = FirmAgent(model)
     firm.price = 10
     firm.position = 0.5
     firm.inventories = 10

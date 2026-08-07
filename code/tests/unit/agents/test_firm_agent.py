@@ -24,32 +24,57 @@ def firm():
     return firm
 
 
-def test_has_default_position(firm):
-    # Assert
-    assert firm.position == 0.0
-
-
 def test_has_default_stocks(firm):
     # Assert
     assert firm.inventories == 0
     assert firm.cash == 0
+    assert firm.loans == 0
 
 
 def test_has_default_flows(firm):
     # Assert
     assert firm.sales == 0
+    assert firm.wage_bill == 0
 
 
 def test_has_default_prices(firm):
     # Assert
     assert firm.price == 0
+    assert firm.wage_offer == 0
 
+
+def test_has_default_decisions(firm):
+    # Assert
+    assert firm.expected_sales == 0
+    assert firm.desired_labor == 0
+    assert firm.desired_output == 0
+    assert firm.desired_loans == 0
+    assert firm.desired_rd == 0
+
+
+def test_has_default_memory(firm):
+    # Assert
+    assert firm.prev_sales == 0
+    assert firm.prev_output == 0
+    assert firm.prev_expected_sales == 0
+    assert firm.prev_inventories == 0
+    assert firm.prev_labor == 0
+    assert firm.prev_desired_labor == 0
+
+
+def test_has_default_position(firm):
+    # Assert
+    assert firm.position == 0.0
+
+
+def test_has_default_productivity(firm):
+    # Assert
+    assert firm.productivity == 0.0
 
 
 # ---------------------------------------------------
 # PRODUCTION TESTS
 # ----------------------------------------------------
-
 
 
 def test_calc_desired_output(firm):

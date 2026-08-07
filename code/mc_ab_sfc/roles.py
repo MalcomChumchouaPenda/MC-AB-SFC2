@@ -9,7 +9,14 @@ class CitizenRole(EcoRole):
 
 
 class EmployerRole(EcoRole):
-    pass
+
+    def __init__(self, owner, space):
+        super().__init__(owner, space)
+        self.labor_demand = 0
+
+    @property
+    def wage_offer(self):
+        return self.owner.wage_offer
 
 
 class WorkerRole(EcoRole):

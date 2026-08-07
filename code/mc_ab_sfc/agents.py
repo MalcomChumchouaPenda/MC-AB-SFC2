@@ -10,7 +10,6 @@ class HouseholdAgent(EcoAgent):
         self.roles = {}
         self.labor_supply = 1.0
 
-
     def revise_reservation_wage(self):
         p = self.p
         random = self.model.nprandom
@@ -32,16 +31,20 @@ class HouseholdAgent(EcoAgent):
         p = self.p
         role = self.roles["worker"]
         employers = role.search_employers(p.psi)
-        accepted = [e for e in employers if e.wage >= self.reservation_wage]
-        accepted.sort(key=lambda employer: employer.wage, reverse=True)
+        print(p.psi, employers)
+        accepted = [e for e in employers if e.wage_offer >= self.reservation_wage]
+        accepted.sort(key=lambda employer: employer.wage_offer, reverse=True)
         remaining = self.labor_supply - role.get_labor_sold()
+        print(accepted, remaining)
         for employer in accepted:
             if remaining <= 0:
                 break
-            quantity = min(remaining, employer.demand)
+            quantity = min(remaining, employer.labor_demand)
+            print(quantity, remaining, employer.labor_demand)
             if quantity > 0:
                 role.create_job(employer, quantity)
                 remaining -= quantity
+                print("create job", employer, quantity)
 
     def calc_gross_income(self):
         self.gross_income = (
@@ -121,12 +124,38 @@ class HouseholdAgent(EcoAgent):
 class FirmAgent(EcoAgent):
 
     def setup(self, **kwargs):
-        self.position = 0.0
+        # prices
         self.price = 0.0
-        self.sales = 0
+        self.wage_offer = 0
+
+        # stocks
         self.inventories = 0
         self.cash = 0
-    
+        self.loans = 0
+
+        # flows
+        self.sales = 0
+        self.wage_bill = 0
+
+        # other props
+        self.position = 0.0
+        self.productivity = 0.0
+
+        # decisions
+        self.expected_sales = 0
+        self.desired_labor = 0
+        self.desired_output = 0
+        self.desired_loans = 0
+        self.desired_rd = 0
+
+        # history
+        self.prev_sales = 0
+        self.prev_output = 0
+        self.prev_expected_sales = 0
+        self.prev_inventories = 0
+        self.prev_labor = 0
+        self.prev_desired_labor = 0
+
     def plan_production(self):
         self.calc_desired_output()
         self.calc_labor_demand()
