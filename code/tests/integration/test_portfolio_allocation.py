@@ -1,6 +1,6 @@
 import math
 import pytest
-from agentpy import Model
+from unittest.mock import Mock
 from mc_ab_sfc.agents import HouseholdAgent, BankAgent
 from mc_ab_sfc.spaces import EquitySpace, DepositMarket
 
@@ -8,7 +8,9 @@ from mc_ab_sfc.spaces import EquitySpace, DepositMarket
 @pytest.fixture
 def model():
     # Given
-    return Model({"lambda_": 0.8})
+    model = Mock()
+    model.p.lambda_ = 0.8
+    return model
 
 
 @pytest.fixture
