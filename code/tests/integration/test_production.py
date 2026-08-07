@@ -1,10 +1,11 @@
-from agentpy import Model
+from unittest.mock import Mock
 from mc_ab_sfc.agents import FirmAgent
 
 
 def test_production_planning_pipeline():
     # Given
-    model = Model({"theta": 0.20})
+    model = Mock()
+    model.p.theta = 0.20
     firm = FirmAgent(model)
     firm.expected_sales = 150
     firm.inventories = 30
