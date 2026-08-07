@@ -10,6 +10,7 @@ class HouseholdAgent(EcoAgent):
         self.roles = {}
         self.labor_supply = 1.0
 
+
     def revise_reservation_wage(self):
         p = self.p
         random = self.model.nprandom
@@ -119,6 +120,13 @@ class HouseholdAgent(EcoAgent):
 
 class FirmAgent(EcoAgent):
 
+    def setup(self, **kwargs):
+        self.position = 0.0
+        self.price = 0.0
+        self.sales = 0
+        self.inventories = 0
+        self.cash = 0
+    
     def plan_production(self):
         self.calc_desired_output()
         self.calc_labor_demand()

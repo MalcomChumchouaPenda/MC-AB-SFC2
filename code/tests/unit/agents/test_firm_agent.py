@@ -16,17 +16,40 @@ def test_is_ecoagent():
     assert issubclass(FirmAgent, EcoAgent)
 
 
-# ---------------------------------------------------
-# PRODUCTION TESTS
-# ----------------------------------------------------
-
-
 @pytest.fixture
 def firm():
     # Given
     model = Mock()
     firm = FirmAgent(model)
     return firm
+
+
+def test_has_default_position(firm):
+    # Assert
+    assert firm.position == 0.0
+
+
+def test_has_default_stocks(firm):
+    # Assert
+    assert firm.inventories == 0
+    assert firm.cash == 0
+
+
+def test_has_default_flows(firm):
+    # Assert
+    assert firm.sales == 0
+
+
+def test_has_default_prices(firm):
+    # Assert
+    assert firm.price == 0
+
+
+
+# ---------------------------------------------------
+# PRODUCTION TESTS
+# ----------------------------------------------------
+
 
 
 def test_calc_desired_output(firm):

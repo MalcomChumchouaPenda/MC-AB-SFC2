@@ -1,7 +1,7 @@
-from dataclasses import dataclass, field
+
 import pytest
 from agentpy import Model
-from mc_ab_sfc.agents import HouseholdAgent
+from mc_ab_sfc.agents import HouseholdAgent, FirmAgent
 from mc_ab_sfc.spaces import GoodsMarket
 
 
@@ -29,20 +29,18 @@ def household(model):
     return household
 
 
-@dataclass
-class FakeFirm:
-    id: int
-    price: float = 10
-    position: float = 0.5
-    inventories: float = 10
-    cash: float = 0
-    sales: float = 0
-    roles: object = field(default_factory=dict)
-
-
-def test_consumer_buy_tradable_goods(model, household):
+@pytest.fixture
+def firm(model):
     # Given
-    firm = FakeFirm(2)
+    firm = FirmAgent(model)    
+    firm.price = 10
+    firm.position = 0.5
+    firm.inventories = 10
+    return firm
+
+
+def test_consumer_buy_tradable_goods(model, household, firm):
+    # Given
     market = GoodsMarket(model, tradable=True)
     consumer = market.add_consumer(household)
     producer = market.add_supplier(firm)
@@ -59,9 +57,8 @@ def test_consumer_buy_tradable_goods(model, household):
     assert firm.inventories == pytest.approx(4)
 
 
-def test_consumer_buy_non_tradable_goods(model, household):
+def test_consumer_buy_non_tradable_goods(model, household, firm):
     # Given
-    firm = FakeFirm(2)
     market = GoodsMarket(model, tradable=False)
     consumer = market.add_consumer(household)
     producer = market.add_supplier(firm)
@@ -82,7 +79,10 @@ def test_household_consumes_tradable_and_non_tradable_goods(model, household):
     # Given
     firms = []
     for i, tradable in enumerate([True, False]):
-        firm = FakeFirm(i + 2)
+        firm = FirmAgent(model)
+        firm.price = 10
+        firm.position = 0.5
+        firm.inventories = 10
         market = GoodsMarket(model, tradable=tradable)
         market.add_consumer(household)
         market.average_price = 10
