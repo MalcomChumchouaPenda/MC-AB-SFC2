@@ -60,9 +60,9 @@ class ConsumerRole(EcoRole):
 
 class ProducerRole(EcoRole):
 
-    def __init__(self, owner, space):
-        super().__init__(owner, space)
-        self.price = 0
+    @property
+    def price(self):
+        return self.owner.price
 
     @property
     def productivity(self):

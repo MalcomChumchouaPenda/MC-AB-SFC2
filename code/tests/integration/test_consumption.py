@@ -32,6 +32,7 @@ def household(model):
 @dataclass
 class FakeFirm:
     id: int
+    price: float = 10
     position: float = 0.5
     inventories: float = 10
     cash: float = 0
@@ -45,7 +46,6 @@ def test_consumer_buy_tradable_goods(model, household):
     market = GoodsMarket(model, tradable=True)
     consumer = market.add_consumer(household)
     producer = market.add_supplier(firm)
-    producer.price = 10
 
     # When
     consumer.buy_goods([producer])
@@ -65,7 +65,6 @@ def test_consumer_buy_non_tradable_goods(model, household):
     market = GoodsMarket(model, tradable=False)
     consumer = market.add_consumer(household)
     producer = market.add_supplier(firm)
-    producer.price = 10
 
     # When
     consumer.buy_goods([producer])
@@ -87,8 +86,7 @@ def test_household_consumes_tradable_and_non_tradable_goods(model, household):
         market = GoodsMarket(model, tradable=tradable)
         market.add_consumer(household)
         market.average_price = 10
-        supplier = market.add_supplier(firm)
-        supplier.price = 10
+        market.add_supplier(firm)
         firms.append(firm)
 
     # When

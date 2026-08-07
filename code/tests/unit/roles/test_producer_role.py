@@ -22,9 +22,14 @@ def producer():
     owner = Mock(id=1)
     return ProducerRole(owner, market)
 
-def test_has_price(producer):
+
+def test_exposes_price(producer):
+    # Given
+    firm = producer.owner
+    firm.price = 15
+
     # Assert
-    assert producer.price == 0
+    assert producer.price == 15
 
 
 def test_exposes_position(producer):
