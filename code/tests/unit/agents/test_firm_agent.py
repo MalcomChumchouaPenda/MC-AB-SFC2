@@ -229,7 +229,7 @@ def test_increases_wage_when_labor_shortage(hiring_firm):
     random.uniform.return_value = 0.05
 
     # When
-    firm.revise_wage()
+    firm.revise_wage_offer()
 
     # Then
     random.uniform.assert_called_with(0, firm.p.delta)
@@ -247,7 +247,7 @@ def test_increases_wage_with_upward_revision_prob(hiring_firm):
     random.uniform.return_value = 0.05
 
     # When
-    firm.revise_wage()
+    firm.revise_wage_offer()
 
     # Then
     random.choice.assert_called_with([0, 1], p=[1 - 0.6, 0.6])
@@ -263,7 +263,7 @@ def test_can_choose_to_not_increases_wage(hiring_firm):
     random.uniform.return_value = 0.05
 
     # When
-    firm.revise_wage()
+    firm.revise_wage_offer()
 
     # Then
     random.uniform.assert_not_called()
@@ -280,7 +280,7 @@ def test_decreases_wage_when_all_positions_filled(hiring_firm):
     random.uniform.return_value = 0.05
 
     # When
-    firm.revise_wage()
+    firm.revise_wage_offer()
 
     # Then
     random.uniform.assert_called_with(0, firm.p.delta)
@@ -298,7 +298,7 @@ def test_decreases_wage_with_downward_revision_prob(hiring_firm):
     random.uniform.return_value = 0.05
 
     # When
-    firm.revise_wage()
+    firm.revise_wage_offer()
 
     # Then
     random.choice.assert_called_with([0, 1], p=[0.6, 1 - 0.6])
@@ -314,7 +314,7 @@ def test_can_choose_to_not_decreases_wage(hiring_firm):
     random.uniform.return_value = 0.05
 
     # When
-    firm.revise_wage()
+    firm.revise_wage_offer()
 
     # Then
     random.uniform.assert_not_called()

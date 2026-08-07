@@ -147,7 +147,7 @@ class FirmAgent(EcoAgent):
             self.price *= 1 - random.uniform(0, delta)
             self.price = max(self.wage_bill / self.productivity, self.price)
 
-    def revise_wage(self):
+    def revise_wage_offer(self):
         p = self.p
         random = self.model.nprandom
         prob = self.calc_revision_probability()
