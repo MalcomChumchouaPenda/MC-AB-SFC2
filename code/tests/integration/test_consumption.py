@@ -1,5 +1,5 @@
 import pytest
-from agentpy import Model
+from unittest.mock import Mock
 from mc_ab_sfc.agents import HouseholdAgent, FirmAgent
 from mc_ab_sfc.spaces import GoodsMarket
 
@@ -7,22 +7,17 @@ from mc_ab_sfc.spaces import GoodsMarket
 @pytest.fixture
 def model():
     # Given
-    return Model(
-        {
-            "psi": 2,
-            "beta": 1,
-        }
-    )
+    model = Mock()
+    model.p.psi = 2
+    model.p.beta = 1
+    return model
 
 
 @pytest.fixture
 def household(model):
     # Given
     household = HouseholdAgent(model)
-    household.position = 0
     household.cash = 100
-    household.tradable_cons = 0
-    household.non_tradable_cons = 0
     household.desired_trad_cons = 60
     household.desired_non_trad_cons = 40
     return household
@@ -41,6 +36,7 @@ def firm(model):
 def test_consumer_buy_tradable_goods(model, household, firm):
     # Given
     market = GoodsMarket(model, tradable=True)
+    market.average_price = 10
     consumer = market.add_consumer(household)
     producer = market.add_supplier(firm)
 
@@ -59,6 +55,7 @@ def test_consumer_buy_tradable_goods(model, household, firm):
 def test_consumer_buy_non_tradable_goods(model, household, firm):
     # Given
     market = GoodsMarket(model, tradable=False)
+    market.average_price = 10
     consumer = market.add_consumer(household)
     producer = market.add_supplier(firm)
 
@@ -74,19 +71,35 @@ def test_consumer_buy_non_tradable_goods(model, household, firm):
     assert firm.inventories == pytest.approx(6)
 
 
-def test_household_consumes_tradable_and_non_tradable_goods(model, household):
+@pytest.fixture
+def firms(model):
     # Given
     firms = []
-    for i, tradable in enumerate([True, False]):
+    for _ in range(2):
         firm = FirmAgent(model)
         firm.price = 10
         firm.position = 0.5
         firm.inventories = 10
-        market = GoodsMarket(model, tradable=tradable)
-        market.add_consumer(household)
-        market.average_price = 10
-        market.add_supplier(firm)
         firms.append(firm)
+    return firms
+
+@pytest.fixture
+def markets(model):
+    markets = []
+    for tradable in [True, False]:
+        market = GoodsMarket(model, tradable=tradable)
+        market.average_price = 10
+        markets.append(market)
+        random = market.model.random
+        random.sample = Mock(side_effect=lambda pop, k: pop[:k])
+    return markets
+
+
+def test_household_consumes_trad_and_non_trad_goods(household, firms, markets):
+    # Given
+    for firm, market in zip(firms, markets):
+        market.add_consumer(household)
+        market.add_supplier(firm)
 
     # When
     household.consume()

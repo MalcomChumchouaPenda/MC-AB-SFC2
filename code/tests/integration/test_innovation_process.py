@@ -59,7 +59,7 @@ def test_firm_innovation_process(firm, market):
     market.average_productivity = 15
     random = market.model.nprandom
     random.choice.return_value = 1
-    random.uniform = lambda a,b: b
+    random.uniform = lambda a, b: b
 
     # When
     firm.update_productivity()

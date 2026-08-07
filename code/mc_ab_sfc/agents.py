@@ -13,18 +13,22 @@ class HouseholdAgent(EcoAgent):
         self.equity = 0
         self.net_worth = 0
 
-        # Assert
+        # flows
         self.labor_income = 0
         self.deposit_interests = 0
         self.dividends = 0
         self.rnd_income = 0
         self.public_transfer = 0
+        self.tradable_cons = 0
+        self.non_tradable_cons = 0
 
-        # Assert
+        # decisions
         self.reservation_wage = 0
         self.expected_consumption = 0
+        self.desired_trad_cons = 0
+        self.desired_non_trad_cons = 0
 
-        # Assert
+        # memory
         self.employed_labor = 0
         self.gross_income = 0
         self.disposable_income = 0

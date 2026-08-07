@@ -15,22 +15,32 @@ def test_is_ecospace():
     assert issubclass(GoodsMarket, EcoSpace)
 
 
-def test_is_tradable_by_default():
+@pytest.fixture
+def market():
     # Given
     model = Mock()
     market = GoodsMarket(model)
+    return market
 
+
+def test_is_tradable_by_default(market):
     # Assert
     assert market.tradable is True
 
 
-def test_goods_market_can_be_non_tradable():
+def test_can_be_non_tradable():
     # Given
     model = Mock()
     market = GoodsMarket(model, tradable=False)
 
     # Assert
     assert market.tradable is False
+
+
+def test_has_default_statistics(market):
+    # Assert
+    assert market.average_price == 0
+    assert market.average_productivity == 0
 
 
 # ---------------------------------------------------

@@ -37,6 +37,8 @@ class GoodsMarket(EcoSpace):
     def __init__(self, model, tradable=True, **kwargs):
         super().__init__(model, **kwargs)
         self.tradable = tradable
+        self.average_price = 0
+        self.average_productivity = 0
 
     def add_supplier(self, firm):
         return self.add_role(ProducerRole, firm, "producer")

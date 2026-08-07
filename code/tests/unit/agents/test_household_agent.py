@@ -39,12 +39,16 @@ def test_has_default_flows(household):
     assert household.dividends == 0
     assert household.rnd_income == 0
     assert household.public_transfer == 0
+    assert household.tradable_cons == 0
+    assert household.non_tradable_cons == 0
 
 
 def test_has_default_decisions(household):
     # Assert
     assert household.reservation_wage == 0
     assert household.expected_consumption == 0
+    assert household.desired_trad_cons == 0
+    assert household.desired_non_trad_cons == 0
 
 
 def test_has_default_memory(household):
