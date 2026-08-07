@@ -1,14 +1,15 @@
 import pytest
-from agentpy import Model
 from unittest.mock import Mock
 from mc_ab_sfc.agents import HouseholdAgent
 from mc_ab_sfc.spaces import LaborMarket
 
 
 @pytest.fixture
-def model(monkeypatch):
-    model = Model({"delta": 0.1, "upsilon": 1.0, "upsilon_h": 1.0})
-    monkeypatch.setattr(model, "nprandom", Mock())
+def model():
+    model = Mock()
+    model.p.delta = 0.1
+    model.p.upsilon = 1.0
+    model.p.upsilon_h = 1.0
     return model
 
 
