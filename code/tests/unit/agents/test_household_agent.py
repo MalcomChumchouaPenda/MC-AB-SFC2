@@ -401,42 +401,42 @@ def test_rank_suppliers_using_supplier_score(household_with_consumer_roles):
 
 def test_consume_tradable_goods_with_steps(household_with_consumer_roles):
     # Given
-    trad_suppliers = [Mock() for _ in range(5)]
+    suppliers = [Mock() for _ in range(5)]
     ranked_suppliers = [Mock() for _ in range(5)]
     household = household_with_consumer_roles
     household.model.p.psi = 5
     household.rank_suppliers = Mock(return_value=ranked_suppliers)
-    trad_role = household.roles["consumer_tradable"]
-    trad_role.get_average_price.return_value = 20
-    trad_role.search_suppliers.return_value = trad_suppliers
+    consumer_role = household.roles["consumer_tradable"]
+    consumer_role.get_average_price.return_value = 20
+    consumer_role.search_suppliers.return_value = suppliers
 
     # When
     household.consume()
 
     # Then
-    trad_role.search_suppliers.assert_called_with(5)
-    household.rank_suppliers.assert_any_call(trad_suppliers, average_price=20)
-    trad_role.buy_goods.assert_called_once_with(ranked_suppliers)
+    consumer_role.search_suppliers.assert_called_with(5)
+    household.rank_suppliers.assert_any_call(suppliers, average_price=20)
+    consumer_role.buy_goods.assert_called_once_with(ranked_suppliers)
 
 
 def test_consume_non_tradable_goods_with_steps(household_with_consumer_roles):
     # Given
+    suppliers = [Mock() for _ in range(5)]
     ranked_suppliers = [Mock() for _ in range(5)]
     household = household_with_consumer_roles
     household.model.p.psi = 5
     household.rank_suppliers = Mock(return_value=ranked_suppliers)
-    non_trad_suppliers = [Mock() for _ in range(5)]
-    non_trad_role = household.roles["consumer_non_tradable"]
-    non_trad_role.get_average_price.return_value = 10
-    non_trad_role.search_suppliers.return_value = non_trad_suppliers
+    consumer_role = household.roles["consumer_non_tradable"]
+    consumer_role.get_average_price.return_value = 10
+    consumer_role.search_suppliers.return_value = suppliers
 
     # When
     household.consume()
 
     # Then
-    non_trad_role.search_suppliers.assert_called_with(5)
-    household.rank_suppliers.assert_any_call(non_trad_suppliers, average_price=10)
-    non_trad_role.buy_goods.assert_called_once_with(ranked_suppliers)
+    consumer_role.search_suppliers.assert_called_with(5)
+    household.rank_suppliers.assert_any_call(suppliers, average_price=10)
+    consumer_role.buy_goods.assert_called_once_with(ranked_suppliers)
 
 
 def test_consume_randomizes_market_order(household_with_consumer_roles):
