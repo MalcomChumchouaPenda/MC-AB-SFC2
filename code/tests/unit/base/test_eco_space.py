@@ -51,32 +51,26 @@ def agent():
     return Mock(id=1, roles={})
 
 
-@dataclass(frozen=True)
-class FakeRole:
-    owner: object = None
-    space: object = None
-    label: int = 2
-
-
 def test_add_role_creates_role(agent, space):
     # Given
     key = "fake_role"
+    fake_cls = Mock()
 
     # When
-    role = space.add_role(FakeRole, agent, key)
+    role = space.add_role(fake_cls, agent, key)
 
     # Then
-    assert isinstance(role, FakeRole)
-    assert role.owner is agent
-    assert role.space is space
+    fake_cls.assert_called_with(agent, space)
+    assert role is fake_cls.return_value
 
 
 def test_add_role_creates_node(agent, space):
     # Given
     key = "fake_role"
+    fake_cls = Mock()
 
     # When
-    role = space.add_role(FakeRole, agent, key)
+    role = space.add_role(fake_cls, agent, key)
 
     # Then
     assert role in space.nodes
@@ -85,9 +79,10 @@ def test_add_role_creates_node(agent, space):
 def test_add_role_registers_role(agent, space):
     # Given
     key = "fake_role"
+    fake_cls = Mock()
 
     # When
-    role = space.add_role(FakeRole, agent, key)
+    role = space.add_role(fake_cls, agent, key)
 
     # Then
     assert role is agent.roles["fake_role"]

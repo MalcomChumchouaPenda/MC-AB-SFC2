@@ -1,16 +1,8 @@
 import pytest
 from agentpy import Model
 from unittest.mock import Mock
-from dataclasses import dataclass
 from mc_ab_sfc.agents import HouseholdAgent
 from mc_ab_sfc.spaces import LaborMarket
-
-
-@dataclass(frozen=True)
-class FakeEmployerRole:
-    label: str
-    wage: float
-    demand: float
 
 
 @pytest.fixture
