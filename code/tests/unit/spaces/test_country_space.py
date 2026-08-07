@@ -1,5 +1,4 @@
 import pytest
-from dataclasses import dataclass
 from unittest.mock import Mock
 from mc_ab_sfc.spaces import CountrySpace
 
@@ -26,31 +25,28 @@ def test_contains_local_markets():
     assert isinstance(country.markets, dict)
 
 
-@dataclass(frozen=True)
-class FakeCitizenRole:
-    owner: object = None
-    space: object = None
-    label: int = 2
+class FakeRole:
+    pass
 
 
 @pytest.fixture
-def country(monkeypatch):
-    # Given a market and fake role class
+def country():
+    # Given
     model = Mock()
     space = CountrySpace(model)
-    monkeypatch.setattr("mc_ab_sfc.spaces.CitizenRole", FakeCitizenRole)
     return space
 
 
-def test_add_citizen_creates_citizen_role(country):
+def test_add_citizen_creates_citizen_role(country, monkeypatch):
     # Given
-    household = Mock(id=1, roles={})
+    household = Mock()
+    country.add_role = Mock()
+    monkeypatch.setattr("mc_ab_sfc.spaces.CitizenRole", FakeRole)
 
     # When
     citizen = country.add_citizen(household)
 
     # Then
-    assert isinstance(citizen, FakeCitizenRole)
-    assert citizen is household.roles["citizen"]
-    assert citizen.owner is household
-    assert citizen.space is country
+    action = country.add_role
+    action.assert_called_with(FakeRole, household, "citizen")
+    assert citizen is action.return_value

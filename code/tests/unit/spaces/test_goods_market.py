@@ -1,6 +1,5 @@
 import pytest
-from unittest.mock import Mock, MagicMock
-from dataclasses import dataclass
+from unittest.mock import Mock
 from mc_ab_sfc.spaces import GoodsMarket
 
 # ---------------------------------------------------
@@ -47,34 +46,23 @@ def market():
     return market
 
 
-class FakeConsumerRole:
+class FakeRole:
     pass
-
-
-def test_add_consumer_returns_created_role(market, monkeypatch):
-    # Given
-    household = Mock()
-    market.add_role = Mock()
-    monkeypatch.setattr("mc_ab_sfc.spaces.ConsumerRole", FakeConsumerRole)
-
-    # When
-    consumer = market.add_consumer(household)
-
-    # Then
-    assert consumer is market.add_role.return_value
 
 
 def test_add_consumer_creates_tradable_consumer_role(market, monkeypatch):
     # Given
     household = Mock()
     market.add_role = Mock()
-    monkeypatch.setattr("mc_ab_sfc.spaces.ConsumerRole", FakeConsumerRole)
+    monkeypatch.setattr("mc_ab_sfc.spaces.ConsumerRole", FakeRole)
 
     # When
-    market.add_consumer(household)
+    consumer = market.add_consumer(household)
 
     # Then
-    market.add_role.assert_called_with(FakeConsumerRole, household, "consumer_tradable")
+    action = market.add_role
+    action.assert_called_with(FakeRole, household, "consumer_tradable")
+    assert consumer is action.return_value
 
 
 def test_add_consumer_creates_non_tradable_consumer_role(market, monkeypatch):
@@ -82,42 +70,41 @@ def test_add_consumer_creates_non_tradable_consumer_role(market, monkeypatch):
     household = Mock()
     market.add_role = Mock()
     market.tradable = False
-    monkeypatch.setattr("mc_ab_sfc.spaces.ConsumerRole", FakeConsumerRole)
+    monkeypatch.setattr("mc_ab_sfc.spaces.ConsumerRole", FakeRole)
 
     # When
-    market.add_consumer(household)
+    consumer = market.add_consumer(household)
 
     # Then
-    market.add_role.assert_called_with(
-        FakeConsumerRole, household, "consumer_non_tradable"
-    )
+    action = market.add_role
+    action.assert_called_with(FakeRole, household, "consumer_non_tradable")
+    assert consumer is action.return_value
 
 
-class FakeProducerRole:
-    pass
-
-
-def test_add_supplier_creates_and_returns_producer_role(market, monkeypatch):
+def test_add_supplier_creates_producer_role(market, monkeypatch):
     # Given
     firm = Mock()
     market.add_role = Mock()
-    monkeypatch.setattr("mc_ab_sfc.spaces.ProducerRole", FakeProducerRole)
+    monkeypatch.setattr("mc_ab_sfc.spaces.ProducerRole", FakeRole)
 
     # When
     producer = market.add_supplier(firm)
 
     # Then
-    market.add_role.assert_called_with(FakeProducerRole, firm, "producer")
-    assert producer is market.add_role.return_value
+    action = market.add_role
+    action.assert_called_with(FakeRole, firm, "producer")
+    assert producer is action.return_value
 
 
 def test_search_suppliers_returns_psi_producers(market, monkeypatch):
     # Given
-    not_producers = [Mock() for _ in range(5)]
-    producers = [FakeProducerRole() for _ in range(5)]
-    market.model.random.sample.return_value = producers[:3]
-    market.graph.add_nodes_from(not_producers + producers)
-    monkeypatch.setattr("mc_ab_sfc.spaces.ProducerRole", FakeProducerRole)
+    others = [Mock() for _ in range(5)]
+    producers = [FakeRole() for _ in range(5)]
+    market.graph.add_nodes_from(others + producers)
+    monkeypatch.setattr("mc_ab_sfc.spaces.ProducerRole", FakeRole)
+
+    random = market.model.random
+    random.sample = Mock(side_effect=lambda pop, k: pop[:k])
 
     # When
     sample = market.search_suppliers(psi=3)
@@ -164,12 +151,11 @@ def test_buy_goods_updates_non_tradable_flows(market):
 def test_calc_average_productivity(market, monkeypatch):
     # Given
     other = Mock(productivity=10)
-    producer1 = FakeProducerRole()
+    producer1, producer2 = FakeRole(), FakeRole()
     producer1.productivity = 10
-    producer2 = FakeProducerRole()
     producer2.productivity = 20
     market.graph.add_nodes_from([other, producer1, producer2])
-    monkeypatch.setattr("mc_ab_sfc.spaces.ProducerRole", FakeProducerRole)
+    monkeypatch.setattr("mc_ab_sfc.spaces.ProducerRole", FakeRole)
 
     # When
     average_productivity = market.calc_average_productivity()

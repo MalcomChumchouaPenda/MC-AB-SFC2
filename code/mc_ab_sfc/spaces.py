@@ -29,10 +29,7 @@ class CountrySpace(EcoSpace):
         self.markets = {}
 
     def add_citizen(self, household):
-        citizen = CitizenRole(household, self)
-        household.roles["citizen"] = citizen
-        self.graph.add_node(citizen)
-        return citizen
+        return self.add_role(CitizenRole, household, "citizen")
 
 
 class GoodsMarket(EcoSpace):

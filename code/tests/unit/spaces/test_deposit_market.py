@@ -1,6 +1,5 @@
 import pytest
 from unittest.mock import Mock
-from dataclasses import dataclass
 from mc_ab_sfc.spaces import DepositMarket
 
 # ---------------------------------------------------
@@ -21,62 +20,52 @@ def test_is_ecospace():
 # ----------------------------------------------------
 
 
-@dataclass(frozen=True)
-class FakeProviderRole:
-    owner: object = None
-    space: object = None
-    label: int = 2
-
-
-@dataclass(frozen=True)
-class FakeHolderRole:
-    owner: object = None
-    space: object = None
-    label: int = 2
+class FakeRole:
+    pass
 
 
 @pytest.fixture
-def market(monkeypatch):
-    # Given a market and fake role class
+def market():
+    # Given
     model = Mock()
     market = DepositMarket(model)
-    monkeypatch.setattr("mc_ab_sfc.spaces.DepositHolderRole", FakeHolderRole)
-    monkeypatch.setattr("mc_ab_sfc.spaces.DepositBankRole", FakeProviderRole)
     return market
 
 
-def test_add_client_creates_and_registers_deposit_holder_role(market):
+def test_add_client_creates_deposit_holder_role(market, monkeypatch):
     # Given
-    household = Mock(id=1, roles={})
+    household = Mock()
+    market.add_role = Mock()
+    monkeypatch.setattr("mc_ab_sfc.spaces.DepositHolderRole", FakeRole)
 
     # When
     deposit_holder = market.add_client(household)
 
     # Then
-    assert isinstance(deposit_holder, FakeHolderRole)
-    assert deposit_holder.owner is household
-    assert deposit_holder.space is market
-    assert deposit_holder is household.roles["deposit_holder"]
+    action = market.add_role
+    action.assert_called_with(FakeRole, household, "deposit_holder")
+    assert deposit_holder is action.return_value
 
 
-def test_add_deposit_bank_creates_and_registers_deposit_deposit_bank(market):
+def test_add_deposit_bank_creates_deposit_bank(market, monkeypatch):
     # Given
-    bank = Mock(id=1, roles={})
+    bank = Mock()
+    market.add_role = Mock()
+    monkeypatch.setattr("mc_ab_sfc.spaces.DepositBankRole", FakeRole)
 
     # When
     deposit_bank = market.add_deposit_bank(bank)
 
     # Then
-    assert isinstance(deposit_bank, FakeProviderRole)
-    assert deposit_bank.owner is bank
-    assert deposit_bank.space is market
-    assert deposit_bank is bank.roles["deposit_bank"]
+    action = market.add_role
+    action.assert_called_with(FakeRole, bank, "deposit_bank")
+    assert deposit_bank is action.return_value
 
 
 def test_assign_deposit_bank_by_adding_graph_edge(market):
     # Given
-    deposit_holder = Mock(label=1)
-    deposit_bank = Mock(label=2)
+    deposit_holder = Mock()
+    deposit_bank = Mock()
     market.graph.add_nodes_from([deposit_holder, deposit_bank])
 
     # When
