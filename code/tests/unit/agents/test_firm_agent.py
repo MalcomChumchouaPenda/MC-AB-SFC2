@@ -29,12 +29,16 @@ def test_has_default_stocks(firm):
     assert firm.inventories == 0
     assert firm.cash == 0
     assert firm.loans == 0
+    assert firm.deposits == 0
 
 
 def test_has_default_flows(firm):
     # Assert
     assert firm.sales == 0
     assert firm.wage_bill == 0
+    assert firm.loan_interest == 0
+    assert firm.deposit_interest == 0
+    assert firm.rd == 0
 
 
 def test_has_default_prices(firm):
@@ -635,6 +639,62 @@ def test_request_loan_and_set_loan_demand(borrowing_firm):
 
     # Then
     assert borrower.loan_demand == 100
+
+
+# ---------------------------------------------------
+# PROFITS, TAXES COMPUTATION TESTS
+# ----------------------------------------------------
+
+
+@pytest.fixture
+def accounting_firm():
+    # Given
+    firm = FirmAgent(model=Mock())
+    firm.sales = 1000
+    firm.productivity = 2
+    firm.wage_offer = 20
+    firm.inventories = 60
+    firm.prev_inventories = 50
+    firm.deposit_interest = 10
+    firm.loan_interest = 15
+    firm.wage_bill = 300
+    firm.rd = 100
+    return firm
+
+
+def test_calc_profit_computes_gross_profits(accounting_firm):
+    # Given
+    firm = accounting_firm
+
+    # When
+    firm.calc_profit()
+
+    # Then
+    assert firm.profits == 695
+
+
+def test_calc_profit_computes_net_cash_flow(accounting_firm):
+    # Given
+    firm = accounting_firm
+
+    # When
+    firm.calc_profit()
+
+    # Then
+    assert firm.net_cash_flow == 595
+
+
+def test_calc_profit_wth_loss(accounting_firm):
+    # Given
+    firm = accounting_firm
+    firm.sales = 200
+
+    # When
+    firm.calc_profit()
+
+    # Then
+    assert firm.profits == -105
+    assert firm.net_cash_flow == -205
 
 
 # ---------------------------------------------------

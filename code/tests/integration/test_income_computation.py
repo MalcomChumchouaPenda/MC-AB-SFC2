@@ -15,9 +15,9 @@ def household(model):
     # Given
     household = HouseholdAgent(model)
     household.labor_income = 100
-    household.deposit_interests = 20
+    household.deposit_interest = 20
     household.dividends = 30
-    household.rnd_income = 10
+    household.rd_income = 10
     household.public_transfer = 40
     household.net_worth = 1000
     household.expected_consumption = 50

@@ -35,9 +35,9 @@ def test_has_default_stocks(household):
 def test_has_default_flows(household):
     # Assert
     assert household.labor_income == 0
-    assert household.deposit_interests == 0
+    assert household.deposit_interest == 0
     assert household.dividends == 0
-    assert household.rnd_income == 0
+    assert household.rd_income == 0
     assert household.public_transfer == 0
     assert household.tradable_cons == 0
     assert household.non_tradable_cons == 0
@@ -316,9 +316,9 @@ def test_calc_gross_income():
     model = Mock()
     household = HouseholdAgent(model)
     household.labor_income = 100
-    household.deposit_interests = 20
+    household.deposit_interest = 20
     household.dividends = 30
-    household.rnd_income = 10
+    household.rd_income = 10
 
     # When
     income = household.calc_gross_income()

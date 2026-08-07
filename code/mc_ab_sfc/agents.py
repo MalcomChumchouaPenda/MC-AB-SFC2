@@ -15,9 +15,9 @@ class HouseholdAgent(EcoAgent):
 
         # flows
         self.labor_income = 0
-        self.deposit_interests = 0
+        self.deposit_interest = 0
         self.dividends = 0
-        self.rnd_income = 0
+        self.rd_income = 0
         self.public_transfer = 0
         self.tradable_cons = 0
         self.non_tradable_cons = 0
@@ -75,10 +75,7 @@ class HouseholdAgent(EcoAgent):
 
     def calc_gross_income(self):
         self.gross_income = (
-            self.labor_income
-            + self.deposit_interests
-            + self.dividends
-            + self.rnd_income
+            self.labor_income + self.deposit_interest + self.dividends + self.rd_income
         )
         return self.gross_income
 
@@ -159,10 +156,14 @@ class FirmAgent(EcoAgent):
         self.inventories = 0
         self.cash = 0
         self.loans = 0
+        self.deposits = 0
 
         # flows
         self.sales = 0
         self.wage_bill = 0
+        self.loan_interest = 0
+        self.deposit_interest = 0
+        self.rd = 0
 
         # other props
         self.position = 0.0
@@ -183,6 +184,8 @@ class FirmAgent(EcoAgent):
         self.prev_labor = 0
         self.prev_desired_labor = 0
 
+    # Production planning
+
     def plan_production(self):
         self.calc_desired_output()
         self.calc_labor_demand()
@@ -197,6 +200,8 @@ class FirmAgent(EcoAgent):
         self.desired_labor = self.desired_output / self.productivity
         return self.desired_labor
 
+    # Price and quantities adaptation
+
     def adapt_expectations(self):
         delta = self.p.delta
         random = self.model.random
@@ -208,6 +213,8 @@ class FirmAgent(EcoAgent):
             self.expected_sales *= 1 - random.uniform(0, delta)
             self.price *= 1 - random.uniform(0, delta)
             self.price = max(self.wage_bill / self.productivity, self.price)
+
+    # Wage revision
 
     def revise_wage_offer(self):
         p = self.p
@@ -225,6 +232,8 @@ class FirmAgent(EcoAgent):
         role = self.roles["employer"]
         unemployment = role.get_unemployment_rate()
         return p.upsilon_f * math.exp(-p.upsilon * unemployment)
+
+    # Innovation and imitation process
 
     def update_productivity(self):
         self.calc_desired_rd()
@@ -266,12 +275,7 @@ class FirmAgent(EcoAgent):
             self.rd = self.desired_rd
         return self.rd
 
-    def update_history(self):
-        super().update_history()
-        self.prev_sales = self.sales
-        self.prev_expected_sales = self.expected_sales
-        self.prev_inventories = self.inventories
-        self.prev_output = self.output
+    # Credit demand
 
     def calc_desired_loans(self):
         wage_bill = self.wage_offer * self.desired_labor
@@ -286,6 +290,37 @@ class FirmAgent(EcoAgent):
         lenders = borrower.search_lenders()
         for lender in lenders:
             borrower.request_loan(lender)
+
+    # Profit, tax and dividend computation
+
+    def calc_profit(self):
+        inv_variation = self._calc_inv_variation()
+        self.net_cash_flow = self._calc_net_cash_flow()
+        self.profits = self.net_cash_flow + inv_variation
+
+    def _calc_inv_variation(self):
+        unit_cost = self.wage_offer / self.productivity
+        print(unit_cost)
+        real_inv_variation = self.inventories - self.prev_inventories
+        return real_inv_variation * unit_cost
+
+    def _calc_net_cash_flow(self):
+        return (
+            self.sales
+            + self.deposit_interest
+            - self.wage_bill
+            - self.rd
+            - self.loan_interest
+        )
+
+    # History
+    
+    def update_history(self):
+        super().update_history()
+        self.prev_sales = self.sales
+        self.prev_expected_sales = self.expected_sales
+        self.prev_inventories = self.inventories
+        self.prev_output = self.output
 
 
 class BankAgent(EcoAgent):
