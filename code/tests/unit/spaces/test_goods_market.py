@@ -148,17 +148,34 @@ def test_buy_goods_updates_non_tradable_flows(market):
     producer.decrease_stock.assert_called_with("inventories", 5)
 
 
-def test_calc_average_productivity(market, monkeypatch):
+# ---------------------------------------------------
+# STATITICS MANAGEMENT TESTS
+# ----------------------------------------------------
+
+
+@pytest.fixture
+def market_with_stats():
     # Given
-    other = Mock(productivity=10)
-    producer1, producer2 = FakeRole(), FakeRole()
-    producer1.productivity = 10
-    producer2.productivity = 20
-    market.graph.add_nodes_from([other, producer1, producer2])
+    model = Mock()
+    market = GoodsMarket(model)
+    market.average_price = 0
+    market.average_productivity = 1
+    return market
+
+
+def test_update_production_statistics(market_with_stats, monkeypatch):
+    # Given
+    market = market_with_stats
+    for _ in range(5):
+        producer = FakeRole()
+        producer.price = 5
+        producer.productivity = 10
+        market.graph.add_node(producer)
     monkeypatch.setattr("mc_ab_sfc.spaces.ProducerRole", FakeRole)
 
     # When
-    average_productivity = market.calc_average_productivity()
+    market.update_statistics()
 
     # Then
-    assert average_productivity == 15
+    assert market.average_price == pytest.approx(5.0)
+    assert market.average_productivity == pytest.approx(10.0)

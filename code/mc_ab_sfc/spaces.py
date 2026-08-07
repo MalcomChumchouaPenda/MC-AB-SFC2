@@ -60,10 +60,17 @@ class GoodsMarket(EcoSpace):
         else:
             consumer.increase_flow("non_tradable_cons", amount)
 
-    def calc_average_productivity(self):
+    def update_statistics(self):
         nodes = self.graph.nodes  # roles
-        values = [n.productivity for n in nodes if isinstance(n, ProducerRole)]
-        return sum(values) / max(1, len(values))
+        producers = [n for n in nodes if isinstance(n, ProducerRole)]
+        self.average_price = self._calc_average_price(producers)
+        self.average_productivity = self._calc_average_productivity(producers)
+
+    def _calc_average_price(self, producers):
+        return sum(prod.price for prod in producers) / max(1, len(producers))
+
+    def _calc_average_productivity(self, producers):
+        return sum(prod.productivity for prod in producers) / max(1, len(producers))
 
 
 class LaborMarket(EcoSpace):

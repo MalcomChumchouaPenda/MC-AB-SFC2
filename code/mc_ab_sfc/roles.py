@@ -77,10 +77,10 @@ class ProducerRole(EcoRole):
         return self.owner.inventories
 
     def get_average_price(self):
-        return self.space.calc_average_price()
+        return self.space.average_price
 
     def get_average_productivity(self):
-        return self.space.calc_average_productivity()
+        return self.space.average_productivity
 
 
 class EquityHolderRole(EcoRole):
