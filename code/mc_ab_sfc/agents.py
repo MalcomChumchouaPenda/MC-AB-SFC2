@@ -21,14 +21,12 @@ class HouseholdAgent(EcoAgent):
             if random.choice([0, 1], p=[prob, 1 - prob]):
                 self.reservation_wage *= 1 - random.uniform(0, p.delta)
 
-
     def calc_revision_probability(self):
         p = self.p
         role = self.roles["worker"]
         unemployment = role.get_unemployment_rate()
         return p.upsilon_h * math.exp(-p.upsilon * unemployment)
 
-    
     def search_jobs(self):
         p = self.p
         role = self.roles["worker"]
@@ -147,8 +145,7 @@ class FirmAgent(EcoAgent):
         elif self.prev_output + self.prev_inventories > self.prev_sales:
             self.expected_sales *= 1 - random.uniform(0, delta)
             self.price *= 1 - random.uniform(0, delta)
-            self.price = max(self.wage_bill/ self.productivity, self.price)
-
+            self.price = max(self.wage_bill / self.productivity, self.price)
 
     def revise_wage(self):
         p = self.p
@@ -161,14 +158,48 @@ class FirmAgent(EcoAgent):
             if random.choice([0, 1], p=[prob, 1 - prob]):
                 self.wage_offer *= 1 - random.uniform(0, p.delta)
 
-
     def calc_revision_probability(self):
         p = self.p
         role = self.roles["employer"]
         unemployment = role.get_unemployment_rate()
         return p.upsilon_f * math.exp(-p.upsilon * unemployment)
 
-    
+    def update_productivity(self):
+        self.calc_desired_rd()
+        self.execute_rd()
+        if self.rd == 0:
+            return self.productivity
+        prob = self.calc_rd_success_probability()
+        random = self.model.nprandom
+        success = random.choice([0, 1], p=[1 - prob, prob])
+        if success:
+            delta = self.p.delta
+            self.productivity *= 1 + random.uniform(0, delta)
+            if self.productivity < self.average_productivity:
+                prod_diff = self.average_productivity - self.productivity
+                self.productivity += random.uniform(0, prod_diff)
+
+    def calc_desired_rd(self):
+        self.desired_wage_bill = self.wage_offer * self.desired_labor
+        self.desired_rd = self.p.gamma * self.desired_wage_bill
+        return self.desired_rd
+
+    def calc_rd_success_probability(self):
+        producer_role = self.roles["producer"]
+        avg_price = producer_role.get_average_price()
+        avg_productivity = producer_role.get_average_productivity()
+        prob = 1 - math.exp(-self.p.nu * self.rd / (avg_price * avg_productivity))
+        return prob
+
+    def execute_rd(self):
+        labor_constraint = self.labor < self.desired_labor
+        financial_constraint = self.loans < self.desired_loans
+        if labor_constraint or financial_constraint:
+            self.rd = 0
+        else:
+            self.rd = self.desired_rd
+        return self.rd
+
     def update_history(self):
         super().update_history()
         self.prev_sales = self.sales

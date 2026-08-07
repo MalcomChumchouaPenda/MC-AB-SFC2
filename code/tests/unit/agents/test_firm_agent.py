@@ -1,4 +1,3 @@
-
 import math
 import pytest
 from unittest.mock import Mock
@@ -105,7 +104,7 @@ def pricing_firm():
     model = Mock()
     model.p.delta = 0.1
     firm = FirmAgent(model)
-    firm.wage_bill= 10
+    firm.wage_bill = 10
     firm.productivity = 2
     firm.expected_sales = 100
     firm.price = 10
@@ -320,6 +319,198 @@ def test_can_choose_to_not_decreases_wage(hiring_firm):
     # Then
     random.uniform.assert_not_called()
     assert firm.wage_offer == 10.0
+
+
+# ---------------------------------------------------
+# R & D INVESTMENTS TESTS
+# ----------------------------------------------------
+
+
+def test_calc_desired_rd():
+    # Given
+    model = Mock()
+    model.p.gamma = 0.1
+    firm = FirmAgent(model)
+    firm.wage_offer = 10
+    firm.desired_labor = 50
+
+    # When
+    rd = firm.calc_desired_rd()
+
+    # Then
+    assert rd == 50
+    assert firm.desired_wage_bill == 500
+    assert firm.desired_rd == 50
+
+
+def test_execute_rd_without_constraints():
+    # Given
+    model = Mock()
+    firm = FirmAgent(model)
+    firm.desired_rd = 100
+    firm.desired_labor = 50
+    firm.labor = 50
+    firm.desired_loans = 200
+    firm.loans = 200
+
+    # When
+    firm.execute_rd()
+
+    # Then
+    assert firm.rd == 100
+
+
+def test_execute_rd_with_labor_constraint():
+    # Given
+    model = Mock()
+    firm = FirmAgent(model)
+    firm.desired_rd = 100
+    firm.desired_labor = 100
+    firm.labor = 80
+    firm.desired_loans = 200
+    firm.loans = 200
+
+    # When
+    firm.execute_rd()
+
+    # Then
+    assert firm.rd == 0
+
+
+def test_execute_rd_with_financial_constraint():
+    # Given
+    model = Mock()
+    firm = FirmAgent(model)
+    firm.desired_rd = 100
+    firm.desired_labor = 50
+    firm.labor = 50
+    firm.desired_loans = 200
+    firm.loans = 100
+
+    # When
+    firm.execute_rd()
+
+    # Then
+    assert firm.rd == 0
+
+
+@pytest.fixture
+def firm_with_rd_project():
+    model = Mock()
+    model.p.nu = 0.5
+    firm = FirmAgent(model)
+    firm.rd = 100
+    firm.roles["producer"] = Mock()
+    return firm
+
+
+def test_calc_rd_success_probability_tradable(firm_with_rd_project):
+    # Given
+    firm = firm_with_rd_project
+    firm.tradable = True
+    producer_role = firm.roles["producer"]
+    producer_role.get_average_price.return_value = 20
+    producer_role.get_average_productivity.return_value = 10
+
+    # When
+    probability = firm.calc_rd_success_probability()
+
+    # Then
+    expected = 1 - math.exp(-0.5 * 100 / (20 * 10))
+    assert probability == pytest.approx(expected)
+
+
+def test_calc_rd_success_probability_non_tradable(firm_with_rd_project):
+    # Given
+    firm = firm_with_rd_project
+    firm.tradable = True
+    producer_role = firm.roles["producer"]
+    producer_role.get_average_price.return_value = 15
+    producer_role.get_average_productivity.return_value = 20
+
+    # When
+    probability = firm.calc_rd_success_probability()
+
+    # Then
+    expected = 1 - math.exp(-0.5 * 100 / (15 * 20))
+    assert probability == pytest.approx(expected)
+
+
+@pytest.fixture
+def innovating_firm():
+    model = Mock()
+    model.p.delta = 0.2
+    firm = FirmAgent(model)
+    firm.calc_desired_rd = Mock(side_effect=setattr(firm, "desired_rd", 100))
+    firm.execute_rd = Mock(side_effect=setattr(firm, "rd", 100))
+    firm.calc_rd_success_probability = Mock(return_value=0.6)
+    return firm
+
+
+def test_update_productivity_with_multi_steps(innovating_firm):
+    # Given
+    firm = innovating_firm
+    firm.productivity = 10
+    firm.average_productivity = 10
+    random = firm.model.nprandom
+    random.choice.return_value = 1
+    random.uniform.return_value = 0.05
+
+    # When
+    firm.update_productivity()
+
+    # Then
+    assert firm.calc_desired_rd.called
+    assert firm.execute_rd.called
+    assert firm.calc_rd_success_probability.called
+    random.choice.assert_called_with([0, 1], p=[1 - 0.6, 0.6])
+
+
+def test_update_productivity_without_success(innovating_firm):
+    # Given
+    firm = innovating_firm
+    firm.productivity = 10
+    firm.average_productivity = 10
+    random = firm.model.nprandom
+    random.choice.return_value = 0
+
+    # When
+    firm.update_productivity()
+
+    # Then
+    assert firm.productivity == 10
+
+
+def test_update_productivity_by_innovation(innovating_firm):
+    # Given
+    firm = innovating_firm
+    firm.productivity = 10
+    firm.average_productivity = 10
+    random = firm.model.nprandom
+    random.choice.return_value = 1
+    random.uniform = lambda a, b: b
+
+    # When
+    firm.update_productivity()
+
+    # Then
+    assert firm.productivity == 12
+
+
+def test_update_productivity_by_imitation(innovating_firm):
+    # Given
+    firm = innovating_firm
+    firm.productivity = 10
+    firm.average_productivity = 20
+    random = firm.model.nprandom
+    random.choice.return_value = 1
+    random.uniform = lambda a, b: b
+
+    # When
+    firm.update_productivity()
+
+    # Then
+    assert firm.productivity == 20
 
 
 # ---------------------------------------------------
