@@ -7,8 +7,31 @@ from .base import EcoAgent
 class HouseholdAgent(EcoAgent):
 
     def setup(self):
-        self.roles = {}
+        # stocks
+        self.cash = 0
+        self.deposits = 0
+        self.equity = 0
+        self.net_worth = 0
+
+        # Assert
+        self.labor_income = 0
+        self.deposit_interests = 0
+        self.dividends = 0
+        self.rnd_income = 0
+        self.public_transfer = 0
+
+        # Assert
+        self.reservation_wage = 0
+        self.expected_consumption = 0
+
+        # Assert
+        self.employed_labor = 0
+        self.gross_income = 0
+        self.disposable_income = 0
+
+        # others props
         self.labor_supply = 1.0
+        self.position = 0
 
     def revise_reservation_wage(self):
         p = self.p
@@ -49,8 +72,8 @@ class HouseholdAgent(EcoAgent):
     def calc_gross_income(self):
         self.gross_income = (
             self.labor_income
-            + self.interest_income
-            + self.dividend_income
+            + self.deposit_interests
+            + self.dividends
             + self.rnd_income
         )
         return self.gross_income

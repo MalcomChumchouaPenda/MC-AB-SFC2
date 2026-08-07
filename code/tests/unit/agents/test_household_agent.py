@@ -16,13 +16,52 @@ def test_is_ecoagent():
     assert issubclass(HouseholdAgent, EcoAgent)
 
 
-def test_has_unit_labor_supply():
+@pytest.fixture
+def household():
     # Given
     model = Mock()
     household = HouseholdAgent(model)
+    return household
 
+
+def test_has_default_stocks(household):
+    # Assert
+    assert household.cash == 0
+    assert household.deposits == 0
+    assert household.equity == 0
+    assert household.net_worth == 0
+
+
+def test_has_default_flows(household):
+    # Assert
+    assert household.labor_income == 0
+    assert household.deposit_interests == 0
+    assert household.dividends == 0
+    assert household.rnd_income == 0
+    assert household.public_transfer == 0
+
+
+def test_has_default_decisions(household):
+    # Assert
+    assert household.reservation_wage == 0
+    assert household.expected_consumption == 0
+
+
+def test_has_default_memory(household):
+    # Assert
+    assert household.employed_labor == 0
+    assert household.gross_income == 0
+    assert household.disposable_income == 0
+
+
+def test_has_unit_labor_supply(household):
     # Assert
     assert household.labor_supply == 1
+
+
+def test_has_default_position(household):
+    # Assert
+    assert household.position == 0
 
 
 # ---------------------------------------------------
@@ -273,8 +312,8 @@ def test_calc_gross_income():
     model = Mock()
     household = HouseholdAgent(model)
     household.labor_income = 100
-    household.interest_income = 20
-    household.dividend_income = 30
+    household.deposit_interests = 20
+    household.dividends = 30
     household.rnd_income = 10
 
     # When
