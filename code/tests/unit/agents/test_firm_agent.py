@@ -579,6 +579,7 @@ def borrowing_firm():
     firm.wage_offer = 10
     firm.desired_labor = 10
     firm.desired_rd = 50
+    firm.roles["borrower"] = Mock()
     return firm
 
 
@@ -604,6 +605,36 @@ def test_calc_desired_loans_when_internal_funds_are_sufficient(borrowing_firm):
 
     # Then
     assert firm.desired_loans == 0
+
+
+def test_request_loan_to_all_lenders(borrowing_firm):
+    # Given
+    firm = borrowing_firm
+    firm.desired_loans = 100
+    lenders = [Mock() for _ in range(3)]
+    borrower = firm.roles["borrower"]
+    borrower.search_lenders.return_value = lenders
+
+    # When
+    firm.request_loan()
+
+    # Then
+    for lender in lenders:
+        borrower.request_loan.assert_any_call(lender)
+
+
+def test_request_loan_and_set_loan_demand(borrowing_firm):
+    # Given
+    firm = borrowing_firm
+    firm.desired_loans = 100
+    borrower = firm.roles["borrower"]
+    borrower.search_lenders.return_value = [Mock()]
+
+    # When
+    firm.request_loan()
+
+    # Then
+    assert borrower.loan_demand == 100
 
 
 # ---------------------------------------------------

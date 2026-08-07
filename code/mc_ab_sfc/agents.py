@@ -278,6 +278,15 @@ class FirmAgent(EcoAgent):
         self.desired_loans = max(0, wage_bill + self.desired_rd - self.deposits)
         return self.desired_loans
 
+    def request_loan(self):
+        if self.desired_loans <= 0:
+            return
+        borrower = self.roles["borrower"]
+        borrower.loan_demand = self.desired_loans
+        lenders = borrower.search_lenders()
+        for lender in lenders:
+            borrower.request_loan(lender)
+
 
 class BankAgent(EcoAgent):
     pass

@@ -1,0 +1,58 @@
+import pytest
+from unittest.mock import Mock
+from mc_ab_sfc.roles import BorrowerRole
+
+# ---------------------------------------------------
+# ARCHITECTURAL TESTS
+# ----------------------------------------------------
+
+
+def test_is_ecorole():
+    # Given
+    from mc_ab_sfc.base import EcoRole
+
+    # Assert
+    assert issubclass(BorrowerRole, EcoRole)
+
+
+@pytest.fixture
+def borrower():
+    # Given
+    market = Mock()
+    owner = Mock(id=1)
+    return BorrowerRole(owner, market)
+
+
+def test_has_default_loan_demand(borrower):
+    # Assert
+    assert borrower.loan_demand == 0.0
+
+
+# ---------------------------------------------------
+# BEHAVIORAL TESTS
+# ----------------------------------------------------
+
+
+def test_search_lenders(borrower):
+    # Given
+    lenders = [Mock() for _ in range(2)]
+    market = borrower.space
+    market.search_lenders.return_value = lenders
+
+    # When
+    result = borrower.search_lenders()
+
+    # Then
+    market.search_lenders.assert_called_once_with()
+    assert result == lenders
+
+
+def test_request_loan(borrower):
+    # Given
+    lender = Mock()
+
+    # When
+    borrower.request_loan(lender)
+
+    # Then
+    lender.receive_request.assert_called_with(borrower)

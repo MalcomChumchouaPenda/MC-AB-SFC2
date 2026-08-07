@@ -11,6 +11,8 @@ from .roles import (
     EquityIssuerRole,
     DepositHolderRole,
     DepositBankRole,
+    LenderRole,
+    BorrowerRole,
 )
 
 
@@ -98,8 +100,16 @@ class LaborMarket(EcoSpace):
 
 
 class CreditMarket(EcoSpace):
-    pass
 
+    def add_borrower(self, firm):
+        return self.add_role(BorrowerRole, firm, 'borrower')
+
+    def add_lender(self, bank):
+        return self.add_role(LenderRole, bank, 'lender')
+
+    def search_lenders(self):
+        return [n for n in self.nodes if isinstance(n, LenderRole)]
+    
 
 class DepositMarket(EcoSpace):
 

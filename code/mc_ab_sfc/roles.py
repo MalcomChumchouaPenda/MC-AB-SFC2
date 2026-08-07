@@ -110,3 +110,27 @@ class DepositBankRole(EcoRole):
 
     def get_deposit_rate(self):
         return self.owner.deposit_rate
+
+
+class BorrowerRole(EcoRole):
+
+    def __init__(self, owner, space):
+        super().__init__(owner, space)
+        self.loan_demand = 0
+
+    def search_lenders(self):
+        return self.space.search_lenders()
+
+    def request_loan(self, lender):
+        lender.receive_request(self)
+
+
+class LenderRole(EcoRole):
+
+    def __init__(self, owner, space):
+        super().__init__(owner, space)
+        self.loan_applicants = []
+
+    def receive_request(self, applicant):
+        self.loan_applicants.append(applicant)
+
