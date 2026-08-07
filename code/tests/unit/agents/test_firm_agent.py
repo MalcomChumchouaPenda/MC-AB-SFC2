@@ -567,6 +567,46 @@ def test_update_productivity_by_imitation(innovating_firm):
 
 
 # ---------------------------------------------------
+# CREDIT RELATED TESTS
+# ----------------------------------------------------
+
+
+@pytest.fixture
+def borrowing_firm():
+    # Given
+    model = Mock()
+    firm = FirmAgent(model)
+    firm.wage_offer = 10
+    firm.desired_labor = 10
+    firm.desired_rd = 50
+    return firm
+
+
+def test_calc_desired_loans_when_external_finance_needed(borrowing_firm):
+    # Given
+    firm = borrowing_firm
+    firm.deposits = 20
+
+    # When
+    firm.calc_desired_loans()
+
+    # Then
+    assert firm.desired_loans == 130
+
+
+def test_calc_desired_loans_when_internal_funds_are_sufficient(borrowing_firm):
+    # Given
+    firm = borrowing_firm
+    firm.deposits = 150
+
+    # When
+    firm.calc_desired_loans()
+
+    # Then
+    assert firm.desired_loans == 0
+
+
+# ---------------------------------------------------
 # HISTORIC DATA STORAGE TESTS
 # ----------------------------------------------------
 

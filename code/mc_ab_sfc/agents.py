@@ -273,6 +273,11 @@ class FirmAgent(EcoAgent):
         self.prev_inventories = self.inventories
         self.prev_output = self.output
 
+    def calc_desired_loans(self):
+        wage_bill = self.wage_offer * self.desired_labor
+        self.desired_loans = max(0, wage_bill + self.desired_rd - self.deposits)
+        return self.desired_loans
+
 
 class BankAgent(EcoAgent):
     pass
