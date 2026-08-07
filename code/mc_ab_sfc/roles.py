@@ -133,4 +133,3 @@ class LenderRole(EcoRole):
 
     def receive_request(self, applicant):
         self.loan_applicants.append(applicant)
-

@@ -32,14 +32,14 @@ def market():
     return market
 
 
-def test_add_client_creates_deposit_holder_role(market, monkeypatch):
+def test_add_deposit_holder_creates_deposit_holder_role(market, monkeypatch):
     # Given
     household = Mock()
     market.add_role = Mock()
     monkeypatch.setattr("mc_ab_sfc.spaces.DepositHolderRole", FakeRole)
 
     # When
-    deposit_holder = market.add_client(household)
+    deposit_holder = market.add_deposit_holder(household)
 
     # Then
     action = market.add_role

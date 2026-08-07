@@ -40,7 +40,7 @@ def test_household_portfolio_allocation(household, bank, model):
     equity_space.add_equity_holder(household)
     deposit_market = DepositMarket(model)
     deposit_bank = deposit_market.add_deposit_bank(bank)
-    deposit_holder = deposit_market.add_client(household)
+    deposit_holder = deposit_market.add_deposit_holder(household)
     deposit_market.assign_deposit_bank(deposit_holder, deposit_bank)
 
     # When

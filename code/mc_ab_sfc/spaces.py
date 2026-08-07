@@ -102,18 +102,18 @@ class LaborMarket(EcoSpace):
 class CreditMarket(EcoSpace):
 
     def add_borrower(self, firm):
-        return self.add_role(BorrowerRole, firm, 'borrower')
+        return self.add_role(BorrowerRole, firm, "borrower")
 
     def add_lender(self, bank):
-        return self.add_role(LenderRole, bank, 'lender')
+        return self.add_role(LenderRole, bank, "lender")
 
     def search_lenders(self):
         return [n for n in self.nodes if isinstance(n, LenderRole)]
-    
+
 
 class DepositMarket(EcoSpace):
 
-    def add_client(self, household):
+    def add_deposit_holder(self, household):
         return self.add_role(DepositHolderRole, household, "deposit_holder")
 
     def add_deposit_bank(self, bank):
