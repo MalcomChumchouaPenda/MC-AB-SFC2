@@ -20,3 +20,8 @@ def central_bank():
     # Given
     model = Mock()
     return CentralBankAgent(model)
+
+
+def test_has_default_discount_rate(central_bank):
+    # Assert
+    assert central_bank.discount_rate == 0

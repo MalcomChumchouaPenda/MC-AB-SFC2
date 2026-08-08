@@ -375,7 +375,6 @@ class BankAgent(EcoAgent):
         # prices
         self.deposit_rate = 0
 
-
     def update_deposit_rate(self):
         role = self.roles["commercial_bank"]
         discount_rate = role.get_discount_rate()
@@ -391,4 +390,6 @@ class GovernmentAgent(EcoAgent):
 
 
 class CentralBankAgent(EcoAgent):
-    pass
+
+    def setup(self, **kwargs):
+        self.discount_rate = 0

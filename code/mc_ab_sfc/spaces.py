@@ -39,17 +39,17 @@ class CountrySpace(EcoSpace):
         return self.add_role(TaxPayerRole, agent, "tax_payer")
 
 
-class CentralBankSpace(EcoSpace):
-
-    def setup(self, **kwargs):
-        self.discount_rate = 0
+class BankSystem(EcoSpace):
 
     def add_commercial_bank(self, agent):
-        return self.add_role(CommercialBankRole, agent, 'commercial_bank')
+        return self.add_role(CommercialBankRole, agent, "commercial_bank")
 
     def add_central_bank(self, agent):
-        return self.add_role(CentralBankRole, agent, 'central_bank')
-    
+        return self.add_role(CentralBankRole, agent, "central_bank")
+
+    def assign_central_bank(self, bank_role, central_role):
+        bank_role.central_bank = central_role
+        self.graph.add_edge(central_role, bank_role)
 
 
 class GoodsMarket(EcoSpace):

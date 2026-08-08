@@ -15,11 +15,6 @@ def test_is_ecorole():
     assert issubclass(CommercialBankRole, EcoRole)
 
 
-# ---------------------------------------------------
-# BEHAVIORAL TESTS
-# ----------------------------------------------------
-
-
 @pytest.fixture
 def role():
     # Given
@@ -28,21 +23,20 @@ def role():
     return CommercialBankRole(agent, space)
 
 
-# def test_sets_discount_rate(role):
-#     # Given
-#     space = role.space
+def test_has_default_central_bank(role):
+    # Assert
+    assert role.central_bank is None
 
-#     # When
-#     role.set_discount_rate(0.05)
 
-#     # Then
-#     assert space.discount_rate == 0.05
+# ---------------------------------------------------
+# BEHAVIORAL TESTS
+# ----------------------------------------------------
 
 
 def test_get_discount_rate(role):
     # Given
-    space = role.space
-    space.discount_rate = 0.05
+    central_bank = Mock(discount_rate=0.05)
+    role.central_bank = central_bank
 
     # When
     result = role.get_discount_rate()

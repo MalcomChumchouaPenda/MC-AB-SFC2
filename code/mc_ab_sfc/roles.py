@@ -161,14 +161,16 @@ class LenderRole(EcoRole):
 
 class CentralBankRole(EcoRole):
 
-    def set_discount_rate(self, rate):
-        self.space.discount_rate = rate
-
-    def get_discount_rate(self):
-        return self.space.discount_rate
+    @property
+    def discount_rate(self):
+        return self.agent.discount_rate
 
 
 class CommercialBankRole(EcoRole):
 
+    def __init__(self, agent, space):
+        super().__init__(agent, space)
+        self.central_bank = None
+
     def get_discount_rate(self):
-        return self.space.discount_rate
+        return self.central_bank.discount_rate
