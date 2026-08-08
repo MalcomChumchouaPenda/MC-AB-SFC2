@@ -377,7 +377,6 @@ class BankAgent(EcoAgent):
         # decisions
         self.credit_capacity = 0
 
-
     def update_deposit_rate(self):
         role = self.roles["commercial_bank"]
         discount_rate = role.get_discount_rate()
@@ -388,7 +387,16 @@ class BankAgent(EcoAgent):
         role.pay_deposit_interest()
 
     def update_credit_capacity(self):
-        self.credit_capacity =  self.equity * self.p.mu1
+        self.credit_capacity = self.equity * self.p.mu1
+
+    def calc_loan_probability(self, borrower):
+        return math.exp(-self.p.iota_l * borrower.target_leverage)
+
+    def calc_loan_rate(self, borrower):
+        bank_role = self.roles["commercial_bank"]
+        discount_rate = bank_role.get_discount_rate()
+        leverage = borrower.target_leverage
+        return self.p.chi * leverage + discount_rate
 
 
 class GovernmentAgent(EcoAgent):

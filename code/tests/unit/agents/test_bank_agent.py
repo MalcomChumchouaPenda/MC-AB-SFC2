@@ -1,3 +1,4 @@
+import math
 import pytest
 from unittest.mock import Mock
 from mc_ab_sfc.agents import BankAgent
@@ -87,3 +88,30 @@ def test_updates_credit_capacity(bank):
 
     # Then
     assert bank.credit_capacity == pytest.approx(1000)
+
+
+def test_calc_loan_probability(bank):
+    # Given
+    bank.p.iota_l = 1
+    borrower = Mock(loan_demand=100, target_leverage=0.5)
+
+    # When
+    probability = bank.calc_loan_probability(borrower)
+
+    # Then
+    assert probability == pytest.approx(math.exp(-0.5))
+
+
+def test_calc_loan_rate(bank):
+    # Given
+    bank_role = Mock()
+    bank_role.get_discount_rate.return_value = 0.05
+    bank.roles["commercial_bank"] = bank_role
+    bank.p.chi = 0.02
+    borrower = Mock(target_leverage=5.0)
+
+    # When
+    rate = bank.calc_loan_rate(borrower)
+
+    # Then
+    assert rate == pytest.approx(0.02 * 5.0 + 0.05)
