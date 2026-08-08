@@ -105,6 +105,8 @@ def test_update_equity_holdings(space, issuer, holders):
     space.update_equity_holdings(issuer)
 
     # Then
+    issuer.clear_stock.assert_called_once_with("equity")
+    issuer.increase_stock.assert_called_once_with("equity", 1200)
     holders[0].clear_stock.assert_called_once_with("equity")
     holders[0].increase_stock.assert_called_once_with("equity", 720)
     holders[1].clear_stock.assert_called_once_with("equity")

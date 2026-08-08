@@ -145,7 +145,7 @@ class BorrowerRole(EcoRole):
     @property
     def target_leverage(self):
         agent = self.agent
-        return agent.desired_loans / agent.net_worth
+        return agent.desired_loans / agent.equity
 
     def search_lenders(self):
         return self.space.search_lenders()

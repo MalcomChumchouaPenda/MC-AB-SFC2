@@ -68,7 +68,7 @@ def test_firm_request_loans(firm, bank):
 
 def test_bank_evaluates_credit_request(firm, bank):
     # Given
-    firm.net_worth = 100
+    firm.equity = 100
     firm.desired_loans = 200
     borrower = firm.roles["borrower"]
 

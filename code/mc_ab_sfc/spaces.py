@@ -174,6 +174,8 @@ class EquitySpace(EcoSpace):
 
     def update_equity_holdings(self, issuer):
         new_equity = issuer.net_worth
+        issuer.clear_stock("equity")
+        issuer.increase_stock("equity", new_equity)
         for _, holder, data in self.graph.edges(issuer, data=True):
             value = new_equity * data["share"]
             holder.clear_stock("equity")

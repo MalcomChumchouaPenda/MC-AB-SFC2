@@ -30,6 +30,7 @@ def test_has_default_stocks(firm):
     assert firm.cash == 0
     assert firm.loans == 0
     assert firm.deposits == 0
+    assert firm.equity == 0
 
 
 def test_has_default_flows(firm):
@@ -803,7 +804,7 @@ def test_update_net_worth(firm_as_equityissuer):
 
     # Then
     issuer.update_equity_holdings.assert_called_once_with()
-    assert firm.net_worth == 1200
+    assert firm.net_worth == pytest.approx(1200)
 
 
 def test_pay_dividends(firm_as_equityissuer):

@@ -153,6 +153,7 @@ class FirmAgent(EcoAgent):
         self.cash = 0
         self.loans = 0
         self.deposits = 0
+        self.equity = 0
 
         # flows
         self.sales = 0

@@ -32,7 +32,7 @@ def test_exposes_target_leverage(borrower):
     # Given
     firm = borrower.agent
     firm.desired_loans = 50
-    firm.net_worth = 100
+    firm.equity = 100
 
     # Assert
     assert borrower.target_leverage == pytest.approx(0.50)
