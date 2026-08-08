@@ -28,6 +28,15 @@ def test_has_deposit_bank_reference(deposit_holder):
     assert deposit_holder.deposit_bank is None
 
 
+def test_exposes_deposits(deposit_holder):
+    # Given
+    agent = deposit_holder.agent
+    agent.deposits = 100
+
+    # Assert
+    assert deposit_holder.deposits == 100
+
+
 # ---------------------------------------------------
 # BEHAVIORAL TESTS
 # ----------------------------------------------------

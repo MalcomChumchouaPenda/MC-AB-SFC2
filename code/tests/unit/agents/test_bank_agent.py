@@ -39,3 +39,15 @@ def test_update_deposit_rate_as_fraction_of_discount_rate(bank):
 
     # Then
     assert bank.deposit_rate == pytest.approx(0.04)
+
+
+def test_pay_deposit_interest_delegates_to_role(bank):
+    # Given
+    bank_role = Mock()
+    bank.roles["deposit_bank"] = bank_role
+
+    # When
+    bank.pay_deposit_interest()
+
+    # Then
+    bank_role.pay_deposit_interest.assert_called_once()

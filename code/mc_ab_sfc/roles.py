@@ -118,6 +118,10 @@ class DepositHolderRole(EcoRole):
         super().__init__(agent, space)
         self.deposit_bank = None
 
+    @property
+    def deposits(self):
+        return self.agent.deposits
+
     def get_deposit_rate(self):
         return self.deposit_bank.deposit_rate
 
@@ -127,6 +131,9 @@ class DepositBankRole(EcoRole):
     @property
     def deposit_rate(self):
         return self.agent.deposit_rate
+
+    def pay_deposit_interest(self):
+        self.space.pay_deposit_interest(self)
 
 
 class BorrowerRole(EcoRole):

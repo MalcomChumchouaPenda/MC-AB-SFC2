@@ -132,6 +132,15 @@ class DepositMarket(EcoSpace):
         deposit_holder.deposit_bank = deposit_bank
         self.graph.add_edge(deposit_holder, deposit_bank)
 
+    def pay_deposit_interest(self, deposit_bank):
+        deposit_rate = deposit_bank.deposit_rate
+        for _, holder in self.graph.edges(deposit_bank):
+            interest = holder.deposits * deposit_rate
+            holder.increase_stock("deposits", interest)
+            holder.increase_flow("deposit_interest", interest)
+            deposit_bank.increase_stock("deposits", interest)
+            deposit_bank.increase_flow("deposit_interest", interest)
+
 
 class BondMarket(EcoSpace):
     pass

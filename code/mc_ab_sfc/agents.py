@@ -366,6 +366,10 @@ class BankAgent(EcoAgent):
         discount_rate = role.get_discount_rate()
         self.deposit_rate = self.p.zeta * discount_rate
 
+    def pay_deposit_interest(self):
+        role = self.roles["deposit_bank"]
+        role.pay_deposit_interest()
+
 
 class GovernmentAgent(EcoAgent):
     pass

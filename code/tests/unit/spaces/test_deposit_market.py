@@ -78,3 +78,25 @@ def test_assign_deposit_bank_by_adding_graph_edge(market):
     assert source is deposit_holder
     assert target is deposit_bank
     assert deposit_holder.deposit_bank is deposit_bank
+
+
+def test_deposit_market_pays_interest_to_all_clients(market):
+    # Given
+    bank = Mock(deposit_rate=0.04)
+    graph = market.graph
+    graph.add_node(bank)
+    holders = [Mock(deposits=1000 * (i + 1)) for i in range(3)]
+    for holder in holders:
+        graph.add_node(holder)
+        graph.add_edge(bank, holder)
+
+    # When
+    market.pay_deposit_interest(bank)
+
+    # Then
+    for i, holder in enumerate(holders):
+        amount = pytest.approx(40.0 * (i + 1))
+        bank.increase_stock.assert_any_call("deposits", amount)
+        bank.increase_flow.assert_any_call("deposit_interest", amount)
+        holder.increase_stock.assert_called_with("deposits", amount)
+        holder.increase_flow.assert_called_with("deposit_interest", amount)

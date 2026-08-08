@@ -35,3 +35,15 @@ def test_exposes_deposit_rate(deposit_bank):
 # ---------------------------------------------------
 # BEHAVIORAL TESTS
 # ----------------------------------------------------
+
+
+def test_deposit_bank_role_delegates_payment(deposit_bank):
+    # Given
+    role = deposit_bank
+    market = deposit_bank.space
+
+    # When
+    role.pay_deposit_interest()
+
+    # Then
+    market.pay_deposit_interest.assert_called_once_with(role)
