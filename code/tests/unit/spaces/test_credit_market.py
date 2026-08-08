@@ -76,3 +76,54 @@ def test_search_lenders_returns_all_lenders(market, monkeypatch):
     random = market.model.random
     assert not random.sample.called
     assert result == lenders
+
+
+def test_grant_loan_creates_credit_edge(market):
+    # Given
+    borrower = Mock(loan_demand=1000)
+    lender = Mock()
+    graph = market.graph
+    graph.add_nodes_from([lender, borrower])
+
+    # When
+    market.grant_loan(lender, borrower, 500, 0.05)
+
+    # Then
+    edges = list(graph.edges(data=True))
+    source, target, data = edges[0]
+    assert len(edges) == 1
+    assert source is borrower
+    assert target is lender
+    assert data["amount"] == 500
+    assert data["rate"] == 0.05
+
+
+def test_grant_loan_reduces_loan_demand(market):
+    # Given
+    borrower = Mock(loan_demand=1000)
+    lender = Mock()
+    graph = market.graph
+    graph.add_nodes_from([lender, borrower])
+
+    # When
+    market.grant_loan(lender, borrower, 500, 0.05)
+
+    # Then
+    assert borrower.loan_demand == 500
+
+
+def test_grant_loan_modifies_stocks_and_flows(market):
+    # Given
+    borrower = Mock(loan_demand=1000)
+    lender = Mock()
+    graph = market.graph
+    graph.add_nodes_from([lender, borrower])
+
+    # When
+    market.grant_loan(lender, borrower, 500, 0.05)
+
+    # Then
+    lender.increase_stock.assert_any_call("loans", 500)
+    lender.increase_stock.assert_any_call("deposits", 500)
+    borrower.increase_stock.assert_any_call("loans", 500)
+    borrower.increase_stock.assert_any_call("deposits", 500)

@@ -163,6 +163,9 @@ class LenderRole(EcoRole):
     def receive_request(self, applicant):
         self.loan_applicants.append(applicant)
 
+    def grant_loan(self, borrower, amount, rate):
+        self.space.grant_loan(self, borrower, amount, rate)
+
 
 class CentralBankRole(EcoRole):
 

@@ -387,6 +387,23 @@ class BankAgent(EcoAgent):
         role = self.roles["deposit_bank"]
         role.pay_deposit_interest()
 
+    def grant_loans(self):
+        role = self.roles["lender"]
+        applicants = role.loan_applicants
+        random = self.model.random
+        random.shuffle(applicants)
+        capacity = self.credit_capacity
+        choice = self.model.nprandom.choice
+        for borrower in applicants:
+            if capacity <= 0:
+                break
+            prob = self.calc_loan_probability(borrower)
+            rate = self.calc_loan_rate(borrower)
+            amount = min(capacity, borrower.loan_demand)
+            if choice([0, 1], p=[1 - prob, prob]):
+                role.grant_loan(borrower, amount, rate)
+                capacity -= amount
+
     def update_credit_capacity(self):
         self.credit_capacity = self.equity * self.p.mu1
 

@@ -128,6 +128,14 @@ class CreditMarket(EcoSpace):
     def search_lenders(self):
         return [n for n in self.nodes if isinstance(n, LenderRole)]
 
+    def grant_loan(self, lender, borrower, amount, rate):
+        borrower.loan_demand -= amount
+        borrower.increase_stock("loans", amount)
+        borrower.increase_stock("deposits", amount)
+        lender.increase_stock("loans", amount)
+        lender.increase_stock("deposits", amount)
+        self.graph.add_edge(borrower, lender, amount=amount, rate=rate)
+
 
 class DepositMarket(EcoSpace):
 

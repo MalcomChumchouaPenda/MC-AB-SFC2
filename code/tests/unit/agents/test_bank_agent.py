@@ -115,3 +115,72 @@ def test_calc_loan_rate(bank):
 
     # Then
     assert rate == pytest.approx(0.02 * 5.0 + 0.05)
+
+
+@pytest.fixture
+def bank_as_lender():
+    # Given
+    borrowers = [Mock(loan_demand=100) for _ in range(5)]
+    lender = Mock(loan_applicants=borrowers)
+    bank = BankAgent(model=Mock())
+    bank.roles["lender"] = lender
+    bank.calc_loan_rate = Mock(return_value=0.02)
+    bank.calc_loan_probability = Mock(return_value=0.4)
+    bank.update_credit_capacity = Mock()
+    random = bank.model.nprandom
+    random.choice.return_value = 0
+    return bank
+
+
+def test_grant_loans_and_processes_all_loan_applicants(bank_as_lender):
+    # Given
+    bank = bank_as_lender
+    bank.credit_capacity = 500
+    lender = bank.roles["lender"]
+    applicants = lender.loan_applicants
+    random = bank.model.random
+
+    # When
+    bank.grant_loans()
+
+    # Then
+    random.shuffle.assert_called_with(applicants)
+    for borrower in applicants:
+        bank.calc_loan_rate.assert_any_call(borrower)
+        bank.calc_loan_probability.assert_any_call(borrower)
+
+
+def test_grant_loans_with_computed_probability(bank_as_lender):
+    # Given
+    bank = bank_as_lender
+    bank.credit_capacity = 500
+    lender = bank.roles["lender"]
+    applicants = lender.loan_applicants
+    random = bank.model.nprandom
+    random.choice.side_effect = iter([1, 0, 0, 0, 0])
+
+    # When
+    bank.grant_loans()
+
+    # Then
+    random.choice.assert_called_with([0, 1], p=[0.6, 0.4])
+    lender.grant_loan.assert_called_with(applicants[0], 100, 0.02)
+    assert lender.grant_loan.call_count == 1
+
+
+def test_grant_loans_in_regards_of_credit_capacity(bank_as_lender):
+    # Given
+    bank = bank_as_lender
+    bank.credit_capacity = 200
+    lender = bank.roles["lender"]
+    applicants = lender.loan_applicants
+    random = bank.model.nprandom
+    random.choice.return_value = 1
+
+    # When
+    bank.grant_loans()
+
+    # Then
+    lender.grant_loan.assert_any_call(applicants[0], 100, 0.02)
+    lender.grant_loan.assert_any_call(applicants[1], 100, 0.02)
+    assert lender.grant_loan.call_count == 2

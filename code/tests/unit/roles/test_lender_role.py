@@ -42,3 +42,16 @@ def test_receive_request(lender):
 
     # Then
     assert lender.loan_applicants == [borrower]
+
+
+def test_grant_loan(lender):
+    # Given
+    borrower = Mock()
+    market = lender.space
+
+    # When
+    lender.grant_loan(borrower, 100, 0.04)
+
+    # Then
+    action = market.grant_loan
+    action.assert_called_once_with(lender, borrower, 100, 0.04)
