@@ -1,4 +1,5 @@
 from .base import EcoSpace
+from .agents import BankAgent
 from .roles import (
     EmployerRole,
     WorkerRole,
@@ -14,6 +15,8 @@ from .roles import (
     BorrowerRole,
     CentralBankRole,
     CommercialBankRole,
+    BondBuyerRole,
+    BondIssuerRole,
 )
 
 
@@ -167,7 +170,27 @@ class DepositMarket(EcoSpace):
 
 
 class BondMarket(EcoSpace):
-    pass
+
+    def add_bond_issuer(self, government):
+        return self.add_role(BondIssuerRole, government, "bond_issuer")
+
+    def add_bond_buyer(self, bank):
+        return self.add_role(BondBuyerRole, bank, "bond_buyer")
+
+    def get_bond_issuers(self):
+        return [n for n in self.nodes if isinstance(n, BondIssuerRole)]
+
+    def buy_bonds(self, buyer, issuer, amount):
+        issuer.bond_supply -= amount
+        issuer.increase_stock("bonds", amount)
+        issuer.increase_stock("reserves", amount)
+        if isinstance(buyer.agent, BankAgent):
+            buyer.increase_stock("bonds", amount)
+            buyer.decrease_stock("reserves", amount)
+        else:
+            buyer.increase_stock("bonds", amount)
+            buyer.increase_stock("reserves", amount)
+        self.graph.add_edge(issuer, buyer, amount=amount)
 
 
 class EquitySpace(EcoSpace):

@@ -426,6 +426,27 @@ class BankAgent(EcoAgent):
             role = self.roles["commercial_bank"]
             role.request_cash_advances(shortage)
 
+    def invest_excess_reserves(self):
+        role = self.roles["bond_buyer"]
+        bond_issuers = role.get_bond_issuers()
+        random = self.model.random
+        random.shuffle(bond_issuers)
+
+        required = self.p.mu2 * self.deposits
+        excess = max(self.reserves - required, 0)
+        choice = self.model.nprandom.choice
+        for issuer in bond_issuers:
+            prob = self.calc_bond_purchases_probability(issuer)
+            if choice([0, 1], p=[1 - prob, prob]):
+                purchase = min(excess, issuer.bond_supply)
+                role.buy_bonds(issuer, purchase)
+                excess -= purchase
+                if excess <= 0:
+                    break
+
+    def calc_bond_purchases_probability(self, issuer):
+        return math.exp(-self.p.iota_b * issuer.bonds / issuer.gdp)
+
 
 class GovernmentAgent(EcoAgent):
     pass

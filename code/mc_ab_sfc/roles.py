@@ -185,3 +185,31 @@ class CommercialBankRole(EcoRole):
 
     def request_cash_advances(self, amount):
         self.space.request_cash_advances(self, self.central_bank, amount)
+
+
+class BondIssuerRole(EcoRole):
+
+    def __init__(self, agent, space):
+        super().__init__(agent, space)
+        self.bond_supply = 0
+
+    @property
+    def interest_rate(self):
+        return self.agent.bond_interest_rate
+
+    @property
+    def bonds(self):
+        return self.agent.bonds
+
+    @property
+    def gdp(self):
+        return self.agent.gdp
+
+
+class BondBuyerRole(EcoRole):
+
+    def get_bond_issuers(self):
+        return self.space.get_bond_issuers()
+
+    def buy_bonds(self, issuer, amount):
+        self.space.buy_bonds(self, issuer, amount)

@@ -238,3 +238,90 @@ def test_request_cash_advance_when_insufficient_reserves(bank_in_banksystem):
     # Then
     bank_role = bank.roles["commercial_bank"]
     bank_role.request_cash_advances.assert_called_with(50)
+
+
+def test_calc_bond_purchases_probability():
+    # Given
+    model = Mock()
+    model.p.iota_b = 2
+    bank = BankAgent(model)
+    issuer = Mock(bonds=500, gdp=1000)
+
+    # When
+    probability = bank.calc_bond_purchases_probability(issuer)
+
+    # Then
+    assert probability == math.exp(-1)
+
+
+@pytest.fixture
+def bond_issuers():
+    return [
+        Mock(bond_supply=100, bonds=100, gdp=100),
+        Mock(bond_supply=100, bonds=100, gdp=100),
+    ]
+
+
+@pytest.fixture
+def bond_buyer(bond_issuers):
+    buyer_role = Mock()
+    buyer_role.get_bond_issuers.return_value = bond_issuers
+    return buyer_role
+
+
+@pytest.fixture
+def bank_as_bondbuyer(bond_buyer):
+    model = Mock()
+    model.p.mu2 = 0.1
+    bank = BankAgent(model)
+    bank.roles["bond_buyer"] = bond_buyer
+    bank.calc_bond_purchases_probability = Mock(return_value=0)
+    bank.model.nprandom.choice.return_value = 1
+    return bank
+
+
+def test_buy_bonds_and_shuffles_all_bonds(bank_as_bondbuyer, bond_issuers):
+    # Given
+    bank = bank_as_bondbuyer
+    bank.reserves = 300
+    bank.deposits = 1000
+    random = bank.model.random
+
+    # When
+    bank.invest_excess_reserves()
+
+    # Then
+    random.shuffle.assert_called_with(bond_issuers)
+
+
+def test_buy_bonds_with_purchases_probability(bank_as_bondbuyer, bond_issuers):
+    # Given
+    bank = bank_as_bondbuyer
+    bank.reserves = 300
+    bank.deposits = 1000
+    calc_prob = bank.calc_bond_purchases_probability
+    calc_prob.return_value = 0.4
+    random = bank.model.nprandom
+
+    # When
+    bank.invest_excess_reserves()
+
+    # Then
+    random.choice.assert_called_with([0, 1], p=[0.6, 0.4])
+    assert random.choice.call_count == 2
+    for bond_issuer in bond_issuers:
+        calc_prob.assert_any_call(bond_issuer)
+
+
+def test_buy_bonds_with_excess_reserves(bank_as_bondbuyer, bond_issuers):
+    # Given
+    bank = bank_as_bondbuyer
+    bank.reserves = 150
+    bank.deposits = 1000
+    buyer = bank.roles["bond_buyer"]
+
+    # When
+    bank.invest_excess_reserves()
+
+    # Then
+    buyer.buy_bonds.assert_called_once_with(bond_issuers[0], 50)
