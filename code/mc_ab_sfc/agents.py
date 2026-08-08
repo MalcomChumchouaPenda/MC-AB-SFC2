@@ -366,6 +366,7 @@ class BankAgent(EcoAgent):
         self.cash = 0
         self.loans = 0
         self.deposits = 0
+        self.equity = 0
 
         # flows
         self.loan_interest = 0
@@ -403,6 +404,7 @@ class BankAgent(EcoAgent):
             if choice([0, 1], p=[1 - prob, prob]):
                 role.grant_loan(borrower, amount, rate)
                 capacity -= amount
+        role.loan_applicants = []
 
     def update_credit_capacity(self):
         self.credit_capacity = self.equity * self.p.mu1

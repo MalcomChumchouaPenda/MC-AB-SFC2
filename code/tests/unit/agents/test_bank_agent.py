@@ -28,6 +28,7 @@ def test_has_default_stocks(bank):
     assert bank.cash == 0
     assert bank.loans == 0
     assert bank.deposits == 0
+    assert bank.equity == 0
 
 
 def test_has_default_flows(bank):
@@ -184,3 +185,18 @@ def test_grant_loans_in_regards_of_credit_capacity(bank_as_lender):
     lender.grant_loan.assert_any_call(applicants[0], 100, 0.02)
     lender.grant_loan.assert_any_call(applicants[1], 100, 0.02)
     assert lender.grant_loan.call_count == 2
+
+
+def test_grant_loans_cleans_loan_applicants_list(bank_as_lender):
+    # Given
+    bank = bank_as_lender
+    bank.credit_capacity = 200
+    lender = bank.roles["lender"]
+    random = bank.model.nprandom
+    random.choice.return_value = 1
+
+    # When
+    bank.grant_loans()
+
+    # Then
+    assert len(lender.loan_applicants) == 0

@@ -11,6 +11,7 @@ def model():
     model = Mock()
     model.p.iota_l = 1
     model.p.chi = 0.05
+    model.p.mu1 = 0.05
     return model
 
 
@@ -80,3 +81,26 @@ def test_bank_evaluates_credit_request(firm, bank):
     # Then
     assert probability == pytest.approx(math.exp(-2))
     assert rate == pytest.approx(0.15)
+
+
+def test_bank_grant_loans(firm, bank, credit_market):
+    # Given
+    firm.equity = 500
+    firm.loans = 0
+    firm.deposits = 200
+    firm.desired_loans = 1000
+    bank.equity = 7500
+    bank.loans = 0
+    bank.deposits = 1000
+    random = bank.model.nprandom
+    random.choice.return_value = 1
+
+    # When
+    firm.request_loan()
+    bank.update_credit_capacity()
+    bank.grant_loans()
+
+    # Then
+    assert bank.loans > 0
+    assert firm.loans == bank.loans
+    assert firm.deposits > 200
