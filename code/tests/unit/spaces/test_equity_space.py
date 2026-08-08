@@ -58,3 +58,54 @@ def test_add_equity_issuer_creates_appropriate_role(space, monkeypatch):
     # Then
     space.add_role.assert_called_with(FakeRole, agent, "equity_issuer")
     assert equity_issuer is space.add_role.return_value
+
+
+@pytest.fixture
+def issuer(space):
+    # Given
+    issuer = Mock()
+    space.graph.add_node(issuer)
+    return issuer
+
+
+@pytest.fixture
+def holders(space):
+    # Given
+    holders = [Mock() for _ in range(3)]
+    space.graph.add_nodes_from(holders)
+    return holders
+
+
+def test_distributes_dividends(space, issuer, holders):
+    # Given
+    graph = space.graph
+    graph.add_edge(issuer, holders[0], share=0.6)
+    graph.add_edge(issuer, holders[1], share=0.4)
+
+    # When
+    space.distribute_dividends(issuer, 200)
+
+    # Then
+    issuer.increase_flows.assert_called_with("dividends", 200)
+    issuer.decrease_stocks.assert_called_with("cash", 200)
+    holders[0].increase_flows.assert_called_with("dividends", 120)
+    holders[0].increase_stocks.assert_called_with("cash", 120)
+    holders[1].increase_flows.assert_called_with("dividends", 80)
+    holders[1].increase_stocks.assert_called_with("cash", 80)
+
+
+def test_update_equity_holdings(space, issuer, holders):
+    # Given
+    graph = space.graph
+    graph.add_edge(issuer, holders[0], share=0.6)
+    graph.add_edge(issuer, holders[1], share=0.4)
+    issuer.net_worth = 1200
+
+    # When
+    space.update_equities(issuer)
+
+    # Then
+    holders[0].clear_stocks.assert_called_once_with("equity")
+    holders[0].increase_stocks.assert_called_once_with("equity", 720)
+    holders[1].clear_stocks.assert_called_once_with("equity")
+    holders[1].increase_stocks.assert_called_once_with("equity", 480)

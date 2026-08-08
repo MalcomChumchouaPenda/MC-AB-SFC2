@@ -1,5 +1,3 @@
-import agentpy as ap
-from networkx import DiGraph
 from .base import EcoSpace
 from .roles import (
     EmployerRole,
@@ -140,3 +138,18 @@ class EquitySpace(EcoSpace):
 
     def add_equity_holder(self, household):
         return self.add_role(EquityHolderRole, household, "equity_holder")
+
+    def distribute_dividends(self, issuer, amount):
+        issuer.increase_flows("dividends", amount)
+        issuer.decrease_stocks("cash", amount)
+        for _, holder, data in self.graph.edges(issuer, data=True):
+            dividend = amount * data["share"]
+            holder.increase_flows("dividends", dividend)
+            holder.increase_stocks("cash", dividend)
+
+    def update_equities(self, issuer):
+        new_equity = issuer.net_worth
+        for _, holder, data in self.graph.edges(issuer, data=True):
+            value = new_equity * data["share"]
+            holder.clear_stocks("equity")
+            holder.increase_stocks("equity", value)

@@ -342,6 +342,11 @@ class FirmAgent(EcoAgent):
         tax_payer.pay_tax(self.taxes_payable)
         self.taxes_payable = 0
 
+    def pay_dividends(self):
+        issuer = self.roles["equity_issuer"]
+        issuer.distribute_dividends(self.dividends_payable)
+        self.dividends_payable = 0
+
     # History
 
     def update_history(self):

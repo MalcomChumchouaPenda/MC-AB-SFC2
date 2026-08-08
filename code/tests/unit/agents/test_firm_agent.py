@@ -793,6 +793,21 @@ def test_pay_taxes():
     assert firm.taxes_payable == 0
 
 
+def test_pay_dividends():
+    # Given
+    issuer = Mock()
+    firm = FirmAgent(model=Mock())
+    firm.roles["equity_issuer"] = issuer
+    firm.dividends_payable = 200
+
+    # When
+    firm.pay_dividends()
+
+    # Then
+    issuer.distribute_dividends.assert_called_once_with(200)
+    assert firm.dividends_payable == 0
+
+
 # ---------------------------------------------------
 # HISTORIC DATA STORAGE TESTS
 # ----------------------------------------------------
