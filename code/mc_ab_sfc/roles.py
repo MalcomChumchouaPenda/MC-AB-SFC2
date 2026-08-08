@@ -1,8 +1,11 @@
-import agentpy as ap
 from .base import EcoRole
 
 
 class CitizenRole(EcoRole):
+    pass
+
+
+class TaxPayerRole(EcoRole):
 
     def get_tax_rate(self):
         return self.space.tax_rate

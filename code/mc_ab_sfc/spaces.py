@@ -5,6 +5,7 @@ from .roles import (
     EmployerRole,
     WorkerRole,
     CitizenRole,
+    TaxPayerRole,
     ConsumerRole,
     ProducerRole,
     EquityHolderRole,
@@ -29,9 +30,13 @@ class CountrySpace(EcoSpace):
     def setup(self):
         super().setup()
         self.markets = {}
+        self.tax_rate = 0
 
     def add_citizen(self, household):
         return self.add_role(CitizenRole, household, "citizen")
+
+    def add_tax_payer(self, agent):
+        return self.add_role(TaxPayerRole, agent, "tax_payer")
 
 
 class GoodsMarket(EcoSpace):

@@ -331,12 +331,12 @@ def test_calc_gross_income():
 def test_calc_disposable_income():
     # Given
     model = Mock()
-    citizen_role = Mock()
-    citizen_role.get_tax_rate.return_value = 0.2
+    tax_payer_role = Mock()
+    tax_payer_role.get_tax_rate.return_value = 0.2
     household = HouseholdAgent(model)
     household.gross_income = 200
     household.public_transfer = 50
-    household.roles["citizen"] = citizen_role
+    household.roles["tax_payer"] = tax_payer_role
 
     # When
     income = household.calc_disposable_income()

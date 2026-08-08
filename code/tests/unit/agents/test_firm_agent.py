@@ -54,6 +54,8 @@ def test_has_default_decisions(firm):
     assert firm.desired_output == 0
     assert firm.desired_loans == 0
     assert firm.desired_rd == 0
+    assert firm.taxes_payable == 0
+    assert firm.dividends_payable == 0
 
 
 def test_has_default_memory(firm):
@@ -695,6 +697,68 @@ def test_calc_profit_wth_loss(accounting_firm):
     # Then
     assert firm.profits == -105
     assert firm.net_cash_flow == -205
+
+
+@pytest.fixture
+def firm_as_taxpayer():
+    # Given
+    role = Mock()
+    role.get_tax_rate.return_value = 0.20
+    firm = FirmAgent(model=Mock())
+    firm.roles["tax_payer"] = role
+    return firm
+
+
+def test_calc_taxes_on_positive_net_cash_flow(firm_as_taxpayer):
+    # Given
+    firm = firm_as_taxpayer
+    firm.net_cash_flow = 100
+
+    # When
+    firm.calc_taxes()
+
+    # Then
+    assert firm.taxes_payable == 20
+
+
+def test_pays_no_tax_on_negative_net_cash_flow(firm_as_taxpayer):
+    # Given
+    firm = firm_as_taxpayer
+    firm.net_cash_flow = -100
+
+    # When
+    firm.calc_taxes()
+
+    # Then
+    assert firm.taxes_payable == 0
+
+
+def test_calc_dividends_on_positive_net_cash_flow(firm_as_taxpayer):
+    # Given
+    firm = firm_as_taxpayer
+    firm.net_cash_flow = 100
+    firm.taxes_payable = 20
+    firm.p.rho = 0.5
+
+    # When
+    firm.calc_dividends()
+
+    # Then
+    assert firm.dividends_payable == 40
+
+
+def test_pays_no_dividends_on_negative_net_cash_flow(firm_as_taxpayer):
+    # Given
+    firm = firm_as_taxpayer
+    firm.net_cash_flow = -100
+    firm.taxes_payable = 0
+    firm.p.rho = 0.5
+
+    # When
+    firm.calc_dividends()
+
+    # Then
+    assert firm.dividends_payable == 0
 
 
 # ---------------------------------------------------

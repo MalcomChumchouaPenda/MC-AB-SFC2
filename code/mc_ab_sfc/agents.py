@@ -58,20 +58,16 @@ class HouseholdAgent(EcoAgent):
         p = self.p
         role = self.roles["worker"]
         employers = role.search_employers(p.psi)
-        print(p.psi, employers)
         accepted = [e for e in employers if e.wage_offer >= self.reservation_wage]
         accepted.sort(key=lambda employer: employer.wage_offer, reverse=True)
         remaining = self.labor_supply - role.get_labor_sold()
-        print(accepted, remaining)
         for employer in accepted:
             if remaining <= 0:
                 break
             quantity = min(remaining, employer.labor_demand)
-            print(quantity, remaining, employer.labor_demand)
             if quantity > 0:
                 role.create_job(employer, quantity)
                 remaining -= quantity
-                print("create job", employer, quantity)
 
     def calc_gross_income(self):
         self.gross_income = (
@@ -80,7 +76,7 @@ class HouseholdAgent(EcoAgent):
         return self.gross_income
 
     def calc_disposable_income(self):
-        role = self.roles["citizen"]
+        role = self.roles["tax_payer"]
         tax_rate = role.get_tax_rate()
         self.disposable_income = (
             1 - tax_rate
@@ -175,6 +171,8 @@ class FirmAgent(EcoAgent):
         self.desired_output = 0
         self.desired_loans = 0
         self.desired_rd = 0
+        self.taxes_payable = 0
+        self.dividends_payable = 0
 
         # history
         self.prev_sales = 0
@@ -297,10 +295,10 @@ class FirmAgent(EcoAgent):
         inv_variation = self._calc_inv_variation()
         self.net_cash_flow = self._calc_net_cash_flow()
         self.profits = self.net_cash_flow + inv_variation
+        print(self.net_cash_flow, self.profits )
 
     def _calc_inv_variation(self):
         unit_cost = self.wage_offer / self.productivity
-        print(unit_cost)
         real_inv_variation = self.inventories - self.prev_inventories
         return real_inv_variation * unit_cost
 
@@ -313,8 +311,25 @@ class FirmAgent(EcoAgent):
             - self.loan_interest
         )
 
+    def calc_taxes(self):
+        role = self.roles["tax_payer"]
+        tax_rate = role.get_tax_rate()
+        if self.net_cash_flow > 0:
+            self.taxes_payable = tax_rate * self.net_cash_flow
+        else:
+            self.taxes_payable = 0
+        return self.taxes_payable
+
+    def calc_dividends(self):
+        if self.net_cash_flow > 0:
+            distributable = self.net_cash_flow - self.taxes_payable
+            self.dividends_payable = self.p.rho * distributable
+        else:
+            self.dividends_payable = 0
+        return self.dividends_payable
+
     # History
-    
+
     def update_history(self):
         super().update_history()
         self.prev_sales = self.sales
