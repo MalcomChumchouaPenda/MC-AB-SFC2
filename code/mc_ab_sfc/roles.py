@@ -168,5 +168,7 @@ class CentralBankRole(EcoRole):
         return self.space.discount_rate
 
 
-class CommercialBankRole:
-    pass
+class CommercialBankRole(EcoRole):
+
+    def get_discount_rate(self):
+        return self.space.discount_rate

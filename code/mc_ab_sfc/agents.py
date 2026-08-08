@@ -361,6 +361,21 @@ class FirmAgent(EcoAgent):
 
 class BankAgent(EcoAgent):
 
+    def setup(self, **kwargs):
+        # stocks
+        self.cash = 0
+        self.loans = 0
+        self.deposits = 0
+
+        # flows
+        self.loan_interest = 0
+        self.deposit_interest = 0
+        self.dividends = 0
+
+        # prices
+        self.deposit_rate = 0
+
+
     def update_deposit_rate(self):
         role = self.roles["commercial_bank"]
         discount_rate = role.get_discount_rate()

@@ -22,6 +22,25 @@ def bank():
     return BankAgent(model)
 
 
+def test_has_default_stocks(bank):
+    # Assert
+    assert bank.cash == 0
+    assert bank.loans == 0
+    assert bank.deposits == 0
+
+
+def test_has_default_flows(bank):
+    # Assert
+    assert bank.loan_interest == 0
+    assert bank.deposit_interest == 0
+    assert bank.dividends == 0
+
+
+def test_has_default_prices(bank):
+    # Assert
+    assert bank.deposit_rate == 0
+
+
 # ---------------------------------------------------
 # BEHAVIORS TESTS
 # ----------------------------------------------------

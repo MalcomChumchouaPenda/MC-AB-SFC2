@@ -75,8 +75,8 @@ def test_assign_deposit_bank_by_adding_graph_edge(market):
     edges = list(market.graph.edges)
     source, target = edges[0]
     assert len(edges) == 1
-    assert source is deposit_holder
-    assert target is deposit_bank
+    assert source is deposit_bank
+    assert target is deposit_holder
     assert deposit_holder.deposit_bank is deposit_bank
 
 

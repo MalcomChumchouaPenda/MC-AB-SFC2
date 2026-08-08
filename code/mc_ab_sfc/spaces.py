@@ -39,8 +39,17 @@ class CountrySpace(EcoSpace):
         return self.add_role(TaxPayerRole, agent, "tax_payer")
 
 
-class CentralBankSpace:
-    pass
+class CentralBankSpace(EcoSpace):
+
+    def setup(self, **kwargs):
+        self.discount_rate = 0
+
+    def add_commercial_bank(self, agent):
+        return self.add_role(CommercialBankRole, agent, 'commercial_bank')
+
+    def add_central_bank(self, agent):
+        return self.add_role(CentralBankRole, agent, 'central_bank')
+    
 
 
 class GoodsMarket(EcoSpace):
@@ -130,10 +139,11 @@ class DepositMarket(EcoSpace):
 
     def assign_deposit_bank(self, deposit_holder, deposit_bank):
         deposit_holder.deposit_bank = deposit_bank
-        self.graph.add_edge(deposit_holder, deposit_bank)
+        self.graph.add_edge(deposit_bank, deposit_holder)
 
     def pay_deposit_interest(self, deposit_bank):
         deposit_rate = deposit_bank.deposit_rate
+        print(deposit_rate, deposit_bank)
         for _, holder in self.graph.edges(deposit_bank):
             interest = holder.deposits * deposit_rate
             holder.increase_stock("deposits", interest)
