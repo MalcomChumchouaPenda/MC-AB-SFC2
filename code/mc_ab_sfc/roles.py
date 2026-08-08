@@ -99,8 +99,17 @@ class EquityHolderRole(EcoRole):
         return self.space.default_probability
 
 
-class EquityIssuerRole:
-    pass
+class EquityIssuerRole(EcoRole):
+
+    @property
+    def net_worth(self):
+        return self.owner.net_worth
+
+    def update_equity_holdings(self):
+        self.space.update_equity_holdings(self)
+
+    def distribute_dividends(self, amount):
+        self.space.distribute_dividends(self, amount)
 
 
 class DepositHolderRole(EcoRole):

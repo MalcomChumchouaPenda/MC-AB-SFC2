@@ -86,12 +86,12 @@ def test_distributes_dividends(space, issuer, holders):
     space.distribute_dividends(issuer, 200)
 
     # Then
-    issuer.increase_flows.assert_called_with("dividends", 200)
-    issuer.decrease_stocks.assert_called_with("cash", 200)
-    holders[0].increase_flows.assert_called_with("dividends", 120)
-    holders[0].increase_stocks.assert_called_with("cash", 120)
-    holders[1].increase_flows.assert_called_with("dividends", 80)
-    holders[1].increase_stocks.assert_called_with("cash", 80)
+    issuer.increase_flow.assert_called_with("dividends", 200)
+    issuer.decrease_stock.assert_called_with("cash", 200)
+    holders[0].increase_flow.assert_called_with("dividends", 120)
+    holders[0].increase_stock.assert_called_with("cash", 120)
+    holders[1].increase_flow.assert_called_with("dividends", 80)
+    holders[1].increase_stock.assert_called_with("cash", 80)
 
 
 def test_update_equity_holdings(space, issuer, holders):
@@ -102,10 +102,10 @@ def test_update_equity_holdings(space, issuer, holders):
     issuer.net_worth = 1200
 
     # When
-    space.update_equities(issuer)
+    space.update_equity_holdings(issuer)
 
     # Then
-    holders[0].clear_stocks.assert_called_once_with("equity")
-    holders[0].increase_stocks.assert_called_once_with("equity", 720)
-    holders[1].clear_stocks.assert_called_once_with("equity")
-    holders[1].increase_stocks.assert_called_once_with("equity", 480)
+    holders[0].clear_stock.assert_called_once_with("equity")
+    holders[0].increase_stock.assert_called_once_with("equity", 720)
+    holders[1].clear_stock.assert_called_once_with("equity")
+    holders[1].increase_stock.assert_called_once_with("equity", 480)

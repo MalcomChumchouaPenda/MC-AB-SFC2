@@ -39,6 +39,7 @@ def test_has_default_flows(firm):
     assert firm.loan_interest == 0
     assert firm.deposit_interest == 0
     assert firm.rd == 0
+    assert firm.dividends == 0
 
 
 def test_has_default_prices(firm):
@@ -735,9 +736,34 @@ def test_pays_no_tax_on_negative_net_cash_flow(firm_as_taxpayer):
     assert firm.taxes_payable == 0
 
 
-def test_calc_dividends_on_positive_net_cash_flow(firm_as_taxpayer):
+def test_pay_taxes(firm_as_taxpayer):
     # Given
     firm = firm_as_taxpayer
+    firm.taxes_payable = 100
+    tax_payer = firm.roles["tax_payer"]
+
+    # When
+    firm.pay_taxes()
+
+    # Then
+    tax_payer.pay_tax.assert_called_once_with(100)
+    assert firm.taxes_payable == 0
+
+
+@pytest.fixture
+def firm_as_equityissuer():
+    # Given
+    tax_payer, issuer = Mock(), Mock()
+    tax_payer.get_tax_rate.return_value = 0.20
+    firm = FirmAgent(model=Mock())
+    firm.roles["tax_payer"] = tax_payer
+    firm.roles["equity_issuer"] = issuer
+    return firm
+
+
+def test_calc_dividends_on_positive_net_cash_flow(firm_as_equityissuer):
+    # Given
+    firm = firm_as_equityissuer
     firm.net_cash_flow = 100
     firm.taxes_payable = 20
     firm.p.rho = 0.5
@@ -749,9 +775,9 @@ def test_calc_dividends_on_positive_net_cash_flow(firm_as_taxpayer):
     assert firm.dividends_payable == 40
 
 
-def test_pays_no_dividends_on_negative_net_cash_flow(firm_as_taxpayer):
+def test_pays_no_dividends_on_negative_net_cash_flow(firm_as_equityissuer):
     # Given
-    firm = firm_as_taxpayer
+    firm = firm_as_equityissuer
     firm.net_cash_flow = -100
     firm.taxes_payable = 0
     firm.p.rho = 0.5
@@ -763,42 +789,28 @@ def test_pays_no_dividends_on_negative_net_cash_flow(firm_as_taxpayer):
     assert firm.dividends_payable == 0
 
 
-def test_update_net_worth():
+def test_update_net_worth(firm_as_equityissuer):
     # Given
-    firm = FirmAgent(model=Mock())
+    firm = firm_as_equityissuer
     firm.net_worth = 1000
     firm.net_cash_flow = 500
     firm.taxes_payable = 100
     firm.dividends_payable = 200
+    issuer = firm.roles["equity_issuer"]
 
     # When
     firm.update_net_worth()
 
     # Then
+    issuer.update_equity_holdings.assert_called_once_with()
     assert firm.net_worth == 1200
 
 
-def test_pay_taxes():
+def test_pay_dividends(firm_as_equityissuer):
     # Given
-    tax_payer = Mock()
-    firm = FirmAgent(model=Mock())
-    firm.roles["tax_payer"] = tax_payer
-    firm.taxes_payable = 100
-
-    # When
-    firm.pay_taxes()
-
-    # Then
-    tax_payer.pay_tax.assert_called_once_with(100)
-    assert firm.taxes_payable == 0
-
-
-def test_pay_dividends():
-    # Given
-    issuer = Mock()
-    firm = FirmAgent(model=Mock())
-    firm.roles["equity_issuer"] = issuer
+    firm = firm_as_equityissuer
     firm.dividends_payable = 200
+    issuer = firm.roles["equity_issuer"]
 
     # When
     firm.pay_dividends()

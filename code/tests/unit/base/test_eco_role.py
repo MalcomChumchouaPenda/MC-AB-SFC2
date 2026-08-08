@@ -72,6 +72,19 @@ def test_decrease_stock_decreases_agent_stock():
     assert agent.deposits == 60
 
 
+def test_clear_agent_stock():
+    # Given
+    space = Mock()
+    agent = DummyAgent()
+    role = EcoRole(agent, space)
+
+    # When vider le stock de produits
+    role.clear_stock("deposits")
+
+    # Then
+    assert agent.deposits == 0.0
+
+
 def test_increase_flow_increases_agent_flow():
     # Given
     space = Mock()
@@ -89,14 +102,28 @@ def test_decrease_flow_decreases_agent_flow():
     # Given
     space = Mock()
     agent = DummyAgent()
+    agent.labor_income = 100
     role = EcoRole(agent, space)
 
     # When
-    role.increase_flow("labor_income", 100)
     role.decrease_flow("labor_income", 30)
 
     # Then
     assert agent.labor_income == 70
+
+
+def test_clear_flow_decreases_agent_flow():
+    # Given
+    space = Mock()
+    agent = DummyAgent()
+    agent.labor_income = 100
+    role = EcoRole(agent, space)
+
+    # When
+    role.clear_flow("labor_income")
+
+    # Then
+    assert agent.labor_income == 0
 
 
 def test_accounting_methods_use_existing_attributes_only():
@@ -112,6 +139,10 @@ def test_accounting_methods_use_existing_attributes_only():
     with pytest.raises(AttributeError, match=expected):
         role.decrease_stock("unknown", 10)
     with pytest.raises(AttributeError, match=expected):
+        role.clear_stock("unknown")
+    with pytest.raises(AttributeError, match=expected):
         role.increase_flow("unknown", 10)
     with pytest.raises(AttributeError, match=expected):
         role.decrease_flow("unknown", 10)
+    with pytest.raises(AttributeError, match=expected):
+        role.clear_flow("unknown")

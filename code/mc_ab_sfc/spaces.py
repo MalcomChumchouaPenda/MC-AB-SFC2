@@ -140,16 +140,16 @@ class EquitySpace(EcoSpace):
         return self.add_role(EquityHolderRole, household, "equity_holder")
 
     def distribute_dividends(self, issuer, amount):
-        issuer.increase_flows("dividends", amount)
-        issuer.decrease_stocks("cash", amount)
+        issuer.increase_flow("dividends", amount)
+        issuer.decrease_stock("cash", amount)
         for _, holder, data in self.graph.edges(issuer, data=True):
             dividend = amount * data["share"]
-            holder.increase_flows("dividends", dividend)
-            holder.increase_stocks("cash", dividend)
+            holder.increase_flow("dividends", dividend)
+            holder.increase_stock("cash", dividend)
 
-    def update_equities(self, issuer):
+    def update_equity_holdings(self, issuer):
         new_equity = issuer.net_worth
         for _, holder, data in self.graph.edges(issuer, data=True):
             value = new_equity * data["share"]
-            holder.clear_stocks("equity")
-            holder.increase_stocks("equity", value)
+            holder.clear_stock("equity")
+            holder.increase_stock("equity", value)

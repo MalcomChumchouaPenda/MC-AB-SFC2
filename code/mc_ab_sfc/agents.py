@@ -160,6 +160,7 @@ class FirmAgent(EcoAgent):
         self.loan_interest = 0
         self.deposit_interest = 0
         self.rd = 0
+        self.dividends = 0
 
         # indicators
         self.productivity = 0.0
@@ -335,6 +336,7 @@ class FirmAgent(EcoAgent):
     def update_net_worth(self):
         payable = self.taxes_payable + self.dividends_payable
         self.net_worth += self.net_cash_flow - payable
+        self.roles["equity_issuer"].update_equity_holdings()
         return self.net_worth
 
     def pay_taxes(self):
