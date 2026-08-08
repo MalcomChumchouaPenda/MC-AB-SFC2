@@ -1,3 +1,5 @@
+import pytest
+from unittest.mock import Mock
 from mc_ab_sfc.agents import BankAgent
 
 # ---------------------------------------------------
@@ -11,3 +13,29 @@ def test_is_ecoagent():
 
     # Assert
     assert issubclass(BankAgent, EcoAgent)
+
+
+@pytest.fixture
+def bank():
+    # Given
+    model = Mock()
+    return BankAgent(model)
+
+
+# ---------------------------------------------------
+# BEHAVIORS TESTS
+# ----------------------------------------------------
+
+
+def test_update_deposit_rate_as_fraction_of_discount_rate(bank):
+    # Given
+    bank_role = Mock()
+    bank_role.get_discount_rate.return_value = 0.05
+    bank.roles["commercial_bank"] = bank_role
+    bank.p.zeta = 0.8
+
+    # When
+    bank.update_deposit_rate()
+
+    # Then
+    assert bank.deposit_rate == pytest.approx(0.04)

@@ -114,13 +114,18 @@ class EquityIssuerRole(EcoRole):
 
 class DepositHolderRole(EcoRole):
 
+    def __init__(self, agent, space):
+        super().__init__(agent, space)
+        self.deposit_bank = None
+
     def get_deposit_rate(self):
-        return self.deposit_bank.get_deposit_rate()
+        return self.deposit_bank.deposit_rate
 
 
 class DepositBankRole(EcoRole):
 
-    def get_deposit_rate(self):
+    @property
+    def deposit_rate(self):
         return self.agent.deposit_rate
 
 
@@ -145,3 +150,16 @@ class LenderRole(EcoRole):
 
     def receive_request(self, applicant):
         self.loan_applicants.append(applicant)
+
+
+class CentralBankRole(EcoRole):
+
+    def set_discount_rate(self, rate):
+        self.space.discount_rate = rate
+
+    def get_discount_rate(self):
+        return self.space.discount_rate
+
+
+class CommercialBankRole:
+    pass

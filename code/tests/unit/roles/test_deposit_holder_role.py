@@ -15,11 +15,6 @@ def test_is_ecorole():
     assert issubclass(DepositHolderRole, EcoRole)
 
 
-# ---------------------------------------------------
-# BEHAVIORAL TESTS
-# ----------------------------------------------------
-
-
 @pytest.fixture
 def deposit_holder():
     # Given
@@ -28,10 +23,20 @@ def deposit_holder():
     return DepositHolderRole(agent, space)
 
 
+def test_has_deposit_bank_reference(deposit_holder):
+    # Assert
+    assert deposit_holder.deposit_bank is None
+
+
+# ---------------------------------------------------
+# BEHAVIORAL TESTS
+# ----------------------------------------------------
+
+
 def test_get_deposit_rate(deposit_holder):
     # Given
     deposit_bank = Mock()
-    deposit_bank.get_deposit_rate.return_value = 0.02
+    deposit_bank.deposit_rate = 0.02
     deposit_holder.deposit_bank = deposit_bank
 
     # When

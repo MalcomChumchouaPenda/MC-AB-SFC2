@@ -1,3 +1,5 @@
+import pytest
+from unittest.mock import Mock
 from mc_ab_sfc.agents import CentralBankAgent
 
 # ---------------------------------------------------
@@ -11,3 +13,10 @@ def test_is_ecoagent():
 
     # Assert
     assert issubclass(CentralBankAgent, EcoAgent)
+
+
+@pytest.fixture
+def central_bank():
+    # Given
+    model = Mock()
+    return CentralBankAgent(model)

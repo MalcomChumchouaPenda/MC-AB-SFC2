@@ -360,7 +360,11 @@ class FirmAgent(EcoAgent):
 
 
 class BankAgent(EcoAgent):
-    pass
+
+    def update_deposit_rate(self):
+        role = self.roles["commercial_bank"]
+        discount_rate = role.get_discount_rate()
+        self.deposit_rate = self.p.zeta * discount_rate
 
 
 class GovernmentAgent(EcoAgent):

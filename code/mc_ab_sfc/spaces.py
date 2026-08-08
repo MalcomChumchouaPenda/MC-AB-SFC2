@@ -12,6 +12,8 @@ from .roles import (
     DepositBankRole,
     LenderRole,
     BorrowerRole,
+    CentralBankRole,
+    CommercialBankRole,
 )
 
 
@@ -35,6 +37,10 @@ class CountrySpace(EcoSpace):
 
     def add_tax_payer(self, agent):
         return self.add_role(TaxPayerRole, agent, "tax_payer")
+
+
+class CentralBankSpace:
+    pass
 
 
 class GoodsMarket(EcoSpace):
