@@ -24,8 +24,8 @@ def test_is_ecorole():
 def deposit_holder():
     # Given
     space = Mock()
-    owner = Mock(id=1)
-    return DepositHolderRole(owner, space)
+    agent = Mock(id=1)
+    return DepositHolderRole(agent, space)
 
 
 def test_get_deposit_rate(deposit_holder):

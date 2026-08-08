@@ -24,8 +24,8 @@ def test_is_ecorole():
 def worker():
     # Given
     market = Mock()
-    owner = Mock(id=1)
-    return WorkerRole(owner, market)
+    agent = Mock(id=1)
+    return WorkerRole(agent, market)
 
 
 def test_perceive_labor_sold(worker):

@@ -24,8 +24,8 @@ def test_is_ecorole():
 def consumer():
     # Given
     market = Mock()
-    owner = Mock(id=1)
-    return ConsumerRole(owner, market)
+    agent = Mock(id=1)
+    return ConsumerRole(agent, market)
 
 
 def test_search_suppliers(consumer):
@@ -58,7 +58,7 @@ def test_get_tradable_demand(consumer):
     # Given
     market = consumer.space
     market.tradable = True
-    household = consumer.owner
+    household = consumer.agent
     household.desired_trad_cons = 40
     household.desired_non_trad_cons = 60
 
@@ -70,7 +70,7 @@ def test_get_non_tradable_demand(consumer):
     # Given
     market = consumer.space
     market.tradable = False
-    household = consumer.owner
+    household = consumer.agent
     household.desired_trad_cons = 40
     household.desired_non_trad_cons = 60
 
@@ -91,7 +91,7 @@ def consumer_with_demand(monkeypatch):
 def test_buy_goods_respects_desired_consumption(consumer_with_demand):
     # Given
     consumer = consumer_with_demand
-    household = consumer.owner
+    household = consumer.agent
     household.cash = 1000
     suppliers = [Mock(price=10, available_quantity=25) for _ in range(3)]
 
@@ -108,7 +108,7 @@ def test_buy_goods_respects_desired_consumption(consumer_with_demand):
 def test_buy_goods_respects_supply_constraints(consumer_with_demand):
     # Given
     consumer = consumer_with_demand
-    household = consumer.owner
+    household = consumer.agent
     household.cash = 1000
     suppliers = [Mock(price=10, available_quantity=10) for _ in range(2)]
 
@@ -124,7 +124,7 @@ def test_buy_goods_respects_supply_constraints(consumer_with_demand):
 def test_buy_goods_respects_monetary_constraints(consumer_with_demand):
     # Given
     consumer = consumer_with_demand
-    household = consumer.owner
+    household = consumer.agent
     household.cash = 300
     suppliers = [Mock(price=10, available_quantity=25) for _ in range(2)]
 

@@ -19,13 +19,13 @@ def test_is_ecorole():
 def producer():
     # Given
     market = Mock()
-    owner = Mock(id=1)
-    return ProducerRole(owner, market)
+    agent = Mock(id=1)
+    return ProducerRole(agent, market)
 
 
 def test_exposes_price(producer):
     # Given
-    firm = producer.owner
+    firm = producer.agent
     firm.price = 15
 
     # Assert
@@ -34,7 +34,7 @@ def test_exposes_price(producer):
 
 def test_exposes_position(producer):
     # Given
-    firm = producer.owner
+    firm = producer.agent
     firm.position = 0.9
 
     # Assert
@@ -43,7 +43,7 @@ def test_exposes_position(producer):
 
 def test_exposes_productivity(producer):
     # Given
-    firm = producer.owner
+    firm = producer.agent
     firm.productivity = 0.9
 
     # Assert
@@ -52,7 +52,7 @@ def test_exposes_productivity(producer):
 
 def test_exposes_available_quantity(producer):
     # Given
-    firm = producer.owner
+    firm = producer.agent
     firm.inventories = 100
 
     # Assert

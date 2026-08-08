@@ -20,8 +20,8 @@ def test_is_ecorole():
 def employer():
     # Given
     market = Mock()
-    owner = Mock(id=1)
-    return EmployerRole(owner, market)
+    agent = Mock(id=1)
+    return EmployerRole(agent, market)
 
 
 def test_has_default_labor_demand(employer):
@@ -31,7 +31,7 @@ def test_has_default_labor_demand(employer):
 
 def test_exposes_available_quantity(employer):
     # Given
-    firm = employer.owner
+    firm = employer.agent
     firm.wage_offer = 10
 
     # Assert

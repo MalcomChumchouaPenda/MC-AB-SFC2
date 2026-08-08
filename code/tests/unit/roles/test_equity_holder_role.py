@@ -24,8 +24,8 @@ def test_is_ecorole():
 def role():
     # Given
     space = Mock()
-    owner = Mock(id=1)
-    return EquityHolderRole(owner, space)
+    agent = Mock(id=1)
+    return EquityHolderRole(agent, space)
 
 
 def test_get_default_probability(role):

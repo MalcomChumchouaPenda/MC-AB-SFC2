@@ -19,13 +19,13 @@ def test_is_ecorole():
 def issuer():
     # Given
     space = Mock()
-    owner = Mock(id=1)
-    return EquityIssuerRole(owner, space)
+    agent = Mock(id=1)
+    return EquityIssuerRole(agent, space)
 
 
 def test_exposes_net_worth(issuer):
     # Given
-    agent = issuer.owner
+    agent = issuer.agent
     agent.net_worth = 10
 
     # Assert

@@ -13,13 +13,13 @@ class TaxPayerRole(EcoRole):
 
 class EmployerRole(EcoRole):
 
-    def __init__(self, owner, space):
-        super().__init__(owner, space)
+    def __init__(self, agent, space):
+        super().__init__(agent, space)
         self.labor_demand = 0
 
     @property
     def wage_offer(self):
-        return self.owner.wage_offer
+        return self.agent.wage_offer
 
 
 class WorkerRole(EcoRole):
@@ -42,8 +42,8 @@ class ConsumerRole(EcoRole):
     @property
     def demand(self):
         if self.space.tradable:
-            return self.owner.desired_trad_cons
-        return self.owner.desired_non_trad_cons
+            return self.agent.desired_trad_cons
+        return self.agent.desired_non_trad_cons
 
     def search_suppliers(self, psi):
         return self.space.search_suppliers(psi)
@@ -52,7 +52,7 @@ class ConsumerRole(EcoRole):
         return self.space.average_price
 
     def buy_goods(self, suppliers):
-        cash = self.owner.cash
+        cash = self.agent.cash
         demand = self.demand
         market = self.space
         for supplier in suppliers:
@@ -72,19 +72,19 @@ class ProducerRole(EcoRole):
 
     @property
     def price(self):
-        return self.owner.price
+        return self.agent.price
 
     @property
     def productivity(self):
-        return self.owner.productivity
+        return self.agent.productivity
 
     @property
     def position(self):
-        return self.owner.position
+        return self.agent.position
 
     @property
     def available_quantity(self):
-        return self.owner.inventories
+        return self.agent.inventories
 
     def get_average_price(self):
         return self.space.average_price
@@ -103,7 +103,7 @@ class EquityIssuerRole(EcoRole):
 
     @property
     def net_worth(self):
-        return self.owner.net_worth
+        return self.agent.net_worth
 
     def update_equity_holdings(self):
         self.space.update_equity_holdings(self)
@@ -121,13 +121,13 @@ class DepositHolderRole(EcoRole):
 class DepositBankRole(EcoRole):
 
     def get_deposit_rate(self):
-        return self.owner.deposit_rate
+        return self.agent.deposit_rate
 
 
 class BorrowerRole(EcoRole):
 
-    def __init__(self, owner, space):
-        super().__init__(owner, space)
+    def __init__(self, agent, space):
+        super().__init__(agent, space)
         self.loan_demand = 0
 
     def search_lenders(self):
@@ -139,8 +139,8 @@ class BorrowerRole(EcoRole):
 
 class LenderRole(EcoRole):
 
-    def __init__(self, owner, space):
-        super().__init__(owner, space)
+    def __init__(self, agent, space):
+        super().__init__(agent, space)
         self.loan_applicants = []
 
     def receive_request(self, applicant):

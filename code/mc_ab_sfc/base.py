@@ -25,40 +25,40 @@ class EcoRole(ap.AgentNode):
     et un adaptateur vers un espace d'interaction.
     """
 
-    def __init__(self, owner, space):
-        super().__init__(owner.id)
-        self.owner = owner
+    def __init__(self, agent, space):
+        super().__init__(agent.id)
+        self.agent = agent
         self.space = space
 
     def increase_stock(self, stock_name, amount):
-        owner = self.owner
-        value = getattr(owner, stock_name)
-        setattr(owner, stock_name, value + amount)
+        agent = self.agent
+        value = getattr(agent, stock_name)
+        setattr(agent, stock_name, value + amount)
 
     def decrease_stock(self, stock_name, amount):
-        owner = self.owner
-        value = getattr(owner, stock_name)
-        setattr(owner, stock_name, value - amount)
+        agent = self.agent
+        value = getattr(agent, stock_name)
+        setattr(agent, stock_name, value - amount)
 
     def clear_stock(self, stock_name):
-        owner = self.owner
-        getattr(owner, stock_name)
-        setattr(owner, stock_name, 0)
+        agent = self.agent
+        getattr(agent, stock_name)
+        setattr(agent, stock_name, 0)
 
     def increase_flow(self, flow_name, amount):
-        owner = self.owner
-        value = getattr(owner, flow_name)
-        setattr(owner, flow_name, value + amount)
+        agent = self.agent
+        value = getattr(agent, flow_name)
+        setattr(agent, flow_name, value + amount)
 
     def decrease_flow(self, flow_name, amount):
-        owner = self.owner
-        value = getattr(owner, flow_name)
-        setattr(owner, flow_name, value - amount)
+        agent = self.agent
+        value = getattr(agent, flow_name)
+        setattr(agent, flow_name, value - amount)
 
     def clear_flow(self, flow_name):
-        owner = self.owner
-        getattr(owner, flow_name)
-        setattr(owner, flow_name, 0)
+        agent = self.agent
+        getattr(agent, flow_name)
+        setattr(agent, flow_name, 0)
 
 
 class EcoSpace(ap.Network):

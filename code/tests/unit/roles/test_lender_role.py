@@ -19,8 +19,8 @@ def test_is_ecorole():
 def lender():
     # Given
     market = Mock()
-    owner = Mock(id=1)
-    return LenderRole(owner, market)
+    agent = Mock(id=1)
+    return LenderRole(agent, market)
 
 
 def test_has_loan_applicants_list(lender):
