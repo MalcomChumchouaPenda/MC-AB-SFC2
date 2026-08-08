@@ -300,7 +300,6 @@ class FirmAgent(EcoAgent):
         inv_variation = self._calc_inv_variation()
         self.net_cash_flow = self._calc_net_cash_flow()
         self.profits = self.net_cash_flow + inv_variation
-        print(self.net_cash_flow, self.profits)
 
     def _calc_inv_variation(self):
         unit_cost = self.wage_offer / self.productivity
@@ -375,6 +374,10 @@ class BankAgent(EcoAgent):
         # prices
         self.deposit_rate = 0
 
+        # decisions
+        self.credit_capacity = 0
+
+
     def update_deposit_rate(self):
         role = self.roles["commercial_bank"]
         discount_rate = role.get_discount_rate()
@@ -383,6 +386,9 @@ class BankAgent(EcoAgent):
     def pay_deposit_interest(self):
         role = self.roles["deposit_bank"]
         role.pay_deposit_interest()
+
+    def update_credit_capacity(self):
+        self.credit_capacity =  self.equity * self.p.mu1
 
 
 class GovernmentAgent(EcoAgent):

@@ -41,6 +41,11 @@ def test_has_default_prices(bank):
     assert bank.deposit_rate == 0
 
 
+def test_has_default_credit_capacity(bank):
+    # Assert
+    assert bank.credit_capacity == 0
+
+
 # ---------------------------------------------------
 # BEHAVIORS TESTS
 # ----------------------------------------------------
@@ -70,3 +75,15 @@ def test_pay_deposit_interest_delegates_to_role(bank):
 
     # Then
     bank_role.pay_deposit_interest.assert_called_once()
+
+
+def test_updates_credit_capacity(bank):
+    # Given
+    bank.equity = 100
+    bank.p.mu1 = 10
+
+    # When
+    bank.update_credit_capacity()
+
+    # Then
+    assert bank.credit_capacity == pytest.approx(1000)
