@@ -73,9 +73,11 @@ def test_has_default_position(firm):
     assert firm.position == 0.0
 
 
-def test_has_default_productivity(firm):
+def test_has_default_indicators(firm):
     # Assert
     assert firm.productivity == 0.0
+    assert firm.net_worth == 0.0
+    assert firm.net_cash_flow == 0.0
 
 
 # ---------------------------------------------------
@@ -644,7 +646,7 @@ def test_request_loan_and_set_loan_demand(borrowing_firm):
 
 
 # ---------------------------------------------------
-# PROFITS, TAXES COMPUTATION TESTS
+# PROFITS, TAXES AND DIVIDENDS TESTS
 # ----------------------------------------------------
 
 
@@ -759,6 +761,36 @@ def test_pays_no_dividends_on_negative_net_cash_flow(firm_as_taxpayer):
 
     # Then
     assert firm.dividends_payable == 0
+
+
+def test_update_net_worth():
+    # Given
+    firm = FirmAgent(model=Mock())
+    firm.net_worth = 1000
+    firm.net_cash_flow = 500
+    firm.taxes_payable = 100
+    firm.dividends_payable = 200
+
+    # When
+    firm.update_net_worth()
+
+    # Then
+    assert firm.net_worth == 1200
+
+
+def test_pay_taxes():
+    # Given
+    tax_payer = Mock()
+    firm = FirmAgent(model=Mock())
+    firm.roles["tax_payer"] = tax_payer
+    firm.taxes_payable = 100
+
+    # When
+    firm.pay_taxes()
+
+    # Then
+    tax_payer.pay_tax.assert_called_once_with(100)
+    assert firm.taxes_payable == 0
 
 
 # ---------------------------------------------------

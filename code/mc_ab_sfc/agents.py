@@ -161,9 +161,10 @@ class FirmAgent(EcoAgent):
         self.deposit_interest = 0
         self.rd = 0
 
-        # other props
-        self.position = 0.0
+        # indicators
         self.productivity = 0.0
+        self.net_cash_flow = 0.0
+        self.net_worth = 0.0
 
         # decisions
         self.expected_sales = 0
@@ -181,6 +182,9 @@ class FirmAgent(EcoAgent):
         self.prev_inventories = 0
         self.prev_labor = 0
         self.prev_desired_labor = 0
+
+        # other props
+        self.position = 0.0
 
     # Production planning
 
@@ -295,7 +299,7 @@ class FirmAgent(EcoAgent):
         inv_variation = self._calc_inv_variation()
         self.net_cash_flow = self._calc_net_cash_flow()
         self.profits = self.net_cash_flow + inv_variation
-        print(self.net_cash_flow, self.profits )
+        print(self.net_cash_flow, self.profits)
 
     def _calc_inv_variation(self):
         unit_cost = self.wage_offer / self.productivity
@@ -327,6 +331,16 @@ class FirmAgent(EcoAgent):
         else:
             self.dividends_payable = 0
         return self.dividends_payable
+
+    def update_net_worth(self):
+        payable = self.taxes_payable + self.dividends_payable
+        self.net_worth += self.net_cash_flow - payable
+        return self.net_worth
+
+    def pay_taxes(self):
+        tax_payer = self.roles["tax_payer"]
+        tax_payer.pay_tax(self.taxes_payable)
+        self.taxes_payable = 0
 
     # History
 
