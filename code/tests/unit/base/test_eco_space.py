@@ -6,7 +6,7 @@ import agentpy as ap
 from mc_ab_sfc.base import EcoSpace
 
 # ---------------------------------------------------
-# ARCHITECTURAL TESTS
+# ARCHITECTURE TESTS
 # ----------------------------------------------------
 
 

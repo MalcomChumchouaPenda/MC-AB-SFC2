@@ -4,11 +4,11 @@ from unittest.mock import Mock
 from mc_ab_sfc.agents import HouseholdAgent
 
 # ---------------------------------------------------
-# ARCHITECTURAL TESTS
+# ARCHITECTURE TESTS
 # ----------------------------------------------------
 
 
-def test_is_ecoagent():
+def test_is_eco_agent():
     # Given
     from mc_ab_sfc.base import EcoAgent
 
