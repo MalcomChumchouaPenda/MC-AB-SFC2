@@ -51,6 +51,12 @@ class BankSystem(EcoSpace):
         bank_role.central_bank = central_role
         self.graph.add_edge(central_role, bank_role)
 
+    def request_cash_advances(self, bank_role, central_role, amount):
+        bank_role.increase_stock("reserves", amount)
+        bank_role.increase_stock("cash_advances", amount)
+        central_role.increase_stock("reserves", amount)
+        central_role.increase_stock("cash_advances", amount)
+
 
 class GoodsMarket(EcoSpace):
 

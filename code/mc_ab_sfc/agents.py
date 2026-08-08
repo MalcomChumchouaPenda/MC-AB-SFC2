@@ -363,9 +363,10 @@ class BankAgent(EcoAgent):
 
     def setup(self, **kwargs):
         # stocks
-        self.cash = 0
         self.loans = 0
         self.deposits = 0
+        self.cash_advances = 0
+        self.reserves = 0
         self.equity = 0
 
         # flows
@@ -418,6 +419,13 @@ class BankAgent(EcoAgent):
         leverage = borrower.target_leverage
         return self.p.chi * leverage + discount_rate
 
+    def request_cash_advances(self):
+        required = self.p.mu2 * self.deposits
+        shortage = max(required - self.reserves, 0)
+        if shortage > 0:
+            role = self.roles["commercial_bank"]
+            role.request_cash_advances(shortage)
+
 
 class GovernmentAgent(EcoAgent):
     pass
@@ -426,4 +434,9 @@ class GovernmentAgent(EcoAgent):
 class CentralBankAgent(EcoAgent):
 
     def setup(self, **kwargs):
+        # stocks
+        self.reserves = 0
+        self.cash_advances = 0
+
+        # prices
         self.discount_rate = 0

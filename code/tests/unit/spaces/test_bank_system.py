@@ -79,3 +79,20 @@ def test_assign_central_bank_by_adding_graph_edge(bank_system):
     assert source is central_role
     assert target is bank_role
     assert bank_role.central_bank is central_role
+
+
+def test_request_cash_advances(bank_system):
+    # Given
+    bank_role = Mock()
+    central_role = Mock()
+    graph = bank_system.graph
+    graph.add_nodes_from([bank_role, central_role])
+
+    # When
+    bank_system.request_cash_advances(bank_role, central_role, 500)
+
+    # Then
+    bank_role.increase_stock.assert_any_call("reserves", 500)
+    bank_role.increase_stock.assert_any_call("cash_advances", 500)
+    central_role.increase_stock.assert_any_call("reserves", 500)
+    central_role.increase_stock.assert_any_call("cash_advances", 500)

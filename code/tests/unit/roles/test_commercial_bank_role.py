@@ -16,16 +16,16 @@ def test_is_ecorole():
 
 
 @pytest.fixture
-def role():
+def bank_role():
     # Given
     space = Mock()
     agent = Mock(id=1)
     return CommercialBankRole(agent, space)
 
 
-def test_has_default_central_bank(role):
+def test_has_default_central_bank(bank_role):
     # Assert
-    assert role.central_bank is None
+    assert bank_role.central_bank is None
 
 
 # ---------------------------------------------------
@@ -33,13 +33,26 @@ def test_has_default_central_bank(role):
 # ----------------------------------------------------
 
 
-def test_get_discount_rate(role):
+def test_get_discount_rate(bank_role):
     # Given
     central_bank = Mock(discount_rate=0.05)
-    role.central_bank = central_bank
+    bank_role.central_bank = central_bank
 
     # When
-    result = role.get_discount_rate()
+    result = bank_role.get_discount_rate()
 
     # Then
     assert result == 0.05
+
+
+def test_request_cash_advances(bank_role):
+    # Given
+    central_bank = Mock()
+    bank_role.central_bank = central_bank
+    bank_system = bank_role.space
+
+    # When
+    bank_role.request_cash_advances(100)
+
+    # Then
+    bank_system.request_cash_advances(bank_role, central_bank, 100)

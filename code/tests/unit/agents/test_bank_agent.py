@@ -25,10 +25,11 @@ def bank():
 
 def test_has_default_stocks(bank):
     # Assert
-    assert bank.cash == 0
     assert bank.loans == 0
     assert bank.deposits == 0
     assert bank.equity == 0
+    assert bank.reserves == 0
+    assert bank.cash_advances == 0
 
 
 def test_has_default_flows(bank):
@@ -200,3 +201,40 @@ def test_grant_loans_cleans_loan_applicants_list(bank_as_lender):
 
     # Then
     assert len(lender.loan_applicants) == 0
+
+
+@pytest.fixture
+def bank_in_banksystem():
+    model = Mock()
+    model.p.mu2 = 0.1
+    bank = BankAgent(model)
+    bank.roles["commercial_bank"] = Mock()
+    return bank
+
+
+def test_doesnot_request_cash_advance_when_sufficient_reserves(bank_in_banksystem):
+    # Given
+    bank = bank_in_banksystem
+    bank.deposits = 1000
+    bank.reserves = 200
+
+    # When
+    bank.request_cash_advances()
+
+    # Then
+    bank_role = bank.roles["commercial_bank"]
+    bank_role.request_cash_advances.assert_not_called()
+
+
+def test_request_cash_advance_when_insufficient_reserves(bank_in_banksystem):
+    # Given
+    bank = bank_in_banksystem
+    bank.deposits = 1000
+    bank.reserves = 50
+
+    # When
+    bank.request_cash_advances()
+
+    # Then
+    bank_role = bank.roles["commercial_bank"]
+    bank_role.request_cash_advances.assert_called_with(50)
