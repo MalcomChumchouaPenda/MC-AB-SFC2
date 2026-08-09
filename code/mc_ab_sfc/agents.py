@@ -447,6 +447,28 @@ class BankAgent(EcoAgent):
     def calc_bond_purchases_probability(self, issuer):
         return math.exp(-self.p.iota_b * issuer.bonds / issuer.gdp)
 
+    def calc_profit(self):
+        return (
+            self.loan_interest
+            + self.bond_interest
+            + self.reserve_interest
+            - self.bad_debt
+            - self.deposit_interest
+            - self.cash_advance_interest
+        )
+
+    def calc_profit_tax(self):
+        if self.profit <= 0:
+            return 0
+        role = self.roles["tax_payer"]
+        rate = role.get_tax_rate()
+        return rate * self.profit
+
+    def calc_dividends(self):
+        if self.profit <= 0:
+            return 0
+        return self.p.rho * (self.profit - self.tax)
+
 
 class GovernmentAgent(EcoAgent):
 

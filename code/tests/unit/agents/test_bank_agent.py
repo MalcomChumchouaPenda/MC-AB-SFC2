@@ -325,3 +325,51 @@ def test_buy_bonds_with_excess_reserves(bank_as_bondbuyer, bond_issuers):
 
     # Then
     buyer.buy_bonds.assert_called_once_with(bond_issuers[0], 50)
+
+
+def test_calc_profit():
+    # Given
+    bank = BankAgent(model=Mock())
+    bank.loan_interest = 100
+    bank.bond_interest = 30
+    bank.reserve_interest = 10
+    bank.bad_debt = 20
+    bank.deposit_interest = 40
+    bank.cash_advance_interest = 10
+
+    # When
+    profit = bank.calc_profit()
+
+    # Then
+    assert profit == 70
+
+
+@pytest.mark.parametrize("profit, expected", [(100, 20), (0, 0), (-50, 0)])
+def test_calc_profit_tax(profit, expected):
+    # Given
+    role = Mock()
+    role.get_tax_rate.return_value = 0.20
+    bank = BankAgent(model=Mock())
+    bank.roles["tax_payer"] = role
+    bank.profit = profit
+
+    # When
+    tax = bank.calc_profit_tax()
+
+    # Then
+    assert tax == expected
+
+
+def test_calc_dividends():
+    # Given
+    model = Mock()
+    model.p.rho = 0.5
+    bank = BankAgent(model)
+    bank.profit = 100
+    bank.tax = 20
+
+    # When
+    dividends = bank.calc_dividends()
+
+    # Then
+    assert dividends == 40
