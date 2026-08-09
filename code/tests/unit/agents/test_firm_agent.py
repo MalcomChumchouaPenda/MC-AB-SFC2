@@ -40,6 +40,7 @@ def test_has_default_flows(firm):
     assert firm.loan_interest == 0
     assert firm.deposit_interest == 0
     assert firm.rd == 0
+    assert firm.taxes == 0
     assert firm.dividends == 0
 
 
@@ -747,7 +748,7 @@ def test_pay_taxes(firm_as_taxpayer):
     firm.pay_taxes()
 
     # Then
-    tax_payer.pay_tax.assert_called_once_with(100)
+    tax_payer.pay_taxes.assert_called_once_with(100)
     assert firm.taxes_payable == 0
 
 

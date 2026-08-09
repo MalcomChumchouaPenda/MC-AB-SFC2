@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import Mock
-from mc_ab_sfc.agents import HouseholdAgent, FirmAgent
+from mc_ab_sfc.agents import HouseholdAgent, FirmAgent, GovernmentAgent
 from mc_ab_sfc.spaces import CountrySpace, EquitySpace
 
 
@@ -24,6 +24,14 @@ def country(model):
 def equity_space(model):
     # Given
     return EquitySpace(model)
+
+
+@pytest.fixture
+def govt(model, country):
+    # Given
+    govt = GovernmentAgent(model)
+    country.add_government(govt)
+    return govt
 
 
 @pytest.fixture
@@ -85,22 +93,22 @@ def test_firm_pay_dividends(firm, household, equity_space):
     assert household.dividends == 200
 
 
-# def test_firm_pay_taxes(firm, household, equity_space):
-#     # Given
-#     issuer = firm.roles['equity_issuer']
-#     holder = household.roles['equity_holder']
-#     graph = equity_space.graph
-#     graph.add_edge(issuer, holder, share=1.0)
+def test_firm_pay_taxes(firm, govt, country):
+    # Given
+    govt_role = govt.roles['government']
+    payer = firm.roles['tax_payer']
+    payer.government = govt_role
+    graph = country.graph
+    graph.add_edge(payer, govt_role)
 
-#     # When
-#     firm.calc_taxes()
-#     firm.calc_dividends()
-#     firm.update_net_worth()
-#     firm.pay_taxes()
-#     firm.pay_dividends()
+    # When
+    firm.calc_taxes()
+    firm.calc_dividends()
+    firm.pay_taxes()
 
-#     assert firm.taxes_payable == 0
-#     assert firm.dividends_payable == 0
-#     assert firm.net_worth == 1200
-#     taxpayer.pay_tax.assert_called_once_with(100)
-#     equity_issuer.distribute_dividends.assert_called_once_with(200)
+    # Then
+    assert firm.taxes_payable == 0
+    assert firm.taxes == 100
+    assert firm.cash == 400
+    assert govt.taxes == 100
+    assert govt.reserves == 100

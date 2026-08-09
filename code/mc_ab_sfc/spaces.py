@@ -4,6 +4,7 @@ from .roles import (
     EmployerRole,
     WorkerRole,
     CitizenRole,
+    GovernmentRole,
     TaxPayerRole,
     ConsumerRole,
     ProducerRole,
@@ -40,6 +41,20 @@ class CountrySpace(EcoSpace):
 
     def add_tax_payer(self, agent):
         return self.add_role(TaxPayerRole, agent, "tax_payer")
+
+    def add_government(self, agent):
+        return self.add_role(GovernmentRole, agent, "government")
+
+
+    def assign_government(self, tax_payer, govt_role):
+        tax_payer.government = govt_role
+        self.graph.add_edge(govt_role, tax_payer)
+
+    def pay_taxes(self, tax_payer, govt_role, amount):
+        govt_role.increase_stock("reserves", amount)
+        govt_role.increase_flow("taxes", amount)
+        tax_payer.decrease_stock("cash", amount)
+        tax_payer.increase_flow("taxes", amount)
 
 
 class BankSystem(EcoSpace):

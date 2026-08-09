@@ -78,7 +78,7 @@ def test_assign_deposit_bank_add_edge(market):
     assert deposit_holder.deposit_bank is deposit_bank
 
 
-def test_deposit_market_pays_interest_to_all_clients(market):
+def test_pays_interest_to_all_clients(market):
     # Given
     bank = Mock(deposit_rate=0.04)
     graph = market.graph

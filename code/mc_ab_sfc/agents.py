@@ -161,6 +161,7 @@ class FirmAgent(EcoAgent):
         self.loan_interest = 0
         self.deposit_interest = 0
         self.rd = 0
+        self.taxes = 0
         self.dividends = 0
 
         # indicators
@@ -341,7 +342,7 @@ class FirmAgent(EcoAgent):
 
     def pay_taxes(self):
         tax_payer = self.roles["tax_payer"]
-        tax_payer.pay_tax(self.taxes_payable)
+        tax_payer.pay_taxes(self.taxes_payable)
         self.taxes_payable = 0
 
     def pay_dividends(self):
@@ -476,6 +477,9 @@ class GovernmentAgent(EcoAgent):
         # stocks
         self.reserves = 0
         self.bonds = 0
+
+        # flows
+        self.taxes = 0
 
         # memory
         self.gdp = 0

@@ -16,18 +16,24 @@ def test_is_eco_agent():
 
 
 @pytest.fixture
-def government():
+def govt():
     # Given
     model = Mock()
     return GovernmentAgent(model)
 
 
-def test_has_default_stocks(government):
+def test_has_default_stocks(govt):
     # Assert
-    assert government.reserves == 0
-    assert government.bonds == 0
+    assert govt.reserves == 0
+    assert govt.bonds == 0
 
 
-def test_has_default_memory(government):
+def test_has_default_flows(govt):
     # Assert
-    assert government.gdp == 0
+    assert govt.taxes == 0
+
+
+def test_has_default_memory(govt):
+    # Assert
+    assert govt.gdp == 0
+
