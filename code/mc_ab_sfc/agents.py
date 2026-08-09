@@ -143,7 +143,7 @@ class HouseholdAgent(EcoAgent):
 
 class FirmAgent(EcoAgent):
 
-    def setup(self, **kwargs):
+    def setup(self):
         # prices
         self.price = 0.0
         self.wage_offer = 0
@@ -361,7 +361,7 @@ class FirmAgent(EcoAgent):
 
 class BankAgent(EcoAgent):
 
-    def setup(self, **kwargs):
+    def setup(self):
         # stocks
         self.loans = 0
         self.deposits = 0
@@ -449,12 +449,19 @@ class BankAgent(EcoAgent):
 
 
 class GovernmentAgent(EcoAgent):
-    pass
+
+    def setup(self):
+        # stocks
+        self.reserves = 0
+        self.bonds = 0
+
+        # memory
+        self.gdp = 0
 
 
 class CentralBankAgent(EcoAgent):
 
-    def setup(self, **kwargs):
+    def setup(self):
         # stocks
         self.reserves = 0
         self.cash_advances = 0
