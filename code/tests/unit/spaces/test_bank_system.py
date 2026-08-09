@@ -62,7 +62,7 @@ def test_add_central_bank_creates_central_bank_role(bank_system, monkeypatch):
     assert central_bank is action.return_value
 
 
-def test_assign_central_bank_by_adding_graph_edge(bank_system):
+def test_assign_central_bank_add_edge(bank_system):
     # Given
     bank_role = Mock()
     central_role = Mock()
@@ -73,11 +73,8 @@ def test_assign_central_bank_by_adding_graph_edge(bank_system):
     bank_system.assign_central_bank(bank_role, central_role)
 
     # Then
-    edges = list(graph.edges)
-    source, target = edges[0]
-    assert len(edges) == 1
-    assert source is central_role
-    assert target is bank_role
+    assert len(graph.edges) == 1
+    assert graph.has_edge(central_role, bank_role)
     assert bank_role.central_bank is central_role
 
 

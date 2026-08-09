@@ -10,6 +10,8 @@ def model():
     model = Mock()
     model.p.psi = 2
     model.p.beta = 1
+    random = model.random
+    random.sample = Mock(side_effect=lambda pop, k: pop[:k])
     return model
 
 
@@ -91,8 +93,6 @@ def markets(model):
         market = GoodsMarket(model, tradable=tradable)
         market.average_price = 10
         markets.append(market)
-        random = market.model.random
-        random.sample = Mock(side_effect=lambda pop, k: pop[:k])
     return markets
 
 

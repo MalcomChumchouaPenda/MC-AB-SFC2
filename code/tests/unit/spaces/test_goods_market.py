@@ -52,6 +52,8 @@ def test_has_default_statistics(market):
 def market():
     # Given
     model = Mock()
+    random = model.random
+    random.sample = Mock(side_effect=lambda pop, k: pop[:k])
     market = GoodsMarket(model)
     return market
 
@@ -112,9 +114,6 @@ def test_search_suppliers_returns_psi_producers(market, monkeypatch):
     producers = [FakeRole() for _ in range(5)]
     market.graph.add_nodes_from(others + producers)
     monkeypatch.setattr("mc_ab_sfc.spaces.ProducerRole", FakeRole)
-
-    random = market.model.random
-    random.sample = Mock(side_effect=lambda pop, k: pop[:k])
 
     # When
     sample = market.search_suppliers(psi=3)

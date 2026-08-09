@@ -12,6 +12,8 @@ def model():
     model.p.iota_l = 1
     model.p.chi = 0.05
     model.p.mu1 = 0.05
+    random = model.nprandom
+    random.choice.return_value = 1
     return model
 
 
@@ -83,7 +85,7 @@ def test_bank_evaluates_credit_request(firm, bank):
     assert rate == pytest.approx(0.15)
 
 
-def test_bank_grant_loans(firm, bank, credit_market):
+def test_bank_grant_loans(firm, bank):
     # Given
     firm.equity = 500
     firm.loans = 0
@@ -92,8 +94,6 @@ def test_bank_grant_loans(firm, bank, credit_market):
     bank.equity = 7500
     bank.loans = 0
     bank.deposits = 1000
-    random = bank.model.nprandom
-    random.choice.return_value = 1
 
     # When
     firm.request_loan()

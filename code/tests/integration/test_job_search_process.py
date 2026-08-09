@@ -9,6 +9,8 @@ def model():
     # Given
     model = Mock()
     model.p.psi = 2
+    random = model.random
+    random.sample = Mock(side_effect=lambda pop, k: pop[:k])
     return model
 
 
@@ -20,10 +22,10 @@ def market(model):
 
 
 @pytest.fixture
-def household(model):
+def household(model, market):
     # Given
     household = HouseholdAgent(model)
-    household.reservation_wage = 10
+    market.add_worker(household)
     return household
 
 
@@ -44,26 +46,22 @@ def employers(model, market):
 
 def test_household_search_jobs_on_labor_market(household, employers, market):
     # Given
-    market.add_worker(household)
-    random = market.model.random
-    random.sample = Mock(side_effect=lambda pop, k: pop[:k])
+    graph = market.graph
+    worker = household.roles["worker"]
+    household.reservation_wage = 10
 
     # When
     household.search_jobs()
 
     # Then
-    edges = list(market.graph.edges)
-    assert len(edges) == 2
-    for source, target in edges:
-        assert target in employers
-        assert source is household.roles["worker"]
+    assert len(graph.edges) == 2
+    for employer in employers[:2]:
+        assert graph.has_edge(worker, employer)
 
 
 def test_household_sells_total_labor_supply(household, employers, market):
     # Given
-    market.add_worker(household)
-    random = market.model.random
-    random.sample = Mock(side_effect=lambda pop, k: pop[:k])
+    household.reservation_wage = 10
 
     # When
     household.search_jobs()

@@ -89,12 +89,9 @@ def test_buy_bonds_creates_edge(market):
     market.buy_bonds(buyer, issuer, 500)
 
     # Then
-    edges = list(graph.edges(data=True))
-    source, target, data = edges[0]
-    assert len(edges) == 1
-    assert source is issuer
-    assert target is buyer
-    assert data["amount"] == 500
+    assert len(graph.edges) == 1
+    assert graph.has_edge(issuer, buyer)
+    assert graph[issuer][buyer]["amount"] == 500
 
 
 def test_buy_bonds_reduces_bond_supply(market):

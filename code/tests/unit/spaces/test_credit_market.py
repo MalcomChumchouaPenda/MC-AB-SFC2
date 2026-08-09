@@ -89,13 +89,10 @@ def test_grant_loan_creates_credit_edge(market):
     market.grant_loan(lender, borrower, 500, 0.05)
 
     # Then
-    edges = list(graph.edges(data=True))
-    source, target, data = edges[0]
-    assert len(edges) == 1
-    assert source is borrower
-    assert target is lender
-    assert data["amount"] == 500
-    assert data["rate"] == 0.05
+    assert len(graph.edges) == 1
+    assert graph.has_edge(borrower, lender)
+    assert graph[borrower][lender]["amount"] == 500
+    assert graph[borrower][lender]["rate"] == 0.05
 
 
 def test_grant_loan_reduces_loan_demand(market):

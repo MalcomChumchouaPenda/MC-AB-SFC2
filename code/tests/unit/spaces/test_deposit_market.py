@@ -62,21 +62,19 @@ def test_add_deposit_bank_creates_deposit_bank(market, monkeypatch):
     assert deposit_bank is action.return_value
 
 
-def test_assign_deposit_bank_by_adding_graph_edge(market):
+def test_assign_deposit_bank_add_edge(market):
     # Given
     deposit_holder = Mock()
     deposit_bank = Mock()
-    market.graph.add_nodes_from([deposit_holder, deposit_bank])
+    graph = market.graph
+    graph.add_nodes_from([deposit_holder, deposit_bank])
 
     # When
     market.assign_deposit_bank(deposit_holder, deposit_bank)
 
     # Then
-    edges = list(market.graph.edges)
-    source, target = edges[0]
-    assert len(edges) == 1
-    assert source is deposit_bank
-    assert target is deposit_holder
+    assert len(graph.edges) == 1
+    assert graph.has_edge(deposit_bank, deposit_holder)
     assert deposit_holder.deposit_bank is deposit_bank
 
 

@@ -24,6 +24,8 @@ def test_is_eco_space():
 def market():
     # Given
     model = Mock()
+    random = model.random
+    random.sample = Mock(side_effect=lambda pop, k: pop[:k])
     market = LaborMarket(model)
     return market
 
@@ -67,9 +69,6 @@ def test_search_employers_returns_psi_employers(market, monkeypatch):
     market.graph.add_nodes_from(employers + others)
     monkeypatch.setattr("mc_ab_sfc.spaces.EmployerRole", FakeRole)
 
-    random = market.model.random
-    random.sample = Mock(side_effect=lambda pop, k: pop[:k])
-
     # When
     sample = market.search_employers(psi=3)
 
@@ -91,29 +90,32 @@ def test_get_labor_sold_by_worker(market):
     assert labor_sold == 0.4
 
 
-def test_create_job_by_adding_graph_edge(market):
+@pytest.fixture
+def employer_with_demand():
+    return Mock(wage_offer=20, labor_demand=10)
+
+
+def test_create_job_add_edge(market, employer_with_demand):
     # Given
+    employer = employer_with_demand
     worker = Mock()
-    employer = Mock(wage_offer=20, labor_demand=10)
-    market.graph.add_nodes_from([employer, worker])
+    graph = market.graph
+    graph.add_nodes_from([employer, worker])
 
     # When
     market.create_job(worker, employer, 0.9)
 
     # Then
-    edges = list(market.graph.edges(data=True))
-    source, target, data = edges[0]
-    assert len(edges) == 1
-    assert source is worker
-    assert target is employer
-    assert data["wage"] == 20
-    assert data["quantity"] == 0.9
+    assert len(graph.edges) == 1
+    assert graph.has_edge(worker, employer)
+    assert graph[worker][employer]["wage"] == 20
+    assert graph[worker][employer]["quantity"] == 0.9
 
 
-def test_create_job_reduces_labor_demand(market):
+def test_create_job_reduces_labor_demand(market, employer_with_demand):
     # Given
     worker = Mock()
-    employer = Mock(wage_offer=20, labor_demand=10)
+    employer = employer_with_demand
     market.graph.add_nodes_from([employer, worker])
 
     # When
