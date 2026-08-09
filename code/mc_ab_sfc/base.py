@@ -70,7 +70,7 @@ class EcoSpace(ap.Network):
     """
 
     def __init__(self, model, **kwargs):
-        super().__init__(model, graph=DiGraph(), **kwargs)
+        super().__init__(model, **kwargs)
         self.roles = {}
 
     def add_role(self, kind, agent, key):

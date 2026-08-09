@@ -1,7 +1,7 @@
 import pytest
 from dataclasses import dataclass
 from unittest.mock import Mock
-from networkx import DiGraph
+from networkx import DiGraph, Graph
 import agentpy as ap
 from mc_ab_sfc.base import EcoSpace
 
@@ -24,13 +24,14 @@ def test_contains_roles_collection():
     assert isinstance(space.roles, dict)
 
 
-def test_has_directed_graph():
+def test_has_undirected_graph():
     # Given
     model = Mock()
     space = EcoSpace(model)
 
     # Assert
-    assert isinstance(space.graph, DiGraph)
+    assert not isinstance(space.graph, DiGraph)
+    assert isinstance(space.graph, Graph)
 
 
 # ---------------------------------------------------
