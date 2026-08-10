@@ -536,6 +536,7 @@ class CentralBankAgent(EcoAgent):
         role = self.roles["central_bank"]
         average_inflation = role.get_average_inflation()
         inflation_gap = average_inflation - p.inflation_target
+        print(p.long_run_rate, self.discount_rate, inflation_gap)
         self.discount_rate = (
             (1 - p.xi) * p.long_run_rate
             + p.xi * self.discount_rate

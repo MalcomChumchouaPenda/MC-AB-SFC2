@@ -26,6 +26,7 @@ class MonetaryUnionSpace(EcoSpace):
         super().__init__(model, **kwargs)
         central_role = self.add_role(CentralBankRole, central_bank, "central_bank")
         self.central_bank_role = central_role
+        self.average_inflation = 0
         self.countries = {}
         self.markets = {}
 
