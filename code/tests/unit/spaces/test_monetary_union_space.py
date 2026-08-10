@@ -64,7 +64,7 @@ def test_contains_international_markets(union):
 def test_has_default_average_inflation(union):
     # Assert
     assert union.average_inflation == 0.0
-    
+
 
 # ---------------------------------------------------
 # BEHAVIORAL TESTS

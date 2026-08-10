@@ -277,7 +277,7 @@ def bond_buyer(bond_issuers):
 
 
 @pytest.fixture
-def bank_as_bondbuyer(bond_buyer):
+def bank_as_bond_buyer(bond_buyer):
     model = Mock()
     model.p.mu2 = 0.1
     bank = BankAgent(model)
@@ -287,9 +287,9 @@ def bank_as_bondbuyer(bond_buyer):
     return bank
 
 
-def test_buy_bonds_and_shuffles_all_bonds(bank_as_bondbuyer, bond_issuers):
+def test_buy_bonds_and_shuffles_all_bonds(bank_as_bond_buyer, bond_issuers):
     # Given
-    bank = bank_as_bondbuyer
+    bank = bank_as_bond_buyer
     bank.reserves = 300
     bank.deposits = 1000
     random = bank.model.random
@@ -301,9 +301,9 @@ def test_buy_bonds_and_shuffles_all_bonds(bank_as_bondbuyer, bond_issuers):
     random.shuffle.assert_called_with(bond_issuers)
 
 
-def test_buy_bonds_with_purchases_probability(bank_as_bondbuyer, bond_issuers):
+def test_buy_bonds_with_purchases_probability(bank_as_bond_buyer, bond_issuers):
     # Given
-    bank = bank_as_bondbuyer
+    bank = bank_as_bond_buyer
     bank.reserves = 300
     bank.deposits = 1000
     calc_prob = bank.calc_bond_purchases_probability
@@ -320,9 +320,9 @@ def test_buy_bonds_with_purchases_probability(bank_as_bondbuyer, bond_issuers):
         calc_prob.assert_any_call(bond_issuer)
 
 
-def test_buy_bonds_with_excess_reserves(bank_as_bondbuyer, bond_issuers):
+def test_buy_bonds_with_excess_reserves(bank_as_bond_buyer, bond_issuers):
     # Given
-    bank = bank_as_bondbuyer
+    bank = bank_as_bond_buyer
     bank.reserves = 150
     bank.deposits = 1000
     buyer = bank.roles["bond_buyer"]

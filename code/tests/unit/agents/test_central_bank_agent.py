@@ -54,3 +54,34 @@ def test_update_discount_rate(central_bank):
 
     # Then
     assert central_bank.discount_rate == pytest.approx(0.04)
+
+
+@pytest.fixture
+def bond_issuers():
+    # Given
+    return [
+        Mock(bond_supply=100),
+        Mock(bond_supply=100),
+    ]
+
+
+@pytest.fixture
+def bond_buyer(bond_issuers):
+    # Given
+    buyer_role = Mock()
+    buyer_role.get_bond_issuers.return_value = bond_issuers
+    return buyer_role
+
+
+def test_buy_all_remaining_bonds(bond_buyer, bond_issuers):
+    # Given
+    central_bank = CentralBankAgent(model=Mock())
+    central_bank.roles["bond_buyer"] = bond_buyer
+    bond_buyer = central_bank.roles["bond_buyer"]
+
+    # When
+    central_bank.buy_remaining_bonds()
+
+    # Then
+    for bond_issuer in bond_issuers:
+        bond_buyer.buy_bonds.assert_any_call(bond_issuer, 100)

@@ -542,3 +542,12 @@ class CentralBankAgent(EcoAgent):
             + p.xi * self.discount_rate
             + (1 - p.xi) * p.xi_deltap * inflation_gap
         )
+
+    def buy_remaining_bonds(self):
+        role = self.roles["bond_buyer"]
+        bond_issuers = role.get_bond_issuers()
+        for issuer in bond_issuers:
+            purchase = issuer.bond_supply
+            role.buy_bonds(issuer, purchase)
+
+            

@@ -20,6 +20,7 @@ def central_bank(model):
     central_bank.discount_rate = 0.03
     return central_bank
 
+
 @pytest.fixture
 def union(model, central_bank):
     union = MonetaryUnionSpace(model, central_bank)
@@ -27,11 +28,10 @@ def union(model, central_bank):
     return union
 
 
-@pytest.mark.usefixtures('union')
+@pytest.mark.usefixtures("union")
 def test_central_bank_updates_discount_rate(central_bank):
     # When
     central_bank.update_discount_rate()
 
     # Then
     assert central_bank.discount_rate == pytest.approx(0.04)
-
