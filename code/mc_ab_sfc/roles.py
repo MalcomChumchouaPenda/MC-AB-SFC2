@@ -183,6 +183,9 @@ class CentralBankRole(EcoRole):
     def discount_rate(self):
         return self.agent.discount_rate
 
+    def get_average_inflation(self):
+        return self.space.average_inflation
+
 
 class CommercialBankRole(EcoRole):
 

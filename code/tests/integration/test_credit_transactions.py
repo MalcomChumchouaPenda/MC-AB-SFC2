@@ -35,9 +35,8 @@ def bank(model):
 @pytest.fixture
 def firm(model):
     # Given
-    firm = FirmAgent(model)  
+    firm = FirmAgent(model)
     return firm
-
 
 
 @pytest.fixture

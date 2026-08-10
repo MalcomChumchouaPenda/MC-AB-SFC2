@@ -31,3 +31,26 @@ def test_has_default_stocks(central_bank):
     # Assert
     assert central_bank.reserves == 0
     assert central_bank.cash_advances == 0
+
+
+# ---------------------------------------------------
+# BEHAVIORS TESTS
+# ----------------------------------------------------
+
+
+def test_update_discount_rate(central_bank):
+    # Given
+    central_role = Mock()
+    central_role.get_average_inflation.return_value = 0.04
+    central_bank.roles["central_bank"] = central_role
+    central_bank.discount_rate = 0.03
+    central_bank.p.long_run_rate = 0.02
+    central_bank.p.xi = 0.5
+    central_bank.p.xi_deltap = 1.5
+    central_bank.p.inflation_target = 0.02
+
+    # When
+    central_bank.update_discount_rate()
+
+    # Then
+    assert central_bank.discount_rate == pytest.approx(0.04)

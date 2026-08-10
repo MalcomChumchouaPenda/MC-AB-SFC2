@@ -41,6 +41,8 @@ def test_has_default_statistics(market):
     # Assert
     assert market.average_price == 0
     assert market.average_productivity == 0
+    assert market.inflation == 0
+    assert market.gdp == 0
 
 
 # ---------------------------------------------------
@@ -163,7 +165,7 @@ def test_buy_goods_updates_non_tradable_flows(market):
 
 
 @pytest.fixture
-def market_with_stats():
+def market_for_stats_computation():
     # Given
     model = Mock()
     market = GoodsMarket(model)
@@ -172,19 +174,108 @@ def market_with_stats():
     return market
 
 
-def test_update_production_statistics(market_with_stats, monkeypatch):
+def test_calc_average_price(market_for_stats_computation):
     # Given
-    market = market_with_stats
-    for _ in range(5):
-        producer = FakeRole()
-        producer.price = 5
-        producer.productivity = 10
-        market.graph.add_node(producer)
+    market = market_for_stats_computation
+    producers = [Mock(price=5) for _ in range(5)]
+
+    # When
+    average_price = market.calc_average_price(producers)
+
+    # Then
+    assert average_price == pytest.approx(5.0)
+
+
+def test_calc_average_productivity(market_for_stats_computation):
+    # Given
+    market = market_for_stats_computation
+    producers = [Mock(productivity=10) for _ in range(5)]
+
+    # When
+    average_prod = market.calc_average_productivity(producers)
+
+    # Then
+    assert average_prod == pytest.approx(10.0)
+
+
+def test_calc_inflation(market_for_stats_computation):
+    # Given
+    producers = [Mock(price=12) for _ in range(5)]
+    market = market_for_stats_computation
+    market.average_price = 10
+
+    # When
+    inflation = market.calc_inflation(producers)
+
+    # Then
+    assert inflation == pytest.approx(0.2)
+
+
+def test_calc_gdp(market_for_stats_computation):
+    # Given
+    producers = [Mock(sales=100) for _ in range(5)]
+    market = market_for_stats_computation
+
+    # When
+    gdp = market.calc_gdp(producers)
+
+    # Then
+    assert gdp == pytest.approx(500)
+
+
+@pytest.fixture
+def market_for_stats_updates(monkeypatch):
+    # Given
+    model = Mock()
+    market = GoodsMarket(model)
+    market.calc_gdp = Mock()
+    market.calc_inflation = Mock()
+    market.calc_average_price = Mock()
+    market.calc_average_productivity = Mock()
     monkeypatch.setattr("mc_ab_sfc.spaces.ProducerRole", FakeRole)
+    return market
+
+
+def test_update_statistics_with_producers(market_for_stats_updates):
+    # Given
+    producers = [FakeRole() for _ in range(5)]
+    others = [Mock() for _ in range(3)]
+    market = market_for_stats_updates
+    market.graph.add_nodes_from(producers + others)
 
     # When
     market.update_statistics()
 
     # Then
-    assert market.average_price == pytest.approx(5.0)
-    assert market.average_productivity == pytest.approx(10.0)
+    market.calc_gdp.assert_called_with(producers)
+    market.calc_inflation.assert_called_with(producers)
+    market.calc_average_price.assert_called_with(producers)
+    market.calc_average_productivity.assert_called_with(producers)
+
+
+def test_update_statistics_with_prices(market_for_stats_updates):
+    # Given
+    market = market_for_stats_updates
+    market.calc_average_price.return_value = 15.0
+    market.calc_inflation.return_value = 0.05
+
+    # When
+    market.update_statistics()
+
+    # Then
+    assert market.average_price == pytest.approx(15.0)
+    assert market.inflation == pytest.approx(0.05)
+
+
+def test_update_statistics_with_production(market_for_stats_updates):
+    # Given
+    market = market_for_stats_updates
+    market.calc_average_productivity.return_value = 2.0
+    market.calc_gdp.return_value = 150
+
+    # When
+    market.update_statistics()
+
+    # Then
+    assert market.average_productivity == pytest.approx(2.0)
+    assert market.gdp == pytest.approx(150)

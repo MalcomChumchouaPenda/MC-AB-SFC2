@@ -56,6 +56,14 @@ def test_contains_local_markets(country):
     assert isinstance(country.markets, dict)
 
 
+def test_exposes_inflation(country):
+    # Given
+    country.markets["goods"] = Mock(inflation=0.03)
+
+    # Assert
+    assert country.inflation == 0.03
+
+
 # ---------------------------------------------------
 # BEHAVIORAL TESTS
 # ----------------------------------------------------
@@ -247,3 +255,15 @@ def test_update_equity_holdings(country, issuer, holders):
     holders[0].increase_stock.assert_called_once_with("equity", 720)
     holders[1].clear_stock.assert_called_once_with("equity")
     holders[1].increase_stock.assert_called_once_with("equity", 480)
+
+
+def test_update_statistics_with_goods_market_stats_updates(country):
+    # Given
+    goods_market = Mock()
+    country.markets["goods"] = goods_market
+
+    # When
+    country.update_statistics()
+
+    # Then
+    goods_market.update_statistics.assert_called_once()

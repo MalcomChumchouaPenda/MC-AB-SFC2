@@ -42,6 +42,17 @@ class MonetaryUnionSpace(EcoSpace):
         bank_role.increase_stock("reserves", amount)
         bank_role.increase_stock("cash_advances", amount)
 
+    def calc_average_inflation(self):
+        countries = self.countries
+        countries_gdps = [c.gdp for c in countries.values()]
+        weighted_inflations = [c.gdp * c.inflation for c in countries.values()]
+        return sum(weighted_inflations) / sum(countries_gdps)
+
+    def update_statistics(self):
+        for country in self.countries.values():
+            country.update_statistics()
+        self.average_inflation = self.calc_average_inflation()
+
 
 class CountrySpace(EcoSpace):
 
@@ -53,6 +64,10 @@ class CountrySpace(EcoSpace):
 
     def setup(self):
         self.tax_rate = 0
+
+    @property
+    def inflation(self):
+        return self.markets["goods"].inflation
 
     def add_tax_payer(self, agent):
         govt_role = self.government_role
@@ -99,12 +114,17 @@ class CountrySpace(EcoSpace):
             holder.clear_stock("equity")
             holder.increase_stock("equity", value)
 
+    def update_statistics(self):
+        self.markets["goods"].update_statistics()
+
 
 class GoodsMarket(EcoSpace):
 
     def __init__(self, model, tradable=True, **kwargs):
         super().__init__(model, **kwargs)
         self.tradable = tradable
+        self.gdp = 0
+        self.inflation = 0.0
         self.average_price = 0
         self.average_productivity = 0
 
@@ -133,14 +153,26 @@ class GoodsMarket(EcoSpace):
     def update_statistics(self):
         nodes = self.graph.nodes  # roles
         producers = [n for n in nodes if isinstance(n, ProducerRole)]
-        self.average_price = self._calc_average_price(producers)
-        self.average_productivity = self._calc_average_productivity(producers)
+        self.gdp = self.calc_gdp(producers)
+        self.inflation = self.calc_inflation(producers)
+        self.average_price = self.calc_average_price(producers)
+        self.average_productivity = self.calc_average_productivity(producers)
 
-    def _calc_average_price(self, producers):
+    def calc_inflation(self, producers):
+        prev_price = self.average_price
+        current_price = self.calc_average_price(producers)
+        if prev_price <= 0:
+            return 0
+        return (current_price - prev_price) / prev_price
+
+    def calc_average_price(self, producers):
         return sum(prod.price for prod in producers) / max(1, len(producers))
 
-    def _calc_average_productivity(self, producers):
+    def calc_average_productivity(self, producers):
         return sum(prod.productivity for prod in producers) / max(1, len(producers))
+
+    def calc_gdp(self, producers):
+        return sum(prod.sales for prod in producers)
 
 
 class LaborMarket(EcoSpace):

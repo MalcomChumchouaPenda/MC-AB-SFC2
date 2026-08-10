@@ -112,3 +112,28 @@ def test_request_cash_advances(union):
     bank_role.increase_stock.assert_any_call("cash_advances", 500)
     central_role.increase_stock.assert_any_call("reserves", 500)
     central_role.increase_stock.assert_any_call("cash_advances", 500)
+
+
+def test_calc_average_inflation(union):
+    # Given
+    union.countries = {i: Mock(inflation=0.05, gdp=100) for i in range(5)}
+
+    # When
+    average_inflation = union.calc_average_inflation()
+
+    # Then
+    assert average_inflation == pytest.approx(0.05)
+
+
+def test_update_statistics_with_country_stats_updates(union, monkeypatch):
+    # Given
+    union.countries = {i: Mock() for i in range(5)}
+    monkeypatch.setattr(union, "calc_average_inflation", Mock(return_value=0.05))
+
+    # When
+    union.update_statistics()
+
+    # Then
+    assert union.average_inflation == pytest.approx(0.05)
+    for country in union.countries.values():
+        country.update_statistics.assert_called_once()

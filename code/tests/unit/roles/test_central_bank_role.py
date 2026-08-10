@@ -35,3 +35,15 @@ def test_exposes_discount_rate(role):
 # ---------------------------------------------------
 # BEHAVIORAL TESTS
 # ----------------------------------------------------
+
+
+def test_get_average_inflation(role):
+    # Given
+    union = role.space
+    union.average_inflation = 0.05
+
+    # When
+    average_inflation = role.get_average_inflation()
+
+    # Assert
+    assert average_inflation == 0.05

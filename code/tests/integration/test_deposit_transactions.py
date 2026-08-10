@@ -12,7 +12,6 @@ def model():
     return model
 
 
-
 @pytest.fixture
 def central_bank(model):
     # Given

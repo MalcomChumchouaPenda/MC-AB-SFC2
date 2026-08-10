@@ -530,3 +530,14 @@ class CentralBankAgent(EcoAgent):
 
         # prices
         self.discount_rate = 0
+
+    def update_discount_rate(self):
+        p = self.model.p
+        role = self.roles["central_bank"]
+        average_inflation = role.get_average_inflation()
+        inflation_gap = average_inflation - p.inflation_target
+        self.discount_rate = (
+            (1 - p.xi) * p.long_run_rate
+            + p.xi * self.discount_rate
+            + (1 - p.xi) * p.xi_deltap * inflation_gap
+        )
