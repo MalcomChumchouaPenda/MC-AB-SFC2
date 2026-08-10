@@ -21,9 +21,9 @@ def govt(model):
 
 
 @pytest.fixture
-def country(model):
+def country(model, govt):
     # Given
-    return CountrySpace(model)
+    return CountrySpace(model, govt)
 
 
 @pytest.fixture
@@ -42,11 +42,9 @@ def firm(model):
     return firm
 
 
-def test_firm_compute_profit_distribution(firm, govt, country):
+def test_firm_compute_profit_distribution(firm, country):
     # Given
-    firm_role = country.add_tax_payer(firm)
-    govt_role = country.add_government(govt)
-    country.assign_government(firm_role, govt_role)
+    country.add_tax_payer(firm)
 
     # When
     firm.compute_profit_distribution()
@@ -71,11 +69,9 @@ def bank(model):
     return bank
 
 
-def test_bank_compute_profit_distribution(bank, govt, country):
+def test_bank_compute_profit_distribution(bank, country):
     # Given
-    bank_role = country.add_tax_payer(bank)
-    govt_role = country.add_government(govt)
-    country.assign_government(bank_role, govt_role)
+    country.add_tax_payer(bank)
 
     # When
     bank.compute_profit_distribution()

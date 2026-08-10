@@ -28,7 +28,6 @@ class MonetaryUnionSpace(EcoSpace):
         self.countries = {}
         self.markets = {}
 
-
     def add_commercial_bank(self, agent):
         return self.add_role(CommercialBankRole, agent, "commercial_bank")
 
@@ -45,26 +44,27 @@ class MonetaryUnionSpace(EcoSpace):
         central_role.increase_stock("reserves", amount)
         central_role.increase_stock("cash_advances", amount)
 
-        
+
 class CountrySpace(EcoSpace):
 
-    def setup(self):
-        super().setup()
+    def __init__(self, model, government, **kwargs):
+        super().__init__(model, **kwargs)
+        govt_role = self.add_role(GovernmentRole, government, "government_role")
+        self.government_role = govt_role
         self.markets = {}
+
+    def setup(self):
         self.tax_rate = 0
 
     def add_citizen(self, household):
         return self.add_role(CitizenRole, household, "citizen")
 
     def add_tax_payer(self, agent):
-        return self.add_role(TaxPayerRole, agent, "tax_payer")
-
-    def add_government(self, agent):
-        return self.add_role(GovernmentRole, agent, "government")
-
-    def assign_government(self, tax_payer, govt_role):
-        tax_payer.government = govt_role
-        self.graph.add_edge(govt_role, tax_payer)
+        govt_role = self.government_role
+        payer_role = self.add_role(TaxPayerRole, agent, "tax_payer")
+        payer_role.government = govt_role
+        self.graph.add_edge(govt_role, payer_role)
+        return payer_role
 
     def pay_taxes(self, tax_payer, govt_role, amount):
         govt_role.increase_stock("reserves", amount)
@@ -102,8 +102,6 @@ class CountrySpace(EcoSpace):
             value = new_equity * data["share"]
             holder.clear_stock("equity")
             holder.increase_stock("equity", value)
-
-
 
 
 class GoodsMarket(EcoSpace):

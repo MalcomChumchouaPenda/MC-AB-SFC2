@@ -20,9 +20,9 @@ def govt(model):
 
 
 @pytest.fixture
-def country(model):
+def country(model, govt):
     # Given
-    return CountrySpace(model)
+    return CountrySpace(model, govt)
 
 
 def test_household_pay_taxes(model, govt, country):
@@ -34,9 +34,7 @@ def test_household_pay_taxes(model, govt, country):
     household.dividends = 30
     household.rd_income = 10
     household.public_transfer = 50
-    govt_role = country.add_government(govt)
-    payer_role = country.add_tax_payer(household)
-    country.assign_government(payer_role, govt_role)
+    country.add_tax_payer(household)
 
     # When
     household.pay_taxes()
@@ -53,9 +51,7 @@ def test_firm_pay_taxes(model, govt, country):
     firm = FirmAgent(model)
     firm.cash = 1000
     firm.taxes_payable = 100
-    govt_role = country.add_government(govt)
-    payer_role = country.add_tax_payer(firm)
-    country.assign_government(payer_role, govt_role)
+    country.add_tax_payer(firm)
 
     # When
     firm.pay_taxes()
@@ -73,9 +69,7 @@ def test_bank_pay_taxes(model, govt, country):
     bank = BankAgent(model)
     bank.reserves = 1000
     bank.taxes_payable = 100
-    govt_role = country.add_government(govt)
-    payer_role = country.add_tax_payer(bank)
-    country.assign_government(payer_role, govt_role)
+    country.add_tax_payer(bank)
 
     # When
     bank.pay_taxes()

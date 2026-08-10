@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import Mock
-from mc_ab_sfc.agents import HouseholdAgent, FirmAgent, BankAgent
+from mc_ab_sfc.agents import HouseholdAgent, FirmAgent, BankAgent, GovernmentAgent
 from mc_ab_sfc.spaces import CountrySpace
 
 
@@ -19,9 +19,15 @@ def household(model):
 
 
 @pytest.fixture
-def country(model):
+def govt(model):
     # Given
-    return CountrySpace(model)
+    return GovernmentAgent(model)
+
+
+@pytest.fixture
+def country(model, govt):
+    # Given
+    return CountrySpace(model, govt)
 
 
 def test_firm_pay_dividends(model, household, country):

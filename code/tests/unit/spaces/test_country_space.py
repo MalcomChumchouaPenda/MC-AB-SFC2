@@ -15,12 +15,39 @@ def test_is_eco_space():
     assert issubclass(CountrySpace, EcoSpace)
 
 
-@pytest.fixture
-def country():
+def test_requires_model_and_government():
+    # Assert
+    expected = "required positional arguments: 'model' and 'government'"
+    with pytest.raises(TypeError, match=expected):
+        CountrySpace()
+
+
+class FakeRole:
+    pass
+
+
+def test_creates_and_registers_government_role(monkeypatch):
     # Given
-    model = Mock()
-    space = CountrySpace(model)
-    return space
+    model, govt, govt_role = Mock(), Mock(), Mock()
+    monkeypatch.setattr(CountrySpace, "add_role", Mock(return_value=govt_role))
+    monkeypatch.setattr("mc_ab_sfc.spaces.GovernmentRole", FakeRole)
+
+    # When
+    country = CountrySpace(model, govt)
+
+    # Then
+    country.add_role.assert_called_with(FakeRole, govt, "government_role")
+    assert country.government_role is govt_role
+
+
+@pytest.fixture
+def country(monkeypatch):
+    # Given
+    model, govt, govt_role = Mock(), Mock(), Mock()
+    monkeypatch.setattr(CountrySpace, "add_role", Mock(return_value=govt_role))
+    monkeypatch.setattr("mc_ab_sfc.spaces.GovernmentRole", FakeRole)
+    country = CountrySpace(model, govt)
+    return country
 
 
 def test_contains_local_markets(country):
@@ -32,10 +59,6 @@ def test_contains_local_markets(country):
 # ---------------------------------------------------
 # BEHAVIORAL TESTS
 # ----------------------------------------------------
-
-
-class FakeRole:
-    pass
 
 
 def test_add_citizen_creates_citizen_role(country, monkeypatch):
@@ -68,35 +91,21 @@ def test_add_tax_payer_creates_tax_payer_role(country, monkeypatch):
     assert tax_payer is action.return_value
 
 
-def test_add_government_creates_government_role(country, monkeypatch):
+def test_add_tax_payer_creates_edge_with_govt_role(country, monkeypatch):
     # Given
-    agent = Mock()
-    country.add_role = Mock()
-    monkeypatch.setattr("mc_ab_sfc.spaces.GovernmentRole", FakeRole)
-
-    # When
-    govt_role = country.add_government(agent)
-
-    # Then
-    action = country.add_role
-    action.assert_called_with(FakeRole, agent, "government")
-    assert govt_role is action.return_value
-
-
-def test_assign_government_add_edge(country):
-    # Given
-    govt = Mock()
-    tax_payer = Mock()
+    tax_payer, agent = Mock(), Mock()
+    country.add_role = Mock(return_value=tax_payer)
+    monkeypatch.setattr("mc_ab_sfc.spaces.TaxPayerRole", FakeRole)
+    govt_role = country.government_role
     graph = country.graph
-    graph.add_nodes_from([tax_payer, govt])
 
     # When
-    country.assign_government(tax_payer, govt)
+    country.add_tax_payer(agent)
 
     # Then
     assert len(graph.edges) == 1
-    assert graph.has_edge(govt, tax_payer)
-    assert tax_payer.government is govt
+    assert graph.has_edge(govt_role, tax_payer)
+    assert tax_payer.government is govt_role
 
 
 class FakeAgent:
