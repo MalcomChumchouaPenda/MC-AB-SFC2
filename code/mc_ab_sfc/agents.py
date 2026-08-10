@@ -525,6 +525,7 @@ class CentralBankAgent(EcoAgent):
 
     def setup(self):
         # stocks
+        self.bonds = 0
         self.reserves = 0
         self.cash_advances = 0
 
@@ -536,7 +537,6 @@ class CentralBankAgent(EcoAgent):
         role = self.roles["central_bank"]
         average_inflation = role.get_average_inflation()
         inflation_gap = average_inflation - p.inflation_target
-        print(p.long_run_rate, self.discount_rate, inflation_gap)
         self.discount_rate = (
             (1 - p.xi) * p.long_run_rate
             + p.xi * self.discount_rate
@@ -548,6 +548,6 @@ class CentralBankAgent(EcoAgent):
         bond_issuers = role.get_bond_issuers()
         for issuer in bond_issuers:
             purchase = issuer.bond_supply
+            print(issuer, purchase)
             role.buy_bonds(issuer, purchase)
 
-            

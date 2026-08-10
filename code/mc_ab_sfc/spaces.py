@@ -260,6 +260,7 @@ class BondMarket(EcoSpace):
             buyer.increase_stock("bonds", amount)
             buyer.decrease_stock("reserves", amount)
         else:
+            print('increase', amount)
             buyer.increase_stock("bonds", amount)
             buyer.increase_stock("reserves", amount)
         self.graph.add_edge(issuer, buyer, amount=amount)
