@@ -198,7 +198,7 @@ class CommercialBankRole(EcoRole):
         return self.central_bank.discount_rate
 
     def request_cash_advances(self, amount):
-        self.space.request_cash_advances(self, self.central_bank, amount)
+        self.space.request_cash_advances(self, amount)
 
 
 class BondIssuerRole(EcoRole):

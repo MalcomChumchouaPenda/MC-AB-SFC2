@@ -55,4 +55,5 @@ def test_request_cash_advances(bank_role):
     bank_role.request_cash_advances(100)
 
     # Then
-    monetary_union.request_cash_advances(bank_role, central_bank, 100)
+    action = monetary_union.request_cash_advances
+    action.assert_called_with(bank_role, 100)

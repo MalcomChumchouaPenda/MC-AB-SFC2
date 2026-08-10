@@ -105,7 +105,7 @@ def test_request_cash_advances(union):
     union.graph.add_nodes_from([bank_role, central_role])
 
     # When
-    union.request_cash_advances(bank_role, central_role, 500)
+    union.request_cash_advances(bank_role, 500)
 
     # Then
     bank_role.increase_stock.assert_any_call("reserves", 500)

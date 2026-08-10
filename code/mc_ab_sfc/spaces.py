@@ -36,11 +36,12 @@ class MonetaryUnionSpace(EcoSpace):
         self.graph.add_edge(self.central_bank_role, bank_role)
         return bank_role
 
-    def request_cash_advances(self, bank_role, central_role, amount):
-        bank_role.increase_stock("reserves", amount)
-        bank_role.increase_stock("cash_advances", amount)
+    def request_cash_advances(self, bank_role, amount):
+        central_role = self.central_bank_role
         central_role.increase_stock("reserves", amount)
         central_role.increase_stock("cash_advances", amount)
+        bank_role.increase_stock("reserves", amount)
+        bank_role.increase_stock("cash_advances", amount)
 
 
 class CountrySpace(EcoSpace):
