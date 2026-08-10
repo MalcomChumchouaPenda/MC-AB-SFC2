@@ -15,21 +15,47 @@ def test_is_eco_space():
     assert issubclass(MonetaryUnionSpace, EcoSpace)
 
 
-def test_contains_countries():
-    # Given
-    model = Mock()
-    union = MonetaryUnionSpace(model)
+def test_requires_model_and_central_bank():
+    # Assert
+    expected = "required positional arguments: 'model' and 'central_bank'"
+    with pytest.raises(TypeError, match=expected):
+        MonetaryUnionSpace()
 
+
+class FakeRole:
+    pass
+
+
+def test_creates_and_registers_central_bank_role(monkeypatch):
+    # Given
+    model, central_bank, central_role = Mock(), Mock(), Mock()
+    monkeypatch.setattr(MonetaryUnionSpace, "add_role", Mock(return_value=central_role))
+    monkeypatch.setattr("mc_ab_sfc.spaces.CentralBankRole", FakeRole)
+
+    # When
+    union = MonetaryUnionSpace(model, central_bank)
+
+    # Then
+    union.add_role.assert_called_with(FakeRole, central_bank, "central_bank")
+    assert union.central_bank_role is central_role
+
+
+@pytest.fixture
+def union(monkeypatch):
+    # Given
+    model, central_bank, central_role = Mock(), Mock(), Mock()
+    monkeypatch.setattr(MonetaryUnionSpace, "add_role", Mock(return_value=central_role))
+    monkeypatch.setattr("mc_ab_sfc.spaces.CentralBankRole", FakeRole)
+    return MonetaryUnionSpace(model, central_bank)
+
+
+def test_contains_countries(union):
     # Assert
     assert hasattr(union, "countries")
     assert isinstance(union.countries, dict)
 
 
-def test_contains_international_markets():
-    # Given
-    model = Mock()
-    union = MonetaryUnionSpace(model)
-
+def test_contains_international_markets(union):
     # Assert
     assert hasattr(union, "markets")
     assert isinstance(union.markets, dict)
@@ -40,56 +66,31 @@ def test_contains_international_markets():
 # ----------------------------------------------------
 
 
-@pytest.fixture
-def monetary_union():
-    # Given
-    model = Mock()
-    return MonetaryUnionSpace(model)
-
-
-class FakeRole:
-    pass
-
-
-def test_add_commercial_bank_creates_commercial_bank_role(monetary_union, monkeypatch):
+def test_add_commercial_bank_creates_commercial_bank_role(union, monkeypatch):
     # Given
     agent = Mock()
-    monetary_union.add_role = Mock()
+    union.add_role = Mock()
     monkeypatch.setattr("mc_ab_sfc.spaces.CommercialBankRole", FakeRole)
 
     # When
-    commercial_bank = monetary_union.add_commercial_bank(agent)
+    commercial_bank = union.add_commercial_bank(agent)
 
     # Then
-    action = monetary_union.add_role
+    action = union.add_role
     action.assert_called_with(FakeRole, agent, "commercial_bank")
     assert commercial_bank is action.return_value
 
 
-def test_add_central_bank_creates_central_bank_role(monetary_union, monkeypatch):
+def test_add_commercial_bank_creates_edge_with_central_role(union, monkeypatch):
     # Given
-    agent = Mock()
-    monetary_union.add_role = Mock()
-    monkeypatch.setattr("mc_ab_sfc.spaces.CentralBankRole", FakeRole)
+    bank_role, agent = Mock(), Mock()
+    union.add_role = Mock(return_value=bank_role)
+    monkeypatch.setattr("mc_ab_sfc.spaces.TaxPayerRole", FakeRole)
+    central_role = union.central_bank_role
+    graph = union.graph
 
     # When
-    central_bank = monetary_union.add_central_bank(agent)
-
-    # Then
-    action = monetary_union.add_role
-    action.assert_called_with(FakeRole, agent, "central_bank")
-    assert central_bank is action.return_value
-
-
-def test_assign_central_bank_add_edge(monetary_union):
-    # Given
-    bank_role = Mock()
-    central_role = Mock()
-    graph = monetary_union.graph
-    graph.add_nodes_from([bank_role, central_role])
-
-    # When
-    monetary_union.assign_central_bank(bank_role, central_role)
+    union.add_commercial_bank(agent)
 
     # Then
     assert len(graph.edges) == 1
@@ -97,15 +98,14 @@ def test_assign_central_bank_add_edge(monetary_union):
     assert bank_role.central_bank is central_role
 
 
-def test_request_cash_advances(monetary_union):
+def test_request_cash_advances(union):
     # Given
     bank_role = Mock()
-    central_role = Mock()
-    graph = monetary_union.graph
-    graph.add_nodes_from([bank_role, central_role])
+    central_role = union.central_bank_role
+    union.graph.add_nodes_from([bank_role, central_role])
 
     # When
-    monetary_union.request_cash_advances(bank_role, central_role, 500)
+    union.request_cash_advances(bank_role, central_role, 500)
 
     # Then
     bank_role.increase_stock.assert_any_call("reserves", 500)

@@ -1,7 +1,7 @@
 import math
 import pytest
 from unittest.mock import Mock
-from mc_ab_sfc.agents import BankAgent, FirmAgent
+from mc_ab_sfc.agents import BankAgent, FirmAgent, CentralBankAgent
 from mc_ab_sfc.spaces import CreditMarket, MonetaryUnionSpace
 
 
@@ -18,9 +18,32 @@ def model():
 
 
 @pytest.fixture
-def monetary_union(model):
+def central_bank(model):
     # Given
-    return MonetaryUnionSpace(model)
+    central_bank = CentralBankAgent(model)
+    central_bank.discount_rate = 0.05
+    return central_bank
+
+
+@pytest.fixture
+def bank(model):
+    # Given
+    bank = BankAgent(model)
+    return bank
+
+
+@pytest.fixture
+def firm(model):
+    # Given
+    firm = FirmAgent(model)  
+    return firm
+
+
+
+@pytest.fixture
+def union(model, central_bank):
+    # Given
+    return MonetaryUnionSpace(model, central_bank)
 
 
 @pytest.fixture
@@ -29,38 +52,12 @@ def credit_market(model):
     return CreditMarket(model)
 
 
-@pytest.fixture
-def central_bank(monetary_union):
+def test_firm_request_loans(firm, bank, credit_market, union):
     # Given
-    agent = Mock(discount_rate=0.05, roles={})
-    monetary_union.add_central_bank(agent)
-    return agent
-
-
-@pytest.fixture
-def bank(model, central_bank, monetary_union, credit_market):
-    # Given
-    bank = BankAgent(model)
-    central_role = central_bank.roles["central_bank"]
-    bank_role = monetary_union.add_commercial_bank(bank)
-    monetary_union.assign_central_bank(bank_role, central_role)
-    credit_market.add_lender(bank)
-    return bank
-
-
-@pytest.fixture
-def firm(model, credit_market):
-    # Given
-    firm = FirmAgent(model)
     firm.desired_loans = 500
-    credit_market.add_borrower(firm)
-    return firm
-
-
-def test_firm_request_loans(firm, bank):
-    # Given
-    borrower = firm.roles["borrower"]
-    lender = bank.roles["lender"]
+    borrower = credit_market.add_borrower(firm)
+    lender = credit_market.add_lender(bank)
+    union.add_commercial_bank(bank)
 
     # When
     firm.request_loan()
@@ -69,11 +66,12 @@ def test_firm_request_loans(firm, bank):
     assert lender.loan_applicants == [borrower]
 
 
-def test_bank_evaluates_credit_request(firm, bank):
+def test_bank_evaluates_credit_request(firm, bank, credit_market, union):
     # Given
     firm.equity = 100
     firm.desired_loans = 200
-    borrower = firm.roles["borrower"]
+    borrower = credit_market.add_borrower(firm)
+    union.add_commercial_bank(bank)
 
     # When
     firm.request_loan()
@@ -85,7 +83,7 @@ def test_bank_evaluates_credit_request(firm, bank):
     assert rate == pytest.approx(0.15)
 
 
-def test_bank_grant_loans(firm, bank):
+def test_bank_grant_loans(firm, bank, credit_market, union):
     # Given
     firm.equity = 500
     firm.loans = 0
@@ -94,6 +92,9 @@ def test_bank_grant_loans(firm, bank):
     bank.equity = 7500
     bank.loans = 0
     bank.deposits = 1000
+    credit_market.add_borrower(firm)
+    credit_market.add_lender(bank)
+    union.add_commercial_bank(bank)
 
     # When
     firm.request_loan()

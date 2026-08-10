@@ -23,20 +23,18 @@ from .roles import (
 
 class MonetaryUnionSpace(EcoSpace):
 
-    def setup(self):
-        super().setup()
+    def __init__(self, model, central_bank, **kwargs):
+        super().__init__(model, **kwargs)
+        central_role = self.add_role(CentralBankRole, central_bank, "central_bank")
+        self.central_bank_role = central_role
         self.countries = {}
         self.markets = {}
 
     def add_commercial_bank(self, agent):
-        return self.add_role(CommercialBankRole, agent, "commercial_bank")
-
-    def add_central_bank(self, agent):
-        return self.add_role(CentralBankRole, agent, "central_bank")
-
-    def assign_central_bank(self, bank_role, central_role):
-        bank_role.central_bank = central_role
-        self.graph.add_edge(central_role, bank_role)
+        bank_role = self.add_role(CommercialBankRole, agent, "commercial_bank")
+        bank_role.central_bank = self.central_bank_role
+        self.graph.add_edge(self.central_bank_role, bank_role)
+        return bank_role
 
     def request_cash_advances(self, bank_role, central_role, amount):
         bank_role.increase_stock("reserves", amount)

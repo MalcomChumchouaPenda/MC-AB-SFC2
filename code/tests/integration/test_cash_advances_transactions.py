@@ -14,35 +14,32 @@ def model():
 
 
 @pytest.fixture
-def monetary_union(model):
+def central_bank(model):
     # Given
-    return MonetaryUnionSpace(model)
+    central_bank = CentralBankAgent(model)
+    central_bank.reserves = 50
+    central_bank.discount_rate = 0.05
+    return central_bank
 
 
 @pytest.fixture
-def central_bank(model, monetary_union):
+def union(model, central_bank):
     # Given
-    agent = CentralBankAgent(model)
-    monetary_union.add_central_bank(agent)
-    return agent
+    return MonetaryUnionSpace(model, central_bank)
 
 
 @pytest.fixture
-def bank(model, central_bank, monetary_union):
+def bank(model):
     # Given
     bank = BankAgent(model)
-    central_role = central_bank.roles["central_bank"]
-    bank_role = monetary_union.add_commercial_bank(bank)
-    monetary_union.assign_central_bank(bank_role, central_role)
+    bank.deposits = 1000
+    bank.reserves = 50
     return bank
 
 
-def test_bank_requests_cash_advance(bank, central_bank):
+def test_bank_requests_cash_advance(bank, central_bank, union):
     # Given
-    central_bank.reserves = 50
-    central_bank.discount_rate = 0.05
-    bank.deposits = 1000
-    bank.reserves = 50
+    union.add_commercial_bank(bank)
 
     # When
     bank.request_cash_advances()
