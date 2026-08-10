@@ -29,7 +29,6 @@ def test_has_default_stocks(household):
     assert household.cash == 0
     assert household.deposits == 0
     assert household.equity == 0
-    assert household.net_worth == 0
 
 
 def test_has_default_flows(household):
@@ -38,12 +37,13 @@ def test_has_default_flows(household):
     assert household.deposit_interest == 0
     assert household.dividends == 0
     assert household.rd_income == 0
+    assert household.taxes == 0
     assert household.public_transfer == 0
     assert household.tradable_cons == 0
     assert household.non_tradable_cons == 0
 
 
-def test_has_default_decisions(household):
+def test_has_default_choices(household):
     # Assert
     assert household.reservation_wage == 0
     assert household.expected_consumption == 0
@@ -51,10 +51,11 @@ def test_has_default_decisions(household):
     assert household.desired_non_trad_cons == 0
 
 
-def test_has_default_memory(household):
+def test_has_default_indicator(household):
     # Assert
     assert household.employed_labor == 0
-    assert household.gross_income == 0
+    assert household.net_worth == 0
+    assert household.income == 0
     assert household.disposable_income == 0
 
 
@@ -307,58 +308,64 @@ def test_can_choose_to_not_decreases_reservation_wage(part_employed_before):
 
 
 # ---------------------------------------------------
-# INCOME COMPUTATION TESTS
+# INCOME COMPUTATION AND TAX PAYMENT
 # ----------------------------------------------------
 
 
-def test_calc_gross_income():
+@pytest.fixture
+def household_as_taxpayer():
     # Given
     model = Mock()
     household = HouseholdAgent(model)
+    household.roles["tax_payer"] = Mock()
+    return household
+
+
+def test_calc_income(household_as_taxpayer):
+    # Given
+    household = household_as_taxpayer
     household.labor_income = 100
     household.deposit_interest = 20
     household.dividends = 30
     household.rd_income = 10
 
     # When
-    income = household.calc_gross_income()
+    income = household.calc_income()
 
     # Then
     assert income == 160
-    assert household.gross_income == 160
 
 
-def test_calc_disposable_income():
+def test_calc_disposable_income(household_as_taxpayer):
     # Given
-    model = Mock()
-    tax_payer_role = Mock()
-    tax_payer_role.get_tax_rate.return_value = 0.2
-    household = HouseholdAgent(model)
-    household.gross_income = 200
+    household = household_as_taxpayer
+    household.income = 200
     household.public_transfer = 50
-    household.roles["tax_payer"] = tax_payer_role
+    payer_role = household.roles["tax_payer"]
+    payer_role.get_tax_rate.return_value = 0.2
 
     # When
-    income = household.calc_disposable_income()
+    disposable_income = household.calc_disposable_income()
 
     # Then
-    assert income == 210
-    assert household.disposable_income == 210
+    assert disposable_income == 210
 
 
-def test_calc_expected_net_worth():
+def test_pay_taxes(household_as_taxpayer):
     # Given
-    model = Mock()
-    household = HouseholdAgent(model)
-    household.net_worth = 1000
-    household.disposable_income = 300
-    household.expected_consumption = 200
+    household = household_as_taxpayer
+    household.calc_income = Mock(return_value=100)
+    household.calc_disposable_income = Mock(return_value=110)
+    payer_role = household.roles["tax_payer"]
+    payer_role.get_tax_rate.return_value = 0.2
 
     # When
-    expected_worth = household.calc_expected_net_worth()
+    household.pay_taxes()
 
     # Then
-    assert expected_worth == 1100
+    payer_role.pay_taxes.assert_called_once_with(20)
+    assert household.disposable_income == 110
+    assert household.income == 100
 
 
 # ---------------------------------------------------
@@ -511,6 +518,20 @@ def household_with_assets():
     household.roles["equity_holder"] = Mock()
     household.roles["deposit_holder"] = Mock()
     return household
+
+
+def test_calc_expected_net_worth(household_with_assets):
+    # Given
+    household = household_with_assets
+    household.net_worth = 1000
+    household.disposable_income = 300
+    household.expected_consumption = 200
+
+    # When
+    expected_worth = household.calc_expected_net_worth()
+
+    # Then
+    assert expected_worth == 1100
 
 
 def test_calc_liquidity_pref_when_equity_is_more_profitable(household_with_assets):

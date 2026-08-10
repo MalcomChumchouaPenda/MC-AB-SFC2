@@ -18,6 +18,7 @@ class HouseholdAgent(EcoAgent):
         self.deposit_interest = 0
         self.dividends = 0
         self.rd_income = 0
+        self.taxes = 0
         self.public_transfer = 0
         self.tradable_cons = 0
         self.non_tradable_cons = 0
@@ -30,7 +31,7 @@ class HouseholdAgent(EcoAgent):
 
         # memory
         self.employed_labor = 0
-        self.gross_income = 0
+        self.income = 0
         self.disposable_income = 0
 
         # others props
@@ -69,20 +70,26 @@ class HouseholdAgent(EcoAgent):
                 role.create_job(employer, quantity)
                 remaining -= quantity
 
-    def calc_gross_income(self):
-        self.gross_income = (
+    def pay_taxes(self):
+        self.income = self.calc_income()
+        self.disposable_income = self.calc_disposable_income()
+        role = self.roles["tax_payer"]
+        tax_rate = role.get_tax_rate()
+        taxes = tax_rate * self.income
+        role.pay_taxes(taxes)
+
+
+    def calc_income(self):
+        return (
             self.labor_income + self.deposit_interest + self.dividends + self.rd_income
         )
-        return self.gross_income
 
     def calc_disposable_income(self):
         role = self.roles["tax_payer"]
         tax_rate = role.get_tax_rate()
-        self.disposable_income = (
-            1 - tax_rate
-        ) * self.gross_income + self.public_transfer
-        return self.disposable_income
+        return (1 - tax_rate) * self.income + self.public_transfer
 
+    
     def calc_consumption(self):
         p = self.p
         self.desired_consumption = p.cy * self.disposable_income + p.cd * self.deposits
