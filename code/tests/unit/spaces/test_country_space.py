@@ -61,21 +61,6 @@ def test_contains_local_markets(country):
 # ----------------------------------------------------
 
 
-def test_add_citizen_creates_citizen_role(country, monkeypatch):
-    # Given
-    household = Mock()
-    country.add_role = Mock()
-    monkeypatch.setattr("mc_ab_sfc.spaces.CitizenRole", FakeRole)
-
-    # When
-    citizen = country.add_citizen(household)
-
-    # Then
-    action = country.add_role
-    action.assert_called_with(FakeRole, household, "citizen")
-    assert citizen is action.return_value
-
-
 def test_add_tax_payer_creates_tax_payer_role(country, monkeypatch):
     # Given
     agent = Mock()

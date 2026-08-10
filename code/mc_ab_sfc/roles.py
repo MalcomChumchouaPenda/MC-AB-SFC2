@@ -1,10 +1,6 @@
 from .base import EcoRole
 
 
-class CitizenRole(EcoRole):
-    pass
-
-
 class TaxPayerRole(EcoRole):
 
     def __init__(self, agent, space):

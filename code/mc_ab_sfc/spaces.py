@@ -3,7 +3,6 @@ from .agents import BankAgent
 from .roles import (
     EmployerRole,
     WorkerRole,
-    CitizenRole,
     GovernmentRole,
     TaxPayerRole,
     ConsumerRole,
@@ -54,9 +53,6 @@ class CountrySpace(EcoSpace):
 
     def setup(self):
         self.tax_rate = 0
-
-    def add_citizen(self, household):
-        return self.add_role(CitizenRole, household, "citizen")
 
     def add_tax_payer(self, agent):
         govt_role = self.government_role
