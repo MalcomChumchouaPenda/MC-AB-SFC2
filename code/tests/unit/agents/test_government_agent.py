@@ -41,3 +41,19 @@ def test_has_default_choices(govt):
 def test_has_default_indicators(govt):
     # Assert
     assert govt.gdp == 0
+
+
+def test_update_history():
+    # Given
+    govt_role = Mock()
+    govt_role.get_gdp.return_value = 120
+    govt = GovernmentAgent(model=Mock())
+    govt.roles['government'] = govt_role
+    govt.gdp = 100
+
+    # When
+    govt.update_history()
+
+    # Then
+    assert govt.gdp == 120
+

@@ -356,7 +356,6 @@ class FirmAgent(EcoAgent):
     # History
 
     def update_history(self):
-        super().update_history()
         self.prev_sales = self.sales
         self.prev_expected_sales = self.expected_sales
         self.prev_inventories = self.inventories
@@ -519,6 +518,10 @@ class GovernmentAgent(EcoAgent):
 
         # indicators
         self.gdp = 0
+
+    def update_history(self):
+        role = self.roles['government']
+        self.gdp = role.get_gdp()
 
 
 class CentralBankAgent(EcoAgent):

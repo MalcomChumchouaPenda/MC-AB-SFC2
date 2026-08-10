@@ -20,6 +20,9 @@ class GovernmentRole(EcoRole):
     def tax_rate(self):
         return self.agent.tax_rate
 
+    def get_gdp(self):
+        return self.space.gdp
+
 
 class EmployerRole(EcoRole):
 

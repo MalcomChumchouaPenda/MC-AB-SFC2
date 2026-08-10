@@ -30,3 +30,14 @@ def test_exposes_tax_rate(govt_role):
 
     # Assert
     assert govt_role.tax_rate == 0.15
+
+def test_get_gdp(govt_role):
+    # Given
+    country = govt_role.space
+    country.gdp = 100
+
+    # When
+    gdp = govt_role.get_gdp()
+
+    # Assert
+    assert gdp == 100

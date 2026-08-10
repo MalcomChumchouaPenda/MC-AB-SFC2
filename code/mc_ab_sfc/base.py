@@ -13,8 +13,6 @@ class EcoAgent(ap.Agent):
         super().__init__(model, *args, **kwargs)
         self.roles = {}
 
-    def update_history(self):
-        pass
 
 
 class EcoRole(ap.AgentNode):
