@@ -112,33 +112,33 @@ class FakeAgent:
     pass
 
 
-def test_pay_taxes_with_reserves(country, monkeypatch):
+def test_pay_taxes_with_tax_payer_reserves(country, monkeypatch):
     # Given
-    govt = Mock()
     tax_payer = Mock(agent=FakeAgent())
+    govt_role = country.government_role
     monkeypatch.setattr("mc_ab_sfc.spaces.BankAgent", FakeAgent)
 
     # When
-    country.pay_taxes(tax_payer, govt, 100)
+    country.pay_taxes(tax_payer, 100)
 
     # Then
-    govt.increase_flow.assert_any_call("taxes", 100)
-    govt.increase_stock.assert_any_call("reserves", 100)
+    govt_role.increase_flow.assert_any_call("taxes", 100)
+    govt_role.increase_stock.assert_any_call("reserves", 100)
     tax_payer.increase_flow.assert_called_with("taxes", 100)
     tax_payer.decrease_stock.assert_called_with("reserves", 100)
 
 
-def test_pay_tax_with_reserves(country):
+def test_pay_taxes_with_tax_payer_cash(country):
     # Given
-    govt = Mock()
     tax_payer = Mock()
+    govt_role = country.government_role
 
     # When
-    country.pay_taxes(tax_payer, govt, 100)
+    country.pay_taxes(tax_payer, 100)
 
     # Then
-    govt.increase_flow.assert_any_call("taxes", 100)
-    govt.increase_stock.assert_any_call("reserves", 100)
+    govt_role.increase_flow.assert_any_call("taxes", 100)
+    govt_role.increase_stock.assert_any_call("reserves", 100)
     tax_payer.increase_flow.assert_called_with("taxes", 100)
     tax_payer.decrease_stock.assert_called_with("cash", 100)
 

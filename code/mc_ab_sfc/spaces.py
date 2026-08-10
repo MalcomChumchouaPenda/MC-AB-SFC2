@@ -65,7 +65,8 @@ class CountrySpace(EcoSpace):
         self.graph.add_edge(govt_role, payer_role)
         return payer_role
 
-    def pay_taxes(self, tax_payer, govt_role, amount):
+    def pay_taxes(self, tax_payer, amount):
+        govt_role = self.government_role
         govt_role.increase_stock("reserves", amount)
         govt_role.increase_flow("taxes", amount)
         if isinstance(tax_payer.agent, BankAgent):

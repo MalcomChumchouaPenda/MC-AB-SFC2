@@ -15,7 +15,7 @@ class TaxPayerRole(EcoRole):
         return self.government.tax_rate
 
     def pay_taxes(self, amount):
-        self.space.pay_taxes(self, self.government, amount)
+        self.space.pay_taxes(self, amount)
 
 
 class GovernmentRole(EcoRole):

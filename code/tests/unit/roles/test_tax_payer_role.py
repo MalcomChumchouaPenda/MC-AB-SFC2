@@ -47,12 +47,10 @@ def test_get_tax_rate(tax_payer):
 
 def test_pay_taxes(tax_payer):
     # Given
-    govt = Mock()
-    tax_payer.government = govt
     country = tax_payer.space
 
     # When
     tax_payer.pay_taxes(10)
 
     # Then
-    country.pay_taxes.assert_called_with(tax_payer, govt, 10)
+    country.pay_taxes.assert_called_with(tax_payer, 10)
