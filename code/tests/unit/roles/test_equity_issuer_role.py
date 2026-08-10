@@ -39,21 +39,21 @@ def test_exposes_net_worth(issuer):
 
 def test_update_equity_holdings(issuer):
     # Given
-    equity_space = issuer.space
+    country = issuer.space
 
     # When
     issuer.update_equity_holdings()
 
     # Then
-    equity_space.update_equity_holdings.assert_called_with(issuer)
+    country.update_equity_holdings.assert_called_with(issuer)
 
 
 def test_distribute_dividends(issuer):
     # Given
-    equity_space = issuer.space
+    country = issuer.space
 
     # When
     issuer.distribute_dividends(100)
 
     # Then
-    equity_space.distribute_dividends.assert_called_with(issuer, 100)
+    country.distribute_dividends.assert_called_with(issuer, 100)

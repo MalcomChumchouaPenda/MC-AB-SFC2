@@ -78,7 +78,6 @@ class HouseholdAgent(EcoAgent):
         taxes = tax_rate * self.income
         role.pay_taxes(taxes)
 
-
     def calc_income(self):
         return (
             self.labor_income + self.deposit_interest + self.dividends + self.rd_income
@@ -89,7 +88,6 @@ class HouseholdAgent(EcoAgent):
         tax_rate = role.get_tax_rate()
         return (1 - tax_rate) * self.income + self.public_transfer
 
-    
     def calc_consumption(self):
         p = self.p
         self.desired_consumption = p.cy * self.disposable_income + p.cd * self.deposits

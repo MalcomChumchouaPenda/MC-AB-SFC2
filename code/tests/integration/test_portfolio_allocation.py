@@ -2,7 +2,7 @@ import math
 import pytest
 from unittest.mock import Mock
 from mc_ab_sfc.agents import HouseholdAgent, BankAgent
-from mc_ab_sfc.spaces import EquitySpace, DepositMarket
+from mc_ab_sfc.spaces import CountrySpace, DepositMarket
 
 
 @pytest.fixture
@@ -35,9 +35,9 @@ def bank(model):
 
 def test_household_portfolio_allocation(household, bank, model):
     # Given
-    equity_space = EquitySpace(model)
-    equity_space.default_probability = 0.10
-    equity_space.add_equity_holder(household)
+    country = CountrySpace(model)
+    country.default_probability = 0.10
+    country.add_equity_holder(household)
     deposit_market = DepositMarket(model)
     deposit_bank = deposit_market.add_deposit_bank(bank)
     deposit_holder = deposit_market.add_deposit_holder(household)

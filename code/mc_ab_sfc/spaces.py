@@ -59,6 +59,33 @@ class CountrySpace(EcoSpace):
             tax_payer.decrease_stock("cash", amount)
             tax_payer.increase_flow("taxes", amount)
 
+    def add_equity_issuer(self, agent):
+        return self.add_role(EquityIssuerRole, agent, "equity_issuer")
+
+    def add_equity_holder(self, household):
+        return self.add_role(EquityHolderRole, household, "equity_holder")
+
+    def assign_equity_holder(self, holder, issuer, share):
+        self.graph.add_edge(holder, issuer, share=share)
+
+    def distribute_dividends(self, issuer, amount):
+        source = "reserves" if isinstance(issuer.agent, BankAgent) else "cash"
+        issuer.increase_flow("dividends", amount)
+        issuer.decrease_stock(source, amount)
+        for _, holder, data in self.graph.edges(issuer, data=True):
+            dividend = amount * data["share"]
+            holder.increase_flow("dividends", dividend)
+            holder.increase_stock("cash", dividend)
+
+    def update_equity_holdings(self, issuer):
+        new_equity = issuer.net_worth
+        issuer.clear_stock("equity")
+        issuer.increase_stock("equity", new_equity)
+        for _, holder, data in self.graph.edges(issuer, data=True):
+            value = new_equity * data["share"]
+            holder.clear_stock("equity")
+            holder.increase_stock("equity", value)
+
 
 class BankSystem(EcoSpace):
 
@@ -209,33 +236,3 @@ class BondMarket(EcoSpace):
             buyer.increase_stock("bonds", amount)
             buyer.increase_stock("reserves", amount)
         self.graph.add_edge(issuer, buyer, amount=amount)
-
-
-class EquitySpace(EcoSpace):
-
-    def add_equity_issuer(self, agent):
-        return self.add_role(EquityIssuerRole, agent, "equity_issuer")
-
-    def add_equity_holder(self, household):
-        return self.add_role(EquityHolderRole, household, "equity_holder")
-
-    def assign_equity_holder(self, holder, issuer, share):
-        self.graph.add_edge(holder, issuer, share=share)
-
-    def distribute_dividends(self, issuer, amount):
-        source = "reserves" if isinstance(issuer.agent, BankAgent) else "cash"
-        issuer.increase_flow("dividends", amount)
-        issuer.decrease_stock(source, amount)
-        for _, holder, data in self.graph.edges(issuer, data=True):
-            dividend = amount * data["share"]
-            holder.increase_flow("dividends", dividend)
-            holder.increase_stock("cash", dividend)
-
-    def update_equity_holdings(self, issuer):
-        new_equity = issuer.net_worth
-        issuer.clear_stock("equity")
-        issuer.increase_stock("equity", new_equity)
-        for _, holder, data in self.graph.edges(issuer, data=True):
-            value = new_equity * data["share"]
-            holder.clear_stock("equity")
-            holder.increase_stock("equity", value)

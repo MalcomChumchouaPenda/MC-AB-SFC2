@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import Mock
 from mc_ab_sfc.agents import HouseholdAgent, FirmAgent, BankAgent
-from mc_ab_sfc.spaces import EquitySpace
+from mc_ab_sfc.spaces import CountrySpace
 
 
 @pytest.fixture
@@ -19,19 +19,19 @@ def household(model):
 
 
 @pytest.fixture
-def equity_space(model):
+def country(model):
     # Given
-    return EquitySpace(model)
+    return CountrySpace(model)
 
 
-def test_firm_pay_dividends(model, household, equity_space):
+def test_firm_pay_dividends(model, household, country):
     # Given
     firm = FirmAgent(model)
     firm.cash = 1000
     firm.dividends_payable = 200
-    holder = equity_space.add_equity_holder(household)
-    issuer = equity_space.add_equity_issuer(firm)
-    equity_space.assign_equity_holder(holder, issuer, 1.0)
+    holder = country.add_equity_holder(household)
+    issuer = country.add_equity_issuer(firm)
+    country.assign_equity_holder(holder, issuer, 1.0)
 
     # When
     firm.pay_dividends()
@@ -44,14 +44,14 @@ def test_firm_pay_dividends(model, household, equity_space):
     assert household.dividends == 200
 
 
-def test_bank_pay_dividends(model, household, equity_space):
+def test_bank_pay_dividends(model, household, country):
     # Given
     bank = BankAgent(model)
     bank.reserves = 500
     bank.dividends_payable = 100
-    holder = equity_space.add_equity_holder(household)
-    issuer = equity_space.add_equity_issuer(bank)
-    equity_space.assign_equity_holder(holder, issuer, 1.0)
+    holder = country.add_equity_holder(household)
+    issuer = country.add_equity_issuer(bank)
+    country.assign_equity_holder(holder, issuer, 1.0)
 
     # When
     bank.pay_dividends()
