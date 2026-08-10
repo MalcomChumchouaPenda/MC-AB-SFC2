@@ -13,3 +13,20 @@ def test_is_eco_role():
 
     # Assert
     assert issubclass(GovernmentRole, EcoRole)
+
+
+@pytest.fixture
+def govt_role():
+    # Given
+    market = Mock()
+    agent = Mock(id=1)
+    return GovernmentRole(agent, market)
+
+
+def test_exposes_tax_rate(govt_role):
+    # Given
+    govt = govt_role.agent
+    govt.tax_rate = 0.15
+
+    # Assert
+    assert govt_role.tax_rate == 0.15

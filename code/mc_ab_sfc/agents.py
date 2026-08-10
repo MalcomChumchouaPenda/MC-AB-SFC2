@@ -296,19 +296,15 @@ class FirmAgent(EcoAgent):
         for lender in lenders:
             borrower.request_loan(lender)
 
-    # Profit, tax and dividend computation
+    # Profit, taxes and dividend computation
 
-    def calc_profit(self):
-        inv_variation = self._calc_inv_variation()
-        self.net_cash_flow = self._calc_net_cash_flow()
-        self.profits = self.net_cash_flow + inv_variation
+    def compute_profit_distribution(self):
+        self.net_cash_flow = self.calc_net_cash_flow()
+        self.profit = self.calc_profit()
+        self.taxes_payable = self.calc_taxes()
+        self.dividends_payable = self.calc_dividends()
 
-    def _calc_inv_variation(self):
-        unit_cost = self.wage_offer / self.productivity
-        real_inv_variation = self.inventories - self.prev_inventories
-        return real_inv_variation * unit_cost
-
-    def _calc_net_cash_flow(self):
+    def calc_net_cash_flow(self):
         return (
             self.sales
             + self.deposit_interest
@@ -317,22 +313,22 @@ class FirmAgent(EcoAgent):
             - self.loan_interest
         )
 
+    def calc_profit(self):
+        unit_cost = self.wage_offer / self.productivity
+        inv_variation = unit_cost * (self.inventories - self.prev_inventories)
+        return self.net_cash_flow + inv_variation
+
     def calc_taxes(self):
+        if self.net_cash_flow <= 0:
+            return 0
         role = self.roles["tax_payer"]
         tax_rate = role.get_tax_rate()
-        if self.net_cash_flow > 0:
-            self.taxes_payable = tax_rate * self.net_cash_flow
-        else:
-            self.taxes_payable = 0
-        return self.taxes_payable
+        return tax_rate * self.net_cash_flow
 
     def calc_dividends(self):
-        if self.net_cash_flow > 0:
-            distributable = self.net_cash_flow - self.taxes_payable
-            self.dividends_payable = self.p.rho * distributable
-        else:
-            self.dividends_payable = 0
-        return self.dividends_payable
+        if self.net_cash_flow <= 0:
+            return 0
+        return self.p.rho * (self.net_cash_flow - self.taxes_payable)
 
     def update_net_worth(self):
         payable = self.taxes_payable + self.dividends_payable
@@ -341,14 +337,16 @@ class FirmAgent(EcoAgent):
         return self.net_worth
 
     def pay_taxes(self):
-        tax_payer = self.roles["tax_payer"]
-        tax_payer.pay_taxes(self.taxes_payable)
-        self.taxes_payable = 0
+        if self.taxes_payable > 0:
+            role = self.roles["tax_payer"]
+            role.pay_taxes(self.taxes_payable)
+            self.taxes_payable = 0
 
     def pay_dividends(self):
-        issuer = self.roles["equity_issuer"]
-        issuer.distribute_dividends(self.dividends_payable)
-        self.dividends_payable = 0
+        if self.dividends_payable > 0:
+            role = self.roles["equity_issuer"]
+            role.distribute_dividends(self.dividends_payable)
+            self.dividends_payable = 0
 
     # History
 
@@ -373,12 +371,19 @@ class BankAgent(EcoAgent):
         # flows
         self.loan_interest = 0
         self.deposit_interest = 0
+        self.bond_interest = 0
+        self.reserve_interest = 0
+        self.cash_advance_interest = 0
         self.dividends = 0
+        self.taxes = 0
 
-        # prices
+        # choices
         self.deposit_rate = 0
+        self.taxes_payable = 0
+        self.dividends_payable = 0
 
-        # decisions
+        # indicators
+        self.profit = 0
         self.credit_capacity = 0
 
     def update_deposit_rate(self):
@@ -458,7 +463,7 @@ class BankAgent(EcoAgent):
             - self.cash_advance_interest
         )
 
-    def calc_profit_tax(self):
+    def calc_taxes(self):
         if self.profit <= 0:
             return 0
         role = self.roles["tax_payer"]
@@ -468,7 +473,7 @@ class BankAgent(EcoAgent):
     def calc_dividends(self):
         if self.profit <= 0:
             return 0
-        return self.p.rho * (self.profit - self.tax)
+        return self.p.rho * (self.profit - self.taxes)
 
 
 class GovernmentAgent(EcoAgent):
@@ -481,7 +486,10 @@ class GovernmentAgent(EcoAgent):
         # flows
         self.taxes = 0
 
-        # memory
+        # choices
+        self.tax_rate = 0.0
+
+        # indicators
         self.gdp = 0
 
 

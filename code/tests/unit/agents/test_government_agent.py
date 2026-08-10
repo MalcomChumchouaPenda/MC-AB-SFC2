@@ -33,7 +33,11 @@ def test_has_default_flows(govt):
     assert govt.taxes == 0
 
 
-def test_has_default_memory(govt):
+def test_has_default_choices(govt):
+    # Assert
+    assert govt.tax_rate == 0
+
+
+def test_has_default_indicators(govt):
     # Assert
     assert govt.gdp == 0
-

@@ -45,7 +45,6 @@ class CountrySpace(EcoSpace):
     def add_government(self, agent):
         return self.add_role(GovernmentRole, agent, "government")
 
-
     def assign_government(self, tax_payer, govt_role):
         tax_payer.government = govt_role
         self.graph.add_edge(govt_role, tax_payer)
@@ -215,6 +214,9 @@ class EquitySpace(EcoSpace):
 
     def add_equity_holder(self, household):
         return self.add_role(EquityHolderRole, household, "equity_holder")
+
+    def assign_equity_holder(self, holder, issuer, share):
+        self.graph.add_edge(holder, issuer, share=share)
 
     def distribute_dividends(self, issuer, amount):
         issuer.increase_flow("dividends", amount)

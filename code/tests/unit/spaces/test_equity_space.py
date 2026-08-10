@@ -60,6 +60,22 @@ def test_add_equity_issuer_creates_appropriate_role(space, monkeypatch):
     assert equity_issuer is space.add_role.return_value
 
 
+def test_assign_equity_holder_add_edge(space):
+    # Given
+    issuer = Mock()
+    holder = Mock()
+    graph = space.graph
+    graph.add_nodes_from([issuer, holder])
+
+    # When
+    space.assign_equity_holder(issuer, holder, 0.5)
+
+    # Then
+    assert len(graph.edges) == 1
+    assert graph.has_edge(holder, issuer)
+    assert graph[holder][issuer]["share"] == 0.5
+
+
 @pytest.fixture
 def issuer(space):
     # Given

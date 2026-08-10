@@ -12,14 +12,17 @@ class TaxPayerRole(EcoRole):
         self.government = None
 
     def get_tax_rate(self):
-        return self.space.tax_rate
+        return self.government.tax_rate
 
     def pay_taxes(self, amount):
         self.space.pay_taxes(self, self.government, amount)
 
 
 class GovernmentRole(EcoRole):
-    pass
+
+    @property
+    def tax_rate(self):
+        return self.agent.tax_rate
 
 
 class EmployerRole(EcoRole):

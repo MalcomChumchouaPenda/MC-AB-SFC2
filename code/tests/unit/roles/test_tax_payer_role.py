@@ -35,8 +35,8 @@ def test_has_government_reference(tax_payer):
 
 def test_get_tax_rate(tax_payer):
     # Given
-    country = tax_payer.space
-    country.tax_rate = 0.20
+    govt = Mock(tax_rate=0.20)
+    tax_payer.government = govt
 
     # When
     tax_rate = tax_payer.get_tax_rate()
@@ -56,4 +56,3 @@ def test_pay_taxes(tax_payer):
 
     # Then
     country.pay_taxes.assert_called_with(tax_payer, govt, 10)
-

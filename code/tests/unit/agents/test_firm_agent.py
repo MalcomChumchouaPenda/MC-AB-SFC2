@@ -44,14 +44,10 @@ def test_has_default_flows(firm):
     assert firm.dividends == 0
 
 
-def test_has_default_prices(firm):
+def test_has_default_choices(firm):
     # Assert
     assert firm.price == 0
     assert firm.wage_offer == 0
-
-
-def test_has_default_decisions(firm):
-    # Assert
     assert firm.expected_sales == 0
     assert firm.desired_labor == 0
     assert firm.desired_output == 0
@@ -61,26 +57,18 @@ def test_has_default_decisions(firm):
     assert firm.dividends_payable == 0
 
 
-def test_has_default_memory(firm):
+def test_has_default_indicators(firm):
     # Assert
+    assert firm.position == 0.0
+    assert firm.productivity == 0.0
+    assert firm.net_worth == 0.0
+    assert firm.net_cash_flow == 0.0
     assert firm.prev_sales == 0
     assert firm.prev_output == 0
     assert firm.prev_expected_sales == 0
     assert firm.prev_inventories == 0
     assert firm.prev_labor == 0
     assert firm.prev_desired_labor == 0
-
-
-def test_has_default_position(firm):
-    # Assert
-    assert firm.position == 0.0
-
-
-def test_has_default_indicators(firm):
-    # Assert
-    assert firm.productivity == 0.0
-    assert firm.net_worth == 0.0
-    assert firm.net_cash_flow == 0.0
 
 
 # ---------------------------------------------------
@@ -653,152 +641,91 @@ def test_request_loan_and_set_loan_demand(borrowing_firm):
 # ----------------------------------------------------
 
 
-@pytest.fixture
-def accounting_firm():
+@pytest.mark.parametrize("sales, expected", [(600, 200), (200, -200)])
+def test_calc_net_cash_flow(firm, sales, expected):
     # Given
-    firm = FirmAgent(model=Mock())
-    firm.sales = 1000
-    firm.productivity = 2
-    firm.wage_offer = 20
+    firm.sales = sales
+    firm.deposit_interest = 10
+    firm.loan_interest = 20
+    firm.wage_bill = 300
+    firm.rd = 90
+
+    # When
+    net_cash_flow = firm.calc_net_cash_flow()
+
+    # Then
+    assert net_cash_flow == expected
+
+
+def test_calc_profit(firm):
+    # Given
+    firm.net_cash_flow = 200
     firm.inventories = 60
     firm.prev_inventories = 50
-    firm.deposit_interest = 10
-    firm.loan_interest = 15
-    firm.wage_bill = 300
-    firm.rd = 100
-    return firm
-
-
-def test_calc_profit_computes_gross_profits(accounting_firm):
-    # Given
-    firm = accounting_firm
+    firm.productivity = 2
+    firm.wage_offer = 20
 
     # When
-    firm.calc_profit()
+    profit = firm.calc_profit()
 
     # Then
-    assert firm.profits == 695
+    assert profit == 300
 
 
-def test_calc_profit_computes_net_cash_flow(accounting_firm):
+@pytest.mark.parametrize("taxable, expected", [(100, 20), (-100, 0)])
+def test_calc_taxes(firm, taxable, expected):
     # Given
-    firm = accounting_firm
+    payer_role = Mock()
+    payer_role.get_tax_rate.return_value = 0.20
+    firm.net_cash_flow = taxable
+    firm.roles["tax_payer"] = payer_role
 
     # When
-    firm.calc_profit()
+    taxes = firm.calc_taxes()
 
     # Then
-    assert firm.net_cash_flow == 595
+    assert taxes == expected
 
 
-def test_calc_profit_wth_loss(accounting_firm):
+@pytest.mark.parametrize("taxable, taxes, expected", [(100, 20, 40), (-100, 0, 0)])
+def test_calc_dividends(firm, taxable, taxes, expected):
     # Given
-    firm = accounting_firm
-    firm.sales = 200
+    firm.net_cash_flow = taxable
+    firm.taxes_payable = taxes
+    firm.p.rho = 0.5
 
     # When
-    firm.calc_profit()
+    dividends = firm.calc_dividends()
 
     # Then
-    assert firm.profits == -105
-    assert firm.net_cash_flow == -205
+    assert dividends == pytest.approx(expected)
 
 
-@pytest.fixture
-def firm_as_taxpayer():
+def test_compute_profit_distribution(firm):
     # Given
-    role = Mock()
-    role.get_tax_rate.return_value = 0.20
-    firm = FirmAgent(model=Mock())
-    firm.roles["tax_payer"] = role
-    return firm
-
-
-def test_calc_taxes_on_positive_net_cash_flow(firm_as_taxpayer):
-    # Given
-    firm = firm_as_taxpayer
-    firm.net_cash_flow = 100
+    firm.calc_net_cash_flow = Mock(return_value=90)
+    firm.calc_profit = Mock(return_value=100)
+    firm.calc_taxes = Mock(return_value=20)
+    firm.calc_dividends = Mock(return_value=30)
 
     # When
-    firm.calc_taxes()
+    firm.compute_profit_distribution()
 
     # Then
+    assert firm.profit == 100
+    assert firm.net_cash_flow == 90
     assert firm.taxes_payable == 20
+    assert firm.dividends_payable == 30
 
 
-def test_pays_no_tax_on_negative_net_cash_flow(firm_as_taxpayer):
+def test_update_net_worth(firm):
     # Given
-    firm = firm_as_taxpayer
-    firm.net_cash_flow = -100
-
-    # When
-    firm.calc_taxes()
-
-    # Then
-    assert firm.taxes_payable == 0
-
-
-def test_pay_taxes(firm_as_taxpayer):
-    # Given
-    firm = firm_as_taxpayer
-    firm.taxes_payable = 100
-    tax_payer = firm.roles["tax_payer"]
-
-    # When
-    firm.pay_taxes()
-
-    # Then
-    tax_payer.pay_taxes.assert_called_once_with(100)
-    assert firm.taxes_payable == 0
-
-
-@pytest.fixture
-def firm_as_equityissuer():
-    # Given
-    tax_payer, issuer = Mock(), Mock()
-    tax_payer.get_tax_rate.return_value = 0.20
-    firm = FirmAgent(model=Mock())
-    firm.roles["tax_payer"] = tax_payer
-    firm.roles["equity_issuer"] = issuer
-    return firm
-
-
-def test_calc_dividends_on_positive_net_cash_flow(firm_as_equityissuer):
-    # Given
-    firm = firm_as_equityissuer
-    firm.net_cash_flow = 100
-    firm.taxes_payable = 20
-    firm.p.rho = 0.5
-
-    # When
-    firm.calc_dividends()
-
-    # Then
-    assert firm.dividends_payable == 40
-
-
-def test_pays_no_dividends_on_negative_net_cash_flow(firm_as_equityissuer):
-    # Given
-    firm = firm_as_equityissuer
-    firm.net_cash_flow = -100
-    firm.taxes_payable = 0
-    firm.p.rho = 0.5
-
-    # When
-    firm.calc_dividends()
-
-    # Then
-    assert firm.dividends_payable == 0
-
-
-def test_update_net_worth(firm_as_equityissuer):
-    # Given
-    firm = firm_as_equityissuer
+    issuer = Mock()
     firm.net_worth = 1000
     firm.net_cash_flow = 500
     firm.taxes_payable = 100
     firm.dividends_payable = 200
-    issuer = firm.roles["equity_issuer"]
+    firm.roles["equity_issuer"] = issuer
 
     # When
     firm.update_net_worth()
@@ -808,11 +735,38 @@ def test_update_net_worth(firm_as_equityissuer):
     assert firm.net_worth == pytest.approx(1200)
 
 
-def test_pay_dividends(firm_as_equityissuer):
+def test_pay_taxes(firm):
     # Given
-    firm = firm_as_equityissuer
+    tax_payer = Mock()
+    firm.taxes_payable = 100
+    firm.roles["tax_payer"] = tax_payer
+
+    # When
+    firm.pay_taxes()
+
+    # Then
+    tax_payer.pay_taxes.assert_called_once_with(100)
+    assert firm.taxes_payable == 0
+
+
+def test_pay_no_taxes(firm):
+    # Given
+    tax_payer = Mock()
+    firm.taxes_payable = 0
+    firm.roles["tax_payer"] = tax_payer
+
+    # When
+    firm.pay_taxes()
+
+    # Then
+    tax_payer.pay_taxes.assert_not_called()
+
+
+def test_pay_dividends(firm):
+    # Given
+    issuer = Mock()
     firm.dividends_payable = 200
-    issuer = firm.roles["equity_issuer"]
+    firm.roles["equity_issuer"] = issuer
 
     # When
     firm.pay_dividends()
@@ -820,6 +774,19 @@ def test_pay_dividends(firm_as_equityissuer):
     # Then
     issuer.distribute_dividends.assert_called_once_with(200)
     assert firm.dividends_payable == 0
+
+
+def test_pay_no_dividends(firm):
+    # Given
+    issuer = Mock()
+    firm.dividends_payable = 0
+    firm.roles["equity_issuer"] = issuer
+
+    # When
+    firm.pay_dividends()
+
+    # Then
+    issuer.distribute_dividends.assert_not_called()
 
 
 # ---------------------------------------------------

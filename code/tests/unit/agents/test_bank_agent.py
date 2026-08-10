@@ -36,17 +36,23 @@ def test_has_default_flows(bank):
     # Assert
     assert bank.loan_interest == 0
     assert bank.deposit_interest == 0
+    assert bank.bond_interest == 0
+    assert bank.reserve_interest == 0
+    assert bank.cash_advance_interest == 0
     assert bank.dividends == 0
 
 
-def test_has_default_prices(bank):
+def test_has_default_choices(bank):
     # Assert
     assert bank.deposit_rate == 0
+    assert bank.taxes_payable == 0
+    assert bank.dividends_payable == 0
 
 
-def test_has_default_credit_capacity(bank):
+def test_has_default_indicators(bank):
     # Assert
     assert bank.credit_capacity == 0
+    assert bank.profit == 0
 
 
 # ---------------------------------------------------
@@ -345,7 +351,7 @@ def test_calc_profit():
 
 
 @pytest.mark.parametrize("profit, expected", [(100, 20), (0, 0), (-50, 0)])
-def test_calc_profit_tax(profit, expected):
+def test_calc_taxes(profit, expected):
     # Given
     role = Mock()
     role.get_tax_rate.return_value = 0.20
@@ -354,10 +360,10 @@ def test_calc_profit_tax(profit, expected):
     bank.profit = profit
 
     # When
-    tax = bank.calc_profit_tax()
+    taxes = bank.calc_taxes()
 
     # Then
-    assert tax == expected
+    assert taxes == expected
 
 
 def test_calc_dividends():
@@ -366,7 +372,7 @@ def test_calc_dividends():
     model.p.rho = 0.5
     bank = BankAgent(model)
     bank.profit = 100
-    bank.tax = 20
+    bank.taxes = 20
 
     # When
     dividends = bank.calc_dividends()

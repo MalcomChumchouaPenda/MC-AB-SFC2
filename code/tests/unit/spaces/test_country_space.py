@@ -29,11 +29,6 @@ def test_contains_local_markets(country):
     assert isinstance(country.markets, dict)
 
 
-def test_has_default_tax_rate(country):
-    # Assert
-    assert country.tax_rate == 0
-
-
 # ---------------------------------------------------
 # BEHAVIORAL TESTS
 # ----------------------------------------------------
@@ -104,7 +99,7 @@ def test_assign_government_add_edge(country):
     assert tax_payer.government is govt
 
 
-def test_pay_taxes_to_government(country):
+def test_pay_tax_to_government(country):
     # Given
     govt = Mock()
     tax_payer = Mock()
