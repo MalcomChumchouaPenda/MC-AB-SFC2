@@ -29,6 +29,23 @@ class MonetaryUnionSpace(EcoSpace):
         self.markets = {}
 
 
+    def add_commercial_bank(self, agent):
+        return self.add_role(CommercialBankRole, agent, "commercial_bank")
+
+    def add_central_bank(self, agent):
+        return self.add_role(CentralBankRole, agent, "central_bank")
+
+    def assign_central_bank(self, bank_role, central_role):
+        bank_role.central_bank = central_role
+        self.graph.add_edge(central_role, bank_role)
+
+    def request_cash_advances(self, bank_role, central_role, amount):
+        bank_role.increase_stock("reserves", amount)
+        bank_role.increase_stock("cash_advances", amount)
+        central_role.increase_stock("reserves", amount)
+        central_role.increase_stock("cash_advances", amount)
+
+        
 class CountrySpace(EcoSpace):
 
     def setup(self):
@@ -87,23 +104,6 @@ class CountrySpace(EcoSpace):
             holder.increase_stock("equity", value)
 
 
-class BankSystem(EcoSpace):
-
-    def add_commercial_bank(self, agent):
-        return self.add_role(CommercialBankRole, agent, "commercial_bank")
-
-    def add_central_bank(self, agent):
-        return self.add_role(CentralBankRole, agent, "central_bank")
-
-    def assign_central_bank(self, bank_role, central_role):
-        bank_role.central_bank = central_role
-        self.graph.add_edge(central_role, bank_role)
-
-    def request_cash_advances(self, bank_role, central_role, amount):
-        bank_role.increase_stock("reserves", amount)
-        bank_role.increase_stock("cash_advances", amount)
-        central_role.increase_stock("reserves", amount)
-        central_role.increase_stock("cash_advances", amount)
 
 
 class GoodsMarket(EcoSpace):

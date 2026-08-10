@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import Mock
 from mc_ab_sfc.agents import BankAgent, FirmAgent, CentralBankAgent
-from mc_ab_sfc.spaces import DepositMarket, BankSystem
+from mc_ab_sfc.spaces import DepositMarket, MonetaryUnionSpace
 
 
 @pytest.fixture
@@ -13,9 +13,9 @@ def model():
 
 
 @pytest.fixture
-def bank_system(model):
+def monetary_union(model):
     # Given
-    return BankSystem(model)
+    return MonetaryUnionSpace(model)
 
 
 @pytest.fixture
@@ -25,20 +25,20 @@ def deposit_market(model):
 
 
 @pytest.fixture
-def central_bank(model, bank_system):
+def central_bank(model, monetary_union):
     # Given
     central_bank = CentralBankAgent(model)
-    bank_system.add_central_bank(central_bank)
+    monetary_union.add_central_bank(central_bank)
     return central_bank
 
 
 @pytest.fixture
-def bank(model, central_bank, bank_system, deposit_market):
+def bank(model, central_bank, monetary_union, deposit_market):
     # Given
     bank = BankAgent(model)
     central_role = central_bank.roles["central_bank"]
-    bank_role = bank_system.add_commercial_bank(bank)
-    bank_system.assign_central_bank(bank_role, central_role)
+    bank_role = monetary_union.add_commercial_bank(bank)
+    monetary_union.assign_central_bank(bank_role, central_role)
     deposit_market.add_deposit_bank(bank)
     return bank
 

@@ -49,10 +49,10 @@ def test_request_cash_advances(bank_role):
     # Given
     central_bank = Mock()
     bank_role.central_bank = central_bank
-    bank_system = bank_role.space
+    monetary_union = bank_role.space
 
     # When
     bank_role.request_cash_advances(100)
 
     # Then
-    bank_system.request_cash_advances(bank_role, central_bank, 100)
+    monetary_union.request_cash_advances(bank_role, central_bank, 100)
