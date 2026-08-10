@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import Mock
-from mc_ab_sfc.agents import FirmAgent, GovernmentAgent
+from mc_ab_sfc.agents import FirmAgent, BankAgent, GovernmentAgent
 from mc_ab_sfc.spaces import CountrySpace
 
 
@@ -10,6 +10,20 @@ def model():
     model = Mock()
     model.p.rho = 0.10
     return model
+
+
+@pytest.fixture
+def govt(model):
+    # Given
+    govt = GovernmentAgent(model)
+    govt.tax_rate = 0.25
+    return govt
+
+
+@pytest.fixture
+def country(model):
+    # Given
+    return CountrySpace(model)
 
 
 @pytest.fixture
@@ -28,20 +42,6 @@ def firm(model):
     return firm
 
 
-@pytest.fixture
-def govt(model):
-    # Given
-    govt = GovernmentAgent(model)
-    govt.tax_rate = 0.25
-    return govt
-
-
-@pytest.fixture
-def country(model):
-    # Given
-    return CountrySpace(model)
-
-
 def test_firm_compute_profit_distribution(firm, govt, country):
     # Given
     firm_role = country.add_tax_payer(firm)
@@ -56,3 +56,31 @@ def test_firm_compute_profit_distribution(firm, govt, country):
     assert firm.net_cash_flow == pytest.approx(600)
     assert firm.taxes_payable == pytest.approx(150.0)
     assert firm.dividends_payable == pytest.approx(45.0)
+
+
+@pytest.fixture
+def bank(model):
+    # Given
+    bank = BankAgent(model)
+    bank.loan_interest = 100
+    bank.bond_interest = 20
+    bank.reserve_interest = 10
+    bank.bad_debt = 10
+    bank.deposit_interest = 30
+    bank.cash_advance_interest = 10
+    return bank
+
+
+def test_bank_compute_profit_distribution(bank, govt, country):
+    # Given
+    bank_role = country.add_tax_payer(bank)
+    govt_role = country.add_government(govt)
+    country.assign_government(bank_role, govt_role)
+
+    # When
+    bank.compute_profit_distribution()
+
+    # Then
+    assert bank.profit == pytest.approx(80)
+    assert bank.taxes_payable == pytest.approx(20)
+    assert bank.dividends_payable == pytest.approx(6)

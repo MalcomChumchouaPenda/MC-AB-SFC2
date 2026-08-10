@@ -52,8 +52,12 @@ class CountrySpace(EcoSpace):
     def pay_taxes(self, tax_payer, govt_role, amount):
         govt_role.increase_stock("reserves", amount)
         govt_role.increase_flow("taxes", amount)
-        tax_payer.decrease_stock("cash", amount)
-        tax_payer.increase_flow("taxes", amount)
+        if isinstance(tax_payer.agent, BankAgent):
+            tax_payer.decrease_stock("reserves", amount)
+            tax_payer.increase_flow("taxes", amount)
+        else:
+            tax_payer.decrease_stock("cash", amount)
+            tax_payer.increase_flow("taxes", amount)
 
 
 class BankSystem(EcoSpace):
@@ -219,8 +223,9 @@ class EquitySpace(EcoSpace):
         self.graph.add_edge(holder, issuer, share=share)
 
     def distribute_dividends(self, issuer, amount):
+        source = "reserves" if isinstance(issuer.agent, BankAgent) else "cash"
         issuer.increase_flow("dividends", amount)
-        issuer.decrease_stock("cash", amount)
+        issuer.decrease_stock(source, amount)
         for _, holder, data in self.graph.edges(issuer, data=True):
             dividend = amount * data["share"]
             holder.increase_flow("dividends", dividend)

@@ -92,7 +92,31 @@ def holders(space):
     return holders
 
 
-def test_distributes_dividends(space, issuer, holders):
+class FakeAgent:
+    pass
+
+
+def test_distributes_dividends_with_reserves(space, issuer, holders, monkeypatch):
+    # Given
+    issuer.agent = FakeAgent()
+    graph = space.graph
+    graph.add_edge(issuer, holders[0], share=0.6)
+    graph.add_edge(issuer, holders[1], share=0.4)
+    monkeypatch.setattr("mc_ab_sfc.spaces.BankAgent", FakeAgent)
+
+    # When
+    space.distribute_dividends(issuer, 200)
+
+    # Then
+    issuer.increase_flow.assert_called_with("dividends", 200)
+    issuer.decrease_stock.assert_called_with("reserves", 200)
+    holders[0].increase_flow.assert_called_with("dividends", 120)
+    holders[0].increase_stock.assert_called_with("cash", 120)
+    holders[1].increase_flow.assert_called_with("dividends", 80)
+    holders[1].increase_stock.assert_called_with("cash", 80)
+
+
+def test_distributes_dividends_with_cash(space, issuer, holders):
     # Given
     graph = space.graph
     graph.add_edge(issuer, holders[0], share=0.6)

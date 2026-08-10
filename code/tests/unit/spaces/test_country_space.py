@@ -99,7 +99,27 @@ def test_assign_government_add_edge(country):
     assert tax_payer.government is govt
 
 
-def test_pay_tax_to_government(country):
+class FakeAgent:
+    pass
+
+
+def test_pay_taxes_with_reserves(country, monkeypatch):
+    # Given
+    govt = Mock()
+    tax_payer = Mock(agent=FakeAgent())
+    monkeypatch.setattr("mc_ab_sfc.spaces.BankAgent", FakeAgent)
+
+    # When
+    country.pay_taxes(tax_payer, govt, 100)
+
+    # Then
+    govt.increase_flow.assert_any_call("taxes", 100)
+    govt.increase_stock.assert_any_call("reserves", 100)
+    tax_payer.increase_flow.assert_called_with("taxes", 100)
+    tax_payer.decrease_stock.assert_called_with("reserves", 100)
+
+
+def test_pay_tax_with_reserves(country):
     # Given
     govt = Mock()
     tax_payer = Mock()

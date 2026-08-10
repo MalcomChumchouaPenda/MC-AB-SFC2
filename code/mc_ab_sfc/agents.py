@@ -384,6 +384,7 @@ class BankAgent(EcoAgent):
 
         # indicators
         self.profit = 0
+        self.net_worth = 0
         self.credit_capacity = 0
 
     def update_deposit_rate(self):
@@ -453,6 +454,11 @@ class BankAgent(EcoAgent):
     def calc_bond_purchases_probability(self, issuer):
         return math.exp(-self.p.iota_b * issuer.bonds / issuer.gdp)
 
+    def compute_profit_distribution(self):
+        self.profit = self.calc_profit()
+        self.taxes_payable = self.calc_taxes()
+        self.dividends_payable = self.calc_dividends()
+
     def calc_profit(self):
         return (
             self.loan_interest
@@ -473,7 +479,24 @@ class BankAgent(EcoAgent):
     def calc_dividends(self):
         if self.profit <= 0:
             return 0
-        return self.p.rho * (self.profit - self.taxes)
+        return self.p.rho * (self.profit - self.taxes_payable)
+
+    def update_net_worth(self):
+        self.net_worth += self.profit - self.taxes_payable - self.dividends_payable
+        self.roles["equity_issuer"].update_equity_holdings()
+        return self.net_worth
+
+    def pay_taxes(self):
+        if self.taxes_payable > 0:
+            role = self.roles["tax_payer"]
+            role.pay_taxes(self.taxes_payable)
+            self.taxes_payable = 0
+
+    def pay_dividends(self):
+        if self.dividends_payable > 0:
+            role = self.roles["equity_issuer"]
+            role.distribute_dividends(self.dividends_payable)
+            self.dividends_payable = 0
 
 
 class GovernmentAgent(EcoAgent):

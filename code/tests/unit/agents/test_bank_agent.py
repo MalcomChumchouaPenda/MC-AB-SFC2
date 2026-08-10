@@ -52,6 +52,7 @@ def test_has_default_choices(bank):
 def test_has_default_indicators(bank):
     # Assert
     assert bank.credit_capacity == 0
+    assert bank.net_worth == 0
     assert bank.profit == 0
 
 
@@ -372,10 +373,96 @@ def test_calc_dividends():
     model.p.rho = 0.5
     bank = BankAgent(model)
     bank.profit = 100
-    bank.taxes = 20
+    bank.taxes_payable = 20
 
     # When
     dividends = bank.calc_dividends()
 
     # Then
     assert dividends == 40
+
+
+def test_compute_profit_distribution(bank):
+    # Given
+    bank.calc_profit = Mock(return_value=100)
+    bank.calc_taxes = Mock(return_value=20)
+    bank.calc_dividends = Mock(return_value=30)
+
+    # When
+    bank.compute_profit_distribution()
+
+    # Then
+    assert bank.profit == 100
+    assert bank.taxes_payable == 20
+    assert bank.dividends_payable == 30
+
+
+def test_update_net_worth(bank):
+    # Given
+    issuer = Mock()
+    bank.profit = 500
+    bank.net_worth = 500
+    bank.taxes_payable = 50
+    bank.dividends_payable = 100
+    bank.roles["equity_issuer"] = issuer
+
+    # When
+    bank.update_net_worth()
+
+    # Then
+    issuer.update_equity_holdings.assert_called_once_with()
+    assert bank.net_worth == pytest.approx(850)
+
+
+def test_pay_taxes(bank):
+    # Given
+    tax_payer = Mock()
+    bank.taxes_payable = 50
+    bank.roles["tax_payer"] = tax_payer
+
+    # When
+    bank.pay_taxes()
+
+    # Then
+    tax_payer.pay_taxes.assert_called_once_with(50)
+    assert bank.taxes_payable == 0
+
+
+def test_pay_no_taxes(bank):
+    # Given
+    tax_payer = Mock()
+    bank.taxes_payable = 0
+    bank.roles["tax_payer"] = tax_payer
+
+    # When
+    bank.pay_taxes()
+
+    # Then
+    tax_payer.pay_taxes.assert_not_called()
+
+
+def test_pay_dividends(bank):
+    # Given
+    issuer = Mock()
+    bank.dividends_payable = 100
+    bank.roles["equity_issuer"] = issuer
+
+    # When
+    bank.pay_dividends()
+
+    # Then
+    issuer.distribute_dividends.assert_called_once_with(100)
+    assert bank.dividends_payable == 0
+
+
+def test_pay_no_dividends(bank):
+    # Given
+    issuer = Mock()
+    bank.dividends_payable = 0
+    bank.roles["equity_issuer"] = issuer
+
+    # When
+    bank.pay_dividends()
+
+    # Then
+    issuer.distribute_dividends.assert_not_called()
