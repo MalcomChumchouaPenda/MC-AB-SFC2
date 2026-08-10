@@ -86,3 +86,33 @@ def test_buy_all_remaining_bonds(bond_buyer, bond_issuers):
     # Then
     for bond_issuer in bond_issuers:
         bond_buyer.buy_bonds.assert_any_call(bond_issuer, 100)
+
+
+def test_calc_profit():
+    # Given
+    central_bank = CentralBankAgent(model=Mock())
+    central_bank.bond_interest = 100
+    central_bank.cash_advance_interest = 40
+    central_bank.reserve_interest = 20
+
+    # When
+    profit = central_bank.calc_profit()
+
+    # Then
+    assert profit == 120
+
+
+# def test_pays_profits_to_government():
+#     # Given
+
+#     central_bank = CentralBankAgent(model=Mock())
+
+#     central_bank = CentralBankAgent()
+#     government = GovernmentAgent()
+#     central_bank.net_cash_flow = 120
+
+#     central_bank.pay_profits(government)
+
+#     assert government.cash == 120
+
+#     assert central_bank.net_cash_flow == 0

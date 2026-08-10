@@ -28,7 +28,7 @@ def bank(model):
     bank = BankAgent(model)
     bank.deposits = 1000
     bank.reserves = 300
-    bank.bonds = 0    
+    bank.bonds = 0
     return bank
 
 
@@ -36,7 +36,7 @@ def bank(model):
 def central_bank(model):
     # Given
     central_bank = CentralBankAgent(model)
-    central_bank.reserves = 1000  
+    central_bank.reserves = 1000
     return central_bank
 
 

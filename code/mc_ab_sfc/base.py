@@ -14,7 +14,6 @@ class EcoAgent(ap.Agent):
         self.roles = {}
 
 
-
 class EcoRole(ap.AgentNode):
     """
     Classe de base des rôles économiques.

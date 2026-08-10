@@ -520,7 +520,7 @@ class GovernmentAgent(EcoAgent):
         self.gdp = 0
 
     def update_history(self):
-        role = self.roles['government']
+        role = self.roles["government"]
         self.gdp = role.get_gdp()
 
 
@@ -554,3 +554,5 @@ class CentralBankAgent(EcoAgent):
             print(issuer, purchase)
             role.buy_bonds(issuer, purchase)
 
+    def calc_profit(self):
+        return self.bond_interest + self.cash_advance_interest - self.reserve_interest

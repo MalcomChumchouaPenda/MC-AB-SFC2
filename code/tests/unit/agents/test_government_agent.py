@@ -48,7 +48,7 @@ def test_update_history():
     govt_role = Mock()
     govt_role.get_gdp.return_value = 120
     govt = GovernmentAgent(model=Mock())
-    govt.roles['government'] = govt_role
+    govt.roles["government"] = govt_role
     govt.gdp = 100
 
     # When
@@ -56,4 +56,3 @@ def test_update_history():
 
     # Then
     assert govt.gdp == 120
-
