@@ -32,6 +32,7 @@ def test_has_default_flows(govt):
     # Assert
     assert govt.taxes == 0
     assert govt.profit == 0
+    assert govt.public_spending == 0
 
 
 def test_has_default_choices(govt):
@@ -44,11 +45,27 @@ def test_has_default_indicators(govt):
     assert govt.gdp == 0
 
 
-def test_update_history():
+def test_pays_public_transfers(govt):
+    # Given
+    households = [Mock() for _ in range(3)]
+    govt_role = Mock()
+    govt_role.get_households.return_value = households
+    govt.roles["government"] = govt_role
+    govt.public_spending = 300
+
+    # When
+    govt.pay_public_transfers()
+
+    # Then
+    action = govt_role.pay_public_transfers
+    for household in households:
+        action.assert_any_call(household, 100)
+
+
+def test_update_history(govt):
     # Given
     govt_role = Mock()
     govt_role.get_gdp.return_value = 120
-    govt = GovernmentAgent(model=Mock())
     govt.roles["government"] = govt_role
     govt.gdp = 100
 

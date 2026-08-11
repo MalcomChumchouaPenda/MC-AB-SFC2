@@ -42,3 +42,29 @@ def test_get_gdp(govt_role):
 
     # Assert
     assert gdp == 100
+
+
+def test_get_households(govt_role):
+    # Given
+    households = [Mock() for _ in range(10)]
+    country = govt_role.space
+    country.get_households.return_value = households
+
+    # When
+    result = govt_role.get_households()
+
+    # Assert
+    assert result == households
+
+
+def test_pay_public_transfers(govt_role):
+    # Given
+    household_role = Mock()
+    country = govt_role.space
+
+    # When
+    govt_role.pay_public_transfers(household_role, 100)
+
+    # Assert
+    action = country.pay_public_transfers
+    action.assert_called_with(govt_role, household_role, 100)

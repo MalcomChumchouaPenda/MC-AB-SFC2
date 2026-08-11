@@ -250,7 +250,7 @@ def test_assign_equity_holder_to_equity_issuer(country):
 # ----------------------------------------------------
 
 
-class FakeBankAgent:
+class FakeBankAgent(Mock):
     pass
 
 
@@ -377,6 +377,26 @@ def test_update_equity_holdings(country, issuer, holders):
     holders[1].increase_stock.assert_called_once_with("equity", 480)
 
 
+class FakeHouseholdAgent(Mock):
+    pass
+
+
+def test_get_households_returns_household_agent_roles(country, monkeypatch):
+    # Given
+    monkeypatch.setattr("mc_ab_sfc.spaces.TaxPayerRole", FakePayerRole)
+    monkeypatch.setattr("mc_ab_sfc.spaces.HouseholdAgent", FakeHouseholdAgent)
+    household_roles = [FakePayerRole(agent=FakeHouseholdAgent()) for _ in range(6)]
+    payer_roles = [FakePayerRole() for _ in range(5)]
+    other_roles = [Mock() for _ in range(5)]
+    country.graph.add_nodes_from(household_roles + payer_roles + other_roles)
+
+    # When
+    result = country.get_households()
+
+    # Then
+    assert result == household_roles
+
+
 def test_transfer_profit_to_government(country):
     # Given
     cb_role, govt_role = Mock(), Mock()
@@ -390,6 +410,21 @@ def test_transfer_profit_to_government(country):
     cb_role.increase_flow.assert_called_once_with("profit", 100)
     govt_role.increase_stock.assert_called_once_with("reserves", 100)
     govt_role.increase_flow.assert_called_once_with("profit", 100)
+
+
+def test_pay_public_transfers_to_household(country):
+    # Given
+    govt_role = Mock()
+    household_role = Mock()
+
+    # When
+    country.pay_public_transfers(govt_role, household_role, 100)
+
+    # Then
+    household_role.increase_stock.assert_called_once_with("cash", 100)
+    household_role.increase_flow.assert_called_once_with("public_transfers", 100)
+    govt_role.decrease_stock.assert_called_once_with("reserves", 100)
+    govt_role.increase_flow.assert_called_once_with("public_spending", 100)
 
 
 def test_update_statistics_with_goods_market_stats_updates(country):

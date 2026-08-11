@@ -38,9 +38,9 @@ def test_has_default_flows(household):
     assert household.dividends == 0
     assert household.rd_income == 0
     assert household.taxes == 0
-    assert household.public_transfer == 0
     assert household.tradable_cons == 0
     assert household.non_tradable_cons == 0
+    assert household.public_transfers == 0
 
 
 def test_has_default_choices(household):
@@ -340,7 +340,7 @@ def test_calc_disposable_income(household_as_taxpayer):
     # Given
     household = household_as_taxpayer
     household.income = 200
-    household.public_transfer = 50
+    household.public_transfers = 50
     payer_role = household.roles["tax_payer"]
     payer_role.get_tax_rate.return_value = 0.2
 

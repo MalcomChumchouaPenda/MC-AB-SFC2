@@ -23,6 +23,12 @@ class GovernmentRole(EcoRole):
     def get_gdp(self):
         return self.space.gdp
 
+    def get_households(self):
+        return self.space.get_households()
+
+    def pay_public_transfers(self, household, transfers):
+        self.space.pay_public_transfers(self, household, transfers)
+
 
 class EmployerRole(EcoRole):
 

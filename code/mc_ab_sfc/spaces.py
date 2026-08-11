@@ -1,5 +1,5 @@
 from .base import EcoSpace
-from .agents import BankAgent
+from .agents import BankAgent, HouseholdAgent
 from .roles import (
     EmployerRole,
     WorkerRole,
@@ -147,6 +147,19 @@ class CountrySpace(EcoSpace):
         govt_role.increase_stock("reserves", amount)
         central_bank_role.increase_flow("profit", amount)
         central_bank_role.increase_stock("reserves", amount)
+
+    def get_households(self):
+        return [
+            role
+            for role in self.graph.nodes
+            if isinstance(role, TaxPayerRole) and isinstance(role.agent, HouseholdAgent)
+        ]
+
+    def pay_public_transfers(self, governement, household, amount):
+        governement.decrease_stock("reserves", amount)
+        governement.increase_flow("public_spending", amount)
+        household.increase_stock("cash", amount)
+        household.increase_flow("public_transfers", amount)
 
     def update_statistics(self):
         self.markets["goods"].update_statistics()

@@ -27,7 +27,7 @@ def household(model):
     household.deposit_interest = 20
     household.dividends = 30
     household.rd_income = 10
-    household.public_transfer = 50
+    household.public_transfers = 50
     return household
 
 

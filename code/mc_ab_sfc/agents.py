@@ -19,7 +19,7 @@ class HouseholdAgent(EcoAgent):
         self.dividends = 0
         self.rd_income = 0
         self.taxes = 0
-        self.public_transfer = 0
+        self.public_transfers = 0
         self.tradable_cons = 0
         self.non_tradable_cons = 0
 
@@ -86,7 +86,7 @@ class HouseholdAgent(EcoAgent):
     def calc_disposable_income(self):
         role = self.roles["tax_payer"]
         tax_rate = role.get_tax_rate()
-        return (1 - tax_rate) * self.income + self.public_transfer
+        return (1 - tax_rate) * self.income + self.public_transfers
 
     def calc_consumption(self):
         p = self.p
@@ -513,12 +513,20 @@ class GovernmentAgent(EcoAgent):
         # flows
         self.taxes = 0
         self.profit = 0
+        self.public_spending = 0
 
         # choices
         self.tax_rate = 0.0
 
         # indicators
         self.gdp = 0
+
+    def pay_public_transfers(self):
+        role = self.roles["government"]
+        households = role.get_households()
+        transfers = self.public_spending / len(households)
+        for household in households:
+            role.pay_public_transfers(household, transfers)
 
     def update_history(self):
         role = self.roles["government"]
