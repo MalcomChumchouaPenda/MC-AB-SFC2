@@ -15,44 +15,16 @@ def test_is_eco_space():
     assert issubclass(MonetaryUnionSpace, EcoSpace)
 
 
-def test_requires_model_and_central_bank():
+@pytest.fixture
+def union():
+    # Given
+    model = Mock()
+    return MonetaryUnionSpace(model)
+
+
+def test_has_central_bank_role(union):
     # Assert
-    expected = "missing 2 required positional arguments: "
-    expected += "'model' and 'central_bank'"
-    with pytest.raises(TypeError, match=expected):
-        MonetaryUnionSpace()
-
-
-class FakeCBRole(Mock):
-    pass
-
-
-@pytest.fixture
-def init_args(monkeypatch):
-    method = Mock(side_effect=lambda a, b, c: a())
-    monkeypatch.setattr(MonetaryUnionSpace, "add_role", method)
-    monkeypatch.setattr("mc_ab_sfc.spaces.UnionCentralBankRole", FakeCBRole)
-    model, union_cb = Mock(), Mock()
-    return model, union_cb
-
-
-def test_init_and_create_union_central_bank_role(init_args):
-    # Given
-    model, cb = init_args
-
-    # When
-    union = MonetaryUnionSpace(model, cb)
-
-    # Then
-    union.add_role.assert_any_call(FakeCBRole, cb, "central_bank")
-    assert isinstance(union.central_bank_role, FakeCBRole)
-
-
-@pytest.fixture
-def union(init_args):
-    # Given
-    model, cb = init_args
-    return MonetaryUnionSpace(model, cb)
+    assert union.central_bank_role is None
 
 
 def test_contains_countries(union):
@@ -87,6 +59,39 @@ def test_change_discount_rate(union):
     # Then
     for country in union.countries.values():
         assert country.discount_rate == 0.06
+
+
+# ---------------------------------------------------
+# ROLES MANAGEMENT
+# ----------------------------------------------------
+
+
+class FakeCBRole(Mock):
+    pass
+
+
+@pytest.fixture
+def union_with_roles():
+    # Given
+    model = Mock()
+    union = MonetaryUnionSpace(model)
+    union.add_role = Mock(side_effect=lambda a, b, c: a())
+    return union
+
+
+def test_add_central_bank_role(union_with_roles, monkeypatch):
+    # Given
+    central_bank = Mock()
+    union = union_with_roles
+    monkeypatch.setattr("mc_ab_sfc.spaces.UnionCentralBankRole", FakeCBRole)
+
+    # When
+    cb_role = union.add_central_bank(central_bank)
+
+    # Then
+    union.add_role.assert_any_call(FakeCBRole, central_bank, "central_bank")
+    assert isinstance(cb_role, FakeCBRole)
+    assert cb_role is union.central_bank_role
 
 
 # ---------------------------------------------------

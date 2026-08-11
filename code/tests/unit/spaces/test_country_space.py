@@ -53,7 +53,7 @@ def test_has_discount_rate(country):
 
 
 # ---------------------------------------------------
-# ROLES MANAGEMENT
+# ROLES MANAGEMENT TESTS
 # ----------------------------------------------------
 
 

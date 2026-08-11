@@ -23,17 +23,13 @@ from .roles import (
 
 class MonetaryUnionSpace(EcoSpace):
 
-    def __init__(self, model, central_bank, **kwargs):
+    def __init__(self, model, **kwargs):
         super().__init__(model, **kwargs)
-        self._create_cb_role(central_bank)
         self._discount_rate = 0.0
         self.average_inflation = 0
+        self.central_bank_role = None
         self.countries = {}
         self.markets = {}
-
-    def _create_cb_role(self, central_bank):
-        cb_role = self.add_role(UnionCentralBankRole, central_bank, "central_bank")
-        self.central_bank_role = cb_role
 
     @property
     def discount_rate(self):
@@ -45,6 +41,12 @@ class MonetaryUnionSpace(EcoSpace):
         for country in self.countries.values():
             country.discount_rate = rate
 
+
+    def add_central_bank(self, central_bank):
+        cb_role = self.add_role(UnionCentralBankRole, central_bank, "central_bank")
+        self.central_bank_role = cb_role
+        return cb_role
+    
     def calc_average_inflation(self):
         countries = self.countries
         countries_gdps = [c.gdp for c in countries.values()]

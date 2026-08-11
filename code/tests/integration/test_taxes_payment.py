@@ -1,12 +1,7 @@
 import pytest
 from unittest.mock import Mock
 from mc_ab_sfc.spaces import CountrySpace
-from mc_ab_sfc.agents import (
-    HouseholdAgent,
-    FirmAgent,
-    BankAgent,
-    GovernmentAgent
-)
+from mc_ab_sfc.agents import HouseholdAgent, FirmAgent, BankAgent, GovernmentAgent
 
 
 @pytest.fixture
@@ -55,8 +50,6 @@ def test_household_pay_taxes(household, govt, country):
     assert household.cash == 940
     assert govt.taxes == 60
     assert govt.reserves == 60
-
-
 
 
 @pytest.fixture
