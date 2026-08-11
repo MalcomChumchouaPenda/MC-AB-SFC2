@@ -50,5 +50,4 @@ def test_transfer_profit(role):
     role.transfer_profit(100)
 
     # Then
-    country.transfer_profit(role,  100)
-    
+    country.transfer_profit(role, 100)

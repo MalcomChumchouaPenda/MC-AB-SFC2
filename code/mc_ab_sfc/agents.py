@@ -567,7 +567,7 @@ class CentralBankAgent(EcoAgent):
 
     def pay_profit(self):
         profit = self.calc_profit()
-        role = self.roles['central_bank']
+        role = self.roles["central_bank"]
         role.transfer_profit(profit)
 
     def calc_profit(self):

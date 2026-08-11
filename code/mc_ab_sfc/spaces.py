@@ -41,12 +41,11 @@ class MonetaryUnionSpace(EcoSpace):
         for country in self.countries.values():
             country.discount_rate = rate
 
-
     def add_central_bank(self, central_bank):
         cb_role = self.add_role(UnionCentralBankRole, central_bank, "central_bank")
         self.central_bank_role = cb_role
         return cb_role
-    
+
     def calc_average_inflation(self):
         countries = self.countries
         countries_gdps = [c.gdp for c in countries.values()]

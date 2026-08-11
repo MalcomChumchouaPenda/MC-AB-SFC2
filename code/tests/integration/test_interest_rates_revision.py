@@ -25,7 +25,7 @@ def central_bank(model):
 def union(model):
     union = MonetaryUnionSpace(model)
     union.average_inflation = 0.04
-    union.countries = {i:CountrySpace(model) for i in range(5)}
+    union.countries = {i: CountrySpace(model) for i in range(5)}
     return union
 
 
@@ -40,4 +40,3 @@ def test_central_bank_updates_discount_rate(central_bank, union):
     assert union.discount_rate == pytest.approx(0.04)
     for country in union.countries.values():
         assert country.discount_rate == pytest.approx(0.04)
-

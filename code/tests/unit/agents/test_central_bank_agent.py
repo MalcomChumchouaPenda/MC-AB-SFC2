@@ -127,7 +127,7 @@ def test_pay_profit_to_government():
     # Given
     cb_role, model = Mock(), Mock()
     central_bank = CentralBankAgent(model)
-    central_bank.roles['central_bank'] = cb_role
+    central_bank.roles["central_bank"] = cb_role
     central_bank.calc_profit = Mock(return_value=100)
 
     # When
@@ -136,7 +136,6 @@ def test_pay_profit_to_government():
     # Then
     central_bank.calc_profit.assert_called_with()
     cb_role.transfer_profit.assert_called_with(100)
-    
 
 
 def test_update_history():

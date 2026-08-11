@@ -20,7 +20,7 @@ def govt(model):
 @pytest.fixture
 def central_bank(model):
     # Given
-    central_bank = CentralBankAgent(model)    
+    central_bank = CentralBankAgent(model)
     central_bank.bond_interest = 100
     central_bank.cash_advance_interest = 50
     central_bank.reserve_interest = 20
@@ -46,5 +46,3 @@ def test_central_bank_transfer_profits(govt, central_bank, country):
     assert central_bank.reserves == 130
     assert govt.profit == 130
     assert govt.reserves == 130
-
-
