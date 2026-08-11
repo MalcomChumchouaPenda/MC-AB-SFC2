@@ -544,6 +544,35 @@ class GovernmentAgent(EcoAgent):
         average_productivity = role.get_average_productivity()
         return average_price * average_productivity * self.prev_public_spending
 
+    def update_fiscal_policy(self):
+        random = self.model.random
+        variation = random.uniform(0, self.p.delta)
+        deficit_ratio = self.budget_deficit / self.gdp
+        if deficit_ratio >= self.dmax:
+            if self.desired_public_spending <= self.public_spending:
+                self.public_spending *= 1 - variation
+                self.tax_rate *= 1 + variation
+
+            elif self.desired_public_spending > self.public_spending:
+                self.tax_rate *= 1 + variation
+
+        else:
+            if self.desired_public_spending <= self.public_spending:
+                self.public_spending *= 1 - variation
+                self.tax_rate *= 1 - variation
+            elif self.desired_public_spending > self.public_spending:
+                self.public_spending *= 1 + variation
+
+    def apply_tax_rate_bounds(self):
+        self.tax_rate = max(self.p.tax_min, self.tax_rate)
+        self.tax_rate = min(self.p.tax_max, self.tax_rate)
+
+    def apply_public_spending_bounds(self):
+        minimum = self.p.g_min * self.gdp
+        maximum = self.p.g_max * self.gdp
+        self.public_spending = max(minimum, self.public_spending)
+        self.public_spending = min(maximum, self.public_spending)
+
     def update_history(self):
         role = self.roles["government"]
         self.gdp = role.get_gdp()
