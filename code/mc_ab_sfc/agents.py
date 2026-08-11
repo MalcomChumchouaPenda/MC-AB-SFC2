@@ -521,6 +521,9 @@ class GovernmentAgent(EcoAgent):
 
         # indicators
         self.gdp = 0
+        self.budget_deficit = 0
+        self.budget_surplus = 0
+
 
     def pay_public_transfers(self):
         role = self.roles["government"]
@@ -528,6 +531,12 @@ class GovernmentAgent(EcoAgent):
         transfers = self.desired_public_spending / len(households)
         for household in households:
             role.pay_public_transfers(household, transfers)
+
+    def calc_budget_balance(self):
+        balance = self.taxes - self.public_spending - self.bond_interest
+        self.budget_deficit = max(0, -balance)
+        self.budget_surplus = max(0, balance)
+        return balance
 
     def update_history(self):
         role = self.roles["government"]

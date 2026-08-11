@@ -44,6 +44,8 @@ def test_has_default_choices(govt):
 def test_has_default_indicators(govt):
     # Assert
     assert govt.gdp == 0
+    assert govt.budget_deficit == 0
+    assert govt.budget_surplus == 0
 
 
 def test_pays_public_transfers(govt):
@@ -61,6 +63,61 @@ def test_pays_public_transfers(govt):
     action = govt_role.pay_public_transfers
     for household in households:
         action.assert_any_call(household, 100)
+
+
+def test_calc_budget_balance(govt):
+    # Given
+    govt.taxes = 1000
+    govt.public_spending = 700
+    govt.bond_interest = 100
+
+    # When
+    balance = govt.calc_budget_balance()
+
+    # Then
+    assert balance == 200
+
+
+def test_calc_and_records_budget_deficit(govt):
+    # Given
+    govt.taxes = 500
+    govt.public_spending = 600
+    govt.bond_interest = 100
+
+    # When
+    govt.calc_budget_balance()
+
+    # Then
+    assert govt.budget_deficit == 200
+    assert govt.budget_surplus == 0
+
+
+def test_calc_and_records_budget_surplus(govt):
+    # Given
+    govt.taxes = 1000
+    govt.public_spending = 700
+    govt.bond_interest = 100
+
+    # When
+    govt.calc_budget_balance()
+
+    # Then
+    assert govt.budget_surplus == 200
+    assert govt.budget_deficit == 0
+
+
+def test_calc_and_records_with_no_deficit_or_surplus(govt):
+    # Given
+    govt.taxes = 800
+    govt.public_spending = 700
+    govt.bond_interest = 100
+
+    # When
+    govt.calc_budget_balance()
+
+    # Then
+    assert govt.budget_deficit == 0
+    assert govt.budget_surplus == 0
 
 
 def test_update_history(govt):
