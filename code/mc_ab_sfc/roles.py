@@ -211,7 +211,7 @@ class CommercialBankRole(EcoRole):
         self.central_bank = None
 
     def get_discount_rate(self):
-        return self.central_bank.discount_rate
+        return self.space.discount_rate
 
     def request_cash_advances(self, amount):
         self.space.request_cash_advances(self, amount)

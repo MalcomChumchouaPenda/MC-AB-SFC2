@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import Mock
 from mc_ab_sfc.spaces import CountrySpace
-from mc_ab_sfc.agents import FirmAgent, BankAgent, GovernmentAgent, CentralBankAgent
+from mc_ab_sfc.agents import FirmAgent, BankAgent, GovernmentAgent
 
 
 @pytest.fixture
@@ -21,14 +21,9 @@ def govt(model):
 
 
 @pytest.fixture
-def central_bank(model):
-    return CentralBankAgent(model)
-
-
-@pytest.fixture
-def country(model, govt, central_bank):
+def country(model):
     # Given
-    return CountrySpace(model, govt, central_bank)
+    return CountrySpace(model)
 
 
 @pytest.fixture
@@ -47,8 +42,9 @@ def firm(model):
     return firm
 
 
-def test_firm_compute_profit_distribution(firm, country):
+def test_firm_compute_profit_distribution(firm, govt, country):
     # Given
+    country.add_government(govt)
     country.add_tax_payer(firm)
 
     # When
@@ -74,8 +70,9 @@ def bank(model):
     return bank
 
 
-def test_bank_compute_profit_distribution(bank, country):
+def test_bank_compute_profit_distribution(bank, govt, country):
     # Given
+    country.add_government(govt)
     country.add_tax_payer(bank)
 
     # When

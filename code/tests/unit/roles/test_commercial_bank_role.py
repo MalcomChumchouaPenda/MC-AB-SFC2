@@ -35,8 +35,8 @@ def test_has_default_central_bank(bank_role):
 
 def test_get_discount_rate(bank_role):
     # Given
-    central_bank = Mock(discount_rate=0.05)
-    bank_role.central_bank = central_bank
+    country = bank_role.space
+    country.discount_rate = 0.05
 
     # When
     result = bank_role.get_discount_rate()

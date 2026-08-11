@@ -1,7 +1,12 @@
 import pytest
 from unittest.mock import Mock
 from mc_ab_sfc.spaces import CountrySpace
-from mc_ab_sfc.agents import HouseholdAgent, FirmAgent, BankAgent, GovernmentAgent, CentralBankAgent
+from mc_ab_sfc.agents import (
+    HouseholdAgent,
+    FirmAgent,
+    BankAgent,
+    GovernmentAgent
+)
 
 
 @pytest.fixture
@@ -20,18 +25,7 @@ def govt(model):
 
 
 @pytest.fixture
-def central_bank(model):
-    return CentralBankAgent(model)
-
-
-@pytest.fixture
-def country(model, govt, central_bank):
-    # Given
-    return CountrySpace(model, govt, central_bank)
-
-
-def test_household_pay_taxes(model, govt, country):
-    # Given
+def household(model):
     household = HouseholdAgent(model)
     household.cash = 1000
     household.labor_income = 540
@@ -39,6 +33,18 @@ def test_household_pay_taxes(model, govt, country):
     household.dividends = 30
     household.rd_income = 10
     household.public_transfer = 50
+    return household
+
+
+@pytest.fixture
+def country(model):
+    # Given
+    return CountrySpace(model)
+
+
+def test_household_pay_taxes(household, govt, country):
+    # Given
+    country.add_government(govt)
     country.add_tax_payer(household)
 
     # When
@@ -51,11 +57,20 @@ def test_household_pay_taxes(model, govt, country):
     assert govt.reserves == 60
 
 
-def test_firm_pay_taxes(model, govt, country):
+
+
+@pytest.fixture
+def firm(model):
     # Given
     firm = FirmAgent(model)
     firm.cash = 1000
     firm.taxes_payable = 100
+    return firm
+
+
+def test_firm_pay_taxes(firm, govt, country):
+    # Given
+    country.add_government(govt)
     country.add_tax_payer(firm)
 
     # When
@@ -69,11 +84,18 @@ def test_firm_pay_taxes(model, govt, country):
     assert govt.reserves == 100
 
 
-def test_bank_pay_taxes(model, govt, country):
+@pytest.fixture
+def bank(model):
     # Given
     bank = BankAgent(model)
     bank.reserves = 1000
     bank.taxes_payable = 100
+    return bank
+
+
+def test_bank_pay_taxes(bank, govt, country):
+    # Given
+    country.add_government(govt)
     country.add_tax_payer(bank)
 
     # When

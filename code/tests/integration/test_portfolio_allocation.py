@@ -2,7 +2,7 @@ import math
 import pytest
 from unittest.mock import Mock
 from mc_ab_sfc.spaces import CountrySpace, DepositMarket
-from mc_ab_sfc.agents import HouseholdAgent, BankAgent, GovernmentAgent, CentralBankAgent
+from mc_ab_sfc.agents import HouseholdAgent, BankAgent
 
 
 @pytest.fixture
@@ -34,20 +34,9 @@ def bank(model):
 
 
 @pytest.fixture
-def govt(model):
+def country(model):
     # Given
-    return GovernmentAgent(model)
-
-
-@pytest.fixture
-def central_bank(model):
-    return CentralBankAgent(model)
-
-
-@pytest.fixture
-def country(model, govt, central_bank):
-    # Given
-    country = CountrySpace(model, govt, central_bank)
+    country = CountrySpace(model)
     country.default_probability = 0.10
     return country
 

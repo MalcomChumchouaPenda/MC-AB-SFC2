@@ -59,25 +59,24 @@ class MonetaryUnionSpace(EcoSpace):
 
 class CountrySpace(EcoSpace):
 
-    def __init__(self, model, government, central_bank, **kwargs):
-        super().__init__(model, **kwargs)
-        self._create_government_role(government)
-        self._create_central_bank_role(central_bank)
-        self.markets = {}
+    def setup(self):
+        self.government_role = None
+        self.central_bank_role = None
         self.discount_rate = 0.0
+        self.tax_rate = 0
+        self.markets = {}
 
-    def _create_government_role(self, govt):
+    def add_government(self, govt):
         govt_role = self.add_role(GovernmentRole, govt, "government")
         self.government_role = govt_role
+        return govt_role
 
-    def _create_central_bank_role(self, central_bank):
+    def add_central_bank(self, central_bank):
         cb_role = self.add_role(NationalCentralBankRole, central_bank, "central_bank")
         cb_role.government = self.government_role
         self.central_bank_role = cb_role
         self.graph.add_edge(cb_role, self.government_role)
-
-    def setup(self):
-        self.tax_rate = 0
+        return cb_role
 
     @property
     def inflation(self):

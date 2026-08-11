@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import Mock
-from mc_ab_sfc.agents import BankAgent, FirmAgent, CentralBankAgent, GovernmentAgent
+from mc_ab_sfc.agents import BankAgent, FirmAgent
 from mc_ab_sfc.spaces import DepositMarket, CountrySpace
 
 
@@ -10,18 +10,6 @@ def model():
     model = Mock()
     model.p.zeta = 0.8
     return model
-
-
-@pytest.fixture
-def govt(model):
-    # Given
-    return GovernmentAgent(model)
-
-
-@pytest.fixture
-def central_bank(model):
-    # Given
-    return CentralBankAgent(model)
 
 
 @pytest.fixture
@@ -41,9 +29,9 @@ def firm(model):
 
 
 @pytest.fixture
-def country(model, govt, central_bank):
+def country(model):
     # Given
-    country = CountrySpace(model, govt, central_bank)
+    country = CountrySpace(model)
     country.discount_rate = 0.05
     return country
 
@@ -59,6 +47,7 @@ def test_bank_pays_deposit_interest(firm, bank, country, deposit_market):
     bank_role = deposit_market.add_deposit_bank(bank)
     firm_role = deposit_market.add_deposit_holder(firm)
     deposit_market.assign_deposit_bank(firm_role, bank_role)
+    country.central_bank_role = Mock()
     country.add_commercial_bank(bank)
 
     # When

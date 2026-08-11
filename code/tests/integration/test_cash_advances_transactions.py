@@ -1,7 +1,7 @@
 import math
 import pytest
 from unittest.mock import Mock
-from mc_ab_sfc.agents import BankAgent, CentralBankAgent, GovernmentAgent
+from mc_ab_sfc.agents import BankAgent, CentralBankAgent
 from mc_ab_sfc.spaces import CountrySpace
 
 
@@ -14,23 +14,12 @@ def model():
 
 
 @pytest.fixture
-def govt(model):
-    return GovernmentAgent(model)
-
-
-@pytest.fixture
 def central_bank(model):
     # Given
     central_bank = CentralBankAgent(model)
     central_bank.reserves = 50
     central_bank.discount_rate = 0.05
     return central_bank
-
-
-@pytest.fixture
-def country(model, govt, central_bank):
-    # Given
-    return CountrySpace(model, govt, central_bank)
 
 
 @pytest.fixture
@@ -42,8 +31,17 @@ def bank(model):
     return bank
 
 
+@pytest.fixture
+def country(model):
+    # Given
+    country = CountrySpace(model)
+    country.government_role = Mock()
+    return country
+
+
 def test_bank_requests_cash_advance(bank, central_bank, country):
     # Given
+    country.add_central_bank(central_bank)
     country.add_commercial_bank(bank)
 
     # When
