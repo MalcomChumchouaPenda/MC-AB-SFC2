@@ -48,12 +48,10 @@ def test_central_bank_transfer_profits(govt, central_bank, country):
     assert govt.reserves == 130
 
 
-
 @pytest.fixture
 def households(model):
     # Given
     return [HouseholdAgent(model) for _ in range(4)]
-
 
 
 def test_government_pay_public_transfer_equally(govt, households, country):
