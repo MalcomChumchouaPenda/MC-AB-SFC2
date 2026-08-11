@@ -1,8 +1,8 @@
 import math
 import pytest
 from unittest.mock import Mock
-from mc_ab_sfc.agents import HouseholdAgent, BankAgent, GovernmentAgent
 from mc_ab_sfc.spaces import CountrySpace, DepositMarket
+from mc_ab_sfc.agents import HouseholdAgent, BankAgent, GovernmentAgent, CentralBankAgent
 
 
 @pytest.fixture
@@ -39,10 +39,21 @@ def govt(model):
     return GovernmentAgent(model)
 
 
-def test_household_portfolio_allocation(household, bank, govt, model):
+@pytest.fixture
+def central_bank(model):
+    return CentralBankAgent(model)
+
+
+@pytest.fixture
+def country(model, govt, central_bank):
     # Given
-    country = CountrySpace(model, govt)
+    country = CountrySpace(model, govt, central_bank)
     country.default_probability = 0.10
+    return country
+
+
+def test_household_portfolio_allocation(household, bank, model, country):
+    # Given
     country.add_equity_holder(household)
     deposit_market = DepositMarket(model)
     deposit_bank = deposit_market.add_deposit_bank(bank)

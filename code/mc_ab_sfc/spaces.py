@@ -76,7 +76,6 @@ class CountrySpace(EcoSpace):
         self.central_bank_role = cb_role
         self.graph.add_edge(cb_role, self.government_role)
 
-
     def setup(self):
         self.tax_rate = 0
 

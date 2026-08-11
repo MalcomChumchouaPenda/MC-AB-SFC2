@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import Mock
-from mc_ab_sfc.agents import BankAgent, FirmAgent, CentralBankAgent
-from mc_ab_sfc.spaces import DepositMarket, MonetaryUnionSpace
+from mc_ab_sfc.agents import BankAgent, FirmAgent, CentralBankAgent, GovernmentAgent
+from mc_ab_sfc.spaces import DepositMarket, CountrySpace
 
 
 @pytest.fixture
@@ -13,11 +13,15 @@ def model():
 
 
 @pytest.fixture
+def govt(model):
+    # Given
+    return GovernmentAgent(model)
+
+
+@pytest.fixture
 def central_bank(model):
     # Given
-    central_bank = CentralBankAgent(model)
-    central_bank.discount_rate = 0.05
-    return central_bank
+    return CentralBankAgent(model)
 
 
 @pytest.fixture
@@ -37,9 +41,11 @@ def firm(model):
 
 
 @pytest.fixture
-def union(model, central_bank):
+def country(model, govt, central_bank):
     # Given
-    return MonetaryUnionSpace(model, central_bank)
+    country = CountrySpace(model, govt, central_bank)
+    country.discount_rate = 0.05
+    return country
 
 
 @pytest.fixture
@@ -48,12 +54,12 @@ def deposit_market(model):
     return DepositMarket(model)
 
 
-def test_bank_pays_deposit_interest(firm, bank, union, deposit_market):
+def test_bank_pays_deposit_interest(firm, bank, country, deposit_market):
     # Given
     bank_role = deposit_market.add_deposit_bank(bank)
     firm_role = deposit_market.add_deposit_holder(firm)
     deposit_market.assign_deposit_bank(firm_role, bank_role)
-    union.add_commercial_bank(bank)
+    country.add_commercial_bank(bank)
 
     # When
     bank.update_deposit_rate()

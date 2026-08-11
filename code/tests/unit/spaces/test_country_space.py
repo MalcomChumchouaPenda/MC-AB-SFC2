@@ -102,7 +102,7 @@ def test_exposes_inflation(country):
 def test_has_discount_rate(country):
     # Assert
     assert country.discount_rate == 0.0
-    
+
 
 # ---------------------------------------------------
 # BEHAVIORAL TESTS

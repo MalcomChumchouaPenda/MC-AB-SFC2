@@ -537,7 +537,7 @@ class CentralBankAgent(EcoAgent):
 
     def update_discount_rate(self):
         role = self.roles["central_bank"]
-        role.discount_rate = self.calc_discount_rate()        
+        role.discount_rate = self.calc_discount_rate()
 
     def calc_discount_rate(self):
         p = self.model.p
@@ -564,4 +564,3 @@ class CentralBankAgent(EcoAgent):
     def update_history(self):
         role = self.roles["central_bank"]
         self.prev_discount_rate = role.discount_rate
-        

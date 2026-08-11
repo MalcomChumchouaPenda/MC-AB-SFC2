@@ -1,8 +1,8 @@
 import math
 import pytest
 from unittest.mock import Mock
-from mc_ab_sfc.agents import BankAgent, CentralBankAgent
-from mc_ab_sfc.spaces import MonetaryUnionSpace
+from mc_ab_sfc.agents import BankAgent, CentralBankAgent, GovernmentAgent
+from mc_ab_sfc.spaces import CountrySpace
 
 
 @pytest.fixture
@@ -11,6 +11,11 @@ def model():
     model = Mock()
     model.p.mu2 = 0.10
     return model
+
+
+@pytest.fixture
+def govt(model):
+    return GovernmentAgent(model)
 
 
 @pytest.fixture
@@ -23,9 +28,9 @@ def central_bank(model):
 
 
 @pytest.fixture
-def union(model, central_bank):
+def country(model, govt, central_bank):
     # Given
-    return MonetaryUnionSpace(model, central_bank)
+    return CountrySpace(model, govt, central_bank)
 
 
 @pytest.fixture
@@ -37,9 +42,9 @@ def bank(model):
     return bank
 
 
-def test_bank_requests_cash_advance(bank, central_bank, union):
+def test_bank_requests_cash_advance(bank, central_bank, country):
     # Given
-    union.add_commercial_bank(bank)
+    country.add_commercial_bank(bank)
 
     # When
     bank.request_cash_advances()
