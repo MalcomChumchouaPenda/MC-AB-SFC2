@@ -15,39 +15,74 @@ def test_is_eco_space():
     assert issubclass(CountrySpace, EcoSpace)
 
 
-def test_requires_model_and_government():
+def test_requires_model_and_government_and_central_bank():
     # Assert
-    expected = "required positional arguments: 'model' and 'government'"
+    expected = "missing 3 required positional arguments: "
+    expected += "'model', 'government', and 'central_bank'"
     with pytest.raises(TypeError, match=expected):
         CountrySpace()
 
 
-class FakeRole:
+class FakeGovtRole(Mock):
     pass
 
 
-def test_creates_and_registers_government_role(monkeypatch):
-    # Given
-    model, govt, govt_role = Mock(), Mock(), Mock()
-    monkeypatch.setattr(CountrySpace, "add_role", Mock(return_value=govt_role))
-    monkeypatch.setattr("mc_ab_sfc.spaces.GovernmentRole", FakeRole)
-
-    # When
-    country = CountrySpace(model, govt)
-
-    # Then
-    country.add_role.assert_called_with(FakeRole, govt, "government_role")
-    assert country.government_role is govt_role
+class FakeCBRole(Mock):
+    pass
 
 
 @pytest.fixture
-def country(monkeypatch):
+def init_args(monkeypatch):
+    method = Mock(side_effect=lambda a, b, c: a())
+    monkeypatch.setattr(CountrySpace, "add_role", method)
+    monkeypatch.setattr("mc_ab_sfc.spaces.GovernmentRole", FakeGovtRole)
+    monkeypatch.setattr("mc_ab_sfc.spaces.NationalCentralBankRole", FakeCBRole)
+    model, govt, cb = Mock(), Mock(), Mock()
+    return model, govt, cb
+
+
+def test_init_and_create_government_role(init_args):
     # Given
-    model, govt, govt_role = Mock(), Mock(), Mock()
-    monkeypatch.setattr(CountrySpace, "add_role", Mock(return_value=govt_role))
-    monkeypatch.setattr("mc_ab_sfc.spaces.GovernmentRole", FakeRole)
-    country = CountrySpace(model, govt)
-    return country
+    model, govt, cb = init_args
+
+    # When
+    country = CountrySpace(model, govt, cb)
+
+    # Then
+    country.add_role.assert_any_call(FakeGovtRole, govt, "government")
+    assert isinstance(country.government_role, FakeGovtRole)
+
+
+def test_init_and_create_central_bank_role(init_args):
+    # Given
+    model, govt, cb = init_args
+
+    # When
+    country = CountrySpace(model, govt, cb)
+
+    # Then
+    country.add_role.assert_any_call(FakeCBRole, cb, "central_bank")
+    assert isinstance(country.central_bank_role, FakeCBRole)
+
+
+def test_init_and_link_central_bank_and_govt(init_args):
+    # Given
+    model, govt, cb = init_args
+
+    # When
+    country = CountrySpace(model, govt, cb)
+
+    # Then
+    govt_role = country.government_role
+    cb_role = country.central_bank_role
+    assert country.graph.has_edge(govt_role, cb_role)
+    assert cb_role.government is govt_role
+
+
+@pytest.fixture
+def country(init_args):
+    # Given
+    return CountrySpace(*init_args)
 
 
 def test_contains_local_markets(country):
@@ -64,52 +99,89 @@ def test_exposes_inflation(country):
     assert country.inflation == 0.03
 
 
+def test_has_discount_rate(country):
+    # Assert
+    assert country.discount_rate == 0.0
+    
+
 # ---------------------------------------------------
 # BEHAVIORAL TESTS
 # ----------------------------------------------------
 
 
+class FakePayerRole(Mock):
+    pass
+
+
 def test_add_tax_payer_creates_tax_payer_role(country, monkeypatch):
     # Given
     agent = Mock()
-    country.add_role = Mock()
-    monkeypatch.setattr("mc_ab_sfc.spaces.TaxPayerRole", FakeRole)
+    monkeypatch.setattr("mc_ab_sfc.spaces.TaxPayerRole", FakePayerRole)
 
     # When
     tax_payer = country.add_tax_payer(agent)
 
     # Then
-    action = country.add_role
-    action.assert_called_with(FakeRole, agent, "tax_payer")
-    assert tax_payer is action.return_value
+    country.add_role.assert_any_call(FakePayerRole, agent, "tax_payer")
+    assert isinstance(tax_payer, FakePayerRole)
 
 
 def test_add_tax_payer_creates_edge_with_govt_role(country, monkeypatch):
     # Given
-    tax_payer, agent = Mock(), Mock()
-    country.add_role = Mock(return_value=tax_payer)
-    monkeypatch.setattr("mc_ab_sfc.spaces.TaxPayerRole", FakeRole)
+    monkeypatch.setattr("mc_ab_sfc.spaces.TaxPayerRole", FakePayerRole)
     govt_role = country.government_role
     graph = country.graph
+    agent = Mock()
 
     # When
-    country.add_tax_payer(agent)
+    tax_payer = country.add_tax_payer(agent)
 
     # Then
-    assert len(graph.edges) == 1
     assert graph.has_edge(govt_role, tax_payer)
     assert tax_payer.government is govt_role
 
 
-class FakeAgent:
+class FakeBankRole(Mock):
+    pass
+
+
+def test_add_commercial_bank_creates_bank_role(country, monkeypatch):
+    # Given
+    agent = Mock()
+    monkeypatch.setattr("mc_ab_sfc.spaces.CommercialBankRole", FakeBankRole)
+
+    # When
+    bank_role = country.add_commercial_bank(agent)
+
+    # Then
+    country.add_role.assert_any_call(FakeBankRole, agent, "commercial_bank")
+    assert isinstance(bank_role, FakeBankRole)
+
+
+def test_add_commercial_bank_creates_edge_with_cb_role(country, monkeypatch):
+    # Given
+    monkeypatch.setattr("mc_ab_sfc.spaces.CommercialBankRole", FakeBankRole)
+    cb_role = country.central_bank_role
+    graph = country.graph
+    agent = Mock()
+
+    # When
+    bank_role = country.add_commercial_bank(agent)
+
+    # Then
+    assert graph.has_edge(cb_role, bank_role)
+    assert bank_role.central_bank is cb_role
+
+
+class FakeBankAgent:
     pass
 
 
 def test_pay_taxes_with_tax_payer_reserves(country, monkeypatch):
     # Given
-    tax_payer = Mock(agent=FakeAgent())
+    tax_payer = Mock(agent=FakeBankAgent())
     govt_role = country.government_role
-    monkeypatch.setattr("mc_ab_sfc.spaces.BankAgent", FakeAgent)
+    monkeypatch.setattr("mc_ab_sfc.spaces.BankAgent", FakeBankAgent)
 
     # When
     country.pay_taxes(tax_payer, 100)
@@ -136,32 +208,38 @@ def test_pay_taxes_with_tax_payer_cash(country):
     tax_payer.decrease_stock.assert_called_with("cash", 100)
 
 
+class FakeHolderRole(Mock):
+    pass
+
+
 def test_add_equity_holder_creates_appropriate_role(country, monkeypatch):
     # Given
     household = Mock()
-    country.add_role = Mock()
-    monkeypatch.setattr("mc_ab_sfc.spaces.EquityHolderRole", FakeRole)
+    monkeypatch.setattr("mc_ab_sfc.spaces.EquityHolderRole", FakeHolderRole)
 
     # When
     equity_holder = country.add_equity_holder(household)
 
     # Then
-    country.add_role.assert_called_with(FakeRole, household, "equity_holder")
-    assert equity_holder is country.add_role.return_value
+    country.add_role.assert_any_call(FakeHolderRole, household, "equity_holder")
+    assert isinstance(equity_holder, FakeHolderRole)
+
+
+class FakeIssuerRole(Mock):
+    pass
 
 
 def test_add_equity_issuer_creates_appropriate_role(country, monkeypatch):
     # Given
     agent = Mock()
-    country.add_role = Mock()
-    monkeypatch.setattr("mc_ab_sfc.spaces.EquityIssuerRole", FakeRole)
+    monkeypatch.setattr("mc_ab_sfc.spaces.EquityIssuerRole", FakeIssuerRole)
 
     # When
     equity_issuer = country.add_equity_issuer(agent)
 
     # Then
-    country.add_role.assert_called_with(FakeRole, agent, "equity_issuer")
-    assert equity_issuer is country.add_role.return_value
+    country.add_role.assert_any_call(FakeIssuerRole, agent, "equity_issuer")
+    assert isinstance(equity_issuer, FakeIssuerRole)
 
 
 def test_assign_equity_holder_add_edge(country):
@@ -175,9 +253,24 @@ def test_assign_equity_holder_add_edge(country):
     country.assign_equity_holder(issuer, holder, 0.5)
 
     # Then
-    assert len(graph.edges) == 1
     assert graph.has_edge(holder, issuer)
     assert graph[holder][issuer]["share"] == 0.5
+
+
+def test_request_cash_advances(country):
+    # Given
+    bank_role = Mock()
+    cb_role = country.central_bank_role
+    country.graph.add_nodes_from([bank_role, cb_role])
+
+    # When
+    country.request_cash_advances(bank_role, 500)
+
+    # Then
+    bank_role.increase_stock.assert_any_call("reserves", 500)
+    bank_role.increase_stock.assert_any_call("cash_advances", 500)
+    cb_role.increase_stock.assert_any_call("reserves", 500)
+    cb_role.increase_stock.assert_any_call("cash_advances", 500)
 
 
 @pytest.fixture
@@ -196,17 +289,13 @@ def holders(country):
     return holders
 
 
-class FakeAgent:
-    pass
-
-
 def test_distributes_dividends_with_reserves(country, issuer, holders, monkeypatch):
     # Given
-    issuer.agent = FakeAgent()
+    issuer.agent = FakeBankAgent()
     graph = country.graph
     graph.add_edge(issuer, holders[0], share=0.6)
     graph.add_edge(issuer, holders[1], share=0.4)
-    monkeypatch.setattr("mc_ab_sfc.spaces.BankAgent", FakeAgent)
+    monkeypatch.setattr("mc_ab_sfc.spaces.BankAgent", FakeBankAgent)
 
     # When
     country.distribute_dividends(issuer, 200)

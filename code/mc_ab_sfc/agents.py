@@ -532,17 +532,21 @@ class CentralBankAgent(EcoAgent):
         self.reserves = 0
         self.cash_advances = 0
 
-        # prices
-        self.discount_rate = 0
+        # history
+        self.prev_discount_rate = 0
 
     def update_discount_rate(self):
+        role = self.roles["central_bank"]
+        role.discount_rate = self.calc_discount_rate()        
+
+    def calc_discount_rate(self):
         p = self.model.p
         role = self.roles["central_bank"]
         average_inflation = role.get_average_inflation()
         inflation_gap = average_inflation - p.inflation_target
-        self.discount_rate = (
+        return (
             (1 - p.xi) * p.long_run_rate
-            + p.xi * self.discount_rate
+            + p.xi * self.prev_discount_rate
             + (1 - p.xi) * p.xi_deltap * inflation_gap
         )
 
@@ -556,3 +560,8 @@ class CentralBankAgent(EcoAgent):
 
     def calc_profit(self):
         return self.bond_interest + self.cash_advance_interest - self.reserve_interest
+
+    def update_history(self):
+        role = self.roles["central_bank"]
+        self.prev_discount_rate = role.discount_rate
+        

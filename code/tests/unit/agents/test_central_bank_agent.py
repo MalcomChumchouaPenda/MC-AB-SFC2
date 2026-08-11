@@ -22,9 +22,9 @@ def central_bank():
     return CentralBankAgent(model)
 
 
-def test_has_default_discount_rate(central_bank):
+def test_has_default_indicators(central_bank):
     # Assert
-    assert central_bank.discount_rate == 0
+    assert central_bank.prev_discount_rate == 0
 
 
 def test_has_default_stocks(central_bank):
@@ -39,22 +39,35 @@ def test_has_default_stocks(central_bank):
 # ----------------------------------------------------
 
 
-def test_update_discount_rate(central_bank):
+def test_calc_discount_rate(central_bank):
     # Given
-    central_role = Mock()
-    central_role.get_average_inflation.return_value = 0.04
-    central_bank.roles["central_bank"] = central_role
-    central_bank.discount_rate = 0.03
+    cb_role = Mock()
+    cb_role.get_average_inflation.return_value = 0.04
+    central_bank.roles["central_bank"] = cb_role
+    central_bank.prev_discount_rate = 0.03
     central_bank.p.long_run_rate = 0.02
     central_bank.p.xi = 0.5
     central_bank.p.xi_deltap = 1.5
     central_bank.p.inflation_target = 0.02
 
     # When
+    discount_rate = central_bank.calc_discount_rate()
+
+    # Then
+    assert discount_rate == pytest.approx(0.04)
+
+
+def test_update_discount_rate(central_bank):
+    # Given
+    cb_role = Mock(discount_rate=0.0)
+    central_bank.roles["central_bank"] = cb_role
+    central_bank.calc_discount_rate = Mock(return_value=0.02)
+
+    # When
     central_bank.update_discount_rate()
 
     # Then
-    assert central_bank.discount_rate == pytest.approx(0.04)
+    assert cb_role.discount_rate == 0.02
 
 
 @pytest.fixture
@@ -116,3 +129,17 @@ def test_calc_profit():
 #     assert government.cash == 120
 
 #     assert central_bank.net_cash_flow == 0
+
+
+def test_update_history():
+    # Given
+    cb_role = Mock(discount_rate=0.05)
+    central_bank = CentralBankAgent(model=Mock())
+    central_bank.roles["central_bank"] = cb_role
+    central_bank.prev_discount_rate = 0.04
+
+    # When
+    central_bank.update_history()
+
+    # Then
+    assert central_bank.prev_discount_rate == 0.05

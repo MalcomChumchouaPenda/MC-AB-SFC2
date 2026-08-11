@@ -13,7 +13,8 @@ from .roles import (
     DepositBankRole,
     LenderRole,
     BorrowerRole,
-    CentralBankRole,
+    UnionCentralBankRole,
+    NationalCentralBankRole,
     CommercialBankRole,
     BondBuyerRole,
     BondIssuerRole,
@@ -24,24 +25,25 @@ class MonetaryUnionSpace(EcoSpace):
 
     def __init__(self, model, central_bank, **kwargs):
         super().__init__(model, **kwargs)
-        central_role = self.add_role(CentralBankRole, central_bank, "central_bank")
-        self.central_bank_role = central_role
+        self._create_cb_role(central_bank)
+        self._discount_rate = 0.0
         self.average_inflation = 0
         self.countries = {}
         self.markets = {}
 
-    def add_commercial_bank(self, agent):
-        bank_role = self.add_role(CommercialBankRole, agent, "commercial_bank")
-        bank_role.central_bank = self.central_bank_role
-        self.graph.add_edge(self.central_bank_role, bank_role)
-        return bank_role
+    def _create_cb_role(self, central_bank):
+        cb_role = self.add_role(UnionCentralBankRole, central_bank, "central_bank")
+        self.central_bank_role = cb_role
 
-    def request_cash_advances(self, bank_role, amount):
-        central_role = self.central_bank_role
-        central_role.increase_stock("reserves", amount)
-        central_role.increase_stock("cash_advances", amount)
-        bank_role.increase_stock("reserves", amount)
-        bank_role.increase_stock("cash_advances", amount)
+    @property
+    def discount_rate(self):
+        return self._discount_rate
+
+    @discount_rate.setter
+    def discount_rate(self, rate):
+        self._discount_rate = rate
+        for country in self.countries.values():
+            country.discount_rate = rate
 
     def calc_average_inflation(self):
         countries = self.countries
@@ -57,11 +59,23 @@ class MonetaryUnionSpace(EcoSpace):
 
 class CountrySpace(EcoSpace):
 
-    def __init__(self, model, government, **kwargs):
+    def __init__(self, model, government, central_bank, **kwargs):
         super().__init__(model, **kwargs)
-        govt_role = self.add_role(GovernmentRole, government, "government_role")
-        self.government_role = govt_role
+        self._create_government_role(government)
+        self._create_central_bank_role(central_bank)
         self.markets = {}
+        self.discount_rate = 0.0
+
+    def _create_government_role(self, govt):
+        govt_role = self.add_role(GovernmentRole, govt, "government")
+        self.government_role = govt_role
+
+    def _create_central_bank_role(self, central_bank):
+        cb_role = self.add_role(NationalCentralBankRole, central_bank, "central_bank")
+        cb_role.government = self.government_role
+        self.central_bank_role = cb_role
+        self.graph.add_edge(cb_role, self.government_role)
+
 
     def setup(self):
         self.tax_rate = 0
@@ -69,6 +83,12 @@ class CountrySpace(EcoSpace):
     @property
     def inflation(self):
         return self.markets["goods"].inflation
+
+    def add_commercial_bank(self, agent):
+        bank_role = self.add_role(CommercialBankRole, agent, "commercial_bank")
+        bank_role.central_bank = self.central_bank_role
+        self.graph.add_edge(self.central_bank_role, bank_role)
+        return bank_role
 
     def add_tax_payer(self, agent):
         govt_role = self.government_role
@@ -114,6 +134,13 @@ class CountrySpace(EcoSpace):
             value = new_equity * data["share"]
             holder.clear_stock("equity")
             holder.increase_stock("equity", value)
+
+    def request_cash_advances(self, bank_role, amount):
+        central_role = self.central_bank_role
+        central_role.increase_stock("reserves", amount)
+        central_role.increase_stock("cash_advances", amount)
+        bank_role.increase_stock("reserves", amount)
+        bank_role.increase_stock("cash_advances", amount)
 
     def update_statistics(self):
         self.markets["goods"].update_statistics()

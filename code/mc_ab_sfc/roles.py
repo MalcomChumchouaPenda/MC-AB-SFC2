@@ -180,11 +180,25 @@ class LenderRole(EcoRole):
         self.space.grant_loan(self, borrower, amount, rate)
 
 
-class CentralBankRole(EcoRole):
+class UnionCentralBankRole(EcoRole):
 
     @property
     def discount_rate(self):
-        return self.agent.discount_rate
+        return self.space.discount_rate
+
+    @discount_rate.setter
+    def discount_rate(self, rate):
+        self.space.discount_rate = rate
+
+    def get_average_inflation(self):
+        return self.space.average_inflation
+
+
+class NationalCentralBankRole(EcoRole):
+
+    @property
+    def discount_rate(self):
+        return self.space.discount_rate
 
     def get_average_inflation(self):
         return self.space.average_inflation
