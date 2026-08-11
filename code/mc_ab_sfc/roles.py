@@ -23,6 +23,12 @@ class GovernmentRole(EcoRole):
     def get_gdp(self):
         return self.space.gdp
 
+    def get_average_price(self):
+        return self.space.average_price
+
+    def get_average_productivity(self):
+        return self.space.average_productivity
+
     def get_households(self):
         return self.space.get_households()
 

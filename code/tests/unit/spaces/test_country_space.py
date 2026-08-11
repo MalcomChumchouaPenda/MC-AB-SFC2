@@ -47,6 +47,24 @@ def test_exposes_inflation(country):
     assert country.inflation == 0.03
 
 
+def test_exposes_average_price(country):
+    # Given
+    goods_market = Mock(average_price=10)
+    country.markets = {"goods": goods_market}
+
+    # Assert
+    assert country.average_price == 10
+
+
+def test_exposes_average_productivity(country):
+    # Given
+    goods_market = Mock(average_productivity=1.5)
+    country.markets = {"goods": goods_market}
+
+    # Assert
+    assert country.average_productivity == 1.5
+
+
 def test_has_discount_rate(country):
     # Assert
     assert country.discount_rate == 0.0

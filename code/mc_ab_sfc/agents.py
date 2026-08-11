@@ -518,12 +518,12 @@ class GovernmentAgent(EcoAgent):
         # choices
         self.tax_rate = 0.0
         self.desired_public_spending = 0
+        self.prev_public_spending = 0
 
         # indicators
         self.gdp = 0
         self.budget_deficit = 0
         self.budget_surplus = 0
-
 
     def pay_public_transfers(self):
         role = self.roles["government"]
@@ -538,9 +538,16 @@ class GovernmentAgent(EcoAgent):
         self.budget_surplus = max(0, balance)
         return balance
 
+    def calc_desired_public_spending(self):
+        role = self.roles["government"]
+        average_price = role.get_average_price()
+        average_productivity = role.get_average_productivity()
+        return average_price * average_productivity * self.prev_public_spending
+
     def update_history(self):
         role = self.roles["government"]
         self.gdp = role.get_gdp()
+        self.prev_public_spending = self.public_spending
 
 
 class CentralBankAgent(EcoAgent):

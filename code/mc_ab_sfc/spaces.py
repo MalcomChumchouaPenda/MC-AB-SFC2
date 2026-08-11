@@ -83,6 +83,14 @@ class CountrySpace(EcoSpace):
     def inflation(self):
         return self.markets["goods"].inflation
 
+    @property
+    def average_price(self):
+        return self.markets["goods"].average_price
+
+    @property
+    def average_productivity(self):
+        return self.markets["goods"].average_productivity
+
     def add_commercial_bank(self, agent):
         bank_role = self.add_role(CommercialBankRole, agent, "commercial_bank")
         bank_role.central_bank = self.central_bank_role

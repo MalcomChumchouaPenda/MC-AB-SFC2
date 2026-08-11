@@ -44,6 +44,30 @@ def test_get_gdp(govt_role):
     assert gdp == 100
 
 
+def test_get_average_price(govt_role):
+    # Given
+    country = govt_role.space
+    country.average_price = 10
+
+    # When
+    average_price = govt_role.get_average_price()
+
+    # Assert
+    assert average_price == 10
+
+
+def test_get_average_productivity(govt_role):
+    # Given
+    country = govt_role.space
+    country.average_productivity = 2
+
+    # When
+    average_productivity = govt_role.get_average_productivity()
+
+    # Assert
+    assert average_productivity == 2
+
+
 def test_get_households(govt_role):
     # Given
     households = [Mock() for _ in range(10)]

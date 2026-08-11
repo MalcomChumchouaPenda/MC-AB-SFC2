@@ -46,6 +46,7 @@ def test_has_default_indicators(govt):
     assert govt.gdp == 0
     assert govt.budget_deficit == 0
     assert govt.budget_surplus == 0
+    assert govt.prev_public_spending == 0
 
 
 def test_pays_public_transfers(govt):
@@ -120,15 +121,33 @@ def test_calc_and_records_with_no_deficit_or_surplus(govt):
     assert govt.budget_surplus == 0
 
 
+def test_calc_desired_public_spending(govt):
+    # Given
+    govt_role = Mock()
+    govt_role.get_average_price.return_value = 2
+    govt_role.get_average_productivity.return_value = 3
+    govt.roles["government"] = govt_role
+    govt.prev_public_spending = 10
+
+    # When
+    desired = govt.calc_desired_public_spending()
+
+    # Then
+    assert desired == 60
+
+
 def test_update_history(govt):
     # Given
     govt_role = Mock()
     govt_role.get_gdp.return_value = 120
     govt.roles["government"] = govt_role
     govt.gdp = 100
+    govt.public_spending = 200
+    govt.prev_public_spending = 150
 
     # When
     govt.update_history()
 
     # Then
     assert govt.gdp == 120
+    assert govt.prev_public_spending == 200
