@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import Mock
 from mc_ab_sfc.spaces import CountrySpace
-from mc_ab_sfc.agents import GovernmentAgent, CentralBankAgent
+from mc_ab_sfc.agents import GovernmentAgent, CentralBankAgent, HouseholdAgent
 
 
 @pytest.fixture
@@ -46,3 +46,30 @@ def test_central_bank_transfer_profits(govt, central_bank, country):
     assert central_bank.reserves == 130
     assert govt.profit == 130
     assert govt.reserves == 130
+
+
+
+@pytest.fixture
+def households(model):
+    # Given
+    return [HouseholdAgent(model) for _ in range(4)]
+
+
+
+def test_government_pay_public_transfer_equally(govt, households, country):
+    # Given
+    govt.reserves = 1000
+    govt.desired_public_spending = 400
+    country.add_government(govt)
+    for household in households:
+        country.add_tax_payer(household)
+
+    # When
+    govt.pay_public_transfers()
+
+    # Then
+    assert govt.reserves == 600
+    assert govt.public_spending == 400
+    for household in households:
+        assert household.cash == 100
+        assert household.public_transfers == 100

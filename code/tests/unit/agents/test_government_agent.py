@@ -38,6 +38,7 @@ def test_has_default_flows(govt):
 def test_has_default_choices(govt):
     # Assert
     assert govt.tax_rate == 0
+    assert govt.desired_public_spending == 0
 
 
 def test_has_default_indicators(govt):
@@ -51,7 +52,7 @@ def test_pays_public_transfers(govt):
     govt_role = Mock()
     govt_role.get_households.return_value = households
     govt.roles["government"] = govt_role
-    govt.public_spending = 300
+    govt.desired_public_spending = 300
 
     # When
     govt.pay_public_transfers()
