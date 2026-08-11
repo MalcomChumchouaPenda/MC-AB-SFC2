@@ -115,20 +115,20 @@ def test_calc_profit():
     assert profit == 120
 
 
-# def test_pays_profits_to_government():
-#     # Given
+def test_pay_profit_to_government():
+    # Given
+    cb_role, model = Mock(), Mock()
+    central_bank = CentralBankAgent(model)
+    central_bank.roles['central_bank'] = cb_role
+    central_bank.calc_profit = Mock(return_value=100)
 
-#     central_bank = CentralBankAgent(model=Mock())
+    # When
+    central_bank.pay_profit()
 
-#     central_bank = CentralBankAgent()
-#     government = GovernmentAgent()
-#     central_bank.net_cash_flow = 120
-
-#     central_bank.pay_profits(government)
-
-#     assert government.cash == 120
-
-#     assert central_bank.net_cash_flow == 0
+    # Then
+    central_bank.calc_profit.assert_called_with()
+    cb_role.transfer_profit.assert_called_with(100)
+    
 
 
 def test_update_history():

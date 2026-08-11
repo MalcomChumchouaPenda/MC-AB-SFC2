@@ -558,6 +558,11 @@ class CentralBankAgent(EcoAgent):
             print(issuer, purchase)
             role.buy_bonds(issuer, purchase)
 
+    def pay_profit(self):
+        profit = self.calc_profit()
+        role = self.roles['central_bank']
+        role.transfer_profit(profit)
+
     def calc_profit(self):
         return self.bond_interest + self.cash_advance_interest - self.reserve_interest
 

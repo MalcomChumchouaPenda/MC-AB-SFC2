@@ -142,6 +142,13 @@ class CountrySpace(EcoSpace):
         bank_role.increase_stock("reserves", amount)
         bank_role.increase_stock("cash_advances", amount)
 
+    def transfer_profit(self, central_bank_role, amount):
+        govt_role = central_bank_role.government
+        govt_role.increase_flow("profit", amount)
+        govt_role.increase_stock("reserves", amount)
+        central_bank_role.increase_flow("profit", amount)
+        central_bank_role.increase_stock("reserves", amount)
+
     def update_statistics(self):
         self.markets["goods"].update_statistics()
 
@@ -169,9 +176,9 @@ class GoodsMarket(EcoSpace):
 
     def buy_goods(self, consumer, producer, quantity):
         amount = quantity * producer.price
+        producer.decrease_stock("inventories", quantity)
         producer.increase_stock("cash", amount)
         producer.increase_flow("sales", amount)
-        producer.decrease_stock("inventories", quantity)
         consumer.decrease_stock("cash", amount)
         if self.tradable:
             consumer.increase_flow("tradable_cons", amount)

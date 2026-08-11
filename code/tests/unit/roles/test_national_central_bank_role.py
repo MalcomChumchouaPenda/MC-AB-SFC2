@@ -23,6 +23,11 @@ def role():
     return NationalCentralBankRole(agent, space)
 
 
+def test_has_government_reference(role):
+    # Assert
+    assert role.government is None
+
+
 def test_exposes_discount_rate(role):
     # Given
     country = role.space
@@ -35,3 +40,15 @@ def test_exposes_discount_rate(role):
 # ---------------------------------------------------
 # BEHAVIORAL TESTS
 # ----------------------------------------------------
+
+
+def test_transfer_profit(role):
+    # Given
+    country = role.space
+
+    # When
+    role.transfer_profit(100)
+
+    # Then
+    country.transfer_profit(role,  100)
+    

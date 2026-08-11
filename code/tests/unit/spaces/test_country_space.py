@@ -377,6 +377,21 @@ def test_update_equity_holdings(country, issuer, holders):
     holders[1].increase_stock.assert_called_once_with("equity", 480)
 
 
+def test_transfer_profit_to_government(country):
+    # Given
+    cb_role, govt_role = Mock(), Mock()
+    cb_role.government = govt_role
+
+    # When
+    country.transfer_profit(cb_role, 100)
+
+    # Then
+    cb_role.increase_stock.assert_called_once_with("reserves", 100)
+    cb_role.increase_flow.assert_called_once_with("profit", 100)
+    govt_role.increase_stock.assert_called_once_with("reserves", 100)
+    govt_role.increase_flow.assert_called_once_with("profit", 100)
+
+
 def test_update_statistics_with_goods_market_stats_updates(country):
     # Given
     goods_market = Mock()
