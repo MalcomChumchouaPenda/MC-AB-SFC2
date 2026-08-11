@@ -31,6 +31,7 @@ def test_has_default_stocks(govt):
 def test_has_default_flows(govt):
     # Assert
     assert govt.taxes == 0
+    assert govt.profit == 0
 
 
 def test_has_default_choices(govt):

@@ -512,6 +512,7 @@ class GovernmentAgent(EcoAgent):
 
         # flows
         self.taxes = 0
+        self.profit = 0
 
         # choices
         self.tax_rate = 0.0
@@ -531,6 +532,12 @@ class CentralBankAgent(EcoAgent):
         self.bonds = 0
         self.reserves = 0
         self.cash_advances = 0
+
+        # flows
+        self.profit = 0
+        self.bond_interest = 0
+        self.reserve_interest = 0
+        self.cash_advance_interest = 0
 
         # history
         self.prev_discount_rate = 0

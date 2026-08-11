@@ -22,16 +22,24 @@ def central_bank():
     return CentralBankAgent(model)
 
 
-def test_has_default_indicators(central_bank):
-    # Assert
-    assert central_bank.prev_discount_rate == 0
-
-
 def test_has_default_stocks(central_bank):
     # Assert
     assert central_bank.bonds == 0
     assert central_bank.reserves == 0
     assert central_bank.cash_advances == 0
+
+
+def test_has_default_flows(central_bank):
+    # Assert
+    assert central_bank.profit == 0
+    assert central_bank.bond_interest == 0
+    assert central_bank.reserve_interest == 0
+    assert central_bank.cash_advance_interest == 0
+
+
+def test_has_default_indicators(central_bank):
+    # Assert
+    assert central_bank.prev_discount_rate == 0
 
 
 # ---------------------------------------------------
