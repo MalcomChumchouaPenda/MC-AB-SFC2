@@ -171,6 +171,7 @@ def test_public_spending_is_bounded_by_gdp(govt, spending, expected):
 def govt_for_policy():
     # Given
     model = Mock()
+    model.p.dmax = 0.05
     model.p.delta = 0.10
     govt = GovernmentAgent(model)
     govt.tax_rate = 0.20
@@ -188,7 +189,6 @@ def test_update_fiscal_policy_with_random_variation(govt_for_policy):
     # Given
     govt = govt_for_policy
     govt.budget_deficit = 100
-    govt.dmax = 0.05
     govt.desired_public_spending = 80
     random = govt.model.random
 
@@ -203,7 +203,6 @@ def test_update_fiscal_policy_with_multi_steps(govt_for_policy):
     # Given
     govt = govt_for_policy
     govt.budget_deficit = 100
-    govt.dmax = 0.05
     govt.desired_public_spending = 80
 
     # When
@@ -218,7 +217,6 @@ def test_update_fiscal_policy_with_multi_steps(govt_for_policy):
 def test_reduce_spending_and_increase_tax_when_deficit_high(govt_for_policy):
     # Given
     govt = govt_for_policy
-    govt.dmax = 0.05
     govt.budget_deficit = 100
     govt.calc_desired_public_spending.return_value = 80
 
@@ -233,7 +231,6 @@ def test_reduce_spending_and_increase_tax_when_deficit_high(govt_for_policy):
 def test_keep_spending_and_increase_tax_when_deficit_high(govt_for_policy):
     # Given
     govt = govt_for_policy
-    govt.dmax = 0.05
     govt.budget_deficit = 100
     govt.calc_desired_public_spending.return_value = 120
 
@@ -248,7 +245,6 @@ def test_keep_spending_and_increase_tax_when_deficit_high(govt_for_policy):
 def test_reduce_spending_and_tax_when_deficit_low(govt_for_policy):
     # Given
     govt = govt_for_policy
-    govt.dmax = 0.05
     govt.budget_deficit = 20
     govt.calc_desired_public_spending.return_value = 80
 
@@ -263,7 +259,6 @@ def test_reduce_spending_and_tax_when_deficit_low(govt_for_policy):
 def test_increase_spending_and_keep_tax_when_deficit_low(govt_for_policy):
     # Given
     govt = govt_for_policy
-    govt.dmax = 0.05
     govt.budget_deficit = 20
     govt.calc_desired_public_spending.return_value = 120
 

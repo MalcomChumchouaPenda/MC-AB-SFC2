@@ -540,11 +540,12 @@ class GovernmentAgent(EcoAgent):
         return balance
 
     def update_fiscal_policy(self):
+        p = self.p
         random = self.model.random
-        variation = random.uniform(0, self.p.delta)
+        variation = random.uniform(0, p.delta)
         deficit_ratio = self.budget_deficit / self.gdp
         desired_spending = self.calc_desired_public_spending()
-        if deficit_ratio >= self.dmax:
+        if deficit_ratio >= p.dmax:
             if desired_spending <= self.public_spending:
                 self.public_spending *= 1 - variation
                 self.tax_rate *= 1 + variation
