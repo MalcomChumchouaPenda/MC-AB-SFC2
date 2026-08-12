@@ -52,3 +52,15 @@ def test_exposes_gdp(issuer):
     government.gdp = 150
     # Assert
     assert issuer.gdp == 150
+
+def test_issue_bonds(issuer):
+    # Given
+    issuer.bond_supply = 0
+
+    # When
+    issuer.issue_bonds(400)
+
+    # Then
+    assert issuer.bond_supply == 400
+
+    

@@ -40,6 +40,7 @@ def test_has_default_choices(govt):
     assert govt.tax_rate == 0
     assert govt.public_spending == 0
     assert govt.desired_public_spending == 0
+    assert govt.new_public_debt == 0
 
 
 def test_has_default_indicators(govt):
@@ -48,6 +49,7 @@ def test_has_default_indicators(govt):
     assert govt.budget_deficit == 0
     assert govt.budget_surplus == 0
     assert govt.prev_public_spending == 0
+    assert govt.prev_budget_surplus == 0
 
 
 def test_pays_public_transfers(govt):
@@ -270,12 +272,104 @@ def test_increase_spending_and_keep_tax_when_deficit_low(govt_for_policy):
     assert govt.tax_rate == pytest.approx(0.20)
 
 
-def test_update_history(govt):
+def test_calc_new_debt(govt):
     # Given
-    govt_role = Mock()
+    govt.bonds = 1000
+    govt.budget_deficit = 200
+    govt.prev_budget_surplus = 50
+
+    # When
+    new_debt = govt.calc_new_debt()
+
+    # Then
+    assert new_debt == 1150
+    assert govt.new_public_debt == 1150
+
+
+
+def test_calc_new_bonds(govt):
+    # Given
+    govt.bonds = 1000
+    govt.new_public_debt = 1150
+
+    # When
+    issuance = govt.calc_new_bonds()
+
+    # Then
+    assert issuance == 150
+
+def test_calc_not_new_bonds_with_enough_bonds(govt):
+    # Given
+    govt.bonds = 1000
+    govt.new_public_debt = 900
+
+    # When
+    issuance = govt.calc_new_bonds()
+
+    # Then
+    assert issuance == 0
+
+
+@pytest.fixture
+def govt_as_bond_supplier():
+    # Given
+    model = Mock()
+    govt = GovernmentAgent(model)
+    govt.roles['bond_issuer'] = Mock()
+    govt.calc_new_debt = Mock(return_value=600)
+    govt.calc_new_bonds = Mock(return_value=500)
+    return govt
+
+
+def test_issues_bonds(govt_as_bond_supplier):
+    # Given
+    govt = govt_as_bond_supplier
+    issuer_role = govt.roles["bond_issuer"]
+
+    # When
+    govt.issue_bonds()
+
+    # Then
+    issuer_role.issue_bonds.assert_called_with(500)
+
+
+def test_issues_bonds_with_multi_step(govt_as_bond_supplier):
+    # Given
+    govt = govt_as_bond_supplier
+
+    # When
+    govt.issue_bonds()
+
+    # Then
+    govt.calc_new_debt.assert_called_with()
+    govt.calc_new_bonds.assert_called_with()
+
+
+@pytest.fixture
+def govt_with_history():
+    # Given
+    model = Mock()
+    govt = GovernmentAgent(model)
+    govt.roles["government"] = Mock()
+    return govt
+
+
+def test_update_production_history(govt_with_history):
+    # Given
+    govt = govt_with_history
+    govt_role = govt.roles["government"]
     govt_role.get_gdp.return_value = 120
-    govt.roles["government"] = govt_role
-    govt.gdp = 100
+
+    # When
+    govt.update_history()
+
+    # Then
+    assert govt.gdp == 120
+
+
+def test_update_public_spending_history(govt_with_history):
+    # Given
+    govt = govt_with_history
     govt.public_spending = 200
     govt.prev_public_spending = 150
 
@@ -283,5 +377,18 @@ def test_update_history(govt):
     govt.update_history()
 
     # Then
-    assert govt.gdp == 120
     assert govt.prev_public_spending == 200
+
+
+def test_update_budget_history(govt_with_history):
+    # Given
+    govt = govt_with_history
+    govt.budget_surplus = 100
+    govt.prev_budget_surplus = 0
+
+    # When
+    govt.update_history()
+
+    # Then
+    assert govt.prev_budget_surplus == 100
+

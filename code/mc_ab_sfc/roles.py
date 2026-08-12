@@ -254,6 +254,9 @@ class BondIssuerRole(EcoRole):
     def gdp(self):
         return self.agent.gdp
 
+    def issue_bonds(self, amount):
+        self.bond_supply = amount
+
 
 class BondBuyerRole(EcoRole):
 

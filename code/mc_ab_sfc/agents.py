@@ -520,6 +520,8 @@ class GovernmentAgent(EcoAgent):
         self.desired_public_spending = 0
         self.prev_public_spending = 0
         self.public_spending = 0
+        self.prev_budget_surplus = 0
+        self.new_public_debt = 0
 
         # indicators
         self.gdp = 0
@@ -579,9 +581,24 @@ class GovernmentAgent(EcoAgent):
         self.public_spending = max(minimum, self.public_spending)
         self.public_spending = min(maximum, self.public_spending)
 
+    def issue_bonds(self):
+        self.calc_new_debt()
+        new_bonds = self.calc_new_bonds()
+        role = self.roles['bond_issuer']
+        role.issue_bonds(new_bonds)
+
+    def calc_new_debt(self):
+        new_debt = self.bonds + self.budget_deficit - self.prev_budget_surplus
+        self.new_public_debt = new_debt
+        return new_debt
+
+    def calc_new_bonds(self):
+        return max(0, self.new_public_debt - self.bonds)
+
     def update_history(self):
         role = self.roles["government"]
         self.gdp = role.get_gdp()
+        self.prev_budget_surplus = self.budget_surplus
         self.prev_public_spending = self.public_spending
 
 
