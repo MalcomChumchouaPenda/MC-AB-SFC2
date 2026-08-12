@@ -16,10 +16,12 @@ def model():
 @pytest.fixture
 def govt(model):
     # Given
-    gov = GovernmentAgent(model)
-    gov.bonds = 500
-    gov.gdp = 1000
-    return gov
+    govt = GovernmentAgent(model)
+    govt.bonds = 500
+    govt.gdp = 1000
+    govt.budget_deficit = 200
+    govt.prev_budget_surplus = 50
+    return govt
 
 
 @pytest.fixture
@@ -44,6 +46,17 @@ def central_bank(model):
 def bond_market(model):
     # Given
     return BondMarket(model)
+
+
+def test_government_issues_bonds(govt, bond_market):
+    # Given
+    issuer_role = bond_market.add_bond_issuer(govt)
+
+    # When
+    govt.issue_bonds()
+
+    # Then
+    assert issuer_role.bond_supply == 150
 
 
 def test_bank_invests_excess_reserves(govt, bank, bond_market):

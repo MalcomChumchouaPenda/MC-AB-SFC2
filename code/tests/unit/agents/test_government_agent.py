@@ -298,6 +298,7 @@ def test_calc_new_bonds(govt):
     # Then
     assert issuance == 150
 
+
 def test_calc_not_new_bonds_with_enough_bonds(govt):
     # Given
     govt.bonds = 1000

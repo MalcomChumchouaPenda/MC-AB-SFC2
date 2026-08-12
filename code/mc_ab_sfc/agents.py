@@ -584,6 +584,7 @@ class GovernmentAgent(EcoAgent):
     def issue_bonds(self):
         self.calc_new_debt()
         new_bonds = self.calc_new_bonds()
+        print(self.bonds, self.budget_deficit, self.prev_budget_surplus)
         role = self.roles['bond_issuer']
         role.issue_bonds(new_bonds)
 
