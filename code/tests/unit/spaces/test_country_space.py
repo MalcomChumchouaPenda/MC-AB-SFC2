@@ -442,7 +442,7 @@ def test_pay_public_transfers_to_household(country):
     household_role.increase_stock.assert_called_once_with("cash", 100)
     household_role.increase_flow.assert_called_once_with("public_transfers", 100)
     govt_role.decrease_stock.assert_called_once_with("reserves", 100)
-    govt_role.increase_flow.assert_called_once_with("public_spending", 100)
+    govt_role.increase_flow.assert_called_once_with("public_transfers", 100)
 
 
 def test_update_statistics_with_goods_market_stats_updates(country):

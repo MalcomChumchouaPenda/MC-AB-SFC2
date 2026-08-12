@@ -165,7 +165,7 @@ class CountrySpace(EcoSpace):
 
     def pay_public_transfers(self, governement, household, amount):
         governement.decrease_stock("reserves", amount)
-        governement.increase_flow("public_spending", amount)
+        governement.increase_flow("public_transfers", amount)
         household.increase_stock("cash", amount)
         household.increase_flow("public_transfers", amount)
 

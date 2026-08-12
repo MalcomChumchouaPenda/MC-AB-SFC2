@@ -57,7 +57,7 @@ def households(model):
 def test_government_pay_public_transfer_equally(govt, households, country):
     # Given
     govt.reserves = 1000
-    govt.desired_public_spending = 400
+    govt.public_spending = 400
     country.add_government(govt)
     for household in households:
         country.add_tax_payer(household)
@@ -67,7 +67,7 @@ def test_government_pay_public_transfer_equally(govt, households, country):
 
     # Then
     assert govt.reserves == 600
-    assert govt.public_spending == 400
+    assert govt.public_transfers == 400
     for household in households:
         assert household.cash == 100
         assert household.public_transfers == 100

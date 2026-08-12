@@ -513,12 +513,13 @@ class GovernmentAgent(EcoAgent):
         # flows
         self.taxes = 0
         self.profit = 0
-        self.public_spending = 0
+        self.public_transfers = 0
 
         # choices
         self.tax_rate = 0.0
         self.desired_public_spending = 0
         self.prev_public_spending = 0
+        self.public_spending = 0
 
         # indicators
         self.gdp = 0
@@ -528,7 +529,7 @@ class GovernmentAgent(EcoAgent):
     def pay_public_transfers(self):
         role = self.roles["government"]
         households = role.get_households()
-        transfers = self.desired_public_spending / len(households)
+        transfers = self.public_spending / len(households)
         for household in households:
             role.pay_public_transfers(household, transfers)
 
