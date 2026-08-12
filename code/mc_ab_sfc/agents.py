@@ -538,31 +538,35 @@ class GovernmentAgent(EcoAgent):
         self.budget_surplus = max(0, balance)
         return balance
 
-    def calc_desired_public_spending(self):
-        role = self.roles["government"]
-        average_price = role.get_average_price()
-        average_productivity = role.get_average_productivity()
-        return average_price * average_productivity * self.prev_public_spending
-
     def update_fiscal_policy(self):
         random = self.model.random
         variation = random.uniform(0, self.p.delta)
         deficit_ratio = self.budget_deficit / self.gdp
+        desired_spending = self.calc_desired_public_spending()
         if deficit_ratio >= self.dmax:
-            if self.desired_public_spending <= self.public_spending:
+            if desired_spending <= self.public_spending:
                 self.public_spending *= 1 - variation
                 self.tax_rate *= 1 + variation
-
-            elif self.desired_public_spending > self.public_spending:
+            else:
                 self.tax_rate *= 1 + variation
-
         else:
-            if self.desired_public_spending <= self.public_spending:
+            if desired_spending <= self.public_spending:
                 self.public_spending *= 1 - variation
                 self.tax_rate *= 1 - variation
-            elif self.desired_public_spending > self.public_spending:
+            else:
                 self.public_spending *= 1 + variation
+        self.apply_tax_rate_bounds()
+        self.apply_public_spending_bounds()
 
+    def calc_desired_public_spending(self):
+        role = self.roles["government"]
+        average_price = role.get_average_price()
+        average_prod = role.get_average_productivity()
+        prev_spending = self.prev_public_spending
+        desired_spending = average_price * average_prod * prev_spending
+        self.desired_public_spending =  desired_spending
+        return desired_spending 
+    
     def apply_tax_rate_bounds(self):
         self.tax_rate = max(self.p.tax_min, self.tax_rate)
         self.tax_rate = min(self.p.tax_max, self.tax_rate)

@@ -121,7 +121,7 @@ def test_calc_and_records_with_no_deficit_or_surplus(govt):
     assert govt.budget_surplus == 0
 
 
-def test_calc_desired_public_spending(govt):
+def test_calc_and_records_desired_public_spending(govt):
     # Given
     govt_role = Mock()
     govt_role.get_average_price.return_value = 2
@@ -134,108 +134,7 @@ def test_calc_desired_public_spending(govt):
 
     # Then
     assert desired == 60
-
-
-@pytest.fixture
-def govt_for_policy():
-    # Given
-    model = Mock()
-    model.p.delta = 0.10
-    govt = GovernmentAgent(model)
-    govt.model.random.uniform.return_value = 0.05
-    return govt
-
-
-def test_update_fiscal_policy_with_random_variation(govt_for_policy):
-    # Given
-    govt = govt_for_policy
-    govt.budget_deficit = 100
-    govt.gdp = 1000
-    govt.dmax = 0.05
-    govt.public_spending = 100
-    govt.desired_public_spending = 80
-    govt.tax_rate = 0.20
-    random = govt.model.random
-
-    # When
-    govt.update_fiscal_policy()
-
-    # Then
-    random.uniform.assert_called_with(0, 0.10)
-
-
-def test_reduce_spending_and_increase_tax_when_deficit_high(govt_for_policy):
-    # Given
-    govt = govt_for_policy
-    govt.budget_deficit = 100
-    govt.gdp = 1000
-    govt.dmax = 0.05
-    govt.public_spending = 100
-    govt.desired_public_spending = 80
-    govt.tax_rate = 0.20
-
-    # When
-    govt.update_fiscal_policy()
-
-    # Then
-    assert govt.public_spending == pytest.approx(95)
-    assert govt.tax_rate == pytest.approx(0.21)
-
-
-def test_keep_spending_and_increase_tax_when_deficit_high(govt_for_policy):
-    # Given
-    govt = govt_for_policy
-    govt.budget_deficit = 100
-    govt.gdp = 1000
-    govt.dmax = 0.05
-    govt.public_spending = 100
-    govt.desired_public_spending = 120
-    govt.tax_rate = 0.20
-
-    # When
-    govt.update_fiscal_policy()
-
-    # Then
-    assert govt.public_spending == pytest.approx(100)
-    assert govt.tax_rate == pytest.approx(0.21)
-
-
-def test_reduce_spending_and_tax_when_deficit_low(govt_for_policy):
-    # Given
-    govt = govt_for_policy
-    govt.budget_deficit = 20
-    govt.gdp = 1000
-    govt.dmax = 0.05
-    govt.public_spending = 100
-    govt.desired_public_spending = 80
-    govt.tax_rate = 0.20
-    govt.delta = 0.10
-
-    # When
-    govt.update_fiscal_policy()
-
-    # Then
-    assert govt.public_spending == pytest.approx(95)
-    assert govt.tax_rate == pytest.approx(0.19)
-
-
-def test_increase_spending_and_keep_tax_when_deficit_low(govt_for_policy):
-    # Given
-    govt = govt_for_policy
-    govt.budget_deficit = 20
-    govt.gdp = 1000
-    govt.dmax = 0.05
-    govt.public_spending = 100
-    govt.desired_public_spending = 120
-    govt.tax_rate = 0.20
-    govt.delta = 0.10
-
-    # When
-    govt.update_fiscal_policy()
-
-    # Then
-    assert govt.public_spending == pytest.approx(105)
-    assert govt.tax_rate == pytest.approx(0.20)
+    assert govt.desired_public_spending == desired
 
 
 @pytest.mark.parametrize("tax_rate, expected", [(0.38, 0.40), (0.58, 0.50)])
@@ -265,6 +164,114 @@ def test_public_spending_is_bounded_by_gdp(govt, spending, expected):
 
     # Then
     assert govt.public_spending == expected
+
+
+@pytest.fixture
+def govt_for_policy():
+    # Given
+    model = Mock()
+    model.p.delta = 0.10
+    govt = GovernmentAgent(model)
+    govt.tax_rate = 0.20
+    govt.gdp = 1000
+    govt.public_spending = 100
+    govt.desired_public_spending = 0
+    govt.apply_tax_rate_bounds = Mock()
+    govt.apply_public_spending_bounds = Mock()
+    govt.calc_desired_public_spending = Mock(return_value=0)
+    govt.model.random.uniform.return_value = 0.05
+    return govt
+
+
+def test_update_fiscal_policy_with_random_variation(govt_for_policy):
+    # Given
+    govt = govt_for_policy
+    govt.budget_deficit = 100
+    govt.dmax = 0.05
+    govt.desired_public_spending = 80
+    random = govt.model.random
+
+    # When
+    govt.update_fiscal_policy()
+
+    # Then
+    random.uniform.assert_called_with(0, 0.10)
+
+
+def test_update_fiscal_policy_with_multi_steps(govt_for_policy):
+    # Given
+    govt = govt_for_policy
+    govt.budget_deficit = 100
+    govt.dmax = 0.05
+    govt.desired_public_spending = 80
+
+    # When
+    govt.update_fiscal_policy()
+
+    # Then
+    govt.calc_desired_public_spending.assert_called_with()
+    govt.apply_public_spending_bounds.assert_called_with()
+    govt.apply_tax_rate_bounds.assert_called_with()
+
+
+def test_reduce_spending_and_increase_tax_when_deficit_high(govt_for_policy):
+    # Given
+    govt = govt_for_policy
+    govt.dmax = 0.05
+    govt.budget_deficit = 100
+    govt.calc_desired_public_spending.return_value = 80
+
+    # When
+    govt.update_fiscal_policy()
+
+    # Then
+    assert govt.public_spending == pytest.approx(95)
+    assert govt.tax_rate == pytest.approx(0.21)
+
+
+def test_keep_spending_and_increase_tax_when_deficit_high(govt_for_policy):
+    # Given
+    govt = govt_for_policy
+    govt.dmax = 0.05
+    govt.budget_deficit = 100
+    govt.calc_desired_public_spending.return_value = 120
+
+    # When
+    govt.update_fiscal_policy()
+
+    # Then
+    assert govt.public_spending == pytest.approx(100)
+    assert govt.tax_rate == pytest.approx(0.21)
+
+
+def test_reduce_spending_and_tax_when_deficit_low(govt_for_policy):
+    # Given
+    govt = govt_for_policy
+    govt.dmax = 0.05
+    govt.budget_deficit = 20
+    govt.calc_desired_public_spending.return_value = 80
+
+    # When
+    govt.update_fiscal_policy()
+
+    # Then
+    assert govt.public_spending == pytest.approx(95)
+    assert govt.tax_rate == pytest.approx(0.19)
+
+
+def test_increase_spending_and_keep_tax_when_deficit_low(govt_for_policy):
+    # Given
+    govt = govt_for_policy
+    govt.dmax = 0.05
+    govt.budget_deficit = 20
+    govt.calc_desired_public_spending.return_value = 120
+
+    # When
+    govt.update_fiscal_policy()
+
+    # Then
+    assert govt.public_spending == pytest.approx(105)
+    assert govt.tax_rate == pytest.approx(0.20)
 
 
 def test_update_history(govt):
