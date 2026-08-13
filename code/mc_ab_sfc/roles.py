@@ -246,7 +246,7 @@ class BondIssuerRole(EcoRole):
         self.bond_supply = 0
 
     @property
-    def interest_rate(self):
+    def bond_rate(self):
         return self.agent.bond_rate
 
     @property

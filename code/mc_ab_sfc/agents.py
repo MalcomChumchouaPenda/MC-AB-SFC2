@@ -514,6 +514,7 @@ class GovernmentAgent(EcoAgent):
         self.taxes = 0
         self.profit = 0
         self.public_transfers = 0
+        self.bond_interest = 0
 
         # choices
         self.tax_rate = 0.0

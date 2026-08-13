@@ -71,13 +71,13 @@ def test_get_average_productivity(govt_role):
 def test_get_discount_rate(govt_role):
     # Given
     country = govt_role.space
-    country.discount_rate = 2
+    country.discount_rate = 0.02
 
     # When
     discount_rate = govt_role.get_discount_rate()
 
     # Assert
-    assert discount_rate == 2
+    assert discount_rate == 0.02
     
 
 def test_get_households(govt_role):

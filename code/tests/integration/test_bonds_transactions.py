@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import Mock
 from mc_ab_sfc.agents import BankAgent, CentralBankAgent, GovernmentAgent
-from mc_ab_sfc.spaces import BondMarket
+from mc_ab_sfc.spaces import BondMarket, CountrySpace
 
 
 @pytest.fixture
@@ -10,6 +10,7 @@ def model():
     model = Mock()
     model.p.mu2 = 0.1
     model.p.iota_b = 0
+    model.p.chi = 0.02
     return model
 
 
@@ -48,15 +49,62 @@ def bond_market(model):
     return BondMarket(model)
 
 
+@pytest.fixture
+def country(model):
+    # Given
+    country = CountrySpace(model)
+    country.discount_rate = 0.04
+    return country
+
 def test_government_issues_bonds(govt, bond_market):
     # Given
-    issuer_role = bond_market.add_bond_issuer(govt)
+    issuer = bond_market.add_bond_issuer(govt)
 
     # When
     govt.issue_bonds()
 
     # Then
-    assert issuer_role.bond_supply == 150
+    assert issuer.bond_supply == 150
+
+
+def test_government_pays_bond_debt_to_bank(govt, bank, country, bond_market):
+    # Given
+    country.add_government(govt)
+    issuer = bond_market.add_bond_issuer(govt)
+    buyer = bond_market.add_bond_buyer(bank)
+    graph = bond_market.graph
+    graph.add_edge(issuer, buyer, amount=100)
+
+    # When
+    govt.pay_bond_debt()
+
+    # Then
+    assert govt.bonds == 400
+    assert govt.reserves == -105.0
+    assert govt.bond_interest == 5.0
+    assert bank.reserves == 405.0
+    assert bank.bonds == -100
+    assert bank.bond_interest == 5.0
+
+
+def test_government_pays_bond_debt_to_central_bank(govt, central_bank, country, bond_market):
+    # Given
+    country.add_government(govt)
+    issuer = bond_market.add_bond_issuer(govt)
+    buyer = bond_market.add_bond_buyer(central_bank)
+    graph = bond_market.graph
+    graph.add_edge(issuer, buyer, amount=100)
+
+    # When
+    govt.pay_bond_debt()
+
+    # Then
+    assert govt.bonds == 400
+    assert govt.reserves == -105.0
+    assert govt.bond_interest == 5.0
+    assert central_bank.reserves == 895.0
+    assert central_bank.bonds == -100
+    assert central_bank.bond_interest == 5.0
 
 
 def test_bank_invests_excess_reserves(govt, bank, bond_market):

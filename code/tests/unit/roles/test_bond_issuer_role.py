@@ -28,13 +28,13 @@ def test_has_default_bond_supply(issuer):
     assert issuer.bond_supply == 0.0
 
 
-def test_exposes_interest_rate(issuer):
+def test_exposes_bond_rate(issuer):
     # Given
     government = issuer.agent
     government.bond_rate = 0.01
 
     # Assert
-    assert issuer.interest_rate == 0.01
+    assert issuer.bond_rate == 0.01
 
 
 def test_exposes_bonds(issuer):

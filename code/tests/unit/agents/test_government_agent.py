@@ -33,6 +33,7 @@ def test_has_default_flows(govt):
     assert govt.taxes == 0
     assert govt.profit == 0
     assert govt.public_transfers == 0
+    assert govt.bond_interest == 0
 
 
 def test_has_default_choices(govt):
