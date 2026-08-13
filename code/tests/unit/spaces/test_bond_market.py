@@ -123,17 +123,17 @@ def test_buy_bonds_modifies_government_stocks(market):
     issuer.increase_stock.assert_any_call("bonds", 500)
 
 
-class FakeAgent:
+class FakeBankAgent:
     pass
 
 
 def test_buy_bonds_modifies_bank_stocks(market, monkeypatch):
     # Given
     issuer = Mock(bond_supply=1000)
-    buyer = Mock(agent=FakeAgent())
+    buyer = Mock(agent=FakeBankAgent())
     graph = market.graph
     graph.add_nodes_from([buyer, issuer])
-    monkeypatch.setattr("mc_ab_sfc.spaces.BankAgent", FakeAgent)
+    monkeypatch.setattr("mc_ab_sfc.spaces.BankAgent", FakeBankAgent)
 
     # When
     market.buy_bonds(buyer, issuer, 500)
@@ -156,3 +156,71 @@ def test_buy_bonds_modifies_central_bank_stocks(market):
     # Then
     buyer.increase_stock.assert_any_call("reserves", 500)
     buyer.increase_stock.assert_any_call("bonds", 500)
+
+
+
+def test_pay_bond_debt_repays_principal(market):
+    # Given
+    issuer = Mock(bond_rate=0.05)
+    buyer = Mock(agent=object())
+    graph = market.graph
+    graph.add_nodes_from([buyer, issuer])
+    graph.add_edge(buyer, issuer, amount=100)
+
+    # When
+    market.pay_bond_debt(issuer)
+
+    # Then
+    assert not graph.has_edge(issuer, buyer)
+
+
+def test_pay_bond_debt_modifies_government_stocks(market):
+    # Given
+    issuer = Mock(bond_rate=0.05)
+    buyer = Mock(agent=object())
+    graph = market.graph
+    graph.add_nodes_from([buyer, issuer])
+    graph.add_edge(buyer, issuer, amount=100)
+
+    # When
+    market.pay_bond_debt(issuer)
+
+    # Then
+    issuer.decrease_stock.assert_any_call("reserves", 105.0)
+    issuer.decrease_stock.assert_any_call("bonds", 100)
+    issuer.increase_flow.assert_any_call("bond_interest", 5.0)
+
+
+def test_pay_bond_debt_modifies_bank_stocks(market, monkeypatch):
+    # Given
+    issuer = Mock(bond_rate=0.05)
+    buyer = Mock(agent=FakeBankAgent())
+    graph = market.graph
+    graph.add_nodes_from([buyer, issuer])
+    graph.add_edge(buyer, issuer, amount=100)
+    monkeypatch.setattr("mc_ab_sfc.spaces.BankAgent", FakeBankAgent)
+
+    # When
+    market.pay_bond_debt(issuer)
+
+    # Then
+    buyer.increase_stock.assert_any_call("reserves", 105.0)
+    buyer.decrease_stock.assert_any_call("bonds", 100)
+    buyer.increase_flow.assert_any_call("bond_interest", 5.0)
+
+
+def test_pay_bond_debt_modifies_central_bank_stocks(market):
+    # Given
+    issuer = Mock(bond_rate=0.05)
+    buyer = Mock(agent=object())
+    graph = market.graph
+    graph.add_nodes_from([buyer, issuer])
+    graph.add_edge(buyer, issuer, amount=100)
+
+    # When
+    market.pay_bond_debt(issuer)
+
+    # Then
+    buyer.decrease_stock.assert_any_call("reserves", 105.0)
+    buyer.decrease_stock.assert_any_call("bonds", 100)
+    buyer.increase_flow.assert_any_call("bond_interest", 5.0)

@@ -29,6 +29,9 @@ class GovernmentRole(EcoRole):
     def get_average_productivity(self):
         return self.space.average_productivity
 
+    def get_discount_rate(self):
+        return self.space.discount_rate
+
     def get_households(self):
         return self.space.get_households()
 
@@ -244,7 +247,7 @@ class BondIssuerRole(EcoRole):
 
     @property
     def interest_rate(self):
-        return self.agent.bond_interest_rate
+        return self.agent.bond_rate
 
     @property
     def bonds(self):
@@ -256,6 +259,9 @@ class BondIssuerRole(EcoRole):
 
     def issue_bonds(self, amount):
         self.bond_supply = amount
+
+    def pay_bond_debt(self):
+        self.space.pay_bond_debt(self)
 
 
 class BondBuyerRole(EcoRole):

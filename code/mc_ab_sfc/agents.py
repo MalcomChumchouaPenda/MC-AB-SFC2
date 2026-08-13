@@ -517,6 +517,7 @@ class GovernmentAgent(EcoAgent):
 
         # choices
         self.tax_rate = 0.0
+        self.bond_rate = 0.0
         self.desired_public_spending = 0
         self.prev_public_spending = 0
         self.public_spending = 0
@@ -595,6 +596,20 @@ class GovernmentAgent(EcoAgent):
 
     def calc_new_bonds(self):
         return max(0, self.new_public_debt - self.bonds)
+
+
+    def pay_bond_debt(self):
+        self.calc_bond_rate()
+        role = self.roles["bond_issuer"]
+        role.pay_bond_debt()
+
+
+    def calc_bond_rate(self):
+        role = self.roles["government"]
+        discount_rate = role.get_discount_rate()
+        bond_rate =  self.p.chi * (self.bonds / self.gdp) + discount_rate
+        self.bond_rate = bond_rate
+        return bond_rate
 
     def update_history(self):
         role = self.roles["government"]

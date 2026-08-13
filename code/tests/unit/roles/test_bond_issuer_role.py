@@ -31,7 +31,7 @@ def test_has_default_bond_supply(issuer):
 def test_exposes_interest_rate(issuer):
     # Given
     government = issuer.agent
-    government.bond_interest_rate = 0.01
+    government.bond_rate = 0.01
 
     # Assert
     assert issuer.interest_rate == 0.01
@@ -53,6 +53,7 @@ def test_exposes_gdp(issuer):
     # Assert
     assert issuer.gdp == 150
 
+
 def test_issue_bonds(issuer):
     # Given
     issuer.bond_supply = 0
@@ -62,5 +63,17 @@ def test_issue_bonds(issuer):
 
     # Then
     assert issuer.bond_supply == 400
+
+
+def test_pay_bond_debt(issuer):
+    # Given
+    market = issuer.space
+
+    # When
+    issuer.pay_bond_debt()
+
+    # Then
+    market.pay_bond_debt.assert_called_with(issuer)
+
 
     

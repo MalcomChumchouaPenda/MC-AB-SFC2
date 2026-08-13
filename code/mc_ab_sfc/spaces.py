@@ -286,7 +286,6 @@ class DepositMarket(EcoSpace):
 
     def pay_deposit_interest(self, deposit_bank):
         deposit_rate = deposit_bank.deposit_rate
-        print(deposit_rate, deposit_bank)
         for _, holder in self.graph.edges(deposit_bank):
             interest = holder.deposits * deposit_rate
             holder.increase_stock("deposits", interest)
@@ -318,3 +317,23 @@ class BondMarket(EcoSpace):
             buyer.increase_stock("bonds", amount)
             buyer.increase_stock("reserves", amount)
         self.graph.add_edge(issuer, buyer, amount=amount)
+
+    def pay_bond_debt(self, issuer):
+        graph = self.graph
+        bond_rate = issuer.bond_rate
+        for _, buyer in list(graph.edges(issuer)):
+            principal = graph[issuer][buyer]["amount"]
+            interest = bond_rate * principal
+            issuer.decrease_stock("bonds", principal)
+            issuer.increase_flow("bond_interest", interest)
+            issuer.decrease_stock("reserves", principal + interest)
+            if isinstance(buyer.agent, BankAgent):
+                buyer.decrease_stock("bonds", principal)
+                buyer.increase_flow("bond_interest", interest)
+                buyer.increase_stock("reserves", principal + interest)
+            else:
+                buyer.decrease_stock("bonds", principal)
+                buyer.increase_flow("bond_interest", interest)
+                buyer.decrease_stock("reserves", principal + interest)
+            self.graph.remove_edge(issuer, buyer)
+            

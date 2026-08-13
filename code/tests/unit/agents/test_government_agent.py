@@ -38,6 +38,7 @@ def test_has_default_flows(govt):
 def test_has_default_choices(govt):
     # Assert
     assert govt.tax_rate == 0
+    assert govt.bond_rate == 0
     assert govt.public_spending == 0
     assert govt.desired_public_spending == 0
     assert govt.new_public_debt == 0
@@ -344,6 +345,37 @@ def test_issues_bonds_with_multi_step(govt_as_bond_supplier):
     # Then
     govt.calc_new_debt.assert_called_with()
     govt.calc_new_bonds.assert_called_with()
+
+
+def test_pay_bond_debt(govt):
+    # Given
+    issuer_role = Mock()
+    govt.roles['bond_issuer'] = issuer_role
+    govt.calc_bond_rate = Mock()
+
+    # When
+    govt.pay_bond_debt()
+
+    # Then
+    govt.calc_bond_rate.assert_called_with()
+    issuer_role.pay_bond_debt.assert_called_with()
+
+
+def test_calc_bond_rate(govt):
+    # Given
+    govt_role = Mock()
+    govt_role.get_discount_rate.return_value = 0.03
+    govt.roles['government'] = govt_role
+    govt.bonds = 500
+    govt.gdp = 1000
+    govt.p.chi = 0.02
+
+    # when
+    rate = govt.calc_bond_rate()
+
+    # Then
+    assert rate == 0.04
+    assert govt.bond_rate == 0.04
 
 
 @pytest.fixture
