@@ -390,6 +390,7 @@ class BankAgent(EcoAgent):
         self.profit = 0
         self.net_worth = 0
         self.credit_capacity = 0
+        self.defaulted = False
 
     def update_deposit_rate(self):
         role = self.roles["commercial_bank"]
@@ -506,6 +507,8 @@ class BankAgent(EcoAgent):
 class GovernmentAgent(EcoAgent):
 
     def setup(self):
+        self._defaults = []
+
         # stocks
         self.reserves = 0
         self.bonds = 0
@@ -586,7 +589,6 @@ class GovernmentAgent(EcoAgent):
     def issue_bonds(self):
         self.calc_new_debt()
         new_bonds = self.calc_new_bonds()
-        print(self.bonds, self.budget_deficit, self.prev_budget_surplus)
         role = self.roles['bond_issuer']
         role.issue_bonds(new_bonds)
 
@@ -604,13 +606,27 @@ class GovernmentAgent(EcoAgent):
         role = self.roles["bond_issuer"]
         role.pay_bond_debt()
 
-
     def calc_bond_rate(self):
         role = self.roles["government"]
         discount_rate = role.get_discount_rate()
         bond_rate =  self.p.chi * (self.bonds / self.gdp) + discount_rate
         self.bond_rate = bond_rate
         return bond_rate
+
+
+    def issue_deposit_guarantee_bonds(self):
+        guarantee_role = self.roles["deposit_guarantee"]
+        defaults = guarantee_role.get_defaulted_banks()
+        needs = sum([b.defaulted_deposits for b in defaults])
+        issuer_role = self.roles["bond_issuer"]
+        issuer_role.issue_bonds(needs)
+        self._defaults = defaults
+
+    def reimburse_deposits(self):
+        guarantee_role = self.roles["deposit_guarantee"]
+        for bank in self._defaults:
+            guarantee_role.reimburse_deposits(bank)
+
 
     def update_history(self):
         role = self.roles["government"]
@@ -656,7 +672,6 @@ class CentralBankAgent(EcoAgent):
         bond_issuers = role.get_bond_issuers()
         for issuer in bond_issuers:
             purchase = issuer.bond_supply
-            print(issuer, purchase)
             role.buy_bonds(issuer, purchase)
 
     def pay_profit(self):

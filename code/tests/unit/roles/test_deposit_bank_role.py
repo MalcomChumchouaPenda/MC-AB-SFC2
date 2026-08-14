@@ -32,6 +32,26 @@ def test_exposes_deposit_rate(deposit_bank):
     assert deposit_bank.deposit_rate == 0.05
 
 
+def test_exposes_defaulted_status(deposit_bank):
+    # Given
+    bank = deposit_bank.agent
+    bank.defaulted = True
+
+    # Assert
+    assert deposit_bank.defaulted == True
+
+
+@pytest.mark.parametrize("defaulted, expected", [(True, 100), (False, 0)])
+def test_exposes_defaulted_deposits(deposit_bank, defaulted, expected):
+    # Given
+    bank = deposit_bank.agent
+    bank.defaulted = defaulted
+    bank.deposits = 100
+
+    # Assert
+    assert deposit_bank.defaulted_deposits == expected
+
+
 # ---------------------------------------------------
 # BEHAVIORAL TESTS
 # ----------------------------------------------------

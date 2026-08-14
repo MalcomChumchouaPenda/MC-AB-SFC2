@@ -54,6 +54,7 @@ def test_has_default_indicators(bank):
     assert bank.credit_capacity == 0
     assert bank.net_worth == 0
     assert bank.profit == 0
+    assert bank.defaulted == False
 
 
 # ---------------------------------------------------

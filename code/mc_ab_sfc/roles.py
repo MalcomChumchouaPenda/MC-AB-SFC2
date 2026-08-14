@@ -160,9 +160,28 @@ class DepositBankRole(EcoRole):
     def deposit_rate(self):
         return self.agent.deposit_rate
 
+    @property
+    def defaulted(self):
+        return self.agent.defaulted
+
+    @property
+    def defaulted_deposits(self):
+        if not self.agent.defaulted:
+            return 0
+        return self.agent.deposits
+
     def pay_deposit_interest(self):
         self.space.pay_deposit_interest(self)
 
+
+class DepositGuaranteeRole(EcoRole):
+
+    def get_defaulted_banks(self):
+        return self.space.get_defaulted_banks()
+
+    def reimburse_deposits(self, bank):
+        self.space.reimburse_deposits(self, bank)
+    
 
 class BorrowerRole(EcoRole):
 
