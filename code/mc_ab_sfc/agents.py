@@ -28,6 +28,8 @@ class HouseholdAgent(EcoAgent):
         self.expected_consumption = 0
         self.desired_trad_cons = 0
         self.desired_non_trad_cons = 0
+        self.desired_equity = 0
+        self.desired_deposits = 0
 
         # memory
         self.employed_labor = 0
@@ -145,6 +147,10 @@ class HouseholdAgent(EcoAgent):
     def calc_expected_net_worth(self):
         return self.net_worth + self.disposable_income - self.expected_consumption
 
+    def find_potential_investors(self):
+        role = self.roles["equity_holder"]
+        return role.get_potential_investors()
+    
 
 class FirmAgent(EcoAgent):
 

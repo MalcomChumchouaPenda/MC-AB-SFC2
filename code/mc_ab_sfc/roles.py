@@ -123,8 +123,20 @@ class ProducerRole(EcoRole):
 
 class EquityHolderRole(EcoRole):
 
+    @property
+    def equity(self):
+        return self.agent.equity
+
+    @property
+    def desired_equity(self):
+        return self.agent.desired_equity
+    
+
     def get_default_probability(self):
         return self.space.default_probability
+
+    def get_potential_investors(self):
+        return self.space.get_potential_investors(exclude=self)
 
 
 class EquityIssuerRole(EcoRole):

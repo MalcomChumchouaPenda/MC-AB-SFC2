@@ -455,3 +455,35 @@ def test_update_statistics_with_goods_market_stats_updates(country):
 
     # Then
     goods_market.update_statistics.assert_called_once()
+
+
+class FakeHolderRole(Mock):
+    pass
+
+def test_get_only_eligible_investors(country, monkeypatch):
+    # Given
+    other = Mock()
+    eligible = FakeHolderRole(desired_equity=100, equity=0)
+    ineligible = FakeHolderRole(desired_equity=100, equity=10)
+    country.graph.add_nodes_from([eligible, ineligible, other])
+    monkeypatch.setattr("mc_ab_sfc.spaces.EquityHolderRole", FakeHolderRole)
+
+    # When
+    investors =  country.get_potential_investors()
+
+    # Then
+    assert investors == [eligible]
+
+
+def test_get_investors_excludes_initiating_household(country, monkeypatch):
+    # Given
+    initiator = FakeHolderRole(desired_equity=100, equity=0)
+    eligible = FakeHolderRole(desired_equity=100, equity=0)
+    country.graph.add_nodes_from([initiator, eligible])
+    monkeypatch.setattr("mc_ab_sfc.spaces.EquityHolderRole", FakeHolderRole)
+
+    # When
+    investors =  country.get_potential_investors(exclude=initiator)
+
+    # Then
+    assert investors == [eligible]

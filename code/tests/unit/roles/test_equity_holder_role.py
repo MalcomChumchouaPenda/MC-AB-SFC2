@@ -15,10 +15,6 @@ def test_is_eco_role():
     assert issubclass(EquityHolderRole, EcoRole)
 
 
-# ---------------------------------------------------
-# BEHAVIORAL TESTS
-# ----------------------------------------------------
-
 
 @pytest.fixture
 def role():
@@ -26,6 +22,31 @@ def role():
     space = Mock()
     agent = Mock(id=1)
     return EquityHolderRole(agent, space)
+
+
+def test_exposes_equity(role):
+    # Given
+    household = role.agent
+    household.equity = 100
+
+    # Assert
+    assert role.equity == 100
+
+
+def test_exposes_desired_equity(role):
+    # Given
+    household = role.agent
+    household.desired_equity = 100
+
+    # Assert
+    assert role.desired_equity == 100
+
+
+
+
+# ---------------------------------------------------
+# BEHAVIORAL TESTS
+# ----------------------------------------------------
 
 
 def test_get_default_probability(role):
@@ -37,3 +58,32 @@ def test_get_default_probability(role):
 
     # Then
     assert default_probability == 0.12
+
+
+def test_gets_potential_investors(role):
+    # Given
+    investors = [Mock()]
+    country = role.space
+    country.get_potential_investors.return_value = investors
+
+    # When
+    result = role.get_potential_investors()
+
+    # Then
+    assert result == investors
+
+
+
+def test_gets_potential_investors_exclude_itself(role):
+    # Given
+    country = role.space
+
+    # When
+    role.get_potential_investors()
+
+    # Then
+    country.get_potential_investors.assert_called_with(
+        exclude=role
+    )
+
+    

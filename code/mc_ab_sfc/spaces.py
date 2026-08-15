@@ -170,6 +170,16 @@ class CountrySpace(EcoSpace):
         household.increase_stock("cash", amount)
         household.increase_flow("public_transfers", amount)
 
+    def get_potential_investors(self, exclude=None):
+        return [
+            n
+            for n in self.graph.nodes()
+            if isinstance(n, EquityHolderRole)
+                and n.desired_equity > 0
+                and n.equity == 0
+                and n is not exclude
+        ]
+
     def update_statistics(self):
         self.markets["goods"].update_statistics()
 

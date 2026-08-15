@@ -49,6 +49,8 @@ def test_has_default_choices(household):
     assert household.expected_consumption == 0
     assert household.desired_trad_cons == 0
     assert household.desired_non_trad_cons == 0
+    assert household.desired_equity == 0
+    assert household.desired_deposits == 0
 
 
 def test_has_default_indicator(household):
@@ -615,3 +617,18 @@ def test_calc_portfolio_allocation_preserves_existing_equity():
 
     # Then
     assert household.desired_equity == 80
+
+
+def test_find_potential_equity_investors():
+    # Given
+    investors = [Mock(), Mock()]
+    holder_role = Mock()
+    holder_role.get_potential_investors.return_value = investors
+    household = HouseholdAgent(model=Mock())
+    household.roles = {"equity_holder": holder_role    }
+
+    # When
+    result = household.find_potential_investors()
+
+    # Then
+    assert result == investors
