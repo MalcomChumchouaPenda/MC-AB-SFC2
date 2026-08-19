@@ -175,6 +175,14 @@ class HouseholdAgent(EcoAgent):
         random = self.model.nprandom
         return random.uniform(minimum, maximum)
 
+    def create_firm(self, founders, equity, tradable):
+        role = self.roles["equity_holder"]
+        role.create_firm(founders, equity, tradable)
+
+    def create_bank(self, founders, equity):
+        role = self.roles["equity_holder"]
+        role.create_bank(founders, equity)
+
 
 class FirmAgent(EcoAgent):
 

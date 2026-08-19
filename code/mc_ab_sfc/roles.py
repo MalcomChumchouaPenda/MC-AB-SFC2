@@ -160,6 +160,12 @@ class EquityHolderRole(EcoRole):
                 equities = [f.equity for f in firms if not f.tradable]
             return min(equities), max(equities)
 
+    def create_firm(self, founders, equity, tradable):
+        self.space.create_firm(founders, equity, tradable)
+
+    def create_bank(self, founders, equity):
+        self.space.create_bank(founders, equity)
+
 
 class EquityIssuerRole(EcoRole):
 

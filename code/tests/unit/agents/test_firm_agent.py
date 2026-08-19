@@ -470,7 +470,7 @@ def test_calc_rd_success_probability_tradable(firm_with_rd_project):
 def test_calc_rd_success_probability_non_tradable(firm_with_rd_project):
     # Given
     firm = firm_with_rd_project
-    firm.tradable = True
+    firm.tradable = False
     producer_role = firm.roles["producer"]
     producer_role.get_average_price.return_value = 15
     producer_role.get_average_productivity.return_value = 20

@@ -258,8 +258,10 @@ def test_add_equity_issuer_creates_appropriate_role(country_with_roles, monkeypa
     assert isinstance(issuer_role, FakeIssuerRole)
 
 
-class FakeBankAgent(Mock):
-    pass
+class FakeBankAgent:
+    def __init__(self, *args, **kwargs):
+        self.args = args
+        self.kwargs = kwargs
 
 
 def test_add_equity_issuer_registers_bank_role(country_with_roles, monkeypatch):
@@ -276,8 +278,11 @@ def test_add_equity_issuer_registers_bank_role(country_with_roles, monkeypatch):
     assert country.bank_roles == [issuer_role]
 
 
-class FakeFirmAgent(Mock):
-    pass
+class FakeFirmAgent:
+    def __init__(self, *args, **kwargs):
+        self.args = args
+        self.kwargs = kwargs
+        self.tradable = False
 
 
 def test_add_equity_issuer_registers_firm_role(country_with_roles, monkeypatch):
@@ -437,8 +442,10 @@ def test_update_equity_holdings(country, issuer, holders):
     holders[1].increase_stock.assert_called_once_with("equity", 480)
 
 
-class FakeHouseholdAgent(Mock):
-    pass
+class FakeHouseholdAgent:
+    def __init__(self, *args, **kwargs):
+        self.args = args
+        self.kwargs = kwargs
 
 
 def test_get_households_returns_household_agent_roles(country, monkeypatch):
@@ -530,3 +537,332 @@ def test_get_investors_excludes_initiating_household(country, monkeypatch):
 
     # Then
     assert investors == [eligible]
+
+
+@pytest.fixture
+def monetary_union():
+    # Given
+    union = Mock()
+    union.markets = {"goods": Mock()}
+    return union
+
+
+@pytest.fixture
+def country_before_firm_creation(monkeypatch, monetary_union):
+    # Given
+    model = Mock()
+    country = CountrySpace(model)
+    country.add_equity_issuer = Mock()
+    country.add_tax_payer = Mock()
+    country.assign_equity_holder = Mock()
+    country.monetary_union = monetary_union
+    country.markets = {
+        "labor": Mock(),
+        "goods": Mock(),
+        "deposit": Mock(),
+        "credit": Mock(),
+    }
+    monkeypatch.setattr("mc_ab_sfc.spaces.FirmAgent", FakeFirmAgent)
+    return country
+
+
+@pytest.mark.parametrize("tradable", [True, False])
+def test_create_firm_creates_firm_agent(country_before_firm_creation, tradable):
+    # Given
+    country = country_before_firm_creation
+    founders = [Mock(desired_equity=500) for _ in range(2)]
+
+    # When
+    firm = country.create_firm(founders, equity=1000, tradable=tradable)
+
+    # Then
+    assert firm.args == (country.model,)
+    assert isinstance(firm, FakeFirmAgent)
+    assert firm.tradable == tradable
+
+
+def test_create_firm_registers_firm_in_model(country_before_firm_creation):
+    # Given
+    country = country_before_firm_creation
+    model = country.model
+    founders = [Mock(desired_equity=1000)]
+
+    # When
+    firm = country.create_firm(founders, equity=1000, tradable=True)
+
+    # Then
+    model.firms.append.assert_called_with(firm)
+
+
+def test_create_firm_add_producer_to_non_tradable_market(country_before_firm_creation):
+    # Given
+    country = country_before_firm_creation
+    non_tradable_market = country.markets["goods"]
+    tradable_market = country.monetary_union.markets["goods"]
+    founders = [Mock(desired_equity=1000)]
+
+    # When
+    firm = country.create_firm(founders, 1000, tradable=False)
+
+    # Then
+    non_tradable_market.add_producer.assert_called_with(firm)
+    tradable_market.add_producer.assert_not_called()
+
+
+def test_create_firm_add_producer_to_tradable_market(country_before_firm_creation):
+    # Given
+    country = country_before_firm_creation
+    non_tradable_market = country.markets["goods"]
+    tradable_market = country.monetary_union.markets["goods"]
+    founders = [Mock(desired_equity=1000)]
+
+    # When
+    firm = country.create_firm(founders, 1000, tradable=True)
+
+    # Then
+    tradable_market.add_producer.assert_called_with(firm)
+    non_tradable_market.add_producer.assert_not_called()
+
+
+@pytest.mark.parametrize("tradable", [True, False])
+def test_create_firm_add_employer_role(country_before_firm_creation, tradable):
+    # Given
+    country = country_before_firm_creation
+    market = country.markets["labor"]
+    founders = [Mock(desired_equity=1000)]
+
+    # When
+    firm = country.create_firm(founders, 1000, tradable=tradable)
+
+    # Then
+    market.add_employer.assert_called_with(firm)
+
+
+@pytest.mark.parametrize("tradable", [True, False])
+def test_create_firm_add_borrower_role(country_before_firm_creation, tradable):
+    # Given
+    country = country_before_firm_creation
+    market = country.markets["credit"]
+    founders = [Mock(desired_equity=1000)]
+
+    # When
+    firm = country.create_firm(founders, 1000, tradable=tradable)
+
+    # Then
+    market.add_borrower.assert_called_with(firm)
+
+
+@pytest.mark.parametrize("tradable", [True, False])
+def test_create_firm_add_deposit_holder_role(country_before_firm_creation, tradable):
+    # Given
+    country = country_before_firm_creation
+    market = country.markets["deposit"]
+    founders = [Mock(desired_equity=1000)]
+
+    # When
+    firm = country.create_firm(founders, 1000, tradable=tradable)
+
+    # Then
+    market.add_deposit_holder.assert_called_with(firm)
+
+
+@pytest.mark.parametrize("tradable", [True, False])
+def test_create_firm_add_equity_issuer_role(country_before_firm_creation, tradable):
+    # Given
+    country = country_before_firm_creation
+    founders = [Mock(desired_equity=1000)]
+
+    # When
+    firm = country.create_firm(founders, 1000, tradable=tradable)
+
+    # Then
+    country.add_equity_issuer.assert_called_with(firm)
+
+
+@pytest.mark.parametrize("tradable", [True, False])
+def test_create_firm_add_tax_payer_role(country_before_firm_creation, tradable):
+    # Given
+    country = country_before_firm_creation
+    founders = [Mock(desired_equity=1000)]
+
+    # When
+    firm = country.create_firm(founders, 1000, tradable=tradable)
+
+    # Then
+    country.add_tax_payer.assert_called_with(firm)
+
+
+@pytest.mark.parametrize("tradable", [True, False])
+def test_create_firm_builds_equity_links(country_before_firm_creation, tradable):
+    # Given
+    issuer = Mock()
+    country = country_before_firm_creation
+    country.add_equity_issuer.return_value = issuer
+    founders = [Mock(desired_equity=500) for _ in range(2)]
+
+    # When
+    country.create_firm(founders, 1000, tradable=tradable)
+
+    # Then
+    for founder in founders:
+        country.assign_equity_holder.assert_any_call(issuer, founder, 0.5)
+
+
+@pytest.mark.parametrize("tradable", [True, False])
+def test_create_firm_builds_initial_equity(country_before_firm_creation, tradable):
+    # Given
+    issuer = Mock()
+    country = country_before_firm_creation
+    country.add_equity_issuer.return_value = issuer
+    founders = [Mock(desired_equity=500) for _ in range(2)]
+
+    # When
+    country.create_firm(founders, 1000, tradable=tradable)
+
+    # Then
+    issuer.increase_stock.assert_any_call("equity", 1000)
+    issuer.increase_stock.assert_any_call("cash", 1000)
+    for founder in founders:
+        founder.increase_stock.assert_any_call("equity", 500)
+        founder.decrease_stock.assert_any_call("cash", 500)
+
+
+@pytest.fixture
+def country_before_bank_creation(monkeypatch, monetary_union):
+    # Given
+    model = Mock()
+    country = CountrySpace(model)
+    country.add_commercial_bank = Mock()
+    country.add_equity_issuer = Mock()
+    country.add_tax_payer = Mock()
+    country.assign_equity_holder = Mock()
+    country.monetary_union = monetary_union
+    country.markets = {
+        "bond": Mock(),
+        "deposit": Mock(),
+        "credit": Mock(),
+    }
+    monkeypatch.setattr("mc_ab_sfc.spaces.BankAgent", FakeBankAgent)
+    return country
+
+
+def test_create_bank_creates_bank_agent(country_before_bank_creation):
+    # Given
+    country = country_before_bank_creation
+    founders = [Mock(desired_equity=500) for _ in range(2)]
+
+    # When
+    bank = country.create_bank(founders, equity=1000)
+
+    # Then
+    assert bank.args == (country.model,)
+    assert isinstance(bank, FakeBankAgent)
+
+
+def test_create_bank_registers_bank_in_model(country_before_bank_creation):
+    # Given
+    country = country_before_bank_creation
+    model = country.model
+    founders = [Mock(desired_equity=1000)]
+
+    # When
+    bank = country.create_bank(founders, equity=1000)
+
+    # Then
+    model.banks.append.assert_called_with(bank)
+
+
+def test_create_bank_add_bond_buyer_role(country_before_bank_creation):
+    # Given
+    country = country_before_bank_creation
+    market = country.markets["bond"]
+    founders = [Mock(desired_equity=1000)]
+
+    # When
+    bank = country.create_bank(founders, 1000)
+
+    # Then
+    market.add_bond_buyer.assert_called_with(bank)
+
+
+def test_create_bank_add_lender_role(country_before_bank_creation):
+    # Given
+    country = country_before_bank_creation
+    market = country.markets["credit"]
+    founders = [Mock(desired_equity=1000)]
+
+    # When
+    bank = country.create_bank(founders, 1000)
+
+    # Then
+    market.add_lender.assert_called_with(bank)
+
+
+def test_create_bank_add_deposit_bank_role(country_before_bank_creation):
+    # Given
+    country = country_before_bank_creation
+    market = country.markets["deposit"]
+    founders = [Mock(desired_equity=1000)]
+
+    # When
+    bank = country.create_bank(founders, 1000)
+
+    # Then
+    market.add_deposit_bank.assert_called_with(bank)
+
+
+def test_create_bank_add_equity_issuer_role(country_before_bank_creation):
+    # Given
+    country = country_before_bank_creation
+    founders = [Mock(desired_equity=1000)]
+
+    # When
+    bank = country.create_bank(founders, 1000)
+
+    # Then
+    country.add_equity_issuer.assert_called_with(bank)
+
+
+def test_create_bank_add_tax_payer_role(country_before_bank_creation):
+    # Given
+    country = country_before_bank_creation
+    founders = [Mock(desired_equity=1000)]
+
+    # When
+    bank = country.create_bank(founders, 1000)
+
+    # Then
+    country.add_tax_payer.assert_called_with(bank)
+
+
+def test_create_bank_builds_equity_links(country_before_bank_creation):
+    # Given
+    issuer = Mock()
+    country = country_before_bank_creation
+    country.add_equity_issuer.return_value = issuer
+    founders = [Mock(desired_equity=500) for _ in range(2)]
+
+    # When
+    country.create_bank(founders, 1000)
+
+    # Then
+    for founder in founders:
+        country.assign_equity_holder.assert_any_call(issuer, founder, 0.5)
+
+
+def test_create_bank_builds_initial_equity(country_before_bank_creation):
+    # Given
+    issuer = Mock()
+    country = country_before_bank_creation
+    country.add_equity_issuer.return_value = issuer
+    founders = [Mock(desired_equity=500) for _ in range(2)]
+
+    # When
+    country.create_bank(founders, 1000)
+
+    # Then
+    issuer.increase_stock.assert_any_call("equity", 1000)
+    issuer.increase_stock.assert_any_call("reserves", 1000)
+    for founder in founders:
+        founder.increase_stock.assert_any_call("equity", 500)
+        founder.decrease_stock.assert_any_call("cash", 500)

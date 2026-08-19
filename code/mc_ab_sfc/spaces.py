@@ -187,6 +187,57 @@ class CountrySpace(EcoSpace):
             and n is not exclude
         ]
 
+    def create_firm(self, founders, equity, tradable):
+        firm = FirmAgent(self.model)
+        firm.tradable = tradable
+        issuer = self.add_equity_issuer(firm)
+        self._distribute_firm_equity(equity, issuer, founders)
+        self._create_firm_market_roles(firm, tradable)
+        self.add_tax_payer(firm)
+        self.model.firms.append(firm)
+        return firm
+
+    def _distribute_firm_equity(self, equity, issuer, founders):
+        issuer.increase_stock("equity", equity)
+        issuer.increase_stock("cash", equity)
+        for founder in founders:
+            share = founder.desired_equity
+            founder.increase_stock("equity", share)
+            founder.decrease_stock("cash", share)
+            self.assign_equity_holder(issuer, founder, share / equity)
+
+    def _create_firm_market_roles(self, firm, tradable):
+        self.markets["labor"].add_employer(firm)
+        self.markets["credit"].add_borrower(firm)
+        self.markets["deposit"].add_deposit_holder(firm)
+        if tradable:
+            self.monetary_union.markets["goods"].add_producer(firm)
+        else:
+            self.markets["goods"].add_producer(firm)
+
+    def create_bank(self, founders, equity):
+        bank = BankAgent(self.model)
+        issuer = self.add_equity_issuer(bank)
+        self._distribute_bank_equity(equity, issuer, founders)
+        self._create_bank_market_roles(bank)
+        self.add_tax_payer(bank)
+        self.model.banks.append(bank)
+        return bank
+
+    def _distribute_bank_equity(self, equity, issuer, founders):
+        issuer.increase_stock("equity", equity)
+        issuer.increase_stock("reserves", equity)
+        for founder in founders:
+            share = founder.desired_equity
+            founder.increase_stock("equity", share)
+            founder.decrease_stock("cash", share)
+            self.assign_equity_holder(issuer, founder, share / equity)
+
+    def _create_bank_market_roles(self, bank):
+        self.markets["credit"].add_lender(bank)
+        self.markets["deposit"].add_deposit_bank(bank)
+        self.markets["bond"].add_bond_buyer(bank)
+
     def update_statistics(self):
         self.markets["goods"].update_statistics()
 

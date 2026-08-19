@@ -162,3 +162,27 @@ def test_get_sector_equity_range_returns_none_initially(role, sector):
 
     # Then
     assert range_ is None
+
+
+def test_create_firm_delegates_to_country(role):
+    # Given
+    country = role.space
+    founders = [Mock(), Mock()]
+
+    # When
+    role.create_firm(founders, 100, True)
+
+    # Then
+    country.create_firm.assert_called_with(founders, 100, True)
+
+
+def test_create_bank_delegates_to_country(role):
+    # Given
+    country = role.space
+    founders = [Mock(), Mock()]
+
+    # When
+    role.create_bank(founders, 100)
+
+    # Then
+    country.create_bank.assert_called_with(founders, 100)
