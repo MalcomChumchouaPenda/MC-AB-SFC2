@@ -166,6 +166,16 @@ class HouseholdAgent(EcoAgent):
         role = self.roles["equity_holder"]
         return role.get_potential_investors()
 
+    def calc_initial_equity(self, sector):
+        role = self.roles["equity_holder"]
+        range_ = role.get_sector_equity_range(sector)
+        if range_ is None:
+            return self.p.initial_equity
+        minimum, maximum = range_
+        random = self.model.nprandom
+        return random.uniform(minimum, maximum)
+
+
 
 class FirmAgent(EcoAgent):
 

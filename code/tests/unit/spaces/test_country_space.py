@@ -258,6 +258,44 @@ def test_add_equity_issuer_creates_appropriate_role(country_with_roles, monkeypa
     assert isinstance(issuer_role, FakeIssuerRole)
 
 
+
+class FakeBankAgent(Mock):
+    pass
+
+
+def test_add_equity_issuer_registers_bank_role(country_with_roles, monkeypatch):
+    # Given
+    agent = FakeBankAgent()
+    country = country_with_roles
+    monkeypatch.setattr("mc_ab_sfc.spaces.EquityIssuerRole", FakeIssuerRole)
+    monkeypatch.setattr("mc_ab_sfc.spaces.BankAgent", FakeBankAgent)
+
+    # When
+    issuer_role = country.add_equity_issuer(agent)
+
+    # Then
+    assert country.bank_roles == [issuer_role]
+
+
+class FakeFirmAgent(Mock):
+    pass
+
+
+def test_add_equity_issuer_registers_firm_role(country_with_roles, monkeypatch):
+    # Given
+    agent = FakeFirmAgent()
+    country = country_with_roles
+    monkeypatch.setattr("mc_ab_sfc.spaces.EquityIssuerRole", FakeIssuerRole)
+    monkeypatch.setattr("mc_ab_sfc.spaces.FirmAgent", FakeFirmAgent)
+
+    # When
+    issuer_role = country.add_equity_issuer(agent)
+
+    # Then
+    assert country.firm_roles == [issuer_role]
+
+
+
 def test_assign_equity_holder_to_equity_issuer(country):
     # Given
     issuer = Mock()
@@ -276,10 +314,6 @@ def test_assign_equity_holder_to_equity_issuer(country):
 # ---------------------------------------------------
 # TRANSACTIONS MANAGEMENT
 # ----------------------------------------------------
-
-
-class FakeBankAgent(Mock):
-    pass
 
 
 def test_pay_taxes_with_tax_payer_reserves(country, monkeypatch):
@@ -500,5 +534,3 @@ def test_get_investors_excludes_initiating_household(country, monkeypatch):
     assert investors == [eligible]
 
 
-class FakeFirmAgent(Mock):
-    pass

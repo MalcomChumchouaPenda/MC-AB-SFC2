@@ -677,3 +677,37 @@ def test_choose_firm_as_investment_sector(household_as_investor):
     random.choice.assert_called_with(sectors, p=[0.4, 0.6])
     assert sector == "tradable_firms"
     assert household.desired_investment_sector == sector
+
+
+@pytest.mark.parametrize("sector", ["non_tradable_firms", "tradable_firms", "banks"])
+def test_calc_initial_equity_for_desired_investment_sector(household_as_investor, sector):
+    # Given
+    household = household_as_investor
+    household.desired_investment_sector = sector
+    holder_role = household.roles["equity_holder"]
+    holder_role.get_sector_equity_range.return_value = (100, 500)
+    random = household.model.nprandom
+    random.uniform.return_value = 300
+
+    # When
+    equity = household.calc_initial_equity(sector)
+
+    # Then
+    holder_role.get_sector_equity_range.assert_called_with(sector)
+    assert equity == 300
+
+
+@pytest.mark.parametrize("sector", ["non_tradable_firms", "tradable_firms", "banks"])
+def test_calc_initial_equity_uses_exogenous_initial_equity(household_as_investor, sector):
+    # Given
+    household = household_as_investor
+    household.p.initial_equity = 1000
+    holder_role = household.roles["equity_holder"]
+    holder_role.get_sector_equity_range.return_value = None
+
+    # When
+    equity = household.calc_initial_equity(sector=sector)
+
+    # Then
+    assert equity == 1000
+

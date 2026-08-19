@@ -105,3 +105,63 @@ def test_get_bank_firm_equity_ratio(role):
 
     # Then
     assert ratio == 0.2
+
+
+def test_get_sector_equity_range_for_banks_sector(role):
+    # Given
+    country = role.space
+    country.bank_roles = [Mock(equity=100 * i) for i in range(1, 10)]
+
+    # When
+    range_ = role.get_sector_equity_range("banks")
+
+    # Then
+    assert range_ == (100, 900)
+
+
+@pytest.fixture
+def firms():
+    tradable = [Mock(tradable=True, equity=100*i) for i in range(1, 10)]
+    non_tradable = [Mock(tradable=False, equity=200*i) for i in range(1, 5)]
+    return tradable + non_tradable
+
+
+
+def test_get_sector_equity_range_for_tradable_firms_sector(role, firms):
+    # Given
+    country = role.space
+    country.firm_roles = [Mock(agent=f) for f in firms]
+
+    # When
+    range_ = role.get_sector_equity_range("tradable_firms")
+
+    # Then
+    assert range_ == (100, 900)
+
+
+def test_get_sector_equity_range_for_non_tradable_firms_sector(role, firms):
+    # Given
+    country = role.space
+    country.firm_roles = [Mock(agent=f) for f in firms]
+
+    # When
+    range_ = role.get_sector_equity_range("non_tradable_firms")
+
+    # Then
+    assert range_ == (200, 800)
+    
+
+
+@pytest.mark.parametrize("sector", ["non_tradable_firms", "tradable_firms", "banks"])
+def test_get_sector_equity_range_returns_none_initially(role, sector):
+    # Given
+    country = role.space
+    country.bank_roles = []
+    country.firm_roles = []
+
+    # When
+    range_ = role.get_sector_equity_range(sector)
+
+    # Then
+    assert range_ is None
+

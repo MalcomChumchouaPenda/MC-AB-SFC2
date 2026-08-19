@@ -119,7 +119,12 @@ class CountrySpace(EcoSpace):
             tax_payer.increase_flow("taxes", amount)
 
     def add_equity_issuer(self, agent):
-        return self.add_role(EquityIssuerRole, agent, "equity_issuer")
+        role = self.add_role(EquityIssuerRole, agent, "equity_issuer")
+        if isinstance(agent, BankAgent):
+            self.bank_roles.append(role)
+        else:
+            self.firm_roles.append(role)
+        return role
 
     def add_equity_holder(self, household):
         return self.add_role(EquityHolderRole, household, "equity_holder")
