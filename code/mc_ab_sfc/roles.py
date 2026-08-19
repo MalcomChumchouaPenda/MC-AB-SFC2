@@ -153,16 +153,17 @@ class EquityHolderRole(EcoRole):
 
     def get_sector_equity_range(self, sector):
         country = self.space
-        if sector == "banks" and len(country.bank_roles) > 0:
+        if sector == "banks":
             equities = [r.equity for r in country.bank_roles]
-            return min(equities), max(equities)
-        elif len(country.firm_roles) > 0:
+        else:
             firms = [r.agent for r in country.firm_roles]
             if sector == "tradable_firms":
                 equities = [f.equity for f in firms if f.tradable]
             else:
                 equities = [f.equity for f in firms if not f.tradable]
-            return min(equities), max(equities)
+        if len(equities) == 0:
+            return None
+        return min(equities), max(equities)
 
     def create_firm(self, founders, tradable):
         self.space.create_firm(founders, tradable)

@@ -8,6 +8,7 @@ from mc_ab_sfc.spaces import (
     DepositMarket,
     CreditMarket,
     GoodsMarket,
+    BondMarket,
 )
 
 
@@ -19,6 +20,7 @@ def model():
     model.p.eta = 0.3
     model.p.initial_equity = 400
     model.firms = []
+    model.banks = []
     return model
 
 
@@ -62,6 +64,7 @@ def country(model, union):
     country.markets["labor"] = LaborMarket(model)
     country.markets["credit"] = CreditMarket(model)
     country.markets["deposit"] = DepositMarket(model)
+    country.markets["bond"] = BondMarket(model)
     return country
 
 
@@ -92,20 +95,65 @@ def test_household_creates_new_firm(country, founders, govt):
 
 def test_household_creates_no_firm(country, founders, govt):
     # Given
-    founder1, _ = founders
+    founder, _ = founders
     country.add_government(govt)
-    country.add_equity_holder(founder1)
+    country.add_equity_holder(founder)
     deposit_market = country.markets["deposit"]
-    deposit_market.add_deposit_holder(founder1)
+    deposit_market.add_deposit_holder(founder)
     firms = country.model.firms
+
+    # When
+    founder.invest_equity()
+
+    # Then
+    assert len(firms) == 0
+    assert founder.equity == 0
+    assert founder.cash == 400
+
+
+def test_household_creates_new_bank(country, founders, govt):
+    # Given
+    founder1, founder2 = founders
+    holder1 = country.add_equity_holder(founder1)
+    holder2 = country.add_equity_holder(founder2)
+    country.markets["deposit"].add_deposit_holder(founder1)
+    country.firm_roles = [Mock(equity=100) for _ in range(5)]
+    country.add_government(govt)
+    banks = country.model.banks
+    graph = country.graph
 
     # When
     founder1.invest_equity()
 
     # Then
-    assert len(firms) == 0
-    assert founder1.equity == 0
-    assert founder1.cash == 400
+    assert isinstance(banks[0], BankAgent)
+    assert banks[0].equity == 500
+    assert banks[0].reserves == 500
+    assert founder1.equity == 300
+    assert founder1.cash == 100
+    assert founder2.equity == 200
+    assert founder2.cash == 200
+    assert graph.has_edge(holder1, banks[0].roles["equity_issuer"])
+    assert graph.has_edge(holder2, banks[0].roles["equity_issuer"])
+
+
+def test_household_creates_no_bank(country, founders, govt):
+    # Given
+    founder, _ = founders
+    country.add_government(govt)
+    country.add_equity_holder(founder)
+    country.firm_roles = [Mock(equity=100) for _ in range(5)]
+    deposit_market = country.markets["deposit"]
+    deposit_market.add_deposit_holder(founder)
+    banks = country.model.banks
+
+    # When
+    founder.invest_equity()
+
+    # Then
+    assert len(banks) == 0
+    assert founder.equity == 0
+    assert founder.cash == 400
 
 
 def test_household_makes_deposits_with_residual_cash(country, founders, bank, govt):
