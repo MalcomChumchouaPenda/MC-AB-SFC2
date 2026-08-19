@@ -849,5 +849,3 @@ def test_invest_equity_does_nothing_when_insufficient_equity(household_as_invest
     household.calc_initial_equity.assert_called_with("any")
     household.create_enterprise.assert_not_called()
     household.make_deposits.assert_called_with()
-
-

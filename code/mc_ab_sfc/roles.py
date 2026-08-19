@@ -149,7 +149,7 @@ class EquityHolderRole(EcoRole):
             return 1.0
         firm_equities = sum([r.equity for r in country.firm_roles])
         bank_equities = sum([r.equity for r in country.bank_roles])
-        return bank_equities /firm_equities
+        return bank_equities / firm_equities
 
     def get_sector_equity_range(self, sector):
         country = self.space

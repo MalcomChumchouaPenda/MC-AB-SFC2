@@ -33,6 +33,7 @@ def founders(model):
     household2.cash = 400
     return household1, household2
 
+
 @pytest.fixture
 def govt(model):
     govt = GovernmentAgent(model)
@@ -43,7 +44,7 @@ def govt(model):
 def union(model):
     # Given
     union = MonetaryUnionSpace(model)
-    union.markets['goods'] = GoodsMarket(model, tradable=True)
+    union.markets["goods"] = GoodsMarket(model, tradable=True)
     return union
 
 
@@ -62,8 +63,8 @@ def country(model, union):
 def test_household_creates_new_firm(country, founders, govt):
     # Given
     founder1, founder2 = founders
-    country.add_equity_holder(founder1)
-    country.add_equity_holder(founder2)
+    holder1 = country.add_equity_holder(founder1)
+    holder2 = country.add_equity_holder(founder2)
     country.markets["deposit"].add_deposit_holder(founder1)
     country.add_government(govt)
     firms = country.model.firms
@@ -80,8 +81,8 @@ def test_household_creates_new_firm(country, founders, govt):
     assert founder1.cash == 100
     assert founder2.equity == 200
     assert founder2.cash == 200
-    assert graph.has_edge(founder1.roles['equity_holder'], firms[0].roles['equity_issuer'])
-    assert graph.has_edge(founder2.roles['equity_holder'], firms[0].roles['equity_issuer'])
+    assert graph.has_edge(holder1, firms[0].roles["equity_issuer"])
+    assert graph.has_edge(holder2, firms[0].roles["equity_issuer"])
 
 
 def test_household_creates_no_firm(country, founders, govt):

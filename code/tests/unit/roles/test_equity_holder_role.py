@@ -93,6 +93,7 @@ def test_get_bank_firm_number_ratio(role):
     # Then
     assert ratio == 0.2
 
+
 def test_get_bank_firm_unit_number_ratio_if_no_firms(role):
     # Given
     country = role.space
