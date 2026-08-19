@@ -176,7 +176,6 @@ class HouseholdAgent(EcoAgent):
         return random.uniform(minimum, maximum)
 
 
-
 class FirmAgent(EcoAgent):
 
     def setup(self):

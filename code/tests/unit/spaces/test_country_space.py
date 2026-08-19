@@ -258,7 +258,6 @@ def test_add_equity_issuer_creates_appropriate_role(country_with_roles, monkeypa
     assert isinstance(issuer_role, FakeIssuerRole)
 
 
-
 class FakeBankAgent(Mock):
     pass
 
@@ -293,7 +292,6 @@ def test_add_equity_issuer_registers_firm_role(country_with_roles, monkeypatch):
 
     # Then
     assert country.firm_roles == [issuer_role]
-
 
 
 def test_assign_equity_holder_to_equity_issuer(country):
@@ -532,5 +530,3 @@ def test_get_investors_excludes_initiating_household(country, monkeypatch):
 
     # Then
     assert investors == [eligible]
-
-

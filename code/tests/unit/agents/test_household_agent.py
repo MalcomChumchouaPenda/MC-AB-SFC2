@@ -680,7 +680,9 @@ def test_choose_firm_as_investment_sector(household_as_investor):
 
 
 @pytest.mark.parametrize("sector", ["non_tradable_firms", "tradable_firms", "banks"])
-def test_calc_initial_equity_for_desired_investment_sector(household_as_investor, sector):
+def test_calc_initial_equity_for_desired_investment_sector(
+    household_as_investor, sector
+):
     # Given
     household = household_as_investor
     household.desired_investment_sector = sector
@@ -698,7 +700,9 @@ def test_calc_initial_equity_for_desired_investment_sector(household_as_investor
 
 
 @pytest.mark.parametrize("sector", ["non_tradable_firms", "tradable_firms", "banks"])
-def test_calc_initial_equity_uses_exogenous_initial_equity(household_as_investor, sector):
+def test_calc_initial_equity_uses_exogenous_initial_equity(
+    household_as_investor, sector
+):
     # Given
     household = household_as_investor
     household.p.initial_equity = 1000
@@ -710,4 +714,3 @@ def test_calc_initial_equity_uses_exogenous_initial_equity(household_as_investor
 
     # Then
     assert equity == 1000
-

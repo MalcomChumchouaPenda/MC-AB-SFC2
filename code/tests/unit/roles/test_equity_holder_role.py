@@ -121,10 +121,9 @@ def test_get_sector_equity_range_for_banks_sector(role):
 
 @pytest.fixture
 def firms():
-    tradable = [Mock(tradable=True, equity=100*i) for i in range(1, 10)]
-    non_tradable = [Mock(tradable=False, equity=200*i) for i in range(1, 5)]
+    tradable = [Mock(tradable=True, equity=100 * i) for i in range(1, 10)]
+    non_tradable = [Mock(tradable=False, equity=200 * i) for i in range(1, 5)]
     return tradable + non_tradable
-
 
 
 def test_get_sector_equity_range_for_tradable_firms_sector(role, firms):
@@ -149,7 +148,6 @@ def test_get_sector_equity_range_for_non_tradable_firms_sector(role, firms):
 
     # Then
     assert range_ == (200, 800)
-    
 
 
 @pytest.mark.parametrize("sector", ["non_tradable_firms", "tradable_firms", "banks"])
@@ -164,4 +162,3 @@ def test_get_sector_equity_range_returns_none_initially(role, sector):
 
     # Then
     assert range_ is None
-
