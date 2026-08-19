@@ -35,7 +35,7 @@ def test_has_central_bank_role(country):
 def test_has_firm_roles(country):
     # Assert
     assert country.firm_roles == []
-    
+
 
 def test_has_bank_roles(country):
     # Assert
@@ -470,6 +470,7 @@ def test_update_statistics_with_goods_market_stats_updates(country):
 class FakeHolderRole(Mock):
     pass
 
+
 def test_get_only_eligible_investors(country, monkeypatch):
     # Given
     other = Mock()
@@ -479,7 +480,7 @@ def test_get_only_eligible_investors(country, monkeypatch):
     monkeypatch.setattr("mc_ab_sfc.spaces.EquityHolderRole", FakeHolderRole)
 
     # When
-    investors =  country.get_potential_investors()
+    investors = country.get_potential_investors()
 
     # Then
     assert investors == [eligible]
@@ -493,7 +494,7 @@ def test_get_investors_excludes_initiating_household(country, monkeypatch):
     monkeypatch.setattr("mc_ab_sfc.spaces.EquityHolderRole", FakeHolderRole)
 
     # When
-    investors =  country.get_potential_investors(exclude=initiator)
+    investors = country.get_potential_investors(exclude=initiator)
 
     # Then
     assert investors == [eligible]
@@ -501,5 +502,3 @@ def test_get_investors_excludes_initiating_household(country, monkeypatch):
 
 class FakeFirmAgent(Mock):
     pass
-
-

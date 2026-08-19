@@ -158,7 +158,6 @@ def test_buy_bonds_modifies_central_bank_stocks(market):
     buyer.increase_stock.assert_any_call("bonds", 500)
 
 
-
 def test_pay_bond_debt_repays_principal(market):
     # Given
     issuer = Mock(bond_rate=0.05)

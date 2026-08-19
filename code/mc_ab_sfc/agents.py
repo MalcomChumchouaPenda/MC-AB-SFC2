@@ -148,7 +148,6 @@ class HouseholdAgent(EcoAgent):
     def calc_expected_net_worth(self):
         return self.net_worth + self.disposable_income - self.expected_consumption
 
-
     def choose_investment_sector(self):
         p = self.p
         role = self.roles["equity_holder"]
@@ -157,17 +156,16 @@ class HouseholdAgent(EcoAgent):
         if ratio1 < p.eta or ratio2 < p.eta:
             sector = "banks"
         else:
-            sectors = ['non_tradable_firms', 'tradable_firms']
+            sectors = ["non_tradable_firms", "tradable_firms"]
             random = self.model.nprandom
-            sector = random.choice(sectors, p=[1-p.cT, p.cT])
+            sector = random.choice(sectors, p=[1 - p.cT, p.cT])
         self.desired_investment_sector = sector
         return sector
-
 
     def find_potential_investors(self):
         role = self.roles["equity_holder"]
         return role.get_potential_investors()
-    
+
 
 class FirmAgent(EcoAgent):
 
@@ -596,9 +594,9 @@ class GovernmentAgent(EcoAgent):
         average_prod = role.get_average_productivity()
         prev_spending = self.prev_public_spending
         desired_spending = average_price * average_prod * prev_spending
-        self.desired_public_spending =  desired_spending
-        return desired_spending 
-    
+        self.desired_public_spending = desired_spending
+        return desired_spending
+
     def apply_tax_rate_bounds(self):
         self.tax_rate = max(self.p.tax_min, self.tax_rate)
         self.tax_rate = min(self.p.tax_max, self.tax_rate)
@@ -612,7 +610,7 @@ class GovernmentAgent(EcoAgent):
     def issue_bonds(self):
         self.calc_new_debt()
         new_bonds = self.calc_new_bonds()
-        role = self.roles['bond_issuer']
+        role = self.roles["bond_issuer"]
         role.issue_bonds(new_bonds)
 
     def calc_new_debt(self):
@@ -623,7 +621,6 @@ class GovernmentAgent(EcoAgent):
     def calc_new_bonds(self):
         return max(0, self.new_public_debt - self.bonds)
 
-
     def pay_bond_debt(self):
         self.calc_bond_rate()
         role = self.roles["bond_issuer"]
@@ -632,10 +629,9 @@ class GovernmentAgent(EcoAgent):
     def calc_bond_rate(self):
         role = self.roles["government"]
         discount_rate = role.get_discount_rate()
-        bond_rate =  self.p.chi * (self.bonds / self.gdp) + discount_rate
+        bond_rate = self.p.chi * (self.bonds / self.gdp) + discount_rate
         self.bond_rate = bond_rate
         return bond_rate
-
 
     def issue_deposit_guarantee_bonds(self):
         guarantee_role = self.roles["deposit_guarantee"]
@@ -649,7 +645,6 @@ class GovernmentAgent(EcoAgent):
         guarantee_role = self.roles["deposit_guarantee"]
         for bank in self._defaults:
             guarantee_role.reimburse_deposits(bank)
-
 
     def update_history(self):
         role = self.roles["government"]

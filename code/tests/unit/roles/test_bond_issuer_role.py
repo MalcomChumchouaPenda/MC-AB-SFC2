@@ -74,6 +74,3 @@ def test_pay_bond_debt(issuer):
 
     # Then
     market.pay_bond_debt.assert_called_with(issuer)
-
-
-    

@@ -46,4 +46,3 @@ def test_reimburse_deposits(role):
 
     # Then
     market.reimburse_deposits.assert_called_with(role, bank)
-

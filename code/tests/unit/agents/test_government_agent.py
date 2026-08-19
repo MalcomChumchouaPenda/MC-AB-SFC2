@@ -288,7 +288,6 @@ def test_calc_new_debt(govt):
     assert govt.new_public_debt == 1150
 
 
-
 def test_calc_new_bonds(govt):
     # Given
     govt.bonds = 1000
@@ -318,7 +317,7 @@ def govt_as_bond_supplier():
     # Given
     model = Mock()
     govt = GovernmentAgent(model)
-    govt.roles['bond_issuer'] = Mock()
+    govt.roles["bond_issuer"] = Mock()
     govt.calc_new_debt = Mock(return_value=600)
     govt.calc_new_bonds = Mock(return_value=500)
     return govt
@@ -351,7 +350,7 @@ def test_issues_bonds_with_multi_step(govt_as_bond_supplier):
 def test_pay_bond_debt(govt):
     # Given
     issuer_role = Mock()
-    govt.roles['bond_issuer'] = issuer_role
+    govt.roles["bond_issuer"] = issuer_role
     govt.calc_bond_rate = Mock()
 
     # When
@@ -366,7 +365,7 @@ def test_calc_bond_rate(govt):
     # Given
     govt_role = Mock()
     govt_role.get_discount_rate.return_value = 0.03
-    govt.roles['government'] = govt_role
+    govt.roles["government"] = govt_role
     govt.bonds = 500
     govt.gdp = 1000
     govt.p.chi = 0.02
@@ -383,17 +382,19 @@ def test_calc_bond_rate(govt):
 def govt_as_deposit_guarantee():
     # Given
     govt = GovernmentAgent(model=Mock())
-    govt.roles['bond_issuer'] = Mock()
-    govt.roles['deposit_guarantee'] = Mock()
+    govt.roles["bond_issuer"] = Mock()
+    govt.roles["deposit_guarantee"] = Mock()
     return govt
 
 
 def test_issue_deposit_guarantee_bonds(govt_as_deposit_guarantee):
     # Given
     govt = govt_as_deposit_guarantee
-    issuer_role = govt.roles['bond_issuer']
-    guarantee_role = govt.roles['deposit_guarantee']
-    guarantee_role.get_defaulted_banks.return_value =[Mock(defaulted_deposits=100) for _ in range(3)]
+    issuer_role = govt.roles["bond_issuer"]
+    guarantee_role = govt.roles["deposit_guarantee"]
+    guarantee_role.get_defaulted_banks.return_value = [
+        Mock(defaulted_deposits=100) for _ in range(3)
+    ]
 
     # When
     govt.issue_deposit_guarantee_bonds()
@@ -402,14 +403,13 @@ def test_issue_deposit_guarantee_bonds(govt_as_deposit_guarantee):
     issuer_role.issue_bonds.assert_called_with(300)
 
 
-
 def test_issue_deposit_guarantee_bonds_registers_defaults(govt_as_deposit_guarantee):
     # Given
     defaults = [Mock(defaulted_deposits=100)]
     govt = govt_as_deposit_guarantee
-    guarantee_role = govt.roles['deposit_guarantee']
+    guarantee_role = govt.roles["deposit_guarantee"]
     guarantee_role.get_defaulted_banks.return_value = defaults
-    
+
     # When
     govt.issue_deposit_guarantee_bonds()
 
@@ -422,7 +422,7 @@ def test_reimburse_deposits(govt_as_deposit_guarantee):
     defaults = [Mock() for _ in range(3)]
     govt = govt_as_deposit_guarantee
     govt._defaults = defaults
-    guarantee_role = govt.roles['deposit_guarantee']
+    guarantee_role = govt.roles["deposit_guarantee"]
 
     # When
     govt.reimburse_deposits()
@@ -430,7 +430,7 @@ def test_reimburse_deposits(govt_as_deposit_guarantee):
     # Then
     for bank in defaults:
         guarantee_role.reimburse_deposits.assert_any_call(bank)
-    
+
 
 @pytest.fixture
 def govt_with_history():
@@ -478,4 +478,3 @@ def test_update_budget_history(govt_with_history):
 
     # Then
     assert govt.prev_budget_surplus == 100
-

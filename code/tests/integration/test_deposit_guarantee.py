@@ -1,4 +1,3 @@
-
 import pytest
 from unittest.mock import Mock
 from mc_ab_sfc.agents import FirmAgent, BankAgent, CentralBankAgent, GovernmentAgent
@@ -21,12 +20,14 @@ def bond_market(model):
     # Given
     return BondMarket(model)
 
+
 @pytest.fixture
 def central_bank(model, bond_market):
     # Given
     central_bank = CentralBankAgent(model)
     bond_market.add_bond_buyer(central_bank)
     return central_bank
+
 
 @pytest.fixture
 def deposit_market(model):
@@ -54,6 +55,7 @@ def banks(model, deposit_market):
         deposit_market.add_deposit_bank(bank)
     return banks
 
+
 @pytest.fixture
 def firms(model, deposit_market, banks):
     firms = []
@@ -62,7 +64,7 @@ def firms(model, deposit_market, banks):
         firm = FirmAgent(model)
         firm.deposits = 100
         firms.append(firm)
-        bank_role = bank_roles[ i % 2]
+        bank_role = bank_roles[i % 2]
         holder_role = deposit_market.add_deposit_holder(firm)
         deposit_market.assign_deposit_bank(holder_role, bank_role)
     return firms
@@ -85,5 +87,3 @@ def test_government_activate_deposit_guarantee(model, govt, central_bank, firms,
     for bank in banks:
         assert bank.deposits == 0
         assert bank.reserves == 0
-
-    

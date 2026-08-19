@@ -75,7 +75,7 @@ def test_add_deposit_guarantee_creates_deposit_guarantee(market, monkeypatch):
     action = market.add_role
     action.assert_called_with(FakeRole, bank, "deposit_guarantee")
     assert deposit_guarantee is action.return_value
-    
+
 
 def test_assign_deposit_bank_add_edge(market):
     # Given
@@ -118,6 +118,7 @@ def test_pays_interest_to_all_clients(market):
 class FakeBankRole(Mock):
     pass
 
+
 def test_get_defaulted_banks(market, monkeypatch):
     # Given
     others = [Mock() for _ in range(5)]
@@ -132,7 +133,7 @@ def test_get_defaulted_banks(market, monkeypatch):
     # Then
     assert sample == defaults
 
-    
+
 def test_reimburse_deposits_to_all_clients(market):
     # Given
     guarantee = Mock()

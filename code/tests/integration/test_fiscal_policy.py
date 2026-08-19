@@ -34,7 +34,7 @@ def govt(model):
 def country(model):
     # Given
     country = CountrySpace(model)
-    country.markets['goods'] = Mock(average_price=2, average_productivity=3)
+    country.markets["goods"] = Mock(average_price=2, average_productivity=3)
     return country
 
 

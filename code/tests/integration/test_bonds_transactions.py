@@ -56,6 +56,7 @@ def country(model):
     country.discount_rate = 0.04
     return country
 
+
 def test_government_issues_bonds(govt, bond_market):
     # Given
     issuer = bond_market.add_bond_issuer(govt)
@@ -87,7 +88,9 @@ def test_government_pays_bond_debt_to_bank(govt, bank, country, bond_market):
     assert bank.bond_interest == 5.0
 
 
-def test_government_pays_bond_debt_to_central_bank(govt, central_bank, country, bond_market):
+def test_government_pays_bond_debt_to_central_bank(
+    govt, central_bank, country, bond_market
+):
     # Given
     country.add_government(govt)
     issuer = bond_market.add_bond_issuer(govt)

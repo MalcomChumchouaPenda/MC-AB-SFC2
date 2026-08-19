@@ -177,12 +177,10 @@ class CountrySpace(EcoSpace):
             n
             for n in self.graph.nodes()
             if isinstance(n, EquityHolderRole)
-                and n.desired_equity > 0
-                and n.equity == 0
-                and n is not exclude
+            and n.desired_equity > 0
+            and n.equity == 0
+            and n is not exclude
         ]
-
-
 
     def update_statistics(self):
         self.markets["goods"].update_statistics()
@@ -369,4 +367,3 @@ class BondMarket(EcoSpace):
                 buyer.increase_flow("bond_interest", interest)
                 buyer.decrease_stock("reserves", principal + interest)
             self.graph.remove_edge(issuer, buyer)
-            

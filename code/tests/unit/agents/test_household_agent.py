@@ -644,7 +644,7 @@ def test_find_potential_equity_investors(household_as_investor):
     assert result == investors
 
 
-@pytest.mark.parametrize('ratio1, ratio2', [(0.2, 0.5), (0.5, 0.2)])
+@pytest.mark.parametrize("ratio1, ratio2", [(0.2, 0.5), (0.5, 0.2)])
 def test_choose_bank_as_investment_sector(household_as_investor, ratio1, ratio2):
     # Given
     household = household_as_investor
@@ -656,7 +656,7 @@ def test_choose_bank_as_investment_sector(household_as_investor, ratio1, ratio2)
     sector = household.choose_investment_sector()
 
     # Then
-    assert sector == 'banks'
+    assert sector == "banks"
     assert household.desired_investment_sector == sector
 
 
@@ -667,13 +667,13 @@ def test_choose_firm_as_investment_sector(household_as_investor):
     holder_role.get_bank_firm_number_ratio.return_value = 0.6
     holder_role.get_bank_firm_equity_ratio.return_value = 0.6
     random = household.model.nprandom
-    random.choice.return_value = 'tradable_firms'
-    sectors = ['non_tradable_firms', 'tradable_firms']
+    random.choice.return_value = "tradable_firms"
+    sectors = ["non_tradable_firms", "tradable_firms"]
 
     # When
     sector = household.choose_investment_sector()
 
     # Then
     random.choice.assert_called_with(sectors, p=[0.4, 0.6])
-    assert sector == 'tradable_firms'  
+    assert sector == "tradable_firms"
     assert household.desired_investment_sector == sector

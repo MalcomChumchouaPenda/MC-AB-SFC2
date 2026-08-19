@@ -15,7 +15,6 @@ def test_is_eco_role():
     assert issubclass(EquityHolderRole, EcoRole)
 
 
-
 @pytest.fixture
 def role():
     # Given
@@ -40,8 +39,6 @@ def test_exposes_desired_equity(role):
 
     # Assert
     assert role.desired_equity == 100
-
-
 
 
 # ---------------------------------------------------
@@ -73,7 +70,6 @@ def test_get_potential_investors(role):
     assert result == investors
 
 
-
 def test_get_potential_investors_exclude_itself(role):
     # Given
     country = role.space
@@ -82,10 +78,7 @@ def test_get_potential_investors_exclude_itself(role):
     role.get_potential_investors()
 
     # Then
-    country.get_potential_investors.assert_called_with(
-        exclude=role
-    )
-
+    country.get_potential_investors.assert_called_with(exclude=role)
 
 
 def test_get_bank_firm_number_ratio(role):
@@ -112,4 +105,3 @@ def test_get_bank_firm_equity_ratio(role):
 
     # Then
     assert ratio == 0.2
-

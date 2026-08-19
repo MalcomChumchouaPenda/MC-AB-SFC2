@@ -78,7 +78,7 @@ def test_get_discount_rate(govt_role):
 
     # Assert
     assert discount_rate == 0.02
-    
+
 
 def test_get_households(govt_role):
     # Given

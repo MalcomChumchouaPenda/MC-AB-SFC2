@@ -130,7 +130,6 @@ class EquityHolderRole(EcoRole):
     @property
     def desired_equity(self):
         return self.agent.desired_equity
-    
 
     def get_default_probability(self):
         return self.space.default_probability
@@ -207,7 +206,7 @@ class DepositGuaranteeRole(EcoRole):
 
     def reimburse_deposits(self, bank):
         self.space.reimburse_deposits(self, bank)
-    
+
 
 class BorrowerRole(EcoRole):
 
