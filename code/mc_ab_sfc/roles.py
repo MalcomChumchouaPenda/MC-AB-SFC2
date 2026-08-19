@@ -202,7 +202,7 @@ class DepositHolderRole(EcoRole):
         return self.deposit_bank.deposit_rate
 
     def make_deposits(self, amount):
-        if self.deposit_bank:
+        if self.deposit_bank is not None:
             self.space.make_deposits(self, self.deposit_bank, amount)
 
 

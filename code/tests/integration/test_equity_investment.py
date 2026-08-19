@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import Mock
-from mc_ab_sfc.agents import HouseholdAgent, FirmAgent, GovernmentAgent
+from mc_ab_sfc.agents import HouseholdAgent, FirmAgent, BankAgent, GovernmentAgent
 from mc_ab_sfc.spaces import (
     CountrySpace,
     MonetaryUnionSpace,
@@ -38,6 +38,11 @@ def founders(model):
 def govt(model):
     govt = GovernmentAgent(model)
     return govt
+
+
+@pytest.fixture
+def bank(model):
+    return BankAgent(model)
 
 
 @pytest.fixture
@@ -88,9 +93,10 @@ def test_household_creates_new_firm(country, founders, govt):
 def test_household_creates_no_firm(country, founders, govt):
     # Given
     founder1, _ = founders
-    country.add_equity_holder(founder1)
-    country.markets["deposit"].add_deposit_holder(founder1)
     country.add_government(govt)
+    country.add_equity_holder(founder1)
+    deposit_market = country.markets["deposit"]
+    deposit_market.add_deposit_holder(founder1)
     firms = country.model.firms
 
     # When
@@ -100,3 +106,24 @@ def test_household_creates_no_firm(country, founders, govt):
     assert len(firms) == 0
     assert founder1.equity == 0
     assert founder1.cash == 400
+
+
+def test_household_makes_deposits_with_residual_cash(country, founders, bank, govt):
+    # Given
+    founder, _ = founders
+    country.add_government(govt)
+    country.add_equity_holder(founder)
+    deposit_market = country.markets["deposit"]
+    bank_role = deposit_market.add_deposit_bank(bank)
+    holder_role = deposit_market.add_deposit_holder(founder)
+    deposit_market.assign_deposit_bank(holder_role, bank_role)
+
+    # When
+    founder.invest_equity()
+
+    # Then
+    assert founder.equity == 0
+    assert founder.cash == 0
+    assert founder.deposits == 400
+    assert bank.reserves == 400
+    assert bank.deposits == 400
