@@ -170,5 +170,3 @@ def test_make_deposits(market):
     bank.increase_stock.assert_any_call("reserves", 500)
     holder.increase_stock.assert_called_with("deposits", 500)
     holder.decrease_stock.assert_called_with("cash", 500)
-
-    

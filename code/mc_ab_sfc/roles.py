@@ -139,13 +139,17 @@ class EquityHolderRole(EcoRole):
 
     def get_bank_firm_number_ratio(self):
         country = self.space
-        return len(country.bank_roles) / max(1, len(country.firm_roles))
+        if len(country.firm_roles) == 0:
+            return 1.0
+        return len(country.bank_roles) / len(country.firm_roles)
 
     def get_bank_firm_equity_ratio(self):
         country = self.space
+        if len(country.firm_roles) == 0:
+            return 1.0
         firm_equities = sum([r.equity for r in country.firm_roles])
         bank_equities = sum([r.equity for r in country.bank_roles])
-        return bank_equities / max(1, firm_equities)
+        return bank_equities /firm_equities
 
     def get_sector_equity_range(self, sector):
         country = self.space
@@ -198,7 +202,8 @@ class DepositHolderRole(EcoRole):
         return self.deposit_bank.deposit_rate
 
     def make_deposits(self, amount):
-        self.space.make_deposits(self, self.deposit_bank, amount)
+        if self.deposit_bank:
+            self.space.make_deposits(self, self.deposit_bank, amount)
 
 
 class DepositBankRole(EcoRole):

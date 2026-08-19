@@ -48,6 +48,11 @@ def test_contains_local_markets(country):
     assert isinstance(country.markets, dict)
 
 
+def test_contains_monetary_union_ref(country):
+    # Assert
+    assert country.monetary_union is None
+
+
 def test_exposes_inflation(country):
     # Given
     goods_market = Mock(inflation=0.03)
@@ -594,7 +599,7 @@ def test_create_firm_registers_firm_in_model(country_before_firm_creation):
     model.firms.append.assert_called_with(firm)
 
 
-def test_create_firm_add_producer_to_non_tradable_market(country_before_firm_creation):
+def test_create_firm_add_supplier_to_non_tradable_market(country_before_firm_creation):
     # Given
     country = country_before_firm_creation
     non_tradable_market = country.markets["goods"]
@@ -605,11 +610,11 @@ def test_create_firm_add_producer_to_non_tradable_market(country_before_firm_cre
     firm = country.create_firm(founders, tradable=False)
 
     # Then
-    non_tradable_market.add_producer.assert_called_with(firm)
-    tradable_market.add_producer.assert_not_called()
+    non_tradable_market.add_supplier.assert_called_with(firm)
+    tradable_market.add_supplier.assert_not_called()
 
 
-def test_create_firm_add_producer_to_tradable_market(country_before_firm_creation):
+def test_create_firm_add_supplier_to_tradable_market(country_before_firm_creation):
     # Given
     country = country_before_firm_creation
     non_tradable_market = country.markets["goods"]
@@ -620,8 +625,8 @@ def test_create_firm_add_producer_to_tradable_market(country_before_firm_creatio
     firm = country.create_firm(founders, tradable=True)
 
     # Then
-    tradable_market.add_producer.assert_called_with(firm)
-    non_tradable_market.add_producer.assert_not_called()
+    tradable_market.add_supplier.assert_called_with(firm)
+    non_tradable_market.add_supplier.assert_not_called()
 
 
 @pytest.mark.parametrize("tradable", [True, False])

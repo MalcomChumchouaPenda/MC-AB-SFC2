@@ -149,20 +149,21 @@ class HouseholdAgent(EcoAgent):
         return self.net_worth + self.disposable_income - self.expected_consumption
 
     def invest_equity(self):
-        if self.desired_equity == 0:
-            return
-        sector = self.choose_investment_sector()
-        investors = self.find_potential_investors()
-        required_equity = self.calc_initial_equity(sector)
-        collected_equity = self.desired_equity
-        initiator = self.roles["equity_holder"]
-        founders = [initiator]
-        for investor in investors:
-            founders.append(investor)
-            collected_equity += investor.desired_equity
-            if collected_equity >= required_equity:
-                self.create_enterprise(founders, sector)
-                return
+        if self.desired_equity > 0:
+            sector = self.choose_investment_sector()
+            print('sector', sector)
+            investors = self.find_potential_investors()
+            required_equity = self.calc_initial_equity(sector)
+            collected_equity = self.desired_equity
+            initiator = self.roles["equity_holder"]
+            founders = [initiator]
+            for investor in investors:
+                founders.append(investor)
+                collected_equity += investor.desired_equity
+                if collected_equity >= required_equity:
+                    self.create_enterprise(founders, sector)
+                    break
+        self.make_deposits()
 
     def choose_investment_sector(self):
         p = self.p

@@ -93,6 +93,18 @@ def test_get_bank_firm_number_ratio(role):
     # Then
     assert ratio == 0.2
 
+def test_get_bank_firm_unit_number_ratio_if_no_firms(role):
+    # Given
+    country = role.space
+    country.bank_roles = []
+    country.firm_roles = []
+
+    # When
+    ratio = role.get_bank_firm_number_ratio()
+
+    # Then
+    assert ratio == 1.0
+
 
 def test_get_bank_firm_equity_ratio(role):
     # Given
@@ -105,6 +117,19 @@ def test_get_bank_firm_equity_ratio(role):
 
     # Then
     assert ratio == 0.2
+
+
+def test_get_bank_firm_unit_equity_ratio_if_no_firms(role):
+    # Given
+    country = role.space
+    country.bank_roles = []
+    country.firm_roles = []
+
+    # When
+    ratio = role.get_bank_firm_equity_ratio()
+
+    # Then
+    assert ratio == 1.0
 
 
 def test_get_sector_equity_range_for_banks_sector(role):

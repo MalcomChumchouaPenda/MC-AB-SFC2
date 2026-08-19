@@ -62,6 +62,7 @@ class MonetaryUnionSpace(EcoSpace):
 class CountrySpace(EcoSpace):
 
     def setup(self):
+        self.monetary_union = None
         self.government_role = None
         self.central_bank_role = None
         self.bank_roles = []
@@ -212,9 +213,9 @@ class CountrySpace(EcoSpace):
         self.markets["credit"].add_borrower(firm)
         self.markets["deposit"].add_deposit_holder(firm)
         if tradable:
-            self.monetary_union.markets["goods"].add_producer(firm)
+            self.monetary_union.markets["goods"].add_supplier(firm)
         else:
-            self.markets["goods"].add_producer(firm)
+            self.markets["goods"].add_supplier(firm)
 
     def create_bank(self, founders):
         bank = BankAgent(self.model)

@@ -751,6 +751,19 @@ def test_create_enterprise_can_create_bank(household_before_investment):
     role.create_bank.assert_called_once_with(founders)
 
 
+def test_make_deposits_with_residual_cash(household):
+    # Given
+    holder_role = Mock()
+    household.roles["deposit_holder"] = holder_role
+    household.cash = 500
+
+    # When
+    household.make_deposits()
+
+    # Then
+    holder_role.make_deposits.assert_called_with(500)
+
+
 @pytest.fixture
 def household_as_investor():
     model = Mock()
@@ -780,6 +793,7 @@ def test_invest_equity_does_nothing_without_desire(household_as_investor):
     household.find_potential_investors.assert_not_called()
     household.calc_initial_equity.assert_not_called()
     household.create_enterprise.assert_not_called()
+    household.make_deposits.assert_called_with()
 
 
 def test_invest_equity_when_sufficient_equity(household_as_investor):
@@ -798,6 +812,7 @@ def test_invest_equity_when_sufficient_equity(household_as_investor):
     household.find_potential_investors.assert_called_with()
     household.calc_initial_equity.assert_called_with("any")
     household.create_enterprise.assert_called_with([initiator] + founders, "any")
+    household.make_deposits.assert_called_with()
 
 
 def test_invest_equity_with_only_sufficient_equity(household_as_investor):
@@ -816,6 +831,7 @@ def test_invest_equity_with_only_sufficient_equity(household_as_investor):
     household.find_potential_investors.assert_called_with()
     household.calc_initial_equity.assert_called_with("any")
     household.create_enterprise.assert_called_with([initiator] + founders[:2], "any")
+    household.make_deposits.assert_called_with()
 
 
 def test_invest_equity_does_nothing_when_insufficient_equity(household_as_investor):
@@ -832,16 +848,6 @@ def test_invest_equity_does_nothing_when_insufficient_equity(household_as_invest
     household.find_potential_investors.assert_called_with()
     household.calc_initial_equity.assert_called_with("any")
     household.create_enterprise.assert_not_called()
+    household.make_deposits.assert_called_with()
 
 
-def test_make_deposits_with_residual_cash(household):
-    # Given
-    holder_role = Mock()
-    household.roles["deposit_holder"] = holder_role
-    household.cash = 500
-
-    # When
-    household.make_deposits()
-
-    # Then
-    holder_role.make_deposits.assert_called_with(500)

@@ -55,7 +55,6 @@ def test_get_deposit_rate(deposit_holder):
     assert deposit_rate == 0.02
 
 
-
 def test_make_deposits(deposit_holder):
     # Given
     deposit_bank = Mock()
@@ -67,4 +66,15 @@ def test_make_deposits(deposit_holder):
 
     # Then
     market.make_deposits.assert_called_with(deposit_holder, deposit_bank, 300)
-    
+
+
+def test_make_no_deposits_if_no_bank(deposit_holder):
+    # Given
+    deposit_holder.deposit_bank = None
+    market = deposit_holder.space
+
+    # When
+    deposit_holder.make_deposits(300)
+
+    # Then
+    market.make_deposits.assert_not_called()
