@@ -148,6 +148,24 @@ class HouseholdAgent(EcoAgent):
     def calc_expected_net_worth(self):
         return self.net_worth + self.disposable_income - self.expected_consumption
 
+    def invest_equity(self):
+        if self.desired_equity == 0:
+            return
+        sector = self.choose_investment_sector()
+        investors = self.find_potential_investors()
+        required_equity = self.calc_initial_equity(sector)
+        collected_equity = self.desired_equity
+        initiator = self.roles['equity_holder']
+        founders = [initiator]
+        for investor in investors:
+            founders.append(investor)
+            collected_equity += investor.desired_equity
+            if collected_equity >= required_equity:
+                self.create_enterprise(founders, sector)
+                break
+        
+
+
     def choose_investment_sector(self):
         p = self.p
         role = self.roles["equity_holder"]
@@ -175,13 +193,14 @@ class HouseholdAgent(EcoAgent):
         random = self.model.nprandom
         return random.uniform(minimum, maximum)
 
-    def create_firm(self, founders, equity, tradable):
+    def create_enterprise(self, founders, sector):
         role = self.roles["equity_holder"]
-        role.create_firm(founders, equity, tradable)
-
-    def create_bank(self, founders, equity):
-        role = self.roles["equity_holder"]
-        role.create_bank(founders, equity)
+        if sector == 'banks':
+            role.create_bank(founders)
+        elif sector == "tradable_firms":
+            role.create_firm(founders, tradable=True)
+        else:
+            role.create_firm(founders, tradable=False)
 
 
 class FirmAgent(EcoAgent):

@@ -621,7 +621,7 @@ def test_calc_portfolio_allocation_preserves_existing_equity():
 
 
 @pytest.fixture
-def household_as_investor():
+def household_before_investment():
     model = Mock()
     model.p.cT = 0.6
     model.p.eta = 0.3
@@ -630,10 +630,10 @@ def household_as_investor():
     return household
 
 
-def test_find_potential_equity_investors(household_as_investor):
+def test_find_potential_equity_investors(household_before_investment):
     # Given
     investors = [Mock(), Mock()]
-    household = household_as_investor
+    household = household_before_investment
     holder_role = household.roles["equity_holder"]
     holder_role.get_potential_investors.return_value = investors
 
@@ -645,9 +645,9 @@ def test_find_potential_equity_investors(household_as_investor):
 
 
 @pytest.mark.parametrize("ratio1, ratio2", [(0.2, 0.5), (0.5, 0.2)])
-def test_choose_bank_as_investment_sector(household_as_investor, ratio1, ratio2):
+def test_choose_bank_as_investment_sector(household_before_investment, ratio1, ratio2):
     # Given
-    household = household_as_investor
+    household = household_before_investment
     holder_role = household.roles["equity_holder"]
     holder_role.get_bank_firm_number_ratio.return_value = ratio1
     holder_role.get_bank_firm_equity_ratio.return_value = ratio2
@@ -660,9 +660,9 @@ def test_choose_bank_as_investment_sector(household_as_investor, ratio1, ratio2)
     assert household.desired_investment_sector == sector
 
 
-def test_choose_firm_as_investment_sector(household_as_investor):
+def test_choose_firm_as_investment_sector(household_before_investment):
     # Given
-    household = household_as_investor
+    household = household_before_investment
     holder_role = household.roles["equity_holder"]
     holder_role.get_bank_firm_number_ratio.return_value = 0.6
     holder_role.get_bank_firm_equity_ratio.return_value = 0.6
@@ -680,9 +680,9 @@ def test_choose_firm_as_investment_sector(household_as_investor):
 
 
 @pytest.mark.parametrize("sector", ["non_tradable_firms", "tradable_firms", "banks"])
-def test_calc_initial_equity_by_investment_sector(household_as_investor, sector):
+def test_calc_initial_equity_by_investment_sector(household_before_investment, sector):
     # Given
-    household = household_as_investor
+    household = household_before_investment
     household.desired_investment_sector = sector
     holder_role = household.roles["equity_holder"]
     holder_role.get_sector_equity_range.return_value = (100, 500)
@@ -698,9 +698,9 @@ def test_calc_initial_equity_by_investment_sector(household_as_investor, sector)
 
 
 @pytest.mark.parametrize("sector", ["non_tradable_firms", "tradable_firms", "banks"])
-def test_calc_initial_equity_uses_exogenous_equity(household_as_investor, sector):
+def test_calc_initial_equity_uses_exogenous_equity(household_before_investment, sector):
     # Given
-    household = household_as_investor
+    household = household_before_investment
     household.p.initial_equity = 1000
     holder_role = household.roles["equity_holder"]
     holder_role.get_sector_equity_range.return_value = None
@@ -712,28 +712,123 @@ def test_calc_initial_equity_uses_exogenous_equity(household_as_investor, sector
     assert equity == 1000
 
 
-@pytest.mark.parametrize("tradable", [True, False])
-def test_create_firm_with_equity_role(household_as_investor, tradable):
+def test_create_enterprise_can_create_non_tradable_firms(household_before_investment):
     # Given
-    household = household_as_investor
+    household = household_before_investment
     role = household.roles["equity_holder"]
     founders = [Mock() for _ in range(5)]
 
     # When
-    household.create_firm(founders, equity=1000, tradable=tradable)
+    household.create_enterprise(founders, sector="non_tradable_firms")
 
     # Then
-    role.create_firm.assert_called_once_with(founders, 1000, tradable)
+    role.create_firm.assert_called_once_with(founders, tradable=False)
 
 
-def test_create_bank_with_equity_role(household_as_investor):
+def test_create_enterprise_can_create_tradable_firms(household_before_investment):
     # Given
-    household = household_as_investor
+    household = household_before_investment
     role = household.roles["equity_holder"]
     founders = [Mock() for _ in range(5)]
 
     # When
-    household.create_bank(founders, equity=2000)
+    household.create_enterprise(founders, sector="tradable_firms")
 
     # Then
-    role.create_bank.assert_called_once_with(founders, 2000)
+    role.create_firm.assert_called_once_with(founders, tradable=True)
+
+
+def test_create_enterprise_can_create_bank(household_before_investment):
+    # Given
+    household = household_before_investment
+    role = household.roles["equity_holder"]
+    founders = [Mock() for _ in range(5)]
+
+    # When
+    household.create_enterprise(founders, sector="banks")
+
+    # Then
+    role.create_bank.assert_called_once_with(founders)
+
+
+@pytest.fixture
+def household_as_investor():
+    model = Mock()
+    household = HouseholdAgent(model)
+    household.desired_equity = 100
+    household.roles = {"equity_holder": Mock()}
+    household.choose_investment_sector = Mock(return_value=None)
+    household.find_potential_investors = Mock(return_value=[])
+    household.calc_initial_equity = Mock(return_value=100)
+    household.create_enterprise = Mock()
+    household.make_deposits = Mock()
+    household.withdraw_deposits = Mock()
+    return household
+
+
+def test_invest_equity_does_nothing_without_desire(household_as_investor):
+    # Given
+    household = household_as_investor
+    household.desired_equity = 0
+
+    # When
+    household.invest_equity()
+
+    # Then
+    household.choose_investment_sector.assert_not_called()
+    household.find_potential_investors.assert_not_called()
+    household.calc_initial_equity.assert_not_called()
+    household.create_enterprise.assert_not_called()
+
+
+def test_invest_equity_when_sufficient_equity(household_as_investor):
+    # Given
+    household = household_as_investor
+    initiator = household.roles["equity_holder"]
+    founders = [Mock(desired_equity=100) for _ in range(2)]
+    household.find_potential_investors.return_value = founders
+    household.choose_investment_sector.return_value = "any"
+    household.calc_initial_equity.return_value = 300
+
+    # When
+    household.invest_equity()
+
+    # Then
+    household.find_potential_investors.assert_called_with()
+    household.calc_initial_equity.assert_called_with("any")
+    household.create_enterprise.assert_called_with([initiator] + founders, "any")
+
+
+def test_invest_equity_with_only_sufficient_equity(household_as_investor):
+    # Given
+    household = household_as_investor
+    initiator = household.roles["equity_holder"]
+    founders = [Mock(desired_equity=100) for _ in range(5)]
+    household.find_potential_investors.return_value = founders
+    household.choose_investment_sector.return_value = "any"
+    household.calc_initial_equity.return_value = 300
+
+    # When
+    household.invest_equity()
+
+    # Then
+    household.find_potential_investors.assert_called_with()
+    household.calc_initial_equity.assert_called_with("any")
+    household.create_enterprise.assert_called_with([initiator] + founders[:2], "any")
+
+
+def test_invest_equity_does_nothing_when_insufficient_equity(household_as_investor):
+    # Given
+    household = household_as_investor
+    household.find_potential_investors.return_value = []
+    household.choose_investment_sector.return_value = "any"
+    household.calc_initial_equity.return_value = 300
+
+    # When
+    household.invest_equity()
+
+    # Then
+    household.find_potential_investors.assert_called_with()
+    household.calc_initial_equity.assert_called_with("any")
+    household.create_enterprise.assert_not_called()
+

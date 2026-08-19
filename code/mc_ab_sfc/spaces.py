@@ -187,17 +187,18 @@ class CountrySpace(EcoSpace):
             and n is not exclude
         ]
 
-    def create_firm(self, founders, equity, tradable):
+    def create_firm(self, founders, tradable):
         firm = FirmAgent(self.model)
         firm.tradable = tradable
         issuer = self.add_equity_issuer(firm)
-        self._distribute_firm_equity(equity, issuer, founders)
+        self._distribute_firm_equity(issuer, founders)
         self._create_firm_market_roles(firm, tradable)
         self.add_tax_payer(firm)
         self.model.firms.append(firm)
         return firm
 
-    def _distribute_firm_equity(self, equity, issuer, founders):
+    def _distribute_firm_equity(self, issuer, founders):
+        equity = sum([f.desired_equity for f in founders])
         issuer.increase_stock("equity", equity)
         issuer.increase_stock("cash", equity)
         for founder in founders:
@@ -215,16 +216,17 @@ class CountrySpace(EcoSpace):
         else:
             self.markets["goods"].add_producer(firm)
 
-    def create_bank(self, founders, equity):
+    def create_bank(self, founders):
         bank = BankAgent(self.model)
         issuer = self.add_equity_issuer(bank)
-        self._distribute_bank_equity(equity, issuer, founders)
+        self._distribute_bank_equity(issuer, founders)
         self._create_bank_market_roles(bank)
         self.add_tax_payer(bank)
         self.model.banks.append(bank)
         return bank
 
-    def _distribute_bank_equity(self, equity, issuer, founders):
+    def _distribute_bank_equity(self, issuer, founders):
+        equity = sum([f.desired_equity for f in founders])
         issuer.increase_stock("equity", equity)
         issuer.increase_stock("reserves", equity)
         for founder in founders:

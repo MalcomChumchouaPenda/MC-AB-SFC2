@@ -573,7 +573,7 @@ def test_create_firm_creates_firm_agent(country_before_firm_creation, tradable):
     founders = [Mock(desired_equity=500) for _ in range(2)]
 
     # When
-    firm = country.create_firm(founders, equity=1000, tradable=tradable)
+    firm = country.create_firm(founders, tradable=tradable)
 
     # Then
     assert firm.args == (country.model,)
@@ -588,7 +588,7 @@ def test_create_firm_registers_firm_in_model(country_before_firm_creation):
     founders = [Mock(desired_equity=1000)]
 
     # When
-    firm = country.create_firm(founders, equity=1000, tradable=True)
+    firm = country.create_firm(founders, tradable=True)
 
     # Then
     model.firms.append.assert_called_with(firm)
@@ -602,7 +602,7 @@ def test_create_firm_add_producer_to_non_tradable_market(country_before_firm_cre
     founders = [Mock(desired_equity=1000)]
 
     # When
-    firm = country.create_firm(founders, 1000, tradable=False)
+    firm = country.create_firm(founders, tradable=False)
 
     # Then
     non_tradable_market.add_producer.assert_called_with(firm)
@@ -617,7 +617,7 @@ def test_create_firm_add_producer_to_tradable_market(country_before_firm_creatio
     founders = [Mock(desired_equity=1000)]
 
     # When
-    firm = country.create_firm(founders, 1000, tradable=True)
+    firm = country.create_firm(founders, tradable=True)
 
     # Then
     tradable_market.add_producer.assert_called_with(firm)
@@ -632,7 +632,7 @@ def test_create_firm_add_employer_role(country_before_firm_creation, tradable):
     founders = [Mock(desired_equity=1000)]
 
     # When
-    firm = country.create_firm(founders, 1000, tradable=tradable)
+    firm = country.create_firm(founders, tradable=tradable)
 
     # Then
     market.add_employer.assert_called_with(firm)
@@ -646,7 +646,7 @@ def test_create_firm_add_borrower_role(country_before_firm_creation, tradable):
     founders = [Mock(desired_equity=1000)]
 
     # When
-    firm = country.create_firm(founders, 1000, tradable=tradable)
+    firm = country.create_firm(founders, tradable=tradable)
 
     # Then
     market.add_borrower.assert_called_with(firm)
@@ -660,7 +660,7 @@ def test_create_firm_add_deposit_holder_role(country_before_firm_creation, trada
     founders = [Mock(desired_equity=1000)]
 
     # When
-    firm = country.create_firm(founders, 1000, tradable=tradable)
+    firm = country.create_firm(founders, tradable=tradable)
 
     # Then
     market.add_deposit_holder.assert_called_with(firm)
@@ -673,7 +673,7 @@ def test_create_firm_add_equity_issuer_role(country_before_firm_creation, tradab
     founders = [Mock(desired_equity=1000)]
 
     # When
-    firm = country.create_firm(founders, 1000, tradable=tradable)
+    firm = country.create_firm(founders, tradable=tradable)
 
     # Then
     country.add_equity_issuer.assert_called_with(firm)
@@ -686,7 +686,7 @@ def test_create_firm_add_tax_payer_role(country_before_firm_creation, tradable):
     founders = [Mock(desired_equity=1000)]
 
     # When
-    firm = country.create_firm(founders, 1000, tradable=tradable)
+    firm = country.create_firm(founders, tradable=tradable)
 
     # Then
     country.add_tax_payer.assert_called_with(firm)
@@ -701,7 +701,7 @@ def test_create_firm_builds_equity_links(country_before_firm_creation, tradable)
     founders = [Mock(desired_equity=500) for _ in range(2)]
 
     # When
-    country.create_firm(founders, 1000, tradable=tradable)
+    country.create_firm(founders, tradable=tradable)
 
     # Then
     for founder in founders:
@@ -717,7 +717,7 @@ def test_create_firm_builds_initial_equity(country_before_firm_creation, tradabl
     founders = [Mock(desired_equity=500) for _ in range(2)]
 
     # When
-    country.create_firm(founders, 1000, tradable=tradable)
+    country.create_firm(founders, tradable=tradable)
 
     # Then
     issuer.increase_stock.assert_any_call("equity", 1000)
@@ -752,7 +752,7 @@ def test_create_bank_creates_bank_agent(country_before_bank_creation):
     founders = [Mock(desired_equity=500) for _ in range(2)]
 
     # When
-    bank = country.create_bank(founders, equity=1000)
+    bank = country.create_bank(founders)
 
     # Then
     assert bank.args == (country.model,)
@@ -766,7 +766,7 @@ def test_create_bank_registers_bank_in_model(country_before_bank_creation):
     founders = [Mock(desired_equity=1000)]
 
     # When
-    bank = country.create_bank(founders, equity=1000)
+    bank = country.create_bank(founders)
 
     # Then
     model.banks.append.assert_called_with(bank)
@@ -779,7 +779,7 @@ def test_create_bank_add_bond_buyer_role(country_before_bank_creation):
     founders = [Mock(desired_equity=1000)]
 
     # When
-    bank = country.create_bank(founders, 1000)
+    bank = country.create_bank(founders)
 
     # Then
     market.add_bond_buyer.assert_called_with(bank)
@@ -792,7 +792,7 @@ def test_create_bank_add_lender_role(country_before_bank_creation):
     founders = [Mock(desired_equity=1000)]
 
     # When
-    bank = country.create_bank(founders, 1000)
+    bank = country.create_bank(founders)
 
     # Then
     market.add_lender.assert_called_with(bank)
@@ -805,7 +805,7 @@ def test_create_bank_add_deposit_bank_role(country_before_bank_creation):
     founders = [Mock(desired_equity=1000)]
 
     # When
-    bank = country.create_bank(founders, 1000)
+    bank = country.create_bank(founders)
 
     # Then
     market.add_deposit_bank.assert_called_with(bank)
@@ -817,7 +817,7 @@ def test_create_bank_add_equity_issuer_role(country_before_bank_creation):
     founders = [Mock(desired_equity=1000)]
 
     # When
-    bank = country.create_bank(founders, 1000)
+    bank = country.create_bank(founders)
 
     # Then
     country.add_equity_issuer.assert_called_with(bank)
@@ -829,7 +829,7 @@ def test_create_bank_add_tax_payer_role(country_before_bank_creation):
     founders = [Mock(desired_equity=1000)]
 
     # When
-    bank = country.create_bank(founders, 1000)
+    bank = country.create_bank(founders)
 
     # Then
     country.add_tax_payer.assert_called_with(bank)
@@ -843,7 +843,7 @@ def test_create_bank_builds_equity_links(country_before_bank_creation):
     founders = [Mock(desired_equity=500) for _ in range(2)]
 
     # When
-    country.create_bank(founders, 1000)
+    country.create_bank(founders)
 
     # Then
     for founder in founders:
@@ -858,7 +858,7 @@ def test_create_bank_builds_initial_equity(country_before_bank_creation):
     founders = [Mock(desired_equity=500) for _ in range(2)]
 
     # When
-    country.create_bank(founders, 1000)
+    country.create_bank(founders)
 
     # Then
     issuer.increase_stock.assert_any_call("equity", 1000)

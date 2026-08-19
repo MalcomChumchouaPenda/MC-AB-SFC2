@@ -170,10 +170,10 @@ def test_create_firm_delegates_to_country(role):
     founders = [Mock(), Mock()]
 
     # When
-    role.create_firm(founders, 100, True)
+    role.create_firm(founders, True)
 
     # Then
-    country.create_firm.assert_called_with(founders, 100, True)
+    country.create_firm.assert_called_with(founders, True)
 
 
 def test_create_bank_delegates_to_country(role):
@@ -182,7 +182,7 @@ def test_create_bank_delegates_to_country(role):
     founders = [Mock(), Mock()]
 
     # When
-    role.create_bank(founders, 100)
+    role.create_bank(founders)
 
     # Then
-    country.create_bank.assert_called_with(founders, 100)
+    country.create_bank.assert_called_with(founders)
