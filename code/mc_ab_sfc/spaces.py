@@ -382,6 +382,12 @@ class DepositMarket(EcoSpace):
             guarantee.decrease_stock("reserves", amount)
             deposit_bank.decrease_stock("deposits", amount)
 
+    def make_deposits(self, holder, bank, amount):
+        holder.increase_stock("deposits", amount)
+        holder.decrease_stock("cash", amount)
+        bank.increase_stock("deposits", amount)
+        bank.increase_stock("reserves", amount)
+
 
 class BondMarket(EcoSpace):
 

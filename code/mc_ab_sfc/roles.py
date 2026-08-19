@@ -197,6 +197,9 @@ class DepositHolderRole(EcoRole):
     def get_deposit_rate(self):
         return self.deposit_bank.deposit_rate
 
+    def make_deposits(self, amount):
+        self.space.make_deposits(self, self.deposit_bank, amount)
+
 
 class DepositBankRole(EcoRole):
 

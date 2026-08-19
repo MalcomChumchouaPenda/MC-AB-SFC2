@@ -162,7 +162,7 @@ class HouseholdAgent(EcoAgent):
             collected_equity += investor.desired_equity
             if collected_equity >= required_equity:
                 self.create_enterprise(founders, sector)
-                break
+                return
 
     def choose_investment_sector(self):
         p = self.p
@@ -199,6 +199,10 @@ class HouseholdAgent(EcoAgent):
             role.create_firm(founders, tradable=True)
         else:
             role.create_firm(founders, tradable=False)
+
+    def make_deposits(self):
+        role = self.roles["deposit_holder"]
+        role.make_deposits(self.cash)
 
 
 class FirmAgent(EcoAgent):

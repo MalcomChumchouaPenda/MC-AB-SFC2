@@ -155,3 +155,20 @@ def test_reimburse_deposits_to_all_clients(market):
         guarantee.decrease_stock.assert_any_call("reserves", amount)
         holder.decrease_stock.assert_called_with("deposits", amount)
         holder.increase_stock.assert_called_with("cash", amount)
+
+
+def test_make_deposits(market):
+    # Given
+    bank = Mock()
+    holder = Mock()
+
+    # When
+    market.make_deposits(holder, bank, 500)
+
+    # Then
+    bank.increase_stock.assert_any_call("deposits", 500)
+    bank.increase_stock.assert_any_call("reserves", 500)
+    holder.increase_stock.assert_called_with("deposits", 500)
+    holder.decrease_stock.assert_called_with("cash", 500)
+
+    

@@ -755,6 +755,7 @@ def test_create_enterprise_can_create_bank(household_before_investment):
 def household_as_investor():
     model = Mock()
     household = HouseholdAgent(model)
+    household.equity = 0
     household.desired_equity = 100
     household.roles = {"equity_holder": Mock()}
     household.choose_investment_sector = Mock(return_value=None)
@@ -831,3 +832,16 @@ def test_invest_equity_does_nothing_when_insufficient_equity(household_as_invest
     household.find_potential_investors.assert_called_with()
     household.calc_initial_equity.assert_called_with("any")
     household.create_enterprise.assert_not_called()
+
+
+def test_make_deposits_with_residual_cash(household):
+    # Given
+    holder_role = Mock()
+    household.roles["deposit_holder"] = holder_role
+    household.cash = 500
+
+    # When
+    household.make_deposits()
+
+    # Then
+    holder_role.make_deposits.assert_called_with(500)
