@@ -30,6 +30,7 @@ class HouseholdAgent(EcoAgent):
         self.desired_non_trad_cons = 0
         self.desired_equity = 0
         self.desired_deposits = 0
+        self.desired_investment_sector = None
 
         # memory
         self.employed_labor = 0
@@ -146,6 +147,22 @@ class HouseholdAgent(EcoAgent):
 
     def calc_expected_net_worth(self):
         return self.net_worth + self.disposable_income - self.expected_consumption
+
+
+    def choose_investment_sector(self):
+        p = self.p
+        role = self.roles["equity_holder"]
+        ratio1 = role.get_bank_firm_number_ratio()
+        ratio2 = role.get_bank_firm_equity_ratio()
+        if ratio1 < p.eta or ratio2 < p.eta:
+            sector = "banks"
+        else:
+            sectors = ['non_tradable_firms', 'tradable_firms']
+            random = self.model.nprandom
+            sector = random.choice(sectors, p=[1-p.cT, p.cT])
+        self.desired_investment_sector = sector
+        return sector
+
 
     def find_potential_investors(self):
         role = self.roles["equity_holder"]

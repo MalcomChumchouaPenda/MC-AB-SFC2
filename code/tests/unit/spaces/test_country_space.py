@@ -32,6 +32,16 @@ def test_has_central_bank_role(country):
     assert country.central_bank_role is None
 
 
+def test_has_firm_roles(country):
+    # Assert
+    assert country.firm_roles == []
+    
+
+def test_has_bank_roles(country):
+    # Assert
+    assert country.bank_roles == []
+
+
 def test_contains_local_markets(country):
     # Assert
     assert hasattr(country, "markets")
@@ -487,3 +497,9 @@ def test_get_investors_excludes_initiating_household(country, monkeypatch):
 
     # Then
     assert investors == [eligible]
+
+
+class FakeFirmAgent(Mock):
+    pass
+
+

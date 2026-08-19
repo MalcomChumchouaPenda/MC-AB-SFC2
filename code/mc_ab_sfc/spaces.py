@@ -1,5 +1,5 @@
 from .base import EcoSpace
-from .agents import BankAgent, HouseholdAgent
+from .agents import FirmAgent, BankAgent, HouseholdAgent
 from .roles import (
     EmployerRole,
     WorkerRole,
@@ -64,6 +64,8 @@ class CountrySpace(EcoSpace):
     def setup(self):
         self.government_role = None
         self.central_bank_role = None
+        self.bank_roles = []
+        self.firm_roles = []
         self.discount_rate = 0.0
         self.tax_rate = 0
         self.markets = {}
@@ -179,6 +181,8 @@ class CountrySpace(EcoSpace):
                 and n.equity == 0
                 and n is not exclude
         ]
+
+
 
     def update_statistics(self):
         self.markets["goods"].update_statistics()

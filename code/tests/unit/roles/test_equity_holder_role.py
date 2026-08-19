@@ -60,7 +60,7 @@ def test_get_default_probability(role):
     assert default_probability == 0.12
 
 
-def test_gets_potential_investors(role):
+def test_get_potential_investors(role):
     # Given
     investors = [Mock()]
     country = role.space
@@ -74,7 +74,7 @@ def test_gets_potential_investors(role):
 
 
 
-def test_gets_potential_investors_exclude_itself(role):
+def test_get_potential_investors_exclude_itself(role):
     # Given
     country = role.space
 
@@ -86,4 +86,30 @@ def test_gets_potential_investors_exclude_itself(role):
         exclude=role
     )
 
-    
+
+
+def test_get_bank_firm_number_ratio(role):
+    # Given
+    country = role.space
+    country.bank_roles = [Mock() for _ in range(2)]
+    country.firm_roles = [Mock() for _ in range(10)]
+
+    # When
+    ratio = role.get_bank_firm_number_ratio()
+
+    # Then
+    assert ratio == 0.2
+
+
+def test_get_bank_firm_equity_ratio(role):
+    # Given
+    country = role.space
+    country.bank_roles = [Mock(equity=100) for _ in range(2)]
+    country.firm_roles = [Mock(equity=100) for _ in range(10)]
+
+    # When
+    ratio = role.get_bank_firm_equity_ratio()
+
+    # Then
+    assert ratio == 0.2
+

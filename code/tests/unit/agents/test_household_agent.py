@@ -51,6 +51,7 @@ def test_has_default_choices(household):
     assert household.desired_non_trad_cons == 0
     assert household.desired_equity == 0
     assert household.desired_deposits == 0
+    assert household.desired_investment_sector is None
 
 
 def test_has_default_indicator(household):
@@ -619,16 +620,60 @@ def test_calc_portfolio_allocation_preserves_existing_equity():
     assert household.desired_equity == 80
 
 
-def test_find_potential_equity_investors():
+@pytest.fixture
+def household_as_investor():
+    model = Mock()
+    model.p.cT = 0.6
+    model.p.eta = 0.3
+    household = HouseholdAgent(model)
+    household.roles = {"equity_holder": Mock()}
+    return household
+
+
+def test_find_potential_equity_investors(household_as_investor):
     # Given
     investors = [Mock(), Mock()]
-    holder_role = Mock()
+    household = household_as_investor
+    holder_role = household.roles["equity_holder"]
     holder_role.get_potential_investors.return_value = investors
-    household = HouseholdAgent(model=Mock())
-    household.roles = {"equity_holder": holder_role    }
 
     # When
     result = household.find_potential_investors()
 
     # Then
     assert result == investors
+
+
+@pytest.mark.parametrize('ratio1, ratio2', [(0.2, 0.5), (0.5, 0.2)])
+def test_choose_bank_as_investment_sector(household_as_investor, ratio1, ratio2):
+    # Given
+    household = household_as_investor
+    holder_role = household.roles["equity_holder"]
+    holder_role.get_bank_firm_number_ratio.return_value = ratio1
+    holder_role.get_bank_firm_equity_ratio.return_value = ratio2
+
+    # When
+    sector = household.choose_investment_sector()
+
+    # Then
+    assert sector == 'banks'
+    assert household.desired_investment_sector == sector
+
+
+def test_choose_firm_as_investment_sector(household_as_investor):
+    # Given
+    household = household_as_investor
+    holder_role = household.roles["equity_holder"]
+    holder_role.get_bank_firm_number_ratio.return_value = 0.6
+    holder_role.get_bank_firm_equity_ratio.return_value = 0.6
+    random = household.model.nprandom
+    random.choice.return_value = 'tradable_firms'
+    sectors = ['non_tradable_firms', 'tradable_firms']
+
+    # When
+    sector = household.choose_investment_sector()
+
+    # Then
+    random.choice.assert_called_with(sectors, p=[0.4, 0.6])
+    assert sector == 'tradable_firms'  
+    assert household.desired_investment_sector == sector

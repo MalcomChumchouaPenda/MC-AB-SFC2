@@ -138,8 +138,22 @@ class EquityHolderRole(EcoRole):
     def get_potential_investors(self):
         return self.space.get_potential_investors(exclude=self)
 
+    def get_bank_firm_number_ratio(self):
+        country = self.space
+        return len(country.bank_roles) / max(1, len(country.firm_roles))
+
+    def get_bank_firm_equity_ratio(self):
+        country = self.space
+        firm_equities = sum([r.equity for r in country.firm_roles])
+        bank_equities = sum([r.equity for r in country.bank_roles])
+        return bank_equities / max(1, firm_equities)
+
 
 class EquityIssuerRole(EcoRole):
+
+    @property
+    def equity(self):
+        return self.agent.equity
 
     @property
     def net_worth(self):

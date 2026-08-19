@@ -23,6 +23,15 @@ def issuer():
     return EquityIssuerRole(agent, space)
 
 
+def test_exposes_equity(issuer):
+    # Given
+    agent = issuer.agent
+    agent.equity = 10
+
+    # Assert
+    assert issuer.equity == 10
+
+
 def test_exposes_net_worth(issuer):
     # Given
     agent = issuer.agent
