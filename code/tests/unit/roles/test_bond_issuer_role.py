@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import Mock
-from mc_ab_sfc.roles import BondIssuerRole
+from mc_ab_sfc.roles.bond_issuer import BondIssuerRole
 
 # ---------------------------------------------------
 # ARCHITECTURE TESTS

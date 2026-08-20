@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import Mock
-from mc_ab_sfc.roles import GovernmentRole
+from mc_ab_sfc.roles.government import GovernmentRole
 
 # ---------------------------------------------------
 # ARCHITECTURE TESTS

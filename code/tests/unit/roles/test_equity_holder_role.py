@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import Mock
-from mc_ab_sfc.roles import EquityHolderRole
+from mc_ab_sfc.roles.equity_holder import EquityHolderRole
 
 # ---------------------------------------------------
 # ARCHITECTURE TESTS

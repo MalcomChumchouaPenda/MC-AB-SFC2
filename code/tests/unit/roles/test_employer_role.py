@@ -1,7 +1,6 @@
 import pytest
-import agentpy as ap
 from unittest.mock import Mock
-from mc_ab_sfc.roles import EmployerRole
+from mc_ab_sfc.roles.employer import EmployerRole
 
 # ---------------------------------------------------
 # ARCHITECTURE TESTS

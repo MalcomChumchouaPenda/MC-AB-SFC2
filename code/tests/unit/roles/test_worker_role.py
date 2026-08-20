@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import Mock
-from mc_ab_sfc.roles import WorkerRole
+from mc_ab_sfc.roles.worker import WorkerRole
 
 # ---------------------------------------------------
 # ARCHITECTURE TESTS

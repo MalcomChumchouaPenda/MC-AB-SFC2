@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import Mock
-from mc_ab_sfc.roles import DepositGuaranteeRole
+from mc_ab_sfc.roles.deposit_guarantee import DepositGuaranteeRole
 
 # ---------------------------------------------------
 # ARCHITECTURE TESTS

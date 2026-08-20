@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import Mock
-from mc_ab_sfc.roles import UnionCentralBankRole
+from mc_ab_sfc.roles.central_bank import UnionCentralBankRole
 
 # ---------------------------------------------------
 # ARCHITECTURE TESTS
