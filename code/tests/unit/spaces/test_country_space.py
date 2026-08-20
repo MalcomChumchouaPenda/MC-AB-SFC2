@@ -80,6 +80,15 @@ def test_exposes_average_productivity(country):
     assert country.average_productivity == 1.5
 
 
+def test_exposes_average_wage(country):
+    # Given
+    labor_market = Mock(average_wage=15)
+    country.markets = {"labor": labor_market}
+
+    # Assert
+    assert country.average_wage == 15
+
+
 def test_has_discount_rate(country):
     # Assert
     assert country.discount_rate == 0.0

@@ -467,3 +467,46 @@ def test_pay_no_dividends(bank):
 
     # Then
     issuer.distribute_dividends.assert_not_called()
+
+
+
+
+# ---------------------------------------------------
+# ENDOGENEOUS EXIT TESTS
+# ----------------------------------------------------
+
+
+@pytest.fixture
+def bank_before_exit():
+    issuer = Mock()
+    issuer.get_average_wage.return_value = 100
+    model=Mock()
+    bank = BankAgent(model)
+    bank.roles = {"equity_issuer":issuer}
+    return bank
+
+
+def test_exit_when_bankrupt(bank_before_exit):
+    # Given
+    bank = bank_before_exit
+    bank.net_worth = 90
+    issuer = bank.roles["equity_issuer"]
+
+    # When
+    bank.exit()
+
+    # Then
+    issuer.close_bank.assert_called_once_with(bank)
+
+
+def test_does_not_exit_when_not_bankrupt(bank_before_exit):
+    # Given
+    bank = bank_before_exit
+    bank.net_worth = 150
+    issuer = bank.roles["equity_issuer"]
+
+    # When
+    bank.exit()
+
+    # Then
+    issuer.close_bank.assert_not_called()

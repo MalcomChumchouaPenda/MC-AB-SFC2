@@ -790,6 +790,46 @@ def test_pay_no_dividends(firm):
 
 
 # ---------------------------------------------------
+# ENDOGENEOUS EXIT TESTS
+# ----------------------------------------------------
+
+
+@pytest.fixture
+def firm_before_exit():
+    model = Mock()
+    firm = FirmAgent(model)
+    firm.roles = {"equity_issuer": Mock()}
+    firm.wage_offer = 100
+    return firm
+
+
+def test_exit_when_bankrupt(firm_before_exit):
+    # Given
+    firm = firm_before_exit
+    firm.net_worth = 90
+    issuer = firm.roles["equity_issuer"]
+
+    # When
+    firm.exit()
+
+    # Then
+    issuer.close_firm.assert_called_once_with(firm)
+
+
+def test_does_not_exit_when_not_bankrupt(firm_before_exit):
+    # Given
+    firm = firm_before_exit
+    firm.net_worth = 150
+    issuer = firm.roles["equity_issuer"]
+
+    # When
+    firm.exit()
+
+    # Then
+    issuer.close_firm.assert_not_called()
+
+
+# ---------------------------------------------------
 # HISTORIC DATA STORAGE TESTS
 # ----------------------------------------------------
 

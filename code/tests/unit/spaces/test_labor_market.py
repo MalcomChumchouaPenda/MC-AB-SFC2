@@ -15,10 +15,6 @@ def test_is_eco_space():
     assert issubclass(LaborMarket, EcoSpace)
 
 
-# ---------------------------------------------------
-# BEHAVIORAL TESTS
-# ----------------------------------------------------
-
 
 @pytest.fixture
 def market():
@@ -28,6 +24,16 @@ def market():
     random.sample = Mock(side_effect=lambda pop, k: pop[:k])
     market = LaborMarket(model)
     return market
+
+
+def test_has_default_statistics(market):
+    # Assert
+    assert market.average_wage == 0
+
+
+# ---------------------------------------------------
+# BEHAVIORAL TESTS
+# ----------------------------------------------------
 
 
 class FakeRole:
@@ -123,3 +129,66 @@ def test_create_job_reduces_labor_demand(market, employer_with_demand):
 
     # Then
     assert employer.labor_demand == pytest.approx(9.1)
+
+
+# ---------------------------------------------------
+# STATITICS MANAGEMENT TESTS
+# ----------------------------------------------------
+
+
+@pytest.fixture
+def market_for_stats_computation():
+    # Given
+    model = Mock()
+    market = LaborMarket(model)
+    market.average_wage = 0
+    return market
+
+
+def test_calc_average_wage(market_for_stats_computation):
+    # Given
+    market = market_for_stats_computation
+    employers = [Mock(wage_offer=5) for _ in range(5)]
+
+    # When
+    average_wage = market.calc_average_wage(employers)
+
+    # Then
+    assert average_wage == pytest.approx(5.0)
+
+
+@pytest.fixture
+def market_for_stats_updates(monkeypatch):
+    # Given
+    model = Mock()
+    market = LaborMarket(model)
+    market.calc_average_wage = Mock()
+    monkeypatch.setattr("mc_ab_sfc.spaces.EmployerRole", FakeRole)
+    return market
+
+
+def test_update_statistics_with_employers(market_for_stats_updates):
+    # Given
+    employers = [FakeRole() for _ in range(5)]
+    others = [Mock() for _ in range(3)]
+    market = market_for_stats_updates
+    market.graph.add_nodes_from(employers + others)
+
+    # When
+    market.update_statistics()
+
+    # Then
+    market.calc_average_wage.assert_called_with(employers)
+
+
+def test_update_statistics(market_for_stats_updates):
+    # Given
+    market = market_for_stats_updates
+    market.calc_average_wage.return_value = 15.0
+
+    # When
+    market.update_statistics()
+
+    # Then
+    assert market.average_wage == pytest.approx(15.0)
+    

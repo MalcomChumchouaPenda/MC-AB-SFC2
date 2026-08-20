@@ -95,6 +95,10 @@ class CountrySpace(EcoSpace):
     def average_productivity(self):
         return self.markets["goods"].average_productivity
 
+    @property
+    def average_wage(self):
+        return self.markets["labor"].average_wage
+
     def add_commercial_bank(self, agent):
         bank_role = self.add_role(CommercialBankRole, agent, "commercial_bank")
         bank_role.central_bank = self.central_bank_role
@@ -304,6 +308,9 @@ class GoodsMarket(EcoSpace):
 
 class LaborMarket(EcoSpace):
 
+    def setup(self):
+        self.average_wage = 0
+
     def add_employer(self, firm):
         return self.add_role(EmployerRole, firm, "employer")
 
@@ -322,6 +329,14 @@ class LaborMarket(EcoSpace):
     def get_labor_sold(self, worker):
         edges = self.graph.edges  # contracts
         return sum(data["quantity"] for (w, e), data in edges.items() if w == worker)
+
+    def update_statistics(self):
+        nodes = self.graph.nodes  # roles
+        employers = [n for n in nodes if isinstance(n, EmployerRole)]
+        self.average_wage = self.calc_average_wage(employers)
+
+    def calc_average_wage(self, employers):
+        return sum([e.wage_offer for e in employers]) / max(1, len(employers))
 
 
 class CreditMarket(EcoSpace):

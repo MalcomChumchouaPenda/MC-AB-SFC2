@@ -412,6 +412,11 @@ class FirmAgent(EcoAgent):
             role.distribute_dividends(self.dividends_payable)
             self.dividends_payable = 0
 
+    def exit(self):
+        role = self.roles["equity_issuer"]
+        if self.net_worth < self.wage_offer:
+            role.close_firm(self)
+
     # History
 
     def update_history(self):
@@ -561,6 +566,12 @@ class BankAgent(EcoAgent):
             role = self.roles["equity_issuer"]
             role.distribute_dividends(self.dividends_payable)
             self.dividends_payable = 0
+
+    def exit(self):
+        role = self.roles["equity_issuer"]
+        average_wage = role.get_average_wage()
+        if self.net_worth < average_wage:
+            role.close_bank(self)
 
 
 class GovernmentAgent(EcoAgent):

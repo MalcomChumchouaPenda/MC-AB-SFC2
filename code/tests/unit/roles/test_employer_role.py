@@ -29,7 +29,7 @@ def test_has_default_labor_demand(employer):
     assert employer.labor_demand == 0.0
 
 
-def test_exposes_available_quantity(employer):
+def test_exposes_wage_offer(employer):
     # Given
     firm = employer.agent
     firm.wage_offer = 10

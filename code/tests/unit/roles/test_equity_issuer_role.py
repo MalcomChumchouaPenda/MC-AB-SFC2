@@ -46,6 +46,18 @@ def test_exposes_net_worth(issuer):
 # ----------------------------------------------------
 
 
+def test_get_average_wage(issuer):
+    # Given
+    country = issuer.space
+    country.average_wage = 15.0
+
+    # When
+    wage = issuer.get_average_wage()
+
+    # Assert
+    assert wage == 15.0
+
+
 def test_update_equity_holdings(issuer):
     # Given
     country = issuer.space
@@ -66,3 +78,27 @@ def test_distribute_dividends(issuer):
 
     # Then
     country.distribute_dividends.assert_called_with(issuer, 100)
+
+
+def test_closes_firm_through_country(issuer):
+    # Given
+    country = issuer.space
+    firm = Mock()
+
+    # When
+    issuer.close_firm(firm)
+
+    # Then
+    country.close_firm.assert_called_once_with(firm)
+
+
+def test_closes_bank_through_country(issuer):
+    # Given
+    country = issuer.space
+    bank = Mock()
+
+    # When
+    issuer.close_bank(bank)
+
+    # Then
+    country.close_bank.assert_called_once_with(bank)
