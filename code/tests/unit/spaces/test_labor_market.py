@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import Mock
-from mc_ab_sfc.spaces import LaborMarket
+from mc_ab_sfc.spaces.labor_market import LaborMarket
 
 # ---------------------------------------------------
 # ARCHITECTURE TESTS
@@ -43,7 +43,7 @@ def test_add_worker_creates_worker_role(market, monkeypatch):
     # Given
     household = Mock()
     market.add_role = Mock()
-    monkeypatch.setattr("mc_ab_sfc.spaces.WorkerRole", FakeRole)
+    monkeypatch.setattr("mc_ab_sfc.spaces.labor_market.WorkerRole", FakeRole)
 
     # When
     worker = market.add_worker(household)
@@ -57,7 +57,7 @@ def test_add_employer_creates_employer_role(market, monkeypatch):
     # Given
     firm = Mock()
     market.add_role = Mock()
-    monkeypatch.setattr("mc_ab_sfc.spaces.EmployerRole", FakeRole)
+    monkeypatch.setattr("mc_ab_sfc.spaces.labor_market.EmployerRole", FakeRole)
 
     # When
     employer = market.add_employer(firm)
@@ -72,7 +72,7 @@ def test_search_employers_returns_psi_employers(market, monkeypatch):
     others = [Mock() for _ in range(3)]
     employers = [FakeRole() for _ in range(5)]
     market.graph.add_nodes_from(employers + others)
-    monkeypatch.setattr("mc_ab_sfc.spaces.EmployerRole", FakeRole)
+    monkeypatch.setattr("mc_ab_sfc.spaces.labor_market.EmployerRole", FakeRole)
 
     # When
     sample = market.search_employers(psi=3)
@@ -162,7 +162,7 @@ def market_for_stats_updates(monkeypatch):
     model = Mock()
     market = LaborMarket(model)
     market.calc_average_wage = Mock()
-    monkeypatch.setattr("mc_ab_sfc.spaces.EmployerRole", FakeRole)
+    monkeypatch.setattr("mc_ab_sfc.spaces.labor_market.EmployerRole", FakeRole)
     return market
 
 

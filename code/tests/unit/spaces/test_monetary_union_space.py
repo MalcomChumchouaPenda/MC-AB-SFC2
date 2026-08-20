@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import Mock
-from mc_ab_sfc.spaces import MonetaryUnionSpace
+from mc_ab_sfc.spaces.monetary_union import MonetaryUnionSpace
 
 # ---------------------------------------------------
 # ARCHITECTURE TESTS
@@ -83,7 +83,9 @@ def test_add_central_bank_role(union_with_roles, monkeypatch):
     # Given
     central_bank = Mock()
     union = union_with_roles
-    monkeypatch.setattr("mc_ab_sfc.spaces.UnionCentralBankRole", FakeCBRole)
+    monkeypatch.setattr(
+        "mc_ab_sfc.spaces.monetary_union.UnionCentralBankRole", FakeCBRole
+    )
 
     # When
     cb_role = union.add_central_bank(central_bank)

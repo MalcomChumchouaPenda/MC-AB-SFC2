@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import Mock
-from mc_ab_sfc.spaces import DepositMarket
+from mc_ab_sfc.spaces.deposit_market import DepositMarket
 
 # ---------------------------------------------------
 # ARCHITECTURE TESTS
@@ -36,7 +36,7 @@ def test_add_deposit_holder_creates_deposit_holder_role(market, monkeypatch):
     # Given
     household = Mock()
     market.add_role = Mock()
-    monkeypatch.setattr("mc_ab_sfc.spaces.DepositHolderRole", FakeRole)
+    monkeypatch.setattr("mc_ab_sfc.spaces.deposit_market.DepositHolderRole", FakeRole)
 
     # When
     deposit_holder = market.add_deposit_holder(household)
@@ -51,7 +51,7 @@ def test_add_deposit_bank_creates_deposit_bank(market, monkeypatch):
     # Given
     bank = Mock()
     market.add_role = Mock()
-    monkeypatch.setattr("mc_ab_sfc.spaces.DepositBankRole", FakeRole)
+    monkeypatch.setattr("mc_ab_sfc.spaces.deposit_market.DepositBankRole", FakeRole)
 
     # When
     deposit_bank = market.add_deposit_bank(bank)
@@ -66,7 +66,9 @@ def test_add_deposit_guarantee_creates_deposit_guarantee(market, monkeypatch):
     # Given
     bank = Mock()
     market.add_role = Mock()
-    monkeypatch.setattr("mc_ab_sfc.spaces.DepositGuaranteeRole", FakeRole)
+    monkeypatch.setattr(
+        "mc_ab_sfc.spaces.deposit_market.DepositGuaranteeRole", FakeRole
+    )
 
     # When
     deposit_guarantee = market.add_deposit_guarantee(bank)
@@ -125,7 +127,7 @@ def test_get_defaulted_banks(market, monkeypatch):
     banks = [FakeBankRole(defaulted=False) for _ in range(2)]
     defaults = [FakeBankRole(defaulted=True) for _ in range(5)]
     market.graph.add_nodes_from(others + banks + defaults)
-    monkeypatch.setattr("mc_ab_sfc.spaces.DepositBankRole", FakeBankRole)
+    monkeypatch.setattr("mc_ab_sfc.spaces.deposit_market.DepositBankRole", FakeBankRole)
 
     # When
     sample = market.get_defaulted_banks()

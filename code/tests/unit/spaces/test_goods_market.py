@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import Mock
-from mc_ab_sfc.spaces import GoodsMarket
+from mc_ab_sfc.spaces.goods_market import GoodsMarket
 
 # ---------------------------------------------------
 # ARCHITECTURE TESTS
@@ -68,7 +68,7 @@ def test_add_consumer_creates_tradable_consumer_role(market, monkeypatch):
     # Given
     household = Mock()
     market.add_role = Mock()
-    monkeypatch.setattr("mc_ab_sfc.spaces.ConsumerRole", FakeRole)
+    monkeypatch.setattr("mc_ab_sfc.spaces.goods_market.ConsumerRole", FakeRole)
 
     # When
     consumer = market.add_consumer(household)
@@ -84,7 +84,7 @@ def test_add_consumer_creates_non_tradable_consumer_role(market, monkeypatch):
     household = Mock()
     market.add_role = Mock()
     market.tradable = False
-    monkeypatch.setattr("mc_ab_sfc.spaces.ConsumerRole", FakeRole)
+    monkeypatch.setattr("mc_ab_sfc.spaces.goods_market.ConsumerRole", FakeRole)
 
     # When
     consumer = market.add_consumer(household)
@@ -99,7 +99,7 @@ def test_add_supplier_creates_producer_role(market, monkeypatch):
     # Given
     firm = Mock()
     market.add_role = Mock()
-    monkeypatch.setattr("mc_ab_sfc.spaces.ProducerRole", FakeRole)
+    monkeypatch.setattr("mc_ab_sfc.spaces.goods_market.ProducerRole", FakeRole)
 
     # When
     producer = market.add_supplier(firm)
@@ -115,7 +115,7 @@ def test_search_suppliers_returns_psi_producers(market, monkeypatch):
     others = [Mock() for _ in range(5)]
     producers = [FakeRole() for _ in range(5)]
     market.graph.add_nodes_from(others + producers)
-    monkeypatch.setattr("mc_ab_sfc.spaces.ProducerRole", FakeRole)
+    monkeypatch.setattr("mc_ab_sfc.spaces.goods_market.ProducerRole", FakeRole)
 
     # When
     sample = market.search_suppliers(psi=3)
@@ -232,7 +232,7 @@ def market_for_stats_updates(monkeypatch):
     market.calc_inflation = Mock()
     market.calc_average_price = Mock()
     market.calc_average_productivity = Mock()
-    monkeypatch.setattr("mc_ab_sfc.spaces.ProducerRole", FakeRole)
+    monkeypatch.setattr("mc_ab_sfc.spaces.goods_market.ProducerRole", FakeRole)
     return market
 
 

@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import Mock
-from mc_ab_sfc.spaces import CountrySpace
+from mc_ab_sfc.spaces.country import CountrySpace
 
 # ---------------------------------------------------
 # ARCHITECTURE TESTS
@@ -116,7 +116,7 @@ def test_add_government_role(country_with_roles, monkeypatch):
     # Given
     govt = Mock()
     country = country_with_roles
-    monkeypatch.setattr("mc_ab_sfc.spaces.GovernmentRole", FakeGovtRole)
+    monkeypatch.setattr("mc_ab_sfc.spaces.country.GovernmentRole", FakeGovtRole)
 
     # When
     govt_role = country.add_government(govt)
@@ -137,7 +137,7 @@ def test_add_central_bank_role(country_with_roles, monkeypatch):
     central_bank = Mock()
     country = country_with_roles
     country.government_role = govt_role
-    monkeypatch.setattr("mc_ab_sfc.spaces.NationalCentralBankRole", FakeCBRole)
+    monkeypatch.setattr("mc_ab_sfc.spaces.country.NationalCentralBankRole", FakeCBRole)
 
     # When
     cb_role = country.add_central_bank(central_bank)
@@ -154,7 +154,7 @@ def test_add_central_bank_role_creates_links(country_with_roles, monkeypatch):
     central_bank = Mock()
     country = country_with_roles
     country.government_role = govt_role
-    monkeypatch.setattr("mc_ab_sfc.spaces.NationalCentralBankRole", FakeCBRole)
+    monkeypatch.setattr("mc_ab_sfc.spaces.country.NationalCentralBankRole", FakeCBRole)
 
     # When
     cb_role = country.add_central_bank(central_bank)
@@ -174,7 +174,7 @@ def test_add_tax_payer_role(country_with_roles, monkeypatch):
     govt_role = Mock()
     country = country_with_roles
     country.government_role = govt_role
-    monkeypatch.setattr("mc_ab_sfc.spaces.TaxPayerRole", FakePayerRole)
+    monkeypatch.setattr("mc_ab_sfc.spaces.country.TaxPayerRole", FakePayerRole)
 
     # When
     payer_role = country.add_tax_payer(agent)
@@ -190,7 +190,7 @@ def test_add_tax_payer_role_creates_links(country_with_roles, monkeypatch):
     govt_role = Mock()
     country = country_with_roles
     country.government_role = govt_role
-    monkeypatch.setattr("mc_ab_sfc.spaces.TaxPayerRole", FakePayerRole)
+    monkeypatch.setattr("mc_ab_sfc.spaces.country.TaxPayerRole", FakePayerRole)
 
     # When
     payer_role = country.add_tax_payer(agent)
@@ -210,7 +210,7 @@ def test_add_commercial_bank_role(country_with_roles, monkeypatch):
     cb_role = Mock()
     country = country_with_roles
     country.central_bank_role = cb_role
-    monkeypatch.setattr("mc_ab_sfc.spaces.CommercialBankRole", FakeBankRole)
+    monkeypatch.setattr("mc_ab_sfc.spaces.country.CommercialBankRole", FakeBankRole)
 
     # When
     bank_role = country.add_commercial_bank(agent)
@@ -226,7 +226,7 @@ def test_add_commercial_bank_role_creates_links(country_with_roles, monkeypatch)
     cb_role = Mock()
     country = country_with_roles
     country.central_bank_role = cb_role
-    monkeypatch.setattr("mc_ab_sfc.spaces.CommercialBankRole", FakeBankRole)
+    monkeypatch.setattr("mc_ab_sfc.spaces.country.CommercialBankRole", FakeBankRole)
 
     # When
     bank_role = country.add_commercial_bank(agent)
@@ -244,7 +244,7 @@ def test_add_equity_holder_role(country_with_roles, monkeypatch):
     # Given
     household = Mock()
     country = country_with_roles
-    monkeypatch.setattr("mc_ab_sfc.spaces.EquityHolderRole", FakeHolderRole)
+    monkeypatch.setattr("mc_ab_sfc.spaces.country.EquityHolderRole", FakeHolderRole)
 
     # When
     holder_role = country.add_equity_holder(household)
@@ -262,7 +262,7 @@ def test_add_equity_issuer_creates_appropriate_role(country_with_roles, monkeypa
     # Given
     agent = Mock()
     country = country_with_roles
-    monkeypatch.setattr("mc_ab_sfc.spaces.EquityIssuerRole", FakeIssuerRole)
+    monkeypatch.setattr("mc_ab_sfc.spaces.country.EquityIssuerRole", FakeIssuerRole)
 
     # When
     issuer_role = country.add_equity_issuer(agent)
@@ -282,8 +282,8 @@ def test_add_equity_issuer_registers_bank_role(country_with_roles, monkeypatch):
     # Given
     agent = FakeBankAgent()
     country = country_with_roles
-    monkeypatch.setattr("mc_ab_sfc.spaces.EquityIssuerRole", FakeIssuerRole)
-    monkeypatch.setattr("mc_ab_sfc.spaces.BankAgent", FakeBankAgent)
+    monkeypatch.setattr("mc_ab_sfc.spaces.country.EquityIssuerRole", FakeIssuerRole)
+    monkeypatch.setattr("mc_ab_sfc.spaces.country.BankAgent", FakeBankAgent)
 
     # When
     issuer_role = country.add_equity_issuer(agent)
@@ -303,8 +303,8 @@ def test_add_equity_issuer_registers_firm_role(country_with_roles, monkeypatch):
     # Given
     agent = FakeFirmAgent()
     country = country_with_roles
-    monkeypatch.setattr("mc_ab_sfc.spaces.EquityIssuerRole", FakeIssuerRole)
-    monkeypatch.setattr("mc_ab_sfc.spaces.FirmAgent", FakeFirmAgent)
+    monkeypatch.setattr("mc_ab_sfc.spaces.country.EquityIssuerRole", FakeIssuerRole)
+    monkeypatch.setattr("mc_ab_sfc.spaces.country.FirmAgent", FakeFirmAgent)
 
     # When
     issuer_role = country.add_equity_issuer(agent)
@@ -338,7 +338,7 @@ def test_pay_taxes_with_tax_payer_reserves(country, monkeypatch):
     govt_role = Mock()
     country.government_role = govt_role
     payer_role = Mock(agent=FakeBankAgent())
-    monkeypatch.setattr("mc_ab_sfc.spaces.BankAgent", FakeBankAgent)
+    monkeypatch.setattr("mc_ab_sfc.spaces.country.BankAgent", FakeBankAgent)
 
     # When
     country.pay_taxes(payer_role, 100)
@@ -405,7 +405,7 @@ def test_distributes_dividends_with_reserves(country, issuer, holders, monkeypat
     graph = country.graph
     graph.add_edge(issuer, holders[0], share=0.6)
     graph.add_edge(issuer, holders[1], share=0.4)
-    monkeypatch.setattr("mc_ab_sfc.spaces.BankAgent", FakeBankAgent)
+    monkeypatch.setattr("mc_ab_sfc.spaces.country.BankAgent", FakeBankAgent)
 
     # When
     country.distribute_dividends(issuer, 200)
@@ -464,8 +464,8 @@ class FakeHouseholdAgent:
 
 def test_get_households_returns_household_agent_roles(country, monkeypatch):
     # Given
-    monkeypatch.setattr("mc_ab_sfc.spaces.TaxPayerRole", FakePayerRole)
-    monkeypatch.setattr("mc_ab_sfc.spaces.HouseholdAgent", FakeHouseholdAgent)
+    monkeypatch.setattr("mc_ab_sfc.spaces.country.TaxPayerRole", FakePayerRole)
+    monkeypatch.setattr("mc_ab_sfc.spaces.country.HouseholdAgent", FakeHouseholdAgent)
     household_roles = [FakePayerRole(agent=FakeHouseholdAgent()) for _ in range(6)]
     payer_roles = [FakePayerRole() for _ in range(5)]
     other_roles = [Mock() for _ in range(5)]
@@ -530,7 +530,7 @@ def test_get_only_eligible_investors(country, monkeypatch):
     eligible = FakeHolderRole(desired_equity=100, equity=0)
     ineligible = FakeHolderRole(desired_equity=100, equity=10)
     country.graph.add_nodes_from([eligible, ineligible, other])
-    monkeypatch.setattr("mc_ab_sfc.spaces.EquityHolderRole", FakeHolderRole)
+    monkeypatch.setattr("mc_ab_sfc.spaces.country.EquityHolderRole", FakeHolderRole)
 
     # When
     investors = country.get_potential_investors()
@@ -544,7 +544,7 @@ def test_get_investors_excludes_initiating_household(country, monkeypatch):
     initiator = FakeHolderRole(desired_equity=100, equity=0)
     eligible = FakeHolderRole(desired_equity=100, equity=0)
     country.graph.add_nodes_from([initiator, eligible])
-    monkeypatch.setattr("mc_ab_sfc.spaces.EquityHolderRole", FakeHolderRole)
+    monkeypatch.setattr("mc_ab_sfc.spaces.country.EquityHolderRole", FakeHolderRole)
 
     # When
     investors = country.get_potential_investors(exclude=initiator)
@@ -576,7 +576,7 @@ def country_before_firm_creation(monkeypatch, monetary_union):
         "deposit": Mock(),
         "credit": Mock(),
     }
-    monkeypatch.setattr("mc_ab_sfc.spaces.FirmAgent", FakeFirmAgent)
+    monkeypatch.setattr("mc_ab_sfc.spaces.country.FirmAgent", FakeFirmAgent)
     return country
 
 
@@ -756,7 +756,7 @@ def country_before_bank_creation(monkeypatch, monetary_union):
         "deposit": Mock(),
         "credit": Mock(),
     }
-    monkeypatch.setattr("mc_ab_sfc.spaces.BankAgent", FakeBankAgent)
+    monkeypatch.setattr("mc_ab_sfc.spaces.country.BankAgent", FakeBankAgent)
     return country
 
 

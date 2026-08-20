@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import Mock
-from mc_ab_sfc.spaces import BondMarket
+from mc_ab_sfc.spaces.bond_market import BondMarket
 
 # ---------------------------------------------------
 # ARCHITECTURE TESTS
@@ -36,7 +36,7 @@ def test_add_bond_issuer_creates_issuer_role(market, monkeypatch):
     # Given
     household = Mock()
     market.add_role = Mock()
-    monkeypatch.setattr("mc_ab_sfc.spaces.BondIssuerRole", FakeRole)
+    monkeypatch.setattr("mc_ab_sfc.spaces.bond_market.BondIssuerRole", FakeRole)
 
     # When
     issuer = market.add_bond_issuer(household)
@@ -51,7 +51,7 @@ def test_add_bond_buyer_creates_buyer(market, monkeypatch):
     # Given
     bank = Mock()
     market.add_role = Mock()
-    monkeypatch.setattr("mc_ab_sfc.spaces.BondBuyerRole", FakeRole)
+    monkeypatch.setattr("mc_ab_sfc.spaces.bond_market.BondBuyerRole", FakeRole)
 
     # When
     buyer = market.add_bond_buyer(bank)
@@ -67,7 +67,7 @@ def test_get_bond_issuers_returns_all_buyers(market, monkeypatch):
     others = [Mock() for _ in range(5)]
     buyers = [FakeRole() for _ in range(5)]
     market.graph.add_nodes_from(others + buyers)
-    monkeypatch.setattr("mc_ab_sfc.spaces.BondIssuerRole", FakeRole)
+    monkeypatch.setattr("mc_ab_sfc.spaces.bond_market.BondIssuerRole", FakeRole)
 
     # When
     result = market.get_bond_issuers()
@@ -133,7 +133,7 @@ def test_buy_bonds_modifies_bank_stocks(market, monkeypatch):
     buyer = Mock(agent=FakeBankAgent())
     graph = market.graph
     graph.add_nodes_from([buyer, issuer])
-    monkeypatch.setattr("mc_ab_sfc.spaces.BankAgent", FakeBankAgent)
+    monkeypatch.setattr("mc_ab_sfc.spaces.bond_market.BankAgent", FakeBankAgent)
 
     # When
     market.buy_bonds(buyer, issuer, 500)
@@ -197,7 +197,7 @@ def test_pay_bond_debt_modifies_bank_stocks(market, monkeypatch):
     graph = market.graph
     graph.add_nodes_from([buyer, issuer])
     graph.add_edge(buyer, issuer, amount=100)
-    monkeypatch.setattr("mc_ab_sfc.spaces.BankAgent", FakeBankAgent)
+    monkeypatch.setattr("mc_ab_sfc.spaces.bond_market.BankAgent", FakeBankAgent)
 
     # When
     market.pay_bond_debt(issuer)
