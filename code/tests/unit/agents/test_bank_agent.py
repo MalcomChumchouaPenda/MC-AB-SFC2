@@ -3,7 +3,6 @@ import pytest
 from unittest.mock import Mock
 from mc_ab_sfc.agents.bank import BankAgent
 
-
 # ---------------------------------------------------
 # ARCHITECTURE TESTS
 # ----------------------------------------------------
@@ -470,8 +469,6 @@ def test_pay_no_dividends(bank):
     issuer.distribute_dividends.assert_not_called()
 
 
-
-
 # ---------------------------------------------------
 # ENDOGENEOUS EXIT TESTS
 # ----------------------------------------------------
@@ -481,9 +478,9 @@ def test_pay_no_dividends(bank):
 def bank_before_exit():
     issuer = Mock()
     issuer.get_average_wage.return_value = 100
-    model=Mock()
+    model = Mock()
     bank = BankAgent(model)
-    bank.roles = {"equity_issuer":issuer}
+    bank.roles = {"equity_issuer": issuer}
     return bank
 
 

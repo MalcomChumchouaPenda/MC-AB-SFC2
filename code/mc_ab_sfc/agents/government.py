@@ -1,5 +1,5 @@
-
 from ..base import EcoAgent
+
 
 class GovernmentAgent(EcoAgent):
 

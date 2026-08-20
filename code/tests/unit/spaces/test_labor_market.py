@@ -15,7 +15,6 @@ def test_is_eco_space():
     assert issubclass(LaborMarket, EcoSpace)
 
 
-
 @pytest.fixture
 def market():
     # Given
@@ -191,4 +190,3 @@ def test_update_statistics(market_for_stats_updates):
 
     # Then
     assert market.average_wage == pytest.approx(15.0)
-    
