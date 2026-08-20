@@ -1,6 +1,7 @@
 import pytest
 from unittest.mock import Mock
-from mc_ab_sfc.agents import GovernmentAgent
+from mc_ab_sfc.agents.government import GovernmentAgent
+
 
 # ---------------------------------------------------
 # ARCHITECTURE TESTS

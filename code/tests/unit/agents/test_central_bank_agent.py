@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import Mock
-from mc_ab_sfc.agents import CentralBankAgent
+from mc_ab_sfc.agents.central_bank import CentralBankAgent
 
 # ---------------------------------------------------
 # ARCHITECTURE TESTS

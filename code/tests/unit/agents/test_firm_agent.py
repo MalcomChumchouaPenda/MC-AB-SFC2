@@ -1,7 +1,8 @@
 import math
 import pytest
 from unittest.mock import Mock
-from mc_ab_sfc.agents import FirmAgent
+from mc_ab_sfc.agents.firm import FirmAgent
+
 
 # ---------------------------------------------------
 # ARCHITECTURE TESTS
