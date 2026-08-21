@@ -113,7 +113,6 @@ class CountrySpace(EcoSpace):
         for _, holder in self.graph.edges(issuer):
             holder.share = holder.equity / issuer.equity
 
-    
     def request_cash_advances(self, bank_role, amount):
         central_role = self.central_bank_role
         central_role.increase_stock("reserves", amount)

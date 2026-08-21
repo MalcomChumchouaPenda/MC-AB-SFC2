@@ -416,7 +416,6 @@ def test_updates_shares(country, issuer, holders):
     assert holders[1].share == 0.3
 
 
-
 def test_distributes_dividends_with_reserves(country, issuer, holders, monkeypatch):
     # Given
     issuer.agent = FakeBankAgent()
@@ -489,7 +488,6 @@ def test_update_equity_holdings(country, issuer, holders):
     holders[0].increase_stock.assert_called_once_with("equity", 720)
     holders[1].clear_stock.assert_called_once_with("equity")
     holders[1].increase_stock.assert_called_once_with("equity", 480)
-
 
 
 def test_update_equity_holdings_updates_shares(country, issuer, holders):

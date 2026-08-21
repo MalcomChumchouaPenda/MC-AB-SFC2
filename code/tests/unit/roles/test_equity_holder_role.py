@@ -51,7 +51,6 @@ def test_has_default_equity_share(role):
     assert role.share == 0.0
 
 
-
 # ---------------------------------------------------
 # BEHAVIORAL TESTS
 # ----------------------------------------------------
@@ -223,4 +222,3 @@ def test_create_bank_delegates_to_country(role):
 
     # Then
     country.create_bank.assert_called_with(founders)
-

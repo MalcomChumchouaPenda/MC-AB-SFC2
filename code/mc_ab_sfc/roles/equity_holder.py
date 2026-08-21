@@ -16,7 +16,6 @@ class EquityHolderRole(EcoRole):
     def desired_equity(self):
         return self.agent.desired_equity
 
-    
     def get_default_probability(self):
         return self.space.default_probability
 
