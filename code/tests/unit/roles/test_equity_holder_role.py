@@ -41,6 +41,17 @@ def test_exposes_desired_equity(role):
     assert role.desired_equity == 100
 
 
+def test_has_equity_issuer_ref(role):
+    # Assert
+    assert role.equity_issuer is None
+
+
+def test_has_default_equity_share(role):
+    # Assert
+    assert role.share == 0.0
+
+
+
 # ---------------------------------------------------
 # BEHAVIORAL TESTS
 # ----------------------------------------------------
@@ -212,3 +223,4 @@ def test_create_bank_delegates_to_country(role):
 
     # Then
     country.create_bank.assert_called_with(founders)
+

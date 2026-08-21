@@ -34,11 +34,12 @@ def country(model):
     return CountrySpace(model)
 
 
-def test_firm_udpate_net_worth(firm, household, country):
+def test_firm_update_net_worth(firm, household, country):
     # Given
+    household.equity = firm.equity = firm.net_worth
     issuer = country.add_equity_issuer(firm)
     holder = country.add_equity_holder(household)
-    country.assign_equity_holder(holder, issuer, 1.0)
+    country.assign_equity_holder(issuer, holder)
 
     # When
     firm.update_net_worth()
@@ -60,11 +61,12 @@ def bank(model):
     return bank
 
 
-def test_bank_udpate_net_worth(bank, household, country):
+def test_bank_update_net_worth(bank, household, country):
     # Given
+    household.equity = bank.equity = bank.net_worth
     issuer = country.add_equity_issuer(bank)
     holder = country.add_equity_holder(household)
-    country.assign_equity_holder(holder, issuer, 1.0)
+    country.assign_equity_holder(issuer, holder)
 
     # When
     bank.update_net_worth()

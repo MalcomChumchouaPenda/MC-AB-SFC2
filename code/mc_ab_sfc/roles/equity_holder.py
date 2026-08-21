@@ -3,6 +3,11 @@ from ..base import EcoRole
 
 class EquityHolderRole(EcoRole):
 
+    def __init__(self, agent, space):
+        super().__init__(agent, space)
+        self.equity_issuer = None
+        self.share = 0.0
+
     @property
     def equity(self):
         return self.agent.equity
@@ -11,6 +16,7 @@ class EquityHolderRole(EcoRole):
     def desired_equity(self):
         return self.agent.desired_equity
 
+    
     def get_default_probability(self):
         return self.space.default_probability
 

@@ -321,11 +321,11 @@ def test_assign_equity_holder_to_equity_issuer(country):
     graph.add_nodes_from([issuer, holder])
 
     # When
-    country.assign_equity_holder(issuer, holder, 0.5)
+    country.assign_equity_holder(issuer, holder)
 
     # Then
     assert graph.has_edge(holder, issuer)
-    assert graph[holder][issuer]["share"] == 0.5
+    assert holder.equity_issuer is issuer
 
 
 # ---------------------------------------------------
@@ -394,17 +394,36 @@ def issuer(country):
 @pytest.fixture
 def holders(country):
     # Given
-    holders = [Mock() for _ in range(3)]
+    holders = [Mock(share=0.6), Mock(share=0.4), Mock()]
     country.graph.add_nodes_from(holders)
     return holders
+
+
+def test_updates_shares(country, issuer, holders):
+    # Given
+    issuer.equity = 100
+    holders[0].equity = 70
+    holders[1].equity = 30
+    graph = country.graph
+    graph.add_edge(issuer, holders[0])
+    graph.add_edge(issuer, holders[1])
+
+    # When
+    country.update_shares(issuer)
+
+    # Then
+    assert holders[0].share == 0.7
+    assert holders[1].share == 0.3
+
 
 
 def test_distributes_dividends_with_reserves(country, issuer, holders, monkeypatch):
     # Given
     issuer.agent = FakeBankAgent()
     graph = country.graph
-    graph.add_edge(issuer, holders[0], share=0.6)
-    graph.add_edge(issuer, holders[1], share=0.4)
+    graph.add_edge(issuer, holders[0])
+    graph.add_edge(issuer, holders[1])
+    country.update_shares = Mock()
     monkeypatch.setattr("mc_ab_sfc.spaces.country.BankAgent", FakeBankAgent)
 
     # When
@@ -422,8 +441,9 @@ def test_distributes_dividends_with_reserves(country, issuer, holders, monkeypat
 def test_distributes_dividends_with_cash(country, issuer, holders):
     # Given
     graph = country.graph
-    graph.add_edge(issuer, holders[0], share=0.6)
-    graph.add_edge(issuer, holders[1], share=0.4)
+    graph.add_edge(issuer, holders[0])
+    graph.add_edge(issuer, holders[1])
+    country.update_shares = Mock()
 
     # When
     country.distribute_dividends(issuer, 200)
@@ -437,12 +457,27 @@ def test_distributes_dividends_with_cash(country, issuer, holders):
     holders[1].increase_stock.assert_called_with("cash", 80)
 
 
+def test_distributes_dividends_updates_shares(country, issuer, holders):
+    # Given
+    graph = country.graph
+    graph.add_edge(issuer, holders[0])
+    graph.add_edge(issuer, holders[1])
+    country.update_shares = Mock()
+
+    # When
+    country.distribute_dividends(issuer, 200)
+
+    # Then
+    country.update_shares.assert_called_once_with(issuer)
+
+
 def test_update_equity_holdings(country, issuer, holders):
     # Given
     graph = country.graph
-    graph.add_edge(issuer, holders[0], share=0.6)
-    graph.add_edge(issuer, holders[1], share=0.4)
+    graph.add_edge(issuer, holders[0])
+    graph.add_edge(issuer, holders[1])
     issuer.net_worth = 1200
+    country.update_shares = Mock()
 
     # When
     country.update_equity_holdings(issuer)
@@ -454,6 +489,22 @@ def test_update_equity_holdings(country, issuer, holders):
     holders[0].increase_stock.assert_called_once_with("equity", 720)
     holders[1].clear_stock.assert_called_once_with("equity")
     holders[1].increase_stock.assert_called_once_with("equity", 480)
+
+
+
+def test_update_equity_holdings_updates_shares(country, issuer, holders):
+    # Given
+    graph = country.graph
+    graph.add_edge(issuer, holders[0])
+    graph.add_edge(issuer, holders[1])
+    issuer.net_worth = 1200
+    country.update_shares = Mock()
+
+    # When
+    country.update_equity_holdings(issuer)
+
+    # Then
+    country.update_shares.assert_called_once_with(issuer)
 
 
 class FakeHouseholdAgent:
@@ -719,7 +770,7 @@ def test_create_firm_builds_equity_links(country_before_firm_creation, tradable)
 
     # Then
     for founder in founders:
-        country.assign_equity_holder.assert_any_call(issuer, founder, 0.5)
+        country.assign_equity_holder.assert_any_call(issuer, founder)
 
 
 @pytest.mark.parametrize("tradable", [True, False])
@@ -861,7 +912,7 @@ def test_create_bank_builds_equity_links(country_before_bank_creation):
 
     # Then
     for founder in founders:
-        country.assign_equity_holder.assert_any_call(issuer, founder, 0.5)
+        country.assign_equity_holder.assert_any_call(issuer, founder)
 
 
 def test_create_bank_builds_initial_equity(country_before_bank_creation):

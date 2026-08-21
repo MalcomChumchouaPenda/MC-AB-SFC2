@@ -85,27 +85,35 @@ class CountrySpace(EcoSpace):
     def add_equity_holder(self, household):
         return self.add_role(EquityHolderRole, household, "equity_holder")
 
-    def assign_equity_holder(self, holder, issuer, share):
-        self.graph.add_edge(holder, issuer, share=share)
+    def assign_equity_holder(self, issuer, holder):
+        self.graph.add_edge(holder, issuer)
+        holder.equity_issuer = issuer
 
     def distribute_dividends(self, issuer, amount):
+        self.update_shares(issuer)
         source = "reserves" if isinstance(issuer.agent, BankAgent) else "cash"
         issuer.increase_flow("dividends", amount)
         issuer.decrease_stock(source, amount)
-        for _, holder, data in self.graph.edges(issuer, data=True):
-            dividend = amount * data["share"]
+        for _, holder in self.graph.edges(issuer):
+            dividend = amount * holder.share
             holder.increase_flow("dividends", dividend)
             holder.increase_stock("cash", dividend)
 
     def update_equity_holdings(self, issuer):
+        self.update_shares(issuer)
         new_equity = issuer.net_worth
         issuer.clear_stock("equity")
         issuer.increase_stock("equity", new_equity)
-        for _, holder, data in self.graph.edges(issuer, data=True):
-            value = new_equity * data["share"]
+        for _, holder in self.graph.edges(issuer):
+            value = new_equity * holder.share
             holder.clear_stock("equity")
             holder.increase_stock("equity", value)
 
+    def update_shares(self, issuer):
+        for _, holder in self.graph.edges(issuer):
+            holder.share = holder.equity / issuer.equity
+
+    
     def request_cash_advances(self, bank_role, amount):
         central_role = self.central_bank_role
         central_role.increase_stock("reserves", amount)
@@ -149,6 +157,7 @@ class CountrySpace(EcoSpace):
         issuer = self.add_equity_issuer(firm)
         self._distribute_firm_equity(issuer, founders)
         self._create_firm_market_roles(firm, tradable)
+        # self.update_shares(issuer)
         self.add_tax_payer(firm)
         self.model.firms.append(firm)
         return firm
@@ -161,7 +170,7 @@ class CountrySpace(EcoSpace):
             share = founder.desired_equity
             founder.increase_stock("equity", share)
             founder.decrease_stock("cash", share)
-            self.assign_equity_holder(issuer, founder, share / equity)
+            self.assign_equity_holder(issuer, founder)
 
     def _create_firm_market_roles(self, firm, tradable):
         self.markets["labor"].add_employer(firm)
@@ -189,7 +198,7 @@ class CountrySpace(EcoSpace):
             share = founder.desired_equity
             founder.increase_stock("equity", share)
             founder.decrease_stock("cash", share)
-            self.assign_equity_holder(issuer, founder, share / equity)
+            self.assign_equity_holder(issuer, founder)
 
     def _create_bank_market_roles(self, bank):
         self.markets["credit"].add_lender(bank)
