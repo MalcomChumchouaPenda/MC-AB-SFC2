@@ -36,9 +36,9 @@ def country(model):
 
 def test_firm_update_net_worth(firm, household, country):
     # Given
-    household.equity = firm.equity = firm.net_worth
-    issuer = country.add_equity_issuer(firm)
     holder = country.add_equity_holder(household)
+    holder.share = 1.0
+    issuer = country.add_equity_issuer(firm)
     country.assign_equity_holder(issuer, holder)
 
     # When
@@ -63,9 +63,9 @@ def bank(model):
 
 def test_bank_update_net_worth(bank, household, country):
     # Given
-    household.equity = bank.equity = bank.net_worth
-    issuer = country.add_equity_issuer(bank)
     holder = country.add_equity_holder(household)
+    holder.share = 1.0
+    issuer = country.add_equity_issuer(bank)
     country.assign_equity_holder(issuer, holder)
 
     # When

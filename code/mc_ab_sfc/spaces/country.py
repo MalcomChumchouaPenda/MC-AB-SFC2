@@ -90,7 +90,6 @@ class CountrySpace(EcoSpace):
         holder.equity_issuer = issuer
 
     def distribute_dividends(self, issuer, amount):
-        self.update_shares(issuer)
         source = "reserves" if isinstance(issuer.agent, BankAgent) else "cash"
         issuer.increase_flow("dividends", amount)
         issuer.decrease_stock(source, amount)
@@ -100,7 +99,6 @@ class CountrySpace(EcoSpace):
             holder.increase_stock("cash", dividend)
 
     def update_equity_holdings(self, issuer):
-        self.update_shares(issuer)
         new_equity = issuer.net_worth
         issuer.clear_stock("equity")
         issuer.increase_stock("equity", new_equity)
@@ -109,7 +107,7 @@ class CountrySpace(EcoSpace):
             holder.clear_stock("equity")
             holder.increase_stock("equity", value)
 
-    def update_shares(self, issuer):
+    def update_equity_shares(self, issuer):
         for _, holder in self.graph.edges(issuer):
             holder.share = holder.equity / issuer.equity
 
@@ -156,7 +154,7 @@ class CountrySpace(EcoSpace):
         issuer = self.add_equity_issuer(firm)
         self._distribute_firm_equity(issuer, founders)
         self._create_firm_market_roles(firm, tradable)
-        # self.update_shares(issuer)
+        # self.update_equity_shares(issuer)
         self.add_tax_payer(firm)
         self.model.firms.append(firm)
         return firm

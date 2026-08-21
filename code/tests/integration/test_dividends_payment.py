@@ -35,8 +35,8 @@ def country(model):
 
 def test_firm_pay_dividends(firm, household, country):
     # Given
-    firm.equity = household.equity = 1000
     holder = country.add_equity_holder(household)
+    holder.share = 1.0
     issuer = country.add_equity_issuer(firm)
     country.assign_equity_holder(issuer, holder)
 
@@ -62,8 +62,8 @@ def bank(model):
 
 def test_bank_pay_dividends(bank, household, country):
     # Given
-    bank.equity = household.equity = 500
     holder = country.add_equity_holder(household)
+    holder.share = 1.0
     issuer = country.add_equity_issuer(bank)
     country.assign_equity_holder(issuer, holder)
 

@@ -409,7 +409,7 @@ def test_updates_shares(country, issuer, holders):
     graph.add_edge(issuer, holders[1])
 
     # When
-    country.update_shares(issuer)
+    country.update_equity_shares(issuer)
 
     # Then
     assert holders[0].share == 0.7
@@ -422,7 +422,6 @@ def test_distributes_dividends_with_reserves(country, issuer, holders, monkeypat
     graph = country.graph
     graph.add_edge(issuer, holders[0])
     graph.add_edge(issuer, holders[1])
-    country.update_shares = Mock()
     monkeypatch.setattr("mc_ab_sfc.spaces.country.BankAgent", FakeBankAgent)
 
     # When
@@ -442,7 +441,6 @@ def test_distributes_dividends_with_cash(country, issuer, holders):
     graph = country.graph
     graph.add_edge(issuer, holders[0])
     graph.add_edge(issuer, holders[1])
-    country.update_shares = Mock()
 
     # When
     country.distribute_dividends(issuer, 200)
@@ -456,19 +454,6 @@ def test_distributes_dividends_with_cash(country, issuer, holders):
     holders[1].increase_stock.assert_called_with("cash", 80)
 
 
-def test_distributes_dividends_updates_shares(country, issuer, holders):
-    # Given
-    graph = country.graph
-    graph.add_edge(issuer, holders[0])
-    graph.add_edge(issuer, holders[1])
-    country.update_shares = Mock()
-
-    # When
-    country.distribute_dividends(issuer, 200)
-
-    # Then
-    country.update_shares.assert_called_once_with(issuer)
-
 
 def test_update_equity_holdings(country, issuer, holders):
     # Given
@@ -476,7 +461,6 @@ def test_update_equity_holdings(country, issuer, holders):
     graph.add_edge(issuer, holders[0])
     graph.add_edge(issuer, holders[1])
     issuer.net_worth = 1200
-    country.update_shares = Mock()
 
     # When
     country.update_equity_holdings(issuer)
@@ -489,20 +473,6 @@ def test_update_equity_holdings(country, issuer, holders):
     holders[1].clear_stock.assert_called_once_with("equity")
     holders[1].increase_stock.assert_called_once_with("equity", 480)
 
-
-def test_update_equity_holdings_updates_shares(country, issuer, holders):
-    # Given
-    graph = country.graph
-    graph.add_edge(issuer, holders[0])
-    graph.add_edge(issuer, holders[1])
-    issuer.net_worth = 1200
-    country.update_shares = Mock()
-
-    # When
-    country.update_equity_holdings(issuer)
-
-    # Then
-    country.update_shares.assert_called_once_with(issuer)
 
 
 class FakeHouseholdAgent:
