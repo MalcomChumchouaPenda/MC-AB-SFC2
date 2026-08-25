@@ -293,23 +293,22 @@ class Consumer:
 
     def write(self, t):
         nameWrite = self.folder + "/" + self.name + "Consumer.csv"
-        c = open(nameWrite, "a")
-        C = [
-            self.run,
-            self.ide,
-            t,
-            self.country,
-            self.omega,
-            self.l,
-            self.A,
-            self.y,
-            self.Consumption,
-            self.Investing,
-            self.Expenditure,
-        ]
-        writer = csv.writer(c)
-        writer.writerow(C)
-        c.close()
+        with open(nameWrite, "a") as file:
+            C = [
+                self.run,
+                self.ide,
+                t,
+                self.country,
+                self.omega,
+                self.l,
+                self.A,
+                self.y,
+                self.Consumption,
+                self.Investing,
+                self.Expenditure,
+            ]
+            writer = csv.writer(file)
+            writer.writerow(C)
 
     def orderBankDeposit(self):
         self.LbankDeposit = []

@@ -571,18 +571,17 @@ class Bank:
 
     def write(self, t, run):
         nameWrite = self.folder + "/" + self.name + "r" + str(run) + "Bank.csv"
-        b = open(nameWrite, "a")
-        B = [
-            run,
-            self.ide,
-            t,
-            self.country,
-            self.A,
-            self.profit,
-            self.Bonds,
-            self.Loan,
-            self.Deposit,
-        ]
-        writer = csv.writer(b)
-        writer.writerow(B)
-        b.close()
+        with open(nameWrite, "a") as file:
+            B = [
+                run,
+                self.ide,
+                t,
+                self.country,
+                self.A,
+                self.profit,
+                self.Bonds,
+                self.Loan,
+                self.Deposit,
+            ]
+            writer = csv.writer(file)
+            writer.writerow(B)

@@ -895,10 +895,10 @@ class Aggregator:
             self.firstCountry = "yes"
             self.WriteInitial()
         self.Lprint = self.DcountryCollectData[country]
-        c = open(self.nameCollect, "a")
-        writer = csv.writer(c)
-        writer.writerow(self.Lprint)
-        c.close()
+        with open(self.nameCollect, "a") as file:
+            writer = csv.writer(file)
+            writer.writerow(self.Lprint)
+            
 
     def WriteInitial(self):
         self.nameCollect = self.folder + "/" + self.name + "AggData.csv"
@@ -964,10 +964,9 @@ class Aggregator:
             "diffCreditFlow",
             "diffBondFlow",
         ]
-        c = open(self.nameCollect, "wb")
-        writer = csv.writer(c)
-        writer.writerow(L)
-        c.close()
+        with open(self.nameCollect, "w") as file:
+            writer = csv.writer(file)
+            writer.writerow(L)
         if self.printAgent == "yes":
             nameCollectFirm = self.folder + "/" + self.name + "Firm.csv"
             L = [
@@ -988,10 +987,9 @@ class Aggregator:
                 "A",
                 "revenue",
             ]
-            c = open(nameCollectFirm, "wb")
-            writer = csv.writer(c)
-            writer.writerow(L)
-            c.close()
+            with open(nameCollectFirm, "w") as file:
+                writer = csv.writer(file)
+                writer.writerow(L)
             nameCollectBank = self.folder + "/" + self.name + "Bank.csv"
             L = [
                 "run",
@@ -1004,10 +1002,9 @@ class Aggregator:
                 "Loan",
                 "Deposit",
             ]
-            c = open(nameCollectBank, "wb")
-            writer = csv.writer(c)
-            writer.writerow(L)
-            c.close()
+            with open(nameCollectBank, "w") as file:
+                writer = csv.writer(file)
+                writer.writerow(L)
 
     def checkNetWorth(
         self,

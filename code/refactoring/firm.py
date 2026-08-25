@@ -417,33 +417,32 @@ class Firm:
 
     def write(self, t, run):
         nameWrite = self.folder + "/" + self.name + "r" + str(run) + "Firm.csv"
-        f = open(nameWrite, "a")
-        x_prod = self.productionEffective
-        x_programmed = self.mind.xProducing
-        x_sold = self.xSold
-        p = self.price
-        revenue = x_sold * p
-        F = [
-            self.run,
-            self.ide,
-            t,
-            self.country,
-            self.phi,
-            self.profit,
-            p,
-            self.w,
-            self.l,
-            x_prod,
-            self.mind.xE,
-            x_sold,
-            self.inventory,
-            self.workForceNumberDesired,
-            self.A,
-            revenue,
-        ]
-        writer = csv.writer(f)
-        writer.writerow(F)
-        f.close()
+        with open(nameWrite, "a") as file:
+            x_prod = self.productionEffective
+            x_programmed = self.mind.xProducing
+            x_sold = self.xSold
+            p = self.price
+            revenue = x_sold * p
+            F = [
+                self.run,
+                self.ide,
+                t,
+                self.country,
+                self.phi,
+                self.profit,
+                p,
+                self.w,
+                self.l,
+                x_prod,
+                self.mind.xE,
+                x_sold,
+                self.inventory,
+                self.workForceNumberDesired,
+                self.A,
+                revenue,
+            ]
+            writer = csv.writer(file)
+            writer.writerow(F)
 
     def orderCreditor(self):
         self.Lcreditor = []
