@@ -24,7 +24,8 @@ from matchingConsumption import *
 from matchingLaborCapital import *
 from enterExit import *
 from aggregator import *
-#from aggregatorAle import *
+
+# from aggregatorAle import *
 from time import *
 import random
 from bank import *
@@ -37,185 +38,398 @@ from centralBankUnion import *
 from policy import *
 
 # parameter
-para=Parameter()
+para = Parameter()
 para.directory()
-printPa=PrintParameters(para.name,para.folder)
+printPa = PrintParameters(para.name, para.folder)
 
 for run in para.Lrun:
-    if para.weSeedRun=='yes':
-       random.seed(run) 
+    if para.weSeedRun == "yes":
+        random.seed(run)
     # initialization
-    printPa.printingPara(para,run)
-    ite=Initialize(para.ncountry,para.nconsumer,para.A,para.phi,\
-                   para.beta,para.folder,para.name,run,para.delta,\
-                   para.taxRatio,para.rDiscount,para.G,\
-                   para.cDisposableIncome,para.cWealth,para.liqPref,para.rDeposit,para.rBonds,\
-                   para.upsilon,para.maxPublicDeficit,para.xiBonds,para.ls,para.taxRatioMin,\
-                   para.taxRatioMax,para.gMin,para.gMax,para.w0,para.wBar) 
+    printPa.printingPara(para, run)
+    ite = Initialize(
+        para.ncountry,
+        para.nconsumer,
+        para.A,
+        para.phi,
+        para.beta,
+        para.folder,
+        para.name,
+        run,
+        para.delta,
+        para.taxRatio,
+        para.rDiscount,
+        para.G,
+        para.cDisposableIncome,
+        para.cWealth,
+        para.liqPref,
+        para.rDeposit,
+        para.rBonds,
+        para.upsilon,
+        para.maxPublicDeficit,
+        para.xiBonds,
+        para.ls,
+        para.taxRatioMin,
+        para.taxRatioMax,
+        para.gMin,
+        para.gMax,
+        para.w0,
+        para.wBar,
+    )
     ite.createCentralBank()
-    ite.createConsumer() 
+    ite.createConsumer()
     ite.createBasic()
-    ite.createEtat()  
-    name=para.name+'r'+str(run)
-    gloInnovation=GlobalInnovation(ite.Lcountry,para.phi)
- 
-    enEx=enterExit(ite.Lcountry,ite.McountryFirmMaxNumber,\
-                  para.folder,para.name,run,para.delta,para.A,\
-                  ite.McountryBankMaxNumber,para.probBank,para.minReserve,\
-                  para.rDiscount,para.xi,para.dividendRate,para.iota,para.rDeposit,\
-                  para.upsilon,para.gamma,para.deltaInnovation,para.mu1,\
-                  para.propTradable,para.Fcost,para.ni,para.minMarkUp,\
-                  para.iotaE,para.theta,para.sigma)
-                 
-     
-    maConsumption=MatchingConsumption(ite.Lcountry,para.bound,para.propTradable)
-    maLaborCapital=MatchingLaborCapital(para.bound)
-    aggrega=Aggregator(ite.Lcountry,name,para.folder,para.timeCollectingStart,\
-                            para.LtimeCollecting,para.printAgent)
-    maCredit=MatchingCredit() 
-    maBonds=MatchingBonds()
-    maDeposit=MatchingDeposit(ite.Lcountry)  
-    aggrega.basicL(ite.McountryConsumer) 
-    centralBankUnion=CentralBankUnion(para.rDiscount,para.rDeposit,para.zeta,para.rBar,para.csi,para.csiDP,para.inflationTarget)
-    maDeposit.creatingAccount(ite.McountryConsumer,ite.McountryFirm,ite.McountryBank,ite.McountryCentralBank) 
-    poli=policy(para.startingPolicy,para.policyKind,para.maxPublicDeficitAusterity,\
-                para.maxPublicDeficit)
-  
-    
+    ite.createEtat()
+    name = para.name + "r" + str(run)
+    gloInnovation = GlobalInnovation(ite.Lcountry, para.phi)
+
+    enEx = enterExit(
+        ite.Lcountry,
+        ite.McountryFirmMaxNumber,
+        para.folder,
+        para.name,
+        run,
+        para.delta,
+        para.A,
+        ite.McountryBankMaxNumber,
+        para.probBank,
+        para.minReserve,
+        para.rDiscount,
+        para.xi,
+        para.dividendRate,
+        para.iota,
+        para.rDeposit,
+        para.upsilon,
+        para.gamma,
+        para.deltaInnovation,
+        para.mu1,
+        para.propTradable,
+        para.Fcost,
+        para.ni,
+        para.minMarkUp,
+        para.iotaE,
+        para.theta,
+        para.sigma,
+    )
+
+    maConsumption = MatchingConsumption(ite.Lcountry, para.bound, para.propTradable)
+    maLaborCapital = MatchingLaborCapital(para.bound)
+    aggrega = Aggregator(
+        ite.Lcountry,
+        name,
+        para.folder,
+        para.timeCollectingStart,
+        para.LtimeCollecting,
+        para.printAgent,
+    )
+    maCredit = MatchingCredit()
+    maBonds = MatchingBonds()
+    maDeposit = MatchingDeposit(ite.Lcountry)
+    aggrega.basicL(ite.McountryConsumer)
+    centralBankUnion = CentralBankUnion(
+        para.rDiscount,
+        para.rDeposit,
+        para.zeta,
+        para.rBar,
+        para.csi,
+        para.csiDP,
+        para.inflationTarget,
+    )
+    maDeposit.creatingAccount(
+        ite.McountryConsumer,
+        ite.McountryFirm,
+        ite.McountryBank,
+        ite.McountryCentralBank,
+    )
+    poli = policy(
+        para.startingPolicy,
+        para.policyKind,
+        para.maxPublicDeficitAusterity,
+        para.maxPublicDeficit,
+    )
+
     # here we go
     for t in range(para.ncycle):
         print()
-        print('name ', para.name, '---- run', run, ' --- t ',  t)
+        print("name ", para.name, "---- run", run, " --- t ", t)
 
         for country in ite.McountryFirm:
-            for firm in ite.McountryFirm[country]: 
-                ite.McountryFirm[country][firm].learning()  
-                ite.McountryFirm[country][firm].wageOffered(aggrega.McountryAvPrice,\
-                                   aggrega.McountryUnemployement,para.nconsumer,aggrega.DcountryAvWage)          
-                ite.McountryFirm[country][firm].productionDesired(ite.McountryBank,ite.McountryCentralBank,t,aggrega.McountryAvPrice)
-                         
-        maCredit.creditNetworkEvolution(ite.McountryFirm,ite.McountryBank,ite.McountryCentralBank)
+            for firm in ite.McountryFirm[country]:
+                ite.McountryFirm[country][firm].learning()
+                ite.McountryFirm[country][firm].wageOffered(
+                    aggrega.McountryAvPrice,
+                    aggrega.McountryUnemployement,
+                    para.nconsumer,
+                    aggrega.DcountryAvWage,
+                )
+                ite.McountryFirm[country][firm].productionDesired(
+                    ite.McountryBank,
+                    ite.McountryCentralBank,
+                    t,
+                    aggrega.McountryAvPrice,
+                )
 
-        for country in ite.McountryBank: 
+        maCredit.creditNetworkEvolution(
+            ite.McountryFirm, ite.McountryBank, ite.McountryCentralBank
+        )
+
+        for country in ite.McountryBank:
             for bank in ite.McountryBank[country]:
-                ite.McountryBank[country][bank].reservingCompulsory(ite.McountryCentralBank)
-        
-        maLaborCapital.working(ite.McountryFirm,ite.McountryConsumer,ite.McountryEtat,\
-                               ite.McountryBank,ite.McountryCentralBank,aggrega.McountryUnemployement)
+                ite.McountryBank[country][bank].reservingCompulsory(
+                    ite.McountryCentralBank
+                )
+
+        maLaborCapital.working(
+            ite.McountryFirm,
+            ite.McountryConsumer,
+            ite.McountryEtat,
+            ite.McountryBank,
+            ite.McountryCentralBank,
+            aggrega.McountryUnemployement,
+        )
 
         for country in ite.McountryFirm:
-            for firm in ite.McountryFirm[country]: 
-                ite.McountryFirm[country][firm].effectiveSelling(gloInnovation.DglobalPhiNotTradable,aggrega.avPhiGlobalTradable,\
-                                           aggrega.avPriceGlobalTradable,aggrega.McountryAvPriceNotTradable)
-   
-        for country in ite.McountryConsumer:
-            for consumer in ite.McountryConsumer[country]:             
-                ite.McountryConsumer[country][consumer].income(ite.McountryBank,ite.McountryCentralBank)      
-
-        for etat in ite.McountryEtat:
-            ite.McountryEtat[etat].expectingTaxation(ite.McountryConsumer,ite.McountryCentralBank,aggrega.McountryUnemployement)
-
-        poli.implementingPolicy(t,ite.McountryEtat,aggrega.McountryY,gloInnovation.DglobalPhi,aggrega.DcountryAvWage,\
-                                aggrega.McountryAvPrice,aggrega.McountryUnemployement,aggrega.DcumulativeDTBC,aggrega.DcountryTradeBalance) 
-
-        for etat in ite.McountryEtat:
-            ite.McountryEtat[etat].governmentPlannedExpenditure(ite.McountryConsumer,\
-                                                  ite.McountryBank,ite.McountryCentralBank,\
-                                                  aggrega.McountryAvPrice,aggrega.McountryY,t,\
-                                                  aggrega.DcountryAvWage,poli.policy,\
-                                                  aggrega.DcountryTradeBalance,aggrega.McountryUnemployement,gloInnovation.DglobalPhi)
-
-        maBonds.allocatingBonds(ite.McountryBank,ite.McountryCentralBank,ite.McountryEtat) 
-
-        for etat in ite.McountryEtat:
-           ite.McountryEtat[etat].taxationConsumer(ite.McountryConsumer,ite.McountryBank,ite.McountryCentralBank) 
-           
-        for etat in ite.McountryEtat:
-            ite.McountryEtat[etat].redistributionConsumer(ite.McountryConsumer,ite.McountryBank,ite.McountryCentralBank,aggrega.McountryAvPrice,t) 
+            for firm in ite.McountryFirm[country]:
+                ite.McountryFirm[country][firm].effectiveSelling(
+                    gloInnovation.DglobalPhiNotTradable,
+                    aggrega.avPhiGlobalTradable,
+                    aggrega.avPriceGlobalTradable,
+                    aggrega.McountryAvPriceNotTradable,
+                )
 
         for country in ite.McountryConsumer:
             for consumer in ite.McountryConsumer[country]:
-                ite.McountryConsumer[country][consumer].consumptionDemand(ite.McountryBank,ite.McountryCentralBank,aggrega.DcountryFailureProbability) 
-             
-        maConsumption.consuming(ite.McountryConsumer,ite.McountryFirm,t,ite.McountryEtat,ite.McountryBank,ite.McountryCentralBank\
-                                ,aggrega.McountryAvPrice,aggrega.avPriceGlobalTradable,\
-                                 aggrega.McountryAvPriceNotTradable)    
-
-        for country in ite.McountryFirm:
-            for firm in ite.McountryFirm[country]:
-                ite.McountryFirm[country][firm].changingInventory()   
-
-        if para.printAgent=='yes':     
-           for country in ite.McountryFirm:
-               for firm in ite.McountryFirm[country]:
-                   ite.McountryFirm[country][firm].write(t,run)
-           for country in ite.McountryBank:
-               for bank in ite.McountryBank[country]:  
-                   ite.McountryBank[country][bank].write(t,run)
-    
-        aggrega.income(ite.McountryConsumer,t,\
-                       run,ite.McountryFirm,ite.McountryEtat,ite.McountryBank,ite.McountryCentralBank,\
-                       gloInnovation.DglobalPhi,enEx.DcountryFirmEnter,enEx.DcountryFirmExit,\
-                       enEx.DcountryBankEnter,enEx.DcountryBankExit,gloInnovation.DglobalPhiTradable,\
-                       gloInnovation.DglobalPhiNotTradable,maCredit.creditCapitalInflow,maCredit.creditCapitalOutflow,
-                       maBonds.creditBondInflow,maBonds.creditBondOutflow,enEx.DcountryEnterValue) 
-
-        gloInnovation.spillover(ite.McountryFirm,t)
-       
-        for country in ite.McountryFirm:
-            for firm in ite.McountryFirm[country]:
-                ite.McountryFirm[country][firm].existence(ite.McountryBank,ite.McountryCentralBank)
-           
-        for etat in ite.McountryEtat:
-            ite.McountryEtat[etat].taxationFirm(ite.McountryFirm,ite.McountryBank,ite.McountryCentralBank)
-        
-        for country in ite.McountryFirm:
-            for firm in ite.McountryFirm[country]:
-                ite.McountryFirm[country][firm].distributingDividends(ite.McountryConsumer,ite.McountryBank,ite.McountryCentralBank)
-           
-        enEx.exitFirm(ite.McountryFirm,ite.McountryBank,ite.McountryCentralBank)
-            
-        for country in ite.McountryBank:
-            for bank in ite.McountryBank[country]:
-                ite.McountryBank[country][bank].existence(ite.McountryConsumer,ite.McountryFirm,\
-                                      ite.McountryCentralBank,ite.McountryEtat[country].rBonds,ite.McountryEtat,aggrega.DcountryAvWage)
+                ite.McountryConsumer[country][consumer].income(
+                    ite.McountryBank, ite.McountryCentralBank
+                )
 
         for etat in ite.McountryEtat:
-            ite.McountryEtat[etat].taxationBank(ite.McountryBank,ite.McountryCentralBank)
+            ite.McountryEtat[etat].expectingTaxation(
+                ite.McountryConsumer,
+                ite.McountryCentralBank,
+                aggrega.McountryUnemployement,
+            )
+
+        poli.implementingPolicy(
+            t,
+            ite.McountryEtat,
+            aggrega.McountryY,
+            gloInnovation.DglobalPhi,
+            aggrega.DcountryAvWage,
+            aggrega.McountryAvPrice,
+            aggrega.McountryUnemployement,
+            aggrega.DcumulativeDTBC,
+            aggrega.DcountryTradeBalance,
+        )
+
+        for etat in ite.McountryEtat:
+            ite.McountryEtat[etat].governmentPlannedExpenditure(
+                ite.McountryConsumer,
+                ite.McountryBank,
+                ite.McountryCentralBank,
+                aggrega.McountryAvPrice,
+                aggrega.McountryY,
+                t,
+                aggrega.DcountryAvWage,
+                poli.policy,
+                aggrega.DcountryTradeBalance,
+                aggrega.McountryUnemployement,
+                gloInnovation.DglobalPhi,
+            )
+
+        maBonds.allocatingBonds(
+            ite.McountryBank, ite.McountryCentralBank, ite.McountryEtat
+        )
+
+        for etat in ite.McountryEtat:
+            ite.McountryEtat[etat].taxationConsumer(
+                ite.McountryConsumer, ite.McountryBank, ite.McountryCentralBank
+            )
+
+        for etat in ite.McountryEtat:
+            ite.McountryEtat[etat].redistributionConsumer(
+                ite.McountryConsumer,
+                ite.McountryBank,
+                ite.McountryCentralBank,
+                aggrega.McountryAvPrice,
+                t,
+            )
+
+        for country in ite.McountryConsumer:
+            for consumer in ite.McountryConsumer[country]:
+                ite.McountryConsumer[country][consumer].consumptionDemand(
+                    ite.McountryBank,
+                    ite.McountryCentralBank,
+                    aggrega.DcountryFailureProbability,
+                )
+
+        maConsumption.consuming(
+            ite.McountryConsumer,
+            ite.McountryFirm,
+            t,
+            ite.McountryEtat,
+            ite.McountryBank,
+            ite.McountryCentralBank,
+            aggrega.McountryAvPrice,
+            aggrega.avPriceGlobalTradable,
+            aggrega.McountryAvPriceNotTradable,
+        )
+
+        for country in ite.McountryFirm:
+            for firm in ite.McountryFirm[country]:
+                ite.McountryFirm[country][firm].changingInventory()
+
+        if para.printAgent == "yes":
+            for country in ite.McountryFirm:
+                for firm in ite.McountryFirm[country]:
+                    ite.McountryFirm[country][firm].write(t, run)
+            for country in ite.McountryBank:
+                for bank in ite.McountryBank[country]:
+                    ite.McountryBank[country][bank].write(t, run)
+
+        aggrega.income(
+            ite.McountryConsumer,
+            t,
+            run,
+            ite.McountryFirm,
+            ite.McountryEtat,
+            ite.McountryBank,
+            ite.McountryCentralBank,
+            gloInnovation.DglobalPhi,
+            enEx.DcountryFirmEnter,
+            enEx.DcountryFirmExit,
+            enEx.DcountryBankEnter,
+            enEx.DcountryBankExit,
+            gloInnovation.DglobalPhiTradable,
+            gloInnovation.DglobalPhiNotTradable,
+            maCredit.creditCapitalInflow,
+            maCredit.creditCapitalOutflow,
+            maBonds.creditBondInflow,
+            maBonds.creditBondOutflow,
+            enEx.DcountryEnterValue,
+        )
+
+        gloInnovation.spillover(ite.McountryFirm, t)
+
+        for country in ite.McountryFirm:
+            for firm in ite.McountryFirm[country]:
+                ite.McountryFirm[country][firm].existence(
+                    ite.McountryBank, ite.McountryCentralBank
+                )
+
+        for etat in ite.McountryEtat:
+            ite.McountryEtat[etat].taxationFirm(
+                ite.McountryFirm, ite.McountryBank, ite.McountryCentralBank
+            )
+
+        for country in ite.McountryFirm:
+            for firm in ite.McountryFirm[country]:
+                ite.McountryFirm[country][firm].distributingDividends(
+                    ite.McountryConsumer, ite.McountryBank, ite.McountryCentralBank
+                )
+
+        enEx.exitFirm(ite.McountryFirm, ite.McountryBank, ite.McountryCentralBank)
 
         for country in ite.McountryBank:
             for bank in ite.McountryBank[country]:
-                ite.McountryBank[country][bank].distributingDividends(ite.McountryConsumer,ite.McountryBank,ite.McountryCentralBank)
+                ite.McountryBank[country][bank].existence(
+                    ite.McountryConsumer,
+                    ite.McountryFirm,
+                    ite.McountryCentralBank,
+                    ite.McountryEtat[country].rBonds,
+                    ite.McountryEtat,
+                    aggrega.DcountryAvWage,
+                )
 
-        enEx.exitBank(ite.McountryConsumer,ite.McountryFirm,ite.McountryBank,ite.McountryCentralBank,ite.McountryEtat)
-           
-        enEx.enter(ite.McountryConsumer,ite.McountryFirm,t,ite.McountryBank,ite.McountryCentralBank,aggrega.McountryAvPrice) 
-    
+        for etat in ite.McountryEtat:
+            ite.McountryEtat[etat].taxationBank(
+                ite.McountryBank, ite.McountryCentralBank
+            )
+
+        for country in ite.McountryBank:
+            for bank in ite.McountryBank[country]:
+                ite.McountryBank[country][bank].distributingDividends(
+                    ite.McountryConsumer, ite.McountryBank, ite.McountryCentralBank
+                )
+
+        enEx.exitBank(
+            ite.McountryConsumer,
+            ite.McountryFirm,
+            ite.McountryBank,
+            ite.McountryCentralBank,
+            ite.McountryEtat,
+        )
+
+        enEx.enter(
+            ite.McountryConsumer,
+            ite.McountryFirm,
+            t,
+            ite.McountryBank,
+            ite.McountryCentralBank,
+            aggrega.McountryAvPrice,
+        )
+
         for country in ite.McountryConsumer:
             for consumer in ite.McountryConsumer[country]:
                 ite.McountryConsumer[country][consumer].ownershipCheck(ite.McountryBank)
 
-        maDeposit.creatingAccount(ite.McountryConsumer,ite.McountryFirm,ite.McountryBank,ite.McountryCentralBank)
+        maDeposit.creatingAccount(
+            ite.McountryConsumer,
+            ite.McountryFirm,
+            ite.McountryBank,
+            ite.McountryCentralBank,
+        )
 
-        maDeposit.allocatingConsumerDeposit(ite.McountryConsumer,ite.McountryBank)
- 
+        maDeposit.allocatingConsumerDeposit(ite.McountryConsumer, ite.McountryBank)
+
         for country in ite.McountryCentralBank:
-            ite.McountryCentralBank[country].balancing(ite.McountryConsumer,ite.McountryFirm,ite.McountryEtat,centralBankUnion,aggrega.DTBC) 
+            ite.McountryCentralBank[country].balancing(
+                ite.McountryConsumer,
+                ite.McountryFirm,
+                ite.McountryEtat,
+                centralBankUnion,
+                aggrega.DTBC,
+            )
 
-        aggrega.checkCA(ite.McountryConsumer,t,run,ite.McountryFirm,ite.McountryEtat,ite.McountryBank,ite.McountryCentralBank,
-                 maCredit.creditCapitalInflow,maCredit.creditCapitalOutflow,
-                 maBonds.creditBondInflow,maBonds.creditBondOutflow,enEx.DcountryFirmGone,enEx.DcountryBankGone,\
-                 enEx.DcountryForeignBankLosses,t)
-       
-        aggrega.checkNetWorth(ite.McountryConsumer,ite.McountryFirm,ite.McountryBank,ite.McountryCentralBank,ite.McountryEtat,\
-                                   enEx.DpastBondExit) 
-        
-        centralBankUnion.taylorRule(aggrega.McountryInflation,aggrega.McountryUnemployement,ite.McountryBank,ite.McountryCentralBank,t,ite.McountryConsumer)
-  
-        if ite.breaking=='yes':
-              break 
-    
-        
-print()        
-print( 'the end')       
-      
+        aggrega.checkCA(
+            ite.McountryConsumer,
+            t,
+            run,
+            ite.McountryFirm,
+            ite.McountryEtat,
+            ite.McountryBank,
+            ite.McountryCentralBank,
+            maCredit.creditCapitalInflow,
+            maCredit.creditCapitalOutflow,
+            maBonds.creditBondInflow,
+            maBonds.creditBondOutflow,
+            enEx.DcountryFirmGone,
+            enEx.DcountryBankGone,
+            enEx.DcountryForeignBankLosses,
+            t,
+        )
+
+        aggrega.checkNetWorth(
+            ite.McountryConsumer,
+            ite.McountryFirm,
+            ite.McountryBank,
+            ite.McountryCentralBank,
+            ite.McountryEtat,
+            enEx.DpastBondExit,
+        )
+
+        centralBankUnion.taylorRule(
+            aggrega.McountryInflation,
+            aggrega.McountryUnemployement,
+            ite.McountryBank,
+            ite.McountryCentralBank,
+            t,
+            ite.McountryConsumer,
+        )
+
+        if ite.breaking == "yes":
+            break
+
+
+print()
+print("the end")
