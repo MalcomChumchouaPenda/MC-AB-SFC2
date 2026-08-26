@@ -1,4 +1,3 @@
-
 from .lender import LenderRole
 from .borrower import BorrowerRole
 
