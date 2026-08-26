@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import Mock
 from mc_ab_sfc.spaces import CountrySpace
-from mc_ab_sfc.agents import Household, Firm, BankAgent, GovernmentAgent
+from mc_ab_sfc.agents import Household, Firm, Bank, Government
 
 
 @pytest.fixture
@@ -14,7 +14,7 @@ def model():
 @pytest.fixture
 def govt(model):
     # Given
-    govt = GovernmentAgent(model)
+    govt = Government(model)
     govt.tax_rate = 0.10
     return govt
 
@@ -80,7 +80,7 @@ def test_firm_pay_taxes(firm, govt, country):
 @pytest.fixture
 def bank(model):
     # Given
-    bank = BankAgent(model)
+    bank = Bank(model)
     bank.reserves = 1000
     bank.taxes_payable = 100
     return bank

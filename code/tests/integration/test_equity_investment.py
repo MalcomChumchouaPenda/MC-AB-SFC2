@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import Mock
-from mc_ab_sfc.agents import Household, Firm, BankAgent, GovernmentAgent
+from mc_ab_sfc.agents import Household, Firm, Bank, Government
 from mc_ab_sfc.spaces import (
     CountrySpace,
     MonetaryUnionSpace,
@@ -38,13 +38,13 @@ def founders(model):
 
 @pytest.fixture
 def govt(model):
-    govt = GovernmentAgent(model)
+    govt = Government(model)
     return govt
 
 
 @pytest.fixture
 def bank(model):
-    return BankAgent(model)
+    return Bank(model)
 
 
 @pytest.fixture
@@ -134,7 +134,7 @@ def test_household_creates_new_bank(country, founders, govt):
     founder1.invest_equity()
 
     # Then
-    assert isinstance(banks[0], BankAgent)
+    assert isinstance(banks[0], Bank)
     assert banks[0].equity == 500
     assert banks[0].reserves == 500
     assert founder1.equity == 300

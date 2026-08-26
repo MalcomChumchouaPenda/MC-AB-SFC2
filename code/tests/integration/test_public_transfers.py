@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import Mock, PropertyMock
 from mc_ab_sfc.spaces import CountrySpace
-from mc_ab_sfc.agents import GovernmentAgent, CentralBank, Household
+from mc_ab_sfc.agents import Government, CentralBank, Household
 
 
 @pytest.fixture
@@ -14,7 +14,7 @@ def model():
 @pytest.fixture
 def govt(model):
     # Given
-    return GovernmentAgent(model)
+    return Government(model)
 
 
 @pytest.fixture

@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import Mock, PropertyMock
 from mc_ab_sfc.spaces import CountrySpace
-from mc_ab_sfc.agents import Firm, BankAgent, GovernmentAgent
+from mc_ab_sfc.agents import Firm, Bank, Government
 
 
 @pytest.fixture
@@ -15,7 +15,7 @@ def model():
 @pytest.fixture
 def govt(model):
     # Given
-    govt = GovernmentAgent(model)
+    govt = Government(model)
     govt.tax_rate = 0.25
     return govt
 
@@ -60,8 +60,8 @@ def test_firm_compute_profit_distribution(firm, govt, country):
 @pytest.fixture
 def bank(model, monkeypatch):
     # Given
-    monkeypatch.setattr(BankAgent, "bond_interests", PropertyMock(return_value=20))
-    bank = BankAgent(model)
+    monkeypatch.setattr(Bank, "bond_interests", PropertyMock(return_value=20))
+    bank = Bank(model)
     bank.loan_interest = 100
     bank.reserve_interest = 10
     bank.bad_debt = 10

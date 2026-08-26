@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import Mock, PropertyMock
-from mc_ab_sfc.agents.government import GovernmentAgent
+from mc_ab_sfc.agents.government import Government
 
 # ---------------------------------------------------
 # ARCHITECTURE TESTS
@@ -12,14 +12,14 @@ def test_is_eco_agent():
     from mc_ab_sfc.base import EcoAgent
 
     # Assert
-    assert issubclass(GovernmentAgent, EcoAgent)
+    assert issubclass(Government, EcoAgent)
 
 
 @pytest.fixture
 def govt():
     # Given
     model = Mock()
-    govt = GovernmentAgent(model)
+    govt = Government(model)
     govt.setup()
     return govt
 
@@ -106,8 +106,8 @@ def govt_with_bond_interests(monkeypatch):
     # Given
     model = Mock()
     interests_prop = PropertyMock()
-    monkeypatch.setattr(GovernmentAgent, "bond_interests", interests_prop)
-    govt = GovernmentAgent(model)
+    monkeypatch.setattr(Government, "bond_interests", interests_prop)
+    govt = Government(model)
     return govt, interests_prop
 
 
@@ -221,7 +221,7 @@ def govt_for_policy():
     model = Mock()
     model.p.dmax = 0.05
     model.p.delta = 0.10
-    govt = GovernmentAgent(model)
+    govt = Government(model)
     govt.tax_rate = 0.20
     govt.gdp = 1000
     govt.public_spending = 100
@@ -323,8 +323,8 @@ def govt_with_bonds(monkeypatch):
     # Given
     model = Mock()
     bonds_prop = PropertyMock()
-    monkeypatch.setattr(GovernmentAgent, "bonds", bonds_prop)
-    govt = GovernmentAgent(model)
+    monkeypatch.setattr(Government, "bonds", bonds_prop)
+    govt = Government(model)
     return govt, bonds_prop
 
 
@@ -373,7 +373,7 @@ def test_calc_not_new_bonds_with_enough_bonds(govt_with_bonds):
 def govt_as_bond_supplier():
     # Given
     model = Mock()
-    govt = GovernmentAgent(model)
+    govt = Government(model)
     govt.bond_supply = 0
     govt.calc_new_debt = Mock(return_value=0)
     govt.calc_new_bonds = Mock(return_value=0)
@@ -451,7 +451,7 @@ def test_calc_bond_rate(govt_with_bonds):
 @pytest.fixture
 def govt_as_deposit_guarantee():
     # Given
-    govt = GovernmentAgent(model=Mock())
+    govt = Government(model=Mock())
     govt.bond_supply = 0
     govt.roles["deposit_guarantee"] = Mock()
     return govt
@@ -506,7 +506,7 @@ def test_reimburse_deposits(govt_as_deposit_guarantee):
 def govt_with_history():
     # Given
     model = Mock()
-    govt = GovernmentAgent(model)
+    govt = Government(model)
     govt.roles["government"] = Mock()
     return govt
 

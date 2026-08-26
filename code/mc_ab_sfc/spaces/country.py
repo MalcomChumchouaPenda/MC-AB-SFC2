@@ -1,5 +1,5 @@
 from ..base import EcoSpace
-from ..agents import Firm, BankAgent, Household
+from ..agents import Firm, Bank, Household
 from ..roles import (
     GovernmentRole,
     TaxPayerRole,
@@ -67,7 +67,7 @@ class CountrySpace(EcoSpace):
         govt_role = self.government_role
         govt_role.increase_stock("reserves", amount)
         govt_role.increase_flow("taxes", amount)
-        if isinstance(tax_payer.agent, BankAgent):
+        if isinstance(tax_payer.agent, Bank):
             tax_payer.decrease_stock("reserves", amount)
             tax_payer.increase_flow("taxes", amount)
         else:
@@ -76,7 +76,7 @@ class CountrySpace(EcoSpace):
 
     def add_equity_issuer(self, agent):
         role = self.add_role(EquityIssuerRole, agent, "equity_issuer")
-        if isinstance(agent, BankAgent):
+        if isinstance(agent, Bank):
             self.bank_roles.append(role)
         else:
             self.firm_roles.append(role)
@@ -90,7 +90,7 @@ class CountrySpace(EcoSpace):
         holder.equity_issuer = issuer
 
     def distribute_dividends(self, issuer, amount):
-        source = "reserves" if isinstance(issuer.agent, BankAgent) else "cash"
+        source = "reserves" if isinstance(issuer.agent, Bank) else "cash"
         issuer.increase_flow("dividends", amount)
         issuer.decrease_stock(source, amount)
         for _, holder in self.graph.edges(issuer):
@@ -179,7 +179,7 @@ class CountrySpace(EcoSpace):
             self.markets["goods"].add_supplier(firm)
 
     def create_bank(self, founders):
-        bank = BankAgent(self.model)
+        bank = Bank(self.model)
         issuer = self.add_equity_issuer(bank)
         self._distribute_bank_equity(issuer, founders)
         self._create_bank_market_roles(bank)

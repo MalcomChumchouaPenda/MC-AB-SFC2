@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import Mock
-from mc_ab_sfc.agents import BankAgent, Firm
+from mc_ab_sfc.agents import Bank, Firm
 from mc_ab_sfc.spaces import DepositMarket, CountrySpace
 
 
@@ -15,7 +15,7 @@ def model():
 @pytest.fixture
 def bank(model):
     # Given
-    bank = BankAgent(model)
+    bank = Bank(model)
     bank.deposits = 2000
     return bank
 

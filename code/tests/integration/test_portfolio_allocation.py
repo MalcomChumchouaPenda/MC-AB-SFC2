@@ -2,7 +2,7 @@ import math
 import pytest
 from unittest.mock import Mock
 from mc_ab_sfc.spaces import CountrySpace, DepositMarket
-from mc_ab_sfc.agents import Household, BankAgent
+from mc_ab_sfc.agents import Household, Bank
 
 
 @pytest.fixture
@@ -28,7 +28,7 @@ def household(model):
 @pytest.fixture
 def bank(model):
     # Given
-    bank = BankAgent(model)
+    bank = Bank(model)
     bank.deposit_rate = 0.05
     return bank
 

@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import Mock
-from mc_ab_sfc.agents import BankAgent, CentralBank, GovernmentAgent
+from mc_ab_sfc.agents import Bank, CentralBank, Government
 from mc_ab_sfc.spaces import BondMarket
 
 
@@ -17,7 +17,7 @@ def model():
 @pytest.fixture
 def govt(model):
     # Given
-    govt = GovernmentAgent(model)
+    govt = Government(model)
     govt.gdp = 1000
     govt.budget_deficit = 200
     govt.prev_budget_surplus = 50
@@ -27,7 +27,7 @@ def govt(model):
 @pytest.fixture
 def bank(model):
     # Given
-    bank = BankAgent(model)
+    bank = Bank(model)
     bank.deposits = 1000
     bank.reserves = 300
     return bank

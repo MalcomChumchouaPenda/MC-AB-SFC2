@@ -1,7 +1,7 @@
 import math
 import pytest
 from unittest.mock import Mock
-from mc_ab_sfc.agents import BankAgent, CentralBank
+from mc_ab_sfc.agents import Bank, CentralBank
 from mc_ab_sfc.spaces import CountrySpace
 
 
@@ -25,7 +25,7 @@ def central_bank(model):
 @pytest.fixture
 def bank(model):
     # Given
-    bank = BankAgent(model)
+    bank = Bank(model)
     bank.deposits = 1000
     bank.reserves = 50
     return bank

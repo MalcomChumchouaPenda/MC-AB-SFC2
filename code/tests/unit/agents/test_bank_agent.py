@@ -1,7 +1,7 @@
 import math
 import pytest
 from unittest.mock import Mock, PropertyMock
-from mc_ab_sfc.agents.bank import BankAgent
+from mc_ab_sfc.agents.bank import Bank
 
 # ---------------------------------------------------
 # ARCHITECTURE TESTS
@@ -13,14 +13,14 @@ def test_is_eco_agent():
     from mc_ab_sfc.base import EcoAgent
 
     # Assert
-    assert issubclass(BankAgent, EcoAgent)
+    assert issubclass(Bank, EcoAgent)
 
 
 @pytest.fixture
 def bank():
     # Given
     model = Mock()
-    bank = BankAgent(model)
+    bank = Bank(model)
     bank.setup()
     return bank
 
@@ -153,7 +153,7 @@ def bank_as_lender():
     # Given
     borrowers = [Mock(loan_demand=100) for _ in range(5)]
     lender = Mock(loan_applicants=borrowers)
-    bank = BankAgent(model=Mock())
+    bank = Bank(model=Mock())
     bank.roles["lender"] = lender
     bank.calc_loan_rate = Mock(return_value=0.02)
     bank.calc_loan_probability = Mock(return_value=0.4)
@@ -236,7 +236,7 @@ def test_grant_loans_cleans_loan_applicants_list(bank_as_lender):
 def bank_in_banksystem():
     model = Mock()
     model.p.mu2 = 0.1
-    bank = BankAgent(model)
+    bank = Bank(model)
     bank.roles["commercial_bank"] = Mock()
     return bank
 
@@ -273,7 +273,7 @@ def test_calc_bond_purchases_probability():
     # Given
     model = Mock()
     model.p.iota_b = 2
-    bank = BankAgent(model)
+    bank = Bank(model)
     issuer = Mock(bonds=500, gdp=1000)
 
     # When
@@ -324,7 +324,7 @@ def bond_issuers():
 @pytest.fixture
 def bank_as_bond_buyer(bond_issuers):
     model = Mock()
-    bank = BankAgent(model)
+    bank = Bank(model)
     bank.calc_bond_purchases_probability = Mock(return_value=0)
     bank.calc_excess_reserves = Mock(return_value=0)
     bank.find_bond_issuers = Mock(return_value=bond_issuers)
@@ -366,7 +366,7 @@ def test_buy_bonds_with_excess_reserves(bank_as_bond_buyer, bond_issuers):
 @pytest.fixture
 def interest_props(monkeypatch):
     bond_interest = PropertyMock()
-    monkeypatch.setattr(BankAgent, "bond_interests", bond_interest)
+    monkeypatch.setattr(Bank, "bond_interests", bond_interest)
     return bond_interest
 
 
@@ -374,7 +374,7 @@ def test_calc_profit(interest_props):
     # Given
     bond_interest = interest_props
     bond_interest.return_value = 30
-    bank = BankAgent(model=Mock())
+    bank = Bank(model=Mock())
     bank.loan_interest = 100
     bank.reserve_interest = 10
     bank.bad_debt = 20
@@ -393,7 +393,7 @@ def test_calc_taxes(profit, expected):
     # Given
     role = Mock()
     role.get_tax_rate.return_value = 0.20
-    bank = BankAgent(model=Mock())
+    bank = Bank(model=Mock())
     bank.roles["tax_payer"] = role
     bank.profit = profit
 
@@ -408,7 +408,7 @@ def test_calc_dividends():
     # Given
     model = Mock()
     model.p.rho = 0.5
-    bank = BankAgent(model)
+    bank = Bank(model)
     bank.profit = 100
     bank.taxes_payable = 20
 
@@ -515,7 +515,7 @@ def bank_before_exit():
     issuer = Mock()
     issuer.get_average_wage.return_value = 100
     model = Mock()
-    bank = BankAgent(model)
+    bank = Bank(model)
     bank.roles = {"equity_issuer": issuer}
     return bank
 

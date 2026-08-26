@@ -272,7 +272,7 @@ def test_add_equity_issuer_creates_appropriate_role(country_with_roles, monkeypa
     assert isinstance(issuer_role, FakeIssuerRole)
 
 
-class FakeBankAgent:
+class FakeBank:
     def __init__(self, *args, **kwargs):
         self.args = args
         self.kwargs = kwargs
@@ -280,10 +280,10 @@ class FakeBankAgent:
 
 def test_add_equity_issuer_registers_bank_role(country_with_roles, monkeypatch):
     # Given
-    agent = FakeBankAgent()
+    agent = FakeBank()
     country = country_with_roles
     monkeypatch.setattr("mc_ab_sfc.spaces.country.EquityIssuerRole", FakeIssuerRole)
-    monkeypatch.setattr("mc_ab_sfc.spaces.country.BankAgent", FakeBankAgent)
+    monkeypatch.setattr("mc_ab_sfc.spaces.country.Bank", FakeBank)
 
     # When
     issuer_role = country.add_equity_issuer(agent)
@@ -337,8 +337,8 @@ def test_pay_taxes_with_tax_payer_reserves(country, monkeypatch):
     # Given
     govt_role = Mock()
     country.government_role = govt_role
-    payer_role = Mock(agent=FakeBankAgent())
-    monkeypatch.setattr("mc_ab_sfc.spaces.country.BankAgent", FakeBankAgent)
+    payer_role = Mock(agent=FakeBank())
+    monkeypatch.setattr("mc_ab_sfc.spaces.country.Bank", FakeBank)
 
     # When
     country.pay_taxes(payer_role, 100)
@@ -418,11 +418,11 @@ def test_updates_shares(country, issuer, holders):
 
 def test_distributes_dividends_with_reserves(country, issuer, holders, monkeypatch):
     # Given
-    issuer.agent = FakeBankAgent()
+    issuer.agent = FakeBank()
     graph = country.graph
     graph.add_edge(issuer, holders[0])
     graph.add_edge(issuer, holders[1])
-    monkeypatch.setattr("mc_ab_sfc.spaces.country.BankAgent", FakeBankAgent)
+    monkeypatch.setattr("mc_ab_sfc.spaces.country.Bank", FakeBank)
 
     # When
     country.distribute_dividends(issuer, 200)
@@ -772,7 +772,7 @@ def country_before_bank_creation(monkeypatch, monetary_union):
         "deposit": Mock(),
         "credit": Mock(),
     }
-    monkeypatch.setattr("mc_ab_sfc.spaces.country.BankAgent", FakeBankAgent)
+    monkeypatch.setattr("mc_ab_sfc.spaces.country.Bank", FakeBank)
     return country
 
 
@@ -786,7 +786,7 @@ def test_create_bank_creates_bank_agent(country_before_bank_creation):
 
     # Then
     assert bank.args == (country.model,)
-    assert isinstance(bank, FakeBankAgent)
+    assert isinstance(bank, FakeBank)
 
 
 def test_create_bank_registers_bank_in_model(country_before_bank_creation):

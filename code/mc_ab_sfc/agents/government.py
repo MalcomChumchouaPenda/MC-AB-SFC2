@@ -1,7 +1,7 @@
 from ..base import EcoAgent
 
 
-class GovernmentAgent(EcoAgent):
+class Government(EcoAgent):
 
     def setup(self):
         self._defaults = []

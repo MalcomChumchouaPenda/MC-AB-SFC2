@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import Mock
 from mc_ab_sfc.spaces import CountrySpace
-from mc_ab_sfc.agents import GovernmentAgent, CentralBank, Household
+from mc_ab_sfc.agents import Government, CentralBank, Household
 
 
 @pytest.fixture
@@ -21,7 +21,7 @@ def model():
 @pytest.fixture
 def govt(model):
     # Given
-    govt = GovernmentAgent(model)
+    govt = Government(model)
     govt.prev_public_spending = 10
     govt.public_spending = 100
     govt.budget_deficit = 100

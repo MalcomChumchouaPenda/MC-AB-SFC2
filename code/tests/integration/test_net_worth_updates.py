@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import Mock
 from mc_ab_sfc.spaces import CountrySpace
-from mc_ab_sfc.agents import Household, Firm, BankAgent
+from mc_ab_sfc.agents import Household, Firm, Bank
 
 
 @pytest.fixture
@@ -53,7 +53,7 @@ def test_firm_update_net_worth(firm, household, country):
 @pytest.fixture
 def bank(model):
     # Given
-    bank = BankAgent(model)
+    bank = Bank(model)
     bank.net_worth = 800
     bank.profit = 200
     bank.taxes_payable = 50

@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import Mock
-from mc_ab_sfc.agents import Firm, BankAgent, CentralBank, GovernmentAgent
+from mc_ab_sfc.agents import Firm, Bank, CentralBank, Government
 from mc_ab_sfc.spaces import BondMarket, DepositMarket, CountrySpace
 
 
@@ -40,7 +40,7 @@ def deposit_market(model):
 @pytest.fixture
 def govt(model, bond_market, deposit_market):
     # Given
-    govt = GovernmentAgent(model)
+    govt = Government(model)
     bond_market.add_issuer(govt)
     deposit_market.add_deposit_guarantee(govt)
     return govt
@@ -50,7 +50,7 @@ def govt(model, bond_market, deposit_market):
 def banks(model, deposit_market):
     banks = []
     for _ in range(2):
-        bank = BankAgent(model)
+        bank = Bank(model)
         bank.defaulted = True
         bank.deposits = 500
         banks.append(bank)

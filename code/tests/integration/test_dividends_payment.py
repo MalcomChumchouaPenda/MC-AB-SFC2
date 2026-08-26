@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import Mock
 from mc_ab_sfc.spaces import CountrySpace
-from mc_ab_sfc.agents import Household, Firm, BankAgent
+from mc_ab_sfc.agents import Household, Firm, Bank
 
 
 @pytest.fixture
@@ -54,7 +54,7 @@ def test_firm_pay_dividends(firm, household, country):
 @pytest.fixture
 def bank(model):
     # Given
-    bank = BankAgent(model)
+    bank = Bank(model)
     bank.reserves = 500
     bank.dividends_payable = 100
     return bank
