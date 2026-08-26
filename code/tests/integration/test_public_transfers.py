@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import Mock, PropertyMock
 from mc_ab_sfc.spaces import CountrySpace
-from mc_ab_sfc.agents import GovernmentAgent, CentralBankAgent, Household
+from mc_ab_sfc.agents import GovernmentAgent, CentralBank, Household
 
 
 @pytest.fixture
@@ -21,8 +21,8 @@ def govt(model):
 def cb(model, monkeypatch):
     # Given
     bond_interests = PropertyMock(return_value=100)
-    monkeypatch.setattr(CentralBankAgent, "bond_interests", bond_interests)
-    cb = CentralBankAgent(model)
+    monkeypatch.setattr(CentralBank, "bond_interests", bond_interests)
+    cb = CentralBank(model)
     cb.cash_advance_interest = 50
     cb.reserve_interest = 20
     return cb

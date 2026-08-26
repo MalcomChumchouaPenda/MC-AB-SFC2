@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import Mock
-from mc_ab_sfc.agents import BankAgent, CentralBankAgent, GovernmentAgent
+from mc_ab_sfc.agents import BankAgent, CentralBank, GovernmentAgent
 from mc_ab_sfc.spaces import BondMarket
 
 
@@ -36,7 +36,7 @@ def bank(model):
 @pytest.fixture
 def cb(model):
     # Given
-    cb = CentralBankAgent(model)
+    cb = CentralBank(model)
     cb.reserves = 1000
     cb.discount_rate = 0.04
     return cb

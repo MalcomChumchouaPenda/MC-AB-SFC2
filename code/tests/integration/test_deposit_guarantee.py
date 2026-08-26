@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import Mock
-from mc_ab_sfc.agents import Firm, BankAgent, CentralBankAgent, GovernmentAgent
+from mc_ab_sfc.agents import Firm, BankAgent, CentralBank, GovernmentAgent
 from mc_ab_sfc.spaces import BondMarket, DepositMarket, CountrySpace
 
 
@@ -26,7 +26,7 @@ def bond_market(model):
 @pytest.fixture
 def cb(model, bond_market):
     # Given
-    cb = CentralBankAgent(model)
+    cb = CentralBank(model)
     bond_market.add_buyer(cb)
     return cb
 

@@ -1,7 +1,7 @@
 from ..base import EcoAgent
 
 
-class CentralBankAgent(EcoAgent):
+class CentralBank(EcoAgent):
 
     def setup(self):
         # stocks

@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import Mock
 from mc_ab_sfc.spaces import CountrySpace
-from mc_ab_sfc.agents import GovernmentAgent, CentralBankAgent, Household
+from mc_ab_sfc.agents import GovernmentAgent, CentralBank, Household
 
 
 @pytest.fixture

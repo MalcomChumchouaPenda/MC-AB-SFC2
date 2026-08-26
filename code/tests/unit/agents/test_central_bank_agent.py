@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import Mock, PropertyMock
-from mc_ab_sfc.agents.central_bank import CentralBankAgent
+from mc_ab_sfc.agents.central_bank import CentralBank
 
 # ---------------------------------------------------
 # ARCHITECTURE TESTS
@@ -12,14 +12,14 @@ def test_is_eco_agent():
     from mc_ab_sfc.base import EcoAgent
 
     # Assert
-    assert issubclass(CentralBankAgent, EcoAgent)
+    assert issubclass(CentralBank, EcoAgent)
 
 
 @pytest.fixture
 def cb():
     # Given
     model = Mock()
-    cb = CentralBankAgent(model)
+    cb = CentralBank(model)
     cb.setup()
     return cb
 
@@ -124,7 +124,7 @@ def test_buy_all_remaining_bonds(cb):
 @pytest.fixture
 def interest_props(monkeypatch):
     bond_interest = PropertyMock()
-    monkeypatch.setattr(CentralBankAgent, "bond_interests", bond_interest)
+    monkeypatch.setattr(CentralBank, "bond_interests", bond_interest)
     return bond_interest
 
 
@@ -132,7 +132,7 @@ def test_calc_profit(interest_props):
     # Given
     bond_interest = interest_props
     bond_interest.return_value = 100
-    cb = CentralBankAgent(model=Mock())
+    cb = CentralBank(model=Mock())
     cb.cash_advance_interest = 40
     cb.reserve_interest = 20
 
@@ -146,7 +146,7 @@ def test_calc_profit(interest_props):
 def test_pay_profit_to_government():
     # Given
     cb_role, model = Mock(), Mock()
-    cb = CentralBankAgent(model)
+    cb = CentralBank(model)
     cb.roles["central_bank"] = cb_role
     cb.calc_profit = Mock(return_value=100)
 
@@ -161,7 +161,7 @@ def test_pay_profit_to_government():
 def test_update_history():
     # Given
     cb_role = Mock(discount_rate=0.05)
-    cb = CentralBankAgent(model=Mock())
+    cb = CentralBank(model=Mock())
     cb.roles["central_bank"] = cb_role
     cb.prev_discount_rate = 0.04
 

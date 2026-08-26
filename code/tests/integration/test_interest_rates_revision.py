@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import Mock
-from mc_ab_sfc.agents import CentralBankAgent
+from mc_ab_sfc.agents import CentralBank
 from mc_ab_sfc.spaces import MonetaryUnionSpace, CountrySpace
 
 
@@ -16,7 +16,7 @@ def model():
 
 @pytest.fixture
 def central_bank(model):
-    central_bank = CentralBankAgent(model)
+    central_bank = CentralBank(model)
     central_bank.prev_discount_rate = 0.03
     return central_bank
 
