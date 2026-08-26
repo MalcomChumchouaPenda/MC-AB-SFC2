@@ -2,7 +2,7 @@ import math
 from ..base import EcoAgent
 
 
-class FirmAgent(EcoAgent):
+class Firm(EcoAgent):
 
     def setup(self):
         # prices

@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import Mock
-from mc_ab_sfc.agents import FirmAgent, BankAgent, CentralBankAgent, GovernmentAgent
+from mc_ab_sfc.agents import Firm, BankAgent, CentralBankAgent, GovernmentAgent
 from mc_ab_sfc.spaces import BondMarket, DepositMarket, CountrySpace
 
 
@@ -63,7 +63,7 @@ def firms(model, deposit_market, banks):
     firms = []
     bank_roles = [b.roles["deposit_bank"] for b in banks]
     for i in range(10):
-        firm = FirmAgent(model)
+        firm = Firm(model)
         firm.deposits = 100
         firms.append(firm)
         bank_role = bank_roles[i % 2]

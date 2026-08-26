@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import Mock, PropertyMock
 from mc_ab_sfc.spaces import CountrySpace
-from mc_ab_sfc.agents import FirmAgent, BankAgent, GovernmentAgent
+from mc_ab_sfc.agents import Firm, BankAgent, GovernmentAgent
 
 
 @pytest.fixture
@@ -29,7 +29,7 @@ def country(model):
 @pytest.fixture
 def firm(model):
     # Given
-    firm = FirmAgent(model)
+    firm = Firm(model)
     firm.sales = 1000
     firm.productivity = 2
     firm.wage_offer = 20

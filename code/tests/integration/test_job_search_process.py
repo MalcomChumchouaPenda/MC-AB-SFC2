@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import Mock
-from mc_ab_sfc.agents import Household, FirmAgent
+from mc_ab_sfc.agents import Household, Firm
 from mc_ab_sfc.spaces import LaborMarket
 
 
@@ -36,7 +36,7 @@ def employers(model, market):
     wages = [20, 15, 16]
     demands = [0.4, 0.8, 0.8]
     for wage, demand in zip(wages, demands):
-        firm = FirmAgent(model)
+        firm = Firm(model)
         firm.wage_offer = wage
         employer = market.add_employer(firm)
         employer.labor_demand = demand

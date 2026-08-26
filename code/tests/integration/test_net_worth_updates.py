@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import Mock
 from mc_ab_sfc.spaces import CountrySpace
-from mc_ab_sfc.agents import Household, FirmAgent, BankAgent
+from mc_ab_sfc.agents import Household, Firm, BankAgent
 
 
 @pytest.fixture
@@ -20,7 +20,7 @@ def household(model):
 @pytest.fixture
 def firm(model):
     # Given
-    firm = FirmAgent(model)
+    firm = Firm(model)
     firm.net_worth = 1000
     firm.net_cash_flow = 500
     firm.taxes_payable = 100

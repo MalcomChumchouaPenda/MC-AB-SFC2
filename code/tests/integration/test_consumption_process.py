@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import Mock
-from mc_ab_sfc.agents import Household, FirmAgent
+from mc_ab_sfc.agents import Household, Firm
 from mc_ab_sfc.spaces import GoodsMarket
 
 
@@ -28,7 +28,7 @@ def household(model):
 @pytest.fixture
 def firm(model):
     # Given
-    firm = FirmAgent(model)
+    firm = Firm(model)
     firm.price = 10
     firm.position = 0.5
     firm.inventories = 10
@@ -78,7 +78,7 @@ def firms(model):
     # Given
     firms = []
     for _ in range(2):
-        firm = FirmAgent(model)
+        firm = Firm(model)
         firm.price = 10
         firm.position = 0.5
         firm.inventories = 10

@@ -1,7 +1,7 @@
 import math
 import pytest
 from unittest.mock import Mock
-from mc_ab_sfc.agents.firm import FirmAgent
+from mc_ab_sfc.agents.firm import Firm
 
 # ---------------------------------------------------
 # ARCHITECTURE TESTS
@@ -13,14 +13,14 @@ def test_is_eco_agent():
     from mc_ab_sfc.base import EcoAgent
 
     # Assert
-    assert issubclass(FirmAgent, EcoAgent)
+    assert issubclass(Firm, EcoAgent)
 
 
 @pytest.fixture
 def firm():
     # Given
     model = Mock()
-    firm = FirmAgent(model)
+    firm = Firm(model)
     return firm
 
 
@@ -150,7 +150,7 @@ def test_plan_production_by_two_steps(firm):
 def pricing_firm():
     model = Mock()
     model.p.delta = 0.1
-    firm = FirmAgent(model)
+    firm = Firm(model)
     firm.wage_bill = 10
     firm.productivity = 2
     firm.expected_sales = 100
@@ -245,7 +245,7 @@ def test_calc_revision_probability():
     model.p.upsilon_f = 0.9
     employer_role = Mock()
     employer_role.get_unemployment_rate.return_value = 0.1
-    firm = FirmAgent(model)
+    firm = Firm(model)
     firm.roles["employer"] = employer_role
 
     # When
@@ -260,7 +260,7 @@ def hiring_firm():
     # Given
     model = Mock()
     model.p.delta = 0.9
-    firm = FirmAgent(model)
+    firm = Firm(model)
     firm.wage_offer = 10.0
     firm.calc_revision_probability = Mock(return_value=0)
     return firm
@@ -377,7 +377,7 @@ def test_calc_desired_rd():
     # Given
     model = Mock()
     model.p.gamma = 0.1
-    firm = FirmAgent(model)
+    firm = Firm(model)
     firm.wage_offer = 10
     firm.desired_labor = 50
 
@@ -393,7 +393,7 @@ def test_calc_desired_rd():
 def test_execute_rd_without_constraints():
     # Given
     model = Mock()
-    firm = FirmAgent(model)
+    firm = Firm(model)
     firm.desired_rd = 100
     firm.desired_labor = 50
     firm.labor = 50
@@ -410,7 +410,7 @@ def test_execute_rd_without_constraints():
 def test_execute_rd_with_labor_constraint():
     # Given
     model = Mock()
-    firm = FirmAgent(model)
+    firm = Firm(model)
     firm.desired_rd = 100
     firm.desired_labor = 100
     firm.labor = 80
@@ -427,7 +427,7 @@ def test_execute_rd_with_labor_constraint():
 def test_execute_rd_with_financial_constraint():
     # Given
     model = Mock()
-    firm = FirmAgent(model)
+    firm = Firm(model)
     firm.desired_rd = 100
     firm.desired_labor = 50
     firm.labor = 50
@@ -445,7 +445,7 @@ def test_execute_rd_with_financial_constraint():
 def firm_with_rd_project():
     model = Mock()
     model.p.nu = 0.5
-    firm = FirmAgent(model)
+    firm = Firm(model)
     firm.rd = 100
     firm.roles["producer"] = Mock()
     return firm
@@ -487,7 +487,7 @@ def test_calc_rd_success_probability_non_tradable(firm_with_rd_project):
 def innovating_firm():
     model = Mock()
     model.p.delta = 0.2
-    firm = FirmAgent(model)
+    firm = Firm(model)
     firm.calc_desired_rd = Mock(side_effect=setattr(firm, "desired_rd", 100))
     firm.execute_rd = Mock(side_effect=setattr(firm, "rd", 100))
     firm.calc_rd_success_probability = Mock(return_value=0.6)
@@ -574,7 +574,7 @@ def test_update_productivity_by_imitation(innovating_firm):
 def borrowing_firm():
     # Given
     model = Mock()
-    firm = FirmAgent(model)
+    firm = Firm(model)
     firm.wage_offer = 10
     firm.desired_labor = 10
     firm.desired_rd = 50
@@ -797,7 +797,7 @@ def test_pay_no_dividends(firm):
 @pytest.fixture
 def firm_before_exit():
     model = Mock()
-    firm = FirmAgent(model)
+    firm = Firm(model)
     firm.roles = {"equity_issuer": Mock()}
     firm.wage_offer = 100
     return firm
@@ -838,7 +838,7 @@ def test_does_not_exit_when_not_bankrupt(firm_before_exit):
 def firm_with_history():
     # Given
     model = Mock()
-    firm = FirmAgent(model)
+    firm = Firm(model)
     firm.prev_expected_sales = 100
     firm.prev_output = 50
     firm.prev_sales = 50

@@ -292,7 +292,7 @@ def test_add_equity_issuer_registers_bank_role(country_with_roles, monkeypatch):
     assert country.bank_roles == [issuer_role]
 
 
-class FakeFirmAgent:
+class FakeFirm:
     def __init__(self, *args, **kwargs):
         self.args = args
         self.kwargs = kwargs
@@ -301,10 +301,10 @@ class FakeFirmAgent:
 
 def test_add_equity_issuer_registers_firm_role(country_with_roles, monkeypatch):
     # Given
-    agent = FakeFirmAgent()
+    agent = FakeFirm()
     country = country_with_roles
     monkeypatch.setattr("mc_ab_sfc.spaces.country.EquityIssuerRole", FakeIssuerRole)
-    monkeypatch.setattr("mc_ab_sfc.spaces.country.FirmAgent", FakeFirmAgent)
+    monkeypatch.setattr("mc_ab_sfc.spaces.country.Firm", FakeFirm)
 
     # When
     issuer_role = country.add_equity_issuer(agent)
@@ -593,7 +593,7 @@ def country_before_firm_creation(monkeypatch, monetary_union):
         "deposit": Mock(),
         "credit": Mock(),
     }
-    monkeypatch.setattr("mc_ab_sfc.spaces.country.FirmAgent", FakeFirmAgent)
+    monkeypatch.setattr("mc_ab_sfc.spaces.country.Firm", FakeFirm)
     return country
 
 
@@ -608,7 +608,7 @@ def test_create_firm_creates_firm_agent(country_before_firm_creation, tradable):
 
     # Then
     assert firm.args == (country.model,)
-    assert isinstance(firm, FakeFirmAgent)
+    assert isinstance(firm, FakeFirm)
     assert firm.tradable == tradable
 
 

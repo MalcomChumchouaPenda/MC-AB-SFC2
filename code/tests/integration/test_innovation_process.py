@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import Mock
-from mc_ab_sfc.agents import FirmAgent
+from mc_ab_sfc.agents import Firm
 from mc_ab_sfc.spaces import GoodsMarket
 
 
@@ -25,7 +25,7 @@ def market(model):
 @pytest.fixture
 def firm(model):
     # Given
-    firm = FirmAgent(model)
+    firm = Firm(model)
     firm.productivity = 10
     firm.wage_offer = 10
     firm.desired_labor = 100

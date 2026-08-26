@@ -1,5 +1,5 @@
 from ..base import EcoSpace
-from ..agents import FirmAgent, BankAgent, Household
+from ..agents import Firm, BankAgent, Household
 from ..roles import (
     GovernmentRole,
     TaxPayerRole,
@@ -149,7 +149,7 @@ class CountrySpace(EcoSpace):
         ]
 
     def create_firm(self, founders, tradable):
-        firm = FirmAgent(self.model)
+        firm = Firm(self.model)
         firm.tradable = tradable
         issuer = self.add_equity_issuer(firm)
         self._distribute_firm_equity(issuer, founders)
