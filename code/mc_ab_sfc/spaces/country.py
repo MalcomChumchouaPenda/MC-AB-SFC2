@@ -6,11 +6,16 @@ from ..roles import EquityHolderRole, EquityIssuerRole
 class Country(EcoSpace):
 
     def setup(self):
+        # agent refs
+        self.government = None
+        self.central_bank = None
+
+        # space refs
         self.monetary_union = None
-        self.government_role = None
-        self.central_bank_role = None
-        self.bank_roles = []
-        self.firm_roles = []
+        self.goods_market = None
+        self.labor_market = None
+        self.deposit_market = None
+
         self.discount_rate = 0.0
         self.tax_rate = 0
         self.markets = {}
@@ -33,10 +38,10 @@ class Country(EcoSpace):
 
     def add_equity_issuer(self, agent):
         role = self.add_role(EquityIssuerRole, agent, "equity_issuer")
-        if isinstance(agent, Bank):
-            self.bank_roles.append(role)
-        else:
-            self.firm_roles.append(role)
+        # if isinstance(agent, Bank):
+        #     self.bank_roles.append(role)
+        # else:
+        #     self.firm_roles.append(role)
         return role
 
     def add_equity_holder(self, household):

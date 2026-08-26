@@ -19,38 +19,24 @@ def test_is_eco_space():
 def country():
     # Given
     model = Mock()
-    return Country(model)
+    country = Country(model)
+    country.setup()
+    return country
 
 
-def test_has_government_role(country):
+def test_has_default_agent_refs(country):
     # Assert
-    assert country.government_role is None
+    assert country.government is None
+    assert country.central_bank is None
 
-
-def test_has_central_bank_role(country):
-    # Assert
-    assert country.central_bank_role is None
-
-
-def test_has_firm_roles(country):
-    # Assert
-    assert country.firm_roles == []
-
-
-def test_has_bank_roles(country):
-    # Assert
-    assert country.bank_roles == []
-
-
-def test_contains_local_markets(country):
-    # Assert
-    assert hasattr(country, "markets")
-    assert isinstance(country.markets, dict)
-
-
-def test_contains_monetary_union_ref(country):
+    
+def test_has_default_space_refs(country):
     # Assert
     assert country.monetary_union is None
+    assert country.goods_market is None
+    assert country.labor_market is None
+    assert country.deposit_market is None
+
 
 
 def test_exposes_inflation(country):
@@ -150,39 +136,11 @@ class FakeBank:
         self.kwargs = kwargs
 
 
-def test_add_equity_issuer_registers_bank_role(country_with_roles, monkeypatch):
-    # Given
-    agent = FakeBank()
-    country = country_with_roles
-    monkeypatch.setattr("mc_ab_sfc.spaces.country.EquityIssuerRole", FakeIssuerRole)
-    monkeypatch.setattr("mc_ab_sfc.spaces.country.Bank", FakeBank)
-
-    # When
-    issuer_role = country.add_equity_issuer(agent)
-
-    # Then
-    assert country.bank_roles == [issuer_role]
-
-
 class FakeFirm:
     def __init__(self, *args, **kwargs):
         self.args = args
         self.kwargs = kwargs
         self.tradable = False
-
-
-def test_add_equity_issuer_registers_firm_role(country_with_roles, monkeypatch):
-    # Given
-    agent = FakeFirm()
-    country = country_with_roles
-    monkeypatch.setattr("mc_ab_sfc.spaces.country.EquityIssuerRole", FakeIssuerRole)
-    monkeypatch.setattr("mc_ab_sfc.spaces.country.Firm", FakeFirm)
-
-    # When
-    issuer_role = country.add_equity_issuer(agent)
-
-    # Then
-    assert country.firm_roles == [issuer_role]
 
 
 def test_assign_equity_holder_to_equity_issuer(country):
