@@ -3,7 +3,7 @@ from ..agents import Firm, Bank
 from ..roles import EquityHolderRole, EquityIssuerRole
 
 
-class CountrySpace(EcoSpace):
+class Country(EcoSpace):
 
     def setup(self):
         self.monetary_union = None

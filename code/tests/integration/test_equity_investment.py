@@ -2,7 +2,7 @@ import pytest
 from unittest.mock import Mock, PropertyMock
 from mc_ab_sfc.agents import Household, Firm, Bank, Government, NationalCentralBank
 from mc_ab_sfc.spaces import (
-    CountrySpace,
+    Country,
     LaborMarket,
     DepositMarket,
     CreditMarket,
@@ -65,7 +65,7 @@ def bond_market(model):
 @pytest.fixture
 def country(model):
     # Given
-    country = CountrySpace(model)
+    country = Country(model)
     country.markets["goods"] = GoodsMarket(model, tradable=False)
     country.markets["labor"] = LaborMarket(model)
     country.markets["credit"] = CreditMarket(model)

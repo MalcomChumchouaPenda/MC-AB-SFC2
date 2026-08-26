@@ -2,7 +2,7 @@ import math
 import pytest
 from unittest.mock import Mock, PropertyMock
 from mc_ab_sfc.agents import Bank, NationalCentralBank
-from mc_ab_sfc.spaces import CountrySpace
+from mc_ab_sfc.spaces import Country
 
 
 @pytest.fixture

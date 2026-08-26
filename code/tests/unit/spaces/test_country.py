@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import Mock
-from mc_ab_sfc.spaces.country import CountrySpace
+from mc_ab_sfc.spaces.country import Country
 
 # ---------------------------------------------------
 # ARCHITECTURE TESTS
@@ -12,14 +12,14 @@ def test_is_eco_space():
     from mc_ab_sfc.base import EcoSpace
 
     # Assert
-    assert issubclass(CountrySpace, EcoSpace)
+    assert issubclass(Country, EcoSpace)
 
 
 @pytest.fixture
 def country():
     # Given
     model = Mock()
-    return CountrySpace(model)
+    return Country(model)
 
 
 def test_has_government_role(country):
@@ -103,7 +103,7 @@ def test_has_discount_rate(country):
 def country_with_roles():
     # Given
     model = Mock()
-    country = CountrySpace(model)
+    country = Country(model)
     country.add_role = Mock(side_effect=lambda a, b, c: a())
     return country
 
@@ -358,7 +358,7 @@ def monetary_union():
 def country_before_firm_creation(monkeypatch, monetary_union):
     # Given
     model = Mock()
-    country = CountrySpace(model)
+    country = Country(model)
     country.add_equity_issuer = Mock()
     country.assign_equity_holder = Mock()
     country.monetary_union = monetary_union
@@ -524,7 +524,7 @@ def test_create_firm_builds_initial_equity(country_before_firm_creation, tradabl
 def country_before_bank_creation(monkeypatch):
     # Given
     model = Mock()
-    country = CountrySpace(model)
+    country = Country(model)
     country.add_equity_issuer = Mock()
     country.assign_equity_holder = Mock()
     country.markets = {
