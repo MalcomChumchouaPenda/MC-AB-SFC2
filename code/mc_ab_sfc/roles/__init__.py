@@ -1,6 +1,3 @@
-from .deposit_bank import DepositBankRole
-from .deposit_holder import DepositHolderRole
-from .deposit_guarantee import DepositGuaranteeRole
 
 from .lender import LenderRole
 from .borrower import BorrowerRole

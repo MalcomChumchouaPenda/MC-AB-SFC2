@@ -1,5 +1,5 @@
 import pytest
-from unittest.mock import Mock
+from unittest.mock import Mock, PropertyMock
 from mc_ab_sfc.spaces import CountrySpace
 from mc_ab_sfc.agents import Household, Firm, Bank, Government
 
@@ -20,11 +20,11 @@ def govt(model):
 
 
 @pytest.fixture
-def household(model):
+def household(model, monkeypatch):
+    monkeypatch.setattr(Household, "dep_interests", PropertyMock(return_value=20))
     household = Household(model)
     household.cash = 1000
     household.labor_income = 540
-    household.deposit_interest = 20
     household.dividends = 30
     household.rd_income = 10
     household.public_transfers = 50

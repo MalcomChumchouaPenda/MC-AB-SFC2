@@ -172,7 +172,7 @@ class CountrySpace(EcoSpace):
     def _create_firm_market_roles(self, firm, tradable):
         self.markets["labor"].add_employer(firm)
         self.markets["credit"].add_borrower(firm)
-        self.markets["deposit"].add_deposit_holder(firm)
+        self.markets["deposit"].add_client(firm)
         if tradable:
             self.monetary_union.markets["goods"].add_supplier(firm)
         else:
@@ -199,7 +199,7 @@ class CountrySpace(EcoSpace):
 
     def _create_bank_market_roles(self, bank):
         self.markets["credit"].add_lender(bank)
-        self.markets["deposit"].add_deposit_bank(bank)
+        self.markets["deposit"].add_bank(bank)
         self.model.bond_market.add_buyer(bank)
 
     def update_statistics(self):

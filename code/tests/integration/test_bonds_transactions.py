@@ -1,5 +1,5 @@
 import pytest
-from unittest.mock import Mock
+from unittest.mock import Mock, PropertyMock
 from mc_ab_sfc.agents import Bank, CentralBank, Government
 from mc_ab_sfc.spaces import BondMarket
 
@@ -25,10 +25,11 @@ def govt(model):
 
 
 @pytest.fixture
-def bank(model):
+def bank(model, monkeypatch):
     # Given
+    deposits = PropertyMock(return_value=1000)
+    monkeypatch.setattr(Bank, "deposits", deposits)
     bank = Bank(model)
-    bank.deposits = 1000
     bank.reserves = 300
     return bank
 

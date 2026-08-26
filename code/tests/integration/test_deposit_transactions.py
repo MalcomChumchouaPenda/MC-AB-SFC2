@@ -1,7 +1,7 @@
 import pytest
-from unittest.mock import Mock
-from mc_ab_sfc.agents import Bank, Firm
-from mc_ab_sfc.spaces import DepositMarket, CountrySpace
+from unittest.mock import Mock, PropertyMock
+from mc_ab_sfc.agents import Bank, Firm, Government
+from mc_ab_sfc.spaces import DepositMarket
 
 
 @pytest.fixture
@@ -16,7 +16,9 @@ def model():
 def bank(model):
     # Given
     bank = Bank(model)
-    bank.deposits = 2000
+    bank.setup()
+    bank.country = "any"
+    bank.deposit_rate = 0.02
     return bank
 
 
@@ -24,38 +26,59 @@ def bank(model):
 def firm(model):
     # Given
     firm = Firm(model)
-    firm.deposits = 1000
+    firm.setup()
     return firm
 
 
 @pytest.fixture
-def country(model):
+def deposit_market_with_participants(model, firm, bank):
     # Given
-    country = CountrySpace(model)
-    country.discount_rate = 0.05
-    return country
+    market = DepositMarket(model)
+    market.setup()
+    deposits = market.deposits
+    deposits.add_node(bank, role="bank")
+    deposits.add_edge(firm, bank, amount=2000)
+    model.deposit_markets = {"any": market}
+    return market, firm, bank
+
+
+def test_bank_pays_deposit_interest_to_firm(deposit_market_with_participants):
+    # Given
+    _, firm, bank = deposit_market_with_participants
+
+    # When
+    bank.pay_deposit_interests()
+    # bank.update_deposit_rate() # TODO
+
+    # Then
+    assert firm.deposits == pytest.approx(2040)
+    assert bank.deposits == pytest.approx(2040)
+    assert firm.dep_interests == pytest.approx(40)
+    assert bank.dep_interests == pytest.approx(40)
 
 
 @pytest.fixture
-def deposit_market(model):
+def govt(model):
     # Given
-    return DepositMarket(model)
+    govt = Government(model)
+    govt.setup()
+    govt.country = "any"
+    return govt
 
 
-def test_bank_pays_deposit_interest(firm, bank, country, deposit_market):
+def test_government_activate_deposit_guarantee(govt, deposit_market_with_participants):
     # Given
-    bank_role = deposit_market.add_deposit_bank(bank)
-    firm_role = deposit_market.add_deposit_holder(firm)
-    deposit_market.assign_deposit_bank(firm_role, bank_role)
-    country.central_bank_role = Mock()
-    country.add_commercial_bank(bank)
+    _, firm, bank = deposit_market_with_participants
+    bank.defaulted = True
 
     # When
-    bank.update_deposit_rate()
-    bank.pay_deposit_interest()
+    govt.issue_deposit_guarantee_bonds()
+    govt.reimburse_deposits()
 
     # Then
-    assert firm.deposits == pytest.approx(1040)
-    assert bank.deposits == pytest.approx(2040)
-    assert firm.deposit_interest == pytest.approx(40)
-    assert bank.deposit_interest == pytest.approx(40)
+    assert govt.bond_supply == 2000
+    assert govt.reserves == -2000
+    assert firm.deposits == 0
+    assert firm.cash == 2000
+    assert bank.deposits == 0
+    assert bank.reserves == 0

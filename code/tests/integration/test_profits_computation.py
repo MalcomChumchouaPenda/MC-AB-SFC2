@@ -27,15 +27,15 @@ def country(model):
 
 
 @pytest.fixture
-def firm(model):
+def firm(model, monkeypatch):
     # Given
+    monkeypatch.setattr(Firm, "dep_interests", PropertyMock(return_value=30))
     firm = Firm(model)
     firm.sales = 1000
     firm.productivity = 2
     firm.wage_offer = 20
     firm.inventories = 60
     firm.prev_inventories = 50
-    firm.deposit_interest = 30
     firm.loan_interest = 30
     firm.wage_bill = 300
     firm.rd = 100
@@ -61,11 +61,11 @@ def test_firm_compute_profit_distribution(firm, govt, country):
 def bank(model, monkeypatch):
     # Given
     monkeypatch.setattr(Bank, "bond_interests", PropertyMock(return_value=20))
+    monkeypatch.setattr(Bank, "dep_interests", PropertyMock(return_value=30))
     bank = Bank(model)
     bank.loan_interest = 100
     bank.reserve_interest = 10
     bank.bad_debt = 10
-    bank.deposit_interest = 30
     bank.cash_advance_interest = 10
     return bank
 

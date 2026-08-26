@@ -7,15 +7,12 @@ class Bank(EcoAgent):
     def setup(self):
         # stocks
         self.loans = 0
-        self.deposits = 0
         self.cash_advances = 0
         self.reserves = 0
         self.equity = 0
 
         # flows
         self.loan_interest = 0
-        self.deposit_interest = 0
-        self.bond_interest = 0
         self.reserve_interest = 0
         self.cash_advance_interest = 0
         self.dividends = 0
@@ -31,6 +28,7 @@ class Bank(EcoAgent):
         self.net_worth = 0
         self.credit_capacity = 0
         self.defaulted = False
+        self.country = None
 
     @property
     def bonds(self):
@@ -44,14 +42,32 @@ class Bank(EcoAgent):
         bonds = bond_market.get_buyer_bonds(self)
         return sum([b["interests"] for b in bonds])
 
+    @property
+    def deposits(self):
+        total = 0
+        for market in self.model.deposit_markets.values():
+            deposits = market.get_bank_deposits(self)
+            total += sum([d["amount"] for d in deposits])
+        return total
+
+    @property
+    def dep_interests(self):
+        total = 0
+        for market in self.model.deposit_markets.values():
+            deposits = market.get_bank_deposits(self)
+            total += sum([d["interests"] for d in deposits])
+        return total
+
     def update_deposit_rate(self):
         role = self.roles["commercial_bank"]
         discount_rate = role.get_discount_rate()
         self.deposit_rate = self.p.zeta * discount_rate
 
-    def pay_deposit_interest(self):
-        role = self.roles["deposit_bank"]
-        role.pay_deposit_interest()
+    def pay_deposit_interests(self):
+        for market in self.model.deposit_markets.values():
+            for deposit in market.get_bank_deposits(self):
+                amount = self.deposit_rate * deposit["amount"]
+                market.pay_interests(deposit["client"], self, amount)
 
     def grant_loans(self):
         role = self.roles["lender"]
@@ -129,7 +145,7 @@ class Bank(EcoAgent):
             + self.bond_interests
             + self.reserve_interest
             - self.bad_debt
-            - self.deposit_interest
+            - self.dep_interests
             - self.cash_advance_interest
         )
 

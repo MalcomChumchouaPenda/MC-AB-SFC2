@@ -13,14 +13,12 @@ class Firm(EcoAgent):
         self.inventories = 0
         self.cash = 0
         self.loans = 0
-        self.deposits = 0
         self.equity = 0
 
         # flows
         self.sales = 0
         self.wage_bill = 0
         self.loan_interest = 0
-        self.deposit_interest = 0
         self.rd = 0
         self.taxes = 0
         self.dividends = 0
@@ -49,6 +47,23 @@ class Firm(EcoAgent):
 
         # other props
         self.position = 0.0
+        self.country = None
+
+    @property
+    def deposits(self):
+        total = 0
+        for market in self.model.deposit_markets.values():
+            deposits = market.get_client_deposits(self)
+            total += sum([d["amount"] for d in deposits])
+        return total
+
+    @property
+    def dep_interests(self):
+        total = 0
+        for market in self.model.deposit_markets.values():
+            deposits = market.get_client_deposits(self)
+            total += sum([d["interests"] for d in deposits])
+        return total
 
     # Production planning
 
@@ -168,7 +183,7 @@ class Firm(EcoAgent):
     def calc_net_cash_flow(self):
         return (
             self.sales
-            + self.deposit_interest
+            + self.dep_interests
             - self.wage_bill
             - self.rd
             - self.loan_interest

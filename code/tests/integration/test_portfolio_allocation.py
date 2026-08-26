@@ -41,13 +41,10 @@ def country(model):
     return country
 
 
-def test_household_portfolio_allocation(household, bank, model, country):
+def test_household_portfolio_allocation(household, bank, country):
     # Given
     country.add_equity_holder(household)
-    deposit_market = DepositMarket(model)
-    deposit_bank = deposit_market.add_deposit_bank(bank)
-    deposit_holder = deposit_market.add_deposit_holder(household)
-    deposit_market.assign_deposit_bank(deposit_holder, deposit_bank)
+    household.deposit_bank = bank
 
     # When
     household.calc_portfolio_allocation()

@@ -24,6 +24,11 @@ def govt():
     return govt
 
 
+def test_has_default_country_value(govt):
+    # Assert
+    assert govt.country is None
+
+
 def test_has_default_reserves_value(govt):
     # Assert
     assert govt.reserves == 0
@@ -449,22 +454,31 @@ def test_calc_bond_rate(govt_with_bonds):
 
 
 @pytest.fixture
-def govt_as_deposit_guarantee():
+def model_with_deposit_markets():
     # Given
-    govt = Government(model=Mock())
+    deposit_market = Mock()
+    model = Mock()
+    model.deposit_markets = {"any": deposit_market}
+    return model, deposit_market
+
+
+@pytest.fixture
+def govt_as_deposit_guarantee(model_with_deposit_markets):
+    # Given
+    model, deposit_market = model_with_deposit_markets
+    govt = Government(model)
     govt.bond_supply = 0
-    govt.roles["deposit_guarantee"] = Mock()
-    return govt
+    govt.country = "any"
+    govt._defaults = []
+    return govt, deposit_market
 
 
 def test_issue_deposit_guarantee_bonds(govt_as_deposit_guarantee):
     # Given
-    govt = govt_as_deposit_guarantee
+    govt, deposit_market = govt_as_deposit_guarantee
     govt.bond_supply = 100
-    guarantee_role = govt.roles["deposit_guarantee"]
-    guarantee_role.get_defaulted_banks.return_value = [
-        Mock(defaulted_deposits=100) for _ in range(3)
-    ]
+    defaults = [Mock(deposits=100) for _ in range(3)]
+    deposit_market.get_defaulted_banks.return_value = defaults
 
     # When
     govt.issue_deposit_guarantee_bonds()
@@ -475,10 +489,9 @@ def test_issue_deposit_guarantee_bonds(govt_as_deposit_guarantee):
 
 def test_issue_deposit_guarantee_bonds_registers_defaults(govt_as_deposit_guarantee):
     # Given
-    defaults = [Mock(defaulted_deposits=100)]
-    govt = govt_as_deposit_guarantee
-    guarantee_role = govt.roles["deposit_guarantee"]
-    guarantee_role.get_defaulted_banks.return_value = defaults
+    defaults = [Mock(deposits=100)]
+    govt, deposit_market = govt_as_deposit_guarantee
+    deposit_market.get_defaulted_banks.return_value = defaults
 
     # When
     govt.issue_deposit_guarantee_bonds()
@@ -489,17 +502,18 @@ def test_issue_deposit_guarantee_bonds_registers_defaults(govt_as_deposit_guaran
 
 def test_reimburse_deposits(govt_as_deposit_guarantee):
     # Given
-    defaults = [Mock() for _ in range(3)]
-    govt = govt_as_deposit_guarantee
-    govt._defaults = defaults
-    guarantee_role = govt.roles["deposit_guarantee"]
+    bank = Mock()
+    govt, market = govt_as_deposit_guarantee
+    govt._defaults = [bank]
+    client = Mock()
+    market.get_bank_deposits.return_value = [{"client": client}]
 
     # When
     govt.reimburse_deposits()
 
     # Then
-    for bank in defaults:
-        guarantee_role.reimburse_deposits.assert_any_call(bank)
+    market.get_bank_deposits.assert_called_with(bank)
+    market.reimburse_deposits.assert_called_with(govt, client, bank)
 
 
 @pytest.fixture

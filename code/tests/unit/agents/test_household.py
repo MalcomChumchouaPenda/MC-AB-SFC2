@@ -1,6 +1,6 @@
 import math
 import pytest
-from unittest.mock import Mock
+from unittest.mock import Mock, PropertyMock
 from mc_ab_sfc.agents.household import Household
 
 # ---------------------------------------------------
@@ -21,20 +21,41 @@ def household():
     # Given
     model = Mock()
     household = Household(model)
+    household.setup()
     return household
+
+
+def test_expose_deposits_total(household):
+    # Given
+    deposits = [{"bank": object(), "amount": 500}]
+    deposit_market = Mock()
+    deposit_market.get_client_deposits.return_value = deposits
+    household.model.deposit_markets = {"any": deposit_market}
+
+    # Assert
+    assert household.deposits == 500
+
+
+def test_expose_deposit_interests_total(household):
+    # Given
+    deposits = [{"bank": object(), "interests": 50.0}]
+    deposit_market = Mock()
+    deposit_market.get_client_deposits.return_value = deposits
+    household.model.deposit_markets = {"any": deposit_market}
+
+    # Assert
+    assert household.dep_interests == pytest.approx(50.0)
 
 
 def test_has_default_stocks(household):
     # Assert
     assert household.cash == 0
-    assert household.deposits == 0
     assert household.equity == 0
 
 
 def test_has_default_flows(household):
     # Assert
     assert household.labor_income == 0
-    assert household.deposit_interest == 0
     assert household.dividends == 0
     assert household.rd_income == 0
     assert household.taxes == 0
@@ -60,6 +81,16 @@ def test_has_default_indicator(household):
     assert household.net_worth == 0
     assert household.income == 0
     assert household.disposable_income == 0
+
+
+def test_has_default_country_value(household):
+    # Assert
+    assert household.country is None
+
+
+def test_has_default_deposit_bank_ref(household):
+    # Assert
+    assert household.deposit_bank is None
 
 
 def test_has_unit_labor_supply(household):
@@ -316,10 +347,19 @@ def test_can_choose_to_not_decreases_reservation_wage(part_employed_before):
 
 
 @pytest.fixture
-def household_as_taxpayer():
+def mock_dep_interests(monkeypatch):
+    # Given
+    mock_interests = PropertyMock()
+    monkeypatch.setattr(Household, "dep_interests", mock_interests)
+    return mock_interests
+
+
+@pytest.fixture
+def household_as_taxpayer(mock_dep_interests):
     # Given
     model = Mock()
     household = Household(model)
+    household.mock_dep_interests = mock_dep_interests
     household.roles["tax_payer"] = Mock()
     return household
 
@@ -328,7 +368,7 @@ def test_calc_income(household_as_taxpayer):
     # Given
     household = household_as_taxpayer
     household.labor_income = 100
-    household.deposit_interest = 20
+    household.mock_dep_interests.return_value = 20
     household.dividends = 30
     household.rd_income = 10
 
@@ -376,7 +416,15 @@ def test_pay_taxes(household_as_taxpayer):
 # ----------------------------------------------------
 
 
-def test_calc_consumption_total():
+@pytest.fixture
+def mock_deposits(monkeypatch):
+    # Given
+    mock_deposits = PropertyMock()
+    monkeypatch.setattr(Household, "deposits", mock_deposits)
+    return mock_deposits
+
+
+def test_calc_consumption_total(mock_deposits):
     # Given
     model = Mock()
     model.p.cy = 0.8
@@ -384,7 +432,7 @@ def test_calc_consumption_total():
     model.p.cT = 0.6
     household = Household(model)
     household.disposable_income = 1000
-    household.deposits = 500
+    mock_deposits.return_value = 500
 
     # When
     consumption = household.calc_consumption()
@@ -394,7 +442,7 @@ def test_calc_consumption_total():
     assert household.desired_consumption == 850
 
 
-def test_calc_consumption_composition():
+def test_calc_consumption_composition(mock_deposits):
     # Given
     model = Mock()
     model.p.cy = 0.8
@@ -402,7 +450,7 @@ def test_calc_consumption_composition():
     model.p.cT = 0.6
     household = Household(model)
     household.disposable_income = 1000
-    household.deposits = 500
+    mock_deposits.return_value = 500
 
     # When
     household.calc_consumption()
@@ -516,10 +564,13 @@ def test_consume_randomizes_market_order(household_with_consumer_roles):
 @pytest.fixture
 def household_with_assets():
     # Given
+    deposit_market = Mock()
     model = Mock()
+    model.deposit_markets = {"any": deposit_market}
     household = Household(model)
+    household.country = "any"
     household.roles["equity_holder"] = Mock()
-    household.roles["deposit_holder"] = Mock()
+    household.deposit_bank = Mock(deposit_rate=0.0)
     return household
 
 
@@ -543,9 +594,9 @@ def test_calc_liquidity_pref_when_equity_is_more_profitable(household_with_asset
     household.dividends = 10
     household.equity = 100
     household.p.lambda_ = 0.6
+    household.deposit_bank.deposit_rate = 0.05
     roles = household.roles
     roles["equity_holder"].get_default_probability.return_value = 0.10
-    roles["deposit_holder"].get_deposit_rate.return_value = 0.05
 
     # When
     lp = household.calc_liquidity_preference()
@@ -561,9 +612,9 @@ def test_calc_liquidity_pref_when_equity_is_less_profitable(household_with_asset
     household.dividends = 2
     household.equity = 100
     household.p.lambda_ = 0.7
+    household.deposit_bank.deposit_rate = 0.05
     roles = household.roles
     roles["equity_holder"].get_default_probability.return_value = 0.10
-    roles["deposit_holder"].get_deposit_rate.return_value = 0.05
 
     # When
     lp = household.calc_liquidity_preference()
@@ -578,9 +629,9 @@ def test_calc_liquidity_preference_when_no_equity(household_with_assets):
     household.dividends = 0
     household.equity = 0
     household.p.lambda_ = 0.8
+    household.deposit_bank.deposit_rate = 0.05
     roles = household.roles
     roles["equity_holder"].get_default_probability.return_value = 0.10
-    roles["deposit_holder"].get_deposit_rate.return_value = 0.05
 
     # When
     lp = household.calc_liquidity_preference()
@@ -751,17 +802,29 @@ def test_create_enterprise_can_create_bank(household_before_investment):
     role.create_bank.assert_called_once_with(founders)
 
 
-def test_make_deposits_with_residual_cash(household):
+@pytest.fixture
+def model_with_deposit_markets():
     # Given
-    holder_role = Mock()
-    household.roles["deposit_holder"] = holder_role
+    deposit_market = Mock()
+    model = Mock()
+    model.deposit_markets = {"any": deposit_market}
+    return model, deposit_market
+
+
+def test_make_deposits_with_residual_cash(model_with_deposit_markets):
+    # Given
+    bank = Mock()
+    model, deposit_market = model_with_deposit_markets
+    household = Household(model)
     household.cash = 500
+    household.country = "any"
+    household.deposit_bank = bank
 
     # When
     household.make_deposits()
 
     # Then
-    holder_role.make_deposits.assert_called_with(500)
+    deposit_market.make_deposits.assert_called_with(household, bank, 500)
 
 
 @pytest.fixture
@@ -849,3 +912,69 @@ def test_invest_equity_does_nothing_when_insufficient_equity(household_as_invest
     household.calc_initial_equity.assert_called_with("any")
     household.create_enterprise.assert_not_called()
     household.make_deposits.assert_called_with()
+
+
+@pytest.fixture
+def household_before_bank_choice(model_with_deposit_markets):
+    # Given
+    model, deposit_market = model_with_deposit_markets
+    household = Household(model)
+    household.deposit_bank = None
+    household.country = "any"
+    deposit_market.get_banks.return_value = [Mock()]
+    return household, deposit_market
+
+
+def test_choose_deposit_bank_opens_account_randomly(household_before_bank_choice):
+    # Given
+    banks = [Mock() for _ in range(3)]
+    household, deposit_market = household_before_bank_choice
+    household.model.random.choice.side_effect = lambda x: x[-1]
+    deposit_market.get_banks.return_value = banks
+
+    # When
+    household.choose_deposit_bank()
+
+    # Then
+    deposit_market.open_account.assert_called_once_with(household, banks[-1])
+
+
+def test_choose_deposit_bank_opens_account_with_amount(household_before_bank_choice):
+    # Given
+    new_bank = Mock()
+    household, deposit_market = household_before_bank_choice
+    household.model.random.choice.return_value = new_bank
+    household.deposit_bank = Mock()
+    deposit_market.close_account.return_value = 400
+
+    # When
+    household.choose_deposit_bank()
+
+    # Then
+    deposit_market.open_account.assert_called_with(household, new_bank, amount=400)
+
+
+def test_choose_deposit_bank_change_deposit_bank_ref(household_before_bank_choice):
+    # Given
+    new_bank = Mock()
+    household, _ = household_before_bank_choice
+    household.model.random.choice.return_value = new_bank
+
+    # When
+    household.choose_deposit_bank()
+
+    # Then
+    assert household.deposit_bank is new_bank
+
+
+def test_choose_deposit_bank_close_old_account(household_before_bank_choice):
+    # Given
+    old_bank = Mock()
+    household, deposit_market = household_before_bank_choice
+    household.deposit_bank = old_bank
+
+    # When
+    household.choose_deposit_bank()
+
+    # Then
+    deposit_market.close_account.assert_called_once_with(household, old_bank)

@@ -1,6 +1,6 @@
 import math
 import pytest
-from unittest.mock import Mock
+from unittest.mock import Mock, PropertyMock
 from mc_ab_sfc.agents.firm import Firm
 
 # ---------------------------------------------------
@@ -24,12 +24,33 @@ def firm():
     return firm
 
 
+def test_expose_deposits_total(firm):
+    # Given
+    deposits = [{"bank": object(), "amount": 500}]
+    deposit_market = Mock()
+    deposit_market.get_client_deposits.return_value = deposits
+    firm.model.deposit_markets = {"any": deposit_market}
+
+    # Assert
+    assert firm.deposits == 500
+
+
+def test_expose_deposit_interests_total(firm):
+    # Given
+    deposits = [{"bank": object(), "interests": 50.0}]
+    deposit_market = Mock()
+    deposit_market.get_client_deposits.return_value = deposits
+    firm.model.deposit_markets = {"any": deposit_market}
+
+    # Assert
+    assert firm.dep_interests == pytest.approx(50.0)
+
+
 def test_has_default_stocks(firm):
     # Assert
     assert firm.inventories == 0
     assert firm.cash == 0
     assert firm.loans == 0
-    assert firm.deposits == 0
     assert firm.equity == 0
 
 
@@ -38,7 +59,6 @@ def test_has_default_flows(firm):
     assert firm.sales == 0
     assert firm.wage_bill == 0
     assert firm.loan_interest == 0
-    assert firm.deposit_interest == 0
     assert firm.rd == 0
     assert firm.taxes == 0
     assert firm.dividends == 0
@@ -69,6 +89,11 @@ def test_has_default_indicators(firm):
     assert firm.prev_inventories == 0
     assert firm.prev_labor == 0
     assert firm.prev_desired_labor == 0
+
+
+def test_has_default_country_value(firm):
+    # Assert
+    assert firm.country is None
 
 
 # ---------------------------------------------------
@@ -571,13 +596,22 @@ def test_update_productivity_by_imitation(innovating_firm):
 
 
 @pytest.fixture
-def borrowing_firm():
+def mock_deposits(monkeypatch):
+    # Given
+    mock_deposits = PropertyMock()
+    monkeypatch.setattr(Firm, "deposits", mock_deposits)
+    return mock_deposits
+
+
+@pytest.fixture
+def borrowing_firm(mock_deposits):
     # Given
     model = Mock()
     firm = Firm(model)
     firm.wage_offer = 10
     firm.desired_labor = 10
     firm.desired_rd = 50
+    firm.mock_deposits = mock_deposits
     firm.roles["borrower"] = Mock()
     return firm
 
@@ -585,7 +619,7 @@ def borrowing_firm():
 def test_calc_desired_loans_when_external_finance_needed(borrowing_firm):
     # Given
     firm = borrowing_firm
-    firm.deposits = 20
+    firm.mock_deposits.return_value = 20
 
     # When
     firm.calc_desired_loans()
@@ -597,7 +631,7 @@ def test_calc_desired_loans_when_external_finance_needed(borrowing_firm):
 def test_calc_desired_loans_when_internal_funds_are_sufficient(borrowing_firm):
     # Given
     firm = borrowing_firm
-    firm.deposits = 150
+    firm.mock_deposits.return_value = 150
 
     # When
     firm.calc_desired_loans()
@@ -641,14 +675,25 @@ def test_request_loan_and_set_loan_demand(borrowing_firm):
 # ----------------------------------------------------
 
 
-@pytest.mark.parametrize("sales, expected", [(600, 200), (200, -200)])
-def test_calc_net_cash_flow(firm, sales, expected):
+@pytest.fixture
+def firm_with_dep_interests(monkeypatch):
     # Given
+    mock_interests = PropertyMock()
+    monkeypatch.setattr(Firm, "dep_interests", mock_interests)
+    model = Mock()
+    firm = Firm(model)
+    return firm, mock_interests
+
+
+@pytest.mark.parametrize("sales, expected", [(600, 200), (200, -200)])
+def test_calc_net_cash_flow(firm_with_dep_interests, sales, expected):
+    # Given
+    firm, dep_interests = firm_with_dep_interests
     firm.sales = sales
-    firm.deposit_interest = 10
     firm.loan_interest = 20
     firm.wage_bill = 300
     firm.rd = 90
+    dep_interests.return_value = 10
 
     # When
     net_cash_flow = firm.calc_net_cash_flow()

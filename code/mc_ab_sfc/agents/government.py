@@ -28,6 +28,7 @@ class Government(EcoAgent):
         self.gdp = 0
         self.budget_deficit = 0
         self.budget_surplus = 0
+        self.country = None
 
         # accointances
         self.central_bank = None
@@ -124,16 +125,18 @@ class Government(EcoAgent):
         return self.p.chi * (self.bonds / self.gdp) + discount_rate
 
     def issue_deposit_guarantee_bonds(self):
-        guarantee_role = self.roles["deposit_guarantee"]
-        defaults = guarantee_role.get_defaulted_banks()
-        needs = sum([b.defaulted_deposits for b in defaults])
+        deposit_market = self.model.deposit_markets[self.country]
+        defaults = deposit_market.get_defaulted_banks()
+        needs = sum([b.deposits for b in defaults])
         self.bond_supply += needs
         self._defaults = defaults
 
     def reimburse_deposits(self):
-        guarantee_role = self.roles["deposit_guarantee"]
+        market = self.model.deposit_markets[self.country]
         for bank in self._defaults:
-            guarantee_role.reimburse_deposits(bank)
+            for deposit in market.get_bank_deposits(bank):
+                client = deposit["client"]
+                market.reimburse_deposits(self, client, bank)
 
     def update_history(self):
         role = self.roles["government"]

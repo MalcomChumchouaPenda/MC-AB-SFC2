@@ -28,10 +28,14 @@ def bank():
 def test_has_default_stocks(bank):
     # Assert
     assert bank.loans == 0
-    assert bank.deposits == 0
     assert bank.equity == 0
     assert bank.reserves == 0
     assert bank.cash_advances == 0
+
+
+def test_has_default_country_value(bank):
+    # Assert
+    assert bank.country is None
 
 
 def test_expose_bonds_total(bank):
@@ -54,10 +58,31 @@ def test_expose_bond_interests_total(bank):
     assert bank.bond_interests == pytest.approx(50.0)
 
 
+def test_expose_deposits_total(bank):
+    # Given
+    deposits = [{"client": object(), "amount": 500}]
+    deposit_market = Mock()
+    deposit_market.get_bank_deposits.return_value = deposits
+    bank.model.deposit_markets = {"any": deposit_market}
+
+    # Assert
+    assert bank.deposits == 500
+
+
+def test_expose_deposit_interests_total(bank):
+    # Given
+    deposits = [{"client": object(), "interests": 50.0}]
+    deposit_market = Mock()
+    deposit_market.get_bank_deposits.return_value = deposits
+    bank.model.deposit_markets = {"any": deposit_market}
+
+    # Assert
+    assert bank.dep_interests == pytest.approx(50.0)
+
+
 def test_has_default_flows(bank):
     # Assert
     assert bank.loan_interest == 0
-    assert bank.deposit_interest == 0
     assert bank.reserve_interest == 0
     assert bank.cash_advance_interest == 0
     assert bank.dividends == 0
@@ -97,16 +122,21 @@ def test_update_deposit_rate_as_fraction_of_discount_rate(bank):
     assert bank.deposit_rate == pytest.approx(0.04)
 
 
-def test_pay_deposit_interest_delegates_to_role(bank):
+def test_pay_deposit_interests_to_all_clients(bank):
     # Given
-    bank_role = Mock()
-    bank.roles["deposit_bank"] = bank_role
+    client = object()
+    deposits = [{"client": client, "amount": 100}]
+    deposit_market = Mock()
+    deposit_market.get_bank_deposits.return_value = deposits
+    bank.model.deposit_markets = {"any": deposit_market}
+    bank.deposit_rate = 0.05
 
     # When
-    bank.pay_deposit_interest()
+    bank.pay_deposit_interests()
 
     # Then
-    bank_role.pay_deposit_interest.assert_called_once()
+    deposit_market.get_bank_deposits.assert_called_once_with(bank)
+    deposit_market.pay_interests.assert_called_once_with(client, bank, 5.0)
 
 
 def test_updates_credit_capacity(bank):
@@ -233,9 +263,11 @@ def test_grant_loans_cleans_loan_applicants_list(bank_as_lender):
 
 
 @pytest.fixture
-def bank_in_banksystem():
+def bank_in_banksystem(monkeypatch):
     model = Mock()
     model.p.mu2 = 0.1
+    deposits_prop = PropertyMock(return_value=1000)
+    monkeypatch.setattr(Bank, "deposits", deposits_prop)
     bank = Bank(model)
     bank.roles["commercial_bank"] = Mock()
     return bank
@@ -244,7 +276,6 @@ def bank_in_banksystem():
 def test_doesnot_request_cash_advance_when_sufficient_reserves(bank_in_banksystem):
     # Given
     bank = bank_in_banksystem
-    bank.deposits = 1000
     bank.reserves = 200
 
     # When
@@ -258,7 +289,6 @@ def test_doesnot_request_cash_advance_when_sufficient_reserves(bank_in_banksyste
 def test_request_cash_advance_when_insufficient_reserves(bank_in_banksystem):
     # Given
     bank = bank_in_banksystem
-    bank.deposits = 1000
     bank.reserves = 50
 
     # When
@@ -284,10 +314,11 @@ def test_calc_bond_purchases_probability():
 
 
 @pytest.mark.parametrize("reserves, expected", [(150, 50), (100, 0)])
-def test_calc_excess_reserves(bank, reserves, expected):
+def test_calc_excess_reserves(monkeypatch, reserves, expected):
     # Given
+    monkeypatch.setattr(Bank, "deposits", PropertyMock(return_value=1000))
+    bank = Bank(model=Mock())
     bank.p.mu2 = 0.1
-    bank.deposits = 1000
     bank.reserves = reserves
 
     # When
@@ -363,23 +394,41 @@ def test_buy_bonds_with_excess_reserves(bank_as_bond_buyer, bond_issuers):
     bond_market.buy_bonds.assert_called_once_with(bank, bond_issuers[0], 50)
 
 
-@pytest.fixture
-def interest_props(monkeypatch):
-    bond_interest = PropertyMock()
-    monkeypatch.setattr(Bank, "bond_interests", bond_interest)
-    return bond_interest
-
-
-def test_calc_profit(interest_props):
+def test_dont_buy_bonds_with_insufficient_reserves(bank_as_bond_buyer, bond_issuers):
     # Given
-    bond_interest = interest_props
-    bond_interest.return_value = 30
-    bank = Bank(model=Mock())
+    bank = bank_as_bond_buyer
+    bank.calc_excess_reserves.return_value = 50
+    bond_market = bank.model.bond_market
+
+    # When
+    bank.buy_bonds()
+
+    # Then
+    bond_market.buy_bonds.assert_called_once_with(bank, bond_issuers[0], 50)
+
+
+@pytest.fixture
+def mock_dep_interests(monkeypatch):
+    dep_interests = PropertyMock()
+    monkeypatch.setattr(Bank, "dep_interests", dep_interests)
+    return dep_interests
+
+
+@pytest.fixture
+def mock_bond_interests(monkeypatch):
+    bond_interests = PropertyMock()
+    monkeypatch.setattr(Bank, "bond_interests", bond_interests)
+    return bond_interests
+
+
+def test_calc_profit(bank, mock_dep_interests, mock_bond_interests):
+    # Given
     bank.loan_interest = 100
     bank.reserve_interest = 10
     bank.bad_debt = 20
-    bank.deposit_interest = 40
     bank.cash_advance_interest = 10
+    mock_dep_interests.return_value = 40
+    mock_bond_interests.return_value = 30
 
     # When
     profit = bank.calc_profit()

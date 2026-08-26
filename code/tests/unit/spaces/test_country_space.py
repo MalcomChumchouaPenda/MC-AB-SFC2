@@ -684,7 +684,7 @@ def test_create_firm_add_borrower_role(country_before_firm_creation, tradable):
 
 
 @pytest.mark.parametrize("tradable", [True, False])
-def test_create_firm_add_deposit_holder_role(country_before_firm_creation, tradable):
+def test_create_firm_add_client_role(country_before_firm_creation, tradable):
     # Given
     country = country_before_firm_creation
     market = country.markets["deposit"]
@@ -694,7 +694,7 @@ def test_create_firm_add_deposit_holder_role(country_before_firm_creation, trada
     firm = country.create_firm(founders, tradable=tradable)
 
     # Then
-    market.add_deposit_holder.assert_called_with(firm)
+    market.add_client.assert_called_with(firm)
 
 
 @pytest.mark.parametrize("tradable", [True, False])
@@ -828,7 +828,7 @@ def test_create_bank_add_lender_role(country_before_bank_creation):
     market.add_lender.assert_called_with(bank)
 
 
-def test_create_bank_add_deposit_bank_role(country_before_bank_creation):
+def test_create_bank_add_bank_role(country_before_bank_creation):
     # Given
     country = country_before_bank_creation
     market = country.markets["deposit"]
@@ -838,7 +838,7 @@ def test_create_bank_add_deposit_bank_role(country_before_bank_creation):
     bank = country.create_bank(founders)
 
     # Then
-    market.add_deposit_bank.assert_called_with(bank)
+    market.add_bank.assert_called_with(bank)
 
 
 def test_create_bank_add_equity_issuer_role(country_before_bank_creation):

@@ -8,13 +8,11 @@ class Household(EcoAgent):
     def setup(self):
         # stocks
         self.cash = 0
-        self.deposits = 0
         self.equity = 0
         self.net_worth = 0
 
         # flows
         self.labor_income = 0
-        self.deposit_interest = 0
         self.dividends = 0
         self.rd_income = 0
         self.taxes = 0
@@ -39,6 +37,26 @@ class Household(EcoAgent):
         # others props
         self.labor_supply = 1.0
         self.position = 0
+        self.country = None
+
+        # accointances
+        self.deposit_bank = None
+
+    @property
+    def deposits(self):
+        total = 0
+        for market in self.model.deposit_markets.values():
+            deposits = market.get_client_deposits(self)
+            total += sum([d["amount"] for d in deposits])
+        return total
+
+    @property
+    def dep_interests(self):
+        total = 0
+        for market in self.model.deposit_markets.values():
+            deposits = market.get_client_deposits(self)
+            total += sum([d["interests"] for d in deposits])
+        return total
 
     def revise_reservation_wage(self):
         p = self.p
@@ -81,9 +99,7 @@ class Household(EcoAgent):
         role.pay_taxes(taxes)
 
     def calc_income(self):
-        return (
-            self.labor_income + self.deposit_interest + self.dividends + self.rd_income
-        )
+        return self.labor_income + self.dep_interests + self.dividends + self.rd_income
 
     def calc_disposable_income(self):
         role = self.roles["tax_payer"]
@@ -138,7 +154,7 @@ class Household(EcoAgent):
         roles = self.roles
         equity = self.equity
         default_prob = roles["equity_holder"].get_default_probability()
-        deposit_rate = roles["deposit_holder"].get_deposit_rate()
+        deposit_rate = self.deposit_bank.deposit_rate
         profit_ratio = self.dividends / equity if equity else 0
         if profit_ratio < deposit_rate or self.equity <= 0:
             return p.lambda_
@@ -200,5 +216,21 @@ class Household(EcoAgent):
             role.create_firm(founders, tradable=False)
 
     def make_deposits(self):
-        role = self.roles["deposit_holder"]
-        role.make_deposits(self.cash)
+        bank = self.deposit_bank
+        market = self.model.deposit_markets[self.country]
+        market.make_deposits(self, bank, self.cash)
+
+    def choose_deposit_bank(self):
+        old_bank = self.deposit_bank
+        country = self.country
+        deposit_market = self.model.deposit_markets[country]
+        banks = deposit_market.get_banks()
+        if len(banks) > 0:
+            random = self.model.random
+            new_bank = random.choice(banks)
+            if old_bank is None:
+                deposit_market.open_account(self, new_bank)
+            else:
+                amount = deposit_market.close_account(self, old_bank)
+                deposit_market.open_account(self, new_bank, amount=amount)
+            self.deposit_bank = new_bank

@@ -1,52 +1,66 @@
-from ..base import EcoSpace
-from ..roles import (
-    DepositHolderRole,
-    DepositBankRole,
-    DepositGuaranteeRole,
-)
+from agentpy.objects import Object
+from networkx import Graph
 
 
-class DepositMarket(EcoSpace):
+class DepositMarket(Object):
 
-    def add_deposit_holder(self, agent):
-        return self.add_role(DepositHolderRole, agent, "deposit_holder")
+    def setup(self):
+        self.deposits = Graph()
 
-    def add_deposit_bank(self, bank):
-        return self.add_role(DepositBankRole, bank, "deposit_bank")
+    def add_client(self, client):
+        self.deposits.add_node(client, role="client")
 
-    def add_deposit_guarantee(self, bank):
-        return self.add_role(DepositGuaranteeRole, bank, "deposit_guarantee")
+    def add_bank(self, bank):
+        self.deposits.add_node(bank, role="bank")
 
-    def assign_deposit_bank(self, deposit_holder, deposit_bank):
-        deposit_holder.deposit_bank = deposit_bank
-        self.graph.add_edge(deposit_bank, deposit_holder)
+    def get_bank_deposits(self, bank):
+        return [
+            dict(client=client, **data)
+            for _, client, data in self.deposits.edges(bank, data=True)
+        ]
 
-    def pay_deposit_interest(self, deposit_bank):
-        deposit_rate = deposit_bank.deposit_rate
-        for _, holder in self.graph.edges(deposit_bank):
-            interest = holder.deposits * deposit_rate
-            holder.increase_stock("deposits", interest)
-            holder.increase_flow("deposit_interest", interest)
-            deposit_bank.increase_stock("deposits", interest)
-            deposit_bank.increase_flow("deposit_interest", interest)
+    def get_client_deposits(self, client):
+        return [
+            dict(bank=bank, **data)
+            for _, bank, data in self.deposits.edges(client, data=True)
+        ]
+
+    def get_banks(self):
+        return [
+            node
+            for node, data in self.deposits.nodes(data=True)
+            if data and data["role"] == "bank"
+        ]
 
     def get_defaulted_banks(self):
         return [
-            n
-            for n in self.graph.nodes
-            if isinstance(n, DepositBankRole) and n.defaulted
+            node
+            for node, data in self.deposits.nodes(data=True)
+            if data and data["role"] == "bank" and node.defaulted
         ]
 
-    def reimburse_deposits(self, guarantee, deposit_bank):
-        for _, holder in self.graph.edges(deposit_bank):
-            amount = holder.deposits
-            holder.increase_stock("cash", amount)
-            holder.decrease_stock("deposits", amount)
-            guarantee.decrease_stock("reserves", amount)
-            deposit_bank.decrease_stock("deposits", amount)
+    def open_account(self, client, bank, amount=0):
+        self.deposits.add_edge(client, bank, amount=amount)
 
-    def make_deposits(self, holder, bank, amount):
-        holder.increase_stock("deposits", amount)
-        holder.decrease_stock("cash", amount)
-        bank.increase_stock("deposits", amount)
-        bank.increase_stock("reserves", amount)
+    def close_account(self, client, bank):
+        amount = self.deposits[client][bank]["amount"]
+        bank.reserves -= amount
+        client.cash += amount
+        self.deposits.remove_edge(client, bank)
+        return amount
+
+    def pay_interests(self, client, bank, amount):
+        deposits = self.deposits
+        deposits[client][bank]["amount"] += amount
+        deposits[client][bank]["interests"] = amount
+
+    def reimburse_deposits(self, govt, client, bank):
+        amount = self.deposits[client][bank]["amount"]
+        govt.reserves -= amount
+        client.cash += amount
+        self.deposits[client][bank]["amount"] = 0
+
+    def make_deposits(self, client, bank, amount):
+        client.cash -= amount
+        bank.reserves += amount
+        self.deposits[client][bank]["amount"] += amount
