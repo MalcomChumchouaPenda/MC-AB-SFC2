@@ -108,25 +108,6 @@ def country_with_roles():
     return country
 
 
-class FakeGovtRole(Mock):
-    pass
-
-
-def test_add_government_role(country_with_roles, monkeypatch):
-    # Given
-    govt = Mock()
-    country = country_with_roles
-    monkeypatch.setattr("mc_ab_sfc.spaces.country.GovernmentRole", FakeGovtRole)
-
-    # When
-    govt_role = country.add_government(govt)
-
-    # Then
-    country.add_role.assert_any_call(FakeGovtRole, govt, "government")
-    assert isinstance(govt_role, FakeGovtRole)
-    assert govt_role == country.government_role
-
-
 class FakeBankRole(Mock):
     pass
 

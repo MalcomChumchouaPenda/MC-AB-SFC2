@@ -80,7 +80,6 @@ def test_household_creates_new_firm(country, founders, govt):
     holder1 = country.add_equity_holder(founder1)
     holder2 = country.add_equity_holder(founder2)
     country.markets["deposit"].add_client(founder1)
-    country.add_government(govt)
     firms = country.model.firms
     graph = country.graph
 
@@ -103,7 +102,6 @@ def test_household_creates_new_firm(country, founders, govt):
 def test_household_creates_no_firm(country, founders, govt):
     # Given
     founder, _ = founders
-    country.add_government(govt)
     country.add_equity_holder(founder)
     deposit_market = country.markets["deposit"]
     deposit_market.add_client(founder)
@@ -127,7 +125,6 @@ def test_household_creates_new_bank(country, founders, govt):
     holder2 = country.add_equity_holder(founder2)
     country.markets["deposit"].add_client(founder1)
     country.firm_roles = [Mock(equity=100) for _ in range(5)]
-    country.add_government(govt)
     banks = country.model.banks
     graph = country.graph
 
@@ -150,7 +147,6 @@ def test_household_creates_new_bank(country, founders, govt):
 def test_household_creates_no_bank(country, founders, govt):
     # Given
     founder, _ = founders
-    country.add_government(govt)
     country.add_equity_holder(founder)
     country.firm_roles = [Mock(equity=100) for _ in range(5)]
     deposit_market = country.markets["deposit"]
@@ -170,7 +166,6 @@ def test_household_creates_no_bank(country, founders, govt):
 def test_household_makes_deposits_with_residual_cash(country, founders, bank, govt):
     # Given
     founder, _ = founders
-    country.add_government(govt)
     country.add_equity_holder(founder)
     deposit_market = country.markets["deposit"]
     # bank_role = deposit_market.add_bank(bank)

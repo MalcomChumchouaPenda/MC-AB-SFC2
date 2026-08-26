@@ -218,11 +218,10 @@ def test_calc_and_records_with_no_deficit_or_surplus(govt_with_bond_interests):
 
 def test_calc_and_records_desired_public_spending(govt):
     # Given
-    govt_role = Mock()
-    govt_role.get_average_price.return_value = 2
-    govt_role.get_average_productivity.return_value = 3
-    govt.roles["government"] = govt_role
+    goods_market = Mock(average_price=2, average_productivity=3)
+    govt.model.goods_markets = {"any": goods_market}
     govt.prev_public_spending = 10
+    govt.country = "any"
 
     # When
     desired = govt.calc_desired_public_spending()
@@ -561,16 +560,19 @@ def test_reimburse_deposits(govt_as_deposit_guarantee):
 def govt_with_history():
     # Given
     model = Mock()
+    goods_market = Mock(gdp=0)
     govt = Government(model)
-    govt.roles["government"] = Mock()
+    govt.setup()
+    govt.country = "any"
+    model.goods_markets = {"any": goods_market}
     return govt
 
 
 def test_update_production_history(govt_with_history):
     # Given
     govt = govt_with_history
-    govt_role = govt.roles["government"]
-    govt_role.get_gdp.return_value = 120
+    goods_market = govt.model.goods_markets["any"]
+    goods_market.gdp = 120
 
     # When
     govt.update_history()

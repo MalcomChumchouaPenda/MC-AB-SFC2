@@ -1,7 +1,6 @@
 from ..base import EcoSpace
 from ..agents import Firm, Bank, Household
 from ..roles import (
-    GovernmentRole,
     EquityHolderRole,
     EquityIssuerRole,
     CommercialBankRole,
@@ -19,11 +18,6 @@ class CountrySpace(EcoSpace):
         self.discount_rate = 0.0
         self.tax_rate = 0
         self.markets = {}
-
-    def add_government(self, govt):
-        govt_role = self.add_role(GovernmentRole, govt, "government")
-        self.government_role = govt_role
-        return govt_role
 
     @property
     def inflation(self):

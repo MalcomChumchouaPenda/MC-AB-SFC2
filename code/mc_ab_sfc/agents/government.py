@@ -85,9 +85,9 @@ class Government(EcoAgent):
         self.apply_public_spending_bounds()
 
     def calc_desired_public_spending(self):
-        role = self.roles["government"]
-        average_price = role.get_average_price()
-        average_prod = role.get_average_productivity()
+        goods_market = self.model.goods_markets[self.country]
+        average_price = goods_market.average_price
+        average_prod = goods_market.average_productivity
         prev_spending = self.prev_public_spending
         desired_spending = average_price * average_prod * prev_spending
         self.desired_public_spending = desired_spending
@@ -144,7 +144,7 @@ class Government(EcoAgent):
                 market.reimburse_deposits(self, client, bank)
 
     def update_history(self):
-        role = self.roles["government"]
-        self.gdp = role.get_gdp()
+        goods_market = self.model.goods_markets[self.country]
+        self.gdp = goods_market.gdp
         self.prev_budget_surplus = self.budget_surplus
         self.prev_public_spending = self.public_spending

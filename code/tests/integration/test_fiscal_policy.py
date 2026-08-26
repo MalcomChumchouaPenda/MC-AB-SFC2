@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import Mock
-from mc_ab_sfc.spaces import CountrySpace
+from mc_ab_sfc.spaces import GoodsMarket
 from mc_ab_sfc.agents import Government, CentralBank, Household
 
 
@@ -22,6 +22,8 @@ def model():
 def govt(model):
     # Given
     govt = Government(model)
+    govt.setup()
+    govt.country = "any"
     govt.prev_public_spending = 10
     govt.public_spending = 100
     govt.budget_deficit = 100
@@ -31,16 +33,18 @@ def govt(model):
 
 
 @pytest.fixture
-def country(model):
+def goods_market(model):
     # Given
-    country = CountrySpace(model)
-    country.markets["goods"] = Mock(average_price=2, average_productivity=3)
-    return country
+    goods_market = GoodsMarket(model)
+    goods_market.setup()
+    model.goods_markets = {"any": goods_market}
+    return goods_market
 
 
-def test_government_updates_fiscal_policy(govt, country):
+def test_government_updates_fiscal_policy(govt, goods_market):
     # Given
-    country.add_government(govt)
+    goods_market.average_price = 2
+    goods_market.average_productivity = 3
 
     # When
     govt.update_fiscal_policy()
