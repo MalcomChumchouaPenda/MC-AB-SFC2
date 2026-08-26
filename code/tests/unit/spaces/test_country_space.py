@@ -108,42 +108,6 @@ def country_with_roles():
     return country
 
 
-class FakeBankRole(Mock):
-    pass
-
-
-def test_add_commercial_bank_role(country_with_roles, monkeypatch):
-    # Given
-    agent = Mock()
-    cb_role = Mock()
-    country = country_with_roles
-    country.central_bank_role = cb_role
-    monkeypatch.setattr("mc_ab_sfc.spaces.country.CommercialBankRole", FakeBankRole)
-
-    # When
-    bank_role = country.add_commercial_bank(agent)
-
-    # Then
-    country.add_role.assert_any_call(FakeBankRole, agent, "commercial_bank")
-    assert isinstance(bank_role, FakeBankRole)
-
-
-def test_add_commercial_bank_role_creates_links(country_with_roles, monkeypatch):
-    # Given
-    agent = Mock()
-    cb_role = Mock()
-    country = country_with_roles
-    country.central_bank_role = cb_role
-    monkeypatch.setattr("mc_ab_sfc.spaces.country.CommercialBankRole", FakeBankRole)
-
-    # When
-    bank_role = country.add_commercial_bank(agent)
-
-    # Then
-    assert country.graph.has_edge(cb_role, bank_role)
-    assert bank_role.central_bank is cb_role
-
-
 class FakeHolderRole(Mock):
     pass
 
@@ -561,7 +525,6 @@ def country_before_bank_creation(monkeypatch):
     # Given
     model = Mock()
     country = CountrySpace(model)
-    country.add_commercial_bank = Mock()
     country.add_equity_issuer = Mock()
     country.assign_equity_holder = Mock()
     country.markets = {

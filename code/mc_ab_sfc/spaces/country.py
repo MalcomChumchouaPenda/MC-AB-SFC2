@@ -1,10 +1,6 @@
 from ..base import EcoSpace
-from ..agents import Firm, Bank, Household
-from ..roles import (
-    EquityHolderRole,
-    EquityIssuerRole,
-    CommercialBankRole,
-)
+from ..agents import Firm, Bank
+from ..roles import EquityHolderRole, EquityIssuerRole
 
 
 class CountrySpace(EcoSpace):
@@ -34,12 +30,6 @@ class CountrySpace(EcoSpace):
     @property
     def average_wage(self):
         return self.markets["labor"].average_wage
-
-    def add_commercial_bank(self, agent):
-        bank_role = self.add_role(CommercialBankRole, agent, "commercial_bank")
-        bank_role.central_bank = self.central_bank_role
-        self.graph.add_edge(self.central_bank_role, bank_role)
-        return bank_role
 
     def add_equity_issuer(self, agent):
         role = self.add_role(EquityIssuerRole, agent, "equity_issuer")
