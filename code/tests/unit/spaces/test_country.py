@@ -32,7 +32,7 @@ def test_has_default_agent_refs(country):
     
 def test_has_default_space_refs(country):
     # Assert
-    assert country.monetary_union is None
+    assert country.union is None
     assert country.goods_market is None
     assert country.labor_market is None
     assert country.deposit_market is None
@@ -41,8 +41,7 @@ def test_has_default_space_refs(country):
 
 def test_exposes_inflation(country):
     # Given
-    goods_market = Mock(inflation=0.03)
-    country.markets = {"goods": goods_market}
+    country.goods_market = Mock(inflation=0.03)
 
     # Assert
     assert country.inflation == 0.03
@@ -50,8 +49,7 @@ def test_exposes_inflation(country):
 
 def test_exposes_average_price(country):
     # Given
-    goods_market = Mock(average_price=10)
-    country.markets = {"goods": goods_market}
+    country.goods_market = Mock(average_price=10)
 
     # Assert
     assert country.average_price == 10
@@ -59,8 +57,7 @@ def test_exposes_average_price(country):
 
 def test_exposes_average_productivity(country):
     # Given
-    goods_market = Mock(average_productivity=1.5)
-    country.markets = {"goods": goods_market}
+    country.goods_market = Mock(average_productivity=1.5)
 
     # Assert
     assert country.average_productivity == 1.5
@@ -68,8 +65,7 @@ def test_exposes_average_productivity(country):
 
 def test_exposes_average_wage(country):
     # Given
-    labor_market = Mock(average_wage=15)
-    country.markets = {"labor": labor_market}
+    country.labor_market = Mock(average_wage=15)
 
     # Assert
     assert country.average_wage == 15
@@ -262,7 +258,7 @@ class FakeHousehold:
 def test_update_statistics_with_goods_market_stats_updates(country):
     # Given
     goods_market = Mock()
-    country.markets["goods"] = goods_market
+    country.goods_market = goods_market
 
     # When
     country.update_statistics()
@@ -308,7 +304,9 @@ def test_get_investors_excludes_initiating_household(country, monkeypatch):
 def monetary_union():
     # Given
     union = Mock()
-    union.markets = {"goods": Mock()}
+    union.goods_market = Mock()
+    union.credit_market = Mock()
+    union.bond_market = Mock()
     return union
 
 
@@ -319,13 +317,10 @@ def country_before_firm_creation(monkeypatch, monetary_union):
     country = Country(model)
     country.add_equity_issuer = Mock()
     country.assign_equity_holder = Mock()
-    country.monetary_union = monetary_union
-    country.markets = {
-        "labor": Mock(),
-        "goods": Mock(),
-        "deposit": Mock(),
-        "credit": Mock(),
-    }
+    country.union = monetary_union
+    country.goods_market = Mock()
+    country.labor_market = Mock()
+    country.deposit_market = Mock()
     monkeypatch.setattr("mc_ab_sfc.spaces.country.Firm", FakeFirm)
     return country
 
@@ -361,8 +356,8 @@ def test_create_firm_registers_firm_in_model(country_before_firm_creation):
 def test_create_firm_add_supplier_to_non_tradable_market(country_before_firm_creation):
     # Given
     country = country_before_firm_creation
-    non_tradable_market = country.markets["goods"]
-    tradable_market = country.monetary_union.markets["goods"]
+    non_tradable_market = country.goods_market
+    tradable_market = country.union.goods_market
     founders = [Mock(desired_equity=1000)]
 
     # When
@@ -376,8 +371,8 @@ def test_create_firm_add_supplier_to_non_tradable_market(country_before_firm_cre
 def test_create_firm_add_supplier_to_tradable_market(country_before_firm_creation):
     # Given
     country = country_before_firm_creation
-    non_tradable_market = country.markets["goods"]
-    tradable_market = country.monetary_union.markets["goods"]
+    non_tradable_market = country.goods_market
+    tradable_market = country.union.goods_market
     founders = [Mock(desired_equity=1000)]
 
     # When
@@ -392,42 +387,42 @@ def test_create_firm_add_supplier_to_tradable_market(country_before_firm_creatio
 def test_create_firm_add_employer_role(country_before_firm_creation, tradable):
     # Given
     country = country_before_firm_creation
-    market = country.markets["labor"]
+    labor_market = country.labor_market
     founders = [Mock(desired_equity=1000)]
 
     # When
     firm = country.create_firm(founders, tradable=tradable)
 
     # Then
-    market.add_employer.assert_called_with(firm)
+    labor_market.add_employer.assert_called_with(firm)
 
 
 @pytest.mark.parametrize("tradable", [True, False])
 def test_create_firm_add_borrower_role(country_before_firm_creation, tradable):
     # Given
     country = country_before_firm_creation
-    market = country.markets["credit"]
+    credit_market = country.union.credit_market
     founders = [Mock(desired_equity=1000)]
 
     # When
     firm = country.create_firm(founders, tradable=tradable)
 
     # Then
-    market.add_borrower.assert_called_with(firm)
+    credit_market.add_borrower.assert_called_with(firm)
 
 
 @pytest.mark.parametrize("tradable", [True, False])
 def test_create_firm_add_client_role(country_before_firm_creation, tradable):
     # Given
     country = country_before_firm_creation
-    market = country.markets["deposit"]
+    deposit_market = country.deposit_market
     founders = [Mock(desired_equity=1000)]
 
     # When
     firm = country.create_firm(founders, tradable=tradable)
 
     # Then
-    market.add_client.assert_called_with(firm)
+    deposit_market.add_client.assert_called_with(firm)
 
 
 @pytest.mark.parametrize("tradable", [True, False])
@@ -479,16 +474,16 @@ def test_create_firm_builds_initial_equity(country_before_firm_creation, tradabl
 
 
 @pytest.fixture
-def country_before_bank_creation(monkeypatch):
+def country_before_bank_creation(monkeypatch, monetary_union):
     # Given
     model = Mock()
     country = Country(model)
     country.add_equity_issuer = Mock()
     country.assign_equity_holder = Mock()
-    country.markets = {
-        "deposit": Mock(),
-        "credit": Mock(),
-    }
+    country.union = monetary_union
+    country.goods_market = Mock()
+    country.labor_market = Mock()
+    country.deposit_market = Mock()
     monkeypatch.setattr("mc_ab_sfc.spaces.country.Bank", FakeBank)
     return country
 
@@ -508,9 +503,9 @@ def test_create_bank_creates_bank_agent(country_before_bank_creation):
 
 def test_create_bank_registers_bank_in_model(country_before_bank_creation):
     # Given
+    founders = [Mock(desired_equity=1000)]
     country = country_before_bank_creation
     model = country.model
-    founders = [Mock(desired_equity=1000)]
 
     # When
     bank = country.create_bank(founders)
@@ -521,9 +516,9 @@ def test_create_bank_registers_bank_in_model(country_before_bank_creation):
 
 def test_create_bank_add_bond_buyer(country_before_bank_creation):
     # Given
+    founders = [Mock(desired_equity=1000)]
     country = country_before_bank_creation
     market = country.model.bond_market
-    founders = [Mock(desired_equity=1000)]
 
     # When
     bank = country.create_bank(founders)
@@ -534,28 +529,28 @@ def test_create_bank_add_bond_buyer(country_before_bank_creation):
 
 def test_create_bank_add_lender_role(country_before_bank_creation):
     # Given
-    country = country_before_bank_creation
-    market = country.markets["credit"]
     founders = [Mock(desired_equity=1000)]
+    country = country_before_bank_creation
+    credit_market = country.union.credit_market
 
     # When
     bank = country.create_bank(founders)
 
     # Then
-    market.add_lender.assert_called_with(bank)
+    credit_market.add_lender.assert_called_with(bank)
 
 
 def test_create_bank_add_bank_role(country_before_bank_creation):
     # Given
-    country = country_before_bank_creation
-    market = country.markets["deposit"]
     founders = [Mock(desired_equity=1000)]
+    country = country_before_bank_creation
+    deposit_market = country.deposit_market
 
     # When
     bank = country.create_bank(founders)
 
     # Then
-    market.add_bank.assert_called_with(bank)
+    deposit_market.add_bank.assert_called_with(bank)
 
 
 def test_create_bank_add_equity_issuer_role(country_before_bank_creation):

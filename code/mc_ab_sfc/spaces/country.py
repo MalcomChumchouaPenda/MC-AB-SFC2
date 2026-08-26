@@ -11,7 +11,7 @@ class Country(EcoSpace):
         self.central_bank = None
 
         # space refs
-        self.monetary_union = None
+        self.union = None
         self.goods_market = None
         self.labor_market = None
         self.deposit_market = None
@@ -22,19 +22,19 @@ class Country(EcoSpace):
 
     @property
     def inflation(self):
-        return self.markets["goods"].inflation
+        return self.goods_market.inflation
 
     @property
     def average_price(self):
-        return self.markets["goods"].average_price
+        return self.goods_market.average_price
 
     @property
     def average_productivity(self):
-        return self.markets["goods"].average_productivity
+        return self.goods_market.average_productivity
 
     @property
     def average_wage(self):
-        return self.markets["labor"].average_wage
+        return self.labor_market.average_wage
 
     def add_equity_issuer(self, agent):
         role = self.add_role(EquityIssuerRole, agent, "equity_issuer")
@@ -111,13 +111,13 @@ class Country(EcoSpace):
             self.assign_equity_holder(issuer, founder)
 
     def _create_firm_market_roles(self, firm, tradable):
-        self.markets["labor"].add_employer(firm)
-        self.markets["credit"].add_borrower(firm)
-        self.markets["deposit"].add_client(firm)
+        self.labor_market.add_employer(firm)
+        self.union.credit_market.add_borrower(firm)
+        self.deposit_market.add_client(firm)
         if tradable:
-            self.monetary_union.markets["goods"].add_supplier(firm)
+            self.union.goods_market.add_supplier(firm)
         else:
-            self.markets["goods"].add_supplier(firm)
+            self.goods_market.add_supplier(firm)
 
     def create_bank(self, founders):
         bank = Bank(self.model)
@@ -138,9 +138,9 @@ class Country(EcoSpace):
             self.assign_equity_holder(issuer, founder)
 
     def _create_bank_market_roles(self, bank):
-        self.markets["credit"].add_lender(bank)
-        self.markets["deposit"].add_bank(bank)
+        self.union.credit_market.add_lender(bank)
+        self.deposit_market.add_bank(bank)
         self.model.bond_market.add_buyer(bank)
 
     def update_statistics(self):
-        self.markets["goods"].update_statistics()
+        self.goods_market.update_statistics()
