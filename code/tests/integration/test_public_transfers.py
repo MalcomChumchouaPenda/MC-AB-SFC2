@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import Mock, PropertyMock
 from mc_ab_sfc.spaces import CountrySpace
-from mc_ab_sfc.agents import Government, CentralBank, Household
+from mc_ab_sfc.agents import Government, NationalCentralBank, Household
 
 
 @pytest.fixture
@@ -14,39 +14,41 @@ def model():
 @pytest.fixture
 def govt(model):
     # Given
-    return Government(model)
+    govt = Government(model)
+    govt.setup()
+    return govt
 
 
 @pytest.fixture
 def cb(model, monkeypatch):
     # Given
     bond_interests = PropertyMock(return_value=100)
-    monkeypatch.setattr(CentralBank, "bond_interests", bond_interests)
-    cb = CentralBank(model)
+    monkeypatch.setattr(NationalCentralBank, "bond_interests", bond_interests)
+    cb = NationalCentralBank(model)
+    cb.setup()
     cb.cash_advance_interest = 50
     cb.reserve_interest = 20
     return cb
+
+
+def test_central_bank_transfer_profits(govt, cb):
+    # Given
+    cb.government = govt
+
+    # When
+    cb.transfer_profit()
+
+    # Then
+    assert cb.profits == 130
+    assert cb.reserves == 130
+    assert govt.profits == 130
+    assert govt.reserves == 130
 
 
 @pytest.fixture
 def country(model):
     # Given
     return CountrySpace(model)
-
-
-def test_central_bank_transfer_profits(govt, cb, country):
-    # Given
-    country.add_government(govt)
-    country.add_central_bank(cb)
-
-    # When
-    cb.pay_profit()
-
-    # Then
-    assert cb.profit == 130
-    assert cb.reserves == 130
-    assert govt.profit == 130
-    assert govt.reserves == 130
 
 
 @pytest.fixture

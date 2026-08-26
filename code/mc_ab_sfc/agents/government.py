@@ -11,7 +11,7 @@ class Government(EcoAgent):
 
         # flows
         self.taxes = 0
-        self.profit = 0
+        self.profits = 0
         self.public_transfers = 0
 
         # choices

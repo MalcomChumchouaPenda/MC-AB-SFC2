@@ -127,43 +127,6 @@ def test_add_government_role(country_with_roles, monkeypatch):
     assert govt_role == country.government_role
 
 
-class FakeCBRole(Mock):
-    pass
-
-
-def test_add_central_bank_role(country_with_roles, monkeypatch):
-    # Given
-    govt_role = Mock()
-    central_bank = Mock()
-    country = country_with_roles
-    country.government_role = govt_role
-    monkeypatch.setattr("mc_ab_sfc.spaces.country.NationalCentralBankRole", FakeCBRole)
-
-    # When
-    cb_role = country.add_central_bank(central_bank)
-
-    # Then
-    country.add_role.assert_any_call(FakeCBRole, central_bank, "central_bank")
-    assert isinstance(cb_role, FakeCBRole)
-    assert cb_role is country.central_bank_role
-
-
-def test_add_central_bank_role_creates_links(country_with_roles, monkeypatch):
-    # Given
-    govt_role = Mock()
-    central_bank = Mock()
-    country = country_with_roles
-    country.government_role = govt_role
-    monkeypatch.setattr("mc_ab_sfc.spaces.country.NationalCentralBankRole", FakeCBRole)
-
-    # When
-    cb_role = country.add_central_bank(central_bank)
-
-    # Then
-    assert country.graph.has_edge(govt_role, cb_role)
-    assert cb_role.government is govt_role
-
-
 class FakePayerRole(Mock):
     pass
 
@@ -493,21 +456,6 @@ def test_get_households_returns_household_agent_roles(country, monkeypatch):
 
     # Then
     assert result == household_roles
-
-
-def test_transfer_profit_to_government(country):
-    # Given
-    cb_role, govt_role = Mock(), Mock()
-    cb_role.government = govt_role
-
-    # When
-    country.transfer_profit(cb_role, 100)
-
-    # Then
-    cb_role.increase_stock.assert_called_once_with("reserves", 100)
-    cb_role.increase_flow.assert_called_once_with("profit", 100)
-    govt_role.increase_stock.assert_called_once_with("reserves", 100)
-    govt_role.increase_flow.assert_called_once_with("profit", 100)
 
 
 def test_pay_public_transfers_to_household(country):

@@ -1,7 +1,7 @@
 import math
 import pytest
 from unittest.mock import Mock, PropertyMock
-from mc_ab_sfc.agents import Bank, Firm
+from mc_ab_sfc.agents import Bank, Firm, NationalCentralBank
 from mc_ab_sfc.spaces import CreditMarket, CountrySpace
 
 
@@ -38,11 +38,13 @@ def firm(model, monkeypatch):
 
 
 @pytest.fixture
-def country(model):
+def cb(model, monkeypatch):
     # Given
-    country = CountrySpace(model)
-    country.discount_rate = 0.05
-    return country
+    mock_rate = PropertyMock(return_value=0.05)
+    monkeypatch.setattr(NationalCentralBank, "discount_rate", mock_rate)
+    cb = NationalCentralBank(model)
+    cb.setup()
+    return cb
 
 
 @pytest.fixture
@@ -51,11 +53,10 @@ def credit_market(model):
     return CreditMarket(model)
 
 
-def test_firm_request_loans(firm, bank, credit_market, country):
+def test_firm_request_loans(firm, bank, cb, credit_market):
     # Given
+    bank.central_bank = cb
     firm.desired_loans = 500
-    country.central_bank_role = Mock()
-    country.add_commercial_bank(bank)
     borrower = credit_market.add_borrower(firm)
     lender = credit_market.add_lender(bank)
 
@@ -66,12 +67,11 @@ def test_firm_request_loans(firm, bank, credit_market, country):
     assert lender.loan_applicants == [borrower]
 
 
-def test_bank_evaluates_credit_request(firm, bank, credit_market, country):
+def test_bank_evaluates_credit_request(firm, bank, cb, credit_market):
     # Given
     firm.equity = 100
     firm.desired_loans = 200
-    country.central_bank_role = Mock()
-    country.add_commercial_bank(bank)
+    bank.central_bank = cb
     borrower = credit_market.add_borrower(firm)
 
     # When
@@ -84,17 +84,16 @@ def test_bank_evaluates_credit_request(firm, bank, credit_market, country):
     assert rate == pytest.approx(0.15)
 
 
-def test_bank_grant_loans(firm, bank, credit_market, country):
+def test_bank_grant_loans(firm, bank, cb, credit_market):
     # Given
     firm.equity = 500
     firm.loans = 0
     firm.mock_deposits.return_value = 200
     firm.desired_loans = 1000
+    bank.central_bank = cb
     bank.equity = 7500
     bank.loans = 0
     bank.mock_deposits.return_value = 1000
-    country.central_bank_role = Mock()
-    country.add_commercial_bank(bank)
     credit_market.add_borrower(firm)
     credit_market.add_lender(bank)
 

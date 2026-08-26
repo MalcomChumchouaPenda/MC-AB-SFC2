@@ -1,9 +1,8 @@
 import pytest
-from unittest.mock import Mock
-from mc_ab_sfc.agents import Household, Firm, Bank, Government
+from unittest.mock import Mock, PropertyMock
+from mc_ab_sfc.agents import Household, Firm, Bank, Government, NationalCentralBank
 from mc_ab_sfc.spaces import (
     CountrySpace,
-    MonetaryUnionSpace,
     LaborMarket,
     DepositMarket,
     CreditMarket,
@@ -48,11 +47,11 @@ def bank(model):
 
 
 @pytest.fixture
-def union(model):
+def cb(model):
     # Given
-    union = MonetaryUnionSpace(model)
-    union.markets["goods"] = GoodsMarket(model, tradable=True)
-    return union
+    cb = NationalCentralBank(model)
+    cb.setup()
+    return cb
 
 
 @pytest.fixture
@@ -64,10 +63,9 @@ def bond_market(model):
 
 
 @pytest.fixture
-def country(model, union):
+def country(model):
     # Given
     country = CountrySpace(model)
-    country.monetary_union = union
     country.markets["goods"] = GoodsMarket(model, tradable=False)
     country.markets["labor"] = LaborMarket(model)
     country.markets["credit"] = CreditMarket(model)

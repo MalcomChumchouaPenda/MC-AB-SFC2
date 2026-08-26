@@ -4,7 +4,6 @@ from .borrower import BorrowerRole
 from .equity_holder import EquityHolderRole
 from .equity_issuer import EquityIssuerRole
 
-from .central_bank import UnionCentralBankRole, NationalCentralBankRole
 from .commercial_bank import CommercialBankRole
 from .government import GovernmentRole
 from .tax_payer import TaxPayerRole

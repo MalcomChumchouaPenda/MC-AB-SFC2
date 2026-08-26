@@ -5,7 +5,6 @@ from ..roles import (
     TaxPayerRole,
     EquityHolderRole,
     EquityIssuerRole,
-    NationalCentralBankRole,
     CommercialBankRole,
 )
 
@@ -26,13 +25,6 @@ class CountrySpace(EcoSpace):
         govt_role = self.add_role(GovernmentRole, govt, "government")
         self.government_role = govt_role
         return govt_role
-
-    def add_central_bank(self, central_bank):
-        cb_role = self.add_role(NationalCentralBankRole, central_bank, "central_bank")
-        cb_role.government = self.government_role
-        self.central_bank_role = cb_role
-        self.graph.add_edge(cb_role, self.government_role)
-        return cb_role
 
     @property
     def inflation(self):
@@ -117,13 +109,6 @@ class CountrySpace(EcoSpace):
         central_role.increase_stock("cash_advances", amount)
         bank_role.increase_stock("reserves", amount)
         bank_role.increase_stock("cash_advances", amount)
-
-    def transfer_profit(self, central_bank_role, amount):
-        govt_role = central_bank_role.government
-        govt_role.increase_flow("profit", amount)
-        govt_role.increase_stock("reserves", amount)
-        central_bank_role.increase_flow("profit", amount)
-        central_bank_role.increase_stock("reserves", amount)
 
     def get_households(self):
         return [

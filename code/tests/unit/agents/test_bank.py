@@ -38,6 +38,11 @@ def test_has_default_country_value(bank):
     assert bank.country is None
 
 
+def test_has_default_central_bank_ref(bank):
+    # Assert
+    assert bank.central_bank is None
+
+
 def test_expose_bonds_total(bank):
     # Given
     bonds = [{"issuer": object(), "principal": 500}]
@@ -110,9 +115,8 @@ def test_has_default_indicators(bank):
 
 def test_update_deposit_rate_as_fraction_of_discount_rate(bank):
     # Given
-    bank_role = Mock()
-    bank_role.get_discount_rate.return_value = 0.05
-    bank.roles["commercial_bank"] = bank_role
+    cb = Mock(discount_rate=0.05)
+    bank.central_bank = cb
     bank.p.zeta = 0.8
 
     # When
@@ -165,9 +169,8 @@ def test_calc_loan_probability(bank):
 
 def test_calc_loan_rate(bank):
     # Given
-    bank_role = Mock()
-    bank_role.get_discount_rate.return_value = 0.05
-    bank.roles["commercial_bank"] = bank_role
+    cb = Mock(discount_rate=0.05)
+    bank.central_bank = cb
     bank.p.chi = 0.02
     borrower = Mock(target_leverage=5.0)
 
@@ -263,40 +266,43 @@ def test_grant_loans_cleans_loan_applicants_list(bank_as_lender):
 
 
 @pytest.fixture
-def bank_in_banksystem(monkeypatch):
+def bank_with_cb(monkeypatch):
     model = Mock()
     model.p.mu2 = 0.1
     deposits_prop = PropertyMock(return_value=1000)
     monkeypatch.setattr(Bank, "deposits", deposits_prop)
+    cb = Mock(cash_advances=0, reserves=0)
     bank = Bank(model)
-    bank.roles["commercial_bank"] = Mock()
-    return bank
+    bank.reserves = 0
+    bank.cash_advances = 0
+    bank.central_bank = cb
+    return bank, cb
 
 
-def test_doesnot_request_cash_advance_when_sufficient_reserves(bank_in_banksystem):
+def test_doesnot_request_cash_advance_when_sufficient_reserves(bank_with_cb):
     # Given
-    bank = bank_in_banksystem
+    bank, cb = bank_with_cb
     bank.reserves = 200
 
     # When
     bank.request_cash_advances()
 
     # Then
-    bank_role = bank.roles["commercial_bank"]
-    bank_role.request_cash_advances.assert_not_called()
+    assert bank.cash_advances == 0
+    assert cb.cash_advances == 0
 
 
-def test_request_cash_advance_when_insufficient_reserves(bank_in_banksystem):
+def test_request_cash_advance_when_insufficient_reserves(bank_with_cb):
     # Given
-    bank = bank_in_banksystem
+    bank, cb = bank_with_cb
     bank.reserves = 50
 
     # When
     bank.request_cash_advances()
 
     # Then
-    bank_role = bank.roles["commercial_bank"]
-    bank_role.request_cash_advances.assert_called_with(50)
+    assert bank.cash_advances == 50
+    assert cb.cash_advances == 50
 
 
 def test_calc_bond_purchases_probability():

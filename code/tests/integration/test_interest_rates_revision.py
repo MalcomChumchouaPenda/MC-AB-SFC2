@@ -1,11 +1,12 @@
 import pytest
 from unittest.mock import Mock
-from mc_ab_sfc.agents import CentralBank
-from mc_ab_sfc.spaces import MonetaryUnionSpace, CountrySpace
+from mc_ab_sfc.agents import NationalCentralBank, UnionCentralBank
+from mc_ab_sfc.spaces import GoodsMarket
 
 
 @pytest.fixture
 def model():
+    # Given
     model = Mock()
     model.p.xi = 0.5
     model.p.xi_deltap = 1.5
@@ -15,28 +16,43 @@ def model():
 
 
 @pytest.fixture
-def central_bank(model):
-    central_bank = CentralBank(model)
-    central_bank.prev_discount_rate = 0.03
-    return central_bank
+def goods_markets(model):
+    # Given
+    markets = {}
+    for n in range(5):
+        market = GoodsMarket(model)
+        market.setup()
+        market.inflation = 0.04
+        market.gdp = 100
+        markets[n] = market
+    model.national_goods_markets = markets
+    return markets
 
 
 @pytest.fixture
-def union(model):
-    union = MonetaryUnionSpace(model)
-    union.average_inflation = 0.04
-    union.countries = {i: CountrySpace(model) for i in range(5)}
-    return union
+def union_cb(model):
+    cb = UnionCentralBank(model)
+    cb.setup()
+    cb.prev_discount_rate = 0.03
+    cb.average_inflation = 0.0
+    return cb
 
 
-def test_central_bank_updates_discount_rate(central_bank, union):
+@pytest.fixture
+def national_cb(model):
+    cb = NationalCentralBank(model)
+    cb.setup()
+    return cb
+
+
+@pytest.mark.usefixtures("goods_markets")
+def test_central_banks_updates_discount_rate(union_cb, national_cb):
     # Given
-    union.add_central_bank(central_bank)
+    national_cb.union_bank = union_cb
 
     # When
-    central_bank.update_discount_rate()
+    union_cb.update_discount_rate()
 
     # Then
-    assert union.discount_rate == pytest.approx(0.04)
-    for country in union.countries.values():
-        assert country.discount_rate == pytest.approx(0.04)
+    assert union_cb.discount_rate == pytest.approx(0.04)
+    assert national_cb.discount_rate == pytest.approx(0.04)

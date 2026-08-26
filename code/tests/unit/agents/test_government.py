@@ -29,6 +29,11 @@ def test_has_default_country_value(govt):
     assert govt.country is None
 
 
+def test_has_default_profits_value(govt):
+    # Assert
+    assert govt.profits == 0
+
+
 def test_has_default_reserves_value(govt):
     # Assert
     assert govt.reserves == 0
@@ -62,7 +67,6 @@ def test_expose_bond_interests_total(govt):
 def test_has_default_flows(govt):
     # Assert
     assert govt.taxes == 0
-    assert govt.profit == 0
     assert govt.public_transfers == 0
 
 

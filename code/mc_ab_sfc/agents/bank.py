@@ -30,6 +30,9 @@ class Bank(EcoAgent):
         self.defaulted = False
         self.country = None
 
+        # accointances
+        self.central_bank = None
+
     @property
     def bonds(self):
         bond_market = self.model.bond_market
@@ -59,9 +62,8 @@ class Bank(EcoAgent):
         return total
 
     def update_deposit_rate(self):
-        role = self.roles["commercial_bank"]
-        discount_rate = role.get_discount_rate()
-        self.deposit_rate = self.p.zeta * discount_rate
+        cb = self.central_bank
+        self.deposit_rate = self.p.zeta * cb.discount_rate
 
     def pay_deposit_interests(self):
         for market in self.model.deposit_markets.values():
@@ -94,17 +96,19 @@ class Bank(EcoAgent):
         return math.exp(-self.p.iota_l * borrower.target_leverage)
 
     def calc_loan_rate(self, borrower):
-        bank_role = self.roles["commercial_bank"]
-        discount_rate = bank_role.get_discount_rate()
+        cb = self.central_bank
         leverage = borrower.target_leverage
-        return self.p.chi * leverage + discount_rate
+        return self.p.chi * leverage + cb.discount_rate
 
     def request_cash_advances(self):
         required = self.p.mu2 * self.deposits
         shortage = max(required - self.reserves, 0)
         if shortage > 0:
-            role = self.roles["commercial_bank"]
-            role.request_cash_advances(shortage)
+            cb = self.central_bank
+            cb.cash_advances += shortage
+            cb.reserves += shortage
+            self.cash_advances += shortage
+            self.reserves += shortage
 
     def buy_bonds(self):
         bond_market = self.model.bond_market
