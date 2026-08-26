@@ -139,8 +139,8 @@ class Country(EcoSpace):
 
     def _create_bank_market_roles(self, bank):
         self.union.credit_market.add_lender(bank)
+        self.union.bond_market.add_buyer(bank)
         self.deposit_market.add_bank(bank)
-        self.model.bond_market.add_buyer(bank)
 
     def update_statistics(self):
         self.goods_market.update_statistics()

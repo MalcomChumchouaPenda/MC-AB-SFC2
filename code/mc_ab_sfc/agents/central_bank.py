@@ -12,19 +12,19 @@ class CentralBank(EcoAgent):
 
     @property
     def bonds(self):
-        bond_market = self.model.bond_market
+        bond_market = self.country.union.bond_market
         bonds = bond_market.get_buyer_bonds(self)
         return sum([b["principal"] for b in bonds])
 
     @property
     def bond_interests(self):
-        bond_market = self.model.bond_market
+        bond_market = self.country.union.bond_market
         bonds = bond_market.get_buyer_bonds(self)
         return sum([b["interests"] for b in bonds])
 
     def buy_remaining_bonds(self):
         govt = self.government
-        bond_market = self.model.bond_market
+        bond_market = self.country.union.bond_market
         bond_market.buy_bonds(self, govt, govt.bond_supply)
 
     def pay_profit(self):

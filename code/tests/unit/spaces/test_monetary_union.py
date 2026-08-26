@@ -13,7 +13,7 @@ def test_is_eco_space():
 
     # Assert
     assert issubclass(MonetaryUnion, EcoSpace)
-    
+
 
 @pytest.fixture
 def union():
@@ -34,4 +34,3 @@ def test_has_default_space_refs(union):
     assert union.goods_market is None
     assert union.credit_market is None
     assert union.bond_market is None
-

@@ -35,13 +35,13 @@ class Government(EcoAgent):
 
     @property
     def bonds(self):
-        bond_market = self.model.bond_market
+        bond_market = self.country.union.bond_market
         bonds = bond_market.get_issuer_bonds(self)
         return sum([b["principal"] for b in bonds])
 
     @property
     def bond_interests(self):
-        bond_market = self.model.bond_market
+        bond_market = self.country.union.bond_market
         bonds = bond_market.get_issuer_bonds(self)
         return sum([b["interests"] for b in bonds])
 
@@ -118,7 +118,7 @@ class Government(EcoAgent):
 
     def repay_bonds(self):
         bond_rate = self.calc_bond_rate()
-        bond_market = self.model.bond_market
+        bond_market = self.country.union.bond_market
         for bond in bond_market.get_issuer_bonds(self):
             principal = bond["principal"]
             interests = bond_rate * principal

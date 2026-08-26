@@ -21,7 +21,7 @@ def cb():
     return cb
 
 
-def test_has_default_country_value(cb):
+def test_has_default_space_refs(cb):
     # Assert
     assert cb.country is None
 
@@ -75,20 +75,31 @@ def test_exposes_union_bank_discount_rate(cb):
     assert cb.discount_rate == 0.05
 
 
-def test_expose_bonds_total(cb):
+@pytest.fixture
+def cb_with_country():
+    model, country = Mock(), Mock()
+    cb = NationalCentralBank(model)
+    cb.setup()
+    cb.country = country
+    return cb, country
+
+
+def test_expose_bonds_total(cb_with_country):
     # Given
     bonds = [{"issuer": object(), "principal": 500}]
-    bond_market = cb.model.bond_market
+    cb, country = cb_with_country
+    bond_market = country.union.bond_market
     bond_market.get_buyer_bonds.return_value = bonds
 
     # Assert
     assert cb.bonds == 500
 
 
-def test_expose_bond_interests_total(cb):
+def test_expose_bond_interests_total(cb_with_country):
     # Given
     bonds = [{"issuer": object(), "interests": 50.0}]
-    bond_market = cb.model.bond_market
+    cb, country = cb_with_country
+    bond_market = country.union.bond_market
     bond_market.get_buyer_bonds.return_value = bonds
 
     # Assert
@@ -100,9 +111,10 @@ def test_expose_bond_interests_total(cb):
 # ----------------------------------------------------
 
 
-def test_buy_all_remaining_bonds(cb):
+def test_buy_all_remaining_bonds(cb_with_country):
     # Given
-    bond_market = cb.model.bond_market
+    cb, country = cb_with_country
+    bond_market = country.union.bond_market
     govt = Mock(bond_supply=100)
     cb.government = govt
 

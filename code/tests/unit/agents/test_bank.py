@@ -67,20 +67,31 @@ def test_has_default_refs(bank):
 # ----------------------------------------------------
 
 
-def test_expose_bonds_total(bank):
+@pytest.fixture
+def bank_with_country():
+    model, country = Mock(), Mock()
+    bank = Bank(model)
+    bank.setup()
+    bank.country = country
+    return bank, country
+
+
+def test_expose_bonds_total(bank_with_country):
     # Given
     bonds = [{"issuer": object(), "principal": 500}]
-    bond_market = bank.model.bond_market
+    bank, country = bank_with_country
+    bond_market = country.union.bond_market
     bond_market.get_buyer_bonds.return_value = bonds
 
     # Assert
     assert bank.bonds == 500
 
 
-def test_expose_bond_interests_total(bank):
+def test_expose_bond_interests_total(bank_with_country):
     # Given
     bonds = [{"issuer": object(), "interests": 50.0}]
-    bond_market = bank.model.bond_market
+    bank, country = bank_with_country
+    bond_market = country.union.bond_market
     bond_market.get_buyer_bonds.return_value = bonds
 
     # Assert
@@ -335,10 +346,11 @@ def test_calc_excess_reserves(monkeypatch, reserves, expected):
     assert excess_reserves == expected
 
 
-def test_find_bond_suppliers_gets_and_shuffles_all_issuers(bank):
+def test_find_bond_suppliers_gets_and_shuffles_issuers(bank_with_country):
     # Given
     bond_issuers = [Mock() for _ in range(3)]
-    bond_market = bank.model.bond_market
+    bank, country = bank_with_country
+    bond_market = country.union.bond_market
     bond_market.get_issuers.return_value = bond_issuers
     random = bank.model.random
 
@@ -363,6 +375,7 @@ def bond_issuers():
 def bank_as_bond_buyer(bond_issuers):
     model = Mock()
     bank = Bank(model)
+    bank.country = Mock()
     bank.calc_bond_purchases_probability = Mock(return_value=0)
     bank.calc_excess_reserves = Mock(return_value=0)
     bank.find_bond_issuers = Mock(return_value=bond_issuers)
@@ -392,7 +405,7 @@ def test_buy_bonds_with_excess_reserves(bank_as_bond_buyer, bond_issuers):
     # Given
     bank = bank_as_bond_buyer
     bank.calc_excess_reserves.return_value = 50
-    bond_market = bank.model.bond_market
+    bond_market = bank.country.union.bond_market
 
     # When
     bank.buy_bonds()
@@ -405,7 +418,7 @@ def test_dont_buy_bonds_with_insufficient_reserves(bank_as_bond_buyer, bond_issu
     # Given
     bank = bank_as_bond_buyer
     bank.calc_excess_reserves.return_value = 50
-    bond_market = bank.model.bond_market
+    bond_market = bank.country.union.bond_market
 
     # When
     bank.buy_bonds()

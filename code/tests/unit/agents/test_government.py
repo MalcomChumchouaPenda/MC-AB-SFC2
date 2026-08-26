@@ -24,7 +24,7 @@ def govt():
     return govt
 
 
-def test_has_default_country_value(govt):
+def test_has_default_space_refs(govt):
     # Assert
     assert govt.country is None
 
@@ -78,20 +78,31 @@ def test_has_default_refs(govt):
 # ----------------------------------------------------
 
 
-def test_expose_bonds_total(govt):
+@pytest.fixture
+def govt_with_country():
+    model, country = Mock(), Mock()
+    govt = Government(model)
+    govt.setup()
+    govt.country = country
+    return govt, country
+
+
+def test_expose_bonds_total(govt_with_country):
     # Given
     bonds = [{"buyer": object(), "principal": 500}]
-    bond_market = govt.model.bond_market
+    govt, country = govt_with_country
+    bond_market = country.union.bond_market
     bond_market.get_issuer_bonds.return_value = bonds
 
     # Assert
     assert govt.bonds == 500
 
 
-def test_expose_bond_interests_total(govt):
+def test_expose_bond_interests_total(govt_with_country):
     # Given
     bonds = [{"buyer": object(), "interests": 50.0}]
-    bond_market = govt.model.bond_market
+    govt, country = govt_with_country
+    bond_market = country.union.bond_market
     bond_market.get_issuer_bonds.return_value = bonds
 
     # Assert
@@ -450,9 +461,10 @@ def test_issues_bonds_with_multi_step(govt_as_bond_supplier):
     govt.calc_new_bonds.assert_called_with()
 
 
-def test_repay_bonds_calc_and_register_bond_rate(govt):
+def test_repay_bonds_calc_and_register_bond_rate(govt_with_country):
     # Given
-    bond_market = govt.model.bond_market
+    govt, country = govt_with_country
+    bond_market = country.union.bond_market
     bond_market.get_issuer_bonds.return_value = []
     govt.calc_bond_rate = Mock(return_value=0.01)
 
@@ -463,11 +475,12 @@ def test_repay_bonds_calc_and_register_bond_rate(govt):
     assert govt.bond_rate == 0.01
 
 
-def test_repay_bonds_uses_bond_market(govt):
+def test_repay_bonds_uses_bond_market(govt_with_country):
     # Given
     buyer = object()
     bonds = [{"buyer": buyer, "principal": 500}]
-    bond_market = govt.model.bond_market
+    govt, country = govt_with_country
+    bond_market = country.union.bond_market
     bond_market.get_issuer_bonds.return_value = bonds
     govt.calc_bond_rate = Mock(return_value=0.01)
 

@@ -29,14 +29,13 @@ def test_has_default_agent_refs(country):
     assert country.government is None
     assert country.central_bank is None
 
-    
+
 def test_has_default_space_refs(country):
     # Assert
     assert country.union is None
     assert country.goods_market is None
     assert country.labor_market is None
     assert country.deposit_market is None
-
 
 
 def test_exposes_inflation(country):
@@ -301,23 +300,13 @@ def test_get_investors_excludes_initiating_household(country, monkeypatch):
 
 
 @pytest.fixture
-def monetary_union():
-    # Given
-    union = Mock()
-    union.goods_market = Mock()
-    union.credit_market = Mock()
-    union.bond_market = Mock()
-    return union
-
-
-@pytest.fixture
-def country_before_firm_creation(monkeypatch, monetary_union):
+def country_before_firm_creation(monkeypatch):
     # Given
     model = Mock()
     country = Country(model)
     country.add_equity_issuer = Mock()
     country.assign_equity_holder = Mock()
-    country.union = monetary_union
+    country.union = Mock()
     country.goods_market = Mock()
     country.labor_market = Mock()
     country.deposit_market = Mock()
@@ -474,13 +463,13 @@ def test_create_firm_builds_initial_equity(country_before_firm_creation, tradabl
 
 
 @pytest.fixture
-def country_before_bank_creation(monkeypatch, monetary_union):
+def country_before_bank_creation(monkeypatch):
     # Given
     model = Mock()
     country = Country(model)
     country.add_equity_issuer = Mock()
     country.assign_equity_holder = Mock()
-    country.union = monetary_union
+    country.union = Mock()
     country.goods_market = Mock()
     country.labor_market = Mock()
     country.deposit_market = Mock()
@@ -518,13 +507,13 @@ def test_create_bank_add_bond_buyer(country_before_bank_creation):
     # Given
     founders = [Mock(desired_equity=1000)]
     country = country_before_bank_creation
-    market = country.model.bond_market
+    bond_market = country.union.bond_market
 
     # When
     bank = country.create_bank(founders)
 
     # Then
-    market.add_buyer.assert_called_with(bank)
+    bond_market.add_buyer.assert_called_with(bank)
 
 
 def test_create_bank_add_lender_role(country_before_bank_creation):

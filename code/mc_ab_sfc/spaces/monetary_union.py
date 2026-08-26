@@ -11,5 +11,3 @@ class MonetaryUnion(EcoSpace):
         self.goods_market = None
         self.credit_market = None
         self.bond_market = None
-        
-

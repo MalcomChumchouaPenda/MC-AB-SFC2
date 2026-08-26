@@ -35,13 +35,13 @@ class Bank(EcoAgent):
 
     @property
     def bonds(self):
-        bond_market = self.model.bond_market
+        bond_market = self.country.union.bond_market
         bonds = bond_market.get_buyer_bonds(self)
         return sum([b["principal"] for b in bonds])
 
     @property
     def bond_interests(self):
-        bond_market = self.model.bond_market
+        bond_market = self.country.union.bond_market
         bonds = bond_market.get_buyer_bonds(self)
         return sum([b["interests"] for b in bonds])
 
@@ -111,7 +111,7 @@ class Bank(EcoAgent):
             self.reserves += shortage
 
     def buy_bonds(self):
-        bond_market = self.model.bond_market
+        bond_market = self.country.union.bond_market
         bond_issuers = self.find_bond_issuers()
         excess = self.calc_excess_reserves()
         choice = self.model.nprandom.choice
@@ -125,7 +125,7 @@ class Bank(EcoAgent):
                     break
 
     def find_bond_issuers(self):
-        bond_market = self.model.bond_market
+        bond_market = self.country.union.bond_market
         bond_issuers = bond_market.get_issuers()
         random = self.model.random
         random.shuffle(bond_issuers)
