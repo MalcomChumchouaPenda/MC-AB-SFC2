@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import Mock
-from mc_ab_sfc.agents import HouseholdAgent
+from mc_ab_sfc.agents import Household
 from mc_ab_sfc.spaces import LaborMarket
 
 
@@ -20,7 +20,7 @@ def market(model):
 
 @pytest.fixture
 def household(model):
-    household = HouseholdAgent(model)
+    household = Household(model)
     household.labor_supply = 1.0
     household.reservation_wage = 100
     return household

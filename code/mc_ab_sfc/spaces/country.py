@@ -1,5 +1,5 @@
 from ..base import EcoSpace
-from ..agents import FirmAgent, BankAgent, HouseholdAgent
+from ..agents import FirmAgent, BankAgent, Household
 from ..roles import (
     GovernmentRole,
     TaxPayerRole,
@@ -129,7 +129,7 @@ class CountrySpace(EcoSpace):
         return [
             role
             for role in self.graph.nodes
-            if isinstance(role, TaxPayerRole) and isinstance(role.agent, HouseholdAgent)
+            if isinstance(role, TaxPayerRole) and isinstance(role.agent, Household)
         ]
 
     def pay_public_transfers(self, governement, household, amount):

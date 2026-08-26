@@ -3,7 +3,7 @@ from functools import partial
 from ..base import EcoAgent
 
 
-class HouseholdAgent(EcoAgent):
+class Household(EcoAgent):
 
     def setup(self):
         # stocks

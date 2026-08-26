@@ -2,7 +2,7 @@ import math
 import pytest
 from unittest.mock import Mock
 from mc_ab_sfc.spaces import CountrySpace, DepositMarket
-from mc_ab_sfc.agents import HouseholdAgent, BankAgent
+from mc_ab_sfc.agents import Household, BankAgent
 
 
 @pytest.fixture
@@ -16,7 +16,7 @@ def model():
 @pytest.fixture
 def household(model):
     # Given
-    household = HouseholdAgent(model)
+    household = Household(model)
     household.dividends = 10
     household.equity = 20
     household.net_worth = 110

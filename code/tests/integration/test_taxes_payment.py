@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import Mock
 from mc_ab_sfc.spaces import CountrySpace
-from mc_ab_sfc.agents import HouseholdAgent, FirmAgent, BankAgent, GovernmentAgent
+from mc_ab_sfc.agents import Household, FirmAgent, BankAgent, GovernmentAgent
 
 
 @pytest.fixture
@@ -21,7 +21,7 @@ def govt(model):
 
 @pytest.fixture
 def household(model):
-    household = HouseholdAgent(model)
+    household = Household(model)
     household.cash = 1000
     household.labor_income = 540
     household.deposit_interest = 20

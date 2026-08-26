@@ -1,7 +1,7 @@
 import math
 import pytest
 from unittest.mock import Mock
-from mc_ab_sfc.agents.household import HouseholdAgent
+from mc_ab_sfc.agents.household import Household
 
 # ---------------------------------------------------
 # ARCHITECTURE TESTS
@@ -13,14 +13,14 @@ def test_is_eco_agent():
     from mc_ab_sfc.base import EcoAgent
 
     # Assert
-    assert issubclass(HouseholdAgent, EcoAgent)
+    assert issubclass(Household, EcoAgent)
 
 
 @pytest.fixture
 def household():
     # Given
     model = Mock()
-    household = HouseholdAgent(model)
+    household = Household(model)
     return household
 
 
@@ -85,7 +85,7 @@ def unemployed():
     role = Mock()
     role.search_employers.return_value = []
     role.get_labor_sold.return_value = 0.0
-    household = HouseholdAgent(model)
+    household = Household(model)
     household.labor_supply = 1.0
     household.reservation_wage = 10
     household.roles = {"worker": role}
@@ -182,7 +182,7 @@ def test_calc_revision_probability():
     model.p.upsilon_h = 0.9
     worker_role = Mock()
     worker_role.get_unemployment_rate.return_value = 0.1
-    household = HouseholdAgent(model)
+    household = Household(model)
     household.roles["worker"] = worker_role
 
     # When
@@ -197,7 +197,7 @@ def fully_employed_before():
     # Given
     model = Mock()
     model.p.delta = 0.9
-    household = HouseholdAgent(model)
+    household = Household(model)
     household.labor_supply = 1.0
     household.employed_labor = 1.0
     household.reservation_wage = 10.0
@@ -256,7 +256,7 @@ def part_employed_before():
     # Given
     model = Mock()
     model.p.delta = 0.9
-    household = HouseholdAgent(model)
+    household = Household(model)
     household.labor_supply = 1.0
     household.employed_labor = 0.0
     household.reservation_wage = 10.0
@@ -319,7 +319,7 @@ def test_can_choose_to_not_decreases_reservation_wage(part_employed_before):
 def household_as_taxpayer():
     # Given
     model = Mock()
-    household = HouseholdAgent(model)
+    household = Household(model)
     household.roles["tax_payer"] = Mock()
     return household
 
@@ -382,7 +382,7 @@ def test_calc_consumption_total():
     model.p.cy = 0.8
     model.p.cd = 0.1
     model.p.cT = 0.6
-    household = HouseholdAgent(model)
+    household = Household(model)
     household.disposable_income = 1000
     household.deposits = 500
 
@@ -400,7 +400,7 @@ def test_calc_consumption_composition():
     model.p.cy = 0.8
     model.p.cd = 0.1
     model.p.cT = 0.6
-    household = HouseholdAgent(model)
+    household = Household(model)
     household.disposable_income = 1000
     household.deposits = 500
 
@@ -416,7 +416,7 @@ def test_calc_consumption_composition():
 def household_with_consumer_roles():
     # Given
     model = Mock()
-    household = HouseholdAgent(model)
+    household = Household(model)
     household.roles["consumer_tradable"] = Mock()
     household.roles["consumer_non_tradable"] = Mock()
     return household
@@ -517,7 +517,7 @@ def test_consume_randomizes_market_order(household_with_consumer_roles):
 def household_with_assets():
     # Given
     model = Mock()
-    household = HouseholdAgent(model)
+    household = Household(model)
     household.roles["equity_holder"] = Mock()
     household.roles["deposit_holder"] = Mock()
     return household
@@ -592,7 +592,7 @@ def test_calc_liquidity_preference_when_no_equity(household_with_assets):
 def test_calc_portfolio_allocation_updates_desired_assets():
     # Given
     model = Mock()
-    household = HouseholdAgent(model)
+    household = Household(model)
     household.equity = 20
     household.calc_liquidity_preference = Mock(return_value=0.40)
     household.calc_expected_net_worth = Mock(return_value=100)
@@ -608,7 +608,7 @@ def test_calc_portfolio_allocation_updates_desired_assets():
 def test_calc_portfolio_allocation_preserves_existing_equity():
     # Given
     model = Mock()
-    household = HouseholdAgent(model)
+    household = Household(model)
     household.equity = 80
     household.calc_liquidity_preference = Mock(return_value=0.80)
     household.calc_expected_net_worth = Mock(return_value=100)
@@ -625,7 +625,7 @@ def household_before_investment():
     model = Mock()
     model.p.cT = 0.6
     model.p.eta = 0.3
-    household = HouseholdAgent(model)
+    household = Household(model)
     household.roles = {"equity_holder": Mock()}
     return household
 
@@ -767,7 +767,7 @@ def test_make_deposits_with_residual_cash(household):
 @pytest.fixture
 def household_as_investor():
     model = Mock()
-    household = HouseholdAgent(model)
+    household = Household(model)
     household.equity = 0
     household.desired_equity = 100
     household.roles = {"equity_holder": Mock()}

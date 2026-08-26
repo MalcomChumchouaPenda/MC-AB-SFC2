@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import Mock
-from mc_ab_sfc.agents import HouseholdAgent, FirmAgent, BankAgent, GovernmentAgent
+from mc_ab_sfc.agents import Household, FirmAgent, BankAgent, GovernmentAgent
 from mc_ab_sfc.spaces import (
     CountrySpace,
     MonetaryUnionSpace,
@@ -27,10 +27,10 @@ def model():
 @pytest.fixture
 def founders(model):
     # Given
-    household1 = HouseholdAgent(model)
+    household1 = Household(model)
     household1.desired_equity = 300
     household1.cash = 400
-    household2 = HouseholdAgent(model)
+    household2 = Household(model)
     household2.desired_equity = 200
     household2.cash = 400
     return household1, household2

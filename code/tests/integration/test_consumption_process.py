@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import Mock
-from mc_ab_sfc.agents import HouseholdAgent, FirmAgent
+from mc_ab_sfc.agents import Household, FirmAgent
 from mc_ab_sfc.spaces import GoodsMarket
 
 
@@ -18,7 +18,7 @@ def model():
 @pytest.fixture
 def household(model):
     # Given
-    household = HouseholdAgent(model)
+    household = Household(model)
     household.cash = 100
     household.desired_trad_cons = 60
     household.desired_non_trad_cons = 40

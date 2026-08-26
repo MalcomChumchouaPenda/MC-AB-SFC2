@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import Mock
 from mc_ab_sfc.spaces import CountrySpace
-from mc_ab_sfc.agents import HouseholdAgent, FirmAgent, BankAgent
+from mc_ab_sfc.agents import Household, FirmAgent, BankAgent
 
 
 @pytest.fixture
@@ -14,7 +14,7 @@ def model():
 @pytest.fixture
 def household(model):
     # Given
-    household = HouseholdAgent(model)
+    household = Household(model)
     return household
 
 

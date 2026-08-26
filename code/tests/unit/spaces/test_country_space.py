@@ -473,7 +473,7 @@ def test_update_equity_holdings(country, issuer, holders):
     holders[1].increase_stock.assert_called_once_with("equity", 480)
 
 
-class FakeHouseholdAgent:
+class FakeHousehold:
     def __init__(self, *args, **kwargs):
         self.args = args
         self.kwargs = kwargs
@@ -482,8 +482,8 @@ class FakeHouseholdAgent:
 def test_get_households_returns_household_agent_roles(country, monkeypatch):
     # Given
     monkeypatch.setattr("mc_ab_sfc.spaces.country.TaxPayerRole", FakePayerRole)
-    monkeypatch.setattr("mc_ab_sfc.spaces.country.HouseholdAgent", FakeHouseholdAgent)
-    household_roles = [FakePayerRole(agent=FakeHouseholdAgent()) for _ in range(6)]
+    monkeypatch.setattr("mc_ab_sfc.spaces.country.Household", FakeHousehold)
+    household_roles = [FakePayerRole(agent=FakeHousehold()) for _ in range(6)]
     payer_roles = [FakePayerRole() for _ in range(5)]
     other_roles = [Mock() for _ in range(5)]
     country.graph.add_nodes_from(household_roles + payer_roles + other_roles)

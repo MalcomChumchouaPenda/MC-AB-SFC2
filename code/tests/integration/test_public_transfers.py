@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import Mock, PropertyMock
 from mc_ab_sfc.spaces import CountrySpace
-from mc_ab_sfc.agents import GovernmentAgent, CentralBankAgent, HouseholdAgent
+from mc_ab_sfc.agents import GovernmentAgent, CentralBankAgent, Household
 
 
 @pytest.fixture
@@ -52,7 +52,7 @@ def test_central_bank_transfer_profits(govt, cb, country):
 @pytest.fixture
 def households(model):
     # Given
-    return [HouseholdAgent(model) for _ in range(4)]
+    return [Household(model) for _ in range(4)]
 
 
 def test_government_pay_public_transfer_equally(govt, households, country):
