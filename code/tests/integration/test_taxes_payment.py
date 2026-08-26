@@ -16,6 +16,7 @@ def govt(model):
     # Given
     govt = Government(model)
     govt.tax_rate = 0.10
+    model.governments = {"any": govt}
     return govt
 
 
@@ -23,6 +24,7 @@ def govt(model):
 def household(model, monkeypatch):
     monkeypatch.setattr(Household, "dep_interests", PropertyMock(return_value=20))
     household = Household(model)
+    household.country = "any"
     household.cash = 1000
     household.labor_income = 540
     household.dividends = 30
@@ -31,16 +33,7 @@ def household(model, monkeypatch):
     return household
 
 
-@pytest.fixture
-def country(model):
-    # Given
-    return CountrySpace(model)
-
-
-def test_household_pay_taxes(household, govt, country):
-    # Given
-    country.add_government(govt)
-    country.add_tax_payer(household)
+def test_household_pay_taxes(household, govt):
 
     # When
     household.pay_taxes()
@@ -56,16 +49,13 @@ def test_household_pay_taxes(household, govt, country):
 def firm(model):
     # Given
     firm = Firm(model)
+    firm.country = "any"
     firm.cash = 1000
     firm.taxes_payable = 100
     return firm
 
 
-def test_firm_pay_taxes(firm, govt, country):
-    # Given
-    country.add_government(govt)
-    country.add_tax_payer(firm)
-
+def test_firm_pay_taxes(firm, govt):
     # When
     firm.pay_taxes()
 
@@ -81,16 +71,13 @@ def test_firm_pay_taxes(firm, govt, country):
 def bank(model):
     # Given
     bank = Bank(model)
+    bank.country = "any"
     bank.reserves = 1000
     bank.taxes_payable = 100
     return bank
 
 
-def test_bank_pay_taxes(bank, govt, country):
-    # Given
-    country.add_government(govt)
-    country.add_tax_payer(bank)
-
+def test_bank_pay_taxes(bank, govt):
     # When
     bank.pay_taxes()
 

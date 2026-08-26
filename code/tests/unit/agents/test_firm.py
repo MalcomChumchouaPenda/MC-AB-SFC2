@@ -24,32 +24,10 @@ def firm():
     return firm
 
 
-def test_expose_deposits_total(firm):
-    # Given
-    deposits = [{"bank": object(), "amount": 500}]
-    deposit_market = Mock()
-    deposit_market.get_client_deposits.return_value = deposits
-    firm.model.deposit_markets = {"any": deposit_market}
-
-    # Assert
-    assert firm.deposits == 500
-
-
-def test_expose_deposit_interests_total(firm):
-    # Given
-    deposits = [{"bank": object(), "interests": 50.0}]
-    deposit_market = Mock()
-    deposit_market.get_client_deposits.return_value = deposits
-    firm.model.deposit_markets = {"any": deposit_market}
-
-    # Assert
-    assert firm.dep_interests == pytest.approx(50.0)
-
-
 def test_has_default_stocks(firm):
     # Assert
-    assert firm.inventories == 0
     assert firm.cash == 0
+    assert firm.inventories == 0
     assert firm.loans == 0
     assert firm.equity == 0
 
@@ -79,6 +57,7 @@ def test_has_default_choices(firm):
 
 def test_has_default_indicators(firm):
     # Assert
+    assert firm.country is None
     assert firm.position == 0.0
     assert firm.productivity == 0.0
     assert firm.net_worth == 0.0
@@ -91,9 +70,31 @@ def test_has_default_indicators(firm):
     assert firm.prev_desired_labor == 0
 
 
-def test_has_default_country_value(firm):
+# ---------------------------------------------------
+# DERIVED STATE TESTS
+# ----------------------------------------------------
+
+
+def test_expose_deposits_total(firm):
+    # Given
+    deposits = [{"bank": object(), "amount": 500}]
+    deposit_market = Mock()
+    deposit_market.get_client_deposits.return_value = deposits
+    firm.model.deposit_markets = {"any": deposit_market}
+
     # Assert
-    assert firm.country is None
+    assert firm.deposits == 500
+
+
+def test_expose_deposit_interests_total(firm):
+    # Given
+    deposits = [{"bank": object(), "interests": 50.0}]
+    deposit_market = Mock()
+    deposit_market.get_client_deposits.return_value = deposits
+    firm.model.deposit_markets = {"any": deposit_market}
+
+    # Assert
+    assert firm.dep_interests == pytest.approx(50.0)
 
 
 # ---------------------------------------------------
@@ -717,13 +718,32 @@ def test_calc_profit(firm):
     assert profit == 300
 
 
-@pytest.mark.parametrize("taxable, expected", [(100, 20), (-100, 0)])
-def test_calc_taxes(firm, taxable, expected):
+@pytest.fixture
+def model_with_govt():
     # Given
-    payer_role = Mock()
-    payer_role.get_tax_rate.return_value = 0.20
+    govt = Mock(tax_rate=0.0, reserves=0, taxes=0)
+    model = Mock()
+    model.governments = {"any": govt}
+    return model, govt
+
+
+@pytest.fixture
+def firm_with_govt(model_with_govt):
+    # Given
+    model, govt = model_with_govt
+    firm = Firm(model)
+    firm.country = "any"
+    firm.taxes = 0
+    firm.reserves = 0
+    return firm, govt
+
+
+@pytest.mark.parametrize("taxable, expected", [(100, 20), (-100, 0)])
+def test_calc_taxes(firm_with_govt, taxable, expected):
+    # Given
+    firm, govt = firm_with_govt
     firm.net_cash_flow = taxable
-    firm.roles["tax_payer"] = payer_role
+    govt.tax_rate = 0.20
 
     # When
     taxes = firm.calc_taxes()
@@ -780,31 +800,36 @@ def test_update_net_worth(firm):
     assert firm.net_worth == pytest.approx(1200)
 
 
-def test_pay_taxes(firm):
+def test_pay_taxes(firm_with_govt):
     # Given
-    tax_payer = Mock()
+    firm, govt = firm_with_govt
     firm.taxes_payable = 100
-    firm.roles["tax_payer"] = tax_payer
 
     # When
     firm.pay_taxes()
 
     # Then
-    tax_payer.pay_taxes.assert_called_once_with(100)
     assert firm.taxes_payable == 0
+    assert firm.taxes == 100
+    assert firm.cash == -100
+    assert govt.taxes == 100
+    assert govt.reserves == 100
 
 
-def test_pay_no_taxes(firm):
+def test_pay_no_taxes(firm_with_govt):
     # Given
-    tax_payer = Mock()
+    firm, govt = firm_with_govt
     firm.taxes_payable = 0
-    firm.roles["tax_payer"] = tax_payer
 
     # When
     firm.pay_taxes()
 
     # Then
-    tax_payer.pay_taxes.assert_not_called()
+    assert firm.taxes_payable == 0
+    assert firm.taxes == 0
+    assert firm.cash == 0
+    assert govt.taxes == 0
+    assert govt.reserves == 0
 
 
 def test_pay_dividends(firm):

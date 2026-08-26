@@ -17,13 +17,8 @@ def govt(model):
     # Given
     govt = Government(model)
     govt.tax_rate = 0.25
+    model.governments = {"any": govt}
     return govt
-
-
-@pytest.fixture
-def country(model):
-    # Given
-    return CountrySpace(model)
 
 
 @pytest.fixture
@@ -31,6 +26,7 @@ def firm(model, monkeypatch):
     # Given
     monkeypatch.setattr(Firm, "dep_interests", PropertyMock(return_value=30))
     firm = Firm(model)
+    firm.country = "any"
     firm.sales = 1000
     firm.productivity = 2
     firm.wage_offer = 20
@@ -42,15 +38,12 @@ def firm(model, monkeypatch):
     return firm
 
 
-def test_firm_compute_profit_distribution(firm, govt, country):
-    # Given
-    country.add_government(govt)
-    country.add_tax_payer(firm)
-
+def test_firm_compute_profit_distribution(firm, govt):
     # When
     firm.compute_profit_distribution()
 
     # Then
+    assert govt.taxes == 0
     assert firm.profit == pytest.approx(700)
     assert firm.net_cash_flow == pytest.approx(600)
     assert firm.taxes_payable == pytest.approx(150.0)
@@ -63,6 +56,7 @@ def bank(model, monkeypatch):
     monkeypatch.setattr(Bank, "bond_interests", PropertyMock(return_value=20))
     monkeypatch.setattr(Bank, "dep_interests", PropertyMock(return_value=30))
     bank = Bank(model)
+    bank.country = "any"
     bank.loan_interest = 100
     bank.reserve_interest = 10
     bank.bad_debt = 10
@@ -70,15 +64,12 @@ def bank(model, monkeypatch):
     return bank
 
 
-def test_bank_compute_profit_distribution(bank, govt, country):
-    # Given
-    country.add_government(govt)
-    country.add_tax_payer(bank)
-
+def test_bank_compute_profit_distribution(bank, govt):
     # When
     bank.compute_profit_distribution()
 
     # Then
+    assert govt.taxes == 0
     assert bank.profit == pytest.approx(80)
     assert bank.taxes_payable == pytest.approx(20)
     assert bank.dividends_payable == pytest.approx(6)

@@ -127,42 +127,6 @@ def test_add_government_role(country_with_roles, monkeypatch):
     assert govt_role == country.government_role
 
 
-class FakePayerRole(Mock):
-    pass
-
-
-def test_add_tax_payer_role(country_with_roles, monkeypatch):
-    # Given
-    agent = Mock()
-    govt_role = Mock()
-    country = country_with_roles
-    country.government_role = govt_role
-    monkeypatch.setattr("mc_ab_sfc.spaces.country.TaxPayerRole", FakePayerRole)
-
-    # When
-    payer_role = country.add_tax_payer(agent)
-
-    # Then
-    country.add_role.assert_any_call(FakePayerRole, agent, "tax_payer")
-    assert isinstance(payer_role, FakePayerRole)
-
-
-def test_add_tax_payer_role_creates_links(country_with_roles, monkeypatch):
-    # Given
-    agent = Mock()
-    govt_role = Mock()
-    country = country_with_roles
-    country.government_role = govt_role
-    monkeypatch.setattr("mc_ab_sfc.spaces.country.TaxPayerRole", FakePayerRole)
-
-    # When
-    payer_role = country.add_tax_payer(agent)
-
-    # Then
-    assert country.graph.has_edge(govt_role, payer_role)
-    assert payer_role.government is govt_role
-
-
 class FakeBankRole(Mock):
     pass
 
@@ -296,56 +260,6 @@ def test_assign_equity_holder_to_equity_issuer(country):
 # ----------------------------------------------------
 
 
-def test_pay_taxes_with_tax_payer_reserves(country, monkeypatch):
-    # Given
-    govt_role = Mock()
-    country.government_role = govt_role
-    payer_role = Mock(agent=FakeBank())
-    monkeypatch.setattr("mc_ab_sfc.spaces.country.Bank", FakeBank)
-
-    # When
-    country.pay_taxes(payer_role, 100)
-
-    # Then
-    govt_role.increase_flow.assert_any_call("taxes", 100)
-    govt_role.increase_stock.assert_any_call("reserves", 100)
-    payer_role.increase_flow.assert_called_with("taxes", 100)
-    payer_role.decrease_stock.assert_called_with("reserves", 100)
-
-
-def test_pay_taxes_with_tax_payer_cash(country):
-    # Given
-    payer_role = Mock()
-    govt_role = Mock()
-    country.government_role = govt_role
-
-    # When
-    country.pay_taxes(payer_role, 100)
-
-    # Then
-    govt_role.increase_flow.assert_any_call("taxes", 100)
-    govt_role.increase_stock.assert_any_call("reserves", 100)
-    payer_role.increase_flow.assert_called_with("taxes", 100)
-    payer_role.decrease_stock.assert_called_with("cash", 100)
-
-
-def test_request_cash_advances(country):
-    # Given
-    bank_role = Mock()
-    cb_role = Mock()
-    country.central_bank_role = cb_role
-    country.graph.add_nodes_from([bank_role, cb_role])
-
-    # When
-    country.request_cash_advances(bank_role, 500)
-
-    # Then
-    bank_role.increase_stock.assert_any_call("reserves", 500)
-    bank_role.increase_stock.assert_any_call("cash_advances", 500)
-    cb_role.increase_stock.assert_any_call("reserves", 500)
-    cb_role.increase_stock.assert_any_call("cash_advances", 500)
-
-
 @pytest.fixture
 def issuer(country):
     # Given
@@ -442,37 +356,6 @@ class FakeHousehold:
         self.kwargs = kwargs
 
 
-def test_get_households_returns_household_agent_roles(country, monkeypatch):
-    # Given
-    monkeypatch.setattr("mc_ab_sfc.spaces.country.TaxPayerRole", FakePayerRole)
-    monkeypatch.setattr("mc_ab_sfc.spaces.country.Household", FakeHousehold)
-    household_roles = [FakePayerRole(agent=FakeHousehold()) for _ in range(6)]
-    payer_roles = [FakePayerRole() for _ in range(5)]
-    other_roles = [Mock() for _ in range(5)]
-    country.graph.add_nodes_from(household_roles + payer_roles + other_roles)
-
-    # When
-    result = country.get_households()
-
-    # Then
-    assert result == household_roles
-
-
-def test_pay_public_transfers_to_household(country):
-    # Given
-    govt_role = Mock()
-    household_role = Mock()
-
-    # When
-    country.pay_public_transfers(govt_role, household_role, 100)
-
-    # Then
-    household_role.increase_stock.assert_called_once_with("cash", 100)
-    household_role.increase_flow.assert_called_once_with("public_transfers", 100)
-    govt_role.decrease_stock.assert_called_once_with("reserves", 100)
-    govt_role.increase_flow.assert_called_once_with("public_transfers", 100)
-
-
 def test_update_statistics_with_goods_market_stats_updates(country):
     # Given
     goods_market = Mock()
@@ -532,7 +415,6 @@ def country_before_firm_creation(monkeypatch, monetary_union):
     model = Mock()
     country = CountrySpace(model)
     country.add_equity_issuer = Mock()
-    country.add_tax_payer = Mock()
     country.assign_equity_holder = Mock()
     country.monetary_union = monetary_union
     country.markets = {
@@ -659,19 +541,6 @@ def test_create_firm_add_equity_issuer_role(country_before_firm_creation, tradab
 
 
 @pytest.mark.parametrize("tradable", [True, False])
-def test_create_firm_add_tax_payer_role(country_before_firm_creation, tradable):
-    # Given
-    country = country_before_firm_creation
-    founders = [Mock(desired_equity=1000)]
-
-    # When
-    firm = country.create_firm(founders, tradable=tradable)
-
-    # Then
-    country.add_tax_payer.assert_called_with(firm)
-
-
-@pytest.mark.parametrize("tradable", [True, False])
 def test_create_firm_builds_equity_links(country_before_firm_creation, tradable):
     # Given
     issuer = Mock()
@@ -707,15 +576,13 @@ def test_create_firm_builds_initial_equity(country_before_firm_creation, tradabl
 
 
 @pytest.fixture
-def country_before_bank_creation(monkeypatch, monetary_union):
+def country_before_bank_creation(monkeypatch):
     # Given
     model = Mock()
     country = CountrySpace(model)
     country.add_commercial_bank = Mock()
     country.add_equity_issuer = Mock()
-    country.add_tax_payer = Mock()
     country.assign_equity_holder = Mock()
-    country.monetary_union = monetary_union
     country.markets = {
         "deposit": Mock(),
         "credit": Mock(),
@@ -799,18 +666,6 @@ def test_create_bank_add_equity_issuer_role(country_before_bank_creation):
 
     # Then
     country.add_equity_issuer.assert_called_with(bank)
-
-
-def test_create_bank_add_tax_payer_role(country_before_bank_creation):
-    # Given
-    country = country_before_bank_creation
-    founders = [Mock(desired_equity=1000)]
-
-    # When
-    bank = country.create_bank(founders)
-
-    # Then
-    country.add_tax_payer.assert_called_with(bank)
 
 
 def test_create_bank_builds_equity_links(country_before_bank_creation):

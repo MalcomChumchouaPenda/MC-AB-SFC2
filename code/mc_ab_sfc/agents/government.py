@@ -46,11 +46,16 @@ class Government(EcoAgent):
         return sum([b["interests"] for b in bonds])
 
     def pay_public_transfers(self):
-        role = self.roles["government"]
-        households = role.get_households()
-        transfers = self.public_spending / len(households)
-        for household in households:
-            role.pay_public_transfers(household, transfers)
+        country = self.country
+        model = self.model
+        households = [h for h in model.households if h.country == country]
+        if len(households) > 0:
+            transfers = self.public_spending / len(households)
+            for household in households:
+                household.cash += transfers
+                household.public_transfers += transfers
+                self.public_transfers += transfers
+                self.reserves -= transfers
 
     def calc_budget_balance(self):
         balance = self.taxes - self.public_spending - self.bond_interests

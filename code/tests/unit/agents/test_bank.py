@@ -33,14 +33,38 @@ def test_has_default_stocks(bank):
     assert bank.cash_advances == 0
 
 
-def test_has_default_country_value(bank):
+def test_has_default_flows(bank):
+    # Assert
+    assert bank.loan_interest == 0
+    assert bank.reserve_interest == 0
+    assert bank.cash_advance_interest == 0
+    assert bank.dividends == 0
+
+
+def test_has_default_choices(bank):
+    # Assert
+    assert bank.deposit_rate == 0
+    assert bank.taxes_payable == 0
+    assert bank.dividends_payable == 0
+
+
+def test_has_default_indicators(bank):
     # Assert
     assert bank.country is None
+    assert bank.credit_capacity == 0
+    assert bank.net_worth == 0
+    assert bank.profit == 0
+    assert bank.defaulted == False
 
 
-def test_has_default_central_bank_ref(bank):
+def test_has_default_refs(bank):
     # Assert
     assert bank.central_bank is None
+
+
+# ---------------------------------------------------
+# DERIVED STATE TESTS
+# ----------------------------------------------------
 
 
 def test_expose_bonds_total(bank):
@@ -83,29 +107,6 @@ def test_expose_deposit_interests_total(bank):
 
     # Assert
     assert bank.dep_interests == pytest.approx(50.0)
-
-
-def test_has_default_flows(bank):
-    # Assert
-    assert bank.loan_interest == 0
-    assert bank.reserve_interest == 0
-    assert bank.cash_advance_interest == 0
-    assert bank.dividends == 0
-
-
-def test_has_default_choices(bank):
-    # Assert
-    assert bank.deposit_rate == 0
-    assert bank.taxes_payable == 0
-    assert bank.dividends_payable == 0
-
-
-def test_has_default_indicators(bank):
-    # Assert
-    assert bank.credit_capacity == 0
-    assert bank.net_worth == 0
-    assert bank.profit == 0
-    assert bank.defaulted == False
 
 
 # ---------------------------------------------------
@@ -443,14 +444,32 @@ def test_calc_profit(bank, mock_dep_interests, mock_bond_interests):
     assert profit == 70
 
 
-@pytest.mark.parametrize("profit, expected", [(100, 20), (0, 0), (-50, 0)])
-def test_calc_taxes(profit, expected):
+@pytest.fixture
+def model_with_govt():
     # Given
-    role = Mock()
-    role.get_tax_rate.return_value = 0.20
-    bank = Bank(model=Mock())
-    bank.roles["tax_payer"] = role
+    govt = Mock(tax_rate=0.0, reserves=0, taxes=0)
+    model = Mock()
+    model.governments = {"any": govt}
+    return model, govt
+
+
+@pytest.fixture
+def bank_with_govt(model_with_govt):
+    # Given
+    model, govt = model_with_govt
+    bank = Bank(model)
+    bank.country = "any"
+    bank.taxes = 0
+    bank.reserves = 0
+    return bank, govt
+
+
+@pytest.mark.parametrize("profit, expected", [(100, 20), (0, 0), (-50, 0)])
+def test_calc_taxes(bank_with_govt, profit, expected):
+    # Given
+    bank, govt = bank_with_govt
     bank.profit = profit
+    govt.tax_rate = 0.20
 
     # When
     taxes = bank.calc_taxes()
@@ -506,31 +525,36 @@ def test_update_net_worth(bank):
     assert bank.net_worth == pytest.approx(850)
 
 
-def test_pay_taxes(bank):
+def test_pay_taxes(bank_with_govt):
     # Given
-    tax_payer = Mock()
+    bank, govt = bank_with_govt
     bank.taxes_payable = 50
-    bank.roles["tax_payer"] = tax_payer
 
     # When
     bank.pay_taxes()
 
     # Then
-    tax_payer.pay_taxes.assert_called_once_with(50)
     assert bank.taxes_payable == 0
+    assert bank.taxes == 50
+    assert bank.reserves == -50
+    assert govt.taxes == 50
+    assert govt.reserves == 50
 
 
-def test_pay_no_taxes(bank):
+def test_pay_no_taxes(bank_with_govt):
     # Given
-    tax_payer = Mock()
+    bank, govt = bank_with_govt
     bank.taxes_payable = 0
-    bank.roles["tax_payer"] = tax_payer
 
     # When
     bank.pay_taxes()
 
     # Then
-    tax_payer.pay_taxes.assert_not_called()
+    assert bank.taxes_payable == 0
+    assert bank.taxes == 0
+    assert bank.reserves == 0
+    assert govt.taxes == 0
+    assert govt.reserves == 0
 
 
 def test_pay_dividends(bank):

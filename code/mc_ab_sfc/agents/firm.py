@@ -197,9 +197,8 @@ class Firm(EcoAgent):
     def calc_taxes(self):
         if self.net_cash_flow <= 0:
             return 0
-        role = self.roles["tax_payer"]
-        tax_rate = role.get_tax_rate()
-        return tax_rate * self.net_cash_flow
+        govt = self.model.governments[self.country]
+        return govt.tax_rate * self.net_cash_flow
 
     def calc_dividends(self):
         if self.net_cash_flow <= 0:
@@ -214,8 +213,12 @@ class Firm(EcoAgent):
 
     def pay_taxes(self):
         if self.taxes_payable > 0:
-            role = self.roles["tax_payer"]
-            role.pay_taxes(self.taxes_payable)
+            taxes = self.taxes_payable
+            govt = self.model.governments[self.country]
+            govt.taxes += taxes
+            govt.reserves += taxes
+            self.taxes += taxes
+            self.cash -= taxes
             self.taxes_payable = 0
 
     def pay_dividends(self):

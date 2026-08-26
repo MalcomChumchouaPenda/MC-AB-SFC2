@@ -2,7 +2,6 @@ from ..base import EcoSpace
 from ..agents import Firm, Bank, Household
 from ..roles import (
     GovernmentRole,
-    TaxPayerRole,
     EquityHolderRole,
     EquityIssuerRole,
     CommercialBankRole,
@@ -48,24 +47,6 @@ class CountrySpace(EcoSpace):
         self.graph.add_edge(self.central_bank_role, bank_role)
         return bank_role
 
-    def add_tax_payer(self, agent):
-        govt_role = self.government_role
-        payer_role = self.add_role(TaxPayerRole, agent, "tax_payer")
-        payer_role.government = govt_role
-        self.graph.add_edge(govt_role, payer_role)
-        return payer_role
-
-    def pay_taxes(self, tax_payer, amount):
-        govt_role = self.government_role
-        govt_role.increase_stock("reserves", amount)
-        govt_role.increase_flow("taxes", amount)
-        if isinstance(tax_payer.agent, Bank):
-            tax_payer.decrease_stock("reserves", amount)
-            tax_payer.increase_flow("taxes", amount)
-        else:
-            tax_payer.decrease_stock("cash", amount)
-            tax_payer.increase_flow("taxes", amount)
-
     def add_equity_issuer(self, agent):
         role = self.add_role(EquityIssuerRole, agent, "equity_issuer")
         if isinstance(agent, Bank):
@@ -110,19 +91,6 @@ class CountrySpace(EcoSpace):
         bank_role.increase_stock("reserves", amount)
         bank_role.increase_stock("cash_advances", amount)
 
-    def get_households(self):
-        return [
-            role
-            for role in self.graph.nodes
-            if isinstance(role, TaxPayerRole) and isinstance(role.agent, Household)
-        ]
-
-    def pay_public_transfers(self, governement, household, amount):
-        governement.decrease_stock("reserves", amount)
-        governement.increase_flow("public_transfers", amount)
-        household.increase_stock("cash", amount)
-        household.increase_flow("public_transfers", amount)
-
     def get_potential_investors(self, exclude=None):
         return [
             n
@@ -139,8 +107,7 @@ class CountrySpace(EcoSpace):
         issuer = self.add_equity_issuer(firm)
         self._distribute_firm_equity(issuer, founders)
         self._create_firm_market_roles(firm, tradable)
-        # self.update_equity_shares(issuer)
-        self.add_tax_payer(firm)
+        # self.update_equity_shares(issuer) # TODO
         self.model.firms.append(firm)
         return firm
 
@@ -168,7 +135,6 @@ class CountrySpace(EcoSpace):
         issuer = self.add_equity_issuer(bank)
         self._distribute_bank_equity(issuer, founders)
         self._create_bank_market_roles(bank)
-        self.add_tax_payer(bank)
         self.model.banks.append(bank)
         return bank
 

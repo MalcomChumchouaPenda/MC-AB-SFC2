@@ -44,26 +44,6 @@ def test_has_default_bond_supply_value(govt):
     assert govt.bond_supply == 0.0
 
 
-def test_expose_bonds_total(govt):
-    # Given
-    bonds = [{"buyer": object(), "principal": 500}]
-    bond_market = govt.model.bond_market
-    bond_market.get_issuer_bonds.return_value = bonds
-
-    # Assert
-    assert govt.bonds == 500
-
-
-def test_expose_bond_interests_total(govt):
-    # Given
-    bonds = [{"buyer": object(), "interests": 50.0}]
-    bond_market = govt.model.bond_market
-    bond_market.get_issuer_bonds.return_value = bonds
-
-    # Assert
-    assert govt.bond_interests == pytest.approx(50.0)
-
-
 def test_has_default_flows(govt):
     # Assert
     assert govt.taxes == 0
@@ -88,26 +68,83 @@ def test_has_default_indicators(govt):
     assert govt.prev_budget_surplus == 0
 
 
-def test_has_default_central_bank_ref(govt):
+def test_has_default_refs(govt):
     # Assert
     assert govt.central_bank is None
 
 
-def test_pays_public_transfers(govt):
+# ---------------------------------------------------
+# DERIVED STATE TESTS
+# ----------------------------------------------------
+
+
+def test_expose_bonds_total(govt):
     # Given
-    households = [Mock() for _ in range(3)]
-    govt_role = Mock()
-    govt_role.get_households.return_value = households
-    govt.roles["government"] = govt_role
-    govt.public_spending = 300
+    bonds = [{"buyer": object(), "principal": 500}]
+    bond_market = govt.model.bond_market
+    bond_market.get_issuer_bonds.return_value = bonds
+
+    # Assert
+    assert govt.bonds == 500
+
+
+def test_expose_bond_interests_total(govt):
+    # Given
+    bonds = [{"buyer": object(), "interests": 50.0}]
+    bond_market = govt.model.bond_market
+    bond_market.get_issuer_bonds.return_value = bonds
+
+    # Assert
+    assert govt.bond_interests == pytest.approx(50.0)
+
+
+# ---------------------------------------------------
+# PUBLIC TRANSFERS TESTS
+# ----------------------------------------------------
+
+
+@pytest.fixture
+def govt_with_spending():
+    # Given
+    spending = 100
+    model = Mock()
+    govt = Government(model)
+    govt.setup()
+    govt.country = "any"
+    govt.public_spending = spending
+    return govt, spending
+
+
+def test_pay_public_transfers_to_domestic_households(govt_with_spending):
+    # Given
+    govt, spending = govt_with_spending
+    household = Mock(country="any", cash=0, public_transfers=0)
+    govt.model.households = [household]
 
     # When
     govt.pay_public_transfers()
 
     # Then
-    action = govt_role.pay_public_transfers
-    for household in households:
-        action.assert_any_call(household, 100)
+    assert household.cash == spending
+    assert household.public_transfers == spending
+    assert govt.reserves == -spending
+    assert govt.public_transfers == spending
+
+
+def test_dont_pay_public_transfers_to_foreign_households(govt_with_spending):
+    # Given
+    govt, _ = govt_with_spending
+    household = Mock(country="other", cash=0, public_transfers=0)
+    govt.model.households = [household]
+
+    # When
+    govt.pay_public_transfers()
+
+    # Then
+    assert household.cash == 0
+    assert household.public_transfers == 0
+    assert govt.reserves == 0
+    assert govt.public_transfers == 0
 
 
 @pytest.fixture

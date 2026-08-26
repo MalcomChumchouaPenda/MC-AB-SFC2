@@ -91,20 +91,21 @@ class Household(EcoAgent):
                 remaining -= quantity
 
     def pay_taxes(self):
+        govt = self.model.governments[self.country]
         self.income = self.calc_income()
         self.disposable_income = self.calc_disposable_income()
-        role = self.roles["tax_payer"]
-        tax_rate = role.get_tax_rate()
-        taxes = tax_rate * self.income
-        role.pay_taxes(taxes)
+        taxes = govt.tax_rate * self.income
+        govt.reserves += taxes
+        govt.taxes += taxes
+        self.cash -= taxes
+        self.taxes += taxes
 
     def calc_income(self):
         return self.labor_income + self.dep_interests + self.dividends + self.rd_income
 
     def calc_disposable_income(self):
-        role = self.roles["tax_payer"]
-        tax_rate = role.get_tax_rate()
-        return (1 - tax_rate) * self.income + self.public_transfers
+        govt = self.model.governments[self.country]
+        return (1 - govt.tax_rate) * self.income + self.public_transfers
 
     def calc_consumption(self):
         p = self.p

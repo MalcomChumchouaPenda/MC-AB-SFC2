@@ -25,28 +25,6 @@ def household():
     return household
 
 
-def test_expose_deposits_total(household):
-    # Given
-    deposits = [{"bank": object(), "amount": 500}]
-    deposit_market = Mock()
-    deposit_market.get_client_deposits.return_value = deposits
-    household.model.deposit_markets = {"any": deposit_market}
-
-    # Assert
-    assert household.deposits == 500
-
-
-def test_expose_deposit_interests_total(household):
-    # Given
-    deposits = [{"bank": object(), "interests": 50.0}]
-    deposit_market = Mock()
-    deposit_market.get_client_deposits.return_value = deposits
-    household.model.deposit_markets = {"any": deposit_market}
-
-    # Assert
-    assert household.dep_interests == pytest.approx(50.0)
-
-
 def test_has_default_stocks(household):
     # Assert
     assert household.cash == 0
@@ -77,30 +55,45 @@ def test_has_default_choices(household):
 
 def test_has_default_indicator(household):
     # Assert
+    assert household.country is None
+    assert household.position == 0
+    assert household.labor_supply == 1
     assert household.employed_labor == 0
     assert household.net_worth == 0
     assert household.income == 0
     assert household.disposable_income == 0
 
 
-def test_has_default_country_value(household):
-    # Assert
-    assert household.country is None
-
-
-def test_has_default_deposit_bank_ref(household):
+def test_has_default_refs(household):
     # Assert
     assert household.deposit_bank is None
 
 
-def test_has_unit_labor_supply(household):
-    # Assert
-    assert household.labor_supply == 1
+# ---------------------------------------------------
+# DERIVED STATE TESTS
+# ----------------------------------------------------
 
 
-def test_has_default_position(household):
+def test_expose_deposits_total(household):
+    # Given
+    deposits = [{"bank": object(), "amount": 500}]
+    deposit_market = Mock()
+    deposit_market.get_client_deposits.return_value = deposits
+    household.model.deposit_markets = {"any": deposit_market}
+
     # Assert
-    assert household.position == 0
+    assert household.deposits == 500
+
+
+def test_expose_deposit_interests_total(household):
+    # Given
+    deposits = [{"bank": object(), "interests": 50.0}]
+    deposit_market = Mock()
+    deposit_market.get_client_deposits.return_value = deposits
+    household.model.deposit_markets = {"any": deposit_market}
+
+    # Assert
+    assert household.dep_interests == pytest.approx(50.0)
 
 
 # ---------------------------------------------------
@@ -355,12 +348,21 @@ def mock_dep_interests(monkeypatch):
 
 
 @pytest.fixture
-def household_as_taxpayer(mock_dep_interests):
+def model_with_govt():
     # Given
+    govt = Mock(tax_rate=0.2, reserves=0, taxes=0)
     model = Mock()
+    model.governments = {"any": govt}
+    return model, govt
+
+
+@pytest.fixture
+def household_as_taxpayer(mock_dep_interests, model_with_govt):
+    # Given
+    model, _ = model_with_govt
     household = Household(model)
     household.mock_dep_interests = mock_dep_interests
-    household.roles["tax_payer"] = Mock()
+    household.country = "any"
     return household
 
 
@@ -384,8 +386,6 @@ def test_calc_disposable_income(household_as_taxpayer):
     household = household_as_taxpayer
     household.income = 200
     household.public_transfers = 50
-    payer_role = household.roles["tax_payer"]
-    payer_role.get_tax_rate.return_value = 0.2
 
     # When
     disposable_income = household.calc_disposable_income()
@@ -394,19 +394,33 @@ def test_calc_disposable_income(household_as_taxpayer):
     assert disposable_income == 210
 
 
-def test_pay_taxes(household_as_taxpayer):
+def test_pay_taxes_transfers_cash(household_as_taxpayer, model_with_govt):
     # Given
+    _, govt = model_with_govt
     household = household_as_taxpayer
     household.calc_income = Mock(return_value=100)
     household.calc_disposable_income = Mock(return_value=110)
-    payer_role = household.roles["tax_payer"]
-    payer_role.get_tax_rate.return_value = 0.2
 
     # When
     household.pay_taxes()
 
     # Then
-    payer_role.pay_taxes.assert_called_once_with(20)
+    assert household.taxes == 20
+    assert household.cash == -20
+    assert govt.taxes == 20
+    assert govt.reserves == 20
+
+
+def test_pay_taxes_updates_indicators(household_as_taxpayer):
+    # Given
+    household = household_as_taxpayer
+    household.calc_income = Mock(return_value=100)
+    household.calc_disposable_income = Mock(return_value=110)
+
+    # When
+    household.pay_taxes()
+
+    # Then
     assert household.disposable_income == 110
     assert household.income == 100
 

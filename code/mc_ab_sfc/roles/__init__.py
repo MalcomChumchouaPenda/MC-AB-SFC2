@@ -6,7 +6,6 @@ from .equity_issuer import EquityIssuerRole
 
 from .commercial_bank import CommercialBankRole
 from .government import GovernmentRole
-from .tax_payer import TaxPayerRole
 
 from .producer import ProducerRole
 from .consumer import ConsumerRole

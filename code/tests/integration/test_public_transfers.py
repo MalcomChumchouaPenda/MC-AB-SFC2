@@ -16,6 +16,7 @@ def govt(model):
     # Given
     govt = Government(model)
     govt.setup()
+    govt.country = "any"
     return govt
 
 
@@ -46,24 +47,21 @@ def test_central_bank_transfer_profits(govt, cb):
 
 
 @pytest.fixture
-def country(model):
-    # Given
-    return CountrySpace(model)
-
-
-@pytest.fixture
 def households(model):
     # Given
-    return [Household(model) for _ in range(4)]
+    households = []
+    for _ in range(4):
+        household = Household(model)
+        household.country = "any"
+        households.append(household)
+    model.households = households
+    return households
 
 
-def test_government_pay_public_transfer_equally(govt, households, country):
+def test_government_pay_public_transfer_equally(govt, households):
     # Given
     govt.reserves = 1000
     govt.public_spending = 400
-    country.add_government(govt)
-    for household in households:
-        country.add_tax_payer(household)
 
     # When
     govt.pay_public_transfers()
