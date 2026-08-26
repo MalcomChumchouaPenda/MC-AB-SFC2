@@ -15,6 +15,6 @@ class PrintParameters:
             if var != "LtimeCollecting" and var != "Lrun":
                 xc = [var, Dvar[var]]
                 C.append(xc)
-        with open(nameAgg, 'wt') as file:
+        with open(nameAgg, "wt") as file:
             writer = csv.writer(file)
             writer.writerows(C)

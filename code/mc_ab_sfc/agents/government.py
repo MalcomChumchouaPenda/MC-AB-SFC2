@@ -8,17 +8,16 @@ class GovernmentAgent(EcoAgent):
 
         # stocks
         self.reserves = 0
-        self.bonds = 0
 
         # flows
         self.taxes = 0
         self.profit = 0
         self.public_transfers = 0
-        self.bond_interest = 0
 
         # choices
         self.tax_rate = 0.0
         self.bond_rate = 0.0
+        self.bond_supply = 0
         self.desired_public_spending = 0
         self.prev_public_spending = 0
         self.public_spending = 0
@@ -30,6 +29,21 @@ class GovernmentAgent(EcoAgent):
         self.budget_deficit = 0
         self.budget_surplus = 0
 
+        # accointances
+        self.central_bank = None
+
+    @property
+    def bonds(self):
+        bond_market = self.model.bond_market
+        bonds = bond_market.get_issuer_bonds(self)
+        return sum([b["principal"] for b in bonds])
+
+    @property
+    def bond_interests(self):
+        bond_market = self.model.bond_market
+        bonds = bond_market.get_issuer_bonds(self)
+        return sum([b["interests"] for b in bonds])
+
     def pay_public_transfers(self):
         role = self.roles["government"]
         households = role.get_households()
@@ -38,7 +52,7 @@ class GovernmentAgent(EcoAgent):
             role.pay_public_transfers(household, transfers)
 
     def calc_budget_balance(self):
-        balance = self.taxes - self.public_spending - self.bond_interest
+        balance = self.taxes - self.public_spending - self.bond_interests
         self.budget_deficit = max(0, -balance)
         self.budget_surplus = max(0, balance)
         return balance
@@ -86,8 +100,7 @@ class GovernmentAgent(EcoAgent):
     def issue_bonds(self):
         self.calc_new_debt()
         new_bonds = self.calc_new_bonds()
-        role = self.roles["bond_issuer"]
-        role.issue_bonds(new_bonds)
+        self.bond_supply += new_bonds
 
     def calc_new_debt(self):
         new_debt = self.bonds + self.budget_deficit - self.prev_budget_surplus
@@ -97,24 +110,24 @@ class GovernmentAgent(EcoAgent):
     def calc_new_bonds(self):
         return max(0, self.new_public_debt - self.bonds)
 
-    def pay_bond_debt(self):
-        self.calc_bond_rate()
-        role = self.roles["bond_issuer"]
-        role.pay_bond_debt()
+    def repay_bonds(self):
+        bond_rate = self.calc_bond_rate()
+        bond_market = self.model.bond_market
+        for bond in bond_market.get_issuer_bonds(self):
+            principal = bond["principal"]
+            interests = bond_rate * principal
+            bond_market.repay_bonds(self, bond["buyer"], principal, interests)
+        self.bond_rate = bond_rate
 
     def calc_bond_rate(self):
-        role = self.roles["government"]
-        discount_rate = role.get_discount_rate()
-        bond_rate = self.p.chi * (self.bonds / self.gdp) + discount_rate
-        self.bond_rate = bond_rate
-        return bond_rate
+        discount_rate = self.central_bank.discount_rate
+        return self.p.chi * (self.bonds / self.gdp) + discount_rate
 
     def issue_deposit_guarantee_bonds(self):
         guarantee_role = self.roles["deposit_guarantee"]
         defaults = guarantee_role.get_defaulted_banks()
         needs = sum([b.defaulted_deposits for b in defaults])
-        issuer_role = self.roles["bond_issuer"]
-        issuer_role.issue_bonds(needs)
+        self.bond_supply += needs
         self._defaults = defaults
 
     def reimburse_deposits(self):

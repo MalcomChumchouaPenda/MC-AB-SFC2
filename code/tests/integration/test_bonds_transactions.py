@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import Mock
 from mc_ab_sfc.agents import BankAgent, CentralBankAgent, GovernmentAgent
-from mc_ab_sfc.spaces import BondMarket, CountrySpace
+from mc_ab_sfc.spaces import BondMarket
 
 
 @pytest.fixture
@@ -18,7 +18,6 @@ def model():
 def govt(model):
     # Given
     govt = GovernmentAgent(model)
-    govt.bonds = 500
     govt.gdp = 1000
     govt.budget_deficit = 200
     govt.prev_budget_surplus = 50
@@ -31,116 +30,106 @@ def bank(model):
     bank = BankAgent(model)
     bank.deposits = 1000
     bank.reserves = 300
-    bank.bonds = 0
     return bank
 
 
 @pytest.fixture
-def central_bank(model):
+def cb(model):
     # Given
-    central_bank = CentralBankAgent(model)
-    central_bank.reserves = 1000
-    return central_bank
+    cb = CentralBankAgent(model)
+    cb.reserves = 1000
+    cb.discount_rate = 0.04
+    return cb
 
 
 @pytest.fixture
-def bond_market(model):
+def bond_market_with_participants(model, govt, cb, bank):
     # Given
-    return BondMarket(model)
+    cb.government = govt
+    govt.central_bank = cb
+    bond_market = BondMarket(model)
+    bond_market.setup()
+    bond_market.add_issuer(govt)
+    bond_market.add_buyer(bank)
+    bond_market.add_buyer(cb)
+    model.bond_market = bond_market
+    return bond_market, govt, cb, bank
 
 
-@pytest.fixture
-def country(model):
+def test_government_issues_bonds(bond_market_with_participants):
     # Given
-    country = CountrySpace(model)
-    country.discount_rate = 0.04
-    return country
-
-
-def test_government_issues_bonds(govt, bond_market):
-    # Given
-    issuer = bond_market.add_bond_issuer(govt)
+    _, govt, *_ = bond_market_with_participants
 
     # When
     govt.issue_bonds()
 
     # Then
-    assert issuer.bond_supply == 150
+    assert govt.bond_supply == 150
 
 
-def test_government_pays_bond_debt_to_bank(govt, bank, country, bond_market):
+def test_government_repay_bonds_to_bank(bond_market_with_participants):
     # Given
-    country.add_government(govt)
-    issuer = bond_market.add_bond_issuer(govt)
-    buyer = bond_market.add_bond_buyer(bank)
-    graph = bond_market.graph
-    graph.add_edge(issuer, buyer, amount=100)
+    bond_market, govt, _, bank = bond_market_with_participants
+    bond_market.bonds.add_edge(govt, bank, principal=100)
 
     # When
-    govt.pay_bond_debt()
+    govt.repay_bonds()
 
     # Then
-    assert govt.bonds == 400
-    assert govt.reserves == -105.0
-    assert govt.bond_interest == 5.0
-    assert bank.reserves == 405.0
-    assert bank.bonds == -100
-    assert bank.bond_interest == 5.0
+    assert govt.bonds == 0
+    assert govt.reserves == -104.2
+    assert govt.bond_interests == 4.2
+    assert bank.reserves == 404.2
+    assert bank.bonds == 0
+    assert bank.bond_interests == 4.2
 
 
-def test_government_pays_bond_debt_to_central_bank(
-    govt, central_bank, country, bond_market
-):
+def test_government_repay_bonds_to_central_bank(bond_market_with_participants):
     # Given
-    country.add_government(govt)
-    issuer = bond_market.add_bond_issuer(govt)
-    buyer = bond_market.add_bond_buyer(central_bank)
-    graph = bond_market.graph
-    graph.add_edge(issuer, buyer, amount=100)
+    bond_market, govt, cb, _ = bond_market_with_participants
+    bond_market.bonds.add_edge(govt, cb, principal=100)
 
     # When
-    govt.pay_bond_debt()
+    govt.repay_bonds()
 
     # Then
-    assert govt.bonds == 400
-    assert govt.reserves == -105.0
-    assert govt.bond_interest == 5.0
-    assert central_bank.reserves == 895.0
-    assert central_bank.bonds == -100
-    assert central_bank.bond_interest == 5.0
+    assert govt.bonds == 0
+    assert govt.reserves == -104.2
+    assert govt.bond_interests == 4.2
+    assert cb.reserves == 895.8
+    assert cb.bonds == 0
+    assert cb.bond_interests == 4.2
 
 
-def test_bank_invests_excess_reserves(govt, bank, bond_market):
+def test_bank_buy_bonds(bond_market_with_participants):
     # Given
-    graph = bond_market.graph
-    buyer = bond_market.add_bond_buyer(bank)
-    issuer = bond_market.add_bond_issuer(govt)
-    issuer.bond_supply = 1000
+    bond_market, govt, _, bank = bond_market_with_participants
+    bonds = bond_market.bonds
+    govt.bond_supply = 1000
 
     # When
-    bank.invest_excess_reserves()
+    bank.buy_bonds()
 
     # Then
     assert bank.reserves == 100
     assert bank.bonds == 200
-    assert govt.bonds == 700
+    assert govt.bonds == 200
     assert govt.reserves == 200
-    assert graph[issuer][buyer]["amount"] == 200
+    assert bonds[govt][bank]["principal"] == 200
 
 
-def test_central_bank_buy_remaining_bonds(govt, central_bank, bond_market):
+def test_central_bank_buy_remaining_bonds(bond_market_with_participants):
     # Given
-    graph = bond_market.graph
-    buyer = bond_market.add_bond_buyer(central_bank)
-    issuer = bond_market.add_bond_issuer(govt)
-    issuer.bond_supply = 1000
+    bond_market, govt, cb, _ = bond_market_with_participants
+    bonds = bond_market.bonds
+    govt.bond_supply = 1000
 
     # When
-    central_bank.buy_remaining_bonds()
+    cb.buy_remaining_bonds()
 
     # Then
-    assert central_bank.reserves == 2000
-    assert central_bank.bonds == 1000
-    assert govt.bonds == 1500
+    assert cb.reserves == 2000
+    assert cb.bonds == 1000
+    assert govt.bonds == 1000
     assert govt.reserves == 1000
-    assert graph[issuer][buyer]["amount"] == 1000
+    assert bonds[govt][cb]["principal"] == 1000

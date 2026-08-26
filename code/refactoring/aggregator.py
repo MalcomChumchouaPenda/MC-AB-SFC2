@@ -898,7 +898,6 @@ class Aggregator:
         with open(self.nameCollect, "a") as file:
             writer = csv.writer(file)
             writer.writerow(self.Lprint)
-            
 
     def WriteInitial(self):
         self.nameCollect = self.folder + "/" + self.name + "AggData.csv"

@@ -200,7 +200,7 @@ class CountrySpace(EcoSpace):
     def _create_bank_market_roles(self, bank):
         self.markets["credit"].add_lender(bank)
         self.markets["deposit"].add_deposit_bank(bank)
-        self.markets["bond"].add_bond_buyer(bank)
+        self.model.bond_market.add_buyer(bank)
 
     def update_statistics(self):
         self.markets["goods"].update_statistics()

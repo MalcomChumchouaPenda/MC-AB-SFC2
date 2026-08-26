@@ -18,15 +18,17 @@ def country(model):
 @pytest.fixture
 def bond_market(model):
     # Given
-    return BondMarket(model)
+    bond_market = BondMarket(model)
+    bond_market.setup()
+    return bond_market
 
 
 @pytest.fixture
-def central_bank(model, bond_market):
+def cb(model, bond_market):
     # Given
-    central_bank = CentralBankAgent(model)
-    bond_market.add_bond_buyer(central_bank)
-    return central_bank
+    cb = CentralBankAgent(model)
+    bond_market.add_buyer(cb)
+    return cb
 
 
 @pytest.fixture
@@ -39,7 +41,7 @@ def deposit_market(model):
 def govt(model, bond_market, deposit_market):
     # Given
     govt = GovernmentAgent(model)
-    bond_market.add_bond_issuer(govt)
+    bond_market.add_issuer(govt)
     deposit_market.add_deposit_guarantee(govt)
     return govt
 
@@ -70,17 +72,14 @@ def firms(model, deposit_market, banks):
     return firms
 
 
-def test_government_activate_deposit_guarantee(model, govt, central_bank, firms, banks):
+def test_government_activate_deposit_guarantee(govt, firms, banks):
     # When
     govt.issue_deposit_guarantee_bonds()
-    central_bank.buy_remaining_bonds()
     govt.reimburse_deposits()
 
     # Then
-    assert govt.bonds == 1000
-    assert govt.reserves == 0
-    assert central_bank.bonds == 1000
-    assert central_bank.reserves == 1000
+    assert govt.bond_supply == 1000
+    assert govt.reserves == -1000
     for firm in firms:
         assert firm.deposits == 0
         assert firm.cash == 100

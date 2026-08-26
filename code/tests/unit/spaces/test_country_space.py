@@ -454,7 +454,6 @@ def test_distributes_dividends_with_cash(country, issuer, holders):
     holders[1].increase_stock.assert_called_with("cash", 80)
 
 
-
 def test_update_equity_holdings(country, issuer, holders):
     # Given
     graph = country.graph
@@ -472,7 +471,6 @@ def test_update_equity_holdings(country, issuer, holders):
     holders[0].increase_stock.assert_called_once_with("equity", 720)
     holders[1].clear_stock.assert_called_once_with("equity")
     holders[1].increase_stock.assert_called_once_with("equity", 480)
-
 
 
 class FakeHouseholdAgent:
@@ -771,7 +769,6 @@ def country_before_bank_creation(monkeypatch, monetary_union):
     country.assign_equity_holder = Mock()
     country.monetary_union = monetary_union
     country.markets = {
-        "bond": Mock(),
         "deposit": Mock(),
         "credit": Mock(),
     }
@@ -805,17 +802,17 @@ def test_create_bank_registers_bank_in_model(country_before_bank_creation):
     model.banks.append.assert_called_with(bank)
 
 
-def test_create_bank_add_bond_buyer_role(country_before_bank_creation):
+def test_create_bank_add_bond_buyer(country_before_bank_creation):
     # Given
     country = country_before_bank_creation
-    market = country.markets["bond"]
+    market = country.model.bond_market
     founders = [Mock(desired_equity=1000)]
 
     # When
     bank = country.create_bank(founders)
 
     # Then
-    market.add_bond_buyer.assert_called_with(bank)
+    market.add_buyer.assert_called_with(bank)
 
 
 def test_create_bank_add_lender_role(country_before_bank_creation):

@@ -1,49 +1,52 @@
-from ..base import EcoSpace
-from ..agents import BankAgent
-from ..roles import (
-    BondBuyerRole,
-    BondIssuerRole,
-)
+from agentpy.objects import Object
+from networkx import Graph
 
 
-class BondMarket(EcoSpace):
+class BondMarket(Object):
 
-    def add_bond_issuer(self, government):
-        return self.add_role(BondIssuerRole, government, "bond_issuer")
+    def setup(self):
+        self.bonds = Graph()
 
-    def add_bond_buyer(self, bank):
-        return self.add_role(BondBuyerRole, bank, "bond_buyer")
+    def add_issuer(self, government):
+        self.bonds.add_node(government, role="issuer")
 
-    def get_bond_issuers(self):
-        return [n for n in self.nodes if isinstance(n, BondIssuerRole)]
+    def add_buyer(self, bank):
+        self.bonds.add_node(bank, role="buyer")
+
+    def get_issuers(self):
+        return [
+            node
+            for node, data in self.bonds.nodes(data=True)
+            if data and data["role"] == "issuer"
+        ]
+
+    def get_issuer_bonds(self, issuer):
+        return [
+            dict(buyer=buyer, **data)
+            for _, buyer, data in self.bonds.edges(issuer, data=True)
+        ]
+
+    def get_buyer_bonds(self, buyer):
+        return [
+            dict(issuer=issuer, **data)
+            for _, issuer, data in self.bonds.edges(buyer, data=True)
+        ]
 
     def buy_bonds(self, buyer, issuer, amount):
         issuer.bond_supply -= amount
-        issuer.increase_stock("bonds", amount)
-        issuer.increase_stock("reserves", amount)
-        if isinstance(buyer.agent, BankAgent):
-            buyer.increase_stock("bonds", amount)
-            buyer.decrease_stock("reserves", amount)
+        issuer.reserves += amount
+        if buyer is issuer.central_bank:
+            buyer.reserves += amount
         else:
-            buyer.increase_stock("bonds", amount)
-            buyer.increase_stock("reserves", amount)
-        self.graph.add_edge(issuer, buyer, amount=amount)
+            buyer.reserves -= amount
+        self.bonds.add_edge(issuer, buyer, principal=amount)
 
-    def pay_bond_debt(self, issuer):
-        graph = self.graph
-        bond_rate = issuer.bond_rate
-        for _, buyer in list(graph.edges(issuer)):
-            principal = graph[issuer][buyer]["amount"]
-            interest = bond_rate * principal
-            issuer.decrease_stock("bonds", principal)
-            issuer.increase_flow("bond_interest", interest)
-            issuer.decrease_stock("reserves", principal + interest)
-            if isinstance(buyer.agent, BankAgent):
-                buyer.decrease_stock("bonds", principal)
-                buyer.increase_flow("bond_interest", interest)
-                buyer.increase_stock("reserves", principal + interest)
-            else:
-                buyer.decrease_stock("bonds", principal)
-                buyer.increase_flow("bond_interest", interest)
-                buyer.decrease_stock("reserves", principal + interest)
-            self.graph.remove_edge(issuer, buyer)
+    def repay_bonds(self, issuer, buyer, principal, interests):
+        repayment = principal + interests
+        issuer.reserves -= repayment
+        if buyer is issuer.central_bank:
+            buyer.reserves -= repayment
+        else:
+            buyer.reserves += repayment
+        self.bonds[issuer][buyer]["principal"] -= principal
+        self.bonds[issuer][buyer]["interests"] = interests

@@ -1,6 +1,3 @@
-from .bond_buyer import BondBuyerRole
-from .bond_issuer import BondIssuerRole
-
 from .deposit_bank import DepositBankRole
 from .deposit_holder import DepositHolderRole
 from .deposit_guarantee import DepositGuaranteeRole

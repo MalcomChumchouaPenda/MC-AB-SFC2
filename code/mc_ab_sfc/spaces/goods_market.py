@@ -1,24 +1,7 @@
 from ..base import EcoSpace
-from ..agents import FirmAgent, BankAgent, HouseholdAgent
 from ..roles import (
-    EmployerRole,
-    WorkerRole,
-    GovernmentRole,
-    TaxPayerRole,
     ConsumerRole,
     ProducerRole,
-    EquityHolderRole,
-    EquityIssuerRole,
-    DepositHolderRole,
-    DepositBankRole,
-    DepositGuaranteeRole,
-    LenderRole,
-    BorrowerRole,
-    UnionCentralBankRole,
-    NationalCentralBankRole,
-    CommercialBankRole,
-    BondBuyerRole,
-    BondIssuerRole,
 )
 
 

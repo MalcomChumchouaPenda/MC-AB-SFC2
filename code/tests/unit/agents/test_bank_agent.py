@@ -1,6 +1,6 @@
 import math
 import pytest
-from unittest.mock import Mock
+from unittest.mock import Mock, PropertyMock
 from mc_ab_sfc.agents.bank import BankAgent
 
 # ---------------------------------------------------
@@ -20,7 +20,9 @@ def test_is_eco_agent():
 def bank():
     # Given
     model = Mock()
-    return BankAgent(model)
+    bank = BankAgent(model)
+    bank.setup()
+    return bank
 
 
 def test_has_default_stocks(bank):
@@ -32,11 +34,30 @@ def test_has_default_stocks(bank):
     assert bank.cash_advances == 0
 
 
+def test_expose_bonds_total(bank):
+    # Given
+    bonds = [{"issuer": object(), "principal": 500}]
+    bond_market = bank.model.bond_market
+    bond_market.get_buyer_bonds.return_value = bonds
+
+    # Assert
+    assert bank.bonds == 500
+
+
+def test_expose_bond_interests_total(bank):
+    # Given
+    bonds = [{"issuer": object(), "interests": 50.0}]
+    bond_market = bank.model.bond_market
+    bond_market.get_buyer_bonds.return_value = bonds
+
+    # Assert
+    assert bank.bond_interests == pytest.approx(50.0)
+
+
 def test_has_default_flows(bank):
     # Assert
     assert bank.loan_interest == 0
     assert bank.deposit_interest == 0
-    assert bank.bond_interest == 0
     assert bank.reserve_interest == 0
     assert bank.cash_advance_interest == 0
     assert bank.dividends == 0
@@ -262,6 +283,36 @@ def test_calc_bond_purchases_probability():
     assert probability == math.exp(-1)
 
 
+@pytest.mark.parametrize("reserves, expected", [(150, 50), (100, 0)])
+def test_calc_excess_reserves(bank, reserves, expected):
+    # Given
+    bank.p.mu2 = 0.1
+    bank.deposits = 1000
+    bank.reserves = reserves
+
+    # When
+    excess_reserves = bank.calc_excess_reserves()
+
+    # Then
+    assert excess_reserves == expected
+
+
+def test_find_bond_suppliers_gets_and_shuffles_all_issuers(bank):
+    # Given
+    bond_issuers = [Mock() for _ in range(3)]
+    bond_market = bank.model.bond_market
+    bond_market.get_issuers.return_value = bond_issuers
+    random = bank.model.random
+
+    # When
+    result = bank.find_bond_issuers()
+
+    # Then
+    bond_market.get_issuers.assert_called_with()
+    random.shuffle.assert_called_with(bond_issuers)
+    assert result == bond_issuers
+
+
 @pytest.fixture
 def bond_issuers():
     return [
@@ -271,48 +322,26 @@ def bond_issuers():
 
 
 @pytest.fixture
-def bond_buyer(bond_issuers):
-    buyer_role = Mock()
-    buyer_role.get_bond_issuers.return_value = bond_issuers
-    return buyer_role
-
-
-@pytest.fixture
-def bank_as_bond_buyer(bond_buyer):
+def bank_as_bond_buyer(bond_issuers):
     model = Mock()
-    model.p.mu2 = 0.1
     bank = BankAgent(model)
-    bank.roles["bond_buyer"] = bond_buyer
     bank.calc_bond_purchases_probability = Mock(return_value=0)
+    bank.calc_excess_reserves = Mock(return_value=0)
+    bank.find_bond_issuers = Mock(return_value=bond_issuers)
     bank.model.nprandom.choice.return_value = 1
     return bank
-
-
-def test_buy_bonds_and_shuffles_all_bonds(bank_as_bond_buyer, bond_issuers):
-    # Given
-    bank = bank_as_bond_buyer
-    bank.reserves = 300
-    bank.deposits = 1000
-    random = bank.model.random
-
-    # When
-    bank.invest_excess_reserves()
-
-    # Then
-    random.shuffle.assert_called_with(bond_issuers)
 
 
 def test_buy_bonds_with_purchases_probability(bank_as_bond_buyer, bond_issuers):
     # Given
     bank = bank_as_bond_buyer
-    bank.reserves = 300
-    bank.deposits = 1000
+    bank.calc_excess_reserves.return_value = 1000
     calc_prob = bank.calc_bond_purchases_probability
     calc_prob.return_value = 0.4
     random = bank.model.nprandom
 
     # When
-    bank.invest_excess_reserves()
+    bank.buy_bonds()
 
     # Then
     random.choice.assert_called_with([0, 1], p=[0.6, 0.4])
@@ -324,22 +353,29 @@ def test_buy_bonds_with_purchases_probability(bank_as_bond_buyer, bond_issuers):
 def test_buy_bonds_with_excess_reserves(bank_as_bond_buyer, bond_issuers):
     # Given
     bank = bank_as_bond_buyer
-    bank.reserves = 150
-    bank.deposits = 1000
-    buyer = bank.roles["bond_buyer"]
+    bank.calc_excess_reserves.return_value = 50
+    bond_market = bank.model.bond_market
 
     # When
-    bank.invest_excess_reserves()
+    bank.buy_bonds()
 
     # Then
-    buyer.buy_bonds.assert_called_once_with(bond_issuers[0], 50)
+    bond_market.buy_bonds.assert_called_once_with(bank, bond_issuers[0], 50)
 
 
-def test_calc_profit():
+@pytest.fixture
+def interest_props(monkeypatch):
+    bond_interest = PropertyMock()
+    monkeypatch.setattr(BankAgent, "bond_interests", bond_interest)
+    return bond_interest
+
+
+def test_calc_profit(interest_props):
     # Given
+    bond_interest = interest_props
+    bond_interest.return_value = 30
     bank = BankAgent(model=Mock())
     bank.loan_interest = 100
-    bank.bond_interest = 30
     bank.reserve_interest = 10
     bank.bad_debt = 20
     bank.deposit_interest = 40

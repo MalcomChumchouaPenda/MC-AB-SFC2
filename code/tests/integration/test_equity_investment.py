@@ -56,6 +56,14 @@ def union(model):
 
 
 @pytest.fixture
+def bond_market(model):
+    bond_market = BondMarket(model)
+    bond_market.setup()
+    model.bond_market = bond_market
+    return bond_market
+
+
+@pytest.fixture
 def country(model, union):
     # Given
     country = CountrySpace(model)
@@ -64,7 +72,6 @@ def country(model, union):
     country.markets["labor"] = LaborMarket(model)
     country.markets["credit"] = CreditMarket(model)
     country.markets["deposit"] = DepositMarket(model)
-    country.markets["bond"] = BondMarket(model)
     return country
 
 
@@ -111,6 +118,7 @@ def test_household_creates_no_firm(country, founders, govt):
     assert founder.cash == 400
 
 
+@pytest.mark.usefixtures("bond_market")
 def test_household_creates_new_bank(country, founders, govt):
     # Given
     founder1, founder2 = founders

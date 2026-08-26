@@ -32,6 +32,18 @@ class BankAgent(EcoAgent):
         self.credit_capacity = 0
         self.defaulted = False
 
+    @property
+    def bonds(self):
+        bond_market = self.model.bond_market
+        bonds = bond_market.get_buyer_bonds(self)
+        return sum([b["principal"] for b in bonds])
+
+    @property
+    def bond_interests(self):
+        bond_market = self.model.bond_market
+        bonds = bond_market.get_buyer_bonds(self)
+        return sum([b["interests"] for b in bonds])
+
     def update_deposit_rate(self):
         role = self.roles["commercial_bank"]
         discount_rate = role.get_discount_rate()
@@ -78,23 +90,30 @@ class BankAgent(EcoAgent):
             role = self.roles["commercial_bank"]
             role.request_cash_advances(shortage)
 
-    def invest_excess_reserves(self):
-        role = self.roles["bond_buyer"]
-        bond_issuers = role.get_bond_issuers()
-        random = self.model.random
-        random.shuffle(bond_issuers)
-
-        required = self.p.mu2 * self.deposits
-        excess = max(self.reserves - required, 0)
+    def buy_bonds(self):
+        bond_market = self.model.bond_market
+        bond_issuers = self.find_bond_issuers()
+        excess = self.calc_excess_reserves()
         choice = self.model.nprandom.choice
         for issuer in bond_issuers:
             prob = self.calc_bond_purchases_probability(issuer)
             if choice([0, 1], p=[1 - prob, prob]):
                 purchase = min(excess, issuer.bond_supply)
-                role.buy_bonds(issuer, purchase)
+                bond_market.buy_bonds(self, issuer, purchase)
                 excess -= purchase
                 if excess <= 0:
                     break
+
+    def find_bond_issuers(self):
+        bond_market = self.model.bond_market
+        bond_issuers = bond_market.get_issuers()
+        random = self.model.random
+        random.shuffle(bond_issuers)
+        return bond_issuers
+
+    def calc_excess_reserves(self):
+        required = self.p.mu2 * self.deposits
+        return max(self.reserves - required, 0)
 
     def calc_bond_purchases_probability(self, issuer):
         return math.exp(-self.p.iota_b * issuer.bonds / issuer.gdp)
@@ -107,7 +126,7 @@ class BankAgent(EcoAgent):
     def calc_profit(self):
         return (
             self.loan_interest
-            + self.bond_interest
+            + self.bond_interests
             + self.reserve_interest
             - self.bad_debt
             - self.deposit_interest
