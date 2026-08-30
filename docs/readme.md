@@ -42,6 +42,9 @@ L'architecture repose sur une séparation claire entre 5 concepts:
 | `EcoSpace`     | espace economique   | gestion des mecanismes d'interaction entre agents           |
 
 
+Nous avons prefixe les classes de base pour les distinguer des classes abstraites fournies par `AgentPy`.
+
+
 
 ## 2. Modélisation
 
@@ -234,7 +237,7 @@ Les prix ou quantites offertes et demandees sont des realites objectives qui fon
 
 Dans l'exemple suivant, on implemente la revision du salaire offert par une firme:
 
-![mc-abm-adjustment](diagrams\mc_abm_adjustment_example.drawio.svg)
+![adjustment](diagrams\example_adjustment.drawio.svg)
 
 Dans cette sequence:
 - la fonction de decision `revise_offered_wage` est active
@@ -256,7 +259,7 @@ L'appariement est un mecanisme qui impliquent la perception des autres agents et
 
 Dans l'exemple suivant, on implemente la recherche d'emploi par un menage:
 
-![mc-abm-matching](diagrams\mc_abm_matching_example.drawio.svg)
+![matching](diagrams\example_matching.drawio.svg)
 
 Dans cette sequence extraite:
 - la fonction de decision `search_jobs` est activee
@@ -278,7 +281,7 @@ Le mecanisme de transaction repose donc sur:
 
 illustrons ce mecanisme par le transfert de profit entre Banque  Centrale et Governement. Nous presentons ici juste l'action du role `CashLender` de la Banque Centrale:
 
-![mc-abm-transactions-01](diagrams\mc_abm_transactions_example_01.drawio.svg)
+![transactions-01](diagrams\example_transactions_01.drawio.svg)
 
 
 Dans cet extrait:
@@ -301,7 +304,7 @@ Dans ces cas, le mecanisme de transaction repose sur:
 
 Nous presentons ici l'exemple l'achat de biens qui necessite un flux dans la sphere reel et un flux dans la sphere institutionnel:
 
-![mc-abm-transactions-02](diagrams\mc_abm_transactions_example_02.drawio.svg)
+![transactions-02](diagrams\example_transactions_02.drawio.svg)
 
 Dans cette sequence extraite:
 - la loi d'interference `buy_goods` est activee
@@ -311,13 +314,13 @@ Dans cette sequence extraite:
 #### 2.3.5. Mobilite (entrees - sorties)
 
 
-![mc-abm-mobility](diagrams\mc_abm_mobility_example.drawio.svg)
+![mobility](diagrams\example_mobility.drawio.svg)
 
 
 #### 2.3.6. Dynamique autonome
 
 
-![mc-abm-evolution](diagrams\mc_abm_evolution_example.drawio.svg)
+![evolution](diagrams\example_evolution.drawio.svg)
 
 
 
