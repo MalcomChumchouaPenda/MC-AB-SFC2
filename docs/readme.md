@@ -136,7 +136,7 @@ La sphere financiere est compose de:
 - `CreditMarket` ou les roles `CreditLender` octroie des `Loans` aux roles `CreditBorrower`
 - `DepositMarket` ou s'echangent des stocks de `Deposit` entre agents jouant les roles de `DepositGuarantee`, `DepositBank`ou `Depositor`
 
-![mc-abm-financial-sphere](diagrams\mc_abm_financial_sphere_objects.drawio.svg)
+![financial-sphere](diagrams\hierarchy_financial_objects.drawio.svg)
 
 
 La sphere reel est compose de:
@@ -144,32 +144,33 @@ La sphere reel est compose de:
 - `GoodsMarket` ou l'action des roles `GoodsConsumer` et `GoodsSupplier` creer des stocks de `Inventories` ou `Sales`
 
 
-![mc-abm-real-sphere](diagrams\mc_abm_real_sphere_objects.drawio.svg)
+![real-sphere](diagrams\hierarchy_real_objects.drawio.svg)
 
 
 La sphere institutionnelle est compose:
-- d'un espace unique `MonetaryUnion` 
-- des stocks de `Equity`, `Transfer`, `CashMoney` et `CashAdvance`
-- des roles `Citizen`, `Company`, `PolicyMaker`, `CashLender` ou `CashBorrower`.
+- d'un espace unique `MonetaryUnion` ou des stocks de `CashMoney` et `CashAdvance` sont detenus et echange par des roles `MonetaryAuthority` et `CashHolder`
+- de plusieurs espaces `Country` ou des stocks de `Equity` ou`Transfer` sont manipules par des roles `Citizen`, `Company` ou `FiscalAuthority`.
 
-![mc-abm-institutionnal-sphere](diagrams\mc_abm_institutionnal_sphere_objects.drawio.svg)
+![institutionnal-sphere](diagrams\hierarchy_institutionnal_objects.drawio.svg)
 
 
 L'espace `MonetaryUnion` joue le role d'**univers** requis dans l'approche MASQ. Cette espace contient tous les autres espaces.
 
 
-![mc-abm-space-structure](diagrams\mc_abm_space_structure.drawio.svg)
+![space-structure](diagrams\space_structure.drawio.svg)
 
 Les relations entre ces espaces on ete implementees selon les regles suivantes :
-- l'espace `MonetaryUnion` contient des references uniques au marches communs
-- l'espace `MonetaryUnion` contient des dictionnaires de marches nationaux
+- l'espace `MonetaryUnion` contient des references au marches communs
+- l'espace `MonetaryUnion` contient un dictionnaire des pays `Country`
+- l'espace `Country` contient des references aux marches nationaux
 
 ```python
-# exemple d'espace avec roles et stocks
+# exemple d'espaces emboites
 
 union = model.monetary_union            # access a l'univers
+country = union.countries[n]            # acces au pays n
 credit_market = union.credit_market     # acces au marche commun du credit
-goods_market = union.goods_markets[n]   # acces au marche national des biens du pays n
+goods_market = country.goods_market     # acces au marche national des biens
 
 ```
 
