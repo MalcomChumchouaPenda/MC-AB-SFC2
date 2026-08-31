@@ -73,9 +73,8 @@ MC-AB-SFC2/
 │   ├── ODD document.pdf         # Scientific documentation (ODD standard)
 │   └── Technical document.pdf   # Technical documentation of implementation
 │
-├── pyproject.toml               # Python project configuration and dependencies
-├── README.md                    # Project overview, installation and usage informations
-└── LICENSE                      # License governing the use and distribution of the project
+├── LICENSE                      # License governing the use and distribution of the project
+└── README.md                    # Project overview, installation and usage informations
 
 ```
 
