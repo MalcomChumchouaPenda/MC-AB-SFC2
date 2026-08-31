@@ -2,14 +2,9 @@ import pytest
 from unittest.mock import Mock, PropertyMock
 from mc_ab_sfc2.agents.private import Household, Firm, Bank
 from mc_ab_sfc2.agents.public import Government, NationalCentralBank
-from mc_ab_sfc2.spaces import (
-    Country,
-    LaborMarket,
-    DepositMarket,
-    CreditMarket,
-    GoodsMarket,
-    BondMarket,
-)
+from mc_ab_sfc2.spaces.institutionnal import Country
+from mc_ab_sfc2.spaces.financial import BondMarket, DepositMarket, CreditMarket
+from mc_ab_sfc2.spaces.real import LaborMarket, GoodsMarket
 
 
 @pytest.fixture

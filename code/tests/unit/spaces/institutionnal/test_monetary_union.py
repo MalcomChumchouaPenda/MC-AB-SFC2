@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import Mock
-from mc_ab_sfc2.spaces.monetary_union import MonetaryUnion
+from mc_ab_sfc2.spaces.institutionnal import MonetaryUnion
 
 # ---------------------------------------------------
 # ARCHITECTURE TESTS

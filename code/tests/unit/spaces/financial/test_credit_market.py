@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import Mock
-from mc_ab_sfc2.spaces.credit_market import CreditMarket
+from mc_ab_sfc2.spaces.financial import CreditMarket
 
 # ---------------------------------------------------
 # ARCHITECTURE TESTS
@@ -36,7 +36,7 @@ def test_add_borrower_creates_borrower_role(market, monkeypatch):
     # Given
     household = Mock()
     market.add_role = Mock()
-    monkeypatch.setattr("mc_ab_sfc2.spaces.credit_market.BorrowerRole", FakeRole)
+    monkeypatch.setattr("mc_ab_sfc2.spaces.financial.BorrowerRole", FakeRole)
 
     # When
     borrower = market.add_borrower(household)
@@ -51,7 +51,7 @@ def test_add_lender_creates_lender(market, monkeypatch):
     # Given
     bank = Mock()
     market.add_role = Mock()
-    monkeypatch.setattr("mc_ab_sfc2.spaces.credit_market.LenderRole", FakeRole)
+    monkeypatch.setattr("mc_ab_sfc2.spaces.financial.LenderRole", FakeRole)
 
     # When
     lender = market.add_lender(bank)
@@ -67,7 +67,7 @@ def test_search_lenders_returns_all_lenders(market, monkeypatch):
     others = [Mock() for _ in range(5)]
     lenders = [FakeRole() for _ in range(5)]
     market.graph.add_nodes_from(others + lenders)
-    monkeypatch.setattr("mc_ab_sfc2.spaces.credit_market.LenderRole", FakeRole)
+    monkeypatch.setattr("mc_ab_sfc2.spaces.financial.LenderRole", FakeRole)
 
     # When
     result = market.search_lenders()

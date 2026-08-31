@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import Mock
-from mc_ab_sfc2.spaces import Country
+from mc_ab_sfc2.spaces.institutionnal import Country
 from mc_ab_sfc2.agents.private import Household, Firm, Bank
 
 
