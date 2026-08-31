@@ -71,7 +71,7 @@ Une economie est composee de 5 entites:
 * des **roles** jouees par les agents dans les espaces
 
 
-![masq-meta-model](diagrams\masq_meta_model.drawio.svg)
+![model](diagrams\base_model.drawio.svg)
 
 Selon l'approche MASQ:
 * les agents sont des *minds* charge de la decision
@@ -91,7 +91,7 @@ Nous avons identifies 5 agents:
 * les banques centrales
 * les gouvernements
 
-![mc-abm-agents](diagrams\mc_abm_agents.drawio.svg)
+![agents](diagrams\hierarchy_agents.drawio.svg)
 
 la classe `Agent` herite de `agentpy.Agent` et possede:
 - un attribut `p` qui donne acces aux `Parameters`
