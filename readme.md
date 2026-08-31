@@ -97,6 +97,13 @@ Within `code/model/`, the `roles/`, `stocks/` and `spaces/` folders each contain
 
 ## 8. Running Tests
 
+To run tests. To laun tests suite one must goto tests directory and run `pytest` command:
+
+```bash
+cd ./code/tests
+pytest
+
+```
 
 ## 9. Deviations
 
