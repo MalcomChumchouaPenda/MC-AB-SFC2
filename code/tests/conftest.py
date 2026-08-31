@@ -9,6 +9,7 @@ while "tests" in root_dir:
 if root_dir not in sys.path:
     sys.path.append(root_dir)
 
+
 @pytest.fixture
 def fake_model():
     model = Mock(t=0)

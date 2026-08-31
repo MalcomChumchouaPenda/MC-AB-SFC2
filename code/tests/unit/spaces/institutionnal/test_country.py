@@ -97,9 +97,7 @@ def test_add_equity_holder_role(country_with_roles, monkeypatch):
     # Given
     household = Mock()
     country = country_with_roles
-    monkeypatch.setattr(
-        "model.spaces.institutionnal.EquityHolderRole", FakeHolderRole
-    )
+    monkeypatch.setattr("model.spaces.institutionnal.EquityHolderRole", FakeHolderRole)
 
     # When
     holder_role = country.add_equity_holder(household)
@@ -117,9 +115,7 @@ def test_add_equity_issuer_creates_appropriate_role(country_with_roles, monkeypa
     # Given
     agent = Mock()
     country = country_with_roles
-    monkeypatch.setattr(
-        "model.spaces.institutionnal.EquityIssuerRole", FakeIssuerRole
-    )
+    monkeypatch.setattr("model.spaces.institutionnal.EquityIssuerRole", FakeIssuerRole)
 
     # When
     issuer_role = country.add_equity_issuer(agent)
@@ -280,9 +276,7 @@ def test_get_only_eligible_investors(country, monkeypatch):
     eligible = FakeHolderRole(desired_equity=100, equity=0)
     ineligible = FakeHolderRole(desired_equity=100, equity=10)
     country.graph.add_nodes_from([eligible, ineligible, other])
-    monkeypatch.setattr(
-        "model.spaces.institutionnal.EquityHolderRole", FakeHolderRole
-    )
+    monkeypatch.setattr("model.spaces.institutionnal.EquityHolderRole", FakeHolderRole)
 
     # When
     investors = country.get_potential_investors()
@@ -296,9 +290,7 @@ def test_get_investors_excludes_initiating_household(country, monkeypatch):
     initiator = FakeHolderRole(desired_equity=100, equity=0)
     eligible = FakeHolderRole(desired_equity=100, equity=0)
     country.graph.add_nodes_from([initiator, eligible])
-    monkeypatch.setattr(
-        "model.spaces.institutionnal.EquityHolderRole", FakeHolderRole
-    )
+    monkeypatch.setattr("model.spaces.institutionnal.EquityHolderRole", FakeHolderRole)
 
     # When
     investors = country.get_potential_investors(exclude=initiator)

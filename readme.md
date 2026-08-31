@@ -41,33 +41,34 @@ Extensions, refinements, and additional empirical calibration procedures are con
 
 ## 5. Project Structure
 The repository is organized into three main parts: 
-* `code/`: model implementation, associated tests, exploratory notebooks, and experiment scripts; 
+* `code/`: model implementation, associated tests, and experiment scripts; 
 * `data/`: input datasets, generated simulation outputs, and analysis results; 
-* `docs/`: scientific and technical documentation. 
+* `docs/`: scientific and technical documentation (including exploratory notebooks). 
 
 ```
 MC-AB-SFC2/
 │
 ├── code/
-│   ├── mc_ab_sfc/               # original implementation of Caiani et al. 2018
-│   ├── mc_ab_sfc2/              # novel implementation based on MASQ approach
+│   │
+│   ├── model/                   # model implementation based on MASQ approach
 │   │   ├── agents/              # definition of agents state and behaviors
 │   │   ├── roles/               # implementation of agent roles
 │   │   ├── spaces/              # representation of interaction spaces
 │   │   ├── stocks/              # representation of economic stocks
 │   │   ├── base.py              # definitions of basic model entities
-│   │   └── model.py             # orchestration of simulations
+│   │   └── model.py             # model simulation tools
+│   │
+│   ├── scripts/                 # experiments scripts (scenarios)
 │   │
 │   ├── tests/                   # tests of novel model implementation
 │   │   ├── unit/                # unit tests of agents, roles, stocks and spaces
 │   │   ├── integration/         # integration tests of economic mechanisms
 │   │   └── acceptance/          # acceptance tests (model verification)
 │   │
-│   ├── experiments/             # experiments scripts (scenarios)
 │   └── notebooks/               # data analysis notebooks
 │
 ├── data/                        # Input/Intermediate/Ouput data
-├── docs/                        # Model and replication documentation
+├── docs/                        # Model and replication documentation (include notebooks)
 │   ├── ODD document.pdf         # Scientific documentation (ODD standard)
 │   └── Technical document.pdf   # Technical documentation of implementation
 │
@@ -78,11 +79,11 @@ MC-AB-SFC2/
 ```
 
 
-The `code/mc_ab_sfc2/agents/` folder contains : 
+The `code/model/agents/` folder contains : 
 * `public/` sub-folder for public agents definition
 * `private/` sub-folder for private agents definition
 
-Within `code/mc_ab_sfc2/`, the `roles/`, `stocks/` and `spaces/` folders each contains : 
+Within `code/model/`, the `roles/`, `stocks/` and `spaces/` folders each contains : 
 * a `institutionnal/` sub-folder for institutionnal entities
 * a `financial/` sub-folder for financial entities
 * a `real/` sub-folder for real entities
