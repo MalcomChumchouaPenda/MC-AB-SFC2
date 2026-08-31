@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import Mock, PropertyMock
-from mc_ab_sfc2.roles.consumer import ConsumerRole
+from mc_ab_sfc2.roles.real import ConsumerRole
 
 # ---------------------------------------------------
 # ARCHITECTURE TESTS

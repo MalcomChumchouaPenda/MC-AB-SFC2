@@ -1,6 +1,6 @@
 from ..base import EcoSpace
 from ..agents.private import Firm, Bank
-from ..roles import EquityHolderRole, EquityIssuerRole
+from ..roles.institutionnal import EquityHolderRole, EquityIssuerRole
 
 
 class MonetaryUnion(EcoSpace):

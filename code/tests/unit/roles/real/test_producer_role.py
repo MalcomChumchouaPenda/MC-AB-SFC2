@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import Mock
-from mc_ab_sfc2.roles.producer import ProducerRole
+from mc_ab_sfc2.roles.real import ProducerRole
 
 # ---------------------------------------------------
 # ARCHITECTURE TESTS

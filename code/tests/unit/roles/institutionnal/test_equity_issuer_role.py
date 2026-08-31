@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import Mock
-from mc_ab_sfc2.roles.equity_issuer import EquityIssuerRole
+from mc_ab_sfc2.roles.institutionnal import EquityIssuerRole
 
 # ---------------------------------------------------
 # ARCHITECTURE TESTS

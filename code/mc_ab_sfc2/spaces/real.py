@@ -1,6 +1,5 @@
 from ..base import EcoSpace
-from ..roles import EmployerRole, WorkerRole
-from ..roles import ConsumerRole, ProducerRole
+from ..roles.real import EmployerRole, WorkerRole, ConsumerRole, ProducerRole
 
 
 class GoodsMarket(EcoSpace):
