@@ -18,7 +18,7 @@
 
 ## 1. Overview
 
-This repository presents a replication of the multi-country Agent-Based Stock-Flow Consistent (AB-SFC) model developed by Caiani et al. (2018).
+This repository presents a replication of the multi-country Agent-Based Stock-Flow Consistent (MC-AB-SFC) model developed by Caiani et al. (2018).
 
 The model is implemented using the MASQ metamodel (Dinu et al., 2012) through a modular and test-driven engineering approach, with the objective of providing a transparent, reproducible, and extensible implementation.
 
@@ -32,6 +32,9 @@ The model is implemented using the MASQ metamodel (Dinu et al., 2012) through a 
 
 ## 3. Replication Scope
 
+This replication focuses on preserving the main institutional sectors the main economic relationships, the core economic mechanisms, the accounting consistency principles and the emergent macroeconomic properties of the original framework.
+
+Extensions, refinements, and additional empirical calibration procedures are considered outside the initial scope of this implementation.
 
 ## 4. Technical Architecture
 
