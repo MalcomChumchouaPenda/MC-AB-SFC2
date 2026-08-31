@@ -55,17 +55,18 @@ MC-AB-SFC2/
 │   │   ├── roles/               # implementation of agent roles
 │   │   ├── spaces/              # representation of interaction spaces
 │   │   ├── stocks/              # representation of economic stocks
-│   │   ├── base.py              # definitions of basic model entities
-│   │   └── model.py             # model simulation tools
+│   │   ├── base.py              # definition of basic model entities
+│   │   └── tools.py             # model simulation tools
 │   │
-│   ├── scripts/                 # experiments scripts (scenarios)
+│   ├── scripts/                 # experiments scripts
+│   │   ├── run_scenario1.py     # script to run scenario 1
+│   │   ├── run_scenario2.py     # script to run scenario 2
+│   │   └── run_all.py           # run all scenarios
 │   │
-│   ├── tests/                   # tests of novel model implementation
-│   │   ├── unit/                # unit tests of agents, roles, stocks and spaces
-│   │   ├── integration/         # integration tests of economic mechanisms
-│   │   └── acceptance/          # acceptance tests (model verification)
-│   │
-│   └── notebooks/               # data analysis notebooks
+│   └── tests/                   # tests of novel model implementation
+│       ├── unit/                # unit tests of agents, roles, stocks and spaces
+│       ├── integration/         # integration tests of economic mechanisms
+│       └── acceptance/          # acceptance tests (model verification)
 │
 ├── data/                        # Input/Intermediate/Ouput data
 ├── docs/                        # Model and replication documentation (include notebooks)
