@@ -54,3 +54,4 @@ output/
 # Temporary files
 temp/
 ~$*
+~*.tmp
