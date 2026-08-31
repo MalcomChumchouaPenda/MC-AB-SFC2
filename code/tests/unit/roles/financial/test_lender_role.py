@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import Mock
-from mc_ab_sfc2.roles.financial import LenderRole
+from model.roles.financial import LenderRole
 
 # ---------------------------------------------------
 # ARCHITECTURE TESTS
@@ -9,7 +9,7 @@ from mc_ab_sfc2.roles.financial import LenderRole
 
 def test_is_eco_role():
     # Given
-    from mc_ab_sfc2.base import EcoRole
+    from model.base import EcoRole
 
     # Assert
     assert issubclass(LenderRole, EcoRole)

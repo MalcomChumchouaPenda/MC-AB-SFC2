@@ -1,7 +1,7 @@
 import pytest
 import agentpy as ap
 from unittest.mock import Mock
-from mc_ab_sfc2.base import EcoRole
+from model.base import EcoRole
 
 
 def test_is_agentnode():

@@ -1,8 +1,8 @@
 import pytest
 from unittest.mock import Mock, PropertyMock
-from mc_ab_sfc2.agents.private import Bank, Firm
-from mc_ab_sfc2.agents.public import Government
-from mc_ab_sfc2.spaces.financial import DepositMarket
+from model.agents.private import Bank, Firm
+from model.agents.public import Government
+from model.spaces.financial import DepositMarket
 
 
 @pytest.fixture

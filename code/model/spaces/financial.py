@@ -1,7 +1,7 @@
 from agentpy.objects import Object
 from networkx import Graph
-from ..base import EcoSpace
-from ..roles.financial import LenderRole, BorrowerRole
+from model.base import EcoSpace
+from model.roles.financial import LenderRole, BorrowerRole
 
 
 class BondMarket(Object):

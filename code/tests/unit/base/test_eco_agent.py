@@ -1,7 +1,7 @@
 import pytest
 import agentpy as ap
 from unittest.mock import Mock
-from mc_ab_sfc2.base import EcoAgent
+from model.base import EcoAgent
 
 
 def test_is_agentpy_agent():

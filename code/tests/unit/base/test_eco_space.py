@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from unittest.mock import Mock
 from networkx import DiGraph, Graph
 import agentpy as ap
-from mc_ab_sfc2.base import EcoSpace
+from model.base import EcoSpace
 
 # ---------------------------------------------------
 # ARCHITECTURE TESTS
