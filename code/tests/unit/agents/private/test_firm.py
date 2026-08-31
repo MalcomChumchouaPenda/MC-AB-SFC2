@@ -1,7 +1,7 @@
 import math
 import pytest
 from unittest.mock import Mock, PropertyMock
-from mc_ab_sfc.agents.firm import Firm
+from mc_ab_sfc2.agents.private import Firm
 
 # ---------------------------------------------------
 # ARCHITECTURE TESTS
@@ -10,7 +10,7 @@ from mc_ab_sfc.agents.firm import Firm
 
 def test_is_eco_agent():
     # Given
-    from mc_ab_sfc.base import EcoAgent
+    from mc_ab_sfc2.base import EcoAgent
 
     # Assert
     assert issubclass(Firm, EcoAgent)

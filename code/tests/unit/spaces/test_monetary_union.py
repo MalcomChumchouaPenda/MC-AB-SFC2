@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import Mock
-from mc_ab_sfc.spaces.monetary_union import MonetaryUnion
+from mc_ab_sfc2.spaces.monetary_union import MonetaryUnion
 
 # ---------------------------------------------------
 # ARCHITECTURE TESTS
@@ -9,7 +9,7 @@ from mc_ab_sfc.spaces.monetary_union import MonetaryUnion
 
 def test_is_eco_space():
     # Given
-    from mc_ab_sfc.base import EcoSpace
+    from mc_ab_sfc2.base import EcoSpace
 
     # Assert
     assert issubclass(MonetaryUnion, EcoSpace)

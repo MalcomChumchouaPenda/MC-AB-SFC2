@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import Mock
-from mc_ab_sfc.roles.producer import ProducerRole
+from mc_ab_sfc2.roles.producer import ProducerRole
 
 # ---------------------------------------------------
 # ARCHITECTURE TESTS
@@ -9,7 +9,7 @@ from mc_ab_sfc.roles.producer import ProducerRole
 
 def test_is_eco_role():
     # Given
-    from mc_ab_sfc.base import EcoRole
+    from mc_ab_sfc2.base import EcoRole
 
     # Assert
     assert issubclass(ProducerRole, EcoRole)

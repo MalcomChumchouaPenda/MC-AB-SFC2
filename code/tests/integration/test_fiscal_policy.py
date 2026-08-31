@@ -1,7 +1,8 @@
 import pytest
 from unittest.mock import Mock
-from mc_ab_sfc.spaces import GoodsMarket
-from mc_ab_sfc.agents import Government, CentralBank, Household
+from mc_ab_sfc2.spaces import GoodsMarket
+from mc_ab_sfc2.agents.public import Government, CentralBank
+from mc_ab_sfc2.agents.private import Household
 
 
 @pytest.fixture

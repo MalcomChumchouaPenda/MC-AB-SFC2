@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import Mock
-from mc_ab_sfc.roles.equity_issuer import EquityIssuerRole
+from mc_ab_sfc2.roles.equity_issuer import EquityIssuerRole
 
 # ---------------------------------------------------
 # ARCHITECTURE TESTS
@@ -9,7 +9,7 @@ from mc_ab_sfc.roles.equity_issuer import EquityIssuerRole
 
 def test_is_eco_role():
     # Given
-    from mc_ab_sfc.base import EcoRole
+    from mc_ab_sfc2.base import EcoRole
 
     # Assert
     assert issubclass(EquityIssuerRole, EcoRole)
