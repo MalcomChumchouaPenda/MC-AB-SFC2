@@ -1,7 +1,7 @@
 import math
 import pytest
 from unittest.mock import Mock, PropertyMock
-from model.agents.private import Firm
+from model.agents.firm import Firm
 
 # ---------------------------------------------------
 # ARCHITECTURE TESTS

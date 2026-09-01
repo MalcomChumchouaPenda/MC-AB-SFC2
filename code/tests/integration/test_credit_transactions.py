@@ -1,8 +1,9 @@
 import math
 import pytest
 from unittest.mock import Mock, PropertyMock
-from model.agents.private import Bank, Firm
-from model.agents.public import NationalCentralBank
+from model.agents.bank import Bank
+from model.agents.firm import Firm
+from model.agents.central_bank import NationalCentralBank
 from model.spaces.financial import CreditMarket
 
 

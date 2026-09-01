@@ -1,5 +1,5 @@
 from unittest.mock import Mock
-from model.agents.private import Firm
+from model.agents.firm import Firm
 
 
 def test_production_planning_pipeline():

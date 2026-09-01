@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import Mock
-from model.agents.public import NationalCentralBank, UnionCentralBank
+from model.agents.central_bank import NationalCentralBank, UnionCentralBank
 from model.spaces.real import GoodsMarket
 
 

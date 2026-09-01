@@ -1,8 +1,9 @@
 import pytest
 from unittest.mock import Mock, PropertyMock
 from model.spaces.institutionnal import Country
-from model.agents.public import Government, NationalCentralBank
-from model.agents.private import Household
+from model.agents.government import Government
+from model.agents.central_bank import NationalCentralBank
+from model.agents.household import Household
 
 
 @pytest.fixture

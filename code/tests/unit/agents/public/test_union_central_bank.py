@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import Mock
-from model.agents.public import CentralBank, UnionCentralBank
+from model.agents.central_bank import CentralBank, UnionCentralBank
 
 # ---------------------------------------------------
 # ARCHITECTURE TESTS

@@ -1,7 +1,7 @@
 import math
 import pytest
 from unittest.mock import Mock, PropertyMock
-from model.agents.private import Bank
+from model.agents.bank import Bank
 
 # ---------------------------------------------------
 # ARCHITECTURE TESTS

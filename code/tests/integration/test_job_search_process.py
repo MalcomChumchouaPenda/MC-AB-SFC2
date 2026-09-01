@@ -1,6 +1,7 @@
 import pytest
 from unittest.mock import Mock
-from model.agents.private import Household, Firm
+from model.agents.household import Household
+from model.agents.firm import Firm
 from model.spaces.real import LaborMarket
 
 

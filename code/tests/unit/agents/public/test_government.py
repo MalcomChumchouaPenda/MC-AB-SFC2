@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import Mock, PropertyMock
-from model.agents.public import Government
+from model.agents.government import Government
 
 # ---------------------------------------------------
 # ARCHITECTURE TESTS

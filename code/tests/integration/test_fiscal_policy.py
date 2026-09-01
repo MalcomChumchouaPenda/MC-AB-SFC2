@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import Mock
 from model.spaces.real import GoodsMarket
-from model.agents.public import Government
+from model.agents.government import Government
 
 
 @pytest.fixture

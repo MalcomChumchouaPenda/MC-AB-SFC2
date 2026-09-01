@@ -1,5 +1,6 @@
 from ..base import EcoSpace
-from ..agents.private import Firm, Bank
+from ..agents.firm import Firm
+from ..agents.bank import Bank
 from ..roles.institutionnal import EquityHolderRole, EquityIssuerRole
 
 

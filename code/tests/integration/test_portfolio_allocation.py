@@ -3,7 +3,8 @@ import pytest
 from unittest.mock import Mock
 from model.spaces.institutionnal import Country
 from model.spaces.financial import DepositMarket
-from model.agents.private import Household, Bank
+from model.agents.household import Household
+from model.agents.bank import Bank
 
 
 @pytest.fixture

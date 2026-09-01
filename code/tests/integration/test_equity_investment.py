@@ -1,7 +1,10 @@
 import pytest
 from unittest.mock import Mock, PropertyMock
-from model.agents.private import Household, Firm, Bank
-from model.agents.public import Government, NationalCentralBank
+from model.agents.household import Household
+from model.agents.firm import Firm
+from model.agents.bank import Bank
+from model.agents.government import Government
+from model.agents.central_bank import NationalCentralBank
 from model.spaces.institutionnal import Country
 from model.spaces.financial import BondMarket, DepositMarket, CreditMarket
 from model.spaces.real import LaborMarket, GoodsMarket
