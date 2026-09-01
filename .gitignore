@@ -49,7 +49,7 @@ data/
 output/
 *.csv
 *.png
-*.pdf
+#*.pdf
 
 # Temporary files
 temp/

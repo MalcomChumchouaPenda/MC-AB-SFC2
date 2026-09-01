@@ -1,7 +1,7 @@
-# Replicating Multi-Country AB-SFC Model: A Modular and Test-Driven approach based on MASQ Metamodel
+# MC-AB-SFC2: *A MASQ-Based Replication of a Multi-Country Agent-Based Stock-Flow Consistent Model*
 
 
-## Table of Contents
+## Contents
 
 1. [Overview](#1-overview)
 2. [Scientific Reference](#2-scientific-reference)
@@ -68,13 +68,14 @@ MC-AB-SFC2/
 │       ├── integration/         # integration tests of economic mechanisms
 │       └── acceptance/          # acceptance tests (model verification)
 │
-├── data/                        # Input/Intermediate/Ouput data
-├── docs/                        # Model and replication documentation (include notebooks)
-│   ├── ODD document.pdf         # Scientific documentation (ODD standard)
-│   └── Technical document.pdf   # Technical documentation of implementation
+├── data/                             # Input/Intermediate/Ouput data
+├── docs/                             # Model and replication documentation
+│   ├── ODD document.pdf              # Scientific documentation (ODD standard)
+│   └── Technical documentation.pdf   # Technical documentation of implementation
 │
-├── LICENSE                      # License governing the use and distribution of the project
-└── README.md                    # Project overview, installation and usage informations
+│
+├── LICENSE                # License governing the use and distribution of the project
+└── README.md              # Project overview, installation and usage informations
 
 ```
 
@@ -97,7 +98,7 @@ Within `code/model/`, the `roles/`, `stocks/` and `spaces/` folders each contain
 
 ## 8. Running Tests
 
-To run tests. To laun tests suite one must goto tests directory and run `pytest` command:
+To run tests, go to `code/tests/` directory and run `pytest` command:
 
 ```bash
 cd ./code/tests
