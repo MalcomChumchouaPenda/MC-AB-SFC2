@@ -5,9 +5,12 @@ from model.agents.firm import Firm
 from model.agents.bank import Bank
 from model.agents.government import Government
 from model.agents.central_bank import NationalCentralBank
-from model.spaces.institutionnal import Country
-from model.spaces.financial import BondMarket, DepositMarket, CreditMarket
-from model.spaces.real import LaborMarket, GoodsMarket
+from model.spaces.country import Country
+from model.spaces.bond_market import BondMarket
+from model.spaces.deposit_market import DepositMarket
+from model.spaces.credit_market import CreditMarket
+from model.spaces.labor_market import LaborMarket
+from model.spaces.goods_market import GoodsMarket
 
 
 @pytest.fixture

@@ -2,7 +2,7 @@ import pytest
 from unittest.mock import Mock
 from networkx import Graph
 from agentpy.objects import Object
-from model.spaces.financial import DepositMarket
+from model.spaces.deposit_market import DepositMarket
 
 # ---------------------------------------------------
 # ARCHITECTURE TESTS

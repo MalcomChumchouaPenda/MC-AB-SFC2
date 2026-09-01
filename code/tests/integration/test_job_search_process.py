@@ -2,7 +2,7 @@ import pytest
 from unittest.mock import Mock
 from model.agents.household import Household
 from model.agents.firm import Firm
-from model.spaces.real import LaborMarket
+from model.spaces.labor_market import LaborMarket
 
 
 @pytest.fixture

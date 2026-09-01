@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import Mock
-from model.spaces.institutionnal import MonetaryUnion
+from model.spaces.monetary_union import MonetaryUnion
 
 # ---------------------------------------------------
 # ARCHITECTURE TESTS

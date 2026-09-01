@@ -2,7 +2,7 @@ import pytest
 from unittest.mock import Mock
 from networkx import Graph
 from agentpy.objects import Object
-from model.spaces.financial import BondMarket
+from model.spaces.bond_market import BondMarket
 
 # ---------------------------------------------------
 # ARCHITECTURE TESTS

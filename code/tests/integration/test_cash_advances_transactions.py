@@ -3,7 +3,7 @@ import pytest
 from unittest.mock import Mock, PropertyMock
 from model.agents.bank import Bank
 from model.agents.central_bank import NationalCentralBank
-from model.spaces.institutionnal import Country
+from model.spaces.country import Country
 
 
 @pytest.fixture

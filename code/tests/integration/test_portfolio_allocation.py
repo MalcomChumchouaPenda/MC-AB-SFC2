@@ -1,8 +1,8 @@
 import math
 import pytest
 from unittest.mock import Mock
-from model.spaces.institutionnal import Country
-from model.spaces.financial import DepositMarket
+from model.spaces.country import Country
+from model.spaces.deposit_market import DepositMarket
 from model.agents.household import Household
 from model.agents.bank import Bank
 

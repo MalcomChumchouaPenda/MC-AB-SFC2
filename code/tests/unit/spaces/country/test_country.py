@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import Mock
-from model.spaces.institutionnal import Country
+from model.spaces.country import Country
 
 # ---------------------------------------------------
 # ARCHITECTURE TESTS
@@ -97,7 +97,7 @@ def test_add_equity_holder_role(country_with_roles, monkeypatch):
     # Given
     household = Mock()
     country = country_with_roles
-    monkeypatch.setattr("model.spaces.institutionnal.EquityHolderRole", FakeHolderRole)
+    monkeypatch.setattr("model.spaces.country.EquityHolderRole", FakeHolderRole)
 
     # When
     holder_role = country.add_equity_holder(household)
@@ -115,7 +115,7 @@ def test_add_equity_issuer_creates_appropriate_role(country_with_roles, monkeypa
     # Given
     agent = Mock()
     country = country_with_roles
-    monkeypatch.setattr("model.spaces.institutionnal.EquityIssuerRole", FakeIssuerRole)
+    monkeypatch.setattr("model.spaces.country.EquityIssuerRole", FakeIssuerRole)
 
     # When
     issuer_role = country.add_equity_issuer(agent)
@@ -197,7 +197,7 @@ def test_distributes_dividends_with_reserves(country, issuer, holders, monkeypat
     graph = country.graph
     graph.add_edge(issuer, holders[0])
     graph.add_edge(issuer, holders[1])
-    monkeypatch.setattr("model.spaces.institutionnal.Bank", FakeBank)
+    monkeypatch.setattr("model.spaces.country.Bank", FakeBank)
 
     # When
     country.distribute_dividends(issuer, 200)
@@ -276,7 +276,7 @@ def test_get_only_eligible_investors(country, monkeypatch):
     eligible = FakeHolderRole(desired_equity=100, equity=0)
     ineligible = FakeHolderRole(desired_equity=100, equity=10)
     country.graph.add_nodes_from([eligible, ineligible, other])
-    monkeypatch.setattr("model.spaces.institutionnal.EquityHolderRole", FakeHolderRole)
+    monkeypatch.setattr("model.spaces.country.EquityHolderRole", FakeHolderRole)
 
     # When
     investors = country.get_potential_investors()
@@ -290,7 +290,7 @@ def test_get_investors_excludes_initiating_household(country, monkeypatch):
     initiator = FakeHolderRole(desired_equity=100, equity=0)
     eligible = FakeHolderRole(desired_equity=100, equity=0)
     country.graph.add_nodes_from([initiator, eligible])
-    monkeypatch.setattr("model.spaces.institutionnal.EquityHolderRole", FakeHolderRole)
+    monkeypatch.setattr("model.spaces.country.EquityHolderRole", FakeHolderRole)
 
     # When
     investors = country.get_potential_investors(exclude=initiator)
@@ -310,7 +310,7 @@ def country_before_firm_creation(monkeypatch):
     country.goods_market = Mock()
     country.labor_market = Mock()
     country.deposit_market = Mock()
-    monkeypatch.setattr("model.spaces.institutionnal.Firm", FakeFirm)
+    monkeypatch.setattr("model.spaces.country.Firm", FakeFirm)
     return country
 
 
@@ -473,7 +473,7 @@ def country_before_bank_creation(monkeypatch):
     country.goods_market = Mock()
     country.labor_market = Mock()
     country.deposit_market = Mock()
-    monkeypatch.setattr("model.spaces.institutionnal.Bank", FakeBank)
+    monkeypatch.setattr("model.spaces.country.Bank", FakeBank)
     return country
 
 
