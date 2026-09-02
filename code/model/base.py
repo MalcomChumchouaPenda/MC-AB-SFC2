@@ -43,17 +43,21 @@ class EcoSpace(Object):
         self.graph = Graph()
 
 
-    def add_role(self, kind, agent, name):
-        role = kind(agent, self)
-        agent.roles[name] = role  
+    def add_role(self, kind, agent):
+        role = kind(self.model)
+        role.setup()
+        role.space = self
+        role.agent = agent
+        agent.roles[role.name] = role  
         self.graph.add_node(role)   
         return role
 
     def remove_role(self, role):
         name = role.name
-        print(name, role.agent.roles)
         agent = role.agent
         agent.roles.pop(name)
+        role.space = None
+        role.agent = None
         self.graph.remove_node(role)
 
 

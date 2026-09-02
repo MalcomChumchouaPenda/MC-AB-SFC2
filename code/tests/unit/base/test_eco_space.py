@@ -34,26 +34,42 @@ def test_has_graph(space):
 
 
 
-def test_add_role_creates_role(space):
+def test_add_role_creates_and_setup_role(space):
     # Given
     agent = Mock(roles={})
     FakeRole = Mock()
 
     # When
-    role = space.add_role(FakeRole, agent, "fake")
+    role = space.add_role(FakeRole, agent)
 
     # Then
-    FakeRole.assert_called_with(agent, space)
+    FakeRole.assert_called_with(space.model)
+    role.setup.assert_called_once_with()
     assert role is FakeRole.return_value
 
 
-def test_add_role_registers_role(space):
+def test_add_role_link_role_to_agent_and_space(space):
     # Given
     agent = Mock(roles={})
     FakeRole = Mock()
 
     # When
-    role = space.add_role(FakeRole, agent, 'fake')
+    role = space.add_role(FakeRole, agent)
+
+    # Then
+    assert role.space is space
+    assert role.agent is agent
+
+
+def test_add_role_registers_role_with_name(space):
+    # Given
+    agent = Mock(roles={})
+    role = Mock()
+    role.name = "fake"
+    FakeRole = Mock(return_value=role)
+
+    # When
+    role = space.add_role(FakeRole, agent)
 
     # Then
     print(agent.roles)
@@ -66,7 +82,7 @@ def test_add_role_add_graph_node(space):
     FakeRole = Mock()
 
     # When
-    role = space.add_role(FakeRole, agent, 'fake')
+    role = space.add_role(FakeRole, agent)
 
     # Then
     assert space.graph.has_node(role)
@@ -82,11 +98,14 @@ def role_and_agent():
     return role, agent
 
 @pytest.fixture
-def space_with_role(role_and_agent):
+def space_with_role():
     # Given
-    role, agent = role_and_agent
     space = EcoSpace(model=Mock())
     space.setup()
+    role, agent = Mock(), Mock()
+    role.agent = agent
+    role.name = "fake"
+    agent.roles = {"fake":role}
     space.graph.add_node(role)
     return space, role, agent
 
@@ -111,3 +130,17 @@ def test_remove_role_remove_graph_node(space_with_role):
 
     # Then
     assert not space.graph.has_node(role)
+
+
+def test_remove_role_unlink_role_to_agent_and_space(space_with_role):
+    # Given
+    space, role, _ = space_with_role
+
+    # When
+    space.remove_role(role)
+
+    # Then
+    assert role.space is None
+    assert role.agent is None
+
+    
