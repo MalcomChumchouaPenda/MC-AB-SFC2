@@ -1,7 +1,7 @@
 
 from agentpy import Agent
 from agentpy.objects import Object
-from networkx import DiGraph
+from networkx import Graph
 
 
 class EcoAgent(Agent):
@@ -16,7 +16,7 @@ class EcoAgent(Agent):
         self.roles = {}
 
 
-class EcoRole(Object):
+class EcoRole:
     """
     Classe de base des rôles économiques.
 
@@ -24,9 +24,11 @@ class EcoRole(Object):
     et un adaptateur vers un espace d'interaction.
     """
 
-    def __init__(self, model, agent_id, space):
-        super().__init__(model)
-        self.agent_id = agent_id
+    name = ''
+
+    def __init__(self, agent, space):
+        super().__init__()
+        self.agent = agent
         self.space = space
 
 
@@ -39,16 +41,23 @@ class EcoSpace(Object):
     à ses noeuds.
     """
 
-    def __init__(self, model, **kwargs):
-        super().__init__(model, **kwargs)
+    def setup(self):
         self.roles = {}
+        self.graph = Graph()
 
-    def add_role(self, kind, agent, key):
-        role = kind(self.model, agent.id, self)
-        agent.roles[key] = role
+
+    def add_role(self, kind, agent, name):
+        role = kind(agent, self)
+        agent.roles[name] = role  
+        self.graph.add_node(role)   
         return role
 
+    def remove_role(self, role):
+        name = role.name
+        print(name, role.agent.roles)
+        agent = role.agent
+        agent.roles.pop(name)
+        self.graph.remove_node(role)
 
-class EcoStock(Object):
-    pass
+
 

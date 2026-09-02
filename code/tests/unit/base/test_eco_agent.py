@@ -16,3 +16,5 @@ def test_contains_roles_collection():
 
     # Assert
     assert isinstance(agent.roles, dict)
+
+

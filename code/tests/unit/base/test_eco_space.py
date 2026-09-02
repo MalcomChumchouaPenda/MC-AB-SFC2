@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import Mock
-from networkx import DiGraph, Graph
+from networkx import Graph
 from agentpy.objects import Object
 from model.base import EcoSpace
 
@@ -14,46 +14,100 @@ def test_is_agentpy_object():
     assert issubclass(EcoSpace, Object)
 
 
+@pytest.fixture
+def space():
+    # Given
+    model = Mock()
+    space = EcoSpace(model)
+    space.setup()
+    return space
+
+
+def test_has_graph(space):
+    # Assert
+    assert isinstance(space.graph, Graph)
+
 
 # ---------------------------------------------------
 # BEHAVIORAL TESTS
 # ----------------------------------------------------
 
 
-@pytest.fixture
-def space():
+
+def test_add_role_creates_role(space):
     # Given
-    model = Mock()
-    return EcoSpace(model)
-
-
-@pytest.fixture
-def agent():
-    # Given
-    return Mock(id=1, roles={})
-
-
-def test_add_role_creates_role(agent, space):
-    # Given
-    key = "fake_role"
-    fake_cls = Mock()
-    model = space.model
+    agent = Mock(roles={})
+    FakeRole = Mock()
 
     # When
-    role = space.add_role(fake_cls, agent, key)
+    role = space.add_role(FakeRole, agent, "fake")
 
     # Then
-    fake_cls.assert_called_with(model, agent.id, space)
-    assert role is fake_cls.return_value
+    FakeRole.assert_called_with(agent, space)
+    assert role is FakeRole.return_value
 
 
-def test_add_role_registers_role(agent, space):
+def test_add_role_registers_role(space):
     # Given
-    key = "fake_role"
-    fake_cls = Mock()
+    agent = Mock(roles={})
+    FakeRole = Mock()
 
     # When
-    role = space.add_role(fake_cls, agent, key)
+    role = space.add_role(FakeRole, agent, 'fake')
 
     # Then
-    assert role is agent.roles["fake_role"]
+    print(agent.roles)
+    assert role is agent.roles["fake"]
+
+    
+def test_add_role_add_graph_node(space):
+    # Given
+    agent = Mock(roles={})
+    FakeRole = Mock()
+
+    # When
+    role = space.add_role(FakeRole, agent, 'fake')
+
+    # Then
+    assert space.graph.has_node(role)
+
+    
+@pytest.fixture
+def role_and_agent():
+    # Given
+    agent, role = Mock(), Mock()
+    agent.roles = {'fake':role}
+    role.name = "fake"
+    role.agent = agent
+    return role, agent
+
+@pytest.fixture
+def space_with_role(role_and_agent):
+    # Given
+    role, agent = role_and_agent
+    space = EcoSpace(model=Mock())
+    space.setup()
+    space.graph.add_node(role)
+    return space, role, agent
+
+
+def test_remove_role_unregisters_role(space_with_role):
+    # Given
+    space, role, agent = space_with_role
+
+    # When
+    space.remove_role(role)
+
+    # Then
+    assert len(agent.roles) == 0
+
+    
+def test_remove_role_remove_graph_node(space_with_role):
+    # Given
+    space, role, _ = space_with_role
+
+    # When
+    space.remove_role(role)
+
+    # Then
+    assert not space.graph.has_node(role)

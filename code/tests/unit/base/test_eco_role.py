@@ -4,25 +4,30 @@ from unittest.mock import Mock
 from model.base import EcoRole
 
 
-def test_is_agentpy_object():
+def test_is_not_agentpy_object():
     # Assert
-    assert issubclass(EcoRole, Object)
+    assert not issubclass(EcoRole, Object)
 
 
-def test_requires_model_agent_id_and_space():
+def test_has_default_name_attr():
     # Assert
-    expected = "required positional arguments: 'model', 'agent_id', and 'space'"
+    assert EcoRole.name == ''
+
+
+def test_requires_agent_and_space():
+    # Assert
+    expected = "required positional arguments: 'agent' and 'space'"
     with pytest.raises(TypeError, match=expected):
         EcoRole()
 
 
-def test_has_agent_id_and_space_reference():
+def test_has_agent_and_space_refs():
     # Given
-    model = Mock()
+    agent = Mock()
     space = Mock()
-    role = EcoRole(model, 1, space)
+    role = EcoRole(agent, space)
 
     # Assert
-    assert role.agent_id == 1
+    assert role.agent is agent
     assert role.space is space
 
