@@ -1,7 +1,6 @@
 from agentpy.objects import Object
 from networkx import Graph
-from model.base import EcoSpace
-from model.roles.financial import LenderRole, BorrowerRole
+from model.base import EcoSpace, EcoRole
 
 
 class DepositMarket(Object):

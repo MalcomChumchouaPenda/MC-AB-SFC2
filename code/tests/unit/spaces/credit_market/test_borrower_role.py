@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import Mock
-from model.roles.financial import BorrowerRole
+from model.spaces.credit_market import BorrowerRole
 
 # ---------------------------------------------------
 # ARCHITECTURE TESTS

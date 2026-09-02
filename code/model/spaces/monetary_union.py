@@ -1,7 +1,5 @@
-from ..base import EcoSpace
-from ..agents.firm import Firm
-from ..agents.bank import Bank
-from ..roles.institutionnal import EquityHolderRole, EquityIssuerRole
+
+from model.base import EcoSpace
 
 
 class MonetaryUnion(EcoSpace):

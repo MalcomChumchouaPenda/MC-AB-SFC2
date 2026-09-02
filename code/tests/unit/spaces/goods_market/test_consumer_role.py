@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import Mock, PropertyMock
-from model.roles.real import ConsumerRole
+from model.spaces.goods_market import ConsumerRole
 
 # ---------------------------------------------------
 # ARCHITECTURE TESTS

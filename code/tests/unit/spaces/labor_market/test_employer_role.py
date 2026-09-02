@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import Mock
-from model.roles.real import EmployerRole
+from model.spaces.labor_market import EmployerRole
 
 # ---------------------------------------------------
 # ARCHITECTURE TESTS

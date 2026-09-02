@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import Mock
-from model.roles.institutionnal import EquityIssuerRole
+from model.spaces.country import EquityIssuerRole
 
 # ---------------------------------------------------
 # ARCHITECTURE TESTS

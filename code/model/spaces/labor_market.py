@@ -1,5 +1,5 @@
-from ..base import EcoSpace
-from ..roles.real import EmployerRole, WorkerRole, ConsumerRole, ProducerRole
+
+from model.base import EcoSpace, EcoRole
 
 
 class LaborMarket(EcoSpace):
@@ -33,3 +33,29 @@ class LaborMarket(EcoSpace):
 
     def calc_average_wage(self, employers):
         return sum([e.wage_offer for e in employers]) / max(1, len(employers))
+
+
+class EmployerRole(EcoRole):
+
+    def __init__(self, agent, space):
+        super().__init__(agent, space)
+        self.labor_demand = 0
+
+    @property
+    def wage_offer(self):
+        return self.agent.wage_offer
+
+
+class WorkerRole(EcoRole):
+
+    def search_employers(self, psi):
+        return self.space.search_employers(psi)
+
+    def create_job(self, employer, quantity):
+        self.space.create_job(self, employer, quantity)
+
+    def get_labor_sold(self):
+        return self.space.get_labor_sold(self)
+
+    def get_unemployment_rate(self):
+        return self.space.unemployment_rate

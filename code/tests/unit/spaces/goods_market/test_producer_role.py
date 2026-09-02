@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import Mock
-from model.roles.real import ProducerRole
+from model.spaces.goods_market import ProducerRole
 
 # ---------------------------------------------------
 # ARCHITECTURE TESTS
