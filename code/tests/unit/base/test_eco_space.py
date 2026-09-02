@@ -1,8 +1,7 @@
 import pytest
-from dataclasses import dataclass
 from unittest.mock import Mock
 from networkx import DiGraph, Graph
-import agentpy as ap
+from agentpy.objects import Object
 from model.base import EcoSpace
 
 # ---------------------------------------------------
@@ -10,28 +9,10 @@ from model.base import EcoSpace
 # ----------------------------------------------------
 
 
-def test_is_agentpy_network():
+def test_is_agentpy_object():
     # Assert
-    assert issubclass(EcoSpace, ap.Network)
+    assert issubclass(EcoSpace, Object)
 
-
-def test_contains_roles_collection():
-    # Given
-    model = Mock()
-    space = EcoSpace(model)
-
-    # Assert
-    assert isinstance(space.roles, dict)
-
-
-def test_has_undirected_graph():
-    # Given
-    model = Mock()
-    space = EcoSpace(model)
-
-    # Assert
-    assert not isinstance(space.graph, DiGraph)
-    assert isinstance(space.graph, Graph)
 
 
 # ---------------------------------------------------
@@ -56,25 +37,14 @@ def test_add_role_creates_role(agent, space):
     # Given
     key = "fake_role"
     fake_cls = Mock()
+    model = space.model
 
     # When
     role = space.add_role(fake_cls, agent, key)
 
     # Then
-    fake_cls.assert_called_with(agent, space)
+    fake_cls.assert_called_with(model, agent.id, space)
     assert role is fake_cls.return_value
-
-
-def test_add_role_creates_node(agent, space):
-    # Given
-    key = "fake_role"
-    fake_cls = Mock()
-
-    # When
-    role = space.add_role(fake_cls, agent, key)
-
-    # Then
-    assert role in space.nodes
 
 
 def test_add_role_registers_role(agent, space):

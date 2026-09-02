@@ -1,12 +1,12 @@
 import pytest
-import agentpy as ap
+from agentpy import Agent
 from unittest.mock import Mock
 from model.base import EcoAgent
 
 
 def test_is_agentpy_agent():
     # Assert
-    assert issubclass(EcoAgent, ap.Agent)
+    assert issubclass(EcoAgent, Agent)
 
 
 def test_contains_roles_collection():

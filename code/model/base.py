@@ -1,8 +1,10 @@
-import agentpy as ap
+
+from agentpy import Agent
+from agentpy.objects import Object
 from networkx import DiGraph
 
 
-class EcoAgent(ap.Agent):
+class EcoAgent(Agent):
     """
     Classe de base des agents économiques.
 
@@ -14,7 +16,7 @@ class EcoAgent(ap.Agent):
         self.roles = {}
 
 
-class EcoRole(ap.AgentNode):
+class EcoRole(Object):
     """
     Classe de base des rôles économiques.
 
@@ -22,43 +24,14 @@ class EcoRole(ap.AgentNode):
     et un adaptateur vers un espace d'interaction.
     """
 
-    def __init__(self, agent, space):
-        super().__init__(agent.id)
-        self.agent = agent
+    def __init__(self, model, agent_id, space):
+        super().__init__(model)
+        self.agent_id = agent_id
         self.space = space
 
-    def increase_stock(self, stock_name, amount):
-        agent = self.agent
-        value = getattr(agent, stock_name)
-        setattr(agent, stock_name, value + amount)
-
-    def decrease_stock(self, stock_name, amount):
-        agent = self.agent
-        value = getattr(agent, stock_name)
-        setattr(agent, stock_name, value - amount)
-
-    def clear_stock(self, stock_name):
-        agent = self.agent
-        getattr(agent, stock_name)
-        setattr(agent, stock_name, 0)
-
-    def increase_flow(self, flow_name, amount):
-        agent = self.agent
-        value = getattr(agent, flow_name)
-        setattr(agent, flow_name, value + amount)
-
-    def decrease_flow(self, flow_name, amount):
-        agent = self.agent
-        value = getattr(agent, flow_name)
-        setattr(agent, flow_name, value - amount)
-
-    def clear_flow(self, flow_name):
-        agent = self.agent
-        getattr(agent, flow_name)
-        setattr(agent, flow_name, 0)
 
 
-class EcoSpace(ap.Network):
+class EcoSpace(Object):
     """
     Classe de base des espaces d'interaction.
 
@@ -71,7 +44,11 @@ class EcoSpace(ap.Network):
         self.roles = {}
 
     def add_role(self, kind, agent, key):
-        role = kind(agent, self)
+        role = kind(self.model, agent.id, self)
         agent.roles[key] = role
-        self.graph.add_node(role)
         return role
+
+
+class EcoStock(Object):
+    pass
+
