@@ -11,12 +11,11 @@ class EcoAgent(Agent):
     Un agent possède un ensemble de rôles.
     """
 
-    def __init__(self, model, *args, **kwargs):
-        super().__init__(model, *args, **kwargs)
+    def setup(self):
         self.roles = {}
 
 
-class EcoRole:
+class EcoRole(Object):
     """
     Classe de base des rôles économiques.
 
@@ -24,12 +23,10 @@ class EcoRole:
     et un adaptateur vers un espace d'interaction.
     """
 
-    name = ''
-
-    def __init__(self, agent, space):
-        super().__init__()
-        self.agent = agent
-        self.space = space
+    def setup(self):
+        self.name = ''
+        self.agent = None
+        self.space = None
 
 
 

@@ -7,6 +7,7 @@ from ..agents.bank import Bank
 class Country(EcoSpace):
 
     def setup(self):
+        super().setup()
         # agent refs
         self.government = None
         self.central_bank = None
@@ -175,10 +176,11 @@ class EquityIssuerRole(EcoRole):
 
 class EquityHolderRole(EcoRole):
 
-    def __init__(self, agent, space):
-        super().__init__(agent, space)
+    def setup(self):
+        super().setup()
         self.equity_issuer = None
         self.share = 0.0
+
 
     @property
     def equity(self):

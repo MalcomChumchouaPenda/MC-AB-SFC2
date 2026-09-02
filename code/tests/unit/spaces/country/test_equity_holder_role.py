@@ -18,9 +18,12 @@ def test_is_eco_role():
 @pytest.fixture
 def role():
     # Given
-    space = Mock()
-    agent = Mock(id=1)
-    return EquityHolderRole(agent, space)
+    model = Mock()
+    role = EquityHolderRole(model)
+    role.setup()
+    role.space = Mock()
+    role.agent = Mock()
+    return role
 
 
 def test_exposes_equity(role):

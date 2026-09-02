@@ -9,10 +9,17 @@ def test_is_agentpy_agent():
     assert issubclass(EcoAgent, Agent)
 
 
-def test_contains_roles_collection():
+@pytest.fixture
+def agent():
     # Given
     model = Mock()
     agent = EcoAgent(model)
+    return agent
+
+
+def test_contains_roles_collection(agent):
+    # When
+    agent.setup()
 
     # Assert
     assert isinstance(agent.roles, dict)

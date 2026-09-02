@@ -85,6 +85,7 @@ def country_with_roles():
     # Given
     model = Mock()
     country = Country(model)
+    country.setup()
     country.add_role = Mock(side_effect=lambda a, b, c: a())
     return country
 
@@ -304,6 +305,7 @@ def country_before_firm_creation(monkeypatch):
     # Given
     model = Mock()
     country = Country(model)
+    country.setup()
     country.add_equity_issuer = Mock()
     country.assign_equity_holder = Mock()
     country.union = Mock()
@@ -467,6 +469,7 @@ def country_before_bank_creation(monkeypatch):
     # Given
     model = Mock()
     country = Country(model)
+    country.setup()
     country.add_equity_issuer = Mock()
     country.assign_equity_holder = Mock()
     country.union = Mock()
