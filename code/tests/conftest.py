@@ -2,6 +2,7 @@ import os
 import sys
 import pytest
 from unittest.mock import Mock
+from agentpy import AgentDList
 
 root_dir = os.path.abspath(__file__)
 while "tests" in root_dir:
@@ -15,3 +16,12 @@ def fake_model():
     model = Mock(t=0)
     model.random = Mock()
     return model
+
+
+@pytest.fixture
+def make_dlist():
+    def f(content=[]):
+        model = Mock()
+        return AgentDList(model, content)
+
+    return f

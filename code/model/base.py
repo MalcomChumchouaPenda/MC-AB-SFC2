@@ -1,7 +1,6 @@
 
-from agentpy import Agent
+from agentpy import Agent, Network
 from agentpy.objects import Object
-from networkx import Graph
 
 
 class EcoAgent(Agent):
@@ -13,6 +12,10 @@ class EcoAgent(Agent):
 
     def setup(self):
         self.roles = {}
+        self.account = None
+        self.cb_account = None
+        self.bank_account = None
+        self.position = 0
 
 
 class EcoRole(Object):
@@ -24,13 +27,21 @@ class EcoRole(Object):
     """
 
     def setup(self):
-        self.name = ''
+        super().setup()
         self.agent = None
         self.space = None
+        self.name = ""
+
+    @property
+    def cb_account(self):
+        return self.agent.cb_account
+
+    @property
+    def bank_account(self):
+        return self.agent.bank_account
 
 
-
-class EcoSpace(Object):
+class EcoSpace(Network):
     """
     Classe de base des espaces d'interaction.
 
@@ -40,15 +51,35 @@ class EcoSpace(Object):
 
     def setup(self):
         self.roles = {}
-        self.graph = Graph()
+        self.root_space = None
+        self.sub_spaces = {}
+        self.position = 0
 
+    def add_space(self, sub_space, name):
+        sub_space.root_space = self
+        self.sub_spaces[name] = sub_space
 
-    def add_role(self, kind, agent):
+    def evolve(self):
+        for sub_space in self.sub_spaces.values():
+            sub_space.update_state()
+            sub_space.clear_defaults()
+        self.update_state()
+        self.clear_defaults()
+
+    def update_state(self):
+        raise NotImplementedError
+
+    def clear_defaults(self):
+        raise NotImplementedError
+    
+
+    def add_role(self, kind, agent, name):
         role = kind(self.model)
         role.setup()
+        role.name = name
         role.space = self
         role.agent = agent
-        agent.roles[role.name] = role  
+        agent.roles[name] = role  
         self.graph.add_node(role)   
         return role
 
@@ -56,9 +87,30 @@ class EcoSpace(Object):
         name = role.name
         agent = role.agent
         agent.roles.pop(name)
-        role.space = None
-        role.agent = None
         self.graph.remove_node(role)
 
+
+class EcoAccount(Object):
+
+    def setup(self):
+        super().setup()
+        self.stocks = {}
+        self.flows = {}
+        self.agent_id = None
+
+    def debit_stock(self, name, amount):
+        self.stocks[name] = self.stocks.get(name, 0) - amount
+        
+    def credit_stock(self, name, amount):
+        self.stocks[name] = self.stocks.get(name, 0) + amount
+        
+    def debit_flow(self, name, amount):
+        self.flows[name] = self.flows.get(name, 0) - amount
+        
+    def credit_flow(self, name, amount):
+        self.flows[name] = self.flows.get(name, 0) + amount
+
+    def clear_flows(self):
+        self.flows.clear()
 
 

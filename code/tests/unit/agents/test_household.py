@@ -610,7 +610,7 @@ def test_calc_liquidity_pref_when_equity_is_more_profitable(household_with_asset
     household.p.lambda_ = 0.6
     household.deposit_bank.deposit_rate = 0.05
     roles = household.roles
-    roles["equity_holder"].get_default_probability.return_value = 0.10
+    roles["equity_holder"].get_prob_failure.return_value = 0.10
 
     # When
     lp = household.calc_liquidity_preference()
@@ -628,7 +628,7 @@ def test_calc_liquidity_pref_when_equity_is_less_profitable(household_with_asset
     household.p.lambda_ = 0.7
     household.deposit_bank.deposit_rate = 0.05
     roles = household.roles
-    roles["equity_holder"].get_default_probability.return_value = 0.10
+    roles["equity_holder"].get_prob_failure.return_value = 0.10
 
     # When
     lp = household.calc_liquidity_preference()
@@ -645,7 +645,7 @@ def test_calc_liquidity_preference_when_no_equity(household_with_assets):
     household.p.lambda_ = 0.8
     household.deposit_bank.deposit_rate = 0.05
     roles = household.roles
-    roles["equity_holder"].get_default_probability.return_value = 0.10
+    roles["equity_holder"].get_prob_failure.return_value = 0.10
 
     # When
     lp = household.calc_liquidity_preference()

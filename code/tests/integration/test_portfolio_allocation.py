@@ -39,7 +39,7 @@ def bank(model):
 def country(model):
     # Given
     country = Country(model)
-    country.default_probability = 0.10
+    country.prob_failure = 0.10
     return country
 
 
