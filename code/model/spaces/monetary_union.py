@@ -36,7 +36,6 @@ class MonetaryUnion(EcoSpace):
         self.accounts.append(account)
         return account
 
-
     #
     # Firm creation
     #

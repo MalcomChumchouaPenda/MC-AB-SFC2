@@ -1,60 +1,44 @@
-from model.base import EcoSpace, EcoRole
+from agentpy import AgentDList
+from model.base import EcoSpace
+from model.roles.employer import Employer
+from model.roles.worker import Worker
 
 
 class LaborMarket(EcoSpace):
 
     def setup(self):
         self.average_wage = 0
+        self.unemployment = 0
+        self.employers = AgentDList(self.model)
+        self.workers = AgentDList(self.model)
 
     def add_employer(self, firm):
-        return self.add_role(EmployerRole, firm, "employer")
+        role = self.add_role(Employer, firm, "employer")
+        self.employers.append(role)
+        return role
 
     def add_worker(self, household):
-        return self.add_role(WorkerRole, household, "worker")
+        role = self.add_role(Worker, household, "worker")
+        self.workers.append(role)
+        return role
 
-    def create_job(self, worker, employer, quantity):
-        wage = employer.wage_offer
+    def hire_worker(self, worker, employer, quantity):
+        wage = employer.wage
+        worker.labor_supply -= quantity
         employer.labor_demand -= quantity
         self.graph.add_edge(worker, employer, wage=wage, quantity=quantity)
 
-    def search_employers(self, psi):
-        employers = [n for n in self.nodes if isinstance(n, EmployerRole)]
-        return self.model.random.sample(employers, k=min(psi, len(employers)))
 
-    def get_labor_sold(self, worker):
-        edges = self.graph.edges  # contracts
-        return sum(data["quantity"] for (w, e), data in edges.items() if w == worker)
+    def update_state(self): 
+        self._update_average_wage()
+        self._update_unemployment()
 
-    def update_statistics(self):
-        nodes = self.graph.nodes  # roles
-        employers = [n for n in nodes if isinstance(n, EmployerRole)]
-        self.average_wage = self.calc_average_wage(employers)
+    def _update_average_wage(self):
+        employers = self.employers      
+        self.average_wage = sum(employers.wage) / max(1, len(employers))
 
-    def calc_average_wage(self, employers):
-        return sum([e.wage_offer for e in employers]) / max(1, len(employers))
+    def _update_unemployment(self):
+        workers = self.workers
+        unemployed = workers.select(workers.labor_supply == 1.0)
+        self.unemployment = len(unemployed) / max(1, len(workers))
 
-
-class EmployerRole(EcoRole):
-
-    def __init__(self, agent, space):
-        super().__init__(agent, space)
-        self.labor_demand = 0
-
-    @property
-    def wage_offer(self):
-        return self.agent.wage_offer
-
-
-class WorkerRole(EcoRole):
-
-    def search_employers(self, psi):
-        return self.space.search_employers(psi)
-
-    def create_job(self, employer, quantity):
-        self.space.create_job(self, employer, quantity)
-
-    def get_labor_sold(self):
-        return self.space.get_labor_sold(self)
-
-    def get_unemployment_rate(self):
-        return self.space.unemployment_rate

@@ -47,7 +47,6 @@ def citizen_with_space(citizen_before_setup):
     space.citizens = AgentDList(Mock())
     space.companies = AgentDList(Mock())
     citizen = citizen_before_setup
-    citizen.position = 1
     citizen.space = space
     return citizen, space
 

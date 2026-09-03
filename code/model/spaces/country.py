@@ -30,7 +30,7 @@ class Country(EcoSpace):
     #
     # Role management
     #
-    
+
     def add_fiscal_authority(self, agent):
         role = self.add_role(FiscalAuthority, agent, "fiscal_authority")
         self.union.add_account(agent)
@@ -41,7 +41,7 @@ class Country(EcoSpace):
         role = self.add_role(MonetaryAuthority, agent, "monetary_authority")
         self.union.add_account(agent)
         self.monetary_authority = role
-        return role    
+        return role
 
     def add_citizen(self, agent):
         role = self.add_role(Citizen, agent, "citizen")
@@ -68,6 +68,7 @@ class Country(EcoSpace):
         company.account.credit_stock("cash", amount)
         founder.account.credit_stock("equities", amount)
         founder.account.debit_stock("cash", amount)
+        founder.resid_equity -= amount
 
     def pay_dividends(self, company, founder, amount):
         company.account.debit_flow("dividends", amount)

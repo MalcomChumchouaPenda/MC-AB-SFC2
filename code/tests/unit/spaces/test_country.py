@@ -382,7 +382,8 @@ def test_add_company_add_account(country_without_companies):
 @pytest.fixture
 def country_with_company_and_founder(country_before_setup):
     # Given
-    company, founder = Mock(), Mock()
+    company = Mock()
+    founder = Mock(resid_equity=0)
     country = country_before_setup
     country.graph.add_edge(company, founder, share=0)
     return country, company, founder
@@ -424,6 +425,18 @@ def test_fund_company_updates_graph_edge(country_with_company_and_founder):
 
     # Then
     assert country.graph[company][founder]["share"] == 150
+
+
+def test_fund_company_reduces_resid_equity(country_with_company_and_founder):
+    # Given
+    country, company, founder = country_with_company_and_founder
+    founder.resid_equity = 150
+
+    # When
+    country.fund_company(company, founder, 100)
+
+    # Then
+    assert founder.resid_equity == 50
 
 
 def test_pay_dividends_updates_accounts(country_with_company_and_founder):
