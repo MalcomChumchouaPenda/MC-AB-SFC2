@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import Mock
-from model.roles.monetary_authority import MonetaryAuthority
+from model.roles.fiscal_authority import FiscalAuthority
 
 # ---------------------------------------------------
 # ARCHITECTURE TESTS
@@ -12,14 +12,14 @@ def test_is_eco_role():
     from model.base import EcoRole
 
     # Assert
-    assert issubclass(MonetaryAuthority, EcoRole)
+    assert issubclass(FiscalAuthority, EcoRole)
 
 
 @pytest.fixture
 def authority_before_setup():
     # Given
     model = Mock()
-    authority = MonetaryAuthority(model)
+    authority = FiscalAuthority(model)
     return authority
 
 
@@ -38,13 +38,13 @@ def authority_with_space(authority_before_setup):
     return authority, space
 
 
-def test_expose_discount_rate_from_space(authority_with_space):
+def test_expose_tax_rate_from_space(authority_with_space):
     # Given
     authority, space = authority_with_space
-    space.discount_rate = 0.02
+    space.tax_rate = 0.02
 
     # When
-    perceived = authority.discount_rate
+    perceived = authority.tax_rate
 
     # Then
     assert perceived == 0.02
@@ -56,13 +56,13 @@ def test_expose_discount_rate_from_space(authority_with_space):
 # ----------------------------------------------------
 
 
-def test_change_discount_rate_into_space(authority_with_space):
+def test_change_tax_rate_into_space(authority_with_space):
     # Given
     authority, space = authority_with_space
 
     # When
-    authority.discount_rate = 0.05
+    authority.tax_rate = 0.05
 
     # Then
-    assert space.discount_rate == 0.05
+    assert space.tax_rate == 0.05
 
