@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import Mock
 from networkx import Graph
-from model.spaces.economy import Company
+from model.roles.company import Company
 
 # ---------------------------------------------------
 # ARCHITECTURE TESTS
@@ -73,8 +73,8 @@ def company_with_space(company_before_setup):
 
 def test_get_average_wage(company_with_space):
     # Given
-    company, economy = company_with_space
-    economy.average_wage = 15.0
+    company, space = company_with_space
+    space.average_wage = 15.0
 
     # When
     perceived = company.get_average_wage()
@@ -86,9 +86,9 @@ def test_get_average_wage(company_with_space):
 def test_get_equity_shares(company_with_space):
     # Given
     founder, graph = Mock(), Graph()
-    company, economy = company_with_space
+    company, space = company_with_space
     graph.add_edge(company, founder, amount=60)
-    economy.graph = graph
+    space.graph = graph
 
     # When
     found = company.get_equity_shares()
@@ -99,11 +99,11 @@ def test_get_equity_shares(company_with_space):
 
 def test_pay_dividends(company_with_space):
     # Given
-    company, economy = company_with_space
+    company, space = company_with_space
     founder = Mock()
 
     # When
     company.pay_dividends(founder, 50)
 
     # Then
-    economy.pay_dividends.assert_called_with(company, founder, 50)
+    space.pay_dividends.assert_called_with(company, founder, 50)

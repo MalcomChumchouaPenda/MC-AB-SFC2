@@ -129,6 +129,7 @@ def test_add_account_register_new_account(space_with_accounts):
 # EVOLUTION TESTS
 # ----------------------------------------------------
 
+
 @pytest.fixture
 def space_before_evolution(space_with_sub_spaces):
     # Given
@@ -183,9 +184,11 @@ def test_clear_defaults_is_not_implemented(space_before_setup):
     with pytest.raises(NotImplementedError):
         space.clear_defaults()
 
+
 # ---------------------------------------------------
 # ROLE MANAGEMENT TESTS
 # ----------------------------------------------------
+
 
 @pytest.fixture
 def role_with_kind():
