@@ -106,11 +106,6 @@ def test_has_inflation_prop(union_before_setup):
 
 
 # ---------------------------------------------------
-# ROLES MANAGEMENT TESTS
-# ----------------------------------------------------
-
-
-# ---------------------------------------------------
 # ACCOUNT MANAGEMENT TESTS
 # ----------------------------------------------------
 
@@ -173,7 +168,7 @@ def union_before_creation(union_before_setup):
 
 def test_place_trad_firm_in_goods_market(union_before_creation):
     # Given
-    firm = Mock(position=1)
+    firm = Mock()
     union = union_before_creation
 
     # When
@@ -185,7 +180,7 @@ def test_place_trad_firm_in_goods_market(union_before_creation):
 
 def test_dont_place_non_trad_firm_in_goods_market(union_before_creation):
     # Given
-    firm = Mock(position=1)
+    firm = Mock()
     union = union_before_creation
 
     # When
@@ -198,7 +193,7 @@ def test_dont_place_non_trad_firm_in_goods_market(union_before_creation):
 @pytest.mark.parametrize("tradable", [True, False])
 def test_place_firm_add_borrower_role(union_before_creation, tradable):
     # Given
-    firm = Mock(position=1)
+    firm = Mock()
     union = union_before_creation
 
     # When
@@ -215,7 +210,7 @@ def test_place_firm_add_borrower_role(union_before_creation, tradable):
 
 def test_place_bank_add_bond_buyer(union_before_creation):
     # Given
-    bank = Mock(position=1)
+    bank = Mock()
     union = union_before_creation
 
     # When
@@ -227,7 +222,7 @@ def test_place_bank_add_bond_buyer(union_before_creation):
 
 def test_place_bank_add_lender_role(union_before_creation):
     # Given
-    bank = Mock(position=1)
+    bank = Mock()
     union = union_before_creation
 
     # When

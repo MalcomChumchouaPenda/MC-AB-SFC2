@@ -348,8 +348,8 @@ def share():
 @pytest.mark.parametrize("trad, sector", [(True, "FT"), (False, "FNT")])
 def test_create_firm_add_and_fund_company(country_before_creation, share, trad, sector):
     # Given
+    firm = Mock()
     company = Mock()
-    firm = Mock(position=1)
     country = country_before_creation
     country.add_company.return_value = company
 
@@ -363,7 +363,7 @@ def test_create_firm_add_and_fund_company(country_before_creation, share, trad, 
 
 def test_dont_create_trad_firm_in_goods_market(country_before_creation, share):
     # Given
-    firm = Mock(position=1)
+    firm = Mock()
     country = country_before_creation
 
     # When
@@ -375,7 +375,7 @@ def test_dont_create_trad_firm_in_goods_market(country_before_creation, share):
 
 def test_create_non_trad_firm_in_goods_market(country_before_creation, share):
     # Given
-    firm = Mock(position=1)
+    firm = Mock()
     country = country_before_creation
 
     # When
@@ -388,7 +388,7 @@ def test_create_non_trad_firm_in_goods_market(country_before_creation, share):
 @pytest.mark.parametrize("tradable", [True, False])
 def test_create_firm_add_employer_role(country_before_creation, share, tradable):
     # Given
-    firm = Mock(position=1)
+    firm = Mock()
     country = country_before_creation
 
     # When
@@ -401,7 +401,7 @@ def test_create_firm_add_employer_role(country_before_creation, share, tradable)
 @pytest.mark.parametrize("tradable", [True, False])
 def test_create_firm_add_depositor_role(country_before_creation, share, tradable):
     # Given
-    firm = Mock(position=1)
+    firm = Mock()
     country = country_before_creation
 
     # When
@@ -414,7 +414,7 @@ def test_create_firm_add_depositor_role(country_before_creation, share, tradable
 @pytest.mark.parametrize("tradable", [True, False])
 def test_create_firm_place_firm_in_union(country_before_creation, share, tradable):
     # Given
-    firm = Mock(position=1)
+    firm = Mock()
     country = country_before_creation
 
     # When
@@ -431,8 +431,8 @@ def test_create_firm_place_firm_in_union(country_before_creation, share, tradabl
 
 def test_create_bank_add_and_fund_company(country_before_creation, share):
     # Given
+    bank = Mock()
     company = Mock()
-    bank = Mock(position=1)
     country = country_before_creation
     country.add_company.return_value = company
 
@@ -446,7 +446,7 @@ def test_create_bank_add_and_fund_company(country_before_creation, share):
 
 def test_create_bank_add_bank_role(country_before_creation, share):
     # Given
-    bank = Mock(position=1)
+    bank = Mock()
     country = country_before_creation
 
     # When
@@ -458,7 +458,7 @@ def test_create_bank_add_bank_role(country_before_creation, share):
 
 def test_create_bank_place_bank_in_union(country_before_creation, share):
     # Given
-    bank = Mock(position=1)
+    bank = Mock()
     country = country_before_creation
 
     # When
