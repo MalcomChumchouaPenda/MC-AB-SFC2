@@ -24,6 +24,17 @@ def union_before_setup():
     return union
 
 
+def test_has_accounts_dlist(union_before_setup):
+    # Given
+    union = union_before_setup
+
+    # When
+    union.setup()
+
+    # Then
+    assert isinstance(union.accounts, AgentDList)
+
+
 # ---------------------------------------------------
 # ROLES SET/REF TESTS
 # ----------------------------------------------------
@@ -65,7 +76,7 @@ def test_has_bond_market_ref(union_before_setup):
 
     # Then
     assert union.bond_market is None
-    
+
 
 def test_has_credit_market_ref(union_before_setup):
     # Given
@@ -99,6 +110,49 @@ def test_has_inflation_prop(union_before_setup):
 # ----------------------------------------------------
 
 
+# ---------------------------------------------------
+# ACCOUNT MANAGEMENT TESTS
+# ----------------------------------------------------
+
+FakeAccount = Mock()
+
+
+@pytest.fixture
+def union_with_accounts(monkeypatch, union_before_setup):
+    # Given
+    accounts = []
+    union = union_before_setup
+    union.accounts = accounts
+    monkeypatch.setattr("model.spaces.monetary_union.EcoAccount", FakeAccount)
+    return union, accounts
+
+
+def test_add_account_create_new_account(union_with_accounts):
+    # Given
+    agent = Mock()
+    union, _ = union_with_accounts
+
+    # When
+    account = union.add_account(agent)
+
+    # Then
+    FakeAccount.assert_called_with(agent.model)
+    assert account is FakeAccount.return_value
+
+
+def test_add_account_register_new_account(union_with_accounts):
+    # Given
+    agent = Mock()
+    union, accounts = union_with_accounts
+
+    # When
+    account = union.add_account(agent)
+
+    # Then
+    assert account in accounts
+    assert account is agent.account
+    assert account.agent_id == agent.id
+
 
 # ---------------------------------------------------
 # FIRM CREATION TESTS
@@ -115,7 +169,6 @@ def union_before_creation(union_before_setup):
     union.bond_market = Mock()
     union.credit_market = Mock()
     return union
-
 
 
 def test_place_trad_firm_in_goods_market(union_before_creation):
@@ -182,4 +235,3 @@ def test_place_bank_add_lender_role(union_before_creation):
 
     # Then
     union.credit_market.add_lender.assert_called_with(bank)
-

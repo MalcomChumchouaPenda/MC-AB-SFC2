@@ -43,17 +43,6 @@ def test_has_sub_spaces_dict(space_before_setup):
     assert space.sub_spaces == {}
 
 
-def test_has_accounts_dlist(space_before_setup):
-    # Given
-    space = space_before_setup
-
-    # When
-    space.setup()
-
-    # Then
-    assert isinstance(space.accounts, AgentDList)
-
-
 # ---------------------------------------------------
 # SUB SPACES MANAGEMENT TESTS
 # ----------------------------------------------------
@@ -79,50 +68,6 @@ def test_add_space_register_sub_space(space_with_sub_spaces):
     # Then
     assert sub_spaces["fake_market"] == new_space
     assert space is new_space.root_space
-
-
-# ---------------------------------------------------
-# ACCOUNT MANAGEMENT TESTS
-# ----------------------------------------------------
-
-FakeAccount = Mock()
-
-
-@pytest.fixture
-def space_with_accounts(monkeypatch, space_before_setup):
-    # Given
-    accounts = []
-    space = space_before_setup
-    space.accounts = accounts
-    monkeypatch.setattr("model.base.EcoAccount", FakeAccount)
-    return space, accounts
-
-
-def test_add_account_create_new_account(space_with_accounts):
-    # Given
-    agent = Mock()
-    space, _ = space_with_accounts
-
-    # When
-    account = space.add_account(agent)
-
-    # Then
-    FakeAccount.assert_called_with(agent.model)
-    assert account is FakeAccount.return_value
-
-
-def test_add_account_register_new_account(space_with_accounts):
-    # Given
-    agent = Mock()
-    space, accounts = space_with_accounts
-
-    # When
-    account = space.add_account(agent)
-
-    # Then
-    assert account in accounts
-    assert account is agent.account
-    assert account.agent_id == agent.id
 
 
 # ---------------------------------------------------

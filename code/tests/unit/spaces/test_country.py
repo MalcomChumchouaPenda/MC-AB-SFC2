@@ -109,7 +109,7 @@ def test_has_labor_market_ref(country_before_setup):
 
     # Then
     assert country.labor_market is None
-    
+
 
 def test_has_deposit_market_ref(country_before_setup):
     # Given
@@ -398,7 +398,6 @@ def test_create_firm_add_employer_role(country_before_creation, share, tradable)
     country.labor_market.add_employer.assert_called_with(firm)
 
 
-
 @pytest.mark.parametrize("tradable", [True, False])
 def test_create_firm_add_depositor_role(country_before_creation, share, tradable):
     # Given
@@ -410,7 +409,6 @@ def test_create_firm_add_depositor_role(country_before_creation, share, tradable
 
     # Then
     country.deposit_market.add_depositor.assert_called_with(firm)
-
 
 
 @pytest.mark.parametrize("tradable", [True, False])
@@ -425,7 +423,7 @@ def test_create_firm_place_firm_in_union(country_before_creation, share, tradabl
     # Then
     country.union.place_firm.assert_called_with(firm, tradable=tradable)
 
-    
+
 # ---------------------------------------------------
 # BANK CREATION TESTS
 # ----------------------------------------------------
