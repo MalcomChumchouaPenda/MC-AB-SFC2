@@ -4,7 +4,7 @@ from model.roles.citizen import Citizen
 from model.roles.company import Company
 
 
-class Economy(EcoSpace):
+class MonetaryUnion(EcoSpace):
 
     def setup(self):
         super().setup()
