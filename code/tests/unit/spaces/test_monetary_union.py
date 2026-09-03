@@ -25,7 +25,7 @@ def union_before_setup():
 
 
 # ---------------------------------------------------
-# AGENT BODIES SET TESTS
+# ROLES SET/REF TESTS
 # ----------------------------------------------------
 
 
@@ -38,6 +38,44 @@ def test_has_monetary_authority_ref(union_before_setup):
 
     # Then
     assert union.monetary_authority is None
+
+
+# ---------------------------------------------------
+# SPACES SET/REF TESTS
+# ----------------------------------------------------
+
+
+def test_has_good_market_ref(union_before_setup):
+    # Given
+    union = union_before_setup
+
+    # When
+    union.setup()
+
+    # Then
+    assert union.good_market is None
+
+
+def test_has_bond_market_ref(union_before_setup):
+    # Given
+    union = union_before_setup
+
+    # When
+    union.setup()
+
+    # Then
+    assert union.bond_market is None
+    
+
+def test_has_credit_market_ref(union_before_setup):
+    # Given
+    union = union_before_setup
+
+    # When
+    union.setup()
+
+    # Then
+    assert union.credit_market is None
 
 
 # ---------------------------------------------------
@@ -73,11 +111,9 @@ def union_before_creation(union_before_setup):
     union = union_before_setup
     union.add_company = Mock()
     union.fund_company = Mock()
-    union.sub_spaces = {
-        "good_market": Mock(),
-        "bond_market": Mock(),
-        "credit_market": Mock(),
-    }
+    union.good_market = Mock()
+    union.bond_market = Mock()
+    union.credit_market = Mock()
     return union
 
 
@@ -86,26 +122,24 @@ def test_place_trad_firm_in_goods_market(union_before_creation):
     # Given
     firm = Mock(position=1)
     union = union_before_creation
-    good_market = union.sub_spaces['good_market']
 
     # When
     union.place_firm(firm, tradable=True)
 
     # Then
-    good_market.add_supplier.assert_called_with(firm)
+    union.good_market.add_supplier.assert_called_with(firm)
 
 
 def test_dont_place_non_trad_firm_in_goods_market(union_before_creation):
     # Given
     firm = Mock(position=1)
     union = union_before_creation
-    good_market = union.sub_spaces['good_market']
 
     # When
     union.place_firm(firm, tradable=False)
 
     # Then
-    good_market.add_supplier.assert_not_called()
+    union.good_market.add_supplier.assert_not_called()
 
 
 @pytest.mark.parametrize("tradable", [True, False])
@@ -113,13 +147,12 @@ def test_place_firm_add_borrower_role(union_before_creation, tradable):
     # Given
     firm = Mock(position=1)
     union = union_before_creation
-    credit_market = union.sub_spaces['credit_market']
 
     # When
     union.place_firm(firm, tradable=tradable)
 
     # Then
-    credit_market.add_borrower.assert_called_with(firm)
+    union.credit_market.add_borrower.assert_called_with(firm)
 
 
 # ---------------------------------------------------
@@ -131,24 +164,22 @@ def test_place_bank_add_bond_buyer(union_before_creation):
     # Given
     bank = Mock(position=1)
     union = union_before_creation
-    bond_market = union.sub_spaces['bond_market']
 
     # When
     union.place_bank(bank)
 
     # Then
-    bond_market.add_buyer.assert_called_with(bank)
+    union.bond_market.add_buyer.assert_called_with(bank)
 
 
 def test_place_bank_add_lender_role(union_before_creation):
     # Given
     bank = Mock(position=1)
     union = union_before_creation
-    credit_market = union.sub_spaces['credit_market']
 
     # When
     union.place_bank(bank)
 
     # Then
-    credit_market.add_lender.assert_called_with(bank)
+    union.credit_market.add_lender.assert_called_with(bank)
 
