@@ -75,19 +75,8 @@ def test_has_companies_list(economy_before_setup):
 
 
 # ---------------------------------------------------
-# ECONOMIC SPACES AND ACCOUNTS SET TESTS
+# ECONOMIC SPACES SET TESTS
 # ----------------------------------------------------
-
-
-def test_has_accounts_list(economy_before_setup):
-    # Given
-    economy = economy_before_setup
-
-    # When
-    economy.setup()
-
-    # Then
-    assert isinstance(economy.accounts, AgentDList)
 
 
 def test_has_labor_markets_dict(economy_before_setup):

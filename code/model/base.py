@@ -1,4 +1,4 @@
-from agentpy import Agent, Network
+from agentpy import Agent, Network, AgentDList
 from agentpy.objects import Object
 
 
@@ -52,7 +52,7 @@ class EcoSpace(Network):
         self.roles = {}
         self.root_space = None
         self.sub_spaces = {}
-        self.position = 0
+        self.accounts = AgentDList(self.model)
 
     def add_space(self, sub_space, name):
         sub_space.root_space = self
@@ -86,6 +86,13 @@ class EcoSpace(Network):
         agent = role.agent
         agent.roles.pop(name)
         self.graph.remove_node(role)
+
+    def add_account(self, agent):
+        account = EcoAccount(agent.model)
+        account.agent_id = agent.id
+        agent.account = account
+        self.accounts.append(account)
+        return account
 
 
 class EcoAccount(Object):

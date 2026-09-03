@@ -14,7 +14,6 @@ class Economy(EcoSpace):
         self.prob_failure = 0
 
         # agent roles and accounts
-        self.accounts = AgentDList(model)
         self.citizens = AgentDList(model)
         self.companies = AgentDList(model)
         self.fiscal_auths = {}
