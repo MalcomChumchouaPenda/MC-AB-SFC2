@@ -332,7 +332,6 @@ def test_pay_dividends_updates_accounts(union_with_company_and_founder):
     founder.account.credit_flow("cash", 10)
 
 
-
 # ---------------------------------------------------
 # FIRM CREATION TESTS
 # ----------------------------------------------------

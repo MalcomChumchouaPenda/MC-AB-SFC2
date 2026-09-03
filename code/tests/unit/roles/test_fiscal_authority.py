@@ -23,7 +23,6 @@ def authority_before_setup():
     return authority
 
 
-
 # ---------------------------------------------------
 # PERCEPTION TESTS
 # ----------------------------------------------------
@@ -50,7 +49,6 @@ def test_expose_tax_rate_from_space(authority_with_space):
     assert perceived == 0.02
 
 
-
 # ---------------------------------------------------
 # ACTION TESTS
 # ----------------------------------------------------
@@ -65,4 +63,3 @@ def test_change_tax_rate_into_space(authority_with_space):
 
     # Then
     assert space.tax_rate == 0.05
-

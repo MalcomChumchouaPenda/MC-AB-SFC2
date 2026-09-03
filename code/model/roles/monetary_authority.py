@@ -10,5 +10,3 @@ class MonetaryAuthority(EcoRole):
     @discount_rate.setter
     def discount_rate(self, rate):
         self.space.discount_rate = rate
-        
-    
