@@ -25,7 +25,7 @@ def country_before_setup():
 
 
 # ---------------------------------------------------
-# AGENT BODIES SET TESTS
+# ROLES SET/REF TESTS
 # ----------------------------------------------------
 
 
@@ -72,6 +72,54 @@ def test_has_companies_list(country_before_setup):
     # Then
     assert isinstance(country.companies, AgentDList)
 
+
+# ---------------------------------------------------
+# SPACES SET/REF TESTS
+# ----------------------------------------------------
+
+
+def test_has_monetary_union_ref(country_before_setup):
+    # Given
+    country = country_before_setup
+
+    # When
+    country.setup()
+
+    # Then
+    assert country.union is None
+
+
+def test_has_good_market_ref(country_before_setup):
+    # Given
+    country = country_before_setup
+
+    # When
+    country.setup()
+
+    # Then
+    assert country.good_market is None
+
+
+def test_has_labor_market_ref(country_before_setup):
+    # Given
+    country = country_before_setup
+
+    # When
+    country.setup()
+
+    # Then
+    assert country.labor_market is None
+    
+
+def test_has_deposit_market_ref(country_before_setup):
+    # Given
+    country = country_before_setup
+
+    # When
+    country.setup()
+
+    # Then
+    assert country.deposit_market is None
 
 
 # ---------------------------------------------------
@@ -284,12 +332,10 @@ def country_before_creation(country_before_setup):
     country = country_before_setup
     country.add_company = Mock()
     country.fund_company = Mock()
-    country.root_space = Mock()
-    country.sub_spaces = {
-        "good_market": Mock(),
-        "labor_market": Mock(),
-        "deposit_market": Mock(),
-    }
+    country.union = Mock()
+    country.good_market = Mock()
+    country.labor_market = Mock()
+    country.deposit_market = Mock()
     return country
 
 
@@ -319,26 +365,24 @@ def test_dont_create_trad_firm_in_goods_market(country_before_creation, share):
     # Given
     firm = Mock(position=1)
     country = country_before_creation
-    good_market = country.sub_spaces['good_market']
 
     # When
     country.create_firm(firm, [share], tradable=True)
 
     # Then
-    good_market.add_supplier.assert_not_called()
+    country.good_market.add_supplier.assert_not_called()
 
 
 def test_create_non_trad_firm_in_goods_market(country_before_creation, share):
     # Given
     firm = Mock(position=1)
     country = country_before_creation
-    good_market = country.sub_spaces['good_market']
 
     # When
     country.create_firm(firm, [share], tradable=False)
 
     # Then
-    good_market.add_supplier.assert_called_with(firm)
+    country.good_market.add_supplier.assert_called_with(firm)
 
 
 @pytest.mark.parametrize("tradable", [True, False])
@@ -346,13 +390,12 @@ def test_create_firm_add_employer_role(country_before_creation, share, tradable)
     # Given
     firm = Mock(position=1)
     country = country_before_creation
-    labor_market = country.sub_spaces['labor_market']
 
     # When
     country.create_firm(firm, [share], tradable=tradable)
 
     # Then
-    labor_market.add_employer.assert_called_with(firm)
+    country.labor_market.add_employer.assert_called_with(firm)
 
 
 
@@ -361,13 +404,12 @@ def test_create_firm_add_depositor_role(country_before_creation, share, tradable
     # Given
     firm = Mock(position=1)
     country = country_before_creation
-    deposit_market = country.sub_spaces['deposit_market']
 
     # When
     country.create_firm(firm, [share], tradable=tradable)
 
     # Then
-    deposit_market.add_depositor.assert_called_with(firm)
+    country.deposit_market.add_depositor.assert_called_with(firm)
 
 
 
@@ -376,13 +418,12 @@ def test_create_firm_place_firm_in_union(country_before_creation, share, tradabl
     # Given
     firm = Mock(position=1)
     country = country_before_creation
-    union = country.root_space
 
     # When
     country.create_firm(firm, [share], tradable=tradable)
 
     # Then
-    union.place_firm.assert_called_with(firm, tradable=tradable)
+    country.union.place_firm.assert_called_with(firm, tradable=tradable)
 
     
 # ---------------------------------------------------
@@ -409,23 +450,21 @@ def test_create_bank_add_bank_role(country_before_creation, share):
     # Given
     bank = Mock(position=1)
     country = country_before_creation
-    deposit_market = country.sub_spaces['deposit_market']
 
     # When
     country.create_bank(bank, [share])
 
     # Then
-    deposit_market.add_bank.assert_called_with(bank)
+    country.deposit_market.add_bank.assert_called_with(bank)
 
 
 def test_create_bank_place_bank_in_union(country_before_creation, share):
     # Given
     bank = Mock(position=1)
     country = country_before_creation
-    union = country.root_space
 
     # When
     country.create_bank(bank, [share])
 
     # Then
-    union.place_bank.assert_called_with(bank)
+    country.union.place_bank.assert_called_with(bank)

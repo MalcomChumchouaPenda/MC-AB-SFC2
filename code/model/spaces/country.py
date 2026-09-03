@@ -12,10 +12,18 @@ class Country(EcoSpace):
         self.gdp = 0
         self.inflation = 0
         self.prob_failure = 0
+
+        # roles
         self.citizens = AgentDList(model)
         self.companies = AgentDList(model)
         self.monetary_authority = None
         self.fiscal_authority = None
+
+        # sub spaces
+        self.union = None
+        self.good_market = None
+        self.labor_market = None
+        self.deposit_market = None
 
     #
     # Role management
@@ -56,18 +64,18 @@ class Country(EcoSpace):
     def create_firm(self, firm, shares, tradable):
         sector = "FT" if tradable else "FNT"
         company = self.add_company(firm, sector=sector)
-        self._place_firm_in_markets(firm, tradable)
+        self._place_firm(firm, tradable)
         for share in shares:
             founder = share["founder"]
             amount = share["amount"]
             self.fund_company(company, founder, amount)
 
-    def _place_firm_in_markets(self, firm, tradable):
-        self.root_space.place_firm(firm, tradable=tradable)
-        self.sub_spaces["deposit_market"].add_depositor(firm)
-        self.sub_spaces["labor_market"].add_employer(firm)
+    def _place_firm(self, firm, tradable):
+        self.union.place_firm(firm, tradable=tradable)
+        self.deposit_market.add_depositor(firm)
+        self.labor_market.add_employer(firm)
         if not tradable:
-            self.sub_spaces["good_market"].add_supplier(firm)
+            self.good_market.add_supplier(firm)
 
     #
     # Bank creation
@@ -78,5 +86,5 @@ class Country(EcoSpace):
             founder = share["founder"]
             amount = share["amount"]
             self.fund_company(company, founder, amount)
-        self.root_space.place_bank(bank)
-        self.sub_spaces["deposit_market"].add_bank(bank)
+        self.union.place_bank(bank)
+        self.deposit_market.add_bank(bank)
