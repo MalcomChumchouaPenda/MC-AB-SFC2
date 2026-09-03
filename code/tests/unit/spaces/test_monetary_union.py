@@ -332,6 +332,7 @@ def test_pay_dividends_updates_accounts(union_with_company_and_founder):
     founder.account.credit_flow("cash", 10)
 
 
+
 # ---------------------------------------------------
 # FIRM CREATION TESTS
 # ----------------------------------------------------
@@ -372,7 +373,7 @@ def test_create_firm_add_and_fund_company(union_before_new_firm, share, trad, se
     union.fund_company.assert_called_with(company, share["founder"], 5)
 
 
-def test_create_tradable_firm_in_common_goods_market(union_before_new_firm, share):
+def test_create_trad_firm_in_common_goods_market(union_before_new_firm, share):
     # Given
     firm = Mock(position=1)
     union = union_before_new_firm
@@ -385,9 +386,7 @@ def test_create_tradable_firm_in_common_goods_market(union_before_new_firm, shar
     union.good_markets[1].add_supplier.assert_not_called()
 
 
-def test_create_non_tradable_firm_in_national_goods_market(
-    union_before_new_firm, share
-):
+def test_create_non_trad_firm_in_national_goods_market(union_before_new_firm, share):
     # Given
     firm = Mock(position=1)
     union = union_before_new_firm
