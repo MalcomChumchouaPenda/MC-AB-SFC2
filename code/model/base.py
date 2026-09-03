@@ -14,7 +14,6 @@ class EcoAgent(Agent):
         self.account = None
         self.cb_account = None
         self.bank_account = None
-        self.position = 0
 
 
 class EcoRole(Object):

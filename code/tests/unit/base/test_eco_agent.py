@@ -21,17 +21,6 @@ def agent_before_setup():
     return agent
 
 
-def test_has_default_position(agent_before_setup):
-    # Given
-    agent = agent_before_setup
-
-    # When
-    agent.setup()
-
-    # Then
-    assert agent.position == 0
-
-
 def test_has_roles_dict(agent_before_setup):
     # Given
     agent = agent_before_setup
