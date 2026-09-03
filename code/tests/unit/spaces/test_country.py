@@ -165,6 +165,97 @@ def test_has_prob_failure_prop(country_before_setup):
 # ----------------------------------------------------
 
 
+FakeAuthority1 = Mock()
+FakeAuthority2 = Mock()
+
+
+@pytest.fixture
+def country_without_authorities(monkeypatch, country_before_setup):
+    # Given
+    monkeypatch.setattr("model.spaces.country.MonetaryAuthority", FakeAuthority1)
+    monkeypatch.setattr("model.spaces.country.FiscalAuthority", FakeAuthority2)
+    country = country_before_setup
+    country.add_role = Mock()
+    country.union = Mock()
+    return country
+
+
+def test_add_monetary_authority_add_appropriate_role(country_without_authorities):
+    # Given
+    cb = Mock()
+    country = country_without_authorities
+
+    # When
+    role = country.add_monetary_authority(cb)
+
+    # Then
+    country.add_role.assert_called_with(FakeAuthority1, cb, "monetary_authority")
+    assert role == country.add_role.return_value
+
+
+def test_add_monetary_authority_registers_authority(country_without_authorities):
+    # Given
+    cb = Mock()
+    country = country_without_authorities
+
+    # When
+    role = country.add_monetary_authority(cb)
+
+    # Then
+    assert country.monetary_authority is role
+
+
+def test_add_monetary_authority_add_account(country_without_authorities):
+    # Given
+    country = country_without_authorities
+    union = country.union
+    cb = Mock()
+
+    # When
+    country.add_monetary_authority(cb)
+
+    # Then
+    union.add_account.assert_called_with(cb)
+
+
+def test_add_fiscal_authority_add_appropriate_role(country_without_authorities):
+    # Given
+    govt = Mock()
+    country = country_without_authorities
+
+    # When
+    role = country.add_fiscal_authority(govt)
+
+    # Then
+    country.add_role.assert_called_with(FakeAuthority2, govt, "fiscal_authority")
+    assert role == country.add_role.return_value
+
+
+def test_add_fiscal_authority_registers_authority(country_without_authorities):
+    # Given
+    govt = Mock()
+    country = country_without_authorities
+
+    # When
+    role = country.add_fiscal_authority(govt)
+
+    # Then
+    assert country.fiscal_authority is role
+
+
+def test_add_fiscal_authority_add_account(country_without_authorities):
+    # Given
+    country = country_without_authorities
+    union = country.union
+    govt = Mock()
+
+    # When
+    country.add_fiscal_authority(govt)
+
+    # Then
+    union.add_account.assert_called_with(govt)
+
+
 class FakeCitizen(Mock):
     pass
 
@@ -216,7 +307,6 @@ def test_add_citizen_add_account(country_without_citizens):
 
     # Then
     union.add_account.assert_called_with(household)
-
 
 
 class FakeCompany(Mock):
@@ -282,7 +372,6 @@ def test_add_company_add_account(country_without_companies):
 
     # Then
     union.add_account.assert_called_with(agent)
-
 
 
 # ---------------------------------------------------

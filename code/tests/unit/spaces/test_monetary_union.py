@@ -176,8 +176,6 @@ def test_add_account_register_new_account(union_without_authority):
     assert role.account.agent_id == cb.id
 
 
-
-
 @pytest.fixture
 def union_with_authority(union_without_authority):
     # Given
@@ -224,7 +222,6 @@ def test_add_account_links_to_authority(union_with_authority):
 
     # Then
     assert agent.cb_account is authority.account
-
 
 
 # ---------------------------------------------------

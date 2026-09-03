@@ -2,6 +2,8 @@ from agentpy import AgentDList
 from model.base import EcoSpace
 from model.roles.citizen import Citizen
 from model.roles.company import Company
+from model.roles.monetary_authority import MonetaryAuthority
+from model.roles.fiscal_authority import FiscalAuthority
 
 
 class Country(EcoSpace):
@@ -28,6 +30,19 @@ class Country(EcoSpace):
     #
     # Role management
     #
+    
+    def add_fiscal_authority(self, agent):
+        role = self.add_role(FiscalAuthority, agent, "fiscal_authority")
+        self.union.add_account(agent)
+        self.fiscal_authority = role
+        return role
+
+    def add_monetary_authority(self, agent):
+        role = self.add_role(MonetaryAuthority, agent, "monetary_authority")
+        self.union.add_account(agent)
+        self.monetary_authority = role
+        return role    
+
     def add_citizen(self, agent):
         role = self.add_role(Citizen, agent, "citizen")
         self.union.add_account(agent)
