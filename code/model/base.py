@@ -1,4 +1,3 @@
-
 from agentpy import Agent, Network
 from agentpy.objects import Object
 
@@ -71,7 +70,6 @@ class EcoSpace(Network):
 
     def clear_defaults(self):
         raise NotImplementedError
-    
 
     def add_role(self, kind, agent, name):
         role = kind(self.model)
@@ -79,8 +77,8 @@ class EcoSpace(Network):
         role.name = name
         role.space = self
         role.agent = agent
-        agent.roles[name] = role  
-        self.graph.add_node(role)   
+        agent.roles[name] = role
+        self.graph.add_node(role)
         return role
 
     def remove_role(self, role):
@@ -100,17 +98,15 @@ class EcoAccount(Object):
 
     def debit_stock(self, name, amount):
         self.stocks[name] = self.stocks.get(name, 0) - amount
-        
+
     def credit_stock(self, name, amount):
         self.stocks[name] = self.stocks.get(name, 0) + amount
-        
+
     def debit_flow(self, name, amount):
         self.flows[name] = self.flows.get(name, 0) - amount
-        
+
     def credit_flow(self, name, amount):
         self.flows[name] = self.flows.get(name, 0) + amount
 
     def clear_flows(self):
         self.flows.clear()
-
-

@@ -3,7 +3,6 @@ from functools import partial
 from model.base import EcoAgent
 
 
-
 class CentralBank(EcoAgent):
 
     def setup(self):

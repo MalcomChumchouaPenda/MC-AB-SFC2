@@ -1,4 +1,3 @@
-
 from model.base import EcoSpace, EcoRole
 
 
@@ -57,8 +56,6 @@ class GoodsMarket(EcoSpace):
 
     def calc_gdp(self, producers):
         return sum(prod.sales for prod in producers)
-
-
 
 
 class ProducerRole(EcoRole):

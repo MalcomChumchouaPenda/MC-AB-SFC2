@@ -239,4 +239,3 @@ class Firm(EcoAgent):
         self.prev_expected_sales = self.expected_sales
         self.prev_inventories = self.inventories
         self.prev_output = self.output
-

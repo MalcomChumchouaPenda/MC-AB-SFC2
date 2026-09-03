@@ -235,4 +235,3 @@ class Household(EcoAgent):
                 amount = deposit_market.close_account(self, old_bank)
                 deposit_market.open_account(self, new_bank, amount=amount)
             self.deposit_bank = new_bank
-

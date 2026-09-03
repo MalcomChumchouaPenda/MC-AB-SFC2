@@ -1,4 +1,3 @@
-
 from agentpy import AgentDList
 from model.base import EcoSpace, EcoRole
 
@@ -32,16 +31,16 @@ class Economy(EcoSpace):
     # Role management
     #
     def add_citizen(self, agent):
-        role = self.add_role(Citizen, agent, 'citizen')
+        role = self.add_role(Citizen, agent, "citizen")
         self.citizens.append(role)
         return role
 
     def add_company(self, agent, sector):
-        role = self.add_role(Company, agent, 'company')
+        role = self.add_role(Company, agent, "company")
         role.sector = sector
         self.companies.append(role)
         return role
-    
+
     #
     # Equity transactions
     #
@@ -87,7 +86,7 @@ class Economy(EcoSpace):
     # Bank creation
     #
     def create_bank(self, bank, shares):
-        company = self.add_company(bank, sector='B')
+        company = self.add_company(bank, sector="B")
         for share in shares:
             founder = share["founder"]
             amount = share["amount"]
@@ -99,8 +98,6 @@ class Economy(EcoSpace):
         self.deposit_markets[k].add_bank(bank)
         self.credit_market.add_lender(bank)
         self.bond_market.add_buyer(bank)
-
-
 
 
 class Citizen(EcoRole):
@@ -121,12 +118,12 @@ class Citizen(EcoRole):
         if self in investors:
             investors.remove(self)
         return investors
-    
+
     def get_bank_firm_ratios(self):
         companies = self.space.companies
         print(companies)
-        firm_sector = companies.select([c.sector[0] == 'F' for c in companies])
-        bank_sector = companies.select(companies.sector == 'B')
+        firm_sector = companies.select([c.sector[0] == "F" for c in companies])
+        bank_sector = companies.select(companies.sector == "B")
         if len(firm_sector) == 0:
             return 1.0, 1.0
         ratio1 = len(bank_sector) / len(firm_sector)
@@ -151,10 +148,10 @@ class Citizen(EcoRole):
 
 
 class Company(EcoRole):
-    
+
     def setup(self):
         super().setup()
-        self.sector = ''
+        self.sector = ""
         self.equity = 0
         self.net_worth = 0
         self.defaulted = False
@@ -164,8 +161,8 @@ class Company(EcoRole):
     #
     def get_equity_shares(self):
         return [
-            {"founder":v, "share":d["amount"]}
-            for _, v, d in self.space.graph.edges(self, data=True)
+            {"founder": founder, "share": data["amount"]}
+            for _, founder, data in self.space.graph.edges(self, data=True)
         ]
 
     def get_average_wage(self):
@@ -176,4 +173,3 @@ class Company(EcoRole):
     #
     def pay_dividends(self, founder, amount):
         self.space.pay_dividends(self, founder, amount)
-

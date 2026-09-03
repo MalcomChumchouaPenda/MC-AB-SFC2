@@ -1,4 +1,3 @@
-
 from model.base import EcoSpace, EcoRole
 from ..agents.firm import Firm
 from ..agents.bank import Bank
@@ -18,7 +17,7 @@ class Country(EcoSpace):
         self.companies = []
         self.discount_rate = 0.0
         self.tax_rate = 0
-        
+
     @property
     def inflation(self):
         return self.goods_market.inflation
@@ -34,7 +33,6 @@ class Country(EcoSpace):
     @property
     def average_wage(self):
         return self.labor_market.average_wage
-
 
     def add_citizen(self, household):
         role = self.add_role(Citizen, household)
@@ -153,17 +151,14 @@ class Company(EcoRole):
 
     def setup(self):
         super().setup()
-        self.name = 'company'
-        self.sector = ''
+        self.name = "company"
+        self.sector = ""
         self.equity = 0
         self.net_worth = 0
         self.defaulted = False
 
     def get_founders(self):
-        return [
-            citizen
-            for _, citizen in self.space.graph.edges(self)
-        ]
+        return [citizen for _, citizen in self.space.graph.edges(self)]
 
     def get_average_wage(self):
         return self.space.average_wage
@@ -173,7 +168,6 @@ class Company(EcoRole):
 
     def pay_dividends(self, founder, amount):
         self.space.pay_dividends(self, founder, amount)
-
 
 
 class Citizen(EcoRole):
@@ -194,13 +188,15 @@ class Citizen(EcoRole):
         return [
             citizen
             for citizen in self.space.citizens
-            if citizen.desired_equity > 0 and citizen.equity == 0 and citizen is not self
+            if citizen.desired_equity > 0
+            and citizen.equity == 0
+            and citizen is not self
         ]
 
     def get_bank_firm_ratios(self):
         country = self.space
-        fequities = [c.equity for c in country.companies if c.sector[0] == 'F']
-        bequities = [c.equity for c in country.companies if c.sector[0] == 'B']
+        fequities = [c.equity for c in country.companies if c.sector[0] == "F"]
+        bequities = [c.equity for c in country.companies if c.sector[0] == "B"]
         if len(fequities) == 0:
             return 1.0, 1.0
         return len(bequities) / len(fequities), sum(bequities) / sum(fequities)
