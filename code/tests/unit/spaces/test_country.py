@@ -175,6 +175,7 @@ def country_without_citizens(monkeypatch, country_before_setup):
     monkeypatch.setattr("model.spaces.country.Citizen", FakeCitizen)
     country = country_before_setup
     country.add_role = Mock()
+    country.union = Mock()
     country.citizens = []
     return country
 
@@ -204,6 +205,20 @@ def test_add_citizen_registers_citizen(country_without_citizens):
     assert country.citizens == [role]
 
 
+def test_add_citizen_add_account(country_without_citizens):
+    # Given
+    country = country_without_citizens
+    union = country.union
+    household = Mock()
+
+    # When
+    country.add_citizen(household)
+
+    # Then
+    union.add_account.assert_called_with(household)
+
+
+
 class FakeCompany(Mock):
     pass
 
@@ -214,6 +229,7 @@ def country_without_companies(monkeypatch, country_before_setup):
     monkeypatch.setattr("model.spaces.country.Company", FakeCompany)
     country = country_before_setup
     country.add_role = Mock()
+    country.union = Mock()
     country.companies = []
     return country
 
@@ -253,6 +269,20 @@ def test_add_company_register_sector(country_without_companies):
 
     # Then
     assert role.sector == "X"
+
+
+def test_add_company_add_account(country_without_companies):
+    # Given
+    country = country_without_companies
+    union = country.union
+    agent = Mock()
+
+    # When
+    country.add_company(agent, sector="X")
+
+    # Then
+    union.add_account.assert_called_with(agent)
+
 
 
 # ---------------------------------------------------

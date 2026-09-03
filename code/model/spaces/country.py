@@ -30,6 +30,7 @@ class Country(EcoSpace):
     #
     def add_citizen(self, agent):
         role = self.add_role(Citizen, agent, "citizen")
+        self.union.add_account(agent)
         self.citizens.append(role)
         return role
 
@@ -37,6 +38,7 @@ class Country(EcoSpace):
         role = self.add_role(Company, agent, "company")
         role.sector = sector
         self.companies.append(role)
+        self.union.add_account(agent)
         return role
 
     #

@@ -1,5 +1,6 @@
 from agentpy import AgentDList
 from model.base import EcoSpace, EcoAccount
+from model.roles.monetary_authority import MonetaryAuthority
 
 
 class MonetaryUnion(EcoSpace):
@@ -15,18 +16,26 @@ class MonetaryUnion(EcoSpace):
         self.credit_market = None
 
     #
-    # Account management
+    # Role / Account management
     #
+    def add_monetary_authority(self, agent):
+        role = self.add_role(MonetaryAuthority, agent, "monetary_authority")
+        self.monetary_authority = role
+        self._create_account(agent)
+        return role
+
     def add_account(self, agent):
+        account = self._create_account(agent)
+        agent.cb_account = self.monetary_authority.account
+        return account
+
+    def _create_account(self, agent):
         account = EcoAccount(agent.model)
         account.agent_id = agent.id
         agent.account = account
         self.accounts.append(account)
         return account
 
-    #
-    # Role management
-    #
 
     #
     # Firm creation
