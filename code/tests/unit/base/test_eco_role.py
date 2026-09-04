@@ -88,3 +88,15 @@ def test_expose_agent_deposit_bank_account(role_with_agent):
 
     # Then
     assert exposed is agent.bank_account
+
+
+def test_change_agent_deposit_bank_account(role_with_agent):
+    # Given
+    role, agent = role_with_agent
+    new_account = Mock()
+
+    # When
+    role.bank_account = new_account
+
+    # Then
+    assert agent.bank_account is new_account

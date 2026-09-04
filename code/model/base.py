@@ -38,6 +38,10 @@ class EcoRole(Object):
     def bank_account(self):
         return self.agent.bank_account
 
+    @bank_account.setter
+    def bank_account(self, account):
+        self.agent.bank_account = account
+
 
 class EcoSpace(Network):
     """
@@ -92,7 +96,7 @@ class EcoAccount(Object):
         super().setup()
         self.stocks = {}
         self.flows = {}
-        self.agent_id = None
+        self.agent = None
 
     def debit_stock(self, name, amount):
         self.stocks[name] = self.stocks.get(name, 0) - amount

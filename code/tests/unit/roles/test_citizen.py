@@ -111,7 +111,6 @@ def test_get_sector_equity_range_from_space(citizen_with_space):
     assert range_ == (100, 200)
 
 
-
 # ---------------------------------------------------
 # ACTION TESTS
 # ----------------------------------------------------

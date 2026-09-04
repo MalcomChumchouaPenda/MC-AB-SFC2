@@ -1,67 +1,92 @@
-from agentpy.objects import Object
-from networkx import Graph
-from model.base import EcoSpace, EcoRole
+from agentpy import AgentDList
+from model.base import EcoSpace
+from model.roles.depositor import Depositor
+from model.roles.deposit_bank import DepositBank
+from model.roles.deposit_guarantee import DepositGuarantee
 
 
-class DepositMarket(Object):
+
+class DepositMarket(EcoSpace):
 
     def setup(self):
-        self.deposits = Graph()
+        super().setup()
+        self.deposit_banks = AgentDList(self.model)
+        self.depositors = AgentDList(self.model)
+        self.deposit_guarantee = None
 
-    def add_client(self, client):
-        self.deposits.add_node(client, role="client")
+    def add_depositor(self, agent):
+        role = self.add_role(Depositor, agent, "depositor")
+        self.depositors.append(role)
+        return role
 
-    def add_bank(self, bank):
-        self.deposits.add_node(bank, role="bank")
+    def add_deposit_bank(self, bank):
+        role = self.add_role(DepositBank, bank, "deposit_bank")
+        self.deposit_banks.append(role)
+        return role
 
-    def get_bank_deposits(self, bank):
+    def add_deposit_guarantee(self, agent):
+        role = self.add_role(DepositGuarantee, agent, "deposit_guarantee")
+        self.deposit_guarantee = role
+        return role
+
+    
+    def find_deposit_accounts(self, bank):
         return [
-            dict(client=client, **data)
-            for _, client, data in self.deposits.edges(bank, data=True)
+            dict(depositor=depositor, **data)
+            for _, depositor, data in self.graph.edges(bank, data=True)
         ]
+    
+    def find_deposit_banks(self):
+        return list(self.deposit_banks)
+    
+    def find_defaulted_banks(self):
+        banks = self.deposit_banks
+        return banks.select(banks.defaulted == True)
 
-    def get_client_deposits(self, client):
-        return [
-            dict(bank=bank, **data)
-            for _, bank, data in self.deposits.edges(client, data=True)
-        ]
+    def link_depositor_to_bank(self, depositor, deposit_bank, amount=0):
+        depositor.account.credit_stock("deposits", amount)
+        depositor.account.debit_stock("cash", amount)
+        deposit_bank.account.debit_stock("deposits", amount)
+        deposit_bank.account.credit_stock("cash", amount)
+        depositor.bank_account = deposit_bank.account
+        depositor.deposit_bank = deposit_bank
+        self.graph.add_edge(depositor, deposit_bank, amount=amount)
 
-    def get_banks(self):
-        return [
-            node
-            for node, data in self.deposits.nodes(data=True)
-            if data and data["role"] == "bank"
-        ]
+    def unlink_depositor_with_bank(self, depositor):
+        deposit_bank = depositor.deposit_bank
+        amount = self.graph[depositor][deposit_bank]["amount"]
+        depositor.account.debit_stock("deposits", amount)
+        depositor.account.credit_stock("cash", amount)
+        depositor.bank_account.credit_stock("deposits", amount)
+        depositor.bank_account.debit_stock("cash", amount)
+        depositor.bank_account = None
+        depositor.deposit_bank = None
+        self.graph.remove_edge(depositor, deposit_bank)
 
-    def get_defaulted_banks(self):
-        return [
-            node
-            for node, data in self.deposits.nodes(data=True)
-            if data and data["role"] == "bank" and node.defaulted
-        ]
 
-    def open_account(self, client, bank, amount=0):
-        self.deposits.add_edge(client, bank, amount=amount)
+    def pay_interests(self, depositor, amount):
+        depositor.account.credit_stock("deposits", amount)
+        depositor.account.credit_flow("dep_interests", amount)
+        depositor.bank_account.debit_stock("deposits", amount)
+        depositor.bank_account.debit_flow("dep_interests", amount)
+        self.graph[depositor][depositor.deposit_bank]["amount"] += amount
 
-    def close_account(self, client, bank):
-        amount = self.deposits[client][bank]["amount"]
-        bank.reserves -= amount
-        client.cash += amount
-        self.deposits.remove_edge(client, bank)
-        return amount
+    def reimburse_deposits(self, guarantee, depositor, amount):
+        depositor.account.debit_stock("deposits", amount)
+        depositor.account.credit_stock("cash", amount)
+        depositor.bank_account.credit_stock("deposits", amount)
+        guarantee.account.debit_stock("cash", amount)
 
-    def pay_interests(self, client, bank, amount):
-        deposits = self.deposits
-        deposits[client][bank]["amount"] += amount
-        deposits[client][bank]["interests"] = amount
+    def make_deposits(self, depositor, amount):
+        depositor.account.credit_stock("deposits", amount)
+        depositor.account.debit_stock("cash", amount)
+        depositor.bank_account.debit_stock("deposits", amount)
+        depositor.bank_account.credit_stock("cash", amount)
+        self.graph[depositor][depositor.deposit_bank]["amount"] += amount
 
-    def reimburse_deposits(self, govt, client, bank):
-        amount = self.deposits[client][bank]["amount"]
-        govt.reserves -= amount
-        client.cash += amount
-        self.deposits[client][bank]["amount"] = 0
-
-    def make_deposits(self, client, bank, amount):
-        client.cash -= amount
-        bank.reserves += amount
-        self.deposits[client][bank]["amount"] += amount
+    def withdraw_deposits(self, depositor, amount):
+        depositor.account.debit_stock("deposits", amount)
+        depositor.account.credit_stock("cash", amount)
+        depositor.bank_account.credit_stock("deposits", amount)
+        depositor.bank_account.debit_stock("cash", amount)
+        self.graph[depositor][depositor.deposit_bank]["amount"] -= amount

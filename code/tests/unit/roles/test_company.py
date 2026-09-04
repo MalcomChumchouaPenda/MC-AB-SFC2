@@ -98,6 +98,7 @@ def test_get_equity_shares_from_space(company_with_space):
 # ACTIONS
 # ----------------------------------------------------
 
+
 def test_pay_dividends(company_with_space):
     # Given
     company, space = company_with_space

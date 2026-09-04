@@ -155,6 +155,7 @@ def test_add_employer_registers_employer(market_without_employers):
 # LABOR MATCHING
 # ----------------------------------------------------
 
+
 @pytest.fixture
 def market_with_employers(market_without_setup):
     # Given
@@ -243,10 +244,10 @@ def test_hire_worker_reduces_labor_supply(market_with_employer):
     assert worker.labor_supply == pytest.approx(0.1)
 
 
-
 # ---------------------------------------------------
 # WAGES PAYMENT
 # ----------------------------------------------------
+
 
 @pytest.fixture
 def market_with_participants(market_without_setup):
@@ -255,7 +256,6 @@ def market_with_participants(market_without_setup):
     market = market_without_setup
     market.graph.add_nodes_from([employer, worker])
     return market, employer, worker
-
 
 
 def test_find_jobs(market_with_participants):

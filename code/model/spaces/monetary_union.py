@@ -31,7 +31,7 @@ class MonetaryUnion(EcoSpace):
 
     def _create_account(self, agent):
         account = EcoAccount(agent.model)
-        account.agent_id = agent.id
+        account.agent = agent
         agent.account = account
         self.accounts.append(account)
         return account

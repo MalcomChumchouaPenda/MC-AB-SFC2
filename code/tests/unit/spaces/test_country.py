@@ -25,7 +25,7 @@ def country_before_setup():
 
 
 # ---------------------------------------------------
-# ROLES 
+# ROLES
 # ----------------------------------------------------
 
 
@@ -71,7 +71,6 @@ def test_has_companies_list(country_before_setup):
 
     # Then
     assert isinstance(country.companies, AgentDList)
-
 
 
 FakeAuthority1 = Mock()
@@ -167,6 +166,7 @@ def test_add_fiscal_authority_add_account(country_without_authorities):
 
 FakeCitizen = Mock()
 
+
 @pytest.fixture
 def country_without_citizens(monkeypatch, country_before_setup):
     # Given
@@ -214,7 +214,6 @@ def test_add_citizen_add_account(country_without_citizens):
 
     # Then
     union.add_account.assert_called_with(household)
-
 
 
 FakeCompany = Mock()
@@ -368,10 +367,10 @@ def test_has_prob_failure_prop(country_before_setup):
     assert country.prob_failure == 0.0
 
 
-
 # ---------------------------------------------------
 # CURRENT INDICATORS
 # ----------------------------------------------------
+
 
 @pytest.fixture
 def country_with_companies(country_before_setup, make_dlist):
@@ -560,7 +559,6 @@ def test_fund_company_reduces_resid_equity(country_with_company_and_founder):
 
     # Then
     assert founder.resid_equity == 50
-
 
 
 # ---------------------------------------------------

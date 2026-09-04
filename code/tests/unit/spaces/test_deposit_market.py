@@ -1,7 +1,6 @@
 import pytest
 from unittest.mock import Mock
-from networkx import Graph
-from agentpy.objects import Object
+from agentpy import AgentDList
 from model.spaces.deposit_market import DepositMarket
 
 # ---------------------------------------------------
@@ -9,295 +8,434 @@ from model.spaces.deposit_market import DepositMarket
 # ----------------------------------------------------
 
 
-def test_is_agentpy_object():
+def test_is_eco_space():
+    # Given
+    from model.base import EcoSpace
+
     # Assert
-    assert issubclass(DepositMarket, Object)
+    assert issubclass(DepositMarket, EcoSpace)
 
 
 @pytest.fixture
-def market():
+def market_before_setup():
     # Given
     model = Mock()
     market = DepositMarket(model)
-    market.setup()
     return market
 
 
-def test_has_deposits_graph(market):
+# ---------------------------------------------------
+# ROLES
+# ----------------------------------------------------
+
+
+def test_has_deposit_banks_list(market_before_setup):
+    # Given
+    market = market_before_setup
+
     # When
     market.setup()
 
     # Then
-    assert isinstance(market.deposits, Graph)
+    assert isinstance(market.deposit_banks, AgentDList)
+
+
+def test_has_depositors_list(market_before_setup):
+    # Given
+    market = market_before_setup
+
+    # When
+    market.setup()
+
+    # Then
+    assert isinstance(market.depositors, AgentDList)
+
+
+def test_has_deposit_guarantee_ref(market_before_setup):
+    # Given
+    market = market_before_setup
+
+    # When
+    market.setup()
+
+    # Then
+    assert market.deposit_guarantee is None
+
+
+class FakeBank(Mock):
+    pass
+
+
+@pytest.fixture
+def market_without_deposit_banks(monkeypatch, market_before_setup):
+    # Given
+    monkeypatch.setattr("model.spaces.deposit_market.DepositBank", FakeBank)
+    market = market_before_setup
+    market.add_role = Mock()
+    market.deposit_banks = []
+    return market
+
+
+def test_add_deposit_bank_add_appropriate_role(market_without_deposit_banks):
+    # Given
+    agent = Mock()
+    market = market_without_deposit_banks
+
+    # When
+    role = market.add_deposit_bank(agent)
+
+    # Then
+    market.add_role.assert_called_with(FakeBank, agent, "deposit_bank")
+    assert role == market.add_role.return_value
+
+
+def test_add_deposit_bank_registers_deposit_bank(market_without_deposit_banks):
+    # Given
+    agent = Mock()
+    market = market_without_deposit_banks
+
+    # When
+    role = market.add_deposit_bank(agent)
+
+    # Then
+    assert market.deposit_banks == [role]
+
+
+class FakeDepositor(Mock):
+    pass
+
+
+@pytest.fixture
+def market_without_depositors(monkeypatch, market_before_setup):
+    # Given
+    monkeypatch.setattr("model.spaces.deposit_market.Depositor", FakeDepositor)
+    market = market_before_setup
+    market.add_role = Mock()
+    market.depositors = []
+    return market
+
+
+def test_add_depositor_add_appropriate_role(market_without_depositors):
+    # Given
+    agent = Mock()
+    market = market_without_depositors
+
+    # When
+    role = market.add_depositor(agent)
+
+    # Then
+    market.add_role.assert_called_with(FakeDepositor, agent, "depositor")
+    assert role == market.add_role.return_value
+
+
+def test_add_depositor_registers_depositor(market_without_depositors):
+    # Given
+    agent = Mock()
+    market = market_without_depositors
+
+    # When
+    role = market.add_depositor(agent)
+
+    # Then
+    assert market.depositors == [role]
+
+
+
+class FakeGuarantee(Mock):
+    pass
+
+
+@pytest.fixture
+def market_without_dep_guarantee(monkeypatch, market_before_setup):
+    # Given
+    monkeypatch.setattr("model.spaces.deposit_market.DepositGuarantee", FakeGuarantee)
+    market = market_before_setup
+    market.add_role = Mock()
+    market.deposit_guarantee = None
+    return market
+
+
+def test_add_deposit_guarantee_add_new_role(market_without_dep_guarantee):
+    # Given
+    agent = Mock()
+    market = market_without_dep_guarantee
+
+    # When
+    role = market.add_deposit_guarantee(agent)
+
+    # Then
+    market.add_role.assert_called_with(FakeGuarantee, agent, "deposit_guarantee")
+    assert role == market.add_role.return_value
+
+
+def test_add_deposit_guarantee_registers_role(market_without_dep_guarantee):
+    # Given
+    agent = Mock()
+    market = market_without_dep_guarantee
+
+    # When
+    role = market.add_deposit_guarantee(agent)
+
+    # Then
+    assert market.deposit_guarantee == role
 
 
 # ---------------------------------------------------
-# BEHAVIORAL TESTS
+# DEPOSIT MATCHING
 # ----------------------------------------------------
 
 
+def test_find_deposit_banks(market_before_setup, make_dlist):
+    # Given
+    deposit_bank = Mock()
+    market = market_before_setup
+    market.deposit_banks = make_dlist([deposit_bank])
+
+    # When
+    sample = market.find_deposit_banks()
+
+    # Then
+    assert sample == [deposit_bank]
+
+
 @pytest.fixture
-def market_with_deposits():
+def market_with_participants(market_before_setup):
     # Given
-    deposits = Graph()
-    model = Mock()
-    market = DepositMarket(model)
-    market.deposits = deposits
-    return market, deposits
+    depositor, deposit_bank = Mock(), Mock()
+    market = market_before_setup
+    market.graph.add_nodes_from([depositor, deposit_bank])
+    return market, depositor, deposit_bank
 
 
-def test_add_client_creates_deposits_graph_node(market_with_deposits):
+def test_link_depositor_creates_graph_edge(market_with_participants):
     # Given
-    client = Mock()
-    market, deposits = market_with_deposits
+    market, depositor, deposit_bank = market_with_participants
+    graph = market.graph
 
     # When
-    market.add_client(client)
+    market.link_depositor_to_bank(depositor, deposit_bank)
 
     # Then
-    assert deposits.has_node(client)
-    assert deposits.nodes[client]["role"] == "client"
+    assert graph.has_edge(depositor, deposit_bank)
 
 
-def test_add_bank_creates_deposits_graph_node(market_with_deposits):
+def test_link_depositor_with_initial_amount(market_with_participants):
     # Given
-    bank = Mock()
-    market, deposits = market_with_deposits
+    market, depositor, deposit_bank = market_with_participants
+    graph = market.graph
 
     # When
-    market.add_bank(bank)
+    market.link_depositor_to_bank(depositor, deposit_bank, amount=500)
 
     # Then
-    assert deposits.has_node(bank)
-    assert deposits.nodes[bank]["role"] == "bank"
+    assert graph[depositor][deposit_bank]["amount"] == 500
 
 
-def test_get_bank_deposits_returns_deposits_data(market_with_deposits):
+def test_link_depositor_updates_accounts(market_with_participants):
     # Given
-    bank, client, other = Mock(), Mock(), Mock()
-    market, deposits = market_with_deposits
-    deposits.add_edge(bank, client, amount=100, interests=5.0)
-    deposits.add_edge(other, client, amount=200, interests=5.0)
+    market, depositor, deposit_bank = market_with_participants
 
     # When
-    result = market.get_bank_deposits(bank)
+    market.link_depositor_to_bank(depositor, deposit_bank, amount=500)
 
     # Then
-    assert len(result) == 1
-    assert result[0]["client"] is client
-    assert result[0]["amount"] == 100
-    assert result[0]["interests"] == 5.0
+    depositor.account.debit_stock.assert_any_call("cash", 500)
+    depositor.account.credit_stock.assert_any_call("deposits", 500)
+    deposit_bank.account.credit_stock.assert_any_call("cash", 500)
+    deposit_bank.account.debit_stock.assert_any_call("deposits", 500)
 
 
-def test_get_client_deposits_returns_deposits_data(market_with_deposits):
+def test_link_depositor_registers_deposit_bank_refs(market_with_participants):
     # Given
-    bank, client, other = Mock(), Mock(), Mock()
-    market, deposits = market_with_deposits
-    deposits.add_edge(bank, client, amount=100, interests=5.0)
-    deposits.add_edge(bank, other, amount=200, interests=5.0)
+    market, depositor, deposit_bank = market_with_participants
 
     # When
-    result = market.get_client_deposits(client)
+    market.link_depositor_to_bank(depositor, deposit_bank)
 
     # Then
-    assert len(result) == 1
-    assert result[0]["bank"] is bank
-    assert result[0]["amount"] == 100
-    assert result[0]["interests"] == 5.0
+    assert depositor.deposit_bank == deposit_bank
+    assert depositor.bank_account == deposit_bank.account
 
 
-def test_get_banks(market_with_deposits):
+@pytest.fixture
+def market_with_depositor_amount(market_with_participants):
     # Given
-    bank, other = Mock(), Mock()
-    market, deposits = market_with_deposits
-    deposits.add_node(bank, role="bank")
-    deposits.add_node(other, role="client")
+    market, depositor, deposit_bank = market_with_participants
+    market.graph.add_edge(depositor, deposit_bank, amount=100)
+    depositor.deposit_bank = deposit_bank
+    depositor.bank_account = Mock()
+    return market, depositor, 100
+
+
+def test_unlink_depositor_remove_graph_edge(market_with_depositor_amount):
+    # Given
+    market, depositor, _ = market_with_depositor_amount
+    deposit_bank = depositor.deposit_bank
+    graph = market.graph
 
     # When
-    sample = market.get_banks()
+    market.unlink_depositor_with_bank(depositor)
 
     # Then
-    assert sample == [bank]
+    assert not graph.has_edge(depositor, deposit_bank)
 
 
-def test_get_defaulted_banks(market_with_deposits):
+def test_unlink_depositor_updates_accounts(market_with_depositor_amount):
     # Given
-    bank1 = Mock(defaulted=True)
-    bank2 = Mock(defaulted=False)
+    market, depositor, amount = market_with_depositor_amount
+    bank_account = depositor.bank_account
+
+    # When
+    market.unlink_depositor_with_bank(depositor)
+
+    # Then
+    depositor.account.credit_stock.assert_any_call("cash", amount)
+    depositor.account.debit_stock.assert_any_call("deposits", amount)
+    bank_account.debit_stock.assert_any_call("cash", amount)
+    bank_account.credit_stock.assert_any_call("deposits", amount)
+
+
+def test_unlink_depositor_change_bank_account_ref(market_with_depositor_amount):
+    # Given
+    market, depositor, _ = market_with_depositor_amount
+
+    # When
+    market.unlink_depositor_with_bank(depositor)
+
+    # Then
+    assert depositor.bank_account is None
+    assert depositor.deposit_bank is None
+
+
+# ---------------------------------------------------
+# MAKE / WITHDRAW DEPOSIT
+# ----------------------------------------------------
+
+
+def test_make_deposits_updates_accounts(market_with_depositor_amount):
+    # Given
+    market, depositor, _ = market_with_depositor_amount
+
+    # When
+    market.make_deposits(depositor, 500)
+
+    # Then
+    depositor.account.debit_stock.assert_any_call("cash", 500)
+    depositor.account.credit_stock.assert_any_call("deposits", 500)
+    depositor.bank_account.credit_stock.assert_any_call("cash", 500)
+    depositor.bank_account.debit_stock.assert_any_call("deposits", 500)
+
+
+def test_make_deposits_transfers_cash(market_with_depositor_amount):
+    # Given
+    market, depositor, amount = market_with_depositor_amount
+    deposit_bank = depositor.deposit_bank
+    graph = market.graph
+
+    # When
+    market.make_deposits(depositor, 500)
+
+    # Then
+    assert graph[depositor][deposit_bank]["amount"] == amount + 500
+
+
+def test_withdraw_deposits_updates_accounts(market_with_depositor_amount):
+    # Given
+    market, depositor, _ = market_with_depositor_amount
+
+    # When
+    market.withdraw_deposits(depositor, 500)
+
+    # Then
+    depositor.account.credit_stock.assert_any_call("cash", 500)
+    depositor.account.debit_stock.assert_any_call("deposits", 500)
+    depositor.bank_account.debit_stock.assert_any_call("cash", 500)
+    depositor.bank_account.credit_stock.assert_any_call("deposits", 500)
+
+
+def test_withdraw_deposits_transfers_cash(market_with_depositor_amount):
+    # Given
+    market, depositor, amount = market_with_depositor_amount
+    deposit_bank = depositor.deposit_bank
+    graph = market.graph
+
+    # When
+    market.withdraw_deposits(depositor, 500)
+
+    # Then
+    assert graph[depositor][deposit_bank]["amount"] == amount - 500
+
+
+# ---------------------------------------------------
+# DEPOSIT REPAYMENT / REIMBURSEMENT
+# ----------------------------------------------------
+
+
+def test_find_deposit_accounts(market_with_participants):
+    # Given
     other = Mock()
-    market, deposits = market_with_deposits
-    deposits.add_node(bank1, role="bank")
-    deposits.add_node(bank2, role="bank")
-    deposits.add_node(other, role="client")
+    market, depositor, deposit_bank = market_with_participants
+    market.graph.add_edge(deposit_bank, depositor, amount=100)
+    market.graph.add_edge(other, depositor, amount=200)
 
     # When
-    sample = market.get_defaulted_banks()
+    deposit_accounts = market.find_deposit_accounts(deposit_bank)
 
     # Then
-    assert sample == [bank1]
+    assert deposit_accounts == [{"depositor": depositor, "amount": 100}]
 
 
-@pytest.fixture
-def participants():
-    client = Mock(cash=0)
-    bank = Mock(reserves=0)
-    return client, bank
-
-
-@pytest.fixture
-def market_with_participants(participants):
+def test_find_defaulted_banks(market_before_setup, make_dlist):
     # Given
-    model = Mock()
-    deposits = Graph()
-    deposits.add_nodes_from(participants)
-    market = DepositMarket(model)
-    market.deposits = deposits
-    return market, *participants
-
-
-def test_open_account_creates_deposits(market_with_participants):
-    # Given
-    market, client, bank = market_with_participants
-    deposits = market.deposits
+    deposit_bank1 = Mock(defaulted=True)
+    deposit_bank2 = Mock(defaulted=False)
+    market = market_before_setup
+    market.deposit_banks = make_dlist([deposit_bank1, deposit_bank2])
 
     # When
-    market.open_account(client, bank)
+    sample = market.find_defaulted_banks()
 
     # Then
-    assert deposits.has_edge(client, bank)
+    assert sample == [deposit_bank1]
 
 
-def test_open_account_with_initial_amount(market_with_participants):
+def test_pay_interests_updates_accounts(market_with_depositor_amount):
     # Given
-    market, client, bank = market_with_participants
-    deposits = market.deposits
+    market, depositor, _ = market_with_depositor_amount
 
     # When
-    market.open_account(client, bank, amount=500)
+    market.pay_interests(depositor, 10.0)
 
     # Then
-    assert deposits[client][bank]["amount"] == 500
+    depositor.account.credit_stock.assert_any_call("deposits", 10.0)
+    depositor.account.credit_flow.assert_any_call("dep_interests", 10.0)
+    depositor.bank_account.debit_stock.assert_any_call("deposits", 10.0)
+    depositor.bank_account.debit_flow.assert_any_call("dep_interests", 10.0)
 
 
-def test_close_account_removes_deposits(market_with_participants):
+def test_pay_interests_updates_graph_edge(market_with_depositor_amount):
     # Given
-    market, client, bank = market_with_participants
-    deposits = market.deposits
-    deposits.add_edge(client, bank, amount=100)
+    market, depositor, amount = market_with_depositor_amount
+    deposit_bank = depositor.deposit_bank
+    graph = market.graph
 
     # When
-    market.close_account(client, bank)
+    market.pay_interests(depositor, 10.0)
 
     # Then
-    assert not deposits.has_edge(client, bank)
+    assert graph[depositor][deposit_bank]["amount"] == amount + 10.0
 
 
-def test_close_account_transfers_cash(market_with_participants):
+def test_reimburse_deposits_updates_accounts(market_with_depositor_amount):
     # Given
-    market, client, bank = market_with_participants
-    deposits = market.deposits
-    deposits.add_edge(client, bank, amount=100)
+    guarantee = Mock()
+    market, depositor, _ = market_with_depositor_amount
 
     # When
-    market.close_account(client, bank)
+    market.reimburse_deposits(guarantee, depositor, 50)
 
     # Then
-    assert client.cash == 100
-    assert bank.reserves == -100
-
-
-def test_close_account_return_deposit_amount(market_with_participants):
-    # Given
-    market, client, bank = market_with_participants
-    deposits = market.deposits
-    deposits.add_edge(client, bank, amount=200)
-
-    # When
-    amount = market.close_account(client, bank)
-
-    # Then
-    assert amount == 200
-
-
-def test_pay_interests_increases_deposits_amount(market_with_participants):
-    # Given
-    market, client, bank = market_with_participants
-    deposits = market.deposits
-    deposits.add_edge(client, bank, amount=200)
-
-    # When
-    market.pay_interests(client, bank, 10.0)
-
-    # Then
-    assert deposits[client][bank]["amount"] == 210.0
-
-
-def test_pay_interests_increases_deposits_interest(market_with_participants):
-    # Given
-    market, client, bank = market_with_participants
-    deposits = market.deposits
-    deposits.add_edge(client, bank, amount=200)
-
-    # When
-    market.pay_interests(client, bank, 10.0)
-
-    # Then
-    assert deposits[client][bank]["interests"] == 10.0
-
-
-def test_make_deposits_increases_deposits_amount(market_with_participants):
-    # Given
-    market, client, bank = market_with_participants
-    deposits = market.deposits
-    deposits.add_edge(client, bank, amount=200)
-
-    # When
-    market.make_deposits(client, bank, 500)
-
-    # Then
-    assert deposits[client][bank]["amount"] == 700
-
-
-def test_make_deposits_transfers_cash(market_with_participants):
-    # Given
-    market, client, bank = market_with_participants
-    client.cash = 500
-    deposits = market.deposits
-    deposits.add_edge(client, bank, amount=0)
-
-    # When
-    market.make_deposits(client, bank, 500)
-
-    # Then
-    assert client.cash == 0
-    assert bank.reserves == 500
-
-
-def test_reimburse_deposits_decreases_deposits_amount(market_with_participants):
-    # Given
-    market, client, bank = market_with_participants
-    govt = Mock(reserves=100)
-    deposits = market.deposits
-    deposits.add_edge(client, bank, amount=100, interests=10.0)
-
-    # When
-    market.reimburse_deposits(govt, client, bank)
-
-    # Then
-    assert deposits[client][bank]["amount"] == 0.0
-    assert deposits[client][bank]["interests"] == 10.0
-
-
-def test_reimburse_deposits_transfers_cash(market_with_participants):
-    # Given
-    market, client, bank = market_with_participants
-    govt = Mock(reserves=200)
-    deposits = market.deposits
-    deposits.add_edge(client, bank, amount=100, interests=10.0)
-
-    # When
-    market.reimburse_deposits(govt, client, bank)
-
-    # Then
-    assert client.cash == 100
-    assert govt.reserves == 100
+    depositor.account.credit_stock.assert_any_call("cash", 50)
+    depositor.account.debit_stock.assert_any_call("deposits", 50)
+    depositor.bank_account.credit_stock.assert_any_call("deposits", 50)
+    guarantee.account.debit_stock.assert_any_call("cash", 50)

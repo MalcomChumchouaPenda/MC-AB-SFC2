@@ -22,7 +22,7 @@ def account_before_setup():
     return account
 
 
-def test_has_agent_id_ref(account_before_setup):
+def test_has_agent_ref(account_before_setup):
     # Given
     account = account_before_setup
 
@@ -30,7 +30,7 @@ def test_has_agent_id_ref(account_before_setup):
     account.setup()
 
     # Then
-    assert account.agent_id is None
+    assert account.agent is None
 
 
 def test_has_stocks_dict(account_before_setup):
