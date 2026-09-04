@@ -106,3 +106,13 @@ class Country(EcoSpace):
             self.fund_company(company, founder, amount)
         self.union.place_bank(bank)
         self.deposit_market.add_bank(bank)
+
+    #
+    # Evolution
+    #
+    def update_state(self):
+        companies = self.companies
+        defaults = companies.select(companies.defaulted == True)
+        self.prob_failure = len(defaults) / max(1, len(companies))
+        self.inflation = self.good_market.calc_inflation()
+        self.gdp = self.good_market.calc_gdp()

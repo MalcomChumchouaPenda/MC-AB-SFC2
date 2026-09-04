@@ -397,10 +397,10 @@ def test_fund_company_updates_accounts(country_with_company_and_founder):
     country.fund_company(company, founder, 100)
 
     # Then
-    company.account.credit_stock("equities", 100)
-    company.account.credit_stock("cash", 100)
-    founder.account.debit_stock("equities", 100)
-    founder.account.debit_stock("cash", 100)
+    company.account.debit_stock.assert_any_call("equities", 100)
+    company.account.credit_stock.assert_any_call("cash", 100)
+    founder.account.credit_stock.assert_any_call("equities", 100)
+    founder.account.debit_stock.assert_any_call("cash", 100)
 
 
 def test_fund_company_adds_graph_edge(country_with_company_and_founder):
@@ -447,10 +447,10 @@ def test_pay_dividends_updates_accounts(country_with_company_and_founder):
     country.pay_dividends(company, founder, 10)
 
     # Then
-    company.account.debit_flow("dividends", 10)
-    company.account.debit_flow("cash", 10)
-    founder.account.credit_flow("dividends", 10)
-    founder.account.credit_flow("cash", 10)
+    company.account.debit_flow.assert_any_call("dividends", 10)
+    company.account.debit_stock.assert_any_call("cash", 10)
+    founder.account.credit_flow.assert_any_call("dividends", 10)
+    founder.account.credit_stock.assert_any_call("cash", 10)
 
 
 # ---------------------------------------------------
@@ -598,3 +598,56 @@ def test_create_bank_place_bank_in_union(country_before_creation, share):
 
     # Then
     country.union.place_bank.assert_called_with(bank)
+
+
+# ---------------------------------------------------
+# EVOLUTION TESTS
+# ----------------------------------------------------
+
+
+@pytest.fixture
+def country_before_update(country_before_setup, make_dlist):
+    # Given
+    country = country_before_setup
+    country.good_market = Mock()
+    country.gdp = 0
+    country.companies = make_dlist()
+    return country
+
+
+def test_update_state_updates_gdp(country_before_update):
+    # Given
+    country = country_before_update
+    country.good_market.calc_gdp.return_value = 100
+
+    # When
+    country.update_state()
+
+    # Then
+    assert country.gdp == 100
+
+
+def test_update_state_updates_inflation(country_before_update):
+    # Given
+    country = country_before_update
+    country.good_market.calc_inflation.return_value = 0.2
+
+    # When
+    country.update_state()
+
+    # Then
+    assert country.inflation == 0.2
+
+
+def test_update_state_updates_prob_failure(country_before_update):
+    # Given
+    defaults = [Mock(defaulted=True) for _ in range(5)]
+    others = [Mock(defaulted=False) for _ in range(5)]
+    country = country_before_update
+    country.companies.extend(defaults + others)
+
+    # When
+    country.update_state()
+
+    # Then
+    assert country.prob_failure == 0.5

@@ -117,7 +117,6 @@ def test_add_worker_registers_worker(market_without_workers):
     assert market.workers == [role]
 
 
-
 class FakeEmployer(Mock):
     pass
 
@@ -234,7 +233,7 @@ def test_update_state_updates_average_wage(market_before_update):
 
     # Then
     assert market.average_wage == pytest.approx(5.0)
-    
+
 
 def test_update_state_updates_unemployment_rate(market_before_update):
     # Given
@@ -247,4 +246,3 @@ def test_update_state_updates_unemployment_rate(market_before_update):
 
     # Then
     assert market.unemployment == pytest.approx(0.5)
-

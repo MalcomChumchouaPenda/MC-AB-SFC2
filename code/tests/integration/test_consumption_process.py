@@ -2,7 +2,7 @@ import pytest
 from unittest.mock import Mock
 from model.agents.household import Household
 from model.agents.firm import Firm
-from model.spaces.goods_market import GoodsMarket
+from model.spaces.good_market import GoodsMarket
 
 
 @pytest.fixture
@@ -36,7 +36,7 @@ def firm(model):
     return firm
 
 
-def test_consumer_buy_tradable_goods(model, household, firm):
+def test_household_buy_tradable_goods(model, household, firm):
     # Given
     market = GoodsMarket(model, tradable=True)
     market.average_price = 10
@@ -55,7 +55,7 @@ def test_consumer_buy_tradable_goods(model, household, firm):
     assert firm.inventories == pytest.approx(4)
 
 
-def test_consumer_buy_non_tradable_goods(model, household, firm):
+def test_household_buy_non_tradable_goods(model, household, firm):
     # Given
     market = GoodsMarket(model, tradable=False)
     market.average_price = 10

@@ -10,7 +10,7 @@ from model.spaces.bond_market import BondMarket
 from model.spaces.deposit_market import DepositMarket
 from model.spaces.credit_market import CreditMarket
 from model.spaces.labor_market import LaborMarket
-from model.spaces.goods_market import GoodsMarket
+from model.spaces.good_market import GoodsMarket
 
 
 @pytest.fixture

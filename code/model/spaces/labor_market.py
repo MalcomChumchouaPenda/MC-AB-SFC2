@@ -28,17 +28,15 @@ class LaborMarket(EcoSpace):
         employer.labor_demand -= quantity
         self.graph.add_edge(worker, employer, wage=wage, quantity=quantity)
 
-
-    def update_state(self): 
+    def update_state(self):
         self._update_average_wage()
         self._update_unemployment()
 
     def _update_average_wage(self):
-        employers = self.employers      
+        employers = self.employers
         self.average_wage = sum(employers.wage) / max(1, len(employers))
 
     def _update_unemployment(self):
         workers = self.workers
         unemployed = workers.select(workers.labor_supply == 1.0)
         self.unemployment = len(unemployed) / max(1, len(workers))
-

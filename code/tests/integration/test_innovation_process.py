@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import Mock
 from model.agents.firm import Firm
-from model.spaces.goods_market import GoodsMarket
+from model.spaces.good_market import GoodsMarket
 
 
 @pytest.fixture

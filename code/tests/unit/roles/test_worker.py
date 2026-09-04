@@ -61,7 +61,6 @@ def test_get_unemployment(worker_with_space):
     assert perceived == 0.12
 
 
-
 @pytest.fixture
 def worker_with_employers(worker_with_space):
     # Given
@@ -114,5 +113,3 @@ def test_accept_job_uses_hire_method(worker_with_space):
 
     # Then
     space.hire_worker.assert_called_with(worker, employer, 0.5)
-
-

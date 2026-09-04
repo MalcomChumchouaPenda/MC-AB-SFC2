@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import Mock
-from model.spaces.goods_market import GoodsMarket
+from model.spaces.good_market import GoodsMarket
 from model.agents.government import Government
 
 

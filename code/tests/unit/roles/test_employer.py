@@ -72,7 +72,6 @@ def test_get_unemployment(employer_with_space):
     assert perceived == 0.12
 
 
-
 def test_get_jobs(employer_with_space):
     # Given
     employer, space = employer_with_space
@@ -86,10 +85,9 @@ def test_get_jobs(employer_with_space):
     jobs = employer.get_jobs()
 
     # Then
-    assert jobs == [{"worker":worker1, "quantity":0.4, "wage":10}]
+    assert jobs == [{"worker": worker1, "quantity": 0.4, "wage": 10}]
 
 
 # ---------------------------------------------------
 # ACTION TESTS
 # ----------------------------------------------------
-
