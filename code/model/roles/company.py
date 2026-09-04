@@ -13,12 +13,10 @@ class Company(EcoRole):
     #
     # perceptions method
     #
+    
     def get_equity_shares(self):
-        return [
-            {"founder": founder, "share": data["amount"]}
-            for _, founder, data in self.space.graph.edges(self, data=True)
-        ]
-
+        return self.space.find_equity_shares(self)
+    
     def get_average_wage(self):
         return self.space.average_wage
 

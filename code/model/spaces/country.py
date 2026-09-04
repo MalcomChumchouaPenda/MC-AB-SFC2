@@ -57,8 +57,56 @@ class Country(EcoSpace):
         return role
 
     #
-    # Equity transactions
+    # Current indicators
     #
+
+    def get_bank_firm_ratios(self):
+        companies = self.space.companies
+        print(companies)
+        firm_sector = companies.select([c.sector[0] == "F" for c in companies])
+        bank_sector = companies.select(companies.sector == "B")
+        if len(firm_sector) == 0:
+            return 1.0, 1.0
+        ratio1 = len(bank_sector) / len(firm_sector)
+        ratio2 = sum(bank_sector.equity) / sum(firm_sector.equity)
+        return ratio1, ratio2
+    
+
+    def calc_bank_firm_number(self):
+        companies = self.companies
+        firm_sector = companies.select([c.sector[0] == "F" for c in companies])
+        if len(firm_sector) == 0:
+            return 1.0
+        bank_sector = companies.select(companies.sector == "B")
+        return len(bank_sector) / len(firm_sector)
+
+
+    def calc_bank_firm_equity(self):
+        companies = self.companies
+        firm_sector = companies.select([c.sector[0] == "F" for c in companies])
+        if len(firm_sector) == 0:
+            return 1.0
+        bank_sector = companies.select(companies.sector == "B")
+        return sum(bank_sector.equity) / sum(firm_sector.equity)
+    
+    def calc_sector_equity_range(self, sector):
+        equities = [c.equity for c in self.companies if c.sector == sector]
+        if len(equities) == 0:
+            return None
+        return min(equities), max(equities)
+
+    #
+    # Equity investment
+    #
+
+    def find_investors(self, initiator=None):
+        citizens = self.citizens
+        investors = citizens.select(citizens.resid_equity > 0)
+        if initiator in investors:
+            investors.remove(initiator)
+        return investors
+
+
     def fund_company(self, company, founder, amount):
         if self.graph.has_edge(company, founder):
             self.graph[company][founder]["share"] += amount
@@ -70,6 +118,16 @@ class Country(EcoSpace):
         founder.account.debit_stock("cash", amount)
         founder.resid_equity -= amount
 
+    #
+    # Dividends
+    #
+    
+    def find_equity_shares(self, company):
+        return [
+            {"founder": founder, **data}
+            for _, founder, data in self.graph.edges(company, data=True)
+        ]
+    
     def pay_dividends(self, company, founder, amount):
         company.account.debit_flow("dividends", amount)
         company.account.debit_stock("cash", amount)

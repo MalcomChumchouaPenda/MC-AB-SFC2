@@ -4,7 +4,7 @@ from unittest.mock import Mock
 from model.spaces.country import Country
 
 # ---------------------------------------------------
-# ARCHITECTURE TESTS
+# ARCHITECTURE
 # ----------------------------------------------------
 
 
@@ -25,7 +25,7 @@ def country_before_setup():
 
 
 # ---------------------------------------------------
-# ROLES SET/REF TESTS
+# ROLES 
 # ----------------------------------------------------
 
 
@@ -72,97 +72,6 @@ def test_has_companies_list(country_before_setup):
     # Then
     assert isinstance(country.companies, AgentDList)
 
-
-# ---------------------------------------------------
-# SPACES SET/REF TESTS
-# ----------------------------------------------------
-
-
-def test_has_monetary_union_ref(country_before_setup):
-    # Given
-    country = country_before_setup
-
-    # When
-    country.setup()
-
-    # Then
-    assert country.union is None
-
-
-def test_has_good_market_ref(country_before_setup):
-    # Given
-    country = country_before_setup
-
-    # When
-    country.setup()
-
-    # Then
-    assert country.good_market is None
-
-
-def test_has_labor_market_ref(country_before_setup):
-    # Given
-    country = country_before_setup
-
-    # When
-    country.setup()
-
-    # Then
-    assert country.labor_market is None
-
-
-def test_has_deposit_market_ref(country_before_setup):
-    # Given
-    country = country_before_setup
-
-    # When
-    country.setup()
-
-    # Then
-    assert country.deposit_market is None
-
-
-# ---------------------------------------------------
-# DYNAMIC STATE TESTS
-# ----------------------------------------------------
-
-
-def test_has_inflation_prop(country_before_setup):
-    # Given
-    country = country_before_setup
-
-    # When
-    country.setup()
-
-    # Then
-    assert country.inflation == 0.0
-
-
-def test_has_gdp_prop(country_before_setup):
-    # Given
-    country = country_before_setup
-
-    # When
-    country.setup()
-
-    # Then
-    assert country.gdp == 0
-
-
-def test_has_prob_failure_prop(country_before_setup):
-    # Given
-    country = country_before_setup
-
-    # When
-    country.setup()
-
-    # Then
-    assert country.prob_failure == 0.0
-
-
-# ---------------------------------------------------
-# ROLES MANAGEMENT TESTS
-# ----------------------------------------------------
 
 
 FakeAuthority1 = Mock()
@@ -256,9 +165,7 @@ def test_add_fiscal_authority_add_account(country_without_authorities):
     union.add_account.assert_called_with(govt)
 
 
-class FakeCitizen(Mock):
-    pass
-
+FakeCitizen = Mock()
 
 @pytest.fixture
 def country_without_citizens(monkeypatch, country_before_setup):
@@ -309,8 +216,8 @@ def test_add_citizen_add_account(country_without_citizens):
     union.add_account.assert_called_with(household)
 
 
-class FakeCompany(Mock):
-    pass
+
+FakeCompany = Mock()
 
 
 @pytest.fixture
@@ -375,8 +282,224 @@ def test_add_company_add_account(country_without_companies):
 
 
 # ---------------------------------------------------
-# EQUITY INVESTMENT AND DIVIDENDS
+# SUB OR ROOT SPACES
 # ----------------------------------------------------
+
+
+def test_has_monetary_union_ref(country_before_setup):
+    # Given
+    country = country_before_setup
+
+    # When
+    country.setup()
+
+    # Then
+    assert country.union is None
+
+
+def test_has_good_market_ref(country_before_setup):
+    # Given
+    country = country_before_setup
+
+    # When
+    country.setup()
+
+    # Then
+    assert country.good_market is None
+
+
+def test_has_labor_market_ref(country_before_setup):
+    # Given
+    country = country_before_setup
+
+    # When
+    country.setup()
+
+    # Then
+    assert country.labor_market is None
+
+
+def test_has_deposit_market_ref(country_before_setup):
+    # Given
+    country = country_before_setup
+
+    # When
+    country.setup()
+
+    # Then
+    assert country.deposit_market is None
+
+
+# ---------------------------------------------------
+# LAG INDICATORS
+# ----------------------------------------------------
+
+
+def test_has_inflation_prop(country_before_setup):
+    # Given
+    country = country_before_setup
+
+    # When
+    country.setup()
+
+    # Then
+    assert country.inflation == 0.0
+
+
+def test_has_gdp_prop(country_before_setup):
+    # Given
+    country = country_before_setup
+
+    # When
+    country.setup()
+
+    # Then
+    assert country.gdp == 0
+
+
+def test_has_prob_failure_prop(country_before_setup):
+    # Given
+    country = country_before_setup
+
+    # When
+    country.setup()
+
+    # Then
+    assert country.prob_failure == 0.0
+
+
+
+# ---------------------------------------------------
+# CURRENT INDICATORS
+# ----------------------------------------------------
+
+@pytest.fixture
+def country_with_companies(country_before_setup, make_dlist):
+    # Given
+    companies = make_dlist()
+    country = country_before_setup
+    country.companies = companies
+    return country, companies
+
+
+def test_calc_bank_firm_number(country_with_companies):
+    # Given
+    country, companies = country_with_companies
+    bank_sector = [Mock(sector="B") for _ in range(2)]
+    firm_sector = [Mock(sector="F") for _ in range(10)]
+    companies.extend(bank_sector + firm_sector)
+
+    # When
+    ratio = country.calc_bank_firm_number()
+
+    # Then
+    assert ratio == 0.2
+
+
+def test_calc_bank_firm_number_if_no_firms(country_with_companies):
+    # Given
+    country, companies = country_with_companies
+    bank_sector = [Mock(sector="B") for _ in range(2)]
+    companies.extend(bank_sector)
+
+    # When
+    ratio = country.calc_bank_firm_number()
+
+    # Then
+    assert ratio == 1.0
+
+
+def test_calc_bank_firm_equity(country_with_companies):
+    # Given
+    country, companies = country_with_companies
+    bank_sector = [Mock(sector="B", equity=100) for _ in range(2)]
+    firm_sector = [Mock(sector="F", equity=50) for _ in range(10)]
+    companies.extend(bank_sector + firm_sector)
+
+    # When
+    ratio = country.calc_bank_firm_equity()
+
+    # Then
+    assert ratio == 0.4
+
+
+def test_calc_bank_firm_equity_if_no_firms(country_with_companies):
+    # Given
+    country, companies = country_with_companies
+    bank_sector = [Mock(sector="B", equity=100) for _ in range(2)]
+    companies.extend(bank_sector)
+
+    # When
+    ratio = country.calc_bank_firm_equity()
+
+    # Then
+    assert ratio == 1.0
+
+
+def test_calc_sector_equity_range_for_any_sector(country_with_companies):
+    # Given
+    country, companies = country_with_companies
+    target_companies = [Mock(sector="X", equity=100 * i) for i in range(2, 5)]
+    other_companies = [Mock(sector="Y", equity=100 * i) for i in range(1, 6)]
+    companies.extend(target_companies + other_companies)
+
+    # When
+    range_ = country.calc_sector_equity_range("X")
+
+    # Then
+    assert range_ == (200, 400)
+
+
+def test_calc_sector_equity_range_if_empty_sector(country_with_companies):
+    # Given
+    country, companies = country_with_companies
+    companies.extend([Mock(sector="Y", equity=100)])
+
+    # When
+    range_ = country.calc_sector_equity_range("X")
+
+    # Then
+    assert range_ is None
+
+
+# ---------------------------------------------------
+# EQUITY INVESTMENT
+# ----------------------------------------------------
+
+
+@pytest.fixture
+def country_with_citizens(country_before_setup, make_dlist):
+    # Given
+    citizens = make_dlist([Mock(resid_equity=100) for _ in range(2)])
+    country = country_before_setup
+    country.citizens = citizens
+    return country, citizens
+
+
+def test_find_investors_with_positive_residual_equity(country_with_citizens):
+    # Given
+    country, citizens = country_with_citizens
+    citizens[0].resid_equity = 0
+    eligible = citizens[1]
+
+    # When
+    investors = country.find_investors()
+
+    # Then
+    assert investors == [eligible]
+
+
+def test_find_investors_excludes_initiator(country_with_citizens):
+    # Given
+    country, citizens = country_with_citizens
+    initiator = citizens[0]
+    eligible = citizens[1]
+
+    # When
+    investors = country.find_investors(initiator=initiator)
+
+    # Then
+    assert investors == [eligible]
 
 
 @pytest.fixture
@@ -439,6 +562,26 @@ def test_fund_company_reduces_resid_equity(country_with_company_and_founder):
     assert founder.resid_equity == 50
 
 
+
+# ---------------------------------------------------
+#  DIVIDENDS
+# ----------------------------------------------------
+
+
+def test_find_equity_shares(country_with_company_and_founder):
+    # Given
+    other = Mock()
+    country, company, founder = country_with_company_and_founder
+    country.graph.add_edge(company, founder, share=60)
+    country.graph.add_edge(other, founder, share=40)
+
+    # When
+    found = country.find_equity_shares(company)
+
+    # Assert
+    assert found == [{"founder": founder, "share": 60}]
+
+
 def test_pay_dividends_updates_accounts(country_with_company_and_founder):
     # Given
     country, company, founder = country_with_company_and_founder
@@ -454,7 +597,7 @@ def test_pay_dividends_updates_accounts(country_with_company_and_founder):
 
 
 # ---------------------------------------------------
-# FIRM CREATION TESTS
+# FIRM CREATION
 # ----------------------------------------------------
 
 
@@ -557,7 +700,7 @@ def test_create_firm_place_firm_in_union(country_before_creation, share, tradabl
 
 
 # ---------------------------------------------------
-# BANK CREATION TESTS
+# BANK CREATION
 # ----------------------------------------------------
 
 
@@ -601,7 +744,7 @@ def test_create_bank_place_bank_in_union(country_before_creation, share):
 
 
 # ---------------------------------------------------
-# EVOLUTION TESTS
+# EVOLUTION
 # ----------------------------------------------------
 
 

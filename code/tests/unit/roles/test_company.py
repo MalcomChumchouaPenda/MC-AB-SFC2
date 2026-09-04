@@ -1,6 +1,5 @@
 import pytest
 from unittest.mock import Mock
-from networkx import Graph
 from model.roles.company import Company
 
 # ---------------------------------------------------
@@ -58,7 +57,7 @@ def test_has_defaulted(company_before_setup):
 
 
 # ---------------------------------------------------
-# BEHAVIORAL TESTS
+#  PERCEPTIONS
 # ----------------------------------------------------
 
 
@@ -83,19 +82,21 @@ def test_get_average_wage(company_with_space):
     assert perceived == 15.0
 
 
-def test_get_equity_shares(company_with_space):
+def test_get_equity_shares_from_space(company_with_space):
     # Given
-    founder, graph = Mock(), Graph()
     company, space = company_with_space
-    graph.add_edge(company, founder, amount=60)
-    space.graph = graph
 
     # When
     found = company.get_equity_shares()
 
     # Assert
-    assert found == [{"founder": founder, "share": 60}]
+    space.find_equity_shares.assert_called_with(company)
+    assert found == space.find_equity_shares.return_value
 
+
+# ---------------------------------------------------
+# ACTIONS
+# ----------------------------------------------------
 
 def test_pay_dividends(company_with_space):
     # Given
