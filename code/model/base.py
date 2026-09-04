@@ -43,6 +43,22 @@ class EcoRole(Object):
         self.agent.bank_account = account
 
 
+    def debit_stock(self, name, amount):
+        self.agent.account.debit_stock(name, amount)
+
+    def credit_stock(self, name, amount):
+        self.agent.account.credit_stock(name, amount)
+
+    def debit_flow(self, name, amount):
+        self.agent.account.debit_flow(name, amount)
+
+    def credit_flow(self, name, amount):
+        self.agent.account.credit_flow(name, amount)
+
+    def clear_flows(self):
+        self.agent.account.clear_flows()
+
+
 class EcoSpace(Network):
     """
     Classe de base des espaces d'interaction.

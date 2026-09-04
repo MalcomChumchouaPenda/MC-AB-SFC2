@@ -100,3 +100,71 @@ def test_change_agent_deposit_bank_account(role_with_agent):
 
     # Then
     assert agent.bank_account is new_account
+
+# ---------------------------------------------------
+# ACCOUNTING TESTS
+# ----------------------------------------------------
+
+
+@pytest.fixture
+def role_with_account(role_before_setup):
+    # Given
+    account = Mock()
+    role = role_before_setup
+    role.agent = Mock(account=account)
+    return role, account
+
+
+def test_debit_stock_decrease_amount(role_with_account):
+    # Given
+    role, account = role_with_account
+
+    # When
+    role.debit_stock("cash", 100)
+
+    # Then
+    account.debit_stock.assert_called_with("cash", 100)
+
+
+def test_credit_stock_increase_amount(role_with_account):
+    # Given
+    role, account = role_with_account
+
+    # When
+    role.credit_stock("cash", 100)
+
+    # Then
+    account.credit_stock.assert_called_with("cash", 100)
+
+
+def test_debit_flow_decrease_amount(role_with_account):
+    # Given
+    role, account = role_with_account
+
+    # When
+    role.debit_flow("consumption", 100)
+
+    # Then
+    account.debit_flow.assert_called_with("consumption", 100)
+
+
+def test_credit_flow_increase_amount(role_with_account):
+    # Given
+    role, account = role_with_account
+
+    # When
+    role.credit_flow("consumption", 100)
+
+    # Then
+    account.credit_flow.assert_called_with("consumption", 100)
+
+
+def test_clear_flows_clear_all_keys(role_with_account):
+    # Given
+    role, account = role_with_account
+
+    # When
+    role.clear_flows()
+
+    # Then
+    account.clear_flows.assert_called_with()
