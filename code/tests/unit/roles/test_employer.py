@@ -75,17 +75,13 @@ def test_get_unemployment(employer_with_space):
 def test_get_jobs(employer_with_space):
     # Given
     employer, space = employer_with_space
-    worker1, worker2 = Mock(), Mock()
-    graph = Graph()
-    graph.add_nodes_from([worker1, worker2, employer])
-    graph.add_edge(worker1, employer, quantity=0.4, wage=10)
-    space.graph = graph
 
     # When
     jobs = employer.get_jobs()
 
     # Then
-    assert jobs == [{"worker": worker1, "quantity": 0.4, "wage": 10}]
+    space.find_jobs.assert_called_with(employer)
+    assert jobs == space.find_jobs.return_value
 
 
 # ---------------------------------------------------

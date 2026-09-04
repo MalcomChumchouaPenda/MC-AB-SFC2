@@ -40,6 +40,18 @@ def test_has_unit_labor_supply_prop(worker_before_setup):
 # ----------------------------------------------------
 
 
+def test_get_labor_sold(worker_before_setup):
+    # Given
+    worker = worker_before_setup
+    worker.labor_supply = 0.6
+
+    # When
+    result = worker.labor_sold
+
+    # Then
+    assert result == 0.4
+
+
 @pytest.fixture
 def worker_with_space(worker_before_setup):
     # Given
@@ -61,41 +73,16 @@ def test_get_unemployment(worker_with_space):
     assert perceived == 0.12
 
 
-@pytest.fixture
-def worker_with_employers(worker_with_space):
+def test_find_employers_uses_space_method(worker_with_space):
     # Given
-    employers = MagicMock()
-    employers.__len__.return_value = 1
-    employers.random.return_value = []
     worker, space = worker_with_space
-    space.employers = employers
-    return worker, employers
-
-
-def test_find_employers_get_random_founders(worker_with_employers):
-    # Given
-    expected = [Mock() for _ in range(10)]
-    worker, employers = worker_with_employers
-    employers.random.return_value = expected
 
     # When
     found = worker.find_employers(5)
 
     # Then
-    assert found == expected
-
-
-@pytest.mark.parametrize("psi, expected", [(5, 5), (15, 10)])
-def test_find_employers_with_psi_params(worker_with_employers, psi, expected):
-    # Given
-    worker, employers = worker_with_employers
-    employers.__len__.return_value = 10
-
-    # When
-    worker.find_employers(psi)
-
-    # Then
-    employers.random.assert_called_with(expected)
+    space.find_employers.assert_called_with(5)
+    assert found == space.find_employers.return_value
 
 
 # ---------------------------------------------------

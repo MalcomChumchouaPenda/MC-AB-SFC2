@@ -10,9 +10,10 @@ class Worker(EcoRole):
     #
     # perceptions method
     #
-    def get_labor_sold(self):
-        jobs = self.space.graph.edges(self, data=True)
-        return sum(data["quantity"] for *_, data in jobs)
+
+    @property
+    def labor_sold(self):
+        return 1.0 - self.labor_supply
 
     def get_unemployment(self):
         return self.space.unemployment
@@ -20,9 +21,9 @@ class Worker(EcoRole):
     #
     # actions method
     #
+    
     def find_employers(self, psi):
-        employers = self.space.employers
-        return employers.random(min(psi, len(employers)))
+        return self.space.find_employers(psi)
 
     def accept_job(self, employer, quantity):
         self.space.hire_worker(self, employer, quantity)

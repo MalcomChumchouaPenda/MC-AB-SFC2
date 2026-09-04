@@ -15,5 +15,5 @@ class Employer(EcoRole):
         return self.space.unemployment
 
     def get_jobs(self):
-        jobs = self.space.graph.edges(self, data=True)
-        return [dict(worker=worker, **data) for _, worker, data in jobs]
+        return self.space.find_jobs(self)
+    

@@ -22,12 +22,29 @@ class LaborMarket(EcoSpace):
         self.workers.append(role)
         return role
 
+    #
+    # labor matching
+    #    
+    def find_employers(self, psi):
+        employers = self.employers
+        return employers.random(min(psi, len(employers)))
+
     def hire_worker(self, worker, employer, quantity):
         wage = employer.wage
         worker.labor_supply -= quantity
         employer.labor_demand -= quantity
         self.graph.add_edge(worker, employer, wage=wage, quantity=quantity)
 
+    #
+    # wages payment
+    #
+    def find_jobs(self, employer):
+        jobs = self.graph.edges(employer, data=True)
+        return [dict(worker=worker, **data) for _, worker, data in jobs]
+
+    #
+    # evolution
+    #
     def update_state(self):
         self._update_average_wage()
         self._update_unemployment()
