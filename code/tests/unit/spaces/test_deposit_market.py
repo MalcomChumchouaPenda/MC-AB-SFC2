@@ -140,7 +140,6 @@ def test_add_depositor_registers_depositor(market_without_depositors):
     assert market.depositors == [role]
 
 
-
 class FakeGuarantee(Mock):
     pass
 

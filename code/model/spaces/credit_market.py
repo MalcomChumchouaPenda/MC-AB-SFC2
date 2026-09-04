@@ -1,54 +1,81 @@
-from agentpy.objects import Object
-from networkx import Graph
-from model.base import EcoSpace, EcoRole
+from agentpy import AgentDList
+from model.base import EcoSpace
+from model.roles.lender import Lender
+from model.roles.borrower import Borrower
+
+
 
 
 class CreditMarket(EcoSpace):
 
-    def add_borrower(self, firm):
-        return self.add_role(BorrowerRole, firm, "borrower")
+    def setup(self):
+        super().setup()
+        self.monetary_union = None
+        self.lenders = AgentDList(self.model)
+        self.borrowers = AgentDList(self.model)
 
-    def add_lender(self, bank):
-        return self.add_role(LenderRole, bank, "lender")
+    @property
+    def discount_rate(self):
+        return self.monetary_union.discount_rate
 
-    def search_lenders(self):
-        return [n for n in self.nodes if isinstance(n, LenderRole)]
+    #
+    # Roles management
+    #
+    def add_borrower(self, agent):
+        role = self.add_role(Borrower, agent, "borrower")
+        self.borrowers.append(role)
+        return role
+
+    def add_lender(self, agent):
+        role = self.add_role(Lender, agent, "lender")
+        self.lenders.append(role)
+        return role
+
+    #
+    # Loan matching
+    #
+    def find_lenders(self):
+        return list(self.lenders)
+
 
     def grant_loan(self, lender, borrower, amount, rate):
         borrower.loan_demand -= amount
-        borrower.increase_stock("loans", amount)
-        borrower.increase_stock("deposits", amount)
-        lender.increase_stock("loans", amount)
-        lender.increase_stock("deposits", amount)
+        borrower.account.debit_stock("loans",amount)
+        borrower.account.credit_stock("deposits", amount)
+        borrower.bank_account.debit_stock("deposits", amount)
+        borrower.bank_account.credit_stock("cash", amount)
+        lender.account.debit_stock("cash", amount)
+        lender.account.credit_stock("loans", amount)
         self.graph.add_edge(borrower, lender, amount=amount, rate=rate)
 
+    #
+    # Loan repayment
+    #
+    def find_loans(self, borrower):
+        return [
+            dict(lender=lender, **data)
+            for _, lender, data in self.graph.edges(borrower, data=True)
+        ]
+    
+    def repay_loan(self, borrower, lender, principal, interests):
+        total = principal + interests
+        borrower.account.credit_stock("loans", principal)
+        borrower.account.debit_flow("loan_interests", interests)
+        borrower.account.debit_stock("deposits", total)
+        borrower.bank_account.credit_stock("deposits", total)
+        borrower.bank_account.debit_stock("cash", total)
+        lender.account.credit_stock("cash", total)
+        lender.account.debit_stock("loans", principal)
+        lender.account.credit_flow("loans_interests", interests)
+        self.graph[borrower][lender]["amount"] -= principal
 
-class LenderRole(EcoRole):
+    #
+    # Cash advances
+    #
+    def request_advances(self, lender, amount):
+        self.monetary_union.request_advances(lender, amount)
 
-    def __init__(self, agent, space):
-        super().__init__(agent, space)
-        self.loan_applicants = []
-
-    def receive_request(self, applicant):
-        self.loan_applicants.append(applicant)
-
-    def grant_loan(self, borrower, amount, rate):
-        self.space.grant_loan(self, borrower, amount, rate)
+    def repay_advances(self, lender, principal, interests):
+        self.monetary_union.repay_advances(lender, principal, interests)
 
 
-class BorrowerRole(EcoRole):
-
-    def __init__(self, agent, space):
-        super().__init__(agent, space)
-        self.loan_demand = 0
-
-    @property
-    def target_leverage(self):
-        agent = self.agent
-        return agent.desired_loans / agent.equity
-
-    def search_lenders(self):
-        return self.space.search_lenders()
-
-    def request_loan(self, lender):
-        lender.receive_request(self)

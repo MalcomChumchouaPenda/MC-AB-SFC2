@@ -74,7 +74,7 @@ def test_withdraw_deposits_into_space(depositor_with_space):
 
     # Then
     space.withdraw_deposits.assert_called_with(depositor, 200)
-    
+
 
 def test_choose_bank_into_space(depositor_with_space):
     # Given
@@ -100,7 +100,7 @@ def test_choose_bank_with_initial_amount(depositor_with_space):
 
     # Then
     space.link_depositor_to_bank.assert_called_with(depositor, deposit_bank, 100)
-    
+
 
 def test_choose_bank_to_switch_bank(depositor_with_space):
     # Given
@@ -115,4 +115,3 @@ def test_choose_bank_to_switch_bank(depositor_with_space):
     # Then
     space.unlink_depositor_with_bank.assert_called_with(depositor)
     space.link_depositor_to_bank.assert_called_with(depositor, new_deposit_bank, 0)
-
