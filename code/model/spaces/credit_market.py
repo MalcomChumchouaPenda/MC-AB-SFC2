@@ -4,8 +4,6 @@ from model.roles.lender import Lender
 from model.roles.borrower import Borrower
 
 
-
-
 class CreditMarket(EcoSpace):
 
     def setup(self):
@@ -37,10 +35,9 @@ class CreditMarket(EcoSpace):
     def find_lenders(self):
         return list(self.lenders)
 
-
     def grant_loan(self, lender, borrower, amount, rate):
         borrower.loan_demand -= amount
-        borrower.account.debit_stock("loans",amount)
+        borrower.account.debit_stock("loans", amount)
         borrower.account.credit_stock("deposits", amount)
         borrower.bank_account.debit_stock("deposits", amount)
         borrower.bank_account.credit_stock("cash", amount)
@@ -56,7 +53,7 @@ class CreditMarket(EcoSpace):
             dict(lender=lender, **data)
             for _, lender, data in self.graph.edges(borrower, data=True)
         ]
-    
+
     def repay_loan(self, borrower, lender, principal, interests):
         total = principal + interests
         borrower.account.credit_stock("loans", principal)
@@ -77,5 +74,3 @@ class CreditMarket(EcoSpace):
 
     def repay_advances(self, lender, principal, interests):
         self.monetary_union.repay_advances(lender, principal, interests)
-
-

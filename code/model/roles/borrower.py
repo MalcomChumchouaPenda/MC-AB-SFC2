@@ -1,5 +1,3 @@
-
-
 from model.base import EcoRole
 
 

@@ -42,7 +42,6 @@ class EcoRole(Object):
     def bank_account(self, account):
         self.agent.bank_account = account
 
-
     def debit_stock(self, name, amount):
         self.agent.account.debit_stock(name, amount)
 

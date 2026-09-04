@@ -70,7 +70,6 @@ class Country(EcoSpace):
         ratio1 = len(bank_sector) / len(firm_sector)
         ratio2 = sum(bank_sector.equity) / sum(firm_sector.equity)
         return ratio1, ratio2
-    
 
     def calc_bank_firm_number(self):
         companies = self.companies
@@ -80,7 +79,6 @@ class Country(EcoSpace):
         bank_sector = companies.select(companies.sector == "B")
         return len(bank_sector) / len(firm_sector)
 
-
     def calc_bank_firm_equity(self):
         companies = self.companies
         firm_sector = companies.select([c.sector[0] == "F" for c in companies])
@@ -88,7 +86,7 @@ class Country(EcoSpace):
             return 1.0
         bank_sector = companies.select(companies.sector == "B")
         return sum(bank_sector.equity) / sum(firm_sector.equity)
-    
+
     def calc_sector_equity_range(self, sector):
         equities = [c.equity for c in self.companies if c.sector == sector]
         if len(equities) == 0:
@@ -106,7 +104,6 @@ class Country(EcoSpace):
             investors.remove(initiator)
         return investors
 
-
     def fund_company(self, company, founder, amount):
         if self.graph.has_edge(company, founder):
             self.graph[company][founder]["share"] += amount
@@ -121,13 +118,13 @@ class Country(EcoSpace):
     #
     # Dividends
     #
-    
+
     def find_equity_shares(self, company):
         return [
             {"founder": founder, **data}
             for _, founder, data in self.graph.edges(company, data=True)
         ]
-    
+
     def pay_dividends(self, company, founder, amount):
         company.account.debit_flow("dividends", amount)
         company.account.debit_stock("cash", amount)

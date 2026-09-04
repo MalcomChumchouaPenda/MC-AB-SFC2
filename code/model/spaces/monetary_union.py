@@ -64,7 +64,6 @@ class MonetaryUnion(EcoSpace):
         authority.account.debit_stock("cash", amount)
         borrower.account.debit_stock("advances", amount)
         borrower.account.credit_stock("cash", amount)
-        
 
     def repay_advances(self, borrower, principal, interests):
         total = principal + interests

@@ -83,7 +83,7 @@ def test_request_advances(lender_with_space):
     # Then
     space.request_advances.assert_called_with(lender, 100)
 
-    
+
 def test_repay_advances(lender_with_space):
     # Given
     lender, space = lender_with_space
@@ -93,4 +93,3 @@ def test_repay_advances(lender_with_space):
 
     # Then
     space.repay_advances.assert_called_with(lender, 100, 10)
-

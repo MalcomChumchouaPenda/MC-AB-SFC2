@@ -5,7 +5,6 @@ from model.roles.deposit_bank import DepositBank
 from model.roles.deposit_guarantee import DepositGuarantee
 
 
-
 class DepositMarket(EcoSpace):
 
     def setup(self):
@@ -29,16 +28,15 @@ class DepositMarket(EcoSpace):
         self.deposit_guarantee = role
         return role
 
-    
     def find_deposit_accounts(self, bank):
         return [
             dict(depositor=depositor, **data)
             for _, depositor, data in self.graph.edges(bank, data=True)
         ]
-    
+
     def find_deposit_banks(self):
         return list(self.deposit_banks)
-    
+
     def find_defaulted_banks(self):
         banks = self.deposit_banks
         return banks.select(banks.defaulted == True)
@@ -62,7 +60,6 @@ class DepositMarket(EcoSpace):
         depositor.bank_account = None
         depositor.deposit_bank = None
         self.graph.remove_edge(depositor, deposit_bank)
-
 
     def pay_interests(self, depositor, amount):
         depositor.account.credit_stock("deposits", amount)

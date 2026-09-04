@@ -24,7 +24,7 @@ class LaborMarket(EcoSpace):
 
     #
     # labor matching
-    #    
+    #
     def find_employers(self, psi):
         employers = self.employers
         return employers.random(min(psi, len(employers)))

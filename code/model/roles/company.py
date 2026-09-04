@@ -13,10 +13,10 @@ class Company(EcoRole):
     #
     # perceptions method
     #
-    
+
     def get_equity_shares(self):
         return self.space.find_equity_shares(self)
-    
+
     def get_average_wage(self):
         return self.space.average_wage
 

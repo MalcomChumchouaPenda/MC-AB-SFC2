@@ -22,4 +22,3 @@ class Depositor(EcoRole):
         if self.deposit_bank is not None:
             self.space.unlink_depositor_with_bank(self)
         self.space.link_depositor_to_bank(self, deposit_bank, amount)
-

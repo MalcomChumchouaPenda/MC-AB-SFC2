@@ -101,6 +101,7 @@ def test_change_agent_deposit_bank_account(role_with_agent):
     # Then
     assert agent.bank_account is new_account
 
+
 # ---------------------------------------------------
 # ACCOUNTING TESTS
 # ----------------------------------------------------

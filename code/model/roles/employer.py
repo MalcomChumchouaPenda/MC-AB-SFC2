@@ -16,4 +16,3 @@ class Employer(EcoRole):
 
     def get_jobs(self):
         return self.space.find_jobs(self)
-    

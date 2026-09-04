@@ -6,7 +6,7 @@ class DepositBank(EcoRole):
     def setup(self):
         super().setup()
         self.defaulted = False
-    
+
     #
     # Perceptions
     #

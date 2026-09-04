@@ -17,16 +17,16 @@ def test_is_eco_space():
 
 
 @pytest.fixture
-def market_without_setup():
+def market_before_setup():
     # Given
     model = Mock()
     market = LaborMarket(model)
     return market
 
 
-def test_has_average_wage_prop(market_without_setup):
+def test_has_average_wage_prop(market_before_setup):
     # Given
-    market = market_without_setup
+    market = market_before_setup
 
     # When
     market.setup()
@@ -35,9 +35,9 @@ def test_has_average_wage_prop(market_without_setup):
     assert market.average_wage == 0
 
 
-def test_has_unemployment_prop(market_without_setup):
+def test_has_unemployment_prop(market_before_setup):
     # Given
-    market = market_without_setup
+    market = market_before_setup
 
     # When
     market.setup()
@@ -51,9 +51,9 @@ def test_has_unemployment_prop(market_without_setup):
 # ----------------------------------------------------
 
 
-def test_has_workers_list(market_without_setup):
+def test_has_workers_list(market_before_setup):
     # Given
-    market = market_without_setup
+    market = market_before_setup
 
     # When
     market.setup()
@@ -62,9 +62,9 @@ def test_has_workers_list(market_without_setup):
     assert isinstance(market.workers, AgentDList)
 
 
-def test_has_employers_list(market_without_setup):
+def test_has_employers_list(market_before_setup):
     # Given
-    market = market_without_setup
+    market = market_before_setup
 
     # When
     market.setup()
@@ -78,10 +78,10 @@ class FakeWorker(Mock):
 
 
 @pytest.fixture
-def market_without_workers(monkeypatch, market_without_setup):
+def market_without_workers(monkeypatch, market_before_setup):
     # Given
     monkeypatch.setattr("model.spaces.labor_market.Worker", FakeWorker)
-    market = market_without_setup
+    market = market_before_setup
     market.add_role = Mock()
     market.workers = []
     return market
@@ -117,10 +117,10 @@ class FakeEmployer(Mock):
 
 
 @pytest.fixture
-def market_without_employers(monkeypatch, market_without_setup):
+def market_without_employers(monkeypatch, market_before_setup):
     # Given
     monkeypatch.setattr("model.spaces.labor_market.Employer", FakeEmployer)
-    market = market_without_setup
+    market = market_before_setup
     market.add_role = Mock()
     market.employers = []
     return market
@@ -157,12 +157,12 @@ def test_add_employer_registers_employer(market_without_employers):
 
 
 @pytest.fixture
-def market_with_employers(market_without_setup):
+def market_with_employers(market_before_setup):
     # Given
     employers = MagicMock()
     employers.__len__.return_value = 1
     employers.random.return_value = []
-    market = market_without_setup
+    market = market_before_setup
     market.employers = employers
     return market, employers
 
@@ -194,9 +194,9 @@ def test_find_employers_with_psi_params(market_with_employers, psi, expected):
 
 
 @pytest.fixture
-def market_with_employer(market_without_setup):
+def market_with_employer(market_before_setup):
     # Given
-    market = market_without_setup
+    market = market_before_setup
     employer = Mock(wage=20, labor_demand=10)
     return market, employer
 
@@ -250,10 +250,10 @@ def test_hire_worker_reduces_labor_supply(market_with_employer):
 
 
 @pytest.fixture
-def market_with_participants(market_without_setup):
+def market_with_participants(market_before_setup):
     # Given
     employer, worker = Mock(), Mock()
-    market = market_without_setup
+    market = market_before_setup
     market.graph.add_nodes_from([employer, worker])
     return market, employer, worker
 
@@ -278,9 +278,9 @@ def test_find_jobs(market_with_participants):
 
 
 @pytest.fixture
-def market_before_update(market_without_setup, make_dlist):
+def market_before_update(market_before_setup, make_dlist):
     # Given
-    market = market_without_setup
+    market = market_before_setup
     market.average_wage = 0
     market.unemployment = 0
     market.employers = make_dlist()

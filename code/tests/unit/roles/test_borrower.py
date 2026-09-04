@@ -45,7 +45,6 @@ def test_has_default_net_worth(borrower_before_setup):
     assert borrower.net_worth == 0.0
 
 
-
 # ---------------------------------------------------
 # PERCEPTIONS
 # ----------------------------------------------------

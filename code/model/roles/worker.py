@@ -21,7 +21,7 @@ class Worker(EcoRole):
     #
     # actions method
     #
-    
+
     def find_employers(self, psi):
         return self.space.find_employers(psi)
 
