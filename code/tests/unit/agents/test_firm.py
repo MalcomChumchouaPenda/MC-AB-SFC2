@@ -681,7 +681,7 @@ def test_request_loan_and_set_loan_demand(borrowing_firm):
 
 
 # ---------------------------------------------------
-# PROFITS, TAXES AND DIVIDENDS TESTS
+# PROFITS, TAXES AND DIVIDENDS COMPUTAION
 # ----------------------------------------------------
 
 
@@ -773,6 +773,7 @@ def test_compute_profit_distribution(firm_before_setup):
     firm.calc_profit = Mock(return_value=100)
     firm.calc_taxes = Mock(return_value=20)
     firm.calc_dividends = Mock(return_value=30)
+    firm.update_production_history = Mock()
 
     # When
     firm.compute_profit_distribution()
@@ -782,6 +783,28 @@ def test_compute_profit_distribution(firm_before_setup):
     assert firm.net_cash_flow == 90
     assert firm.taxes_payable == 20
     assert firm.dividends_payable == 30
+
+
+# ---------------------------------------------------
+# NET WORTH AND STATS UPDATES
+# ----------------------------------------------------
+
+
+def test_update_production_history(firm_with_roles_and_account):
+    # Given
+    role = Mock(output=100, sales=100, inventories=10)
+    firm, roles, _ = firm_with_roles_and_account
+    firm.expected_sales = 120
+    roles["producer"] = role
+
+    # When
+    firm.update_production_history()
+
+    # Then
+    assert firm.prev_expected_sales == 120
+    assert firm.prev_output == 100
+    assert firm.prev_sales == 100
+    assert firm.prev_inventories == 10
 
 
 def test_update_net_worth(firm_with_roles_and_account):
@@ -800,6 +823,11 @@ def test_update_net_worth(firm_with_roles_and_account):
     # Then
     role.update_equity_holdings.assert_called_once_with()
     assert firm.net_worth == pytest.approx(1200)
+
+
+# ---------------------------------------------------
+# TAXES AND DIVIDENDS PAYMENTS
+# ----------------------------------------------------
 
 
 def test_pay_taxes(firm_as_tax_payer):
@@ -858,7 +886,7 @@ def test_pay_no_dividends(firm_with_roles_and_account):
 
 
 # ---------------------------------------------------
-# ENDOGENEOUS EXIT TESTS
+# ENDOGENEOUS EXIT
 # ----------------------------------------------------
 
 
@@ -894,39 +922,3 @@ def test_does_not_exit_when_not_bankrupt(firm_before_exit):
 
     # Then
     role.close_firm.assert_not_called()
-
-
-# ---------------------------------------------------
-# HISTORIC DATA
-# ----------------------------------------------------
-
-
-@pytest.fixture
-def firm_with_history(firm_with_roles_and_account):
-    # Given
-    role = Mock()
-    role.output = 100
-    role.sales = 100
-    role.inventories = 10
-    firm, roles, _ = firm_with_roles_and_account
-    firm.prev_expected_sales = 100
-    firm.prev_output = 50
-    firm.prev_sales = 50
-    firm.prev_inventories = 20
-    firm.expected_sales = 120
-    roles["producer"] = role
-    return firm
-
-
-def test_update_history_overwrites_previous_values(firm_with_history):
-    # Given
-    firm = firm_with_history
-
-    # When
-    firm.update_history()
-
-    # Then
-    assert firm.prev_expected_sales == 120
-    assert firm.prev_output == 100
-    assert firm.prev_sales == 100
-    assert firm.prev_inventories == 10

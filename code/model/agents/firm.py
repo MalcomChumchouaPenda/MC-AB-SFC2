@@ -13,7 +13,6 @@ class Firm(EcoAgent):
         self.rd = 0
 
         # indicators
-        self.productivity = 0.0
         self.net_cash_flow = 0.0
         self.net_worth = 0.0
 
@@ -210,7 +209,7 @@ class Firm(EcoAgent):
 
     # History
 
-    def update_history(self):
+    def update_production_history(self):
         role = self.roles["producer"]
         self.prev_sales = role.sales
         self.prev_expected_sales = self.expected_sales
