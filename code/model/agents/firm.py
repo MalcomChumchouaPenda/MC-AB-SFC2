@@ -208,7 +208,7 @@ class Firm(EcoAgent):
     def update_net_worth(self):
         payable = self.taxes_payable + self.dividends_payable
         self.net_worth += self.net_cash_flow - payable
-        self.roles["equity_issuer"].update_equity_holdings()
+        self.roles["company"].update_equity_holdings()
         return self.net_worth
 
     def pay_taxes(self):
@@ -223,12 +223,12 @@ class Firm(EcoAgent):
 
     def pay_dividends(self):
         if self.dividends_payable > 0:
-            role = self.roles["equity_issuer"]
+            role = self.roles["company"]
             role.distribute_dividends(self.dividends_payable)
             self.dividends_payable = 0
 
     def exit(self):
-        role = self.roles["equity_issuer"]
+        role = self.roles["company"]
         if self.net_worth < self.wage_offer:
             role.close_firm(self)
 

@@ -97,8 +97,8 @@ def test_household_creates_new_firm(country, founders, govt):
     # assert founder1.cash == 100
     # assert founder2.equity == 200
     # assert founder2.cash == 200
-    # assert graph.has_edge(holder1, firms[0].roles["equity_issuer"])
-    # assert graph.has_edge(holder2, firms[0].roles["equity_issuer"])
+    # assert graph.has_edge(holder1, firms[0].roles["company"])
+    # assert graph.has_edge(holder2, firms[0].roles["company"])
 
 
 def test_household_creates_no_firm(country, founders, govt):
@@ -142,8 +142,8 @@ def test_household_creates_new_bank(country, founders, govt):
     # assert founder1.cash == 100
     # assert founder2.equity == 200
     # assert founder2.cash == 200
-    # assert graph.has_edge(holder1, banks[0].roles["equity_issuer"])
-    # assert graph.has_edge(holder2, banks[0].roles["equity_issuer"])
+    # assert graph.has_edge(holder1, banks[0].roles["company"])
+    # assert graph.has_edge(holder2, banks[0].roles["company"])
 
 
 def test_household_creates_no_bank(country, founders, govt):

@@ -17,23 +17,35 @@ def test_is_eco_agent():
 
 
 @pytest.fixture
-def firm():
+def firm_before_setup():
     # Given
     model = Mock()
     firm = Firm(model)
     return firm
 
 
-def test_has_default_stocks(firm):
-    # Assert
+def test_has_default_stocks(firm_before_setup):
+    # Given
+    firm = firm_before_setup
+
+    # When
+    firm.setup()
+
+    # Then
     assert firm.cash == 0
     assert firm.inventories == 0
     assert firm.loans == 0
     assert firm.equity == 0
 
 
-def test_has_default_flows(firm):
-    # Assert
+def test_has_default_flows(firm_before_setup):
+    # Given
+    firm = firm_before_setup
+
+    # When
+    firm.setup()
+
+    # Then
     assert firm.sales == 0
     assert firm.wage_bill == 0
     assert firm.loan_interest == 0
@@ -42,8 +54,14 @@ def test_has_default_flows(firm):
     assert firm.dividends == 0
 
 
-def test_has_default_choices(firm):
-    # Assert
+def test_has_default_choices(firm_before_setup):
+    # Given
+    firm = firm_before_setup
+
+    # When
+    firm.setup()
+
+    # Then
     assert firm.price == 0
     assert firm.wage_offer == 0
     assert firm.expected_sales == 0
@@ -55,8 +73,14 @@ def test_has_default_choices(firm):
     assert firm.dividends_payable == 0
 
 
-def test_has_default_indicators(firm):
-    # Assert
+def test_has_default_indicators(firm_before_setup):
+    # Given
+    firm = firm_before_setup
+
+    # When
+    firm.setup()
+
+    # Then
     assert firm.country is None
     assert firm.position == 0.0
     assert firm.productivity == 0.0
@@ -70,13 +94,30 @@ def test_has_default_indicators(firm):
     assert firm.prev_desired_labor == 0
 
 
+@pytest.fixture
+def firm_with_roles_and_account(firm_before_setup):
+    # Given
+    roles = {}
+    account = Mock()
+    firm = firm_before_setup
+    firm.account = account
+    firm.roles = roles
+    return firm, roles, account
+
+
 # ---------------------------------------------------
 # DERIVED STATE TESTS
 # ----------------------------------------------------
 
 
-def test_expose_deposits_total(firm):
+def test_expose_deposits_total(firm_before_setup):
     # Given
+    firm = firm_before_setup
+
+    # When
+    firm.setup()
+
+    # Then
     deposits = [{"bank": object(), "amount": 500}]
     deposit_market = Mock()
     deposit_market.get_client_deposits.return_value = deposits
@@ -86,8 +127,14 @@ def test_expose_deposits_total(firm):
     assert firm.deposits == 500
 
 
-def test_expose_deposit_interests_total(firm):
+def test_expose_deposit_interests_total(firm_before_setup):
     # Given
+    firm = firm_before_setup
+
+    # When
+    firm.setup()
+
+    # Then
     deposits = [{"bank": object(), "interests": 50.0}]
     deposit_market = Mock()
     deposit_market.get_client_deposits.return_value = deposits
@@ -102,8 +149,9 @@ def test_expose_deposit_interests_total(firm):
 # ----------------------------------------------------
 
 
-def test_calc_desired_output(firm):
+def test_calc_desired_output(firm_before_setup):
     # Given
+    firm = firm_before_setup
     firm.expected_sales = 100
     firm.inventories = 20
     firm.p.theta = 0.20
@@ -116,8 +164,9 @@ def test_calc_desired_output(firm):
     assert firm.desired_output == 100
 
 
-def test_calc_desired_output_decreases_with_inventories(firm):
+def test_calc_desired_output_decreases_with_inventories(firm_before_setup):
     # Given
+    firm = firm_before_setup
     firm.expected_sales = 100
     firm.inventories = 50
     firm.p.theta = 0.20
@@ -129,8 +178,9 @@ def test_calc_desired_output_decreases_with_inventories(firm):
     assert firm.desired_output == 70
 
 
-def test_calc_labor_demand(firm):
+def test_calc_labor_demand(firm_before_setup):
     # Given
+    firm = firm_before_setup
     firm.desired_output = 100
     firm.productivity = 2
 
@@ -142,8 +192,9 @@ def test_calc_labor_demand(firm):
     assert firm.desired_labor == 50
 
 
-def test_calc_desired_output_cannot_be_negative(firm):
+def test_calc_desired_output_cannot_be_negative(firm_before_setup):
     # Given
+    firm = firm_before_setup
     firm.expected_sales = 50
     firm.inventories = 100
     firm.p.theta = 0.10
@@ -155,8 +206,9 @@ def test_calc_desired_output_cannot_be_negative(firm):
     assert firm.desired_output == 0
 
 
-def test_plan_production_by_two_steps(firm):
+def test_plan_production_by_two_steps(firm_before_setup):
     # Given
+    firm = firm_before_setup
     firm.calc_desired_output = Mock(side_effect=setattr(firm, "yD", 10))
     firm.calc_labor_demand = Mock(side_effect=setattr(firm, "yD", firm.yD + 10))
 
@@ -173,10 +225,9 @@ def test_plan_production_by_two_steps(firm):
 
 
 @pytest.fixture
-def pricing_firm():
-    model = Mock()
-    model.p.delta = 0.1
-    firm = Firm(model)
+def pricing_firm(firm_before_setup):
+    firm = firm_before_setup
+    firm.p.delta = 0.1
     firm.wage_bill = 10
     firm.productivity = 2
     firm.expected_sales = 100
@@ -264,15 +315,14 @@ def test_price_cannot_be_below_unit_cost(pricing_firm):
 # ----------------------------------------------------
 
 
-def test_calc_revision_probability():
+def test_calc_revision_probability(firm_with_roles_and_account):
     # Given
-    model = Mock()
-    model.p.upsilon = 1.0
-    model.p.upsilon_f = 0.9
-    employer_role = Mock()
-    employer_role.get_unemployment_rate.return_value = 0.1
-    firm = Firm(model)
-    firm.roles["employer"] = employer_role
+    role = Mock()
+    role.get_unemployment_rate.return_value = 0.1
+    firm, roles, _ = firm_with_roles_and_account
+    firm.p.upsilon = 1.0
+    firm.p.upsilon_f = 0.9
+    roles["employer"] = role
 
     # When
     result = firm.calc_revision_probability()
@@ -282,11 +332,10 @@ def test_calc_revision_probability():
 
 
 @pytest.fixture
-def hiring_firm():
+def hiring_firm(firm_before_setup):
     # Given
-    model = Mock()
-    model.p.delta = 0.9
-    firm = Firm(model)
+    firm = firm_before_setup
+    firm.p.delta = 0.9
     firm.wage_offer = 10.0
     firm.calc_revision_probability = Mock(return_value=0)
     return firm
@@ -399,11 +448,10 @@ def test_can_choose_to_not_decreases_wage(hiring_firm):
 # ----------------------------------------------------
 
 
-def test_calc_desired_rd():
+def test_calc_desired_rd(firm_before_setup):
     # Given
-    model = Mock()
-    model.p.gamma = 0.1
-    firm = Firm(model)
+    firm = firm_before_setup
+    firm.p.gamma = 0.1
     firm.wage_offer = 10
     firm.desired_labor = 50
 
@@ -416,10 +464,9 @@ def test_calc_desired_rd():
     assert firm.desired_rd == 50
 
 
-def test_execute_rd_without_constraints():
+def test_execute_rd_without_constraints(firm_before_setup):
     # Given
-    model = Mock()
-    firm = Firm(model)
+    firm = firm_before_setup
     firm.desired_rd = 100
     firm.desired_labor = 50
     firm.labor = 50
@@ -433,10 +480,9 @@ def test_execute_rd_without_constraints():
     assert firm.rd == 100
 
 
-def test_execute_rd_with_labor_constraint():
+def test_execute_rd_with_labor_constraint(firm_before_setup):
     # Given
-    model = Mock()
-    firm = Firm(model)
+    firm = firm_before_setup
     firm.desired_rd = 100
     firm.desired_labor = 100
     firm.labor = 80
@@ -450,10 +496,9 @@ def test_execute_rd_with_labor_constraint():
     assert firm.rd == 0
 
 
-def test_execute_rd_with_financial_constraint():
+def test_execute_rd_with_financial_constraint(firm_before_setup):
     # Given
-    model = Mock()
-    firm = Firm(model)
+    firm = firm_before_setup
     firm.desired_rd = 100
     firm.desired_labor = 50
     firm.labor = 50
@@ -468,12 +513,12 @@ def test_execute_rd_with_financial_constraint():
 
 
 @pytest.fixture
-def firm_with_rd_project():
-    model = Mock()
-    model.p.nu = 0.5
-    firm = Firm(model)
+def firm_with_rd_project(firm_with_roles_and_account):
+    # Given
+    firm, roles, _ = firm_with_roles_and_account
+    firm.p.nu = 0.5
     firm.rd = 100
-    firm.roles["producer"] = Mock()
+    roles["producer"] = Mock()
     return firm
 
 
@@ -481,9 +526,9 @@ def test_calc_rd_success_probability_tradable(firm_with_rd_project):
     # Given
     firm = firm_with_rd_project
     firm.tradable = True
-    producer_role = firm.roles["producer"]
-    producer_role.get_average_price.return_value = 20
-    producer_role.get_average_productivity.return_value = 10
+    role = firm.roles["producer"]
+    role.get_average_price.return_value = 20
+    role.get_average_productivity.return_value = 10
 
     # When
     probability = firm.calc_rd_success_probability()
@@ -497,9 +542,9 @@ def test_calc_rd_success_probability_non_tradable(firm_with_rd_project):
     # Given
     firm = firm_with_rd_project
     firm.tradable = False
-    producer_role = firm.roles["producer"]
-    producer_role.get_average_price.return_value = 15
-    producer_role.get_average_productivity.return_value = 20
+    role = firm.roles["producer"]
+    role.get_average_price.return_value = 15
+    role.get_average_productivity.return_value = 20
 
     # When
     probability = firm.calc_rd_success_probability()
@@ -510,14 +555,13 @@ def test_calc_rd_success_probability_non_tradable(firm_with_rd_project):
 
 
 @pytest.fixture
-def innovating_firm():
-    model = Mock()
-    model.p.delta = 0.2
-    firm = Firm(model)
+def innovating_firm(firm_with_roles_and_account):
+    firm, roles, _ = firm_with_roles_and_account
+    firm.p.delta = 0.2
     firm.calc_desired_rd = Mock(side_effect=setattr(firm, "desired_rd", 100))
     firm.execute_rd = Mock(side_effect=setattr(firm, "rd", 100))
     firm.calc_rd_success_probability = Mock(return_value=0.6)
-    firm.roles["producer"] = Mock()
+    roles["producer"] = Mock()
     return firm
 
 
@@ -528,8 +572,8 @@ def test_update_productivity_with_multi_steps(innovating_firm):
     random = firm.model.nprandom
     random.choice.return_value = 1
     random.uniform.return_value = 0.05
-    producer_role = firm.roles["producer"]
-    producer_role.get_average_productivity.return_value = 10
+    role = firm.roles["producer"]
+    role.get_average_productivity.return_value = 10
 
     # When
     firm.update_productivity()
@@ -547,8 +591,8 @@ def test_update_productivity_without_success(innovating_firm):
     firm.productivity = 10
     random = firm.model.nprandom
     random.choice.return_value = 0
-    producer_role = firm.roles["producer"]
-    producer_role.get_average_productivity.return_value = 10
+    role = firm.roles["producer"]
+    role.get_average_productivity.return_value = 10
 
     # When
     firm.update_productivity()
@@ -564,8 +608,8 @@ def test_update_productivity_by_innovation(innovating_firm):
     random = firm.model.nprandom
     random.choice.return_value = 1
     random.uniform = lambda a, b: b
-    producer_role = firm.roles["producer"]
-    producer_role.get_average_productivity.return_value = 10
+    role = firm.roles["producer"]
+    role.get_average_productivity.return_value = 10
 
     # When
     firm.update_productivity()
@@ -581,8 +625,8 @@ def test_update_productivity_by_imitation(innovating_firm):
     random = firm.model.nprandom
     random.choice.return_value = 1
     random.uniform = lambda a, b: b
-    producer_role = firm.roles["producer"]
-    producer_role.get_average_productivity.return_value = 20
+    role = firm.roles["producer"]
+    role.get_average_productivity.return_value = 20
 
     # When
     firm.update_productivity()
@@ -605,15 +649,14 @@ def mock_deposits(monkeypatch):
 
 
 @pytest.fixture
-def borrowing_firm(mock_deposits):
+def borrowing_firm(mock_deposits, firm_with_roles_and_account):
     # Given
-    model = Mock()
-    firm = Firm(model)
+    firm, roles, _ = firm_with_roles_and_account
     firm.wage_offer = 10
     firm.desired_labor = 10
     firm.desired_rd = 50
     firm.mock_deposits = mock_deposits
-    firm.roles["borrower"] = Mock()
+    roles["borrower"] = Mock()
     return firm
 
 
@@ -677,12 +720,11 @@ def test_request_loan_and_set_loan_demand(borrowing_firm):
 
 
 @pytest.fixture
-def firm_with_dep_interests(monkeypatch):
+def firm_with_dep_interests(monkeypatch, firm_before_setup):
     # Given
     mock_interests = PropertyMock()
     monkeypatch.setattr(Firm, "dep_interests", mock_interests)
-    model = Mock()
-    firm = Firm(model)
+    firm = firm_before_setup
     return firm, mock_interests
 
 
@@ -703,8 +745,9 @@ def test_calc_net_cash_flow(firm_with_dep_interests, sales, expected):
     assert net_cash_flow == expected
 
 
-def test_calc_profit(firm):
+def test_calc_profit(firm_before_setup):
     # Given
+    firm = firm_before_setup
     firm.net_cash_flow = 200
     firm.inventories = 60
     firm.prev_inventories = 50
@@ -753,8 +796,9 @@ def test_calc_taxes(firm_with_govt, taxable, expected):
 
 
 @pytest.mark.parametrize("taxable, taxes, expected", [(100, 20, 40), (-100, 0, 0)])
-def test_calc_dividends(firm, taxable, taxes, expected):
+def test_calc_dividends(firm_before_setup, taxable, taxes, expected):
     # Given
+    firm = firm_before_setup
     firm.net_cash_flow = taxable
     firm.taxes_payable = taxes
     firm.p.rho = 0.5
@@ -766,8 +810,9 @@ def test_calc_dividends(firm, taxable, taxes, expected):
     assert dividends == pytest.approx(expected)
 
 
-def test_compute_profit_distribution(firm):
+def test_compute_profit_distribution(firm_before_setup):
     # Given
+    firm = firm_before_setup
     firm.calc_net_cash_flow = Mock(return_value=90)
     firm.calc_profit = Mock(return_value=100)
     firm.calc_taxes = Mock(return_value=20)
@@ -783,20 +828,21 @@ def test_compute_profit_distribution(firm):
     assert firm.dividends_payable == 30
 
 
-def test_update_net_worth(firm):
+def test_update_net_worth(firm_with_roles_and_account):
     # Given
-    issuer = Mock()
+    role = Mock()
+    firm, roles, _  = firm_with_roles_and_account
     firm.net_worth = 1000
     firm.net_cash_flow = 500
     firm.taxes_payable = 100
     firm.dividends_payable = 200
-    firm.roles["equity_issuer"] = issuer
+    roles["company"] = role
 
     # When
     firm.update_net_worth()
 
     # Then
-    issuer.update_equity_holdings.assert_called_once_with()
+    role.update_equity_holdings.assert_called_once_with()
     assert firm.net_worth == pytest.approx(1200)
 
 
@@ -832,31 +878,33 @@ def test_pay_no_taxes(firm_with_govt):
     assert govt.reserves == 0
 
 
-def test_pay_dividends(firm):
+def test_pay_dividends(firm_with_roles_and_account):
     # Given
-    issuer = Mock()
+    role = Mock()
+    firm, roles, _ = firm_with_roles_and_account
     firm.dividends_payable = 200
-    firm.roles["equity_issuer"] = issuer
+    roles["company"] = role
 
     # When
     firm.pay_dividends()
 
     # Then
-    issuer.distribute_dividends.assert_called_once_with(200)
+    role.distribute_dividends.assert_called_once_with(200)
     assert firm.dividends_payable == 0
 
 
-def test_pay_no_dividends(firm):
+def test_pay_no_dividends(firm_with_roles_and_account):
     # Given
-    issuer = Mock()
+    role = Mock()
+    firm, roles, _ = firm_with_roles_and_account
     firm.dividends_payable = 0
-    firm.roles["equity_issuer"] = issuer
+    roles["company"] = role
 
     # When
     firm.pay_dividends()
 
     # Then
-    issuer.distribute_dividends.assert_not_called()
+    role.distribute_dividends.assert_not_called()
 
 
 # ---------------------------------------------------
@@ -865,11 +913,10 @@ def test_pay_no_dividends(firm):
 
 
 @pytest.fixture
-def firm_before_exit():
-    model = Mock()
-    firm = Firm(model)
-    firm.roles = {"equity_issuer": Mock()}
+def firm_before_exit(firm_with_roles_and_account):
+    firm, roles,  _ = firm_with_roles_and_account
     firm.wage_offer = 100
+    roles["company"] = Mock()
     return firm
 
 
@@ -877,26 +924,26 @@ def test_exit_when_bankrupt(firm_before_exit):
     # Given
     firm = firm_before_exit
     firm.net_worth = 90
-    issuer = firm.roles["equity_issuer"]
+    role = firm.roles["company"]
 
     # When
     firm.exit()
 
     # Then
-    issuer.close_firm.assert_called_once_with(firm)
+    role.close_firm.assert_called_once_with(firm)
 
 
 def test_does_not_exit_when_not_bankrupt(firm_before_exit):
     # Given
     firm = firm_before_exit
     firm.net_worth = 150
-    issuer = firm.roles["equity_issuer"]
+    role = firm.roles["company"]
 
     # When
     firm.exit()
 
     # Then
-    issuer.close_firm.assert_not_called()
+    role.close_firm.assert_not_called()
 
 
 # ---------------------------------------------------
@@ -905,10 +952,9 @@ def test_does_not_exit_when_not_bankrupt(firm_before_exit):
 
 
 @pytest.fixture
-def firm_with_history():
+def firm_with_history(firm_before_setup):
     # Given
-    model = Mock()
-    firm = Firm(model)
+    firm = firm_before_setup
     firm.prev_expected_sales = 100
     firm.prev_output = 50
     firm.prev_sales = 50

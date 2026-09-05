@@ -166,7 +166,7 @@ class Bank(EcoAgent):
 
     def update_net_worth(self):
         self.net_worth += self.profit - self.taxes_payable - self.dividends_payable
-        self.roles["equity_issuer"].update_equity_holdings()
+        self.roles["company"].update_equity_holdings()
         return self.net_worth
 
     def pay_taxes(self):
@@ -181,12 +181,12 @@ class Bank(EcoAgent):
 
     def pay_dividends(self):
         if self.dividends_payable > 0:
-            role = self.roles["equity_issuer"]
+            role = self.roles["company"]
             role.distribute_dividends(self.dividends_payable)
             self.dividends_payable = 0
 
     def exit(self):
-        role = self.roles["equity_issuer"]
+        role = self.roles["company"]
         average_wage = role.get_average_wage()
         if self.net_worth < average_wage:
             role.close_bank(self)

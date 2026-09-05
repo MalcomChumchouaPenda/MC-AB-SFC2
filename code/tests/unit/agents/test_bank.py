@@ -17,39 +17,53 @@ def test_is_eco_agent():
 
 
 @pytest.fixture
-def bank():
+def bank_before_setup():
     # Given
     model = Mock()
     bank = Bank(model)
-    bank.setup()
     return bank
 
 
-def test_has_default_stocks(bank):
-    # Assert
+@pytest.fixture
+def bank_with_roles_and_account(bank_before_setup):
+    # Given
+    roles = {}
+    account = Mock()
+    bank = bank_before_setup
+    bank.account = account
+    bank.roles = roles
+    return bank, roles, account
+
+
+def test_has_default_stocks(bank_before_setup):
+    # Given
+    bank = bank_before_setup
     assert bank.loans == 0
     assert bank.equity == 0
     assert bank.reserves == 0
     assert bank.cash_advances == 0
 
 
-def test_has_default_flows(bank):
-    # Assert
+def test_has_default_flows(bank_before_setup):
+    # Given
+    bank = bank_before_setup
     assert bank.loan_interest == 0
     assert bank.reserve_interest == 0
     assert bank.cash_advance_interest == 0
     assert bank.dividends == 0
 
 
-def test_has_default_choices(bank):
-    # Assert
+def test_has_default_choices(bank_before_setup):
+    # Given
+    bank = bank_before_setup
     assert bank.deposit_rate == 0
     assert bank.taxes_payable == 0
     assert bank.dividends_payable == 0
 
 
-def test_has_default_indicators(bank):
-    # Assert
+def test_has_default_indicators(bank_before_setup):
+    # Given
+    bank = bank_before_setup
     assert bank.country is None
     assert bank.credit_capacity == 0
     assert bank.net_worth == 0
@@ -57,8 +71,9 @@ def test_has_default_indicators(bank):
     assert bank.defaulted == False
 
 
-def test_has_default_refs(bank):
-    # Assert
+def test_has_default_refs(bank_before_setup):
+    # Given
+    bank = bank_before_setup
     assert bank.central_bank is None
 
 
@@ -98,8 +113,9 @@ def test_expose_bond_interests_total(bank_with_country):
     assert bank.bond_interests == pytest.approx(50.0)
 
 
-def test_expose_deposits_total(bank):
+def test_expose_deposits_total(bank_before_setup):
     # Given
+    bank = bank_before_setup
     deposits = [{"client": object(), "amount": 500}]
     deposit_market = Mock()
     deposit_market.get_bank_deposits.return_value = deposits
@@ -109,8 +125,9 @@ def test_expose_deposits_total(bank):
     assert bank.deposits == 500
 
 
-def test_expose_deposit_interests_total(bank):
+def test_expose_deposit_interests_total(bank_before_setup):
     # Given
+    bank = bank_before_setup
     deposits = [{"client": object(), "interests": 50.0}]
     deposit_market = Mock()
     deposit_market.get_bank_deposits.return_value = deposits
@@ -125,8 +142,9 @@ def test_expose_deposit_interests_total(bank):
 # ----------------------------------------------------
 
 
-def test_update_deposit_rate_as_fraction_of_discount_rate(bank):
+def test_update_deposit_rate_as_fraction_of_discount_rate(bank_before_setup):
     # Given
+    bank = bank_before_setup
     cb = Mock(discount_rate=0.05)
     bank.central_bank = cb
     bank.p.zeta = 0.8
@@ -138,8 +156,9 @@ def test_update_deposit_rate_as_fraction_of_discount_rate(bank):
     assert bank.deposit_rate == pytest.approx(0.04)
 
 
-def test_pay_deposit_interests_to_all_clients(bank):
+def test_pay_deposit_interests_to_all_clients(bank_before_setup):
     # Given
+    bank = bank_before_setup
     client = object()
     deposits = [{"client": client, "amount": 100}]
     deposit_market = Mock()
@@ -155,8 +174,9 @@ def test_pay_deposit_interests_to_all_clients(bank):
     deposit_market.pay_interests.assert_called_once_with(client, bank, 5.0)
 
 
-def test_updates_credit_capacity(bank):
+def test_updates_credit_capacity(bank_before_setup):
     # Given
+    bank = bank_before_setup
     bank.equity = 100
     bank.p.mu1 = 10
 
@@ -167,8 +187,9 @@ def test_updates_credit_capacity(bank):
     assert bank.credit_capacity == pytest.approx(1000)
 
 
-def test_calc_loan_probability(bank):
+def test_calc_loan_probability(bank_before_setup):
     # Given
+    bank = bank_before_setup
     bank.p.iota_l = 1
     borrower = Mock(loan_demand=100, target_leverage=0.5)
 
@@ -179,8 +200,9 @@ def test_calc_loan_probability(bank):
     assert probability == pytest.approx(math.exp(-0.5))
 
 
-def test_calc_loan_rate(bank):
+def test_calc_loan_rate(bank_before_setup):
     # Given
+    bank = bank_before_setup
     cb = Mock(discount_rate=0.05)
     bank.central_bank = cb
     bank.p.chi = 0.02
@@ -194,17 +216,17 @@ def test_calc_loan_rate(bank):
 
 
 @pytest.fixture
-def bank_as_lender():
+def bank_as_lender(bank_with_roles_and_account):
     # Given
     borrowers = [Mock(loan_demand=100) for _ in range(5)]
     lender = Mock(loan_applicants=borrowers)
-    bank = Bank(model=Mock())
-    bank.roles["lender"] = lender
+    bank, roles, _ = bank_with_roles_and_account
     bank.calc_loan_rate = Mock(return_value=0.02)
     bank.calc_loan_probability = Mock(return_value=0.4)
     bank.update_credit_capacity = Mock()
     random = bank.model.nprandom
     random.choice.return_value = 0
+    roles["lender"] = lender
     return bank
 
 
@@ -441,8 +463,9 @@ def mock_bond_interests(monkeypatch):
     return bond_interests
 
 
-def test_calc_profit(bank, mock_dep_interests, mock_bond_interests):
+def test_calc_profit(bank_before_setup, mock_dep_interests, mock_bond_interests):
     # Given
+    bank = bank_before_setup
     bank.loan_interest = 100
     bank.reserve_interest = 10
     bank.bad_debt = 20
@@ -506,8 +529,9 @@ def test_calc_dividends():
     assert dividends == 40
 
 
-def test_compute_profit_distribution(bank):
+def test_compute_profit_distribution(bank_before_setup):
     # Given
+    bank = bank_before_setup
     bank.calc_profit = Mock(return_value=100)
     bank.calc_taxes = Mock(return_value=20)
     bank.calc_dividends = Mock(return_value=30)
@@ -521,20 +545,21 @@ def test_compute_profit_distribution(bank):
     assert bank.dividends_payable == 30
 
 
-def test_update_net_worth(bank):
+def test_update_net_worth(bank_with_roles_and_account):
     # Given
-    issuer = Mock()
+    bank, roles, _ = bank_with_roles_and_account
+    role = Mock()
     bank.profit = 500
     bank.net_worth = 500
     bank.taxes_payable = 50
     bank.dividends_payable = 100
-    bank.roles["equity_issuer"] = issuer
+    roles["company"] = role
 
     # When
     bank.update_net_worth()
 
     # Then
-    issuer.update_equity_holdings.assert_called_once_with()
+    role.update_equity_holdings.assert_called_once_with()
     assert bank.net_worth == pytest.approx(850)
 
 
@@ -570,31 +595,33 @@ def test_pay_no_taxes(bank_with_govt):
     assert govt.reserves == 0
 
 
-def test_pay_dividends(bank):
+def test_pay_dividends(bank_with_roles_and_account):
     # Given
-    issuer = Mock()
+    role = Mock()
+    bank, roles, _ = bank_with_roles_and_account
     bank.dividends_payable = 100
-    bank.roles["equity_issuer"] = issuer
+    roles["company"] = role
 
     # When
     bank.pay_dividends()
 
     # Then
-    issuer.distribute_dividends.assert_called_once_with(100)
+    role.distribute_dividends.assert_called_once_with(100)
     assert bank.dividends_payable == 0
 
 
-def test_pay_no_dividends(bank):
+def test_pay_no_dividends(bank_with_roles_and_account):
     # Given
-    issuer = Mock()
+    role = Mock()
+    bank, roles, _ = bank_with_roles_and_account
     bank.dividends_payable = 0
-    bank.roles["equity_issuer"] = issuer
+    roles["company"] = role
 
     # When
     bank.pay_dividends()
 
     # Then
-    issuer.distribute_dividends.assert_not_called()
+    role.distribute_dividends.assert_not_called()
 
 
 # ---------------------------------------------------
@@ -603,12 +630,11 @@ def test_pay_no_dividends(bank):
 
 
 @pytest.fixture
-def bank_before_exit():
-    issuer = Mock()
-    issuer.get_average_wage.return_value = 100
-    model = Mock()
-    bank = Bank(model)
-    bank.roles = {"equity_issuer": issuer}
+def bank_before_exit(bank_with_roles_and_account):
+    role = Mock()
+    role.get_average_wage.return_value = 100
+    bank, roles, _ = bank_with_roles_and_account
+    roles["company"] = role
     return bank
 
 
@@ -616,23 +642,23 @@ def test_exit_when_bankrupt(bank_before_exit):
     # Given
     bank = bank_before_exit
     bank.net_worth = 90
-    issuer = bank.roles["equity_issuer"]
+    role = bank.roles["company"]
 
     # When
     bank.exit()
 
     # Then
-    issuer.close_bank.assert_called_once_with(bank)
+    role.close_bank.assert_called_once_with(bank)
 
 
 def test_does_not_exit_when_not_bankrupt(bank_before_exit):
     # Given
     bank = bank_before_exit
     bank.net_worth = 150
-    issuer = bank.roles["equity_issuer"]
+    role = bank.roles["company"]
 
     # When
     bank.exit()
 
     # Then
-    issuer.close_bank.assert_not_called()
+    role.close_bank.assert_not_called()

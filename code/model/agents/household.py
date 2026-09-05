@@ -78,16 +78,17 @@ class Household(EcoAgent):
     def search_jobs(self):
         p = self.p
         role = self.roles["worker"]
-        employers = role.search_employers(p.psi)
-        accepted = [e for e in employers if e.wage_offer >= self.reservation_wage]
-        accepted.sort(key=lambda employer: employer.wage_offer, reverse=True)
-        remaining = self.labor_supply - role.get_labor_sold()
+        employers = role.find_employers(p.psi)
+        accepted = [e for e in employers if e.wage >= self.reservation_wage]
+        accepted.sort(key=lambda employer: employer.wage, reverse=True)
+        remaining = role.labor_supply
         for employer in accepted:
             if remaining <= 0:
                 break
             quantity = min(remaining, employer.labor_demand)
+            print(employer, quantity)
             if quantity > 0:
-                role.create_job(employer, quantity)
+                role.accept_job(employer, quantity)
                 remaining -= quantity
 
     def pay_taxes(self):
@@ -154,8 +155,8 @@ class Household(EcoAgent):
         p = self.p
         roles = self.roles
         equity = self.equity
-        default_prob = roles["equity_holder"].get_prob_failure()
-        deposit_rate = self.deposit_bank.deposit_rate
+        default_prob = roles["citizen"].get_prob_failure()
+        deposit_rate = roles["depositor"].get_deposit_rate()
         profit_ratio = self.dividends / equity if equity else 0
         if profit_ratio < deposit_rate or self.equity <= 0:
             return p.lambda_
@@ -170,36 +171,36 @@ class Household(EcoAgent):
             investors = self.find_potential_investors()
             required_equity = self.calc_initial_equity(sector)
             collected_equity = self.desired_equity
-            initiator = self.roles["equity_holder"]
+            initiator = self.roles["citizen"]
             founders = [initiator]
             for investor in investors:
                 founders.append(investor)
                 collected_equity += investor.desired_equity
                 if collected_equity >= required_equity:
-                    self.create_enterprise(founders, sector)
+                    self.create_company(founders, sector)
                     break
         self.make_deposits()
 
     def choose_investment_sector(self):
         p = self.p
-        role = self.roles["equity_holder"]
+        role = self.roles["citizen"]
         ratio1 = role.get_bank_firm_number_ratio()
         ratio2 = role.get_bank_firm_equity_ratio()
         if ratio1 < p.eta or ratio2 < p.eta:
-            sector = "banks"
+            sector = "B"
         else:
-            sectors = ["non_tradable_firms", "tradable_firms"]
+            sectors = ["FNT", "FT"]
             random = self.model.nprandom
             sector = random.choice(sectors, p=[1 - p.cT, p.cT])
         self.desired_investment_sector = sector
         return sector
 
     def find_potential_investors(self):
-        role = self.roles["equity_holder"]
+        role = self.roles["citizen"]
         return role.get_potential_investors()
 
     def calc_initial_equity(self, sector):
-        role = self.roles["equity_holder"]
+        role = self.roles["citizen"]
         range_ = role.get_sector_equity_range(sector)
         if range_ is None:
             return self.p.initial_equity
@@ -207,31 +208,23 @@ class Household(EcoAgent):
         random = self.model.nprandom
         return random.uniform(minimum, maximum)
 
-    def create_enterprise(self, founders, sector):
-        role = self.roles["equity_holder"]
-        if sector == "banks":
+    def create_company(self, founders, sector):
+        role = self.roles["citizen"]
+        if sector == "B":
             role.create_bank(founders)
-        elif sector == "tradable_firms":
+        elif sector == "FT":
             role.create_firm(founders, tradable=True)
         else:
             role.create_firm(founders, tradable=False)
 
     def make_deposits(self):
-        bank = self.deposit_bank
-        market = self.model.deposit_markets[self.country]
-        market.make_deposits(self, bank, self.cash)
+        role = self.roles["depositor"]
+        role.make_deposits(self.cash)
 
     def choose_deposit_bank(self):
-        old_bank = self.deposit_bank
-        country = self.country
-        deposit_market = self.model.deposit_markets[country]
-        banks = deposit_market.get_banks()
+        role = self.roles["depositor"]
+        banks = role.find_deposit_banks()
         if len(banks) > 0:
             random = self.model.random
             new_bank = random.choice(banks)
-            if old_bank is None:
-                deposit_market.open_account(self, new_bank)
-            else:
-                amount = deposit_market.close_account(self, old_bank)
-                deposit_market.open_account(self, new_bank, amount=amount)
-            self.deposit_bank = new_bank
+            role.choose_bank(new_bank)
