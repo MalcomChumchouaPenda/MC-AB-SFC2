@@ -961,8 +961,6 @@ def test_invest_equity_does_nothing_when_insufficient_equity(household_as_invest
     household.make_deposits.assert_called_with()
 
 
-
-
 def test_choose_deposit_bank_opens_account_randomly(household_as_depositor):
     # Given
     banks = [Mock() for _ in range(3)]
@@ -975,6 +973,3 @@ def test_choose_deposit_bank_opens_account_randomly(household_as_depositor):
 
     # Then
     role.choose_bank.assert_called_once_with(banks[-1])
-
-
-

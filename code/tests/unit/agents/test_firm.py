@@ -831,7 +831,7 @@ def test_compute_profit_distribution(firm_before_setup):
 def test_update_net_worth(firm_with_roles_and_account):
     # Given
     role = Mock()
-    firm, roles, _  = firm_with_roles_and_account
+    firm, roles, _ = firm_with_roles_and_account
     firm.net_worth = 1000
     firm.net_cash_flow = 500
     firm.taxes_payable = 100
@@ -914,7 +914,7 @@ def test_pay_no_dividends(firm_with_roles_and_account):
 
 @pytest.fixture
 def firm_before_exit(firm_with_roles_and_account):
-    firm, roles,  _ = firm_with_roles_and_account
+    firm, roles, _ = firm_with_roles_and_account
     firm.wage_offer = 100
     roles["company"] = Mock()
     return firm
