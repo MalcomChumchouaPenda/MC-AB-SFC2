@@ -9,19 +9,8 @@ class Firm(EcoAgent):
         self.price = 0.0
         self.wage_offer = 0
 
-        # stocks
-        self.inventories = 0
-        self.cash = 0
-        self.loans = 0
-        self.equity = 0
-
         # flows
-        self.sales = 0
-        self.wage_bill = 0
-        self.loan_interest = 0
         self.rd = 0
-        self.taxes = 0
-        self.dividends = 0
 
         # indicators
         self.productivity = 0.0
@@ -46,24 +35,9 @@ class Firm(EcoAgent):
         self.prev_desired_labor = 0
 
         # other props
-        self.position = 0.0
-        self.country = None
+        self.variety = 0.0
+        self.country = 0
 
-    @property
-    def deposits(self):
-        total = 0
-        for market in self.model.deposit_markets.values():
-            deposits = market.get_client_deposits(self)
-            total += sum([d["amount"] for d in deposits])
-        return total
-
-    @property
-    def dep_interests(self):
-        total = 0
-        for market in self.model.deposit_markets.values():
-            deposits = market.get_client_deposits(self)
-            total += sum([d["interests"] for d in deposits])
-        return total
 
     # Production planning
 
@@ -73,12 +47,13 @@ class Firm(EcoAgent):
 
     def calc_desired_output(self):
         theta = self.p.theta
-        inv = self.inventories
+        inv = self.roles["producer"].inventories
         self.desired_output = max(0, self.expected_sales * (1 + theta) - inv)
         return self.desired_output
 
     def calc_labor_demand(self):
-        self.desired_labor = self.desired_output / self.productivity
+        role = self.roles["producer"]
+        self.desired_labor = self.desired_output / role.productivity
         return self.desired_labor
 
     # Price and quantities adaptation
@@ -91,9 +66,11 @@ class Firm(EcoAgent):
             self.price *= 1 + random.uniform(0, delta)
 
         elif self.prev_output + self.prev_inventories > self.prev_sales:
+            role = self.roles["producer"]
+            wage_bill = self.account.flows["wages"]
             self.expected_sales *= 1 - random.uniform(0, delta)
             self.price *= 1 - random.uniform(0, delta)
-            self.price = max(self.wage_bill / self.productivity, self.price)
+            self.price = max(wage_bill / role.productivity, self.price)
 
     # Wage revision
 
@@ -117,23 +94,23 @@ class Firm(EcoAgent):
     # Innovation and imitation process
 
     def update_productivity(self):
+        role = self.roles["producer"]
         self.calc_desired_rd()
         self.execute_rd()
         if self.rd == 0:
-            return self.productivity
+            return role.productivity
 
         prob = self.calc_rd_success_probability()
         random = self.model.nprandom
         success = random.choice([0, 1], p=[1 - prob, prob])
         if success:
             delta = self.p.delta
-            self.productivity *= 1 + random.uniform(0, delta)  # innovation
+            role.productivity *= 1 + random.uniform(0, delta)  # innovation
 
-            producer_role = self.roles["producer"]
-            avg_productivity = producer_role.get_average_productivity()
-            prod_diff = avg_productivity - self.productivity
+            avg_productivity = role.get_average_productivity()
+            prod_diff = avg_productivity - role.productivity
             if prod_diff > 0:
-                self.productivity += random.uniform(0, prod_diff)  # imitation
+                role.productivity += random.uniform(0, prod_diff)  # imitation
 
     def calc_desired_rd(self):
         self.desired_wage_bill = self.wage_offer * self.desired_labor
@@ -160,18 +137,19 @@ class Firm(EcoAgent):
     # Credit demand
 
     def calc_desired_loans(self):
+        deposits = self.account.stocks["deposits"]
         wage_bill = self.wage_offer * self.desired_labor
-        self.desired_loans = max(0, wage_bill + self.desired_rd - self.deposits)
+        self.desired_loans = max(0, wage_bill + self.desired_rd - deposits)
         return self.desired_loans
 
     def request_loan(self):
         if self.desired_loans <= 0:
             return
-        borrower = self.roles["borrower"]
-        borrower.loan_demand = self.desired_loans
-        lenders = borrower.search_lenders()
+        role = self.roles["borrower"]
+        role.loan_demand = self.desired_loans
+        lenders = role.find_lenders()
         for lender in lenders:
-            borrower.request_loan(lender)
+            role.request_loan(lender)
 
     # Profit, taxes and dividend computation
 
@@ -182,17 +160,18 @@ class Firm(EcoAgent):
         self.dividends_payable = self.calc_dividends()
 
     def calc_net_cash_flow(self):
+        flows = self.account.flows
         return (
-            self.sales
-            + self.dep_interests
-            - self.wage_bill
-            - self.rd
-            - self.loan_interest
+            flows["consumption"]
+            + flows["dep_interests"]
+            - flows["wages"]
+            - flows["loan_interests"]
         )
 
     def calc_profit(self):
-        unit_cost = self.wage_offer / self.productivity
-        inv_variation = unit_cost * (self.inventories - self.prev_inventories)
+        role = self.roles["producer"]
+        unit_cost = self.wage_offer / role.productivity
+        inv_variation = unit_cost * (role.inventories - self.prev_inventories)
         return self.net_cash_flow + inv_variation
 
     def calc_taxes(self):
@@ -233,7 +212,8 @@ class Firm(EcoAgent):
     # History
 
     def update_history(self):
-        self.prev_sales = self.sales
+        role = self.roles["producer"]
+        self.prev_sales = role.sales
         self.prev_expected_sales = self.expected_sales
-        self.prev_inventories = self.inventories
-        self.prev_output = self.output
+        self.prev_inventories = role.inventories
+        self.prev_output = role.output
