@@ -24,7 +24,7 @@ def firm_before_setup():
     return firm
 
 
-def test_has_default_stocks(firm_before_setup):
+def test_has_default_inventories(firm_before_setup):
     # Given
     firm = firm_before_setup
 
@@ -32,10 +32,7 @@ def test_has_default_stocks(firm_before_setup):
     firm.setup()
 
     # Then
-    assert firm.cash == 0
     assert firm.inventories == 0
-    assert firm.loans == 0
-    assert firm.equity == 0
 
 
 def test_has_default_flows(firm_before_setup):
@@ -464,14 +461,14 @@ def test_calc_desired_rd(firm_before_setup):
     assert firm.desired_rd == 50
 
 
-def test_execute_rd_without_constraints(firm_before_setup):
+def test_execute_rd_without_constraints(firm_with_roles_and_account):
     # Given
-    firm = firm_before_setup
+    firm, _, account = firm_with_roles_and_account
     firm.desired_rd = 100
     firm.desired_labor = 50
     firm.labor = 50
     firm.desired_loans = 200
-    firm.loans = 200
+    account.stocks["loans"] = 200
 
     # When
     firm.execute_rd()
@@ -480,14 +477,14 @@ def test_execute_rd_without_constraints(firm_before_setup):
     assert firm.rd == 100
 
 
-def test_execute_rd_with_labor_constraint(firm_before_setup):
+def test_execute_rd_with_labor_constraint(firm_with_roles_and_account):
     # Given
-    firm = firm_before_setup
+    firm, _, account = firm_with_roles_and_account
     firm.desired_rd = 100
     firm.desired_labor = 100
     firm.labor = 80
     firm.desired_loans = 200
-    firm.loans = 200
+    account.stocks["loans"] = 200
 
     # When
     firm.execute_rd()
@@ -496,14 +493,14 @@ def test_execute_rd_with_labor_constraint(firm_before_setup):
     assert firm.rd == 0
 
 
-def test_execute_rd_with_financial_constraint(firm_before_setup):
+def test_execute_rd_with_financial_constraint(firm_with_roles_and_account):
     # Given
-    firm = firm_before_setup
+    firm, _, account = firm_with_roles_and_account
     firm.desired_rd = 100
     firm.desired_labor = 50
     firm.labor = 50
     firm.desired_loans = 200
-    firm.loans = 100
+    account.stocks["loans"] = 100
 
     # When
     firm.execute_rd()
@@ -771,22 +768,22 @@ def model_with_govt():
 
 
 @pytest.fixture
-def firm_with_govt(model_with_govt):
+def firm_as_tax_payer(firm_with_roles_and_account):
     # Given
-    model, govt = model_with_govt
-    firm = Firm(model)
-    firm.country = "any"
+    role = Mock()
+    firm, roles, account = firm_with_roles_and_account
     firm.taxes = 0
     firm.reserves = 0
-    return firm, govt
+    roles["company"] = role
+    return firm, role
 
 
 @pytest.mark.parametrize("taxable, expected", [(100, 20), (-100, 0)])
-def test_calc_taxes(firm_with_govt, taxable, expected):
+def test_calc_taxes(firm_as_tax_payer, taxable, expected):
     # Given
-    firm, govt = firm_with_govt
+    firm, role = firm_as_tax_payer
     firm.net_cash_flow = taxable
-    govt.tax_rate = 0.20
+    role.get_tax_rate.return_value = 0.20
 
     # When
     taxes = firm.calc_taxes()
@@ -796,9 +793,9 @@ def test_calc_taxes(firm_with_govt, taxable, expected):
 
 
 @pytest.mark.parametrize("taxable, taxes, expected", [(100, 20, 40), (-100, 0, 0)])
-def test_calc_dividends(firm_before_setup, taxable, taxes, expected):
+def test_calc_dividends(firm_as_tax_payer, taxable, taxes, expected):
     # Given
-    firm = firm_before_setup
+    firm, _ = firm_as_tax_payer
     firm.net_cash_flow = taxable
     firm.taxes_payable = taxes
     firm.p.rho = 0.5
@@ -846,36 +843,30 @@ def test_update_net_worth(firm_with_roles_and_account):
     assert firm.net_worth == pytest.approx(1200)
 
 
-def test_pay_taxes(firm_with_govt):
+def test_pay_taxes(firm_as_tax_payer):
     # Given
-    firm, govt = firm_with_govt
+    firm, role = firm_as_tax_payer
     firm.taxes_payable = 100
 
     # When
     firm.pay_taxes()
 
     # Then
+    role.pay_taxes.assert_called_with(100)
     assert firm.taxes_payable == 0
-    assert firm.taxes == 100
-    assert firm.cash == -100
-    assert govt.taxes == 100
-    assert govt.reserves == 100
 
 
-def test_pay_no_taxes(firm_with_govt):
+def test_pay_no_taxes(firm_as_tax_payer):
     # Given
-    firm, govt = firm_with_govt
+    firm, role = firm_as_tax_payer
     firm.taxes_payable = 0
 
     # When
     firm.pay_taxes()
 
     # Then
+    role.pay_taxes.assert_not_called()
     assert firm.taxes_payable == 0
-    assert firm.taxes == 0
-    assert firm.cash == 0
-    assert govt.taxes == 0
-    assert govt.reserves == 0
 
 
 def test_pay_dividends(firm_with_roles_and_account):

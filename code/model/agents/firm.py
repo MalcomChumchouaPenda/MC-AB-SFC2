@@ -148,8 +148,9 @@ class Firm(EcoAgent):
         return prob
 
     def execute_rd(self):
+        stocks = self.account.stocks
         labor_constraint = self.labor < self.desired_labor
-        financial_constraint = self.loans < self.desired_loans
+        financial_constraint = stocks["loans"] < self.desired_loans
         if labor_constraint or financial_constraint:
             self.rd = 0
         else:
@@ -197,8 +198,8 @@ class Firm(EcoAgent):
     def calc_taxes(self):
         if self.net_cash_flow <= 0:
             return 0
-        govt = self.model.governments[self.country]
-        return govt.tax_rate * self.net_cash_flow
+        tax_rate = self.roles["company"].get_tax_rate()
+        return tax_rate * self.net_cash_flow
 
     def calc_dividends(self):
         if self.net_cash_flow <= 0:
@@ -214,11 +215,8 @@ class Firm(EcoAgent):
     def pay_taxes(self):
         if self.taxes_payable > 0:
             taxes = self.taxes_payable
-            govt = self.model.governments[self.country]
-            govt.taxes += taxes
-            govt.reserves += taxes
-            self.taxes += taxes
-            self.cash -= taxes
+            role = self.roles["company"]
+            role.pay_taxes(taxes)
             self.taxes_payable = 0
 
     def pay_dividends(self):
