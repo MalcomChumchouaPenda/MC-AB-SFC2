@@ -28,29 +28,12 @@ def bank_before_setup():
 def bank_with_roles_and_account(bank_before_setup):
     # Given
     roles = {}
-    account = Mock()
+    account = Mock(stocks={}, flows={})
     bank = bank_before_setup
     bank.account = account
     bank.roles = roles
     return bank, roles, account
 
-
-def test_has_default_stocks(bank_before_setup):
-    # Given
-    bank = bank_before_setup
-    assert bank.loans == 0
-    assert bank.equity == 0
-    assert bank.reserves == 0
-    assert bank.cash_advances == 0
-
-
-def test_has_default_flows(bank_before_setup):
-    # Given
-    bank = bank_before_setup
-    assert bank.loan_interest == 0
-    assert bank.reserve_interest == 0
-    assert bank.cash_advance_interest == 0
-    assert bank.dividends == 0
 
 
 def test_has_default_choices(bank_before_setup):
@@ -75,66 +58,6 @@ def test_has_default_refs(bank_before_setup):
     # Given
     bank = bank_before_setup
     assert bank.central_bank is None
-
-
-# ---------------------------------------------------
-# DERIVED STATE TESTS
-# ----------------------------------------------------
-
-
-@pytest.fixture
-def bank_with_country():
-    model, country = Mock(), Mock()
-    bank = Bank(model)
-    bank.setup()
-    bank.country = country
-    return bank, country
-
-
-def test_expose_bonds_total(bank_with_country):
-    # Given
-    bonds = [{"issuer": object(), "principal": 500}]
-    bank, country = bank_with_country
-    bond_market = country.union.bond_market
-    bond_market.get_buyer_bonds.return_value = bonds
-
-    # Assert
-    assert bank.bonds == 500
-
-
-def test_expose_bond_interests_total(bank_with_country):
-    # Given
-    bonds = [{"issuer": object(), "interests": 50.0}]
-    bank, country = bank_with_country
-    bond_market = country.union.bond_market
-    bond_market.get_buyer_bonds.return_value = bonds
-
-    # Assert
-    assert bank.bond_interests == pytest.approx(50.0)
-
-
-def test_expose_deposits_total(bank_before_setup):
-    # Given
-    bank = bank_before_setup
-    deposits = [{"client": object(), "amount": 500}]
-    deposit_market = Mock()
-    deposit_market.get_bank_deposits.return_value = deposits
-    bank.model.deposit_markets = {"any": deposit_market}
-
-    # Assert
-    assert bank.deposits == 500
-
-
-def test_expose_deposit_interests_total(bank_before_setup):
-    # Given
-    bank = bank_before_setup
-    deposits = [{"client": object(), "interests": 50.0}]
-    deposit_market = Mock()
-    deposit_market.get_bank_deposits.return_value = deposits
-    bank.model.deposit_markets = {"any": deposit_market}
-
-    # Assert
-    assert bank.dep_interests == pytest.approx(50.0)
 
 
 # ---------------------------------------------------
@@ -174,11 +97,11 @@ def test_pay_deposit_interests_to_all_clients(bank_before_setup):
     deposit_market.pay_interests.assert_called_once_with(client, bank, 5.0)
 
 
-def test_updates_credit_capacity(bank_before_setup):
+def test_updates_credit_capacity(bank_with_roles_and_account):
     # Given
-    bank = bank_before_setup
-    bank.equity = 100
+    bank, _, account = bank_with_roles_and_account
     bank.p.mu1 = 10
+    account.stocks["equity"] = 100
 
     # When
     bank.update_credit_capacity()
@@ -300,43 +223,40 @@ def test_grant_loans_cleans_loan_applicants_list(bank_as_lender):
 
 
 @pytest.fixture
-def bank_with_cb(monkeypatch):
-    model = Mock()
-    model.p.mu2 = 0.1
-    deposits_prop = PropertyMock(return_value=1000)
-    monkeypatch.setattr(Bank, "deposits", deposits_prop)
-    cb = Mock(cash_advances=0, reserves=0)
-    bank = Bank(model)
-    bank.reserves = 0
-    bank.cash_advances = 0
-    bank.central_bank = cb
-    return bank, cb
+def bank_before_advance(bank_with_roles_and_account):
+    bank, roles, account = bank_with_roles_and_account
+    bank.p.mu2 = 0.1
+    account.stocks["deposits"] = 1000
+    account.stocks["advances"] = 0
+    account.stocks["cash"] = 0
+    roles["lender"] = Mock()
+    return bank
 
 
-def test_doesnot_request_cash_advance_when_sufficient_reserves(bank_with_cb):
+def test_doesnot_request_advance_when_sufficient_reserves(bank_before_advance):
     # Given
-    bank, cb = bank_with_cb
-    bank.reserves = 200
+    bank = bank_before_advance
+    bank.account.stocks["cash"] = 200
+    role = bank.roles["lender"]
 
     # When
     bank.request_cash_advances()
 
     # Then
-    assert bank.cash_advances == 0
-    assert cb.cash_advances == 0
+    role.request_advances.assert_not_called()
 
 
-def test_request_cash_advance_when_insufficient_reserves(bank_with_cb):
+def test_request_advance_when_insufficient_reserves(bank_before_advance):
     # Given
-    bank, cb = bank_with_cb
-    bank.reserves = 50
+    bank = bank_before_advance
+    bank.account.stocks["cash"] = 50
+    role = bank.roles["lender"]
 
     # When
     bank.request_cash_advances()
 
     # Then
-    assert bank.cash_advances == 50
-    assert cb.cash_advances == 50
+    role.request_advances.assert_called_with(50)
 
 
 def test_calc_bond_purchases_probability():
@@ -354,12 +274,11 @@ def test_calc_bond_purchases_probability():
 
 
 @pytest.mark.parametrize("reserves, expected", [(150, 50), (100, 0)])
-def test_calc_excess_reserves(monkeypatch, reserves, expected):
+def test_calc_excess_reserves(bank_before_advance, reserves, expected):
     # Given
-    monkeypatch.setattr(Bank, "deposits", PropertyMock(return_value=1000))
-    bank = Bank(model=Mock())
+    bank = bank_before_advance
+    bank.account.stocks["cash"] = reserves
     bank.p.mu2 = 0.1
-    bank.reserves = reserves
 
     # When
     excess_reserves = bank.calc_excess_reserves()
@@ -368,19 +287,32 @@ def test_calc_excess_reserves(monkeypatch, reserves, expected):
     assert excess_reserves == expected
 
 
-def test_find_bond_suppliers_gets_and_shuffles_issuers(bank_with_country):
+
+@pytest.fixture
+def bank_as_bond_buyer(bank_with_roles_and_account):
+    # Given
+    role = Mock()
+    role.find_bond_issuers = Mock(return_value=[])
+    bank, roles, _ = bank_with_roles_and_account
+    bank.calc_bond_purchases_probability = Mock(return_value=0)
+    bank.calc_excess_reserves = Mock(return_value=0)
+    bank.model.nprandom.choice.return_value = 1
+    roles["bond_buyer"] = role
+    return bank, role
+
+
+def test_find_bond_suppliers_gets_and_shuffles_issuers(bank_as_bond_buyer):
     # Given
     bond_issuers = [Mock() for _ in range(3)]
-    bank, country = bank_with_country
-    bond_market = country.union.bond_market
-    bond_market.get_issuers.return_value = bond_issuers
+    bank, role = bank_as_bond_buyer
     random = bank.model.random
+    role.find_bond_issuers.return_value = bond_issuers
 
     # When
     result = bank.find_bond_issuers()
 
     # Then
-    bond_market.get_issuers.assert_called_with()
+    role.find_bond_issuers.assert_called_with()
     random.shuffle.assert_called_with(bond_issuers)
     assert result == bond_issuers
 
@@ -393,25 +325,14 @@ def bond_issuers():
     ]
 
 
-@pytest.fixture
-def bank_as_bond_buyer(bond_issuers):
-    model = Mock()
-    bank = Bank(model)
-    bank.country = Mock()
-    bank.calc_bond_purchases_probability = Mock(return_value=0)
-    bank.calc_excess_reserves = Mock(return_value=0)
-    bank.find_bond_issuers = Mock(return_value=bond_issuers)
-    bank.model.nprandom.choice.return_value = 1
-    return bank
-
-
 def test_buy_bonds_with_purchases_probability(bank_as_bond_buyer, bond_issuers):
     # Given
-    bank = bank_as_bond_buyer
+    bank, role = bank_as_bond_buyer
     bank.calc_excess_reserves.return_value = 1000
     calc_prob = bank.calc_bond_purchases_probability
     calc_prob.return_value = 0.4
     random = bank.model.nprandom
+    role.find_bond_issuers.return_value = bond_issuers
 
     # When
     bank.buy_bonds()
@@ -425,53 +346,40 @@ def test_buy_bonds_with_purchases_probability(bank_as_bond_buyer, bond_issuers):
 
 def test_buy_bonds_with_excess_reserves(bank_as_bond_buyer, bond_issuers):
     # Given
-    bank = bank_as_bond_buyer
+    bank, role = bank_as_bond_buyer
     bank.calc_excess_reserves.return_value = 50
-    bond_market = bank.country.union.bond_market
+    role.find_bond_issuers.return_value = bond_issuers
 
     # When
     bank.buy_bonds()
 
     # Then
-    bond_market.buy_bonds.assert_called_once_with(bank, bond_issuers[0], 50)
+    role.buy_bonds.assert_called_once_with(bond_issuers[0], 50)
 
 
 def test_dont_buy_bonds_with_insufficient_reserves(bank_as_bond_buyer, bond_issuers):
     # Given
-    bank = bank_as_bond_buyer
+    bank, role = bank_as_bond_buyer
     bank.calc_excess_reserves.return_value = 50
-    bond_market = bank.country.union.bond_market
+    role.find_bond_issuers.return_value = bond_issuers
 
     # When
     bank.buy_bonds()
 
     # Then
-    bond_market.buy_bonds.assert_called_once_with(bank, bond_issuers[0], 50)
+    role.buy_bonds.assert_called_once_with(bond_issuers[0], 50)
 
 
-@pytest.fixture
-def mock_dep_interests(monkeypatch):
-    dep_interests = PropertyMock()
-    monkeypatch.setattr(Bank, "dep_interests", dep_interests)
-    return dep_interests
 
-
-@pytest.fixture
-def mock_bond_interests(monkeypatch):
-    bond_interests = PropertyMock()
-    monkeypatch.setattr(Bank, "bond_interests", bond_interests)
-    return bond_interests
-
-
-def test_calc_profit(bank_before_setup, mock_dep_interests, mock_bond_interests):
+def test_calc_profit(bank_with_roles_and_account):
     # Given
-    bank = bank_before_setup
-    bank.loan_interest = 100
-    bank.reserve_interest = 10
+    bank, _ , account = bank_with_roles_and_account
+    account.flows["loan_interests"] = 100
+    account.flows["cash_interests"] = 10
     bank.bad_debt = 20
-    bank.cash_advance_interest = 10
-    mock_dep_interests.return_value = 40
-    mock_bond_interests.return_value = 30
+    account.flows["adv_interests"] = 10
+    account.flows["dep_interests"] = 40
+    account.flows["bond_interests"] = 30
 
     # When
     profit = bank.calc_profit()
@@ -490,22 +398,22 @@ def model_with_govt():
 
 
 @pytest.fixture
-def bank_with_govt(model_with_govt):
+def bank_as_taxpayer(bank_with_roles_and_account):
     # Given
-    model, govt = model_with_govt
-    bank = Bank(model)
-    bank.country = "any"
-    bank.taxes = 0
-    bank.reserves = 0
-    return bank, govt
+    role = Mock()
+    bank, roles, account = bank_with_roles_and_account    
+    account.flows["taxes"] = 0
+    account.stocks["cash"] = 0
+    roles["company"] = role
+    return bank, role
 
 
 @pytest.mark.parametrize("profit, expected", [(100, 20), (0, 0), (-50, 0)])
-def test_calc_taxes(bank_with_govt, profit, expected):
+def test_calc_taxes(bank_as_taxpayer, profit, expected):
     # Given
-    bank, govt = bank_with_govt
-    bank.profit = profit
-    govt.tax_rate = 0.20
+    bank, role = bank_as_taxpayer
+    bank.profit = profit    
+    role.get_tax_rate.return_value = 0.20
 
     # When
     taxes = bank.calc_taxes()
@@ -514,11 +422,10 @@ def test_calc_taxes(bank_with_govt, profit, expected):
     assert taxes == expected
 
 
-def test_calc_dividends():
+def test_calc_dividends(bank_as_taxpayer):
     # Given
-    model = Mock()
-    model.p.rho = 0.5
-    bank = Bank(model)
+    bank, _ = bank_as_taxpayer
+    bank.p.rho = 0.5
     bank.profit = 100
     bank.taxes_payable = 20
 
@@ -563,36 +470,29 @@ def test_update_net_worth(bank_with_roles_and_account):
     assert bank.net_worth == pytest.approx(850)
 
 
-def test_pay_taxes(bank_with_govt):
+def test_pay_taxes(bank_as_taxpayer):
     # Given
-    bank, govt = bank_with_govt
+    bank, role = bank_as_taxpayer
     bank.taxes_payable = 50
 
     # When
     bank.pay_taxes()
 
     # Then
+    role.pay_taxes.assert_called_with(50)
     assert bank.taxes_payable == 0
-    assert bank.taxes == 50
-    assert bank.reserves == -50
-    assert govt.taxes == 50
-    assert govt.reserves == 50
 
 
-def test_pay_no_taxes(bank_with_govt):
+def test_pay_no_taxes(bank_as_taxpayer):
     # Given
-    bank, govt = bank_with_govt
+    bank, role = bank_as_taxpayer
     bank.taxes_payable = 0
 
     # When
     bank.pay_taxes()
 
     # Then
-    assert bank.taxes_payable == 0
-    assert bank.taxes == 0
-    assert bank.reserves == 0
-    assert govt.taxes == 0
-    assert govt.reserves == 0
+    role.pay_taxes.assert_not_called()
 
 
 def test_pay_dividends(bank_with_roles_and_account):
@@ -606,7 +506,7 @@ def test_pay_dividends(bank_with_roles_and_account):
     bank.pay_dividends()
 
     # Then
-    role.distribute_dividends.assert_called_once_with(100)
+    role.pay_dividends.assert_called_once_with(100)
     assert bank.dividends_payable == 0
 
 
@@ -621,7 +521,7 @@ def test_pay_no_dividends(bank_with_roles_and_account):
     bank.pay_dividends()
 
     # Then
-    role.distribute_dividends.assert_not_called()
+    role.pay_dividends.assert_not_called()
 
 
 # ---------------------------------------------------

@@ -98,7 +98,7 @@ def test_has_default_indicators(firm_before_setup):
 def firm_with_roles_and_account(firm_before_setup):
     # Given
     roles = {}
-    account = Mock()
+    account = Mock(stocks={}, flows={})
     firm = firm_before_setup
     firm.account = account
     firm.roles = roles
