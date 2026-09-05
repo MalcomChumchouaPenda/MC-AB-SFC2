@@ -35,17 +35,6 @@ def test_has_monetary_union_ref(market_before_setup):
     assert market.monetary_union is None
 
 
-def test_has_monetary_union_ref(market_before_setup):
-    # Given
-    market = market_before_setup
-
-    # When
-    market.setup()
-
-    # Then
-    assert market.monetary_union is None
-
-
 def test_expose_discount_rate(market_before_setup):
     # Given
     market = market_before_setup
