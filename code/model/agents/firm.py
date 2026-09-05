@@ -38,7 +38,6 @@ class Firm(EcoAgent):
         self.variety = 0.0
         self.country = 0
 
-
     # Production planning
 
     def plan_production(self):

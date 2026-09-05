@@ -35,7 +35,6 @@ def bank_with_roles_and_account(bank_before_setup):
     return bank, roles, account
 
 
-
 def test_has_default_choices(bank_before_setup):
     # Given
     bank = bank_before_setup
@@ -287,7 +286,6 @@ def test_calc_excess_reserves(bank_before_advance, reserves, expected):
     assert excess_reserves == expected
 
 
-
 @pytest.fixture
 def bank_as_bond_buyer(bank_with_roles_and_account):
     # Given
@@ -370,10 +368,9 @@ def test_dont_buy_bonds_with_insufficient_reserves(bank_as_bond_buyer, bond_issu
     role.buy_bonds.assert_called_once_with(bond_issuers[0], 50)
 
 
-
 def test_calc_profit(bank_with_roles_and_account):
     # Given
-    bank, _ , account = bank_with_roles_and_account
+    bank, _, account = bank_with_roles_and_account
     account.flows["loan_interests"] = 100
     account.flows["cash_interests"] = 10
     bank.bad_debt = 20
@@ -401,7 +398,7 @@ def model_with_govt():
 def bank_as_taxpayer(bank_with_roles_and_account):
     # Given
     role = Mock()
-    bank, roles, account = bank_with_roles_and_account    
+    bank, roles, account = bank_with_roles_and_account
     account.flows["taxes"] = 0
     account.stocks["cash"] = 0
     roles["company"] = role
@@ -412,7 +409,7 @@ def bank_as_taxpayer(bank_with_roles_and_account):
 def test_calc_taxes(bank_as_taxpayer, profit, expected):
     # Given
     bank, role = bank_as_taxpayer
-    bank.profit = profit    
+    bank.profit = profit
     role.get_tax_rate.return_value = 0.20
 
     # When

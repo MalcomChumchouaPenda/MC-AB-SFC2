@@ -109,6 +109,7 @@ def firm_with_roles_and_account(firm_before_setup):
 # PRODUCTION TESTS
 # ----------------------------------------------------
 
+
 @pytest.fixture
 def firm_before_production(firm_with_roles_and_account):
     # Given
@@ -117,7 +118,6 @@ def firm_before_production(firm_with_roles_and_account):
     account.stocks["inventories"] = 0
     roles["producer"] = role
     return firm
-
 
 
 def test_calc_desired_output(firm_before_production):
@@ -199,7 +199,7 @@ def test_plan_production_by_two_steps(firm_before_setup):
 
 @pytest.fixture
 def pricing_firm(firm_with_roles_and_account):
-    role = Mock(productivity = 2)
+    role = Mock(productivity=2)
     firm, roles, account = firm_with_roles_and_account
     firm.p.delta = 0.1
     firm.price = 10
@@ -614,7 +614,6 @@ def test_update_productivity_by_imitation(innovating_firm):
 # ----------------------------------------------------
 
 
-
 @pytest.fixture
 def borrowing_firm(firm_with_roles_and_account):
     # Given
@@ -686,7 +685,6 @@ def test_request_loan_and_set_loan_demand(borrowing_firm):
 # ----------------------------------------------------
 
 
-
 @pytest.mark.parametrize("sales, expected", [(600, 200), (200, -200)])
 def test_calc_net_cash_flow(firm_with_roles_and_account, sales, expected):
     # Given
@@ -710,7 +708,7 @@ def test_calc_profit(firm_with_roles_and_account):
     firm.net_cash_flow = 200
     firm.prev_inventories = 50
     firm.wage_offer = 20
-    roles["producer"]= role
+    roles["producer"] = role
 
     # When
     profit = firm.calc_profit()
@@ -932,4 +930,3 @@ def test_update_history_overwrites_previous_values(firm_with_history):
     assert firm.prev_output == 100
     assert firm.prev_sales == 100
     assert firm.prev_inventories == 10
-

@@ -20,7 +20,6 @@ class Bank(EcoAgent):
         # accointances
         self.central_bank = None
 
-
     def update_deposit_rate(self):
         cb = self.central_bank
         self.deposit_rate = self.p.zeta * cb.discount_rate
@@ -111,7 +110,7 @@ class Bank(EcoAgent):
             + flows["cash_interests"]
             - self.bad_debt
             - flows["dep_interests"]
-            - flows['adv_interests']
+            - flows["adv_interests"]
         )
 
     def calc_taxes(self):
