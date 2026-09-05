@@ -7,16 +7,9 @@ class Household(EcoAgent):
 
     def setup(self):
         # stocks
-        self.cash = 0
-        self.equity = 0
         self.net_worth = 0
 
         # flows
-        self.labor_income = 0
-        self.dividends = 0
-        self.rd_income = 0
-        self.taxes = 0
-        self.public_transfers = 0
         self.tradable_cons = 0
         self.non_tradable_cons = 0
 
@@ -92,21 +85,21 @@ class Household(EcoAgent):
                 remaining -= quantity
 
     def pay_taxes(self):
-        govt = self.model.governments[self.country]
         self.income = self.calc_income()
         self.disposable_income = self.calc_disposable_income()
-        taxes = govt.tax_rate * self.income
-        govt.reserves += taxes
-        govt.taxes += taxes
-        self.cash -= taxes
-        self.taxes += taxes
+        role = self.roles["citizen"]
+        tax_rate = role.get_tax_rate()
+        taxes = tax_rate * self.income
+        role.pay_taxes(taxes)
 
     def calc_income(self):
-        return self.labor_income + self.dep_interests + self.dividends + self.rd_income
+        flows = self.account.flows
+        return flows["wages"] + flows["dep_interests"] + flows["dividends"]
 
     def calc_disposable_income(self):
-        govt = self.model.governments[self.country]
-        return (1 - govt.tax_rate) * self.income + self.public_transfers
+        tax_rate = self.roles["citizen"].get_tax_rate()
+        public_transfers = self.account.flows["public_transfers"]
+        return (1 - tax_rate) * self.income + public_transfers
 
     def calc_consumption(self):
         p = self.p
@@ -147,18 +140,20 @@ class Household(EcoAgent):
 
     def calc_portfolio_allocation(self):
         lp = self.calc_liquidity_preference()
+        equity = self.account.stocks["equity"]
         expected_worth = self.calc_expected_net_worth()
-        self.desired_equity = max(self.equity, (1 - lp) * expected_worth)
-        self.desired_deposits = expected_worth - (self.desired_equity - self.equity)
+        self.desired_equity = max(equity, (1 - lp) * expected_worth)
+        self.desired_deposits = expected_worth - (self.desired_equity - equity)
 
     def calc_liquidity_preference(self):
         p = self.p
         roles = self.roles
-        equity = self.equity
+        equity = self.account.stocks["equity"]
+        dividends = self.account.flows["dividends"]
         default_prob = roles["citizen"].get_prob_failure()
         deposit_rate = roles["depositor"].get_deposit_rate()
-        profit_ratio = self.dividends / equity if equity else 0
-        if profit_ratio < deposit_rate or self.equity <= 0:
+        profit_ratio = dividends / equity if equity else 0
+        if profit_ratio < deposit_rate or equity <= 0:
             return p.lambda_
         return p.lambda_ * math.exp(-(profit_ratio * (1 - default_prob)) - deposit_rate)
 
@@ -218,8 +213,9 @@ class Household(EcoAgent):
             role.create_firm(founders, tradable=False)
 
     def make_deposits(self):
+        account = self.account
         role = self.roles["depositor"]
-        role.make_deposits(self.cash)
+        role.make_deposits(account.stocks["cash"])
 
     def choose_deposit_bank(self):
         role = self.roles["depositor"]

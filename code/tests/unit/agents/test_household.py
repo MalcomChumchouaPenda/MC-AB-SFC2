@@ -24,28 +24,6 @@ def household_before_setup():
     return household
 
 
-# def test_has_default_stocks(household_before_setup):
-#     # Given
-#     household = household_before_setup
-
-#     # When
-
-#     # Assert
-#     assert household.cash == 0
-#     assert household.equity == 0
-
-
-# def test_has_default_flows(household):
-#     # Assert
-#     assert household.labor_income == 0
-#     assert household.dividends == 0
-#     assert household.rd_income == 0
-#     assert household.taxes == 0
-#     assert household.tradable_cons == 0
-#     assert household.non_tradable_cons == 0
-#     assert household.public_transfers == 0
-
-
 def test_has_default_reservation_wage(household_before_setup):
     # Given
     household = household_before_setup
@@ -142,18 +120,20 @@ def test_has_default_incomes(household_before_setup):
 
 
 @pytest.fixture
-def household_with_roles(household_before_setup):
+def household_with_roles_and_account(household_before_setup):
     # Given
     roles = {}
+    account = Mock(stocks={}, flows={})
     household = household_before_setup
     household.roles = roles
-    return household, roles
+    household.account = account
+    return household, roles, account
 
 
 @pytest.fixture
-def household_unemployed(household_with_roles):
+def household_unemployed(household_with_roles_and_account):
     # Given
-    household, roles = household_with_roles
+    household, roles, _ = household_with_roles_and_account
     household.p.psi = 6
     household.labor_supply = 1.0
     household.reservation_wage = 10
@@ -242,11 +222,11 @@ def test_search_jobs_while_labor_supply_is_remaining(household_unemployed):
 # ----------------------------------------------------
 
 
-def test_calc_revision_probability(household_with_roles):
+def test_calc_revision_probability(household_with_roles_and_account):
     # Given
     role = Mock()
     role.get_unemployment_rate.return_value = 0.1
-    household, roles = household_with_roles
+    household, roles, _ = household_with_roles_and_account
     household.p.upsilon = 1.0
     household.p.upsilon_h = 0.9
     roles["worker"] = role
@@ -259,9 +239,9 @@ def test_calc_revision_probability(household_with_roles):
 
 
 @pytest.fixture
-def fully_employed_before(household_with_roles):
+def fully_employed_before(household_with_roles_and_account):
     # Given
-    household, _ = household_with_roles
+    household, *_ = household_with_roles_and_account
     household.p.delta = 0.9
     household.labor_supply = 1.0
     household.employed_labor = 1.0
@@ -317,9 +297,9 @@ def test_can_choose_to_not_increases_reserv_wage(fully_employed_before):
 
 
 @pytest.fixture
-def part_employed_before(household_with_roles):
+def part_employed_before(household_with_roles_and_account):
     # Given
-    household, _ = household_with_roles
+    household, *_ = household_with_roles_and_account
     household.p.delta = 0.9
     household.labor_supply = 1.0
     household.employed_labor = 0.0
@@ -380,39 +360,21 @@ def test_can_choose_to_not_decreases_reserv_wage(part_employed_before):
 
 
 @pytest.fixture
-def mock_dep_interests(monkeypatch):
+def household_as_taxpayer(household_with_roles_and_account):
     # Given
-    mock_interests = PropertyMock()
-    monkeypatch.setattr(Household, "dep_interests", mock_interests)
-    return mock_interests
-
-
-@pytest.fixture
-def model_with_govt():
-    # Given
-    govt = Mock(tax_rate=0.2, reserves=0, taxes=0)
-    model = Mock()
-    model.governments = {"any": govt}
-    return model, govt
-
-
-@pytest.fixture
-def household_as_taxpayer(mock_dep_interests, model_with_govt):
-    # Given
-    model, _ = model_with_govt
-    household = Household(model)
-    household.mock_dep_interests = mock_dep_interests
-    household.country = "any"
-    return household
+    role = Mock()
+    role.get_tax_rate.return_value = 0.2
+    household, roles, _ = household_with_roles_and_account
+    roles["citizen"] = role
+    return household, role
 
 
 def test_calc_income(household_as_taxpayer):
     # Given
-    household = household_as_taxpayer
-    household.labor_income = 100
-    household.mock_dep_interests.return_value = 20
-    household.dividends = 30
-    household.rd_income = 10
+    household, _ = household_as_taxpayer
+    household.account.flows["wages"] = 110
+    household.account.flows["dep_interests"] = 20
+    household.account.flows["dividends"] = 30
 
     # When
     income = household.calc_income()
@@ -423,9 +385,9 @@ def test_calc_income(household_as_taxpayer):
 
 def test_calc_disposable_income(household_as_taxpayer):
     # Given
-    household = household_as_taxpayer
+    household, _ = household_as_taxpayer
     household.income = 200
-    household.public_transfers = 50
+    household.account.flows["public_transfers"] = 50
 
     # When
     disposable_income = household.calc_disposable_income()
@@ -434,10 +396,9 @@ def test_calc_disposable_income(household_as_taxpayer):
     assert disposable_income == 210
 
 
-def test_pay_taxes_transfers_cash(household_as_taxpayer, model_with_govt):
+def test_pay_taxes_transfers_cash(household_as_taxpayer):
     # Given
-    _, govt = model_with_govt
-    household = household_as_taxpayer
+    household, role = household_as_taxpayer
     household.calc_income = Mock(return_value=100)
     household.calc_disposable_income = Mock(return_value=110)
 
@@ -445,15 +406,12 @@ def test_pay_taxes_transfers_cash(household_as_taxpayer, model_with_govt):
     household.pay_taxes()
 
     # Then
-    assert household.taxes == 20
-    assert household.cash == -20
-    assert govt.taxes == 20
-    assert govt.reserves == 20
+    role.pay_taxes.assert_called_with(20)
 
 
 def test_pay_taxes_updates_indicators(household_as_taxpayer):
     # Given
-    household = household_as_taxpayer
+    household, _ = household_as_taxpayer
     household.calc_income = Mock(return_value=100)
     household.calc_disposable_income = Mock(return_value=110)
 
@@ -515,11 +473,11 @@ def test_calc_consumption_composition(mock_deposits):
 
 
 @pytest.fixture
-def household_with_consumer_roles(household_with_roles):
+def household_with_consumer_roles(household_with_roles_and_account):
     # Given
-    household, _ = household_with_roles
-    household.roles["consumer_tradable"] = Mock()
-    household.roles["consumer_non_tradable"] = Mock()
+    household, roles, _ = household_with_roles_and_account
+    roles["consumer_tradable"] = Mock()
+    roles["consumer_non_tradable"] = Mock()
     return household
 
 
@@ -615,10 +573,9 @@ def test_consume_randomizes_market_order(household_with_consumer_roles):
 
 
 @pytest.fixture
-def hh_before_allocation(household_with_roles):
+def hh_before_allocation(household_with_roles_and_account):
     # Given
-    household, roles = household_with_roles
-    household.account = Mock()
+    household, roles, _ = household_with_roles_and_account
     roles["citizen"] = Mock()
     roles["depositor"] = Mock()
     return household
@@ -641,8 +598,8 @@ def test_calc_expected_net_worth(hh_before_allocation):
 def test_calc_liquidity_pref_when_equity_is_more_profitable(hh_before_allocation):
     # Given
     household = hh_before_allocation
-    household.dividends = 10
-    household.equity = 100
+    household.account.flows["dividends"] = 10
+    household.account.stocks["equity"] = 100
     household.p.lambda_ = 0.6
     roles = household.roles
     roles["citizen"].get_prob_failure.return_value = 0.10
@@ -659,8 +616,8 @@ def test_calc_liquidity_pref_when_equity_is_more_profitable(hh_before_allocation
 def test_calc_liquidity_pref_when_equity_is_less_profitable(hh_before_allocation):
     # Given
     household = hh_before_allocation
-    household.dividends = 2
-    household.equity = 100
+    household.account.flows["dividends"] = 2
+    household.account.stocks["equity"] = 100
     household.p.lambda_ = 0.7
     roles = household.roles
     roles["citizen"].get_prob_failure.return_value = 0.10
@@ -676,8 +633,8 @@ def test_calc_liquidity_pref_when_equity_is_less_profitable(hh_before_allocation
 def test_calc_liquidity_preference_when_no_equity(hh_before_allocation):
     # Given
     household = hh_before_allocation
-    household.dividends = 0
-    household.equity = 0
+    household.account.flows["dividends"] = 0
+    household.account.stocks["equity"] = 0
     household.p.lambda_ = 0.8
     roles = household.roles
     roles["citizen"].get_prob_failure.return_value = 0.10
@@ -690,11 +647,10 @@ def test_calc_liquidity_preference_when_no_equity(hh_before_allocation):
     assert lp == 0.8
 
 
-def test_calc_portfolio_allocation_updates_desired_assets():
+def test_calc_portfolio_allocation_updates_desired_assets(hh_before_allocation):
     # Given
-    model = Mock()
-    household = Household(model)
-    household.equity = 20
+    household = hh_before_allocation
+    household.account.stocks["equity"] = 20
     household.calc_liquidity_preference = Mock(return_value=0.40)
     household.calc_expected_net_worth = Mock(return_value=100)
 
@@ -706,11 +662,10 @@ def test_calc_portfolio_allocation_updates_desired_assets():
     assert household.desired_deposits == 60
 
 
-def test_calc_portfolio_allocation_preserves_existing_equity():
+def test_calc_portfolio_allocation_preserves_existing_equity(hh_before_allocation):
     # Given
-    model = Mock()
-    household = Household(model)
-    household.equity = 80
+    household = hh_before_allocation
+    household.account.stocks["equity"] = 80
     household.calc_liquidity_preference = Mock(return_value=0.80)
     household.calc_expected_net_worth = Mock(return_value=100)
 
@@ -853,10 +808,10 @@ def test_create_company_can_create_bank(household_before_investment):
 
 
 @pytest.fixture
-def household_as_depositor(household_with_roles):
+def household_as_depositor(household_with_roles_and_account):
     # Given
     role = Mock()
-    household, roles = household_with_roles
+    household, roles, _ = household_with_roles_and_account
     roles["depositor"] = role
     return household, role
 
@@ -864,8 +819,7 @@ def household_as_depositor(household_with_roles):
 def test_make_deposits_with_residual_cash(household_as_depositor):
     # Given
     household, role = household_as_depositor
-    household.cash = 500
-    household.country = "any"
+    household.account.stocks["cash"] = 500
 
     # When
     household.make_deposits()
@@ -875,10 +829,10 @@ def test_make_deposits_with_residual_cash(household_as_depositor):
 
 
 @pytest.fixture
-def household_as_investor():
-    model = Mock()
-    household = Household(model)
-    household.equity = 0
+def household_as_investor(hh_before_allocation):
+    # Given
+    household = hh_before_allocation
+    household.account.stocks["equity"] = 0
     household.desired_equity = 100
     household.roles = {"citizen": Mock()}
     household.choose_investment_sector = Mock(return_value=None)
