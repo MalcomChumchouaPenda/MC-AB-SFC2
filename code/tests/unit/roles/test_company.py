@@ -94,6 +94,31 @@ def test_get_equity_shares_from_space(company_with_space):
     assert found == space.find_equity_shares.return_value
 
 
+
+def test_get_tax_rate(company_with_space):
+    # Given
+    company, space = company_with_space
+    space.fiscal_authority.tax_rate = 0.2
+
+    # When
+    perceived = company.get_tax_rate()
+
+    # Assert
+    assert perceived == 0.2
+
+
+def test_get_discount_rate(company_with_space):
+    # Given
+    company, space = company_with_space
+    space.monetary_authority.discount_rate = 0.05
+
+    # When
+    perceived = company.get_discount_rate()
+
+    # Assert
+    assert perceived == 0.05
+
+
 # ---------------------------------------------------
 # ACTIONS
 # ----------------------------------------------------

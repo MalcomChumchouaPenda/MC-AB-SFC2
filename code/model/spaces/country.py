@@ -29,10 +29,6 @@ class Country(EcoSpace):
         self.labor_market = None
         self.deposit_market = None
 
-    @property
-    def discount_rate(self):
-        return self.union.discount_rate
-
     #
     # Role management
     #
@@ -51,6 +47,7 @@ class Country(EcoSpace):
 
     def add_citizen(self, agent):
         role = self.add_role(Citizen, agent, "citizen")
+        agent.cb_account = self.monetary_authority.account
         self.union.add_account(agent)
         self.citizens.append(role)
         return role
@@ -58,6 +55,7 @@ class Country(EcoSpace):
     def add_company(self, agent, sector):
         role = self.add_role(Company, agent, "company")
         role.sector = sector
+        agent.cb_account = self.monetary_authority.account
         self.companies.append(role)
         self.union.add_account(agent)
         return role

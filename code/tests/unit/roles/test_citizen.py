@@ -111,6 +111,19 @@ def test_get_sector_equity_range_from_space(citizen_with_space):
     assert range_ == (100, 200)
 
 
+
+def test_get_tax_rate(citizen_with_space):
+    # Given
+    citizen, space = citizen_with_space
+    space.fiscal_authority.tax_rate = 0.2
+
+    # When
+    perceived = citizen.get_tax_rate()
+
+    # Assert
+    assert perceived == 0.2
+
+
 # ---------------------------------------------------
 # ACTION TESTS
 # ----------------------------------------------------

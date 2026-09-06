@@ -1,49 +1,70 @@
 import math
 import pytest
-from unittest.mock import Mock, PropertyMock
+from unittest.mock import Mock
+from model.base import EcoAccount
 from model.agents.bank import Bank
-from model.agents.central_bank import NationalCentralBank
-from model.spaces.country import Country
+from model.spaces.credit_market import CreditMarket
 
 
 @pytest.fixture
 def model():
     # Given
-    model = Mock()
-    model.p.mu2 = 0.10
-    return model
+    return Mock()
 
 
 @pytest.fixture
-def cb(model):
+def bank(model):
     # Given
-    union_cb = Mock(discount_rate=0.05)
-    cb = NationalCentralBank(model)
-    cb.setup()
-    cb.reserves = 50
-    cb.union_bank = union_cb
-    return cb
-
-
-@pytest.fixture
-def bank(model, monkeypatch):
-    # Given
-    mock_deposits = PropertyMock(return_value=1000)
-    monkeypatch.setattr(Bank, "deposits", mock_deposits)
     bank = Bank(model)
-    bank.reserves = 50
+    bank.setup()
+    bank.account = EcoAccount(model)
+    bank.account.setup()
+    bank.cb_account = EcoAccount(model)
+    bank.cb_account.setup()
     return bank
 
 
-def test_bank_requests_cash_advance(bank, cb):
+@pytest.fixture
+def market(model, bank):
     # Given
-    bank.central_bank = cb
+    market = CreditMarket(model)
+    market.setup()
+    market.add_lender(bank)    
+    return market
+
+
+@pytest.mark.usefixtures("market")
+def test_bank_requests_cash_advance(bank):
+    # Given
+    bank.p.mu2 = 0.10
+    bank.account.stocks["cash"] = 50
+    bank.account.stocks["deposits"] = 1000
 
     # When
     bank.request_cash_advances()
 
     # Then
-    assert bank.reserves == 100
-    assert bank.cash_advances == 50
-    assert cb.reserves == 100
-    assert cb.cash_advances == 50
+    assert bank.account.stocks["cash"] == 100
+    assert bank.account.stocks["advances"] == -50
+    assert bank.cb_account.stocks["cash"] == -50
+    assert bank.cb_account.stocks["advances"] == 50
+
+
+
+@pytest.mark.usefixtures("market")
+def test_bank_repays_cash_advance(bank):
+    # Given
+    bank.account.stocks["advances"] = -100
+    bank.roles["company"] = Mock()
+    bank.roles["company"].get_discount_rate.return_value = 0.05
+
+    # When
+    bank.repay_cash_advances()
+
+    # Then
+    assert bank.account.stocks["cash"] == -105
+    assert bank.account.stocks["advances"] == 0
+    assert bank.account.flows["adv_interests"] == -5
+    assert bank.cb_account.stocks["cash"] == 105
+    assert bank.cb_account.stocks["advances"] == -100
+    assert bank.cb_account.flows["adv_interests"] == 5

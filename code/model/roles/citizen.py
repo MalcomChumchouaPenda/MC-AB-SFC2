@@ -25,6 +25,9 @@ class Citizen(EcoRole):
     def get_sector_equity_range(self, sector):
         return self.space.calc_sector_equity_range(sector)
 
+    def get_tax_rate(self):
+        return self.space.fiscal_authority.tax_rate
+
     #
     # Creation actions
     #

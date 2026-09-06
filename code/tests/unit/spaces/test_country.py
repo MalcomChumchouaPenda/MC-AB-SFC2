@@ -79,18 +79,6 @@ def test_has_tax_rate(country_before_setup):
     assert country.tax_rate == 0
 
 
-def test_expose_discount_rate(country_before_setup):
-    # Given
-    union = Mock(discount_rate=0.02)
-    country = country_before_setup
-
-    # When
-    country.union = union
-
-    # Then
-    assert country.discount_rate == 0.02
-
-
 # ---------------------------------------------------
 # ROLES
 # ----------------------------------------------------
@@ -240,8 +228,9 @@ def country_without_citizens(monkeypatch, country_before_setup):
     monkeypatch.setattr("model.spaces.country.Citizen", FakeCitizen)
     country = country_before_setup
     country.add_role = Mock()
-    country.union = Mock()
     country.citizens = []
+    country.union = Mock()
+    country.monetary_authority = Mock()
     return country
 
 
@@ -283,6 +272,20 @@ def test_add_citizen_add_account(country_without_citizens):
     union.add_account.assert_called_with(household)
 
 
+
+def test_add_citizen_links_to_cb_account(country_without_citizens):
+    # Given
+    country = country_without_citizens
+    authority = country.monetary_authority
+    household = Mock()
+
+    # When
+    country.add_citizen(household)
+
+    # Then
+    assert household.cb_account is authority.account
+
+
 FakeCompany = Mock()
 
 
@@ -294,6 +297,7 @@ def country_without_companies(monkeypatch, country_before_setup):
     country.add_role = Mock()
     country.union = Mock()
     country.companies = []
+    country.monetary_authority = Mock()
     return country
 
 
@@ -345,6 +349,19 @@ def test_add_company_add_account(country_without_companies):
 
     # Then
     union.add_account.assert_called_with(agent)
+
+
+def test_add_company_links_to_cb_account(country_without_companies):
+    # Given
+    country = country_without_companies
+    authority = country.monetary_authority
+    agent = Mock()
+
+    # When
+    country.add_company(agent, sector="X")
+
+    # Then
+    assert agent.cb_account is authority.account
 
 
 # ---------------------------------------------------
@@ -806,6 +823,7 @@ def test_create_bank_place_bank_in_union(country_before_creation, share):
 
     # Then
     country.union.place_bank.assert_called_with(bank)
+
 
 
 # ---------------------------------------------------

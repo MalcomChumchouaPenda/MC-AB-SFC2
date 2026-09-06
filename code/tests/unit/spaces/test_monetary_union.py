@@ -223,18 +223,6 @@ def test_add_account_register_new_account(union_with_authority):
     assert account.agent == agent
 
 
-def test_add_account_links_to_authority(union_with_authority):
-    # Given
-    agent = Mock()
-    union, authority = union_with_authority
-
-    # When
-    union.add_account(agent)
-
-    # Then
-    assert agent.cb_account is authority.account
-
-
 # ---------------------------------------------------
 # FIRM CREATION TESTS
 # ----------------------------------------------------
@@ -335,39 +323,3 @@ def test_transfer_cash_between_agents_updates_accounts(union_with_authority):
     source.account.debit_stock.assert_any_call("cash", 100)
     target.account.credit_stock.assert_any_call("cash", 100)
 
-
-# ---------------------------------------------------
-# CASH ADVANCE REQUEST / REPAYMENT
-# ----------------------------------------------------
-
-
-def test_request_advances_updates_accounts(union_with_authority):
-    # Given
-    borrower = Mock()
-    union, authority = union_with_authority
-
-    # When
-    union.request_advances(borrower, 100)
-
-    # Then
-    authority.account.debit_stock.assert_any_call("cash", 100)
-    authority.account.credit_stock.assert_any_call("advances", 100)
-    borrower.account.credit_stock.assert_any_call("cash", 100)
-    borrower.account.debit_stock.assert_any_call("advances", 100)
-
-
-def test_repay_advances_updates_accounts(union_with_authority):
-    # Given
-    borrower = Mock()
-    union, authority = union_with_authority
-
-    # When
-    union.repay_advances(borrower, 100, 10)
-
-    # Then
-    authority.account.credit_stock.assert_any_call("cash", 110)
-    authority.account.debit_stock.assert_any_call("advances", 100)
-    authority.account.credit_stock.assert_any_call("adv_interests", 10)
-    borrower.account.debit_stock.assert_any_call("cash", 110)
-    borrower.account.credit_stock.assert_any_call("advances", 100)
-    borrower.account.debit_stock.assert_any_call("adv_interests", 10)

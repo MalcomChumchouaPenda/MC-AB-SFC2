@@ -201,12 +201,12 @@ def test_grant_loan_updates_accounts(market_with_participants):
     market.grant_loan(lender, borrower, 500, 0.05)
 
     # Then
-    borrower.account.debit_stock.assert_any_call("loans", 500)
-    borrower.account.credit_stock.assert_any_call("deposits", 500)
+    borrower.debit_stock.assert_any_call("loans", 500)
+    borrower.credit_stock.assert_any_call("deposits", 500)
     borrower.bank_account.debit_stock.assert_any_call("deposits", 500)
     borrower.bank_account.credit_stock.assert_any_call("cash", 500)
-    lender.account.debit_stock.assert_any_call("cash", 500)
-    lender.account.credit_stock.assert_any_call("loans", 500)
+    lender.debit_stock.assert_any_call("cash", 500)
+    lender.credit_stock.assert_any_call("loans", 500)
 
 
 def test_grant_loan_reduces_loan_demand(market_with_participants):
@@ -269,14 +269,14 @@ def test_repay_loan_updates_accounts(market_with_loan):
     market.repay_loan(borrower, lender, 100, 10)
 
     # Then
-    borrower.account.credit_stock.assert_any_call("loans", 100)
-    borrower.account.debit_flow.assert_any_call("loan_interests", 10)
-    borrower.account.debit_stock.assert_any_call("deposits", 110)
+    borrower.credit_stock.assert_any_call("loans", 100)
+    borrower.debit_flow.assert_any_call("loan_interests", 10)
+    borrower.debit_stock.assert_any_call("deposits", 110)
     borrower.bank_account.credit_stock.assert_any_call("deposits", 110)
     borrower.bank_account.debit_stock.assert_any_call("cash", 110)
-    lender.account.credit_stock.assert_any_call("cash", 110)
-    lender.account.debit_stock.assert_any_call("loans", 100)
-    lender.account.credit_flow.assert_any_call("loans_interests", 10)
+    lender.credit_stock.assert_any_call("cash", 110)
+    lender.debit_stock.assert_any_call("loans", 100)
+    lender.credit_flow.assert_any_call("loans_interests", 10)
 
 
 # ---------------------------------------------------
@@ -293,25 +293,40 @@ def market_with_union(market_before_setup):
     return market, union
 
 
+
+# ---------------------------------------------------
+# CASH ADVANCE REQUEST / REPAYMENT
+# ----------------------------------------------------
+
+
 def test_request_advances_updates_accounts(market_with_union):
     # Given
     lender = Mock()
-    market, union = market_with_union
+    market, _ = market_with_union
 
     # When
     market.request_advances(lender, 100)
 
     # Then
-    union.request_advances.assert_any_call(lender, 100)
+    lender.credit_stock.assert_any_call("cash", 100)
+    lender.debit_stock.assert_any_call("advances", 100)
+    lender.cb_account.debit_stock.assert_any_call("cash", 100)
+    lender.cb_account.credit_stock.assert_any_call("advances", 100)
 
 
 def test_repay_advances_updates_accounts(market_with_union):
     # Given
     lender = Mock()
-    market, union = market_with_union
+    market, _ = market_with_union
 
     # When
     market.repay_advances(lender, 100, 10)
 
     # Then
-    union.repay_advances.assert_any_call(lender, 100, 10)
+    lender.debit_stock.assert_any_call("cash", 110)
+    lender.credit_stock.assert_any_call("advances", 100)
+    lender.debit_flow.assert_any_call("adv_interests", 10)
+    lender.cb_account.credit_stock.assert_any_call("cash", 110)
+    lender.cb_account.debit_stock.assert_any_call("advances", 100)
+    lender.cb_account.credit_flow.assert_any_call("adv_interests", 10)
+

@@ -10,9 +10,7 @@ from model.spaces.bond_market import BondMarket
 @pytest.fixture
 def model():
     # Given
-    model = Mock()
-    model.p.iota_b = 0
-    return model
+    return Mock()
 
 
 @pytest.fixture
@@ -20,10 +18,8 @@ def cb(model):
     # Given
     cb = CentralBank(model)
     cb.setup()
-    cb.discount_rate = 0.04
     cb.account = EcoAccount(model)
     cb.account.setup()
-    # cb.account.stocks["cash"] = 1000
     return cb
 
 

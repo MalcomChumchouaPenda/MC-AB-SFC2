@@ -61,6 +61,9 @@ class Bank(EcoAgent):
         leverage = borrower.target_leverage
         return self.p.chi * leverage + cb.discount_rate
 
+    #
+    # Cash advances
+    #
     def request_cash_advances(self):
         stocks = self.account.stocks
         required = self.p.mu2 * stocks["deposits"]
@@ -68,6 +71,15 @@ class Bank(EcoAgent):
         if shortage > 0:
             role = self.roles["lender"]
             role.request_advances(shortage)
+
+    def repay_cash_advances(self):
+        discount_rate = self.roles["company"].get_discount_rate()
+        principal = abs(self.account.stocks["advances"])
+        if principal > 0:
+            interests = discount_rate * principal
+            role = self.roles["lender"]
+            role.repay_advances(principal, interests)
+
 
     def buy_bonds(self):
         role = self.roles["bond_buyer"]

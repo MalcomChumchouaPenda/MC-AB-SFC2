@@ -102,7 +102,7 @@ def test_has_default_defaulted(bank_before_setup):
 
 
 # ---------------------------------------------------
-# BEHAVIORS TESTS
+# DEPOSIT INTERESTS PAYMENT
 # ----------------------------------------------------
 
 
@@ -137,6 +137,10 @@ def test_pay_deposit_interests_to_all_clients(bank_before_setup):
     deposit_market.get_bank_deposits.assert_called_once_with(bank)
     deposit_market.pay_interests.assert_called_once_with(client, bank, 5.0)
 
+
+# ---------------------------------------------------
+#  CREDIT SUPPLY
+# ----------------------------------------------------
 
 def test_updates_credit_capacity(bank_with_roles_and_account):
     # Given
@@ -263,6 +267,11 @@ def test_grant_loans_cleans_loan_applicants_list(bank_as_lender):
     assert len(lender.loan_applicants) == 0
 
 
+# ---------------------------------------------------
+#  ADVANCES REQUEST
+# ----------------------------------------------------
+
+
 @pytest.fixture
 def bank_before_advance(bank_with_roles_and_account):
     bank, roles, account = bank_with_roles_and_account
@@ -271,6 +280,7 @@ def bank_before_advance(bank_with_roles_and_account):
     account.stocks["advances"] = 0
     account.stocks["cash"] = 0
     roles["lender"] = Mock()
+    roles["company"] = Mock()
     return bank
 
 
@@ -298,6 +308,27 @@ def test_request_advance_when_insufficient_reserves(bank_before_advance):
 
     # Then
     role.request_advances.assert_called_with(50)
+
+
+
+def test_repay_advance_when_insufficient_reserves(bank_before_advance):
+    # Given
+    bank = bank_before_advance
+    bank.account.stocks["advances"] = -100
+    lender_role = bank.roles["lender"]
+    company_role = bank.roles["company"]
+    company_role.get_discount_rate.return_value = 0.02
+
+    # When
+    bank.repay_cash_advances()
+
+    # Then
+    lender_role.repay_advances.assert_called_with(100, 2)
+
+
+# ---------------------------------------------------
+# BONDS PURCHASES
+# ----------------------------------------------------
 
 
 def test_calc_bond_purchases_probability():
@@ -409,6 +440,10 @@ def test_dont_buy_bonds_with_insufficient_reserves(bank_as_bond_buyer, bond_issu
     # Then
     role.buy_bonds.assert_called_once_with(bond_issuers[0], 1)
 
+
+# ---------------------------------------------------
+#  PROFIT AND TAXES 
+# ----------------------------------------------------
 
 def test_calc_profit(bank_with_roles_and_account):
     # Given
