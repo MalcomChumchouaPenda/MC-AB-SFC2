@@ -94,7 +94,6 @@ def test_get_equity_shares_from_space(company_with_space):
     assert found == space.find_equity_shares.return_value
 
 
-
 def test_get_tax_rate(company_with_space):
     # Given
     company, space = company_with_space

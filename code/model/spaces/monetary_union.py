@@ -58,5 +58,3 @@ class MonetaryUnion(EcoSpace):
     def transfer_cash(self, source, target, amount):
         source.account.debit_stock("cash", amount)
         target.account.credit_stock("cash", amount)
-
-

@@ -22,10 +22,10 @@ class Company(EcoRole):
 
     def get_tax_rate(self):
         return self.space.fiscal_authority.tax_rate
-    
+
     def get_discount_rate(self):
         return self.space.monetary_authority.discount_rate
-    
+
     #
     #  Actions methods
     #

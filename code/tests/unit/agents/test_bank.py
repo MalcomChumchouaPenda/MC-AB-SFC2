@@ -142,6 +142,7 @@ def test_pay_deposit_interests_to_all_clients(bank_before_setup):
 #  CREDIT SUPPLY
 # ----------------------------------------------------
 
+
 def test_updates_credit_capacity(bank_with_roles_and_account):
     # Given
     bank, _, account = bank_with_roles_and_account
@@ -310,7 +311,6 @@ def test_request_advance_when_insufficient_reserves(bank_before_advance):
     role.request_advances.assert_called_with(50)
 
 
-
 def test_repay_advance_when_insufficient_reserves(bank_before_advance):
     # Given
     bank = bank_before_advance
@@ -442,8 +442,9 @@ def test_dont_buy_bonds_with_insufficient_reserves(bank_as_bond_buyer, bond_issu
 
 
 # ---------------------------------------------------
-#  PROFIT AND TAXES 
+#  PROFIT AND TAXES
 # ----------------------------------------------------
+
 
 def test_calc_profit(bank_with_roles_and_account):
     # Given

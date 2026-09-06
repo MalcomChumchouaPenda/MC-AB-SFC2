@@ -80,7 +80,6 @@ class Bank(EcoAgent):
             role = self.roles["lender"]
             role.repay_advances(principal, interests)
 
-
     def buy_bonds(self):
         role = self.roles["bond_buyer"]
         bond_issuers = self.find_bond_issuers()

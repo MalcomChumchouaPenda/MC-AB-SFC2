@@ -272,7 +272,6 @@ def test_add_citizen_add_account(country_without_citizens):
     union.add_account.assert_called_with(household)
 
 
-
 def test_add_citizen_links_to_cb_account(country_without_citizens):
     # Given
     country = country_without_citizens
@@ -823,7 +822,6 @@ def test_create_bank_place_bank_in_union(country_before_creation, share):
 
     # Then
     country.union.place_bank.assert_called_with(bank)
-
 
 
 # ---------------------------------------------------

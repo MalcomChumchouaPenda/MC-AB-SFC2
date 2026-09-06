@@ -29,7 +29,7 @@ def market(model, bank):
     # Given
     market = CreditMarket(model)
     market.setup()
-    market.add_lender(bank)    
+    market.add_lender(bank)
     return market
 
 
@@ -48,7 +48,6 @@ def test_bank_requests_cash_advance(bank):
     assert bank.account.stocks["advances"] == -50
     assert bank.cb_account.stocks["cash"] == -50
     assert bank.cb_account.stocks["advances"] == 50
-
 
 
 @pytest.mark.usefixtures("market")

@@ -293,7 +293,6 @@ def market_with_union(market_before_setup):
     return market, union
 
 
-
 # ---------------------------------------------------
 # CASH ADVANCE REQUEST / REPAYMENT
 # ----------------------------------------------------
@@ -329,4 +328,3 @@ def test_repay_advances_updates_accounts(market_with_union):
     lender.cb_account.credit_stock.assert_any_call("cash", 110)
     lender.cb_account.debit_stock.assert_any_call("advances", 100)
     lender.cb_account.credit_flow.assert_any_call("adv_interests", 10)
-

@@ -322,4 +322,3 @@ def test_transfer_cash_between_agents_updates_accounts(union_with_authority):
     # Then
     source.account.debit_stock.assert_any_call("cash", 100)
     target.account.credit_stock.assert_any_call("cash", 100)
-
