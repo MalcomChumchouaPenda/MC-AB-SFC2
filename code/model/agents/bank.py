@@ -79,7 +79,7 @@ class Bank(EcoAgent):
             prob = self.calc_bond_purchases_probability(issuer)
             if choice([0, 1], p=[1 - prob, prob]):
                 bond_value = issuer.bond_value
-                purchase = min(excess/bond_value, issuer.bond_number)
+                purchase = min(excess / bond_value, issuer.bond_number)
                 role.buy_bonds(issuer, purchase)
                 excess -= purchase * bond_value
                 if excess <= 0:

@@ -23,7 +23,6 @@ class CentralBank(EcoAgent):
             if issuer.country == self.country:
                 role.buy_bonds(issuer, issuer.bond_number)
 
-
     def pay_profit(self):
         profit = self.calc_profit()
         role = self.roles["central_bank"]

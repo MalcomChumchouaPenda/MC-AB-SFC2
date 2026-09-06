@@ -27,15 +27,15 @@ def cb_before_setup():
 # BEHAVIORAL TESTS
 # ----------------------------------------------------
 
+
 @pytest.fixture
 def cb_as_bond_buyer(cb_before_setup):
     # Given
     role = Mock()
     cb = cb_before_setup
-    cb.roles = {"bond_buyer":role}
+    cb.roles = {"bond_buyer": role}
     cb.country = 1
     return cb, role
-
 
 
 def test_buy_all_domestic_remaining_bonds(cb_as_bond_buyer):
@@ -49,7 +49,6 @@ def test_buy_all_domestic_remaining_bonds(cb_as_bond_buyer):
 
     # Then
     role.buy_bonds.assert_called_with(issuer, 5)
-
 
 
 def test_dont_buy_foreign_bonds(cb_as_bond_buyer):

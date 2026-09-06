@@ -110,6 +110,7 @@ def test_expose_bond_interests_total(cb_with_country):
 # BEHAVIORAL TESTS
 # ----------------------------------------------------
 
+
 @pytest.fixture
 def mock_bond_interests(monkeypatch):
     bond_interests = PropertyMock()
