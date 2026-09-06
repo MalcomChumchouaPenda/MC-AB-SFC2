@@ -65,18 +65,7 @@ def test_has_default_variety(firm_before_setup):
     assert firm.variety == 0.0
 
 
-def test_has_default_country_indicator(firm_before_setup):
-    # Given
-    firm = firm_before_setup
-
-    # When
-    firm.setup()
-
-    # Then
-    assert firm.country == 0
-
-
-def test_has_default_indicators(firm_before_setup):
+def test_has_default_net_worth(firm_before_setup):
     # Given
     firm = firm_before_setup
 
@@ -85,12 +74,82 @@ def test_has_default_indicators(firm_before_setup):
 
     # Then
     assert firm.net_worth == 0.0
+
+
+def test_has_default_net_cash_flow(firm_before_setup):
+    # Given
+    firm = firm_before_setup
+
+    # When
+    firm.setup()
+
+    # Then
     assert firm.net_cash_flow == 0.0
+
+
+def test_has_default_prev_sales(firm_before_setup):
+    # Given
+    firm = firm_before_setup
+
+    # When
+    firm.setup()
+
+    # Then
     assert firm.prev_sales == 0
+
+
+def test_has_default_prev_output(firm_before_setup):
+    # Given
+    firm = firm_before_setup
+
+    # When
+    firm.setup()
+
+    # Then
     assert firm.prev_output == 0
+
+
+def test_has_default_prev_expected_sales(firm_before_setup):
+    # Given
+    firm = firm_before_setup
+
+    # When
+    firm.setup()
+
+    # Then
     assert firm.prev_expected_sales == 0
+
+
+def test_has_default_prev_inventories(firm_before_setup):
+    # Given
+    firm = firm_before_setup
+
+    # When
+    firm.setup()
+
+    # Then
     assert firm.prev_inventories == 0
+
+
+def test_has_default_prev_labor(firm_before_setup):
+    # Given
+    firm = firm_before_setup
+
+    # When
+    firm.setup()
+
+    # Then
     assert firm.prev_labor == 0
+
+
+def test_has_default_prev_desired_labor(firm_before_setup):
+    # Given
+    firm = firm_before_setup
+
+    # When
+    firm.setup()
+
+    # Then
     assert firm.prev_desired_labor == 0
 
 

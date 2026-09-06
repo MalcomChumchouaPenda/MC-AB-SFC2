@@ -6,12 +6,9 @@ from model.base import EcoAgent
 class Household(EcoAgent):
 
     def setup(self):
-        # stocks
+        super().setup()
         self.net_worth = 0
-
-        # flows
-        self.tradable_cons = 0
-        self.non_tradable_cons = 0
+        self.desired_consumption = 0
 
         # decisions
         self.reservation_wage = 0
@@ -29,27 +26,7 @@ class Household(EcoAgent):
 
         # others props
         self.labor_supply = 1.0
-        self.position = 0
-        self.country = None
-
-        # accointances
-        self.deposit_bank = None
-
-    @property
-    def deposits(self):
-        total = 0
-        for market in self.model.deposit_markets.values():
-            deposits = market.get_client_deposits(self)
-            total += sum([d["amount"] for d in deposits])
-        return total
-
-    @property
-    def dep_interests(self):
-        total = 0
-        for market in self.model.deposit_markets.values():
-            deposits = market.get_client_deposits(self)
-            total += sum([d["interests"] for d in deposits])
-        return total
+        self.preference = 0
 
     def revise_reservation_wage(self):
         p = self.p
@@ -103,29 +80,57 @@ class Household(EcoAgent):
 
     def calc_consumption(self):
         p = self.p
-        self.desired_consumption = p.cy * self.disposable_income + p.cd * self.deposits
-        self.desired_trad_cons = p.cT * self.desired_consumption
-        self.desired_non_trad_cons = (1 - self.p.cT) * self.desired_consumption
+        deposits = self.account.stocks["deposits"]
+        self.desired_consumption = p.cy * self.disposable_income + p.cd * deposits
+        # self.desired_trad_cons = p.cT * self.desired_consumption
+        # self.desired_non_trad_cons = (1 - self.p.cT) * self.desired_consumption
         return self.desired_consumption
 
     def consume(self):
         p = self.p
-        random = self.model.random
-        consumer_roles = [
-            self.roles["consumer_tradable"],
-            self.roles["consumer_non_tradable"],
+        roles = self.roles
+        desired_cons = self.desired_consumption
+        steps = [
+            (roles["consumer_tradable"], p.cT * desired_cons),
+            (roles["consumer_non_tradable"], (1 - p.cT) * desired_cons),
         ]
-        random.shuffle(consumer_roles)
-        for role in consumer_roles:
-            average_price = role.get_average_price()
-            suppliers = role.search_suppliers(p.psi)
-            ranked = self.rank_suppliers(suppliers, average_price=average_price)
-            role.buy_goods(ranked)
+        random = self.model.random
+        random.shuffle(steps)
+        self._fund_consumption(desired_cons)
+        for role, target_cons in steps:
+            self.consume_good(role, target_cons)
 
-    def search_suppliers(self):
+    def _fund_consumption(self, desired_cons):
+        stocks = self.account.stocks
+        if desired_cons > stocks["cash"]:
+            needs = desired_cons - stocks["cash"]
+            feasible = min(needs, stocks["deposits"])
+            role = self.roles["depositor"]
+            role.withdraw_deposits(feasible)
+
+    def consume_good(self, role, target_cons):
+        cash = self.account.stocks["cash"]
+        average_price = role.get_average_price()
+        suppliers = role.find_suppliers(self.p.psi)
+        ranked = self.rank_suppliers(suppliers, average_price=average_price)
+        for supplier in ranked:
+            if target_cons <= 0 or cash <= 0:
+                break
+            amount = self._buy_supplier_goods(role, supplier, target_cons, cash)
+            target_cons -= amount
+            cash -= amount
+
+    def _buy_supplier_goods(self, role, supplier, target_cons, cash):
+        price = supplier.price
+        quantity = min(supplier.inventories, target_cons / price)
+        quantity = min(quantity, cash / price)
+        role.buy_goods(supplier, quantity)
+        return price * quantity
+
+    def find_suppliers(self):
         p = self.p
         role = self.roles["consumer"]
-        return role.search_suppliers(p.psi)
+        return role.find_suppliers(p.psi)
 
     def rank_suppliers(self, suppliers, average_price):
         key = partial(self.calc_supplier_score, average_price=average_price)
@@ -133,7 +138,7 @@ class Household(EcoAgent):
 
     def calc_supplier_score(self, supplier, average_price):
         p = self.p
-        diff = abs(self.position - supplier.position)
+        diff = abs(self.preference - supplier.variety)
         diff = min(diff, 2 * math.pi - diff)
         distance = math.sin(diff / 2)
         return (1 / distance**p.beta) * (average_price / supplier.price)

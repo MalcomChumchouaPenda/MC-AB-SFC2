@@ -41,7 +41,15 @@ def test_has_stocks_dict(account_before_setup):
     account.setup()
 
     # Then
-    assert account.stocks == {}
+    assert account.stocks == {
+        "deposits": 0,
+        "loans": 0,
+        "inventories": 0,
+        "bonds": 0,
+        "cash": 0,
+        "advances": 0,
+        "equities": 0,
+    }
 
 
 def test_has_flows_dict(account_before_setup):
@@ -52,7 +60,19 @@ def test_has_flows_dict(account_before_setup):
     account.setup()
 
     # Then
-    assert account.flows == {}
+    assert account.flows == {
+        "consumption": 0,
+        "wages": 0,
+        "public_transfers": 0,
+        "taxes": 0,
+        "dep_interests": 0,
+        "loan_interests": 0,
+        "bond_interests": 0,
+        "cash_interests": 0,
+        "adv_interests": 0,
+        "dividends": 0,
+        "profit_transfers": 0,
+    }
 
 
 # ---------------------------------------------------

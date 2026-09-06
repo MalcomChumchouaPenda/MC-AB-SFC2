@@ -1,5 +1,5 @@
 import pytest
-from unittest.mock import Mock, PropertyMock
+from unittest.mock import Mock
 from model.agents.government import Government
 
 # ---------------------------------------------------
@@ -16,97 +16,121 @@ def test_is_eco_agent():
 
 
 @pytest.fixture
-def govt():
+def govt_before_setup():
     # Given
     model = Mock()
     govt = Government(model)
-    govt.setup()
     return govt
 
 
-def test_has_default_space_refs(govt):
-    # Assert
-    assert govt.country is None
+def test_has_tax_rate(govt_before_setup):
+    # Given
+    govt = govt_before_setup
 
+    # When
+    govt.setup()
 
-def test_has_default_profits_value(govt):
-    # Assert
-    assert govt.profits == 0
-
-
-def test_has_default_reserves_value(govt):
-    # Assert
-    assert govt.reserves == 0
-
-
-def test_has_default_bond_supply_value(govt):
-    # Assert
-    assert govt.bond_supply == 0.0
-
-
-def test_has_default_flows(govt):
-    # Assert
-    assert govt.taxes == 0
-    assert govt.public_transfers == 0
-
-
-def test_has_default_choices(govt):
-    # Assert
+    # Then
     assert govt.tax_rate == 0
+
+
+def test_has_bond_rate(govt_before_setup):
+    # Given
+    govt = govt_before_setup
+
+    # When
+    govt.setup()
+
+    # Then
     assert govt.bond_rate == 0
+
+
+def test_has_public_spending(govt_before_setup):
+    # Given
+    govt = govt_before_setup
+
+    # When
+    govt.setup()
+
+    # Then
     assert govt.public_spending == 0
+
+
+def test_has_desired_public_spending(govt_before_setup):
+    # Given
+    govt = govt_before_setup
+
+    # When
+    govt.setup()
+
+    # Then
     assert govt.desired_public_spending == 0
+
+
+def test_has_new_public_debt(govt_before_setup):
+    # Given
+    govt = govt_before_setup
+
+    # When
+    govt.setup()
+
+    # Then
     assert govt.new_public_debt == 0
 
 
-def test_has_default_indicators(govt):
-    # Assert
-    assert govt.gdp == 0
+def test_has_budget_deficit(govt_before_setup):
+    # Given
+    govt = govt_before_setup
+
+    # When
+    govt.setup()
+
+    # Then
     assert govt.budget_deficit == 0
+
+
+def test_has_budget_surplus(govt_before_setup):
+    # Given
+    govt = govt_before_setup
+
+    # When
+    govt.setup()
+
+    # Then
     assert govt.budget_surplus == 0
+
+
+def test_has_prev_public_spending(govt_before_setup):
+    # Given
+    govt = govt_before_setup
+
+    # When
+    govt.setup()
+
+    # Then
     assert govt.prev_public_spending == 0
+
+
+def test_has_prev_budget_surplus(govt_before_setup):
+    # Given
+    govt = govt_before_setup
+
+    # When
+    govt.setup()
+
+    # Then
     assert govt.prev_budget_surplus == 0
 
 
-def test_has_default_refs(govt):
-    # Assert
-    assert govt.central_bank is None
-
-
-# ---------------------------------------------------
-# DERIVED STATE TESTS
-# ----------------------------------------------------
-
-
 @pytest.fixture
-def govt_with_country():
-    model, country = Mock(), Mock()
-    govt = Government(model)
-    govt.setup()
-    govt.country = country
-    return govt, country
-
-
-def test_expose_bonds_total(govt_with_country):
+def govt_with_roles_and_account(govt_before_setup):
     # Given
-    bonds = [{"buyer": object(), "principal": 500}]
-    govt, country = govt_with_country
-    bond_market = country.union.bond_market
-    bond_market.get_issuer_bonds.return_value = bonds
-
-    # Assert
-    assert govt.bonds == 500
-
-
-def test_expose_bond_interests_total(govt_with_country):
-    # Given
-    bonds = [{"buyer": object(), "interests": 50.0}]
-    govt, country = govt_with_country
-    bond_market = country.union.bond_market
-    bond_market.get_issuer_bonds.return_value = bonds
-
-    # Assert
-    assert govt.bond_interests == pytest.approx(50.0)
+    roles = {}
+    account = Mock(stocks={}, flows={})
+    govt = govt_before_setup
+    govt.account = account
+    govt.roles = roles
+    return govt, roles, account
 
 
 # ---------------------------------------------------
@@ -115,65 +139,40 @@ def test_expose_bond_interests_total(govt_with_country):
 
 
 @pytest.fixture
-def govt_with_spending():
+def govt_as_authority(govt_with_roles_and_account):
     # Given
-    spending = 100
-    model = Mock()
-    govt = Government(model)
-    govt.setup()
-    govt.country = "any"
-    govt.public_spending = spending
-    return govt, spending
+    role = Mock()
+    govt, roles, _ = govt_with_roles_and_account
+    roles["fiscal_authority"] = role
+    return govt, role
 
 
-def test_pay_public_transfers_to_domestic_households(govt_with_spending):
+def test_pay_public_transfers(govt_as_authority):
     # Given
-    govt, spending = govt_with_spending
-    household = Mock(country="any", cash=0, public_transfers=0)
-    govt.model.households = [household]
+    found = [Mock() for _ in range(2)]
+    govt, role = govt_as_authority
+    govt.public_spending = 100
+    role.find_citizens.return_value = found
 
     # When
     govt.pay_public_transfers()
 
     # Then
-    assert household.cash == spending
-    assert household.public_transfers == spending
-    assert govt.reserves == -spending
-    assert govt.public_transfers == spending
+    role.pay_public_transfers.assert_any_call(found[0], 50.0)
+    role.pay_public_transfers.assert_any_call(found[1], 50.0)
 
 
-def test_dont_pay_public_transfers_to_foreign_households(govt_with_spending):
+# ---------------------------------------------------
+#  BUDGET BALANCE
+# ----------------------------------------------------
+
+
+def test_calc_budget_balance(govt_with_roles_and_account):
     # Given
-    govt, _ = govt_with_spending
-    household = Mock(country="other", cash=0, public_transfers=0)
-    govt.model.households = [household]
-
-    # When
-    govt.pay_public_transfers()
-
-    # Then
-    assert household.cash == 0
-    assert household.public_transfers == 0
-    assert govt.reserves == 0
-    assert govt.public_transfers == 0
-
-
-@pytest.fixture
-def govt_with_bond_interests(monkeypatch):
-    # Given
-    model = Mock()
-    interests_prop = PropertyMock()
-    monkeypatch.setattr(Government, "bond_interests", interests_prop)
-    govt = Government(model)
-    return govt, interests_prop
-
-
-def test_calc_budget_balance(govt_with_bond_interests):
-    # Given
-    govt, bond_interests = govt_with_bond_interests
-    govt.taxes = 1000
-    govt.public_spending = 700
-    bond_interests.return_value = 100
+    govt, _, account = govt_with_roles_and_account
+    account.flows["public_transfers"] = 700
+    account.flows["taxes"] = 1000
+    account.flows["bond_interests"] = 100
 
     # When
     balance = govt.calc_budget_balance()
@@ -182,12 +181,12 @@ def test_calc_budget_balance(govt_with_bond_interests):
     assert balance == 200
 
 
-def test_calc_and_records_budget_deficit(govt_with_bond_interests):
+def test_calc_and_records_budget_deficit(govt_with_roles_and_account):
     # Given
-    govt, bond_interests = govt_with_bond_interests
-    govt.taxes = 500
-    govt.public_spending = 600
-    bond_interests.return_value = 100
+    govt, _, account = govt_with_roles_and_account
+    account.flows["public_transfers"] = 600
+    account.flows["taxes"] = 500
+    account.flows["bond_interests"] = 100
 
     # When
     govt.calc_budget_balance()
@@ -197,12 +196,12 @@ def test_calc_and_records_budget_deficit(govt_with_bond_interests):
     assert govt.budget_surplus == 0
 
 
-def test_calc_and_records_budget_surplus(govt_with_bond_interests):
+def test_calc_and_records_budget_surplus(govt_with_roles_and_account):
     # Given
-    govt, bond_interests = govt_with_bond_interests
-    govt.taxes = 1000
-    govt.public_spending = 700
-    bond_interests.return_value = 100
+    govt, _, account = govt_with_roles_and_account
+    account.flows["public_transfers"] = 700
+    account.flows["taxes"] = 1000
+    account.flows["bond_interests"] = 100
 
     # When
     govt.calc_budget_balance()
@@ -212,12 +211,12 @@ def test_calc_and_records_budget_surplus(govt_with_bond_interests):
     assert govt.budget_deficit == 0
 
 
-def test_calc_and_records_with_no_deficit_or_surplus(govt_with_bond_interests):
+def test_calc_and_records_with_no_deficit_or_surplus(govt_with_roles_and_account):
     # Given
-    govt, bond_interests = govt_with_bond_interests
-    govt.taxes = 800
-    govt.public_spending = 700
-    bond_interests.return_value = 100
+    govt, _, account = govt_with_roles_and_account
+    account.flows["public_transfers"] = 700
+    account.flows["taxes"] = 800
+    account.flows["bond_interests"] = 100
 
     # When
     govt.calc_budget_balance()
@@ -227,12 +226,12 @@ def test_calc_and_records_with_no_deficit_or_surplus(govt_with_bond_interests):
     assert govt.budget_surplus == 0
 
 
-def test_calc_and_records_desired_public_spending(govt):
+def test_calc_and_records_desired_public_spending(govt_as_authority):
     # Given
-    goods_market = Mock(average_price=2, average_productivity=3)
-    govt.model.goods_markets = {"any": goods_market}
+    govt, role = govt_as_authority
     govt.prev_public_spending = 10
-    govt.country = "any"
+    role.get_average_price.return_value = 2
+    role.get_average_productivity.return_value = 3
 
     # When
     desired = govt.calc_desired_public_spending()
@@ -242,9 +241,15 @@ def test_calc_and_records_desired_public_spending(govt):
     assert govt.desired_public_spending == desired
 
 
+# ---------------------------------------------------
+#  PUBLIC POLICY
+# ----------------------------------------------------
+
+
 @pytest.mark.parametrize("tax_rate, expected", [(0.38, 0.40), (0.58, 0.50)])
-def test_tax_rate_is_bounded(govt, tax_rate, expected):
+def test_tax_rate_is_bounded(govt_before_setup, tax_rate, expected):
     # Given
+    govt = govt_before_setup
     govt.tax_rate = tax_rate
     govt.p.tax_min = 0.40
     govt.p.tax_max = 0.50
@@ -257,12 +262,13 @@ def test_tax_rate_is_bounded(govt, tax_rate, expected):
 
 
 @pytest.mark.parametrize("spending, expected", [(80, 100), (150, 120)])
-def test_public_spending_is_bounded_by_gdp(govt, spending, expected):
+def test_public_spending_is_bounded_by_gdp(govt_as_authority, spending, expected):
     # Given
+    govt, role = govt_as_authority
     govt.public_spending = spending
-    govt.gdp = 1000
     govt.p.g_min = 0.10
     govt.p.g_max = 0.12
+    role.get_gdp.return_value = 1000
 
     # When
     govt.apply_public_spending_bounds()
@@ -272,20 +278,19 @@ def test_public_spending_is_bounded_by_gdp(govt, spending, expected):
 
 
 @pytest.fixture
-def govt_for_policy():
+def govt_for_policy(govt_as_authority):
     # Given
-    model = Mock()
-    model.p.dmax = 0.05
-    model.p.delta = 0.10
-    govt = Government(model)
+    govt, role = govt_as_authority
+    govt.p.dmax = 0.05
+    govt.p.delta = 0.10
     govt.tax_rate = 0.20
-    govt.gdp = 1000
     govt.public_spending = 100
     govt.desired_public_spending = 0
     govt.apply_tax_rate_bounds = Mock()
     govt.apply_public_spending_bounds = Mock()
     govt.calc_desired_public_spending = Mock(return_value=0)
     govt.model.random.uniform.return_value = 0.05
+    role.get_gdp.return_value = 1000
     return govt
 
 
@@ -374,22 +379,25 @@ def test_increase_spending_and_keep_tax_when_deficit_low(govt_for_policy):
     assert govt.tax_rate == pytest.approx(0.20)
 
 
+# ---------------------------------------------------
+#  BOND SUPPLY
+# ----------------------------------------------------
+
+
 @pytest.fixture
-def govt_with_bonds(monkeypatch):
+def govt_before_bond_calc(govt_with_roles_and_account):
     # Given
-    model = Mock()
-    bonds_prop = PropertyMock()
-    monkeypatch.setattr(Government, "bonds", bonds_prop)
-    govt = Government(model)
-    return govt, bonds_prop
+    govt, roles, _ = govt_with_roles_and_account
+    roles["fiscal_authority"] = Mock()
+    return govt
 
 
-def test_calc_new_debt(govt_with_bonds):
+def test_calc_new_debt(govt_before_bond_calc):
     # Given
-    govt, bonds = govt_with_bonds
+    govt = govt_before_bond_calc
     govt.budget_deficit = 200
     govt.prev_budget_surplus = 50
-    bonds.return_value = 1000
+    govt.account.stocks["bonds"] = 1000
 
     # When
     new_debt = govt.calc_new_debt()
@@ -399,11 +407,11 @@ def test_calc_new_debt(govt_with_bonds):
     assert govt.new_public_debt == 1150
 
 
-def test_calc_new_bonds(govt_with_bonds):
+def test_calc_new_bonds(govt_before_bond_calc):
     # Given
-    govt, bonds = govt_with_bonds
+    govt = govt_before_bond_calc
     govt.new_public_debt = 1150
-    bonds.return_value = 1000
+    govt.account.stocks["bonds"] = 1000
 
     # When
     issuance = govt.calc_new_bonds()
@@ -412,11 +420,11 @@ def test_calc_new_bonds(govt_with_bonds):
     assert issuance == 150
 
 
-def test_calc_not_new_bonds_with_enough_bonds(govt_with_bonds):
+def test_calc_not_new_bonds_with_enough_bonds(govt_before_bond_calc):
     # Given
-    govt, bonds = govt_with_bonds
+    govt = govt_before_bond_calc
     govt.new_public_debt = 900
-    bonds.return_value = 1000
+    govt.account.stocks["bonds"] = 1000
 
     # When
     issuance = govt.calc_new_bonds()
@@ -426,32 +434,39 @@ def test_calc_not_new_bonds_with_enough_bonds(govt_with_bonds):
 
 
 @pytest.fixture
-def govt_as_bond_supplier():
+def govt_before_bond_supply(govt_with_roles_and_account):
     # Given
-    model = Mock()
-    govt = Government(model)
-    govt.bond_supply = 0
+    govt, roles, _ = govt_with_roles_and_account
     govt.calc_new_debt = Mock(return_value=0)
     govt.calc_new_bonds = Mock(return_value=0)
+    govt.bond_supply = 0
+    roles["bond_issuer"] = Mock()
+    roles["fiscal_authority"] = Mock()
     return govt
 
 
-def test_issues_bonds(govt_as_bond_supplier):
+def test_issues_bonds_with_role(govt_before_bond_supply):
     # Given
-    govt = govt_as_bond_supplier
+    govt = govt_before_bond_supply
     govt.bond_supply = 100
     govt.calc_new_bonds.return_value = 500
+    govt.roles["fiscal_authority"].get_gdp.return_value = 1000
+    role = govt.roles["bond_issuer"]
 
     # When
     govt.issue_bonds()
 
     # Then
     assert govt.bond_supply == 600
+    assert role.debt_ratio == 0.6
+    assert role.bond_value == 6.0
+    assert role.bond_number == 100
 
 
-def test_issues_bonds_with_multi_step(govt_as_bond_supplier):
+def test_issues_bonds_with_multi_step(govt_before_bond_supply):
     # Given
-    govt = govt_as_bond_supplier
+    govt = govt_before_bond_supply
+    govt.roles["fiscal_authority"].get_gdp.return_value = 1000
 
     # When
     govt.issue_bonds()
@@ -461,142 +476,119 @@ def test_issues_bonds_with_multi_step(govt_as_bond_supplier):
     govt.calc_new_bonds.assert_called_with()
 
 
-def test_repay_bonds_calc_and_register_bond_rate(govt_with_country):
+# ---------------------------------------------------
+#  BOND REPAYMENT
+# ----------------------------------------------------
+
+
+@pytest.fixture
+def govt_before_repayment(govt_with_roles_and_account):
     # Given
-    govt, country = govt_with_country
-    bond_market = country.union.bond_market
-    bond_market.get_issuer_bonds.return_value = []
-    govt.calc_bond_rate = Mock(return_value=0.01)
-
-    # When
-    govt.repay_bonds()
-
-    # Then
-    assert govt.bond_rate == 0.01
+    govt, roles, _ = govt_with_roles_and_account
+    roles["bond_issuer"] = Mock()
+    roles["fiscal_authority"] = Mock()
+    return govt
 
 
-def test_repay_bonds_uses_bond_market(govt_with_country):
+def test_update_bond_rate(govt_before_repayment):
     # Given
-    buyer = object()
-    bonds = [{"buyer": buyer, "principal": 500}]
-    govt, country = govt_with_country
-    bond_market = country.union.bond_market
-    bond_market.get_issuer_bonds.return_value = bonds
-    govt.calc_bond_rate = Mock(return_value=0.01)
-
-    # When
-    govt.repay_bonds()
-
-    # Then
-    bond_market.repay_bonds.assert_called_with(govt, buyer, 500, 5.0)
-
-
-def test_calc_bond_rate(govt_with_bonds):
-    # Given
-    govt, bonds = govt_with_bonds
-    govt.central_bank = Mock(discount_rate=0.03)
-    govt.gdp = 1000
+    govt = govt_before_repayment
     govt.p.chi = 0.02
-    bonds.return_value = 500
+    govt.account.stocks["bonds"] = 500
+    govt.roles["fiscal_authority"].get_gdp.return_value = 1000
+    govt.roles["fiscal_authority"].get_discount_rate.return_value = 0.03
 
     # when
-    rate = govt.calc_bond_rate()
+    rate = govt.update_bond_rate()
 
     # Then
     assert rate == 0.04
+    assert govt.bond_rate == 0.04
+
+
+def test_repay_bonds(govt_before_repayment):
+    # Given
+    buyer = object()
+    bonds = [{"buyer": buyer, "amount": 500}]
+    govt = govt_before_repayment
+    govt.bond_rate = 0.01
+    role = govt.roles["bond_issuer"]
+    role.find_bonds.return_value = bonds
+
+    # When
+    govt.repay_bonds()
+
+    # Then
+    role.repay_bonds.assert_called_with(buyer, 500, 5.0)
+
+
+# ---------------------------------------------------
+#  DEPOSIT GUARANTEE
+# ----------------------------------------------------
 
 
 @pytest.fixture
-def model_with_deposit_markets():
+def govt_as_deposit_guarantee(govt_with_roles_and_account):
     # Given
-    deposit_market = Mock()
-    model = Mock()
-    model.deposit_markets = {"any": deposit_market}
-    return model, deposit_market
-
-
-@pytest.fixture
-def govt_as_deposit_guarantee(model_with_deposit_markets):
-    # Given
-    model, deposit_market = model_with_deposit_markets
-    govt = Government(model)
+    role = Mock()
+    govt, roles, _ = govt_with_roles_and_account
     govt.bond_supply = 0
-    govt.country = "any"
     govt._defaults = []
-    return govt, deposit_market
+    roles["bond_issuer"] = Mock()
+    roles["deposit_guarantee"] = role
+    return govt, role
 
 
 def test_issue_deposit_guarantee_bonds(govt_as_deposit_guarantee):
     # Given
-    govt, deposit_market = govt_as_deposit_guarantee
-    govt.bond_supply = 100
-    defaults = [Mock(deposits=100) for _ in range(3)]
-    deposit_market.get_defaulted_banks.return_value = defaults
+    bank = Mock()
+    bank.account.stocks = {"deposits": 100}
+    govt, role = govt_as_deposit_guarantee
+    govt.bond_supply = 200
+    role.find_defaulted_banks.return_value = [bank]
 
     # When
     govt.issue_deposit_guarantee_bonds()
 
     # Then
-    assert govt.bond_supply == 400
+    assert govt.bond_supply == 300
+    assert govt.roles["bond_issuer"].bond_value == 3
+    assert govt.roles["bond_issuer"].bond_number == 100
 
 
 def test_issue_deposit_guarantee_bonds_registers_defaults(govt_as_deposit_guarantee):
     # Given
-    defaults = [Mock(deposits=100)]
-    govt, deposit_market = govt_as_deposit_guarantee
-    deposit_market.get_defaulted_banks.return_value = defaults
+    bank = Mock()
+    bank.account.stocks = {"deposits": 100}
+    govt, role = govt_as_deposit_guarantee
+    role.find_defaulted_banks.return_value = [bank]
 
     # When
     govt.issue_deposit_guarantee_bonds()
 
     # Then
-    assert govt._defaults == defaults
+    assert govt._defaults == [bank]
 
 
 def test_reimburse_deposits(govt_as_deposit_guarantee):
     # Given
-    bank = Mock()
-    govt, market = govt_as_deposit_guarantee
+    bank, client = Mock(), Mock()
+    deposits = [{"depositor": client, "amount": 100}]
+    govt, role = govt_as_deposit_guarantee
     govt._defaults = [bank]
-    client = Mock()
-    market.get_bank_deposits.return_value = [{"client": client}]
+    role.find_deposit_accounts.return_value = deposits
 
     # When
     govt.reimburse_deposits()
 
     # Then
-    market.get_bank_deposits.assert_called_with(bank)
-    market.reimburse_deposits.assert_called_with(govt, client, bank)
+    role.find_deposit_accounts.assert_called_with(bank)
+    role.reimburse_deposits.assert_called_with(client, 100)
 
 
-@pytest.fixture
-def govt_with_history():
+def test_update_public_spending_history(govt_before_setup):
     # Given
-    model = Mock()
-    goods_market = Mock(gdp=0)
-    govt = Government(model)
-    govt.setup()
-    govt.country = "any"
-    model.goods_markets = {"any": goods_market}
-    return govt
-
-
-def test_update_production_history(govt_with_history):
-    # Given
-    govt = govt_with_history
-    goods_market = govt.model.goods_markets["any"]
-    goods_market.gdp = 120
-
-    # When
-    govt.update_history()
-
-    # Then
-    assert govt.gdp == 120
-
-
-def test_update_public_spending_history(govt_with_history):
-    # Given
-    govt = govt_with_history
+    govt = govt_before_setup
     govt.public_spending = 200
     govt.prev_public_spending = 150
 
@@ -607,9 +599,9 @@ def test_update_public_spending_history(govt_with_history):
     assert govt.prev_public_spending == 200
 
 
-def test_update_budget_history(govt_with_history):
+def test_update_budget_history(govt_before_setup):
     # Given
-    govt = govt_with_history
+    govt = govt_before_setup
     govt.budget_surplus = 100
     govt.prev_budget_surplus = 0
 

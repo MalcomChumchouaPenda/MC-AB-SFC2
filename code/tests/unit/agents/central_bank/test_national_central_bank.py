@@ -110,21 +110,6 @@ def test_expose_bond_interests_total(cb_with_country):
 # BEHAVIORAL TESTS
 # ----------------------------------------------------
 
-
-def test_buy_all_remaining_bonds(cb_with_country):
-    # Given
-    cb, country = cb_with_country
-    bond_market = country.union.bond_market
-    govt = Mock(bond_supply=100)
-    cb.government = govt
-
-    # When
-    cb.buy_remaining_bonds()
-
-    # Then
-    bond_market.buy_bonds.assert_called_with(cb, govt, 100)
-
-
 @pytest.fixture
 def mock_bond_interests(monkeypatch):
     bond_interests = PropertyMock()

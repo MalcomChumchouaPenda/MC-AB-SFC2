@@ -24,6 +24,73 @@ def country_before_setup():
     return country
 
 
+def test_has_monetary_union_ref(country_before_setup):
+    # Given
+    country = country_before_setup
+
+    # When
+    country.setup()
+
+    # Then
+    assert country.union is None
+
+
+def test_has_inflation(country_before_setup):
+    # Given
+    country = country_before_setup
+
+    # When
+    country.setup()
+
+    # Then
+    assert country.inflation == 0
+
+
+def test_has_gdp(country_before_setup):
+    # Given
+    country = country_before_setup
+
+    # When
+    country.setup()
+
+    # Then
+    assert country.gdp == 0
+
+
+def test_has_prob_failure(country_before_setup):
+    # Given
+    country = country_before_setup
+
+    # When
+    country.setup()
+
+    # Then
+    assert country.prob_failure == 0
+
+
+def test_has_tax_rate(country_before_setup):
+    # Given
+    country = country_before_setup
+
+    # When
+    country.setup()
+
+    # Then
+    assert country.tax_rate == 0
+
+
+def test_expose_discount_rate(country_before_setup):
+    # Given
+    union = Mock(discount_rate=0.02)
+    country = country_before_setup
+
+    # When
+    country.union = union
+
+    # Then
+    assert country.discount_rate == 0.02
+
+
 # ---------------------------------------------------
 # ROLES
 # ----------------------------------------------------

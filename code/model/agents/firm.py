@@ -5,6 +5,7 @@ from model.base import EcoAgent
 class Firm(EcoAgent):
 
     def setup(self):
+        super().setup()
         # prices
         self.price = 0.0
         self.wage_offer = 0

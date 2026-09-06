@@ -15,6 +15,8 @@ class Country(EcoSpace):
         self.inflation = 0
         self.prob_failure = 0
 
+        self.tax_rate = 0
+
         # roles
         self.citizens = AgentDList(model)
         self.companies = AgentDList(model)
@@ -26,6 +28,10 @@ class Country(EcoSpace):
         self.good_market = None
         self.labor_market = None
         self.deposit_market = None
+
+    @property
+    def discount_rate(self):
+        return self.union.discount_rate
 
     #
     # Role management

@@ -15,8 +15,11 @@ class BondIssuer(EcoRole):
     def find_bonds(self):
         return self.space.find_bonds(self)
 
+    def get_discount_rate(self):
+        return self.space.discount_rate
+
     #
     # Actions
     #
-    def repay_bond(self, issuer, principal, interests):
-        self.space.repay_bond(self, issuer, principal, interests)
+    def repay_bonds(self, buyer, principal, interests):
+        self.space.repay_bonds(buyer, self, principal, interests)

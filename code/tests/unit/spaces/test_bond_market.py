@@ -74,7 +74,7 @@ def test_add_buyer_add_appropriate_role(market_without_buyers):
     role = market.add_buyer(agent)
 
     # Then
-    market.add_role.assert_called_with(FakeBuyer, agent,"bond_buyer")
+    market.add_role.assert_called_with(FakeBuyer, agent, "bond_buyer")
     assert role == market.add_role.return_value
 
 
@@ -129,10 +129,10 @@ def test_add_issuer_registers_issuer(market_without_issuers):
     assert market.issuers == [role]
 
 
-
 # ---------------------------------------------------
 # BONDS MATCHING
 # ----------------------------------------------------
+
 
 @pytest.fixture
 def market_with_issuers(market_before_setup, make_dlist):
@@ -169,13 +169,13 @@ def test_find_bonds_returns_bonds_edge(market_before_setup):
     result = market.find_bonds(issuer)
 
     # Then
-    assert result == [{"buyer":buyer, "amount":100}]
-
+    assert result == [{"buyer": buyer, "amount": 100}]
 
 
 # ---------------------------------------------------
 # BONDS TRANSACTION
 # ----------------------------------------------------
+
 
 @pytest.fixture
 def market_with_participants(market_before_setup):
@@ -237,7 +237,7 @@ def market_with_purchase(market_before_setup):
     return market, issuer, buyer
 
 
-def test_repay_bonds_creates_graph_edge(market_with_purchase):
+def test_repay_bond_creates_graph_edge(market_with_purchase):
     # Given
     market, issuer, buyer = market_with_purchase
     graph = market.graph
@@ -250,7 +250,7 @@ def test_repay_bonds_creates_graph_edge(market_with_purchase):
     assert graph[buyer][issuer]["amount"] == -100
 
 
-def test_repay_bonds_updates_accounts(market_with_purchase):
+def test_repay_bond_updates_accounts(market_with_purchase):
     # Given
     market, issuer, buyer = market_with_purchase
 
@@ -264,4 +264,3 @@ def test_repay_bonds_updates_accounts(market_with_purchase):
     buyer.credit_flow.assert_called_with("bond_interests", 10)
     buyer.debit_stock.assert_called_with("bonds", 100)
     buyer.credit_stock.assert_called_with("cash", 110)
-

@@ -63,3 +63,14 @@ def test_has_deposit_bank_account_ref(agent_before_setup):
 
     # Assert
     assert agent.bank_account is None
+
+
+def test_has_default_country(agent_before_setup):
+    # Given
+    agent = agent_before_setup
+
+    # When
+    agent.setup()
+
+    # Then
+    assert agent.country == 0

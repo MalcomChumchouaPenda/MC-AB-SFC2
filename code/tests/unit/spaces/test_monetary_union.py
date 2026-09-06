@@ -35,6 +35,17 @@ def test_has_accounts_dlist(union_before_setup):
     assert isinstance(union.accounts, AgentDList)
 
 
+def test_has_discount_rate(union_before_setup):
+    # Given
+    union = union_before_setup
+
+    # When
+    union.setup()
+
+    # Then
+    assert union.discount_rate == 0
+
+
 # ---------------------------------------------------
 # ROLES SET/REF TESTS
 # ----------------------------------------------------

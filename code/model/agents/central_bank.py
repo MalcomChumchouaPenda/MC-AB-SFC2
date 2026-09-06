@@ -5,13 +5,6 @@ from model.base import EcoAgent
 
 class CentralBank(EcoAgent):
 
-    def setup(self):
-
-        # flows
-
-        # accointances
-        self.government = None
-
     @property
     def bonds(self):
         bond_market = self.country.union.bond_market
@@ -25,9 +18,11 @@ class CentralBank(EcoAgent):
         return sum([b["interests"] for b in bonds])
 
     def buy_remaining_bonds(self):
-        govt = self.government
-        bond_market = self.country.union.bond_market
-        bond_market.buy_bonds(self, govt, govt.bond_supply)
+        role = self.roles["bond_buyer"]
+        for issuer in role.find_issuers():
+            if issuer.country == self.country:
+                role.buy_bonds(issuer, issuer.bond_number)
+
 
     def pay_profit(self):
         profit = self.calc_profit()

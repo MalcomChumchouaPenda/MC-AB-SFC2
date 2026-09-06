@@ -11,6 +11,7 @@ class BondMarket(EcoSpace):
         super().setup()
         self.issuers = AgentDList(self.model)
         self.buyers = AgentDList(self.model)
+
     #
     # roles
     #
@@ -37,7 +38,7 @@ class BondMarket(EcoSpace):
             dict(buyer=buyer, **data)
             for _, buyer, data in self.graph.edges(issuer, data=True)
         ]
-    
+
     def buy_bonds(self, buyer, issuer, number):
         amount = issuer.bond_value * number
         print(amount)
@@ -45,7 +46,7 @@ class BondMarket(EcoSpace):
         issuer.debit_stock("bonds", amount)
         issuer.credit_stock("cash", amount)
         buyer.credit_stock("bonds", amount)
-        buyer.debit_stock("cash", amount)        
+        buyer.debit_stock("cash", amount)
         self.graph.add_edge(issuer, buyer, amount=amount)
 
     def repay_bonds(self, buyer, issuer, principal, interests):

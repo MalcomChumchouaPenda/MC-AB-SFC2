@@ -11,6 +11,7 @@ class EcoAgent(Agent):
 
     def setup(self):
         self.roles = {}
+        self.country = 0
         self.account = None
         self.cb_account = None
         self.bank_account = None
@@ -29,6 +30,10 @@ class EcoRole(Object):
         self.agent = None
         self.space = None
         self.name = ""
+
+    @property
+    def country(self):
+        return self.agent.country
 
     @property
     def cb_account(self):
@@ -109,9 +114,29 @@ class EcoAccount(Object):
 
     def setup(self):
         super().setup()
-        self.stocks = {}
-        self.flows = {}
         self.agent = None
+        self.stocks = {
+            "deposits": 0,
+            "loans": 0,
+            "inventories": 0,
+            "bonds": 0,
+            "cash": 0,
+            "advances": 0,
+            "equities": 0,
+        }
+        self.flows = {
+            "consumption": 0,
+            "wages": 0,
+            "public_transfers": 0,
+            "taxes": 0,
+            "dep_interests": 0,
+            "loan_interests": 0,
+            "bond_interests": 0,
+            "cash_interests": 0,
+            "adv_interests": 0,
+            "dividends": 0,
+            "profit_transfers": 0,
+        }
 
     def debit_stock(self, name, amount):
         self.stocks[name] = self.stocks.get(name, 0) - amount

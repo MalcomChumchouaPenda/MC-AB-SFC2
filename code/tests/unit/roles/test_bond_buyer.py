@@ -23,11 +23,10 @@ def buyer_before_setup():
     return buyer
 
 
-
-
 # ---------------------------------------------------
 #  PERCEPTIONS
 # ----------------------------------------------------
+
 
 def test_find_issuers(buyer_with_space):
     # Given
@@ -65,5 +64,3 @@ def test_buy_bonds(buyer_with_space):
 
     # Then
     space.buy_bonds.assert_called_with(buyer, issuer, 2)
-
-

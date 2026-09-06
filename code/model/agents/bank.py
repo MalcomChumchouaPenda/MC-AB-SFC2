@@ -5,6 +5,7 @@ from model.base import EcoAgent
 class Bank(EcoAgent):
 
     def setup(self):
+        super().setup()
         # choices
         self.deposit_rate = 0
         self.taxes_payable = 0
@@ -72,19 +73,21 @@ class Bank(EcoAgent):
         role = self.roles["bond_buyer"]
         bond_issuers = self.find_bond_issuers()
         excess = self.calc_excess_reserves()
+        print(excess, bond_issuers)
         choice = self.model.nprandom.choice
         for issuer in bond_issuers:
             prob = self.calc_bond_purchases_probability(issuer)
             if choice([0, 1], p=[1 - prob, prob]):
-                purchase = min(excess, issuer.bond_supply)
+                bond_value = issuer.bond_value
+                purchase = min(excess/bond_value, issuer.bond_number)
                 role.buy_bonds(issuer, purchase)
-                excess -= purchase
+                excess -= purchase * bond_value
                 if excess <= 0:
                     break
 
     def find_bond_issuers(self):
         role = self.roles["bond_buyer"]
-        bond_issuers = role.find_bond_issuers()
+        bond_issuers = role.find_issuers()
         random = self.model.random
         random.shuffle(bond_issuers)
         return bond_issuers
@@ -95,7 +98,7 @@ class Bank(EcoAgent):
         return max(stocks["cash"] - required, 0)
 
     def calc_bond_purchases_probability(self, issuer):
-        return math.exp(-self.p.iota_b * issuer.bonds / issuer.gdp)
+        return math.exp(-self.p.iota_b * issuer.debt_ratio)
 
     def compute_profit_distribution(self):
         self.profit = self.calc_profit()

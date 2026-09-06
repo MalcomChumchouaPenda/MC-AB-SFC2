@@ -4,6 +4,7 @@ from model.base import EcoAgent
 class Government(EcoAgent):
 
     def setup(self):
+        super().setup()
         self._defaults = []
 
         # stocks
@@ -33,32 +34,23 @@ class Government(EcoAgent):
         # accointances
         self.central_bank = None
 
-    @property
-    def bonds(self):
-        bond_market = self.country.union.bond_market
-        bonds = bond_market.get_issuer_bonds(self)
-        return sum([b["principal"] for b in bonds])
-
-    @property
-    def bond_interests(self):
-        bond_market = self.country.union.bond_market
-        bonds = bond_market.get_issuer_bonds(self)
-        return sum([b["interests"] for b in bonds])
-
+    #
+    # Public tranfers
+    #
     def pay_public_transfers(self):
-        country = self.country
-        model = self.model
-        households = [h for h in model.households if h.country == country]
-        if len(households) > 0:
-            transfers = self.public_spending / len(households)
-            for household in households:
-                household.cash += transfers
-                household.public_transfers += transfers
-                self.public_transfers += transfers
-                self.reserves -= transfers
+        role = self.roles["fiscal_authority"]
+        citizens = role.find_citizens()
+        if len(citizens) > 0:
+            transfers = self.public_spending / len(citizens)
+            for household in citizens:
+                role.pay_public_transfers(household, transfers)
 
+    #
+    # Fiscal policy
+    #
     def calc_budget_balance(self):
-        balance = self.taxes - self.public_spending - self.bond_interests
+        flows = self.account.flows
+        balance = flows["taxes"] - flows["public_transfers"] - flows["bond_interests"]
         self.budget_deficit = max(0, -balance)
         self.budget_surplus = max(0, balance)
         return balance
@@ -67,27 +59,31 @@ class Government(EcoAgent):
         p = self.p
         random = self.model.random
         variation = random.uniform(0, p.delta)
-        deficit_ratio = self.budget_deficit / self.gdp
-        desired_spending = self.calc_desired_public_spending()
-        if deficit_ratio >= p.dmax:
-            if desired_spending <= self.public_spending:
+        gdp = self.roles["fiscal_authority"].get_gdp()
+        ratio = self.budget_deficit / gdp
+        target = self.calc_desired_public_spending()
+        self._update_policy_randomly(ratio, target, variation)
+        self.apply_tax_rate_bounds()
+        self.apply_public_spending_bounds()
+
+    def _update_policy_randomly(self, ratio, target, variation):
+        if ratio >= self.p.dmax:
+            if target <= self.public_spending:
                 self.public_spending *= 1 - variation
                 self.tax_rate *= 1 + variation
             else:
                 self.tax_rate *= 1 + variation
         else:
-            if desired_spending <= self.public_spending:
+            if target <= self.public_spending:
                 self.public_spending *= 1 - variation
                 self.tax_rate *= 1 - variation
             else:
                 self.public_spending *= 1 + variation
-        self.apply_tax_rate_bounds()
-        self.apply_public_spending_bounds()
 
     def calc_desired_public_spending(self):
-        goods_market = self.model.goods_markets[self.country]
-        average_price = goods_market.average_price
-        average_prod = goods_market.average_productivity
+        role = self.roles["fiscal_authority"]
+        average_price = role.get_average_price()
+        average_prod = role.get_average_productivity()
         prev_spending = self.prev_public_spending
         desired_spending = average_price * average_prod * prev_spending
         self.desired_public_spending = desired_spending
@@ -98,53 +94,79 @@ class Government(EcoAgent):
         self.tax_rate = min(self.p.tax_max, self.tax_rate)
 
     def apply_public_spending_bounds(self):
-        minimum = self.p.g_min * self.gdp
-        maximum = self.p.g_max * self.gdp
+        gdp = self.roles["fiscal_authority"].get_gdp()
+        minimum = self.p.g_min * gdp
+        maximum = self.p.g_max * gdp
         self.public_spending = max(minimum, self.public_spending)
         self.public_spending = min(maximum, self.public_spending)
 
+    #
+    # Bond Supply
+    #
     def issue_bonds(self):
         self.calc_new_debt()
         new_bonds = self.calc_new_bonds()
         self.bond_supply += new_bonds
+        gdp = self.roles["fiscal_authority"].get_gdp()
+        role = self.roles["bond_issuer"]
+        role.debt_ratio = self.bond_supply / gdp
+        role.bond_value = self.bond_supply / 100
+        role.bond_number = 100
 
     def calc_new_debt(self):
-        new_debt = self.bonds + self.budget_deficit - self.prev_budget_surplus
+        bonds = self.account.stocks["bonds"]
+        new_debt = bonds + self.budget_deficit - self.prev_budget_surplus
         self.new_public_debt = new_debt
         return new_debt
 
     def calc_new_bonds(self):
-        return max(0, self.new_public_debt - self.bonds)
+        bonds = self.account.stocks["bonds"]
+        return max(0, self.new_public_debt - bonds)
 
+    #
+    # Bonds repayment
+    #
     def repay_bonds(self):
-        bond_rate = self.calc_bond_rate()
-        bond_market = self.country.union.bond_market
-        for bond in bond_market.get_issuer_bonds(self):
-            principal = bond["principal"]
+        bond_rate = self.bond_rate
+        role = self.roles["bond_issuer"]
+        for bond in role.find_bonds():
+            principal = bond["amount"]
             interests = bond_rate * principal
-            bond_market.repay_bonds(self, bond["buyer"], principal, interests)
+            role.repay_bonds(bond["buyer"], principal, interests)
+
+    def update_bond_rate(self):
+        bonds = self.account.stocks["bonds"]
+        role = self.roles["fiscal_authority"]
+        gdp = role.get_gdp()
+        discount_rate = role.get_discount_rate()
+        bond_rate = self.p.chi * (bonds / gdp) + discount_rate
         self.bond_rate = bond_rate
+        return bond_rate
 
-    def calc_bond_rate(self):
-        discount_rate = self.central_bank.discount_rate
-        return self.p.chi * (self.bonds / self.gdp) + discount_rate
-
+    #
+    # Deposit guarantee
+    #
     def issue_deposit_guarantee_bonds(self):
-        deposit_market = self.model.deposit_markets[self.country]
-        defaults = deposit_market.get_defaulted_banks()
-        needs = sum([b.deposits for b in defaults])
+        guarantee_role = self.roles["deposit_guarantee"]
+        defaults = guarantee_role.find_defaulted_banks()
+        needs = sum([b.account.stocks["deposits"] for b in defaults])
         self.bond_supply += needs
         self._defaults = defaults
+        issuer_role = self.roles["bond_issuer"]
+        issuer_role.bond_number = 100
+        issuer_role.bond_value = self.bond_supply / 100
 
     def reimburse_deposits(self):
-        market = self.model.deposit_markets[self.country]
+        role = self.roles["deposit_guarantee"]
         for bank in self._defaults:
-            for deposit in market.get_bank_deposits(bank):
-                client = deposit["client"]
-                market.reimburse_deposits(self, client, bank)
+            for deposit in role.find_deposit_accounts(bank):
+                amount = deposit["amount"]
+                client = deposit["depositor"]
+                role.reimburse_deposits(client, amount)
 
+    #
+    # History
+    #
     def update_history(self):
-        goods_market = self.model.goods_markets[self.country]
-        self.gdp = goods_market.gdp
         self.prev_budget_surplus = self.budget_surplus
         self.prev_public_spending = self.public_spending

@@ -9,7 +9,7 @@ class BondBuyer(EcoRole):
 
     #
     # Perceptions
-    #        
+    #
     def find_issuers(self):
         return self.space.find_issuers()
 
@@ -18,4 +18,3 @@ class BondBuyer(EcoRole):
     #
     def buy_bonds(self, issuer, number):
         self.space.buy_bonds(self, issuer, number)
-

@@ -9,6 +9,7 @@ class MonetaryUnion(EcoSpace):
         super().setup()
         self.gdp = 0
         self.inflation = 0
+        self.discount_rate = 0
         self.accounts = AgentDList(self.model)
         self.monetary_authority = None
         self.good_market = None
