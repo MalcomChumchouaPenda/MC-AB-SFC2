@@ -38,7 +38,7 @@ def firm(model):
 
 def test_firm_innovation_process(firm, market):
     # Given
-    producer = market.add_supplier(firm)
+    producer = market.add_producer(firm)
     market.average_productivity = 10
     random = market.model.nprandom
     random.choice.return_value = 1
@@ -54,7 +54,7 @@ def test_firm_innovation_process(firm, market):
 
 def test_firm_innovation_process(firm, market):
     # Given
-    producer = market.add_supplier(firm)
+    producer = market.add_producer(firm)
     market.average_productivity = 15
     random = market.model.nprandom
     random.choice.return_value = 1

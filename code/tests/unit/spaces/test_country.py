@@ -727,7 +727,7 @@ def test_dont_create_trad_firm_in_goods_market(country_before_creation, share):
     country.create_firm(firm, [share], tradable=True)
 
     # Then
-    country.good_market.add_supplier.assert_not_called()
+    country.good_market.add_producer.assert_not_called()
 
 
 def test_create_non_trad_firm_in_goods_market(country_before_creation, share):
@@ -739,7 +739,7 @@ def test_create_non_trad_firm_in_goods_market(country_before_creation, share):
     country.create_firm(firm, [share], tradable=False)
 
     # Then
-    country.good_market.add_supplier.assert_called_with(firm)
+    country.good_market.add_producer.assert_called_with(firm)
 
 
 @pytest.mark.parametrize("tradable", [True, False])

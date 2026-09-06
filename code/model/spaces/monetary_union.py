@@ -43,7 +43,7 @@ class MonetaryUnion(EcoSpace):
     def place_firm(self, firm, tradable):
         self.credit_market.add_borrower(firm)
         if tradable:
-            self.good_market.add_supplier(firm)
+            self.good_market.add_producer(firm)
 
     #
     # Bank creation

@@ -249,7 +249,7 @@ def test_place_trad_firm_in_goods_market(union_before_creation):
     union.place_firm(firm, tradable=True)
 
     # Then
-    union.good_market.add_supplier.assert_called_with(firm)
+    union.good_market.add_producer.assert_called_with(firm)
 
 
 def test_dont_place_non_trad_firm_in_goods_market(union_before_creation):
@@ -261,7 +261,7 @@ def test_dont_place_non_trad_firm_in_goods_market(union_before_creation):
     union.place_firm(firm, tradable=False)
 
     # Then
-    union.good_market.add_supplier.assert_not_called()
+    union.good_market.add_producer.assert_not_called()
 
 
 @pytest.mark.parametrize("tradable", [True, False])

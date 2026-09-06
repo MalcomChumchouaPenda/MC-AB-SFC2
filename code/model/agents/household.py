@@ -82,8 +82,6 @@ class Household(EcoAgent):
         p = self.p
         deposits = self.account.stocks["deposits"]
         self.desired_consumption = p.cy * self.disposable_income + p.cd * deposits
-        # self.desired_trad_cons = p.cT * self.desired_consumption
-        # self.desired_non_trad_cons = (1 - self.p.cT) * self.desired_consumption
         return self.desired_consumption
 
     def consume(self):
@@ -91,8 +89,8 @@ class Household(EcoAgent):
         roles = self.roles
         desired_cons = self.desired_consumption
         steps = [
-            (roles["consumer_tradable"], p.cT * desired_cons),
-            (roles["consumer_non_tradable"], (1 - p.cT) * desired_cons),
+            (roles["trad_consumer"], p.cT * desired_cons),
+            (roles["non_trad_consumer"], (1 - p.cT) * desired_cons),
         ]
         random = self.model.random
         random.shuffle(steps)

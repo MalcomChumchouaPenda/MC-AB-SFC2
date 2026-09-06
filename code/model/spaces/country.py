@@ -152,7 +152,7 @@ class Country(EcoSpace):
         self.deposit_market.add_depositor(firm)
         self.labor_market.add_employer(firm)
         if not tradable:
-            self.good_market.add_supplier(firm)
+            self.good_market.add_producer(firm)
 
     #
     # Bank creation

@@ -578,8 +578,8 @@ def hh_as_general_consumer(hh_with_roles_and_account):
     household, roles, account = hh_with_roles_and_account
     household.consume_good = Mock()
     roles["depositor"] = Mock()
-    roles["consumer_tradable"] = Mock()
-    roles["consumer_non_tradable"] = Mock()
+    roles["trad_consumer"] = Mock()
+    roles["non_trad_consumer"] = Mock()
     account.stocks["cash"] = 0
     account.stocks["deposits"] = 0
     return household, roles, account
@@ -594,8 +594,8 @@ def test_consume_each_good_type(hh_as_general_consumer):
     household.consume()
 
     # Then
-    household.consume_good.assert_any_call(roles["consumer_tradable"], 60.0)
-    household.consume_good.assert_any_call(roles["consumer_non_tradable"], 40.0)
+    household.consume_good.assert_any_call(roles["trad_consumer"], 60.0)
+    household.consume_good.assert_any_call(roles["non_trad_consumer"], 40.0)
 
 
 def test_consume_randomizes_entry_order(hh_as_general_consumer):
@@ -605,8 +605,8 @@ def test_consume_randomizes_entry_order(hh_as_general_consumer):
     household.desired_consumption = 100
     random = household.model.random
     entry_order = [
-        (roles["consumer_tradable"], 60.0),
-        (roles["consumer_non_tradable"], 40.0),
+        (roles["trad_consumer"], 60.0),
+        (roles["non_trad_consumer"], 40.0),
     ]
 
     # When
