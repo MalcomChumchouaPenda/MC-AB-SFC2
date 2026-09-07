@@ -72,7 +72,6 @@ def test_get_average_price_from_space(authority_with_space):
 
     # Then
     assert perceived == 1.5
-    
 
 
 def test_get_average_productivity_from_space(authority_with_space):
@@ -90,4 +89,3 @@ def test_get_average_productivity_from_space(authority_with_space):
 # ---------------------------------------------------
 # ACTION TESTS
 # ----------------------------------------------------
-

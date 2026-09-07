@@ -68,13 +68,13 @@ def test_government_updates_fiscal_policy(govt, country_before_fiscal_policy):
     assert govt.tax_rate == pytest.approx(0.21)
 
 
-
 @pytest.fixture
 def household(model):
     # Given
     household = Household(model)
     household.setup()
     return household
+
 
 @pytest.fixture
 def firm(model):
@@ -83,12 +83,14 @@ def firm(model):
     firm.setup()
     return firm
 
+
 @pytest.fixture
 def bank(model):
     # Given
     bank = Bank(model)
     bank.setup()
     return bank
+
 
 @pytest.fixture
 def country_before_tax_payment(country, govt, household, firm, bank):
@@ -110,9 +112,9 @@ def test_household_pay_taxes(household, govt):
     # Given
     govt.tax_rate = 0.10
     household.account.stocks["cash"] = 1000
-    household.account.flows["wages"]  = 550
-    household.account.flows["dividends"]  = 50
-    household.account.flows["public_transfers"]  = 50
+    household.account.flows["wages"] = 550
+    household.account.flows["dividends"] = 50
+    household.account.flows["public_transfers"] = 50
 
     # When
     household.pay_taxes()
