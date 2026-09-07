@@ -1009,7 +1009,9 @@ def test_pay_no_taxes(firm_as_tax_payer):
 
 def test_pay_dividends(firm_with_roles_and_account):
     # Given
-    role = Mock()
+    founder, role = Mock(), Mock()
+    share = {"founder":founder, "value":1000}
+    role.get_equity_shares.return_value = [share]
     firm, roles, _ = firm_with_roles_and_account
     firm.dividends_payable = 200
     roles["company"] = role
@@ -1018,13 +1020,14 @@ def test_pay_dividends(firm_with_roles_and_account):
     firm.pay_dividends()
 
     # Then
-    role.distribute_dividends.assert_called_once_with(200)
+    role.pay_dividends.assert_called_with(founder, 200)
     assert firm.dividends_payable == 0
 
 
 def test_pay_no_dividends(firm_with_roles_and_account):
     # Given
     role = Mock()
+    role.get_equity_shares.return_value = []
     firm, roles, _ = firm_with_roles_and_account
     firm.dividends_payable = 0
     roles["company"] = role
@@ -1033,7 +1036,8 @@ def test_pay_no_dividends(firm_with_roles_and_account):
     firm.pay_dividends()
 
     # Then
-    role.distribute_dividends.assert_not_called()
+    role.get_equity_shares.assert_not_called()
+    role.pay_dividends.assert_not_called()
 
 
 # ---------------------------------------------------

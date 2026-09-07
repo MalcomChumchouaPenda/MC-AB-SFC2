@@ -154,7 +154,12 @@ class Bank(EcoAgent):
     def pay_dividends(self):
         if self.dividends_payable > 0:
             role = self.roles["company"]
-            role.pay_dividends(self.dividends_payable)
+            shares = role.get_equity_shares()
+            total_dividend = self.dividends_payable
+            total_shares = sum(s["value"] for s in shares)
+            for share in shares:
+                dividend = share["value"] * total_dividend / total_shares
+                role.pay_dividends(share["founder"], dividend)
             self.dividends_payable = 0
 
     def exit(self):

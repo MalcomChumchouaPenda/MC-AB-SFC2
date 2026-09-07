@@ -464,7 +464,7 @@ def country_with_companies(country_before_setup, make_dlist):
     return country, companies
 
 
-def test_calc_bank_firm_number(country_with_companies):
+def test_calc_bank_number_ratio(country_with_companies):
     # Given
     country, companies = country_with_companies
     bank_sector = [Mock(sector="B") for _ in range(2)]
@@ -472,26 +472,26 @@ def test_calc_bank_firm_number(country_with_companies):
     companies.extend(bank_sector + firm_sector)
 
     # When
-    ratio = country.calc_bank_firm_number()
+    ratio = country.calc_bank_number_ratio()
 
     # Then
     assert ratio == 0.2
 
 
-def test_calc_bank_firm_number_if_no_firms(country_with_companies):
+def test_calc_bank_number_ratio_if_no_firms(country_with_companies):
     # Given
     country, companies = country_with_companies
     bank_sector = [Mock(sector="B") for _ in range(2)]
     companies.extend(bank_sector)
 
     # When
-    ratio = country.calc_bank_firm_number()
+    ratio = country.calc_bank_number_ratio()
 
     # Then
     assert ratio == 1.0
 
 
-def test_calc_bank_firm_equity(country_with_companies):
+def test_calc_bank_equity_ratio(country_with_companies):
     # Given
     country, companies = country_with_companies
     bank_sector = [Mock(sector="B", equity=100) for _ in range(2)]
@@ -499,20 +499,20 @@ def test_calc_bank_firm_equity(country_with_companies):
     companies.extend(bank_sector + firm_sector)
 
     # When
-    ratio = country.calc_bank_firm_equity()
+    ratio = country.calc_bank_equity_ratio()
 
     # Then
     assert ratio == 0.4
 
 
-def test_calc_bank_firm_equity_if_no_firms(country_with_companies):
+def test_calc_bank_equity_ratio_if_no_firms(country_with_companies):
     # Given
     country, companies = country_with_companies
     bank_sector = [Mock(sector="B", equity=100) for _ in range(2)]
     companies.extend(bank_sector)
 
     # When
-    ratio = country.calc_bank_firm_equity()
+    ratio = country.calc_bank_equity_ratio()
 
     # Then
     assert ratio == 1.0
@@ -590,7 +590,7 @@ def country_with_company_and_founder(country_before_setup):
     company = Mock()
     founder = Mock(resid_equity=0)
     country = country_before_setup
-    country.graph.add_edge(company, founder, share=0)
+    country.graph.add_edge(company, founder, value=0)
     return country, company, founder
 
 
@@ -602,34 +602,35 @@ def test_fund_company_updates_accounts(country_with_company_and_founder):
     country.fund_company(company, founder, 100)
 
     # Then
-    company.account.debit_stock.assert_any_call("equities", 100)
-    company.account.credit_stock.assert_any_call("cash", 100)
-    founder.account.credit_stock.assert_any_call("equities", 100)
-    founder.account.debit_stock.assert_any_call("cash", 100)
+    company.debit_stock.assert_any_call("equities", 100)
+    company.credit_stock.assert_any_call("cash", 100)
+    founder.credit_stock.assert_any_call("equities", 100)
+    founder.debit_stock.assert_any_call("cash", 100)
 
 
 def test_fund_company_adds_graph_edge(country_with_company_and_founder):
     # Given
     country, company, founder = country_with_company_and_founder
     graph = country.graph
+    graph.remove_edge(company, founder)
 
     # When
     country.fund_company(company, founder, 100)
 
     # Then
-    assert graph[company][founder]["share"] == 100
+    assert graph[company][founder]["value"] == 100
 
 
 def test_fund_company_updates_graph_edge(country_with_company_and_founder):
     # Given
     country, company, founder = country_with_company_and_founder
-    country.graph.add_edge(company, founder, share=50)
+    country.graph.add_edge(company, founder, value=50)
 
     # When
     country.fund_company(company, founder, 100)
 
     # Then
-    assert country.graph[company][founder]["share"] == 150
+    assert country.graph[company][founder]["value"] == 150
 
 
 def test_fund_company_reduces_resid_equity(country_with_company_and_founder):
@@ -653,14 +654,14 @@ def test_find_equity_shares(country_with_company_and_founder):
     # Given
     other = Mock()
     country, company, founder = country_with_company_and_founder
-    country.graph.add_edge(company, founder, share=60)
-    country.graph.add_edge(other, founder, share=40)
+    country.graph.add_edge(company, founder, value=60)
+    country.graph.add_edge(other, founder, value=40)
 
     # When
     found = country.find_equity_shares(company)
 
     # Assert
-    assert found == [{"founder": founder, "share": 60}]
+    assert found == [{"founder": founder, "value": 60}]
 
 
 def test_pay_dividends_updates_accounts(country_with_company_and_founder):
@@ -671,10 +672,10 @@ def test_pay_dividends_updates_accounts(country_with_company_and_founder):
     country.pay_dividends(company, founder, 10)
 
     # Then
-    company.account.debit_flow.assert_any_call("dividends", 10)
-    company.account.debit_stock.assert_any_call("cash", 10)
-    founder.account.credit_flow.assert_any_call("dividends", 10)
-    founder.account.credit_stock.assert_any_call("cash", 10)
+    company.debit_flow.assert_any_call("dividends", 10)
+    company.debit_stock.assert_any_call("cash", 10)
+    founder.credit_flow.assert_any_call("dividends", 10)
+    founder.credit_stock.assert_any_call("cash", 10)
 
 
 # ---------------------------------------------------

@@ -64,18 +64,7 @@ class Country(EcoSpace):
     # Current indicators
     #
 
-    def get_bank_firm_ratios(self):
-        companies = self.space.companies
-        print(companies)
-        firm_sector = companies.select([c.sector[0] == "F" for c in companies])
-        bank_sector = companies.select(companies.sector == "B")
-        if len(firm_sector) == 0:
-            return 1.0, 1.0
-        ratio1 = len(bank_sector) / len(firm_sector)
-        ratio2 = sum(bank_sector.equity) / sum(firm_sector.equity)
-        return ratio1, ratio2
-
-    def calc_bank_firm_number(self):
+    def calc_bank_number_ratio(self):
         companies = self.companies
         firm_sector = companies.select([c.sector[0] == "F" for c in companies])
         if len(firm_sector) == 0:
@@ -83,7 +72,7 @@ class Country(EcoSpace):
         bank_sector = companies.select(companies.sector == "B")
         return len(bank_sector) / len(firm_sector)
 
-    def calc_bank_firm_equity(self):
+    def calc_bank_equity_ratio(self):
         companies = self.companies
         firm_sector = companies.select([c.sector[0] == "F" for c in companies])
         if len(firm_sector) == 0:
@@ -110,13 +99,13 @@ class Country(EcoSpace):
 
     def fund_company(self, company, founder, amount):
         if self.graph.has_edge(company, founder):
-            self.graph[company][founder]["share"] += amount
+            self.graph[company][founder]["value"] += amount
         else:
-            self.graph.add_edge(company, founder, amount)
-        company.account.debit_stock("equities", amount)
-        company.account.credit_stock("cash", amount)
-        founder.account.credit_stock("equities", amount)
-        founder.account.debit_stock("cash", amount)
+            self.graph.add_edge(company, founder, value=amount)
+        company.debit_stock("equities", amount)
+        company.credit_stock("cash", amount)
+        founder.credit_stock("equities", amount)
+        founder.debit_stock("cash", amount)
         founder.resid_equity -= amount
 
     #
@@ -130,10 +119,10 @@ class Country(EcoSpace):
         ]
 
     def pay_dividends(self, company, founder, amount):
-        company.account.debit_flow("dividends", amount)
-        company.account.debit_stock("cash", amount)
-        founder.account.credit_flow("dividends", amount)
-        founder.account.credit_stock("cash", amount)
+        company.debit_flow("dividends", amount)
+        company.debit_stock("cash", amount)
+        founder.credit_flow("dividends", amount)
+        founder.credit_stock("cash", amount)
 
     #
     # Firm creation

@@ -36,6 +36,10 @@ class EcoRole(Object):
         return self.agent.country
 
     @property
+    def account(self):
+        return self.agent.account
+    
+    @property
     def cb_account(self):
         return self.agent.cb_account
 

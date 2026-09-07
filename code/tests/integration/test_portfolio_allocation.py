@@ -49,7 +49,7 @@ def test_household_portfolio_allocation(household, bank, country):
     household.deposit_bank = bank
 
     # When
-    household.calc_portfolio_allocation()
+    household.choose_portfolio_allocation()
 
     # Then
     lp = 0.8 * math.exp(-((10 * (1 - 0.10)) / 20) - 0.05)

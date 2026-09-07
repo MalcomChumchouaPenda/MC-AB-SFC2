@@ -1,6 +1,8 @@
 import math
 from functools import partial
 from model.base import EcoAgent
+from model.agents.firm import Firm
+from model.agents.bank import Bank
 
 
 class Household(EcoAgent):
@@ -56,7 +58,6 @@ class Household(EcoAgent):
             if remaining <= 0:
                 break
             quantity = min(remaining, employer.labor_demand)
-            print(employer, quantity)
             if quantity > 0:
                 role.accept_job(employer, quantity)
                 remaining -= quantity
@@ -78,6 +79,9 @@ class Household(EcoAgent):
         public_transfers = self.account.flows["public_transfers"]
         return (1 - tax_rate) * self.income + public_transfers
 
+    #
+    # Consumption
+    #
     def calc_consumption(self):
         p = self.p
         deposits = self.account.stocks["deposits"]
@@ -141,12 +145,16 @@ class Household(EcoAgent):
         distance = math.sin(diff / 2)
         return (1 / distance**p.beta) * (average_price / supplier.price)
 
-    def calc_portfolio_allocation(self):
+    #
+    # Equity investment
+    #
+    def choose_portfolio_allocation(self):
         lp = self.calc_liquidity_preference()
         equity = self.account.stocks["equities"]
         expected_worth = self.calc_expected_net_worth()
         self.desired_equity = max(equity, (1 - lp) * expected_worth)
         self.desired_deposits = expected_worth - (self.desired_equity - equity)
+        self.roles["citizen"].resid_equity = self.desired_equity
 
     def calc_liquidity_preference(self):
         p = self.p
@@ -170,20 +178,22 @@ class Household(EcoAgent):
             required_equity = self.calc_initial_equity(sector)
             collected_equity = self.desired_equity
             initiator = self.roles["citizen"]
-            founders = [initiator]
+            shares = [{"founder":initiator, "amount":initiator.resid_equity}]
             for investor in investors:
-                founders.append(investor)
-                collected_equity += investor.desired_equity
+                shares.append({"founder":investor, "amount":investor.resid_equity})
+                collected_equity += investor.resid_equity
                 if collected_equity >= required_equity:
-                    self.create_company(founders, sector)
+                    self.create_company(shares, sector)
                     break
         self.make_deposits()
+
+
 
     def choose_investment_sector(self):
         p = self.p
         role = self.roles["citizen"]
-        ratio1 = role.get_bank_firm_number_ratio()
-        ratio2 = role.get_bank_firm_equity_ratio()
+        ratio1 = role.get_bank_number_ratio()
+        ratio2 = role.get_bank_equity_ratio()
         if ratio1 < p.eta or ratio2 < p.eta:
             sector = "B"
         else:
@@ -195,7 +205,7 @@ class Household(EcoAgent):
 
     def find_potential_investors(self):
         role = self.roles["citizen"]
-        return role.get_potential_investors()
+        return role.find_investors()
 
     def calc_initial_equity(self, sector):
         role = self.roles["citizen"]
@@ -206,14 +216,15 @@ class Household(EcoAgent):
         random = self.model.nprandom
         return random.uniform(minimum, maximum)
 
-    def create_company(self, founders, sector):
+    def create_company(self, shares, sector):
         role = self.roles["citizen"]
         if sector == "B":
-            role.create_bank(founders)
-        elif sector == "FT":
-            role.create_firm(founders, tradable=True)
+            bank = Bank(self.model)
+            role.create_bank(bank, shares)
         else:
-            role.create_firm(founders, tradable=False)
+            firm = Firm(self.model)
+            tradable = sector == "FT"
+            role.create_firm(firm, shares, tradable=tradable)
 
     def make_deposits(self):
         account = self.account

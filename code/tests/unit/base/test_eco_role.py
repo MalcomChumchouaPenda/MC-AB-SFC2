@@ -68,6 +68,17 @@ def role_with_agent(role_before_setup):
     return role, agent
 
 
+def test_expose_agent_account(role_with_agent):
+    # Given
+    role, agent = role_with_agent
+
+    # When
+    exposed = role.account
+
+    # Then
+    assert exposed is agent.account
+
+
 def test_expose_agent_central_bank_account(role_with_agent):
     # Given
     role, agent = role_with_agent

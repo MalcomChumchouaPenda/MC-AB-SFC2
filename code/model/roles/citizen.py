@@ -16,11 +16,11 @@ class Citizen(EcoRole):
     def find_investors(self):
         return self.space.find_investors(initiator=self)
 
-    def get_bank_firm_number(self):
-        return self.space.calc_bank_firm_number()
+    def get_bank_number_ratio(self):
+        return self.space.calc_bank_number_ratio()
 
-    def get_bank_firm_equity(self):
-        return self.space.calc_bank_firm_equity()
+    def get_bank_equity_ratio(self):
+        return self.space.calc_bank_equity_ratio()
 
     def get_sector_equity_range(self, sector):
         return self.space.calc_sector_equity_range(sector)

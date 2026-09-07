@@ -75,25 +75,25 @@ def test_find_investors_use_space_method(citizen_with_space):
     assert investors == expected
 
 
-def test_get_bank_firm_number_from_space(citizen_with_space):
+def test_get_bank_number_ratio_from_space(citizen_with_space):
     # Given
     citizen, space = citizen_with_space
-    space.calc_bank_firm_number.return_value = 0.5
+    space.calc_bank_number_ratio.return_value = 0.5
 
     # When
-    ratio = citizen.get_bank_firm_number()
+    ratio = citizen.get_bank_number_ratio()
 
     # Then
     assert ratio == 0.5
 
 
-def test_get_bank_firm_equity_from_space(citizen_with_space):
+def test_get_bank_equity_ratio_from_space(citizen_with_space):
     # Given
     citizen, space = citizen_with_space
-    space.calc_bank_firm_equity.return_value = 0.6
+    space.calc_bank_equity_ratio.return_value = 0.6
 
     # When
-    ratio = citizen.get_bank_firm_equity()
+    ratio = citizen.get_bank_equity_ratio()
 
     # Then
     assert ratio == 0.6
