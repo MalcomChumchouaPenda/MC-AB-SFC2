@@ -32,7 +32,6 @@ class Country(EcoSpace):
     #
     # Role management
     #
-
     def add_fiscal_authority(self, agent):
         role = self.add_role(FiscalAuthority, agent, "fiscal_authority")
         self.union.add_account(agent)
@@ -63,7 +62,6 @@ class Country(EcoSpace):
     #
     # Current indicators
     #
-
     def calc_bank_number_ratio(self):
         companies = self.companies
         firm_sector = companies.select([c.sector[0] == "F" for c in companies])
@@ -89,7 +87,6 @@ class Country(EcoSpace):
     #
     # Equity investment
     #
-
     def find_investors(self, initiator=None):
         citizens = self.citizens
         investors = citizens.select(citizens.resid_equity > 0)
@@ -111,7 +108,6 @@ class Country(EcoSpace):
     #
     # Dividends
     #
-
     def find_equity_shares(self, company):
         return [
             {"founder": founder, **data}
@@ -161,6 +157,15 @@ class Country(EcoSpace):
             self.fund_company(company, founder, amount)
         self.union.place_bank(bank)
         self.deposit_market.add_bank(bank)
+
+    #
+    # Profit transfers
+    # 
+    def transfer_central_bank_profits(self, amount):
+        self.fiscal_authority.credit_flow("profit_transfers", amount)
+        self.fiscal_authority.credit_stock("cash", amount)
+        self.monetary_authority.debit_flow("profit_transfers", amount)
+        self.monetary_authority.debit_stock("cash", amount)
 
     #
     # Evolution

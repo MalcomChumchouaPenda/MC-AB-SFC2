@@ -8,7 +8,7 @@ class MonetaryUnion(EcoSpace):
     def setup(self):
         super().setup()
         self.gdp = 0
-        self.inflation = 0
+        self.average_inflation = 0
         self.discount_rate = 0
         self.accounts = AgentDList(self.model)
         self.monetary_authority = None
@@ -58,3 +58,12 @@ class MonetaryUnion(EcoSpace):
     def transfer_cash(self, source, target, amount):
         source.account.debit_stock("cash", amount)
         target.account.credit_stock("cash", amount)
+
+    #
+    # Evolution
+    #
+    def update_average_inflation(self):
+        countries = self.countries
+        gdps = [c.gdp for c in countries.values()]
+        weighted_inflations = [c.gdp * c.inflation for c in countries.values()]
+        self.average_inflation = sum(weighted_inflations) / sum(gdps)

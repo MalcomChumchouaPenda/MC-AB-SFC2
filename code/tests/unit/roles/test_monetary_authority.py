@@ -23,6 +23,20 @@ def authority_before_setup():
     return authority
 
 
+
+def test_expose_discount_rate_from_agent(authority_before_setup):
+    # Given
+    agent = Mock(discount_rate=0.02)
+    authority = authority_before_setup
+    authority.agent = agent
+
+    # When
+    perceived = authority.discount_rate
+
+    # Then
+    assert perceived == 0.02
+
+
 # ---------------------------------------------------
 # PERCEPTION TESTS
 # ----------------------------------------------------
@@ -37,29 +51,41 @@ def authority_with_space(authority_before_setup):
     return authority, space
 
 
-def test_expose_discount_rate_from_space(authority_with_space):
+def test_get_union_discount_rate_from_space(authority_with_space):
     # Given
     authority, space = authority_with_space
-    space.discount_rate = 0.02
+    space.union.monetary_authority.discount_rate = 0.03
 
     # When
-    perceived = authority.discount_rate
+    perceived = authority.get_union_discount_rate()
 
     # Then
-    assert perceived == 0.02
+    assert perceived == 0.03
+
+
+def test_get_average_inflation_from_space(authority_with_space):
+    # Given
+    authority, space = authority_with_space
+    space.average_inflation = 0.03
+
+    # When
+    perceived = authority.get_average_inflation()
+
+    # Then
+    assert perceived == 0.03
 
 
 # ---------------------------------------------------
-# ACTION TESTS
+# ACTIONS TESTS
 # ----------------------------------------------------
 
 
-def test_change_discount_rate_into_space(authority_with_space):
+def test_transfer_profits_with_space(authority_with_space):
     # Given
     authority, space = authority_with_space
 
     # When
-    authority.discount_rate = 0.05
+    authority.transfer_profit(200)
 
     # Then
-    assert space.discount_rate == 0.05
+    space.transfer_central_bank_profits.assert_called_with(200)

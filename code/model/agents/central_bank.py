@@ -5,84 +5,35 @@ from model.base import EcoAgent
 
 class CentralBank(EcoAgent):
 
-    @property
-    def bonds(self):
-        bond_market = self.country.union.bond_market
-        bonds = bond_market.get_buyer_bonds(self)
-        return sum([b["principal"] for b in bonds])
+    def setup(self):
+        super().setup()
+        self.prev_discount_rate = 0
+        self.discount_rate = 0
 
-    @property
-    def bond_interests(self):
-        bond_market = self.country.union.bond_market
-        bonds = bond_market.get_buyer_bonds(self)
-        return sum([b["interests"] for b in bonds])
-
+    #
+    # Bond purchases
+    #
     def buy_remaining_bonds(self):
         role = self.roles["bond_buyer"]
         for issuer in role.find_issuers():
             if issuer.country == self.country:
                 role.buy_bonds(issuer, issuer.bond_number)
 
-    def pay_profit(self):
+    #
+    # Profit transfer
+    #
+    def transfer_profit(self):
         profit = self.calc_profit()
-        role = self.roles["central_bank"]
+        role = self.roles["monetary_authority"]
         role.transfer_profit(profit)
 
     def calc_profit(self):
-        return self.bond_interests + self.cash_advance_interest - self.reserve_interest
+        flows = self.account.flows
+        return flows["bond_interests"] + flows["adv_interests"] - flows["cash_interests"]
 
-
-class NationalCentralBank(CentralBank):
-
-    def setup(self):
-        # stocks
-        self.reserves = 0
-        self.cash_advances = 0
-
-        # flows
-        self.profits = 0
-        self.reserve_interest = 0
-        self.cash_advance_interest = 0
-
-        # indicators
-        self.country = None
-
-        # accointances
-        self.union_bank = None
-        self.government = None
-
-    @property
-    def discount_rate(self):
-        union_cb = self.union_bank
-        if union_cb is None:
-            return 0.0
-        return union_cb.discount_rate
-
-    def transfer_profit(self):
-        amount = self.calc_profit()
-        govt = self.government
-        govt.profits += amount
-        govt.reserves += amount
-        self.profits += amount
-        self.reserves += amount
-
-
-class UnionCentralBank(CentralBank):
-
-    def setup(self):
-        # history
-        self.prev_discount_rate = 0
-        self.average_inflation = 0
-
-        # decisions
-        self.discount_rate = 0
-
-    def calc_average_inflation(self):
-        markets = self.model.national_goods_markets
-        gdps = [m.gdp for m in markets.values()]
-        weighted_inflations = [m.gdp * m.inflation for m in markets.values()]
-        return sum(weighted_inflations) / sum(gdps)
-
+    #
+    # Monetary policy
+    #
     def calc_discount_rate(self):
         p = self.model.p
         average_inflation = self.average_inflation
@@ -93,8 +44,16 @@ class UnionCentralBank(CentralBank):
             + (1 - p.xi) * p.xi_deltap * inflation_gap
         )
 
-    def update_discount_rate(self):
+    def determine_discount_rate(self):
+        role = self.roles["monetary_authority"]
         old_discount_rate = self.discount_rate
-        self.average_inflation = self.calc_average_inflation()
+        self.average_inflation = role.get_average_inflation()
         self.discount_rate = self.calc_discount_rate()
         self.prev_discount_rate = old_discount_rate
+
+    def implement_discount_rate(self):
+        role = self.roles["monetary_authority"]
+        old_discount_rate = self.discount_rate
+        self.discount_rate = role.get_union_discount_rate()
+        self.prev_discount_rate = old_discount_rate
+

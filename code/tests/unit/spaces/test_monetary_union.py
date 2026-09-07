@@ -105,7 +105,7 @@ def test_has_credit_market_ref(union_before_setup):
 # ----------------------------------------------------
 
 
-def test_has_inflation_prop(union_before_setup):
+def test_has_average_inflation_prop(union_before_setup):
     # Given
     union = union_before_setup
 
@@ -113,7 +113,7 @@ def test_has_inflation_prop(union_before_setup):
     union.setup()
 
     # Then
-    assert union.inflation == 0.0
+    assert union.average_inflation == 0.0
 
 
 # ---------------------------------------------------
@@ -322,3 +322,21 @@ def test_transfer_cash_between_agents_updates_accounts(union_with_authority):
     # Then
     source.account.debit_stock.assert_any_call("cash", 100)
     target.account.credit_stock.assert_any_call("cash", 100)
+
+
+
+# ---------------------------------------------------
+# INFLATION
+# ----------------------------------------------------
+
+def test_update_average_inflation(union_before_setup):
+    # Given
+    union = union_before_setup
+    union.countries = {i: Mock(inflation=0.05, gdp=100) for i in range(5)}
+
+    # When
+    union.update_average_inflation()
+
+    # Then
+    assert union.average_inflation == pytest.approx(0.05)
+

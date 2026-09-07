@@ -2,7 +2,7 @@ import pytest
 from unittest.mock import Mock, PropertyMock
 from model.spaces.country import Country
 from model.agents.government import Government
-from model.agents.central_bank import NationalCentralBank
+from model.agents.central_bank import CentralBank
 from model.agents.household import Household
 
 
@@ -26,8 +26,8 @@ def govt(model):
 def cb(model, monkeypatch):
     # Given
     bond_interests = PropertyMock(return_value=100)
-    monkeypatch.setattr(NationalCentralBank, "bond_interests", bond_interests)
-    cb = NationalCentralBank(model)
+    monkeypatch.setattr(CentralBank, "bond_interests", bond_interests)
+    cb = CentralBank(model)
     cb.setup()
     cb.cash_advance_interest = 50
     cb.reserve_interest = 20
