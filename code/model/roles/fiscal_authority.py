@@ -5,8 +5,13 @@ class FiscalAuthority(EcoRole):
 
     @property
     def tax_rate(self):
-        return self.space.tax_rate
+        return self.agent.tax_rate
 
-    @tax_rate.setter
-    def tax_rate(self, rate):
-        self.space.tax_rate = rate
+    def get_gdp(self):
+        return self.space.gdp
+
+    def get_average_price(self):
+        return self.space.good_market.average_price
+
+    def get_average_productivity(self):
+        return self.space.good_market.average_prod

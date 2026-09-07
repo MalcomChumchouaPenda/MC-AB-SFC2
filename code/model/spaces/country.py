@@ -124,6 +124,13 @@ class Country(EcoSpace):
         founder.credit_flow("dividends", amount)
         founder.credit_stock("cash", amount)
 
+    def pay_taxes(self, payer, amount):
+        payer.debit_flow("taxes", amount)
+        payer.debit_stock("cash", amount)
+        authority = self.fiscal_authority
+        authority.credit_flow("taxes", amount)
+        authority.credit_stock("cash", amount)
+
     #
     # Firm creation
     #

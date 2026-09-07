@@ -133,3 +133,14 @@ def test_pay_dividends(company_with_space):
 
     # Then
     space.pay_dividends.assert_called_with(company, founder, 50)
+
+
+def test_pay_taxes_uses_space_method(company_with_space):
+    # Given
+    company, space = company_with_space
+
+    # When
+    company.pay_taxes(50)
+
+    # Then
+    space.pay_taxes.assert_called_with(company, 50)

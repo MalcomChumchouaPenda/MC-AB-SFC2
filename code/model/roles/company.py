@@ -31,3 +31,6 @@ class Company(EcoRole):
     #
     def pay_dividends(self, founder, amount):
         self.space.pay_dividends(self, founder, amount)
+
+    def pay_taxes(self, amount):
+        self.space.pay_taxes(self, amount)

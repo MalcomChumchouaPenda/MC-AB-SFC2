@@ -646,7 +646,7 @@ def test_fund_company_reduces_resid_equity(country_with_company_and_founder):
 
 
 # ---------------------------------------------------
-#  DIVIDENDS
+#  DIVIDENDS AND TAXES
 # ----------------------------------------------------
 
 
@@ -676,6 +676,22 @@ def test_pay_dividends_updates_accounts(country_with_company_and_founder):
     company.debit_stock.assert_any_call("cash", 10)
     founder.credit_flow.assert_any_call("dividends", 10)
     founder.credit_stock.assert_any_call("cash", 10)
+
+
+def test_pay_taxes_updates_accounts(country_before_setup):
+    # Given
+    payer, authority = Mock(), Mock()
+    country = country_before_setup
+    country.fiscal_authority = authority
+
+    # When
+    country.pay_taxes(payer, 10)
+
+    # Then
+    payer.debit_flow.assert_any_call("taxes", 10)
+    payer.debit_stock.assert_any_call("cash", 10)
+    authority.credit_flow.assert_any_call("taxes", 10)
+    authority.credit_stock.assert_any_call("cash", 10)
 
 
 # ---------------------------------------------------

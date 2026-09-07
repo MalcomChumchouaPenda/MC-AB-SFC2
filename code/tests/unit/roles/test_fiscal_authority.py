@@ -23,6 +23,19 @@ def authority_before_setup():
     return authority
 
 
+def test_expose_tax_rate_from_agent(authority_before_setup):
+    # Given
+    agent = Mock()
+    authority = authority_before_setup
+    authority.agent = agent
+
+    # When
+    agent.tax_rate = 0.02
+
+    # Then
+    assert authority.tax_rate == 0.02
+
+
 # ---------------------------------------------------
 # PERCEPTION TESTS
 # ----------------------------------------------------
@@ -37,29 +50,44 @@ def authority_with_space(authority_before_setup):
     return authority, space
 
 
-def test_expose_tax_rate_from_space(authority_with_space):
+def test_get_gdp_from_space(authority_with_space):
     # Given
     authority, space = authority_with_space
-    space.tax_rate = 0.02
+    space.gdp = 500
 
     # When
-    perceived = authority.tax_rate
+    perceived = authority.get_gdp()
 
     # Then
-    assert perceived == 0.02
+    assert perceived == 500
+
+
+def test_get_average_price_from_space(authority_with_space):
+    # Given
+    authority, space = authority_with_space
+    space.good_market.average_price = 1.5
+
+    # When
+    perceived = authority.get_average_price()
+
+    # Then
+    assert perceived == 1.5
+    
+
+
+def test_get_average_productivity_from_space(authority_with_space):
+    # Given
+    authority, space = authority_with_space
+    space.good_market.average_prod = 1.0
+
+    # When
+    perceived = authority.get_average_productivity()
+
+    # Then
+    assert perceived == 1.0
 
 
 # ---------------------------------------------------
 # ACTION TESTS
 # ----------------------------------------------------
 
-
-def test_change_tax_rate_into_space(authority_with_space):
-    # Given
-    authority, space = authority_with_space
-
-    # When
-    authority.tax_rate = 0.05
-
-    # Then
-    assert space.tax_rate == 0.05

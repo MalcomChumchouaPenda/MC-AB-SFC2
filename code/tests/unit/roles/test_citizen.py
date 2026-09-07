@@ -151,3 +151,14 @@ def test_create_bank_uses_space_method(citizen_with_space):
 
     # Then
     space.create_bank.assert_called_with(bank, [share])
+
+
+def test_pay_taxes_uses_space_method(citizen_with_space):
+    # Given
+    citizen, space = citizen_with_space
+
+    # When
+    citizen.pay_taxes(100)
+
+    # Then
+    space.pay_taxes.assert_called_with(citizen, 100)

@@ -36,3 +36,6 @@ class Citizen(EcoRole):
 
     def create_bank(self, bank, shares):
         self.space.create_bank(bank, shares)
+
+    def pay_taxes(self, amount):
+        self.space.pay_taxes(self, amount)
