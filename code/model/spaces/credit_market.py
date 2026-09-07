@@ -54,7 +54,7 @@ class CreditMarket(EcoSpace):
             for _, lender, data in self.graph.edges(borrower, data=True)
         ]
 
-    def repay_loan(self, borrower, lender, principal, interests):
+    def repay_loans(self, borrower, lender, principal, interests):
         total = principal + interests
         borrower.credit_stock("loans", principal)
         borrower.debit_flow("loan_interests", interests)
@@ -63,7 +63,7 @@ class CreditMarket(EcoSpace):
         borrower.bank_account.debit_stock("cash", total)
         lender.credit_stock("cash", total)
         lender.debit_stock("loans", principal)
-        lender.credit_flow("loans_interests", interests)
+        lender.credit_flow("loan_interests", interests)
         self.graph[borrower][lender]["amount"] -= principal
 
     #

@@ -22,8 +22,8 @@ class Bank(EcoAgent):
         self.central_bank = None
 
     def update_deposit_rate(self):
-        cb = self.central_bank
-        self.deposit_rate = self.p.zeta * cb.discount_rate
+        discount_rate = self.roles["company"].get_discount_rate()
+        self.deposit_rate = self.p.zeta * discount_rate
 
     def pay_deposit_interests(self):
         for market in self.model.deposit_markets.values():
@@ -36,7 +36,7 @@ class Bank(EcoAgent):
         applicants = role.loan_applicants
         random = self.model.random
         random.shuffle(applicants)
-        capacity = self.credit_capacity
+        capacity = self.calc_credit_capacity()
         choice = self.model.nprandom.choice
         for borrower in applicants:
             if capacity <= 0:
@@ -49,17 +49,18 @@ class Bank(EcoAgent):
                 capacity -= amount
         role.loan_applicants = []
 
-    def update_credit_capacity(self):
-        equity = self.account.stocks["equity"]
-        self.credit_capacity = equity * self.p.mu1
+    def calc_credit_capacity(self):
+        equity = self.account.stocks["equities"]
+        return equity * self.p.mu1
 
     def calc_loan_probability(self, borrower):
-        return math.exp(-self.p.iota_l * borrower.target_leverage)
+        leverage = borrower.loan_demand / borrower.net_worth
+        return math.exp(-self.p.iota_l * leverage)
 
     def calc_loan_rate(self, borrower):
-        cb = self.central_bank
-        leverage = borrower.target_leverage
-        return self.p.chi * leverage + cb.discount_rate
+        discount_rate = self.roles["company"].get_discount_rate()
+        leverage = borrower.loan_demand / borrower.net_worth
+        return self.p.chi * leverage + discount_rate
 
     #
     # Cash advances

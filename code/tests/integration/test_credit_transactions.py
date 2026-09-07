@@ -1,110 +1,121 @@
 import math
 import pytest
 from unittest.mock import Mock, PropertyMock
+from agentpy import Model
+from model.base import EcoAccount
 from model.agents.bank import Bank
 from model.agents.firm import Firm
-from model.agents.central_bank import NationalCentralBank
 from model.spaces.credit_market import CreditMarket
 
 
 @pytest.fixture
 def model():
     # Given
-    model = Mock()
-    model.p.iota_l = 1
-    model.p.chi = 0.05
-    model.p.mu1 = 0.05
-    random = model.nprandom
-    random.choice.return_value = 1
+    model = Model()
+    model.p.iota_l = 0
+    model.p.chi = 0.0
+    model.p.mu1 = 1.0
     return model
 
 
 @pytest.fixture
-def bank(model, monkeypatch):
+def bank(model):
     # Given
-    mock_deposits = PropertyMock()
-    monkeypatch.setattr(Bank, "deposits", mock_deposits)
     bank = Bank(model)
-    bank.mock_deposits = mock_deposits
+    bank.setup()
+    bank.roles["company"] = Mock()
+    bank.account = EcoAccount(model)
+    bank.account.setup()
+    bank.cb_account = EcoAccount(model)
+    bank.cb_account.setup()
     return bank
 
 
 @pytest.fixture
-def firm(model, monkeypatch):
+def firm(model):
     # Given
-    mock_deposits = PropertyMock()
-    monkeypatch.setattr(Firm, "deposits", mock_deposits)
     firm = Firm(model)
-    firm.mock_deposits = mock_deposits
+    firm.setup()
+    firm.roles["depositor"] = Mock()
+    firm.account = EcoAccount(model)
+    firm.account.setup()
+    firm.cb_account = EcoAccount(model)
+    firm.cb_account.setup()
+    firm.bank_account = EcoAccount(model)
+    firm.bank_account.setup()
     return firm
 
 
 @pytest.fixture
-def cb(model, monkeypatch):
+def market(model, firm, bank):
     # Given
-    mock_rate = PropertyMock(return_value=0.05)
-    monkeypatch.setattr(NationalCentralBank, "discount_rate", mock_rate)
-    cb = NationalCentralBank(model)
-    cb.setup()
-    return cb
+    market = CreditMarket(model)
+    market.setup()
+    market.add_lender(bank)
+    market.add_borrower(firm)
+    return market
 
 
-@pytest.fixture
-def credit_market(model):
+@pytest.mark.usefixtures("market")
+def test_firm_request_loans(firm, bank):
     # Given
-    return CreditMarket(model)
-
-
-def test_firm_request_loans(firm, bank, cb, credit_market):
-    # Given
-    bank.central_bank = cb
-    firm.desired_loans = 500
-    borrower = credit_market.add_borrower(firm)
-    lender = credit_market.add_lender(bank)
+    firm.wage_offer = 4
+    firm.desired_rd = 100
+    firm.desired_labor = 100
+    lender = bank.roles["lender"]
+    borrower = firm.roles["borrower"]
 
     # When
-    firm.request_loan()
+    firm.request_loans()
 
     # Then
+    assert firm.desired_loans == 500
+    assert borrower.loan_demand == 500
     assert lender.loan_applicants == [borrower]
 
 
-def test_bank_evaluates_credit_request(firm, bank, cb, credit_market):
+def test_bank_grant_loans(market, firm, bank):
     # Given
-    firm.equity = 100
-    firm.desired_loans = 200
-    bank.central_bank = cb
-    borrower = credit_market.add_borrower(firm)
+    bank.account.stocks["equities"] = 100
+    bank.roles["company"].get_discount_rate.return_value = 0.05
+    borrower, lender = firm.roles["borrower"], bank.roles["lender"]
+    borrower.loan_demand = 50
+    borrower.net_worth = 100
+    lender.loan_applicants = [borrower]
 
     # When
-    firm.request_loan()
-    probability = bank.calc_loan_probability(borrower)
-    rate = bank.calc_loan_rate(borrower)
-
-    # Then
-    assert probability == pytest.approx(math.exp(-2))
-    assert rate == pytest.approx(0.15)
-
-
-def test_bank_grant_loans(firm, bank, cb, credit_market):
-    # Given
-    firm.equity = 500
-    firm.loans = 0
-    firm.mock_deposits.return_value = 200
-    firm.desired_loans = 1000
-    bank.central_bank = cb
-    bank.equity = 7500
-    bank.loans = 0
-    bank.mock_deposits.return_value = 1000
-    credit_market.add_borrower(firm)
-    credit_market.add_lender(bank)
-
-    # When
-    firm.request_loan()
-    bank.update_credit_capacity()
     bank.grant_loans()
 
     # Then
-    assert bank.loans > 0
-    assert firm.loans == bank.loans
-    # assert firm.deposits > 200
+    assert bank.account.stocks["loans"] == 50
+    assert bank.account.stocks["cash"] == -50
+    assert firm.account.stocks["loans"] == -50
+    assert firm.account.stocks["deposits"] == 50
+    assert firm.bank_account.stocks["deposits"] == -50
+    assert firm.bank_account.stocks["cash"] == 50
+    assert market.graph[lender][borrower]["amount"] == 50
+    assert market.graph[lender][borrower]["rate"] == 0.05
+
+
+def test_firm_repays_loans(market, firm, bank):
+    # Given
+    bank.account.stocks["loans"] = 50
+    firm.account.stocks["loans"] = -50
+    firm.account.stocks["deposits"] = 55
+    firm.bank_account.stocks["deposits"] = -55
+    borrower, lender = firm.roles["borrower"], bank.roles["lender"]
+    market.graph.add_edge(lender, borrower, amount=50, rate=0.1)
+
+    # When
+    firm.repay_loans()
+
+    # Then
+    assert bank.account.stocks["loans"] == 0
+    assert bank.account.stocks["cash"] == 55
+    assert bank.account.flows["loan_interests"] == 5
+    assert firm.account.stocks["loans"] == 0
+    assert firm.account.stocks["deposits"] == 0
+    assert firm.account.flows["loan_interests"] == -5
+    assert firm.bank_account.stocks["deposits"] == 0
+    assert firm.bank_account.stocks["cash"] == -55
+    assert market.graph[lender][borrower]["amount"] == 0

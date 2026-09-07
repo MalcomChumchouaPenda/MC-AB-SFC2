@@ -20,8 +20,8 @@ class Borrower(EcoRole):
     #
     # Actions
     #
-    def request_loan(self, lender):
+    def request_loans(self, lender):
         lender.receive_request(self)
 
-    def repay_loan(self, lender, principal, interests):
-        self.space.repay_loan(self, lender, principal, interests)
+    def repay_loans(self, lender, principal, interests):
+        self.space.repay_loans(self, lender, principal, interests)

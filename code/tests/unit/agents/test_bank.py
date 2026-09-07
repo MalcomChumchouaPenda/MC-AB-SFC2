@@ -108,9 +108,10 @@ def test_has_default_defaulted(bank_before_setup):
 
 def test_update_deposit_rate_as_fraction_of_discount_rate(bank_before_setup):
     # Given
+    company = Mock()
+    company.get_discount_rate.return_value = 0.05
     bank = bank_before_setup
-    cb = Mock(discount_rate=0.05)
-    bank.central_bank = cb
+    bank.roles["company"] = company
     bank.p.zeta = 0.8
 
     # When
@@ -143,24 +144,24 @@ def test_pay_deposit_interests_to_all_clients(bank_before_setup):
 # ----------------------------------------------------
 
 
-def test_updates_credit_capacity(bank_with_roles_and_account):
+def test_calc_credit_capacity(bank_with_roles_and_account):
     # Given
     bank, _, account = bank_with_roles_and_account
     bank.p.mu1 = 10
-    account.stocks["equity"] = 100
+    account.stocks["equities"] = 100
 
     # When
-    bank.update_credit_capacity()
+    result = bank.calc_credit_capacity()
 
     # Then
-    assert bank.credit_capacity == pytest.approx(1000)
+    assert result == pytest.approx(1000)
 
 
 def test_calc_loan_probability(bank_before_setup):
     # Given
     bank = bank_before_setup
     bank.p.iota_l = 1
-    borrower = Mock(loan_demand=100, target_leverage=0.5)
+    borrower = Mock(loan_demand=100, net_worth=200)
 
     # When
     probability = bank.calc_loan_probability(borrower)
@@ -171,17 +172,18 @@ def test_calc_loan_probability(bank_before_setup):
 
 def test_calc_loan_rate(bank_before_setup):
     # Given
+    company = Mock()
+    company.get_discount_rate.return_value = 0.05
     bank = bank_before_setup
-    cb = Mock(discount_rate=0.05)
-    bank.central_bank = cb
     bank.p.chi = 0.02
-    borrower = Mock(target_leverage=5.0)
+    bank.roles["company"] = company
+    borrower = Mock(loan_demand=100, net_worth=200)
 
     # When
     rate = bank.calc_loan_rate(borrower)
 
     # Then
-    assert rate == pytest.approx(0.02 * 5.0 + 0.05)
+    assert rate == pytest.approx(0.02 * 0.5 + 0.05)
 
 
 @pytest.fixture
@@ -192,7 +194,7 @@ def bank_as_lender(bank_with_roles_and_account):
     bank, roles, _ = bank_with_roles_and_account
     bank.calc_loan_rate = Mock(return_value=0.02)
     bank.calc_loan_probability = Mock(return_value=0.4)
-    bank.update_credit_capacity = Mock()
+    bank.calc_credit_capacity = Mock(return_value=500)
     random = bank.model.nprandom
     random.choice.return_value = 0
     roles["lender"] = lender
@@ -238,7 +240,7 @@ def test_grant_loans_with_computed_probability(bank_as_lender):
 def test_grant_loans_in_regards_of_credit_capacity(bank_as_lender):
     # Given
     bank = bank_as_lender
-    bank.credit_capacity = 200
+    bank.calc_credit_capacity.return_value = 200
     lender = bank.roles["lender"]
     applicants = lender.loan_applicants
     random = bank.model.nprandom
@@ -256,7 +258,7 @@ def test_grant_loans_in_regards_of_credit_capacity(bank_as_lender):
 def test_grant_loans_cleans_loan_applicants_list(bank_as_lender):
     # Given
     bank = bank_as_lender
-    bank.credit_capacity = 200
+    bank.calc_credit_capacity.return_value = 200
     lender = bank.roles["lender"]
     random = bank.model.nprandom
     random.choice.return_value = 1

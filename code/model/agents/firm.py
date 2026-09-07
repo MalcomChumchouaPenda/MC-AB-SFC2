@@ -133,25 +133,57 @@ class Firm(EcoAgent):
             self.rd = self.desired_rd
         return self.rd
 
-    # Credit demand
-
-    def calc_desired_loans(self):
-        deposits = self.account.stocks["deposits"]
-        wage_bill = self.wage_offer * self.desired_labor
-        self.desired_loans = max(0, wage_bill + self.desired_rd - deposits)
-        return self.desired_loans
-
-    def request_loan(self):
+    #
+    # Credit transaction
+    #
+    def request_loans(self):
+        self.desired_loans = self.calc_desired_loans()
         if self.desired_loans <= 0:
             return
         role = self.roles["borrower"]
         role.loan_demand = self.desired_loans
+        role.net_worth = self.account.stocks["equities"]
         lenders = role.find_lenders()
         for lender in lenders:
-            role.request_loan(lender)
+            role.request_loans(lender)
 
+    def calc_desired_loans(self):
+        deposits = self.account.stocks["deposits"]
+        wage_bill = self.wage_offer * self.desired_labor
+        return max(0, wage_bill + self.desired_rd - deposits)
+
+    def repay_loans(self):
+        stocks = self.account.stocks
+        borrower_role = self.roles["borrower"]
+        depositor_role = self.roles["depositor"]
+        self._fund_repayments(depositor_role, stocks)
+        for loan in borrower_role.find_loans():
+            deposits = stocks["deposits"]
+            if deposits <= 0:
+                break
+            self._pay_lender(borrower_role, loan, deposits)
+
+    def _fund_repayments(self, role, stocks):
+        needs = max(0, stocks["loans"] - stocks["deposits"])
+        if needs > 0:
+            feasible = min(stocks["cash"], needs)
+            role.make_deposits(feasible)
+
+    def _pay_lender(self, role, loan, deposits):
+        lender = loan["lender"]
+        principal = loan["amount"]
+        interests = principal * loan["rate"]
+        total = principal + interests
+        if total > deposits:
+            amount = min(principal, deposits)
+            role.repay_loans(lender, amount, 0.0)                
+        else:
+            role.repay_loans(lender, principal, interests)
+
+
+    #
     # Profit, taxes and dividend computation
-
+    #
     def compute_profit_distribution(self):
         self.net_cash_flow = self.calc_net_cash_flow()
         self.profit = self.calc_profit()

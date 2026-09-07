@@ -88,25 +88,25 @@ def test_find_loans(borrower_with_space):
 # ----------------------------------------------------
 
 
-def test_request_loan_use_lender_method(borrower_before_setup):
+def test_request_loans_use_lender_method(borrower_before_setup):
     # Given
     lender = Mock()
     borrower = borrower_before_setup
 
     # When
-    borrower.request_loan(lender)
+    borrower.request_loans(lender)
 
     # Then
     lender.receive_request.assert_called_with(borrower)
 
 
-def test_repay_loan_use_space_method(borrower_with_space):
+def test_repay_loans_use_space_method(borrower_with_space):
     # Given
     lender = Mock()
     borrower, space = borrower_with_space
 
     # When
-    borrower.repay_loan(lender, 100, 10)
+    borrower.repay_loans(lender, 100, 10)
 
     # Then
-    space.repay_loan.assert_called_with(borrower, lender, 100, 10)
+    space.repay_loans.assert_called_with(borrower, lender, 100, 10)

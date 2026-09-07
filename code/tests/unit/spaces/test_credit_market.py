@@ -248,25 +248,25 @@ def market_with_loan(market_with_participants):
     return market, borrower, lender
 
 
-def test_repay_loan_updates_graph_edge(market_with_loan):
+def test_repay_loans_updates_graph_edge(market_with_loan):
     # Given
     market, borrower, lender = market_with_loan
     graph = market.graph
     graph[borrower][lender]["amount"] = 300
 
     # When
-    market.repay_loan(borrower, lender, 100, 10)
+    market.repay_loans(borrower, lender, 100, 10)
 
     # Then
     assert graph[borrower][lender]["amount"] == 200
 
 
-def test_repay_loan_updates_accounts(market_with_loan):
+def test_repay_loans_updates_accounts(market_with_loan):
     # Given
     market, borrower, lender = market_with_loan
 
     # When
-    market.repay_loan(borrower, lender, 100, 10)
+    market.repay_loans(borrower, lender, 100, 10)
 
     # Then
     borrower.credit_stock.assert_any_call("loans", 100)
@@ -276,7 +276,7 @@ def test_repay_loan_updates_accounts(market_with_loan):
     borrower.bank_account.debit_stock.assert_any_call("cash", 110)
     lender.credit_stock.assert_any_call("cash", 110)
     lender.debit_stock.assert_any_call("loans", 100)
-    lender.credit_flow.assert_any_call("loans_interests", 10)
+    lender.credit_flow.assert_any_call("loan_interests", 10)
 
 
 # ---------------------------------------------------

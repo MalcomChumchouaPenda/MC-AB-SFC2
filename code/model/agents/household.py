@@ -143,7 +143,7 @@ class Household(EcoAgent):
 
     def calc_portfolio_allocation(self):
         lp = self.calc_liquidity_preference()
-        equity = self.account.stocks["equity"]
+        equity = self.account.stocks["equities"]
         expected_worth = self.calc_expected_net_worth()
         self.desired_equity = max(equity, (1 - lp) * expected_worth)
         self.desired_deposits = expected_worth - (self.desired_equity - equity)
@@ -151,7 +151,7 @@ class Household(EcoAgent):
     def calc_liquidity_preference(self):
         p = self.p
         roles = self.roles
-        equity = self.account.stocks["equity"]
+        equity = self.account.stocks["equities"]
         dividends = self.account.flows["dividends"]
         default_prob = roles["citizen"].get_prob_failure()
         deposit_rate = roles["depositor"].get_deposit_rate()

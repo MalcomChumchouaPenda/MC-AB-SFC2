@@ -682,7 +682,7 @@ def test_calc_liquidity_pref_when_equity_is_more_profitable(hh_before_allocation
     # Given
     household = hh_before_allocation
     household.account.flows["dividends"] = 10
-    household.account.stocks["equity"] = 100
+    household.account.stocks["equities"] = 100
     household.p.lambda_ = 0.6
     roles = household.roles
     roles["citizen"].get_prob_failure.return_value = 0.10
@@ -700,7 +700,7 @@ def test_calc_liquidity_pref_when_equity_is_less_profitable(hh_before_allocation
     # Given
     household = hh_before_allocation
     household.account.flows["dividends"] = 2
-    household.account.stocks["equity"] = 100
+    household.account.stocks["equities"] = 100
     household.p.lambda_ = 0.7
     roles = household.roles
     roles["citizen"].get_prob_failure.return_value = 0.10
@@ -717,7 +717,7 @@ def test_calc_liquidity_preference_when_no_equity(hh_before_allocation):
     # Given
     household = hh_before_allocation
     household.account.flows["dividends"] = 0
-    household.account.stocks["equity"] = 0
+    household.account.stocks["equities"] = 0
     household.p.lambda_ = 0.8
     roles = household.roles
     roles["citizen"].get_prob_failure.return_value = 0.10
@@ -733,7 +733,7 @@ def test_calc_liquidity_preference_when_no_equity(hh_before_allocation):
 def test_calc_portfolio_allocation_updates_desired_assets(hh_before_allocation):
     # Given
     household = hh_before_allocation
-    household.account.stocks["equity"] = 20
+    household.account.stocks["equities"] = 20
     household.calc_liquidity_preference = Mock(return_value=0.40)
     household.calc_expected_net_worth = Mock(return_value=100)
 
@@ -748,7 +748,7 @@ def test_calc_portfolio_allocation_updates_desired_assets(hh_before_allocation):
 def test_calc_portfolio_allocation_preserves_existing_equity(hh_before_allocation):
     # Given
     household = hh_before_allocation
-    household.account.stocks["equity"] = 80
+    household.account.stocks["equities"] = 80
     household.calc_liquidity_preference = Mock(return_value=0.80)
     household.calc_expected_net_worth = Mock(return_value=100)
 
@@ -915,7 +915,7 @@ def test_make_deposits_with_residual_cash(hh_as_depositor):
 def hh_as_investor(hh_before_allocation):
     # Given
     household = hh_before_allocation
-    household.account.stocks["equity"] = 0
+    household.account.stocks["equities"] = 0
     household.desired_equity = 100
     household.roles = {"citizen": Mock()}
     household.choose_investment_sector = Mock(return_value=None)

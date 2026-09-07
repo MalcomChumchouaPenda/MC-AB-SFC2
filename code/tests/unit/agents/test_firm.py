@@ -674,69 +674,161 @@ def test_update_productivity_by_imitation(innovating_firm):
 
 
 @pytest.fixture
-def borrowing_firm(firm_with_roles_and_account):
+def firm_before_borrowing(firm_with_roles_and_account):
     # Given
-    firm, roles, account = firm_with_roles_and_account
+    firm, _, account = firm_with_roles_and_account
     firm.wage_offer = 10
     firm.desired_labor = 10
     firm.desired_rd = 50
     account.stocks["deposits"] = 0
-    roles["borrower"] = Mock()
     return firm
 
 
-def test_calc_desired_loans_when_external_finance_needed(borrowing_firm):
+def test_calc_desired_loans_when_external_finance_needed(firm_before_borrowing):
     # Given
-    firm = borrowing_firm
+    firm = firm_before_borrowing
     firm.account.stocks["deposits"] = 20
 
     # When
-    firm.calc_desired_loans()
+    result = firm.calc_desired_loans()
 
     # Then
-    assert firm.desired_loans == 130
+    assert result == 130
 
 
-def test_calc_desired_loans_when_internal_funds_are_sufficient(borrowing_firm):
+def test_calc_desired_loans_when_internal_funds_are_sufficient(firm_before_borrowing):
     # Given
-    firm = borrowing_firm
+    firm = firm_before_borrowing
     firm.account.stocks["deposits"] = 150
 
     # When
-    firm.calc_desired_loans()
+    result = firm.calc_desired_loans()
 
     # Then
-    assert firm.desired_loans == 0
+    assert result == 0
 
 
-def test_request_loan_to_all_lenders(borrowing_firm):
+@pytest.fixture
+def firm_as_borrower(firm_with_roles_and_account):
     # Given
-    lenders = [Mock() for _ in range(3)]
-    firm = borrowing_firm
-    firm.desired_loans = 100
-    role = firm.roles["borrower"]
-    role.find_lenders.return_value = lenders
+    role = Mock()
+    role.find_lenders.return_value = []
+    firm, roles, account = firm_with_roles_and_account
+    firm.calc_desired_loans = Mock(return_value=10)
+    account.stocks["equities"] = 100
+    roles["borrower"] = role
+    return firm, role
+
+
+def test_request_loans_to_all_lenders(firm_as_borrower):
+    # Given
+    lender = Mock()
+    firm, role = firm_as_borrower
+    role.find_lenders.return_value = [lender]
 
     # When
-    firm.request_loan()
+    firm.request_loans()
 
     # Then
-    for lender in lenders:
-        role.request_loan.assert_any_call(lender)
+    role.request_loans.assert_any_call(lender)
 
 
-def test_request_loan_and_set_loan_demand(borrowing_firm):
+def test_request_loans_and_set_loan_demand(firm_as_borrower):
     # Given
-    firm = borrowing_firm
-    firm.desired_loans = 100
-    role = firm.roles["borrower"]
+    firm, role = firm_as_borrower
+    firm.calc_desired_loans.return_value = 100
     role.find_lenders.return_value = [Mock()]
 
     # When
-    firm.request_loan()
+    firm.request_loans()
 
     # Then
     assert role.loan_demand == 100
+
+
+def test_request_loans_and_registers_networth(firm_as_borrower):
+    # Given
+    firm, role = firm_as_borrower
+    firm.account.stocks["equities"] = 200
+    firm.calc_desired_loans.return_value = 100
+
+    # When
+    firm.request_loans()
+
+    # Then
+    assert role.net_worth == 200
+
+
+def test_request_loans_and_registers_desired_loans(firm_as_borrower):
+    # Given
+    firm, _ = firm_as_borrower
+    firm.calc_desired_loans.return_value = 100
+
+    # When
+    firm.request_loans()
+
+    # Then
+    assert firm.desired_loans == 100
+
+
+@pytest.fixture
+def firm_after_borrowing(firm_with_roles_and_account):
+    # Given
+    role = Mock()
+    role.find_loans.return_value = []
+    firm, roles, account = firm_with_roles_and_account
+    account.stocks["deposits"] = 100
+    account.stocks["loans"] = 100
+    account.stocks["cash"] = 100
+    roles["depositor"] = Mock()
+    roles["borrower"] = role
+    return firm, roles, account
+
+
+def test_repay_loans_to_all_lenders(firm_after_borrowing):
+    # Given
+    firm, roles, account = firm_after_borrowing
+    account.stocks["deposits"] = 200
+    lender, role = object(), roles["borrower"]
+    loans = [{"lender": lender, "amount": 100, "rate": 0.1}]
+    role.find_loans.return_value = loans
+
+    # When
+    firm.repay_loans()
+
+    # Then
+    role.repay_loans.assert_called_once_with(lender, 100, 10.0)
+
+
+def test_repay_loans_with_available_deposits(firm_after_borrowing):
+    # Given
+    firm, roles, account = firm_after_borrowing
+    account.stocks["deposits"] = 50
+    lender, role = object(), roles["borrower"]
+    loans = [{"lender": lender, "amount": 100, "rate": 0.1}]
+    role.find_loans.return_value = loans
+
+    # When
+    firm.repay_loans()
+
+    # Then
+    role.repay_loans.assert_called_once_with(lender, 50, 0.0)
+
+
+@pytest.mark.parametrize("cash, expected", [(100, 80), (50, 50)])
+def test_repay_loans_after_making_deposits(firm_after_borrowing, cash, expected):
+    # Given
+    firm, roles, account = firm_after_borrowing
+    account.stocks["deposits"] = 20
+    account.stocks["loans"] = 100
+    account.stocks["cash"] = cash
+    role = roles["depositor"]
+
+    # When
+    firm.repay_loans()
+
+    # Then
+    role.make_deposits.assert_called_once_with(expected)
 
 
 # ---------------------------------------------------
