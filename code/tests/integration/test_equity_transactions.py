@@ -28,7 +28,6 @@ def country(model):
     return country
 
 
-
 @pytest.fixture
 def founders(model):
     # Given
@@ -43,7 +42,7 @@ def founders(model):
         hh.account = EcoAccount(model)
         hh.account.setup()
         hh.account.stocks["cash"] = 400
-        hh.desired_equity = 300 - i*100
+        hh.desired_equity = 300 - i * 100
         founders.append(hh)
     return founders
 
@@ -54,9 +53,11 @@ def country_before_investment(country, founders):
     for founder in founders:
         role = country.add_citizen(founder)
         role.resid_equity = founder.desired_equity
+
     def add_account(agent):
         agent.account = EcoAccount(country.model)
         agent.account.setup()
+
     country.union.add_account = add_account
     return country
 
@@ -85,7 +86,6 @@ def test_household_creates_new_firm(country_before_investment, founders):
     assert country.graph[citizen2][companies[0]]["value"] == 200
 
 
-
 def test_household_creates_new_bank(country_before_investment, founders):
     # Given
     household1, household2 = founders
@@ -111,7 +111,9 @@ def test_household_creates_new_bank(country_before_investment, founders):
     assert country.graph[citizen2][companies[-1]]["value"] == 200
 
 
-def test_household_makes_deposits_with_residual_cash(country_before_investment, founders):
+def test_household_makes_deposits_with_residual_cash(
+    country_before_investment, founders
+):
     # Given
     household1, household2 = founders
     citizen2 = household2.roles["citizen"]
@@ -125,10 +127,7 @@ def test_household_makes_deposits_with_residual_cash(country_before_investment, 
     # Then
     household1.roles["depositor"].make_deposits.assert_called_with(400)
     assert len(companies) == 0
-    
 
-
-    
 
 @pytest.fixture
 def household(model):
@@ -153,12 +152,14 @@ def bank(model):
     bank.setup()
     return bank
 
+
 @pytest.fixture
 def country_before_distribution(country, firm, bank, household):
     # Given
     def add_account(agent):
         agent.account = EcoAccount(country.model)
         agent.account.setup()
+
     country.union.add_account = add_account
     founder = country.add_citizen(household)
     company1 = country.add_company(firm, "FT")
@@ -192,7 +193,6 @@ def test_bank_pay_dividends(bank, household):
     bank.account.stocks["cash"] = 500
     bank.dividends_payable = 100
 
-
     # When
     bank.pay_dividends()
 
@@ -202,4 +202,3 @@ def test_bank_pay_dividends(bank, household):
     assert bank.account.stocks["cash"] == 400
     assert household.account.stocks["cash"] == 100
     assert household.account.flows["dividends"] == 100
-    

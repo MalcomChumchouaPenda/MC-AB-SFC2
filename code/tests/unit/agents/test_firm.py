@@ -1010,7 +1010,7 @@ def test_pay_no_taxes(firm_as_tax_payer):
 def test_pay_dividends(firm_with_roles_and_account):
     # Given
     founder, role = Mock(), Mock()
-    share = {"founder":founder, "value":1000}
+    share = {"founder": founder, "value": 1000}
     role.get_equity_shares.return_value = [share]
     firm, roles, _ = firm_with_roles_and_account
     firm.dividends_payable = 200

@@ -178,16 +178,14 @@ class Household(EcoAgent):
             required_equity = self.calc_initial_equity(sector)
             collected_equity = self.desired_equity
             initiator = self.roles["citizen"]
-            shares = [{"founder":initiator, "amount":initiator.resid_equity}]
+            shares = [{"founder": initiator, "amount": initiator.resid_equity}]
             for investor in investors:
-                shares.append({"founder":investor, "amount":investor.resid_equity})
+                shares.append({"founder": investor, "amount": investor.resid_equity})
                 collected_equity += investor.resid_equity
                 if collected_equity >= required_equity:
                     self.create_company(shares, sector)
                     break
         self.make_deposits()
-
-
 
     def choose_investment_sector(self):
         p = self.p

@@ -38,7 +38,7 @@ class EcoRole(Object):
     @property
     def account(self):
         return self.agent.account
-    
+
     @property
     def cb_account(self):
         return self.agent.cb_account

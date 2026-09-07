@@ -176,10 +176,9 @@ class Firm(EcoAgent):
         total = principal + interests
         if total > deposits:
             amount = min(principal, deposits)
-            role.repay_loans(lender, amount, 0.0)                
+            role.repay_loans(lender, amount, 0.0)
         else:
             role.repay_loans(lender, principal, interests)
-
 
     #
     # Profit, taxes and dividend computation

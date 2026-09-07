@@ -773,8 +773,10 @@ def test_choose_portfolio_allocation_updates_citizen_role(hh_before_allocation):
     # Then
     assert role.resid_equity == 80
 
+
 FakeFirm = Mock()
 FakeBank = Mock()
+
 
 @pytest.fixture
 def hh_before_investment(monkeypatch):
@@ -895,7 +897,6 @@ def test_create_company_can_create_tradable_firms(hh_before_investment):
     role = household.roles["citizen"]
     shares = [Mock() for _ in range(5)]
 
-
     # When
     household.create_company(shares, sector="FT")
 
@@ -978,7 +979,7 @@ def test_invest_equity_when_sufficient_equity(hh_as_investor):
     household = hh_as_investor
     initiator = household.roles["citizen"]
     founders = [Mock(resid_equity=100) for _ in range(2)]
-    shares = [{"founder":o, "amount":o.resid_equity} for o in [initiator] + founders]
+    shares = [{"founder": o, "amount": o.resid_equity} for o in [initiator] + founders]
     household.find_potential_investors.return_value = founders
     household.choose_investment_sector.return_value = "any"
     household.calc_initial_equity.return_value = 300
@@ -998,7 +999,9 @@ def test_invest_equity_with_only_sufficient_equity(hh_as_investor):
     household = hh_as_investor
     initiator = household.roles["citizen"]
     founders = [Mock(resid_equity=100) for _ in range(5)]
-    shares = [{"founder":o, "amount":o.resid_equity} for o in [initiator] + founders[:2]]
+    shares = [
+        {"founder": o, "amount": o.resid_equity} for o in [initiator] + founders[:2]
+    ]
     household.find_potential_investors.return_value = founders
     household.choose_investment_sector.return_value = "any"
     household.calc_initial_equity.return_value = 300
