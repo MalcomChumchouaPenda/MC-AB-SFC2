@@ -38,8 +38,9 @@ class Firm(EcoAgent):
         self.variety = 0.0
         self.country = 0
 
+    #
     # Production planning
-
+    #
     def plan_production(self):
         self.calc_desired_output()
         self.calc_labor_demand()
@@ -55,8 +56,9 @@ class Firm(EcoAgent):
         self.desired_labor = self.desired_output / role.productivity
         return self.desired_labor
 
+    #
     # Price and quantities adaptation
-
+    #
     def adapt_expectations(self):
         delta = self.p.delta
         random = self.model.random
@@ -71,8 +73,9 @@ class Firm(EcoAgent):
             self.price *= 1 - random.uniform(0, delta)
             self.price = max(wage_bill / role.productivity, self.price)
 
+    #
     # Wage revision
-
+    #
     def revise_wage_offer(self):
         p = self.p
         random = self.model.nprandom
@@ -90,8 +93,9 @@ class Firm(EcoAgent):
         unemployment = role.get_unemployment_rate()
         return p.upsilon_f * math.exp(-p.upsilon * unemployment)
 
+    #
     # Innovation and imitation process
-
+    #
     def update_productivity(self):
         role = self.roles["producer"]
         self.calc_desired_rd()
@@ -102,14 +106,20 @@ class Firm(EcoAgent):
         prob = self.calc_rd_success_probability()
         random = self.model.nprandom
         success = random.choice([0, 1], p=[1 - prob, prob])
+        print(success)
         if success:
-            delta = self.p.delta
-            role.productivity *= 1 + random.uniform(0, delta)  # innovation
+            self._innovation(role, random)
+            self._imitation(role, random)
 
-            avg_productivity = role.get_average_productivity()
-            prod_diff = avg_productivity - role.productivity
-            if prod_diff > 0:
-                role.productivity += random.uniform(0, prod_diff)  # imitation
+    def _innovation(self, role, random):
+        delta = self.p.delta
+        role.productivity *= 1 + random.uniform(0, delta)
+
+    def _imitation(self, role, random):
+        avg_productivity = role.get_average_productivity()
+        prod_diff = avg_productivity - role.productivity
+        if prod_diff > 0:
+            role.productivity += random.uniform(0, prod_diff)
 
     def calc_desired_rd(self):
         self.desired_wage_bill = self.wage_offer * self.desired_labor
@@ -244,8 +254,9 @@ class Firm(EcoAgent):
         if self.net_worth < self.wage_offer:
             role.close_firm(self)
 
+    #
     # History
-
+    #
     def update_production_history(self):
         role = self.roles["producer"]
         self.prev_sales = role.sales
