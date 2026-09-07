@@ -324,10 +324,10 @@ def test_transfer_cash_between_agents_updates_accounts(union_with_authority):
     target.account.credit_stock.assert_any_call("cash", 100)
 
 
-
 # ---------------------------------------------------
 # INFLATION
 # ----------------------------------------------------
+
 
 def test_update_average_inflation(union_before_setup):
     # Given
@@ -339,4 +339,3 @@ def test_update_average_inflation(union_before_setup):
 
     # Then
     assert union.average_inflation == pytest.approx(0.05)
-

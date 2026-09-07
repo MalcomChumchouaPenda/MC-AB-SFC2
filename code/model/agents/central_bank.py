@@ -29,7 +29,9 @@ class CentralBank(EcoAgent):
 
     def calc_profit(self):
         flows = self.account.flows
-        return flows["bond_interests"] + flows["adv_interests"] - flows["cash_interests"]
+        return (
+            flows["bond_interests"] + flows["adv_interests"] - flows["cash_interests"]
+        )
 
     #
     # Monetary policy
@@ -56,4 +58,3 @@ class CentralBank(EcoAgent):
         old_discount_rate = self.discount_rate
         self.discount_rate = role.get_union_discount_rate()
         self.prev_discount_rate = old_discount_rate
-

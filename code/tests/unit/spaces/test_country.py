@@ -845,6 +845,7 @@ def test_create_bank_place_bank_in_union(country_before_creation, share):
 # TRANSFER PROFITS
 # ----------------------------------------------------
 
+
 def test_transfer_profits_to_government(country_before_setup):
     # Given
     fiscal_auth, monetary_auth = Mock(), Mock()

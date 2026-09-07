@@ -50,7 +50,6 @@ def union_cb(model, union):
     return cb
 
 
-
 def test_central_banks_determines_discount_rate(union, union_cb):
     # Given
     union_cb.prev_discount_rate = 0.03
@@ -63,7 +62,6 @@ def test_central_banks_determines_discount_rate(union, union_cb):
     assert union_cb.discount_rate == pytest.approx(0.04)
 
 
-
 def test_central_banks_implements_discount_rate(union_cb, national_cb):
     # Given
     union_cb.discount_rate = 0.05
@@ -73,4 +71,3 @@ def test_central_banks_implements_discount_rate(union_cb, national_cb):
 
     # Then
     assert national_cb.discount_rate == pytest.approx(0.05)
-

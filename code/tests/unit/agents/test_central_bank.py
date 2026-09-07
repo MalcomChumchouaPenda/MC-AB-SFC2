@@ -86,7 +86,6 @@ def test_dont_buy_foreign_bonds(cb_as_bond_buyer):
     role.buy_bonds.assert_not_called()
 
 
-
 # ---------------------------------------------------
 # MONETARY POLICY
 # ----------------------------------------------------
@@ -100,7 +99,6 @@ def cb_as_authority(cb_before_setup):
     cb.account = Mock(stocks={}, flows={})
     cb.roles = {"monetary_authority": role}
     return cb, role
-
 
 
 def test_calc_discount_rate(cb_as_authority):
@@ -151,7 +149,6 @@ def test_determine_discount_rate_changes_lag_values(cb_as_authority):
     assert cb.discount_rate == 0.03
 
 
-
 def test_implement_discount_rate(cb_as_authority):
     # Given
     cb, role = cb_as_authority
@@ -181,7 +178,6 @@ def test_implement_discount_rate_changes_lag_values(cb_as_authority):
     assert cb.discount_rate == 0.03
 
 
-
 # ---------------------------------------------------
 # PROFIT TRANSFER
 # ----------------------------------------------------
@@ -201,7 +197,6 @@ def test_calc_profit(cb_as_authority):
     assert profit == 120
 
 
-
 def test_transfer_profit_to_government(cb_as_authority):
     # Given
     cb, role = cb_as_authority
@@ -212,5 +207,3 @@ def test_transfer_profit_to_government(cb_as_authority):
 
     # Then
     role.transfer_profit.assert_called_with(100)
-
-

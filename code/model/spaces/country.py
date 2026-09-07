@@ -160,7 +160,7 @@ class Country(EcoSpace):
 
     #
     # Profit transfers
-    # 
+    #
     def transfer_central_bank_profits(self, amount):
         self.fiscal_authority.credit_flow("profit_transfers", amount)
         self.fiscal_authority.credit_stock("cash", amount)

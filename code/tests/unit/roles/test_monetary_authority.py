@@ -23,7 +23,6 @@ def authority_before_setup():
     return authority
 
 
-
 def test_expose_discount_rate_from_agent(authority_before_setup):
     # Given
     agent = Mock(discount_rate=0.02)
