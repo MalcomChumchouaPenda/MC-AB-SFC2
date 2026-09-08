@@ -143,12 +143,12 @@ class Bank(EcoAgent):
             return 0
         return self.p.rho * (self.profit - self.taxes_payable)
 
-    def update_net_worth(self):        
+    def update_net_worth(self):
         stocks = self.account.stocks
         self.net_worth += self.profit - self.taxes_payable - self.dividends_payable
         self.update_equity_shares(self.net_worth + stocks["equities"])
         return self.net_worth
-    
+
     def update_equity_shares(self, total_variation):
         role = self.roles["company"]
         shares = role.get_equity_shares()
@@ -156,7 +156,6 @@ class Bank(EcoAgent):
         for share in shares:
             variation = share["value"] * total_variation / total_shares
             role.update_equity_share(share["founder"], variation)
-
 
     def pay_taxes(self):
         if self.taxes_payable > 0:

@@ -224,14 +224,14 @@ class Firm(EcoAgent):
         if self.net_cash_flow <= 0:
             return 0
         return self.p.rho * (self.net_cash_flow - self.taxes_payable)
-    
-    def update_net_worth(self):        
+
+    def update_net_worth(self):
         stocks = self.account.stocks
         payable = self.taxes_payable + self.dividends_payable
         self.net_worth += self.net_cash_flow - payable
         self.update_equity_shares(self.net_worth + stocks["equities"])
         return self.net_worth
-    
+
     def update_equity_shares(self, total_variation):
         role = self.roles["company"]
         shares = role.get_equity_shares()
