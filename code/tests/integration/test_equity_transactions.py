@@ -36,8 +36,6 @@ def household(model):
     return household
 
 
-
-
 @pytest.fixture
 def country_before_allocation(country, household):
     # Given
@@ -170,7 +168,6 @@ def test_household_makes_deposits(country_before_investment, founders):
     # Then
     household1.roles["depositor"].make_deposits.assert_called_with(400)
     assert len(companies) == 0
-
 
 
 @pytest.fixture

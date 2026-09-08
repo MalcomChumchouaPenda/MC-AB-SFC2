@@ -744,7 +744,6 @@ def test_calc_liquidity_preference_when_no_equity(hh_before_allocation):
     assert lp == 0.8
 
 
-
 def test_choose_portfolio_allocation_calc_net_worth(hh_before_allocation):
     # Given
     household = hh_before_allocation
