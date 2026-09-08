@@ -202,3 +202,41 @@ def test_bank_pay_dividends(bank, household):
     assert bank.account.stocks["cash"] == 400
     assert household.account.stocks["cash"] == 100
     assert household.account.flows["dividends"] == 100
+
+
+@pytest.mark.usefixtures("country_before_distribution")
+def test_firm_update_net_worth(firm, household):
+    # Given
+    firm.net_worth = 1000
+    firm.net_cash_flow = 500
+    firm.taxes_payable = 100
+    firm.dividends_payable = 200
+    firm.account.stocks["equities"] = -1000
+    household.account.stocks["equities"] = 1000
+
+    # When
+    firm.update_net_worth()
+
+    # Then
+    assert firm.net_worth == 1200
+    assert firm.account.stocks["equities"] == -1200
+    assert household.account.stocks["equities"] == 1200
+
+
+@pytest.mark.usefixtures("country_before_distribution")
+def test_bank_update_net_worth(bank, household):
+    # Given
+    bank.net_worth = 800
+    bank.profit = 200
+    bank.taxes_payable = 50
+    bank.dividends_payable = 50
+    bank.account.stocks["equities"] = -800
+    household.account.stocks["equities"] = 800
+
+    # When
+    bank.update_net_worth()
+
+    # Then
+    assert bank.net_worth == 900
+    assert bank.account.stocks["equities"] == -900
+    assert household.account.stocks["equities"] == 900

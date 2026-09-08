@@ -29,6 +29,9 @@ class Company(EcoRole):
     #
     #  Actions methods
     #
+    def update_equity_share(self, founder, variation):
+        self.space.update_equity_share(self, founder, variation)
+
     def pay_dividends(self, founder, amount):
         self.space.pay_dividends(self, founder, amount)
 

@@ -960,20 +960,38 @@ def test_update_production_history(firm_with_roles_and_account):
 
 def test_update_net_worth(firm_with_roles_and_account):
     # Given
-    role = Mock()
-    firm, roles, _ = firm_with_roles_and_account
+    firm, *_ = firm_with_roles_and_account
+    firm.update_equity_shares = Mock()
     firm.net_worth = 1000
     firm.net_cash_flow = 500
     firm.taxes_payable = 100
     firm.dividends_payable = 200
-    roles["company"] = role
+    firm.account.stocks["equities"] = -1000
 
     # When
     firm.update_net_worth()
 
     # Then
-    role.update_equity_holdings.assert_called_once_with()
+    firm.update_equity_shares.assert_called_once_with(200)
     assert firm.net_worth == pytest.approx(1200)
+
+
+def test_update_equity_shares(firm_with_roles_and_account):
+    # Given
+    founder1, founder2 = Mock(), Mock()
+    share1 = {"founder": founder1, "value": 1000}
+    share2 = {"founder": founder2, "value": 3000}
+    role = Mock()
+    role.get_equity_shares.return_value = [share1, share2]
+    firm, roles, _ = firm_with_roles_and_account
+    roles["company"] = role
+
+    # When
+    firm.update_equity_shares(-100)
+
+    # Then
+    role.update_equity_share.assert_any_call(founder1, -25)
+    role.update_equity_share.assert_any_call(founder2, -75)
 
 
 # ---------------------------------------------------

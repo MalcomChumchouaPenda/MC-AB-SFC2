@@ -522,20 +522,38 @@ def test_compute_profit_distribution(bank_before_setup):
 
 def test_update_net_worth(bank_with_roles_and_account):
     # Given
-    bank, roles, _ = bank_with_roles_and_account
-    role = Mock()
+    bank, *_ = bank_with_roles_and_account
+    bank.update_equity_shares = Mock()
     bank.profit = 500
     bank.net_worth = 500
     bank.taxes_payable = 50
     bank.dividends_payable = 100
-    roles["company"] = role
+    bank.account.stocks["equities"] = -500
 
     # When
     bank.update_net_worth()
 
     # Then
-    role.update_equity_holdings.assert_called_once_with()
+    bank.update_equity_shares.assert_called_once_with(350)
     assert bank.net_worth == pytest.approx(850)
+
+
+def test_update_equity_shares(bank_with_roles_and_account):
+    # Given
+    founder1, founder2 = Mock(), Mock()
+    share1 = {"founder": founder1, "value": 1000}
+    share2 = {"founder": founder2, "value": 3000}
+    role = Mock()
+    role.get_equity_shares.return_value = [share1, share2]
+    bank, roles, _ = bank_with_roles_and_account
+    roles["company"] = role
+
+    # When
+    bank.update_equity_shares(-100)
+
+    # Then
+    role.update_equity_share.assert_any_call(founder1, -25)
+    role.update_equity_share.assert_any_call(founder2, -75)
 
 
 def test_pay_taxes(bank_as_taxpayer):

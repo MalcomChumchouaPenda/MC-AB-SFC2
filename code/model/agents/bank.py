@@ -112,6 +112,10 @@ class Bank(EcoAgent):
     def calc_bond_purchases_probability(self, issuer):
         return math.exp(-self.p.iota_b * issuer.debt_ratio)
 
+    #
+    # Net worth and stats updates
+    # Taxes and dividends payment
+    #
     def compute_profit_distribution(self):
         self.profit = self.calc_profit()
         self.taxes_payable = self.calc_taxes()
@@ -139,10 +143,20 @@ class Bank(EcoAgent):
             return 0
         return self.p.rho * (self.profit - self.taxes_payable)
 
-    def update_net_worth(self):
+    def update_net_worth(self):        
+        stocks = self.account.stocks
         self.net_worth += self.profit - self.taxes_payable - self.dividends_payable
-        self.roles["company"].update_equity_holdings()
+        self.update_equity_shares(self.net_worth + stocks["equities"])
         return self.net_worth
+    
+    def update_equity_shares(self, total_variation):
+        role = self.roles["company"]
+        shares = role.get_equity_shares()
+        total_shares = sum(share["value"] for share in shares)
+        for share in shares:
+            variation = share["value"] * total_variation / total_shares
+            role.update_equity_share(share["founder"], variation)
+
 
     def pay_taxes(self):
         if self.taxes_payable > 0:
@@ -156,7 +170,7 @@ class Bank(EcoAgent):
             role = self.roles["company"]
             shares = role.get_equity_shares()
             total_dividend = self.dividends_payable
-            total_shares = sum(s["value"] for s in shares)
+            total_shares = sum(share["value"] for share in shares)
             for share in shares:
                 dividend = share["value"] * total_dividend / total_shares
                 role.pay_dividends(share["founder"], dividend)

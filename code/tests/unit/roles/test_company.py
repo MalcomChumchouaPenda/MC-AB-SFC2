@@ -144,3 +144,15 @@ def test_pay_taxes_uses_space_method(company_with_space):
 
     # Then
     space.pay_taxes.assert_called_with(company, 50)
+
+
+def test_update_equity_share(company_with_space):
+    # Given
+    company, space = company_with_space
+    founder = Mock()
+
+    # When
+    company.update_equity_share(founder, -50)
+
+    # Then
+    space.update_equity_share.assert_called_with(company, founder, -50)

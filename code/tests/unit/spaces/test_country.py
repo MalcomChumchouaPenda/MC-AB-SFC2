@@ -694,6 +694,29 @@ def test_pay_taxes_updates_accounts(country_before_setup):
     authority.credit_stock.assert_any_call("cash", 10)
 
 
+def test_update_equity_share_updates_accounts(country_with_company_and_founder):
+    # Given
+    country, company, founder = country_with_company_and_founder
+
+    # When
+    country.update_equity_share(company, founder, -10)
+
+    # Then
+    company.debit_stock.assert_any_call("equities", -10)
+    founder.credit_stock.assert_any_call("equities", -10)
+
+
+def test_update_equity_share_updates_graph_edge(country_with_company_and_founder):
+    # Given
+    country, company, founder = country_with_company_and_founder
+
+    # When
+    country.update_equity_share(company, founder, -10)
+
+    # Then
+    assert country.graph[company][founder]["value"] == -10
+
+
 # ---------------------------------------------------
 # FIRM CREATION
 # ----------------------------------------------------

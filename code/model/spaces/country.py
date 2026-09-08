@@ -106,13 +106,18 @@ class Country(EcoSpace):
         founder.resid_equity -= amount
 
     #
-    # Dividends
+    # Dividends and losses
     #
     def find_equity_shares(self, company):
         return [
             {"founder": founder, **data}
             for _, founder, data in self.graph.edges(company, data=True)
         ]
+
+    def update_equity_share(self, company, founder, variation):
+        company.debit_stock("equities", variation)
+        founder.credit_stock("equities", variation)
+        self.graph[company][founder]["value"] += variation
 
     def pay_dividends(self, company, founder, amount):
         company.debit_flow("dividends", amount)
