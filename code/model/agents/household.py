@@ -149,7 +149,9 @@ class Household(EcoAgent):
     # Equity investment
     #
     def choose_portfolio_allocation(self):
+        self.calc_net_worth()
         lp = self.calc_liquidity_preference()
+        print(lp, self.net_worth)
         equity = self.account.stocks["equities"]
         expected_worth = self.calc_expected_net_worth()
         self.desired_equity = max(equity, (1 - lp) * expected_worth)
@@ -166,8 +168,12 @@ class Household(EcoAgent):
         profit_ratio = dividends / equity if equity else 0
         if profit_ratio < deposit_rate or equity <= 0:
             return p.lambda_
-        return p.lambda_ * math.exp(-(profit_ratio * (1 - default_prob)) - deposit_rate)
+        return p.lambda_ * math.exp(profit_ratio * (1 - default_prob) - deposit_rate)
 
+    def calc_net_worth(self):
+        stocks = self.account.stocks
+        self.net_worth = stocks["deposits"] + stocks["equities"] + stocks["cash"]
+    
     def calc_expected_net_worth(self):
         return self.net_worth + self.disposable_income - self.expected_consumption
 

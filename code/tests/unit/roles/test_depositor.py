@@ -49,6 +49,18 @@ def test_find_deposit_banks_from_space(depositor_with_space):
     assert found == space.find_deposit_banks.return_value
 
 
+def test_get_deposit_rate_from_deposit_bank(depositor_before_setup):
+    # Given
+    depositor = depositor_before_setup
+    depositor.deposit_bank = Mock(deposit_rate=0.01)
+
+    # When
+    perceived = depositor.get_deposit_rate()
+
+    # Then
+    assert perceived == 0.01
+
+
 # ---------------------------------------------------
 # ACTION TESTS
 # ----------------------------------------------------

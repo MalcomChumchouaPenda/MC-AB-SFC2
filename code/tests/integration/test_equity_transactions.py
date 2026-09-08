@@ -29,6 +29,51 @@ def country(model):
 
 
 @pytest.fixture
+def household(model):
+    # Given
+    household = Household(model)
+    household.setup()
+    return household
+
+
+
+
+@pytest.fixture
+def country_before_allocation(country, household):
+    # Given
+    def add_account(agent):
+        agent.account = EcoAccount(country.model)
+        agent.account.setup()
+
+    country.union.add_account = add_account
+    country.add_citizen(household)
+    household.roles["depositor"] = Mock()
+    return country
+
+
+def test_household_portfolio_allocation(country_before_allocation, household):
+    # Given
+    country = country_before_allocation
+    country.prob_failure = 0.0
+    role = household.roles["depositor"]
+    role.get_deposit_rate.return_value = 0.05
+    household.p.lambda_ = 0.4
+    household.disposable_income = 100
+    household.expected_consumption = 50
+    household.account.flows["dividends"] = 2.5
+    household.account.stocks["equities"] = 50
+    household.account.stocks["deposits"] = 0
+    household.account.stocks["cash"] = 0
+
+    # When
+    household.choose_portfolio_allocation()
+
+    # Then
+    assert household.desired_equity == pytest.approx(60.0)
+    assert household.desired_deposits == pytest.approx(90.0)
+
+
+@pytest.fixture
 def founders(model):
     # Given
     model.p.cT = 0.6
@@ -111,9 +156,7 @@ def test_household_creates_new_bank(country_before_investment, founders):
     assert country.graph[citizen2][companies[-1]]["value"] == 200
 
 
-def test_household_makes_deposits_with_residual_cash(
-    country_before_investment, founders
-):
+def test_household_makes_deposits(country_before_investment, founders):
     # Given
     household1, household2 = founders
     citizen2 = household2.roles["citizen"]
@@ -128,13 +171,6 @@ def test_household_makes_deposits_with_residual_cash(
     household1.roles["depositor"].make_deposits.assert_called_with(400)
     assert len(companies) == 0
 
-
-@pytest.fixture
-def household(model):
-    # Given
-    household = Household(model)
-    household.setup()
-    return household
 
 
 @pytest.fixture

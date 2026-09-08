@@ -664,6 +664,20 @@ def hh_before_allocation(hh_with_roles_and_account):
     return household
 
 
+def test_calc_net_worth(hh_before_allocation):
+    # Given
+    household = hh_before_allocation
+    household.account.stocks["deposits"] = 200
+    household.account.stocks["equities"] = 300
+    household.account.stocks["cash"] = 500
+
+    # When
+    household.calc_net_worth()
+
+    # Then
+    assert household.net_worth == 1000
+
+
 def test_calc_expected_net_worth(hh_before_allocation):
     # Given
     household = hh_before_allocation
@@ -687,12 +701,12 @@ def test_calc_liquidity_pref_when_equity_is_more_profitable(hh_before_allocation
     roles = household.roles
     roles["citizen"].get_prob_failure.return_value = 0.10
     roles["depositor"].get_deposit_rate.return_value = 0.05
+    expected = 0.6 * math.exp(((10 * (1 - 0.10)) / 100) - 0.05)
 
     # When
     lp = household.calc_liquidity_preference()
 
     # Then
-    expected = 0.6 * math.exp(-((10 * (1 - 0.10)) / 100) - 0.05)
     assert lp == pytest.approx(expected)
 
 
@@ -730,12 +744,29 @@ def test_calc_liquidity_preference_when_no_equity(hh_before_allocation):
     assert lp == 0.8
 
 
+
+def test_choose_portfolio_allocation_calc_net_worth(hh_before_allocation):
+    # Given
+    household = hh_before_allocation
+    household.account.stocks["equities"] = 80
+    household.calc_liquidity_preference = Mock(return_value=0.80)
+    household.calc_expected_net_worth = Mock(return_value=100)
+    household.calc_net_worth = Mock()
+
+    # When
+    household.choose_portfolio_allocation()
+
+    # Then
+    household.calc_net_worth.assert_called_once_with()
+
+
 def test_choose_portfolio_allocation_updates_desired_assets(hh_before_allocation):
     # Given
     household = hh_before_allocation
     household.account.stocks["equities"] = 20
     household.calc_liquidity_preference = Mock(return_value=0.40)
     household.calc_expected_net_worth = Mock(return_value=100)
+    household.calc_net_worth = Mock()
 
     # When
     household.choose_portfolio_allocation()
@@ -751,6 +782,7 @@ def test_choose_portfolio_allocation_preserves_existing_equity(hh_before_allocat
     household.account.stocks["equities"] = 80
     household.calc_liquidity_preference = Mock(return_value=0.80)
     household.calc_expected_net_worth = Mock(return_value=100)
+    household.calc_net_worth = Mock()
 
     # When
     household.choose_portfolio_allocation()
@@ -765,6 +797,7 @@ def test_choose_portfolio_allocation_updates_citizen_role(hh_before_allocation):
     household.account.stocks["equities"] = 80
     household.calc_liquidity_preference = Mock(return_value=0.80)
     household.calc_expected_net_worth = Mock(return_value=100)
+    household.calc_net_worth = Mock()
     role = household.roles["citizen"]
 
     # When

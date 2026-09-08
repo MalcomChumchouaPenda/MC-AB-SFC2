@@ -9,6 +9,9 @@ class Depositor(EcoRole):
     def find_deposit_banks(self):
         return self.space.find_deposit_banks()
 
+    def get_deposit_rate(self):
+        return self.deposit_bank.deposit_rate
+
     #
     # Actions
     #
