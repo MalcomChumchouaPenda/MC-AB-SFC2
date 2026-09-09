@@ -56,9 +56,9 @@ def test_bank_pays_deposit_interest_to_firm(firm, bank):
 
     # Then
     assert firm.account.stocks["deposits"] == 2040
-    assert bank.account.stocks["deposits"] == - 2040
+    assert bank.account.stocks["deposits"] == -2040
     assert firm.account.flows["dep_interests"] == 40
-    assert bank.account.flows["dep_interests"] == - 40
+    assert bank.account.flows["dep_interests"] == -40
 
 
 @pytest.fixture
@@ -89,7 +89,7 @@ def test_government_reimburse_deposits(govt, firm, bank):
     firm.account.stocks["cash"] = 0
     bank.account.stocks["cash"] = 0
     bank.roles["deposit_bank"].defaulted = True
-    govt.roles["bond_issuer"]= Mock()
+    govt.roles["bond_issuer"] = Mock()
 
     # When
     govt.issue_deposit_guarantee_bonds()
