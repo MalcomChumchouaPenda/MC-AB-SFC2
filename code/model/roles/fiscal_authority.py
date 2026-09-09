@@ -15,3 +15,9 @@ class FiscalAuthority(EcoRole):
 
     def get_average_productivity(self):
         return self.space.good_market.average_prod
+
+    def find_citizens(self):
+        return self.space.find_citizens()
+
+    def pay_public_transfers(self, citizen, amount):
+        self.space.pay_public_transfers(self, citizen, amount)

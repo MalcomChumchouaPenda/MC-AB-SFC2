@@ -86,6 +86,29 @@ def test_get_average_productivity_from_space(authority_with_space):
     assert perceived == 1.0
 
 
+def test_find_citizens_from_space(authority_with_space):
+    # Given
+    authority, space = authority_with_space
+
+    # When
+    perceived = authority.find_citizens()
+
+    # Then
+    assert perceived == space.find_citizens.return_value
+
+
 # ---------------------------------------------------
 # ACTION TESTS
 # ----------------------------------------------------
+
+def test_pay_public_transfers_from_space(authority_with_space):
+    # Given
+    citizen = Mock()
+    authority, space = authority_with_space
+
+    # When
+    authority.pay_public_transfers(citizen, 100)
+
+    # Then
+    space.pay_public_transfers(authority, citizen, 100)
+    

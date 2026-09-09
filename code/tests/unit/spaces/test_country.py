@@ -584,6 +584,33 @@ def test_find_investors_excludes_initiator(country_with_citizens):
     assert investors == [eligible]
 
 
+def test_find_citizens(country_with_citizens):
+    # Given
+    country, citizens = country_with_citizens
+
+    # When
+    result = country.find_citizens()
+
+    # Then
+    assert result == list(citizens)
+
+
+
+def test_pay_public_transfers_updates_accounts(country_with_citizens):
+    # Given
+    country, citizens = country_with_citizens
+    authority = Mock()
+
+    # When
+    country.pay_public_transfers(authority, citizens[0], 10)
+
+    # Then
+    citizens[0].credit_flow.assert_any_call("public_transfers", 10)
+    citizens[0].credit_stock.assert_any_call("cash", 10)
+    authority.debit_flow.assert_any_call("public_transfers", 10)
+    authority.debit_stock.assert_any_call("cash", 10)
+
+
 @pytest.fixture
 def country_with_company_and_founder(country_before_setup):
     # Given

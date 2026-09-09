@@ -59,6 +59,7 @@ class Country(EcoSpace):
         self.union.add_account(agent)
         return role
 
+
     #
     # Current indicators
     #
@@ -171,6 +172,18 @@ class Country(EcoSpace):
         self.fiscal_authority.credit_stock("cash", amount)
         self.monetary_authority.debit_flow("profit_transfers", amount)
         self.monetary_authority.debit_stock("cash", amount)
+
+    #
+    # Public transfers
+    #
+    def find_citizens(self):
+        return list(self.citizens)
+
+    def pay_public_transfers(self, authority, citizen, amount):
+        citizen.credit_flow("public_transfers", amount)
+        citizen.credit_stock("cash", amount)
+        authority.debit_flow("public_transfers", amount)
+        authority.debit_stock("cash", amount)
 
     #
     # Evolution
