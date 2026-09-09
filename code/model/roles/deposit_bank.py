@@ -11,8 +11,8 @@ class DepositBank(EcoRole):
     # Perceptions
     #
 
-    def find_deposit_accounts(self, deposit_bank):
-        return self.space.find_deposit_accounts(deposit_bank)
+    def find_deposit_accounts(self):
+        return self.space.find_deposit_accounts(self)
 
     #
     # Actions

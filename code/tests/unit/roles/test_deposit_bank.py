@@ -51,13 +51,12 @@ def role_with_space(role_before_setup):
 def test_find_deposit_accounts_from_space(role_with_space):
     # Given
     role, space = role_with_space
-    bank = Mock()
 
     # When
-    found = role.find_deposit_accounts(bank)
+    found = role.find_deposit_accounts()
 
     # Then
-    space.find_deposit_accounts.assert_called_with(bank)
+    space.find_deposit_accounts.assert_called_with(role)
     assert found == space.find_deposit_accounts.return_value
 
 

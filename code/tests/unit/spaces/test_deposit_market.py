@@ -314,6 +314,7 @@ def test_unlink_depositor_change_bank_account_ref(market_with_depositor_amount):
 def test_make_deposits_updates_accounts(market_with_depositor_amount):
     # Given
     market, depositor, _ = market_with_depositor_amount
+    deposit_bank = depositor.deposit_bank
 
     # When
     market.make_deposits(depositor, 500)
@@ -321,8 +322,8 @@ def test_make_deposits_updates_accounts(market_with_depositor_amount):
     # Then
     depositor.account.debit_stock.assert_any_call("cash", 500)
     depositor.account.credit_stock.assert_any_call("deposits", 500)
-    depositor.bank_account.credit_stock.assert_any_call("cash", 500)
-    depositor.bank_account.debit_stock.assert_any_call("deposits", 500)
+    deposit_bank.credit_stock.assert_any_call("cash", 500)
+    deposit_bank.debit_stock.assert_any_call("deposits", 500)
 
 
 def test_make_deposits_transfers_cash(market_with_depositor_amount):
@@ -341,6 +342,7 @@ def test_make_deposits_transfers_cash(market_with_depositor_amount):
 def test_withdraw_deposits_updates_accounts(market_with_depositor_amount):
     # Given
     market, depositor, _ = market_with_depositor_amount
+    deposit_bank = depositor.deposit_bank
 
     # When
     market.withdraw_deposits(depositor, 500)
@@ -348,8 +350,8 @@ def test_withdraw_deposits_updates_accounts(market_with_depositor_amount):
     # Then
     depositor.account.credit_stock.assert_any_call("cash", 500)
     depositor.account.debit_stock.assert_any_call("deposits", 500)
-    depositor.bank_account.debit_stock.assert_any_call("cash", 500)
-    depositor.bank_account.credit_stock.assert_any_call("deposits", 500)
+    deposit_bank.debit_stock.assert_any_call("cash", 500)
+    deposit_bank.credit_stock.assert_any_call("deposits", 500)
 
 
 def test_withdraw_deposits_transfers_cash(market_with_depositor_amount):
@@ -401,15 +403,16 @@ def test_find_defaulted_banks(market_before_setup, make_dlist):
 def test_pay_interests_updates_accounts(market_with_depositor_amount):
     # Given
     market, depositor, _ = market_with_depositor_amount
+    deposit_bank = depositor.deposit_bank
 
     # When
-    market.pay_interests(depositor, 10.0)
+    market.pay_interests(deposit_bank, depositor, 10.0)
 
     # Then
     depositor.account.credit_stock.assert_any_call("deposits", 10.0)
     depositor.account.credit_flow.assert_any_call("dep_interests", 10.0)
-    depositor.bank_account.debit_stock.assert_any_call("deposits", 10.0)
-    depositor.bank_account.debit_flow.assert_any_call("dep_interests", 10.0)
+    deposit_bank.debit_stock.assert_any_call("deposits", 10.0)
+    deposit_bank.debit_flow.assert_any_call("dep_interests", 10.0)
 
 
 def test_pay_interests_updates_graph_edge(market_with_depositor_amount):
@@ -419,7 +422,7 @@ def test_pay_interests_updates_graph_edge(market_with_depositor_amount):
     graph = market.graph
 
     # When
-    market.pay_interests(depositor, 10.0)
+    market.pay_interests(deposit_bank, depositor, 10.0)
 
     # Then
     assert graph[depositor][deposit_bank]["amount"] == amount + 10.0
@@ -429,6 +432,7 @@ def test_reimburse_deposits_updates_accounts(market_with_depositor_amount):
     # Given
     guarantee = Mock()
     market, depositor, _ = market_with_depositor_amount
+    deposit_bank = depositor.deposit_bank
 
     # When
     market.reimburse_deposits(guarantee, depositor, 50)
@@ -436,5 +440,5 @@ def test_reimburse_deposits_updates_accounts(market_with_depositor_amount):
     # Then
     depositor.account.credit_stock.assert_any_call("cash", 50)
     depositor.account.debit_stock.assert_any_call("deposits", 50)
-    depositor.bank_account.credit_stock.assert_any_call("deposits", 50)
+    deposit_bank.credit_stock.assert_any_call("deposits", 50)
     guarantee.account.debit_stock.assert_any_call("cash", 50)

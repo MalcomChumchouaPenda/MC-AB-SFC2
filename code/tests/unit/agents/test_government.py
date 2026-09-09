@@ -542,7 +542,7 @@ def govt_as_deposit_guarantee(govt_with_roles_and_account):
 def test_issue_deposit_guarantee_bonds(govt_as_deposit_guarantee):
     # Given
     bank = Mock()
-    bank.account.stocks = {"deposits": 100}
+    bank.account.stocks = {"deposits": -100}
     govt, role = govt_as_deposit_guarantee
     govt.bond_supply = 200
     role.find_defaulted_banks.return_value = [bank]
@@ -559,7 +559,7 @@ def test_issue_deposit_guarantee_bonds(govt_as_deposit_guarantee):
 def test_issue_deposit_guarantee_bonds_registers_defaults(govt_as_deposit_guarantee):
     # Given
     bank = Mock()
-    bank.account.stocks = {"deposits": 100}
+    bank.account.stocks = {"deposits": -100}
     govt, role = govt_as_deposit_guarantee
     role.find_defaulted_banks.return_value = [bank]
 

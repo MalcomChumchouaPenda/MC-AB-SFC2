@@ -61,29 +61,29 @@ class DepositMarket(EcoSpace):
         depositor.deposit_bank = None
         self.graph.remove_edge(depositor, deposit_bank)
 
-    def pay_interests(self, depositor, amount):
+    def pay_interests(self, deposit_bank, depositor, amount):
         depositor.account.credit_stock("deposits", amount)
         depositor.account.credit_flow("dep_interests", amount)
-        depositor.bank_account.debit_stock("deposits", amount)
-        depositor.bank_account.debit_flow("dep_interests", amount)
-        self.graph[depositor][depositor.deposit_bank]["amount"] += amount
+        deposit_bank.debit_stock("deposits", amount)
+        deposit_bank.debit_flow("dep_interests", amount)
+        self.graph[depositor][deposit_bank]["amount"] += amount
 
     def reimburse_deposits(self, guarantee, depositor, amount):
         depositor.account.debit_stock("deposits", amount)
         depositor.account.credit_stock("cash", amount)
-        depositor.bank_account.credit_stock("deposits", amount)
+        depositor.deposit_bank.credit_stock("deposits", amount)
         guarantee.account.debit_stock("cash", amount)
 
     def make_deposits(self, depositor, amount):
         depositor.account.credit_stock("deposits", amount)
         depositor.account.debit_stock("cash", amount)
-        depositor.bank_account.debit_stock("deposits", amount)
-        depositor.bank_account.credit_stock("cash", amount)
+        depositor.deposit_bank.debit_stock("deposits", amount)
+        depositor.deposit_bank.credit_stock("cash", amount)
         self.graph[depositor][depositor.deposit_bank]["amount"] += amount
 
     def withdraw_deposits(self, depositor, amount):
         depositor.account.debit_stock("deposits", amount)
         depositor.account.credit_stock("cash", amount)
-        depositor.bank_account.credit_stock("deposits", amount)
-        depositor.bank_account.debit_stock("cash", amount)
+        depositor.deposit_bank.credit_stock("deposits", amount)
+        depositor.deposit_bank.debit_stock("cash", amount)
         self.graph[depositor][depositor.deposit_bank]["amount"] -= amount
