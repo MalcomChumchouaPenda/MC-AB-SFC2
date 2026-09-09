@@ -32,10 +32,9 @@ class Household(EcoAgent):
 
     def revise_reservation_wage(self):
         p = self.p
-        role = self.roles["worker"]
         random = self.model.nprandom
         prob = self.calc_revision_probability()
-        if role.labor_supply == 0.0:
+        if self.labor_supply == self.prev_labor_sold:
             if random.choice([0, 1], p=[1 - prob, prob]):
                 self.reservation_wage *= 1 + random.uniform(0, p.delta)
         else:

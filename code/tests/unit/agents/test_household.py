@@ -24,6 +24,17 @@ def hh_before_setup():
     return household
 
 
+def test_has_default_labor_supply(hh_before_setup):
+    # Given
+    household = hh_before_setup
+
+    # When
+    household.setup()
+
+    # Then
+    assert household.labor_supply == 1.0
+
+
 def test_has_default_preference(hh_before_setup):
     # Given
     household = hh_before_setup
@@ -251,12 +262,12 @@ def test_calc_revision_probability(hh_with_roles_and_account):
 @pytest.fixture
 def fully_employed_before(hh_with_roles_and_account):
     # Given
-    household, roles, _ = hh_with_roles_and_account
+    household, *_ = hh_with_roles_and_account
     household.p.delta = 0.9
+    household.prev_labor_sold = 1.0
     household.reservation_wage = 10.0
     household.calc_revision_probability = Mock()
     household.calc_revision_probability.return_value = 0
-    roles["worker"] = Mock(labor_supply=0.0)
     return household
 
 
@@ -308,12 +319,12 @@ def test_can_choose_to_not_increases_reserv_wage(fully_employed_before):
 @pytest.fixture
 def part_employed_before(hh_with_roles_and_account):
     # Given
-    household, roles, _ = hh_with_roles_and_account
+    household, *_ = hh_with_roles_and_account
     household.p.delta = 0.9
+    household.prev_labor_sold = 0.5
     household.reservation_wage = 10.0
     household.calc_revision_probability = Mock()
     household.calc_revision_probability.return_value = 0
-    roles["worker"] = Mock(labor_supply=0.5)
     return household
 
 
