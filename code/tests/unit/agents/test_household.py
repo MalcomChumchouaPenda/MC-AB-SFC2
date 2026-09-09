@@ -235,7 +235,7 @@ def test_search_jobs_while_labor_supply_is_remaining(hh_unemployed):
 def test_calc_revision_probability(hh_with_roles_and_account):
     # Given
     role = Mock()
-    role.get_unemployment_rate.return_value = 0.1
+    role.get_unemployment.return_value = 0.1
     household, roles, _ = hh_with_roles_and_account
     household.p.upsilon = 1.0
     household.p.upsilon_h = 0.9
@@ -251,13 +251,12 @@ def test_calc_revision_probability(hh_with_roles_and_account):
 @pytest.fixture
 def fully_employed_before(hh_with_roles_and_account):
     # Given
-    household, *_ = hh_with_roles_and_account
+    household, roles, _ = hh_with_roles_and_account
     household.p.delta = 0.9
-    household.labor_supply = 1.0
-    household.employed_labor = 1.0
     household.reservation_wage = 10.0
     household.calc_revision_probability = Mock()
-    household.calc_revision_probability.return_value = 0
+    household.calc_revision_probability.return_value = 0 
+    roles["worker"] = Mock(labor_supply=0.0)
     return household
 
 
@@ -309,13 +308,12 @@ def test_can_choose_to_not_increases_reserv_wage(fully_employed_before):
 @pytest.fixture
 def part_employed_before(hh_with_roles_and_account):
     # Given
-    household, *_ = hh_with_roles_and_account
+    household, roles, _ = hh_with_roles_and_account
     household.p.delta = 0.9
-    household.labor_supply = 1.0
-    household.employed_labor = 0.0
     household.reservation_wage = 10.0
     household.calc_revision_probability = Mock()
     household.calc_revision_probability.return_value = 0
+    roles["worker"] = Mock(labor_supply=0.5)
     return household
 
 

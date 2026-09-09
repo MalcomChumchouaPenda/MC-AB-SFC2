@@ -32,9 +32,10 @@ class Household(EcoAgent):
 
     def revise_reservation_wage(self):
         p = self.p
+        role = self.roles["worker"]
         random = self.model.nprandom
         prob = self.calc_revision_probability()
-        if self.employed_labor == self.labor_supply:
+        if role.labor_supply == 0.0:
             if random.choice([0, 1], p=[1 - prob, prob]):
                 self.reservation_wage *= 1 + random.uniform(0, p.delta)
         else:
@@ -44,7 +45,7 @@ class Household(EcoAgent):
     def calc_revision_probability(self):
         p = self.p
         role = self.roles["worker"]
-        unemployment = role.get_unemployment_rate()
+        unemployment = role.get_unemployment()
         return p.upsilon_h * math.exp(-p.upsilon * unemployment)
 
     def search_jobs(self):
