@@ -595,7 +595,6 @@ def test_find_citizens(country_with_citizens):
     assert result == list(citizens)
 
 
-
 def test_pay_public_transfers_updates_accounts(country_with_citizens):
     # Given
     country, citizens = country_with_citizens

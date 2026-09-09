@@ -101,6 +101,7 @@ def test_find_citizens_from_space(authority_with_space):
 # ACTION TESTS
 # ----------------------------------------------------
 
+
 def test_pay_public_transfers_from_space(authority_with_space):
     # Given
     citizen = Mock()
@@ -111,4 +112,3 @@ def test_pay_public_transfers_from_space(authority_with_space):
 
     # Then
     space.pay_public_transfers(authority, citizen, 100)
-    

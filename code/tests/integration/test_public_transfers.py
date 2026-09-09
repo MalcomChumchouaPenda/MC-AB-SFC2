@@ -29,6 +29,7 @@ def cb(model):
     cb.setup()
     return cb
 
+
 @pytest.fixture
 def country(model):
     # Given
@@ -81,8 +82,6 @@ def households(model):
         household.setup()
         households.append(household)
     return households
-
-
 
 
 @pytest.fixture
