@@ -255,7 +255,7 @@ def fully_employed_before(hh_with_roles_and_account):
     household.p.delta = 0.9
     household.reservation_wage = 10.0
     household.calc_revision_probability = Mock()
-    household.calc_revision_probability.return_value = 0 
+    household.calc_revision_probability.return_value = 0
     roles["worker"] = Mock(labor_supply=0.0)
     return household
 
