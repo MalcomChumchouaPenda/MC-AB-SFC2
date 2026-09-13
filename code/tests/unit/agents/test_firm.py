@@ -20,6 +20,7 @@ def test_is_eco_agent():
 # DEFAULT STATE
 # ----------------------------------------------------
 
+
 @pytest.fixture
 def firm_before_setup():
     # Given
@@ -39,7 +40,7 @@ def test_has_default_rd_expenditure(firm_before_setup):
     assert firm.rd == 0
 
 
-def test_has_default_choices(firm_before_setup):
+def test_has_default_price_offered(firm_before_setup):
     # Given
     firm = firm_before_setup
 
@@ -48,13 +49,93 @@ def test_has_default_choices(firm_before_setup):
 
     # Then
     assert firm.price == 0
+
+
+def test_has_default_wage_offered(firm_before_setup):
+    # Given
+    firm = firm_before_setup
+
+    # When
+    firm.setup()
+
+    # Then
     assert firm.wage_offer == 0
+
+
+def test_has_default_expected_sales(firm_before_setup):
+    # Given
+    firm = firm_before_setup
+
+    # When
+    firm.setup()
+
+    # Then
     assert firm.expected_sales == 0
+
+
+def test_has_default_desired_labor(firm_before_setup):
+    # Given
+    firm = firm_before_setup
+
+    # When
+    firm.setup()
+
+    # Then
     assert firm.desired_labor == 0
+
+
+def test_has_default_desired_output(firm_before_setup):
+    # Given
+    firm = firm_before_setup
+
+    # When
+    firm.setup()
+
+    # Then
     assert firm.desired_output == 0
+
+
+def test_has_default_desired_loans(firm_before_setup):
+    # Given
+    firm = firm_before_setup
+
+    # When
+    firm.setup()
+
+    # Then
     assert firm.desired_loans == 0
+
+
+def test_has_default_desired_rd_expense(firm_before_setup):
+    # Given
+    firm = firm_before_setup
+
+    # When
+    firm.setup()
+
+    # Then
     assert firm.desired_rd == 0
+
+
+def test_has_default_taxes_payable(firm_before_setup):
+    # Given
+    firm = firm_before_setup
+
+    # When
+    firm.setup()
+
+    # Then
     assert firm.taxes_payable == 0
+
+
+def test_has_default_dividends_payable(firm_before_setup):
+    # Given
+    firm = firm_before_setup
+
+    # When
+    firm.setup()
+
+    # Then
     assert firm.dividends_payable == 0
 
 
@@ -157,11 +238,9 @@ def test_has_default_prev_desired_labor(firm_before_setup):
     assert firm.prev_desired_labor == 0
 
 
-
 # ---------------------------------------------------
 # PRODUCTION PLANNING
 # ----------------------------------------------------
-
 
 
 @pytest.fixture
@@ -173,6 +252,7 @@ def firm_with_roles_and_account(firm_before_setup):
     firm.account = account
     firm.roles = roles
     return firm, roles, account
+
 
 def test_plan_production_by_two_steps(firm_before_setup):
     # Given
@@ -502,7 +582,6 @@ def test_calc_desired_rd(firm_before_setup):
     assert firm.desired_rd == 50
 
 
-
 def test_execute_rd_without_constraints(firm_with_roles_and_account):
     # Given
     firm, _, account = firm_with_roles_and_account
@@ -802,7 +881,6 @@ def test_dont_request_unneccessary_loans(firm_as_borrower, desired):
 
     # Then
     role.request_loans.assert_not_called()
-
 
 
 # ---------------------------------------------------

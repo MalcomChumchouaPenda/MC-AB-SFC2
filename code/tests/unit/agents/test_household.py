@@ -16,10 +16,10 @@ def test_is_eco_agent():
     assert issubclass(Household, EcoAgent)
 
 
-
 # ---------------------------------------------------
 # DEFAULT STATE
 # ----------------------------------------------------
+
 
 @pytest.fixture
 def hh_before_setup():

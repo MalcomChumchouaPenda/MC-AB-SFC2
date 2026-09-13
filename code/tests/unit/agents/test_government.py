@@ -15,9 +15,6 @@ def test_is_eco_agent():
     assert issubclass(Government, EcoAgent)
 
 
-
-
-
 # ---------------------------------------------------
 # DEFAULT STATE
 # ----------------------------------------------------
@@ -128,6 +125,11 @@ def test_has_prev_budget_surplus(govt_before_setup):
     assert govt.prev_budget_surplus == 0
 
 
+# ---------------------------------------------------
+# PUBLIC TRANSFERS
+# ----------------------------------------------------
+
+
 @pytest.fixture
 def govt_with_roles_and_account(govt_before_setup):
     # Given
@@ -137,11 +139,6 @@ def govt_with_roles_and_account(govt_before_setup):
     govt.account = account
     govt.roles = roles
     return govt, roles, account
-
-
-# ---------------------------------------------------
-# PUBLIC TRANSFERS
-# ----------------------------------------------------
 
 
 @pytest.fixture

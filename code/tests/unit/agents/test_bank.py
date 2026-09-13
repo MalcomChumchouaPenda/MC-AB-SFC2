@@ -16,11 +16,10 @@ def test_is_eco_agent():
     assert issubclass(Bank, EcoAgent)
 
 
-
-
 # ---------------------------------------------------
 # DEFAULT STATE
 # ----------------------------------------------------
+
 
 @pytest.fixture
 def bank_before_setup():

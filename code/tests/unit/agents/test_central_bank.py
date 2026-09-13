@@ -15,9 +15,6 @@ def test_is_eco_agent():
     assert issubclass(CentralBank, EcoAgent)
 
 
-
-
-
 # ---------------------------------------------------
 # DEFAULT STATE
 # ----------------------------------------------------
