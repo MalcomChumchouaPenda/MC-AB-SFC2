@@ -488,18 +488,19 @@ def test_calc_taxes(bank_as_taxpayer, profit, expected):
     assert taxes == expected
 
 
-def test_calc_dividends(bank_as_taxpayer):
+@pytest.mark.parametrize("profit, expected", [(100, 40), (-100, 0)])
+def test_calc_dividends(bank_as_taxpayer, profit, expected):
     # Given
     bank, _ = bank_as_taxpayer
     bank.p.rho = 0.5
-    bank.profit = 100
+    bank.profit = profit
     bank.taxes_payable = 20
 
     # When
     dividends = bank.calc_dividends()
 
     # Then
-    assert dividends == 40
+    assert dividends == expected
 
 
 def test_compute_profit_distribution(bank_before_setup):

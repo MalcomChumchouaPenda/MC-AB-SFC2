@@ -634,6 +634,20 @@ def test_update_productivity_without_success(innovating_firm):
     assert role.productivity == 10
 
 
+def test_update_productivity_without_rd(innovating_firm):
+    # Given
+    firm = innovating_firm
+    firm.execute_rd.side_effect = setattr(firm, "rd", 0)
+    role = firm.roles["producer"]
+    role.productivity = 10
+
+    # When
+    firm.update_productivity()
+
+    # Then
+    assert role.productivity == 10
+
+
 def test_update_productivity_by_innovation(innovating_firm):
     # Given
     firm = innovating_firm
@@ -771,6 +785,19 @@ def test_request_loans_and_registers_desired_loans(firm_as_borrower):
     assert firm.desired_loans == 100
 
 
+@pytest.mark.parametrize("desired", [0, -100])
+def test_dont_request_unneccessary_loans(firm_as_borrower, desired):
+    # Given
+    firm, role = firm_as_borrower
+    firm.calc_desired_loans.return_value = desired
+
+    # When
+    firm.request_loans()
+
+    # Then
+    role.request_loans.assert_not_called()
+
+
 @pytest.fixture
 def firm_after_borrowing(firm_with_roles_and_account):
     # Given
@@ -820,8 +847,8 @@ def test_repay_loans_after_making_deposits(firm_after_borrowing, cash, expected)
     # Given
     firm, roles, account = firm_after_borrowing
     account.stocks["deposits"] = 20
-    account.stocks["loans"] = 100
     account.stocks["cash"] = cash
+    account.stocks["loans"] = 100
     role = roles["depositor"]
 
     # When
@@ -829,6 +856,23 @@ def test_repay_loans_after_making_deposits(firm_after_borrowing, cash, expected)
 
     # Then
     role.make_deposits.assert_called_once_with(expected)
+
+
+
+@pytest.mark.parametrize("cash, deposits", [(20, 0), (0, 20)])
+def test_dont_repay_loans_without_sufficient_funds(firm_after_borrowing, cash, deposits):
+    # Given
+    firm, roles, account = firm_after_borrowing
+    account.stocks["deposits"] = deposits
+    account.stocks["cash"] = cash
+    account.stocks["loans"] = 100
+    role = roles["borrower"]
+
+    # When
+    firm.repay_loans()
+
+    # Then
+    role.repay_loans.assert_not_called()
 
 
 # ---------------------------------------------------

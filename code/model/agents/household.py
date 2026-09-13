@@ -129,10 +129,10 @@ class Household(EcoAgent):
         role.buy_goods(supplier, quantity)
         return price * quantity
 
-    def find_suppliers(self):
-        p = self.p
-        role = self.roles["consumer"]
-        return role.find_suppliers(p.psi)
+    # def find_suppliers(self):
+    #     p = self.p
+    #     role = self.roles["consumer"]
+    #     return role.find_suppliers(p.psi)
 
     def rank_suppliers(self, suppliers, average_price):
         key = partial(self.calc_supplier_score, average_price=average_price)
