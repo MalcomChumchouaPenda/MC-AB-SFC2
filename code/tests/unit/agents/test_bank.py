@@ -456,7 +456,7 @@ def test_calc_profit(bank_with_roles_and_account):
     bank, _, account = bank_with_roles_and_account
     account.flows["loan_interests"] = 100
     account.flows["cash_interests"] = 10
-    bank.bad_debt = 20
+    account.flows["loan_defaults"] = 20
     account.flows["adv_interests"] = 10
     account.flows["dep_interests"] = 40
     account.flows["bond_interests"] = 30

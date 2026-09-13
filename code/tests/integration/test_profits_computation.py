@@ -66,7 +66,7 @@ def test_bank_compute_profit_distribution(bank):
     bank.account.flows["dep_interests"] = 30
     bank.account.flows["loan_interests"] = 100
     bank.account.flows["cash_interests"] = 10
-    bank.bad_debt = 10
+    bank.account.flows["loan_defaults"] = 10
     bank.account.flows["adv_interests"] = 10
 
     # When

@@ -135,6 +135,7 @@ class EcoAccount(Object):
             "taxes": 0,
             "dep_interests": 0,
             "loan_interests": 0,
+            "loan_defaults": 0,
             "bond_interests": 0,
             "cash_interests": 0,
             "adv_interests": 0,

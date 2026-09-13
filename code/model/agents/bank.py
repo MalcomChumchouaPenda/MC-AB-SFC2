@@ -127,7 +127,7 @@ class Bank(EcoAgent):
             flows["loan_interests"]
             + flows["bond_interests"]
             + flows["cash_interests"]
-            - self.bad_debt
+            - flows["loan_defaults"]
             - flows["dep_interests"]
             - flows["adv_interests"]
         )
