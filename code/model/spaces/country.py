@@ -59,7 +59,6 @@ class Country(EcoSpace):
         self.union.add_account(agent)
         return role
 
-
     #
     # Current indicators
     #

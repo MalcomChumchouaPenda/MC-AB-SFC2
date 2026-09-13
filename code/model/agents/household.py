@@ -173,7 +173,7 @@ class Household(EcoAgent):
     def calc_net_worth(self):
         stocks = self.account.stocks
         self.net_worth = stocks["deposits"] + stocks["equities"] + stocks["cash"]
-    
+
     def calc_expected_net_worth(self):
         return self.net_worth + self.disposable_income - self.expected_consumption
 

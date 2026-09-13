@@ -858,9 +858,8 @@ def test_repay_loans_after_making_deposits(firm_after_borrowing, cash, expected)
     role.make_deposits.assert_called_once_with(expected)
 
 
-
 @pytest.mark.parametrize("cash, deposits", [(20, 0), (0, 20)])
-def test_dont_repay_loans_without_sufficient_funds(firm_after_borrowing, cash, deposits):
+def test_dont_repay_loans_with_insufficient_fund(firm_after_borrowing, cash, deposits):
     # Given
     firm, roles, account = firm_after_borrowing
     account.stocks["deposits"] = deposits
@@ -925,9 +924,8 @@ def model_with_govt():
 def firm_as_tax_payer(firm_with_roles_and_account):
     # Given
     role = Mock()
-    firm, roles, account = firm_with_roles_and_account
+    firm, roles, _ = firm_with_roles_and_account
     firm.account.flows["taxes"] = 0
-    firm.reserves = 0
     roles["company"] = role
     return firm, role
 
