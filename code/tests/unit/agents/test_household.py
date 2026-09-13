@@ -1,10 +1,10 @@
 import math
 import pytest
-from unittest.mock import Mock, PropertyMock
+from unittest.mock import Mock
 from model.agents.household import Household
 
 # ---------------------------------------------------
-# ARCHITECTURE TESTS
+# ENTITY HIERARCHY
 # ----------------------------------------------------
 
 
@@ -15,6 +15,11 @@ def test_is_eco_agent():
     # Assert
     assert issubclass(Household, EcoAgent)
 
+
+
+# ---------------------------------------------------
+# DEFAULT STATE
+# ----------------------------------------------------
 
 @pytest.fixture
 def hh_before_setup():
@@ -135,8 +140,8 @@ def test_has_default_incomes(hh_before_setup):
     assert household.disposable_income == 0
 
 
-# ---------------------------------------------------
-# JOB SEARCH TESTS
+# ----------------------------------------------------
+# JOB SEARCH
 # ----------------------------------------------------
 
 
@@ -239,7 +244,7 @@ def test_search_jobs_while_labor_supply_is_remaining(hh_unemployed):
 
 
 # ---------------------------------------------------
-# WAGE REVISION TESTS
+# WAGE REVISION
 # ----------------------------------------------------
 
 
@@ -443,7 +448,7 @@ def test_pay_taxes_updates_indicators(hh_as_taxpayer):
 
 
 # ---------------------------------------------------
-# CONSUMPTION BEHAVIOR TESTS
+# CONSUMPTION
 # ----------------------------------------------------
 
 
@@ -660,7 +665,7 @@ def test_consume_with_insufficient_deposits(hh_as_general_consumer):
 
 
 # ---------------------------------------------------
-# PORTFOLIO ALLOCATION TESTS
+# PORTFOLIO ALLOCATION
 # ----------------------------------------------------
 
 
@@ -814,6 +819,10 @@ def test_choose_portfolio_allocation_updates_citizen_role(hh_before_allocation):
     # Then
     assert role.resid_equity == 80
 
+
+# ---------------------------------------------------
+# FIRM AND BANK CREATION
+# ----------------------------------------------------
 
 FakeFirm = Mock()
 FakeBank = Mock()

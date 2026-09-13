@@ -3,7 +3,7 @@ from unittest.mock import Mock
 from model.agents.central_bank import CentralBank
 
 # ---------------------------------------------------
-# ARCHITECTURE TESTS
+# ENTITY HIERARCHY
 # ----------------------------------------------------
 
 
@@ -15,6 +15,12 @@ def test_is_eco_agent():
     assert issubclass(CentralBank, EcoAgent)
 
 
+
+
+
+# ---------------------------------------------------
+# DEFAULT STATE
+# ----------------------------------------------------
 @pytest.fixture
 def cb_before_setup():
     # Given

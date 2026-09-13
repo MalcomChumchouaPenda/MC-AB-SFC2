@@ -1,10 +1,10 @@
 import math
 import pytest
-from unittest.mock import Mock, PropertyMock
+from unittest.mock import Mock
 from model.agents.bank import Bank
 
 # ---------------------------------------------------
-# ARCHITECTURE TESTS
+# ENTITY HIERARCHY
 # ----------------------------------------------------
 
 
@@ -15,6 +15,12 @@ def test_is_eco_agent():
     # Assert
     assert issubclass(Bank, EcoAgent)
 
+
+
+
+# ---------------------------------------------------
+# DEFAULT STATE
+# ----------------------------------------------------
 
 @pytest.fixture
 def bank_before_setup():
@@ -614,7 +620,7 @@ def test_pay_no_dividends(bank_with_roles_and_account):
 
 
 # ---------------------------------------------------
-# ENDOGENEOUS EXIT TESTS
+# ENDOGENEOUS EXIT
 # ----------------------------------------------------
 
 

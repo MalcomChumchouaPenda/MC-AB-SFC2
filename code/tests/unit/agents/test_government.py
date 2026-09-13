@@ -3,7 +3,7 @@ from unittest.mock import Mock
 from model.agents.government import Government
 
 # ---------------------------------------------------
-# ARCHITECTURE TESTS
+# ENTITY HIERARCHY
 # ----------------------------------------------------
 
 
@@ -15,6 +15,12 @@ def test_is_eco_agent():
     assert issubclass(Government, EcoAgent)
 
 
+
+
+
+# ---------------------------------------------------
+# DEFAULT STATE
+# ----------------------------------------------------
 @pytest.fixture
 def govt_before_setup():
     # Given
@@ -134,7 +140,7 @@ def govt_with_roles_and_account(govt_before_setup):
 
 
 # ---------------------------------------------------
-# PUBLIC TRANSFERS TESTS
+# PUBLIC TRANSFERS
 # ----------------------------------------------------
 
 

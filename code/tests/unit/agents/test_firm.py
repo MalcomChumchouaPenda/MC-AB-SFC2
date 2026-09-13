@@ -1,10 +1,10 @@
 import math
 import pytest
-from unittest.mock import Mock, PropertyMock
+from unittest.mock import Mock
 from model.agents.firm import Firm
 
 # ---------------------------------------------------
-# ARCHITECTURE TESTS
+# ENTITY HIERARCHY
 # ----------------------------------------------------
 
 
@@ -15,6 +15,10 @@ def test_is_eco_agent():
     # Assert
     assert issubclass(Firm, EcoAgent)
 
+
+# ---------------------------------------------------
+# DEFAULT STATE
+# ----------------------------------------------------
 
 @pytest.fixture
 def firm_before_setup():
@@ -153,6 +157,13 @@ def test_has_default_prev_desired_labor(firm_before_setup):
     assert firm.prev_desired_labor == 0
 
 
+
+# ---------------------------------------------------
+# PRODUCTION PLANNING
+# ----------------------------------------------------
+
+
+
 @pytest.fixture
 def firm_with_roles_and_account(firm_before_setup):
     # Given
@@ -163,10 +174,19 @@ def firm_with_roles_and_account(firm_before_setup):
     firm.roles = roles
     return firm, roles, account
 
+def test_plan_production_by_two_steps(firm_before_setup):
+    # Given
+    firm = firm_before_setup
+    firm.calc_desired_output = Mock(side_effect=setattr(firm, "desired_output", 10))
+    firm.calc_labor_demand = Mock(side_effect=setattr(firm, "desired_output", 20))
 
-# ---------------------------------------------------
-# PRODUCTION TESTS
-# ----------------------------------------------------
+    # When
+    firm.plan_production()
+
+    # Then
+    firm.calc_desired_output.assert_called_once_with()
+    firm.calc_labor_demand.assert_called_once_with()
+    assert firm.desired_output == 20
 
 
 @pytest.fixture
@@ -236,23 +256,8 @@ def test_calc_desired_output_cannot_be_negative(firm_before_production):
     assert firm.desired_output == 0
 
 
-def test_plan_production_by_two_steps(firm_before_setup):
-    # Given
-    firm = firm_before_setup
-    firm.calc_desired_output = Mock(side_effect=setattr(firm, "desired_output", 10))
-    firm.calc_labor_demand = Mock(side_effect=setattr(firm, "desired_output", 20))
-
-    # When
-    firm.plan_production()
-
-    # Then
-    firm.calc_desired_output.assert_called_once_with()
-    firm.calc_labor_demand.assert_called_once_with()
-    assert firm.desired_output == 20
-
-
 # ---------------------------------------------------
-# PRICES AND EXPECTATIONS TESTS
+# PRICES AND EXPECTATIONS
 # ----------------------------------------------------
 
 
@@ -344,7 +349,7 @@ def test_price_cannot_be_below_unit_cost(pricing_firm):
 
 
 # ---------------------------------------------------
-# WAGE REVISION TESTS
+# WAGE REVISION
 # ----------------------------------------------------
 
 
@@ -477,7 +482,7 @@ def test_can_choose_to_not_decreases_wage(hiring_firm):
 
 
 # ---------------------------------------------------
-# R & D INVESTMENTS TESTS
+# R & D INVESTMENTS
 # ----------------------------------------------------
 
 
@@ -495,6 +500,7 @@ def test_calc_desired_rd(firm_before_setup):
     assert rd == 50
     assert firm.desired_wage_bill == 500
     assert firm.desired_rd == 50
+
 
 
 def test_execute_rd_without_constraints(firm_with_roles_and_account):
@@ -683,7 +689,7 @@ def test_update_productivity_by_imitation(innovating_firm):
 
 
 # ---------------------------------------------------
-# CREDIT RELATED TESTS
+# CREDIT DEMAND
 # ----------------------------------------------------
 
 
@@ -798,6 +804,12 @@ def test_dont_request_unneccessary_loans(firm_as_borrower, desired):
     role.request_loans.assert_not_called()
 
 
+
+# ---------------------------------------------------
+# CREDIT AND LOAN REPAYMENT
+# ----------------------------------------------------
+
+
 @pytest.fixture
 def firm_after_borrowing(firm_with_roles_and_account):
     # Given
@@ -875,7 +887,7 @@ def test_dont_repay_loans_with_insufficient_fund(firm_after_borrowing, cash, dep
 
 
 # ---------------------------------------------------
-# PROFITS, TAXES AND DIVIDENDS COMPUTAION
+# PROFITS, TAXES AND DIVIDENDS COMPUTATION
 # ----------------------------------------------------
 
 
