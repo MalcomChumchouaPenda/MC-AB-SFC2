@@ -171,7 +171,6 @@ class Firm(EcoAgent):
             deposits = stocks["deposits"]
             self._pay_lender(borrower_role, loan, deposits)
 
-
     def _fund_repayments(self, role, stocks):
         needs = max(0, stocks["loans"] - stocks["deposits"])
         if needs > 0:

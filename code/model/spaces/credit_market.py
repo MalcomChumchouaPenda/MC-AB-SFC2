@@ -66,7 +66,6 @@ class CreditMarket(EcoSpace):
         lender.credit_flow("loan_interests", interests)
         self.graph[borrower][lender]["amount"] -= principal
 
-
     def make_defaults(self, borrower, lender, amount):
         borrower.debit_flow("loan_defaults", amount)
         borrower.credit_stock("loans", amount)

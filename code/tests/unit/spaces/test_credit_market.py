@@ -279,7 +279,6 @@ def test_repay_loans_updates_accounts(market_with_loan):
     lender.credit_flow.assert_any_call("loan_interests", 10)
 
 
-
 def test_make_defaults_updates_graph_edge(market_with_loan):
     # Given
     market, borrower, lender = market_with_loan

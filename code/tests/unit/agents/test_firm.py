@@ -952,7 +952,6 @@ def test_repay_loans_with_available_deposits(firm_after_borrowing, fund, default
     role.make_defaults.assert_called_once_with(lender, default)
 
 
-
 # ---------------------------------------------------
 # PROFITS, TAXES AND DIVIDENDS COMPUTATION
 # ----------------------------------------------------
