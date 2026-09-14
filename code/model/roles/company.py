@@ -37,3 +37,7 @@ class Company(EcoRole):
 
     def pay_taxes(self, amount):
         self.space.pay_taxes(self, amount)
+
+    def transfer_residual_cash(self, founder, amount):
+        self.space.transfer_residual_cash(self, founder, amount)
+

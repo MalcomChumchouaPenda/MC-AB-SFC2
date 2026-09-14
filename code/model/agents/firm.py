@@ -37,6 +37,7 @@ class Firm(EcoAgent):
         # other props
         self.variety = 0.0
         self.country = 0
+        self.defaulted = False
 
     #
     # Production planning
@@ -163,18 +164,18 @@ class Firm(EcoAgent):
         return max(0, wage_bill + self.desired_rd - deposits)
 
     def repay_loans(self):
+        role = self.roles["borrower"]
         stocks = self.account.stocks
-        borrower_role = self.roles["borrower"]
-        depositor_role = self.roles["depositor"]
-        self._fund_repayments(depositor_role, stocks)
-        for loan in borrower_role.find_loans():
+        self._fund_repayments(stocks)
+        for loan in role.find_loans():
             deposits = stocks["deposits"]
-            self._pay_lender(borrower_role, loan, deposits)
+            self._pay_lender(role, loan, deposits)
 
-    def _fund_repayments(self, role, stocks):
+    def _fund_repayments(self, stocks):
         needs = max(0, stocks["loans"] - stocks["deposits"])
         if needs > 0:
             feasible = min(stocks["cash"], needs)
+            role = self.roles["depositor"]
             role.make_deposits(feasible)
 
     def _pay_lender(self, role, loan, deposits):
@@ -258,10 +259,39 @@ class Firm(EcoAgent):
                 role.pay_dividends(share["founder"], dividend)
             self.dividends_payable = 0
 
+    #
+    # Exit process
+    #
     def exit(self):
-        role = self.roles["company"]
         if self.net_worth < self.wage_offer:
-            role.close_firm(self)
+            self.defaulted = True
+            self._make_loan_defaults()
+            self._withdraw_residual_deposits()
+            self._transfer_residual_cash()
+
+    def _withdraw_residual_deposits(self):
+        amount = self.account.stocks["deposits"]
+        role = self.roles["depositor"]
+        role.withdraw_deposits(amount)
+
+    def _make_loan_defaults(self):
+        role = self.roles["borrower"]
+        for loan in role.find_loans():
+            lender = loan["lender"]
+            principal = loan["amount"]
+            role.make_defaults(lender, principal)
+
+    def _transfer_residual_cash(self):
+        cash = self.account.stocks["cash"]
+        if cash > 0:
+            role = self.roles["company"]
+            shares = role.get_equity_shares()
+            total_shares = sum(share["value"] for share in shares)
+            for share in shares:
+                founder = share["founder"]
+                amount = share["value"] * cash / total_shares
+                role.transfer_residual_cash(founder, amount)
+
 
     #
     # History

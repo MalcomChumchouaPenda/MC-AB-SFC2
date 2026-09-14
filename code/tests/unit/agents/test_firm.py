@@ -28,6 +28,16 @@ def firm_before_setup():
     firm = Firm(model)
     return firm
 
+def test_has_defaulted_prop(firm_before_setup):
+    # Given
+    firm = firm_before_setup
+
+    # When
+    firm.setup()
+
+    # Then
+    assert firm.defaulted is False
+
 
 def test_has_default_rd_expenditure(firm_before_setup):
     # Given
@@ -1185,33 +1195,76 @@ def test_pay_no_dividends(firm_with_roles_and_account):
 
 @pytest.fixture
 def firm_before_exit(firm_with_roles_and_account):
-    firm, roles, _ = firm_with_roles_and_account
+    # Given
+    role1, role2 = Mock(), Mock()
+    role1.find_loans.return_value = []
+    role2.get_equity_shares.return_value = []
+    firm, roles, account = firm_with_roles_and_account
     firm.wage_offer = 100
-    roles["company"] = Mock()
-    return firm
+    firm.net_worth = 50
+    roles["company"] = role2
+    roles["borrower"] = role1
+    roles["depositor"] = Mock()
+    account.stocks["deposits"] = 0
+    account.stocks["loans"] = 0
+    account.stocks["cash"] = 0
+    return firm, roles, account
 
 
-def test_exit_when_bankrupt(firm_before_exit):
+@pytest.mark.parametrize('net_worth, defaulted', [(90, True), (150, False)])
+def test_exit_when_bankrupt(firm_before_exit, net_worth, defaulted):
     # Given
-    firm = firm_before_exit
-    firm.net_worth = 90
-    role = firm.roles["company"]
+    firm, *_ = firm_before_exit
+    firm.net_worth = net_worth
+    firm.wage_offer = 100
 
     # When
     firm.exit()
 
     # Then
-    role.close_firm.assert_called_once_with(firm)
+    assert firm.defaulted == defaulted
 
 
-def test_does_not_exit_when_not_bankrupt(firm_before_exit):
+def test_exit_withdraws_residual_deposits(firm_before_exit):
     # Given
-    firm = firm_before_exit
-    firm.net_worth = 150
-    role = firm.roles["company"]
+    firm, roles, account = firm_before_exit
+    account.stocks["deposits"] = 100
+    role = roles["depositor"]
 
     # When
     firm.exit()
 
     # Then
-    role.close_firm.assert_not_called()
+    role.withdraw_deposits.assert_called_with(100)
+
+
+def test_exit_makes_default_on_all_loans(firm_before_exit):
+    # Given
+    lender = object()
+    loan = {"lender": lender, "amount": 100, "rate": 0.1}
+    firm, roles, _ = firm_before_exit
+    role = roles["borrower"]
+    role.find_loans.return_value = [loan]
+
+    # When
+    firm.exit()
+
+    # Then
+    role.make_defaults.assert_called_with(lender, 100)
+
+
+def test_exit_transfer_residual_cash_to_founders(firm_before_exit):
+    # Given
+    founder = object()
+    share = {"founder": founder, "value": 1000}
+    firm, roles, account = firm_before_exit
+    account.stocks["cash"] = 200
+    role = roles["company"]
+    role.get_equity_shares.return_value = [share]
+
+    # When
+    firm.exit()
+
+    # Then
+    role.transfer_residual_cash.assert_called_with(founder, 200)
+

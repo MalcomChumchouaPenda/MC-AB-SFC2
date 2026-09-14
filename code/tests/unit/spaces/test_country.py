@@ -891,7 +891,7 @@ def test_create_bank_place_bank_in_union(country_before_creation, share):
 
 
 # ---------------------------------------------------
-# TRANSFER PROFITS
+# TRANSFERS
 # ----------------------------------------------------
 
 
@@ -910,6 +910,21 @@ def test_transfer_profits_to_government(country_before_setup):
     fiscal_auth.credit_flow.assert_any_call("profit_transfers", 100)
     monetary_auth.debit_stock.assert_any_call("cash", 100)
     monetary_auth.debit_flow.assert_any_call("profit_transfers", 100)
+
+
+def test_transfer_residual_cash_of_company(country_before_setup):
+    # Given
+    company, founder = Mock(), Mock()
+    country = country_before_setup
+
+    # When
+    country.transfer_residual_cash(company, founder, 100)
+
+    # Then
+    founder.credit_stock.assert_any_call("cash", 100)
+    founder.debit_stock.assert_any_call("equities", 100)
+    company.debit_stock.assert_any_call("cash", 100)
+    company.credit_stock.assert_any_call("equities", 100)
 
 
 # ---------------------------------------------------

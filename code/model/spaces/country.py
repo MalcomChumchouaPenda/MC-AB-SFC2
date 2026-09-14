@@ -185,6 +185,16 @@ class Country(EcoSpace):
         authority.debit_stock("cash", amount)
 
     #
+    # Residual transfers
+    #
+    def transfer_residual_cash(self, company, founder, amount):
+        company.credit_stock("equities", amount)
+        company.debit_stock("cash", amount)
+        founder.debit_stock("equities", amount)
+        founder.credit_stock("cash", amount)
+
+
+    #
     # Evolution
     #
     def update_state(self):
