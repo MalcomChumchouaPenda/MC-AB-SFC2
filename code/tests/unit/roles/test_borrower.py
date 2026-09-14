@@ -110,3 +110,15 @@ def test_repay_loans_use_space_method(borrower_with_space):
 
     # Then
     space.repay_loans.assert_called_with(borrower, lender, 100, 10)
+
+
+def test_make_defaults_use_space_method(borrower_with_space):
+    # Given
+    lender = Mock()
+    borrower, space = borrower_with_space
+
+    # When
+    borrower.make_defaults(lender, 100)
+
+    # Then
+    space.make_defaults.assert_called_with(borrower, lender, 100)

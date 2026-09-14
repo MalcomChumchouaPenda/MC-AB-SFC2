@@ -169,8 +169,8 @@ class Firm(EcoAgent):
         self._fund_repayments(depositor_role, stocks)
         for loan in borrower_role.find_loans():
             deposits = stocks["deposits"]
-            if deposits > 0:
-                self._pay_lender(borrower_role, loan, deposits)
+            self._pay_lender(borrower_role, loan, deposits)
+
 
     def _fund_repayments(self, role, stocks):
         needs = max(0, stocks["loans"] - stocks["deposits"])
@@ -183,11 +183,13 @@ class Firm(EcoAgent):
         principal = loan["amount"]
         interests = principal * loan["rate"]
         total = principal + interests
-        if total > deposits:
-            amount = min(principal, deposits)
-            role.repay_loans(lender, amount, 0.0)
-        else:
+        if total <= deposits:
             role.repay_loans(lender, principal, interests)
+        else:
+            amount = min(principal, deposits)
+            default = principal - amount
+            role.make_defaults(lender, default)
+            role.repay_loans(lender, amount, 0.0)
 
     #
     # Profit, taxes and dividend computation

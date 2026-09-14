@@ -902,37 +902,7 @@ def firm_after_borrowing(firm_with_roles_and_account):
     return firm, roles, account
 
 
-def test_repay_loans_to_all_lenders(firm_after_borrowing):
-    # Given
-    firm, roles, account = firm_after_borrowing
-    account.stocks["deposits"] = 200
-    lender, role = object(), roles["borrower"]
-    loans = [{"lender": lender, "amount": 100, "rate": 0.1}]
-    role.find_loans.return_value = loans
-
-    # When
-    firm.repay_loans()
-
-    # Then
-    role.repay_loans.assert_called_once_with(lender, 100, 10.0)
-
-
-def test_repay_loans_with_available_deposits(firm_after_borrowing):
-    # Given
-    firm, roles, account = firm_after_borrowing
-    account.stocks["deposits"] = 50
-    lender, role = object(), roles["borrower"]
-    loans = [{"lender": lender, "amount": 100, "rate": 0.1}]
-    role.find_loans.return_value = loans
-
-    # When
-    firm.repay_loans()
-
-    # Then
-    role.repay_loans.assert_called_once_with(lender, 50, 0.0)
-
-
-@pytest.mark.parametrize("cash, expected", [(100, 80), (50, 50)])
+@pytest.mark.parametrize("cash, expected", [(100, 80), (50, 50), (0, 0)])
 def test_repay_loans_after_making_deposits(firm_after_borrowing, cash, expected):
     # Given
     firm, roles, account = firm_after_borrowing
@@ -948,20 +918,39 @@ def test_repay_loans_after_making_deposits(firm_after_borrowing, cash, expected)
     role.make_deposits.assert_called_once_with(expected)
 
 
-@pytest.mark.parametrize("cash, deposits", [(20, 0), (0, 20)])
-def test_dont_repay_loans_with_insufficient_fund(firm_after_borrowing, cash, deposits):
+def test_repay_loans_to_all_lenders(firm_after_borrowing):
     # Given
+    lender = object()
+    loan = {"lender": lender, "amount": 100, "rate": 0.1}
     firm, roles, account = firm_after_borrowing
-    account.stocks["deposits"] = deposits
-    account.stocks["cash"] = cash
-    account.stocks["loans"] = 100
+    account.stocks["deposits"] = 200
     role = roles["borrower"]
+    role.find_loans.return_value = [loan]
 
     # When
     firm.repay_loans()
 
     # Then
-    role.repay_loans.assert_not_called()
+    role.repay_loans.assert_called_once_with(lender, 100, 10.0)
+
+
+@pytest.mark.parametrize("fund, default", [(100, 0), (80, 20), (0, 100)])
+def test_repay_loans_with_available_deposits(firm_after_borrowing, fund, default):
+    # Given
+    lender = object()
+    loan = {"lender": lender, "amount": 100, "rate": 0.1}
+    firm, roles, account = firm_after_borrowing
+    account.stocks["deposits"] = fund
+    role = roles["borrower"]
+    role.find_loans.return_value = [loan]
+
+    # When
+    firm.repay_loans()
+
+    # Then
+    role.repay_loans.assert_called_once_with(lender, fund, 0.0)
+    role.make_defaults.assert_called_once_with(lender, default)
+
 
 
 # ---------------------------------------------------

@@ -25,3 +25,6 @@ class Borrower(EcoRole):
 
     def repay_loans(self, lender, principal, interests):
         self.space.repay_loans(self, lender, principal, interests)
+
+    def make_defaults(self, lender, amount):
+        self.space.make_defaults(self, lender, amount)

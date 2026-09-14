@@ -279,6 +279,34 @@ def test_repay_loans_updates_accounts(market_with_loan):
     lender.credit_flow.assert_any_call("loan_interests", 10)
 
 
+
+def test_make_defaults_updates_graph_edge(market_with_loan):
+    # Given
+    market, borrower, lender = market_with_loan
+    graph = market.graph
+    graph[borrower][lender]["amount"] = 300
+
+    # When
+    market.make_defaults(borrower, lender, 100)
+
+    # Then
+    assert graph[borrower][lender]["amount"] == 200
+
+
+def test_make_defaults_updates_accounts(market_with_loan):
+    # Given
+    market, borrower, lender = market_with_loan
+
+    # When
+    market.make_defaults(borrower, lender, 100)
+
+    # Then
+    borrower.credit_stock.assert_any_call("loans", 100)
+    borrower.debit_flow.assert_any_call("loan_defaults", 100)
+    lender.debit_stock.assert_any_call("loans", 100)
+    lender.credit_flow.assert_any_call("loan_defaults", 100)
+
+
 # ---------------------------------------------------
 # CASH ADVANCE REQUEST / REPAYMENT
 # ----------------------------------------------------
