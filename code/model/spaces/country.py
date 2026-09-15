@@ -34,6 +34,7 @@ class Country(EcoSpace):
     #
     def add_fiscal_authority(self, agent):
         role = self.add_role(FiscalAuthority, agent, "fiscal_authority")
+        agent.cb_account = self.monetary_authority.account
         self.fiscal_authority = role
         self.add_account(agent)
         return role
