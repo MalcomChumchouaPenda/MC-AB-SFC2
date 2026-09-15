@@ -23,7 +23,6 @@ class MonetaryUnion(EcoSpace):
         self.monetary_authority = role
         self.add_account(agent)
         return role
-    
 
     #
     # Firm creation

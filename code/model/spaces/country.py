@@ -194,7 +194,6 @@ class Country(EcoSpace):
         founder.debit_stock("equities", amount)
         founder.credit_stock("cash", amount)
 
-
     #
     # Evolution
     #

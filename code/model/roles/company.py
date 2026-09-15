@@ -40,4 +40,3 @@ class Company(EcoRole):
 
     def transfer_residual_cash(self, founder, amount):
         self.space.transfer_residual_cash(self, founder, amount)
-

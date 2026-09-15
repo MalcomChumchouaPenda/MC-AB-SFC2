@@ -14,12 +14,12 @@ from model.agents.firm import Firm
 from model.agents.bank import Bank
 
 
-
 @pytest.fixture
 def model():
     # Given
     model = Model()
     return model
+
 
 @pytest.fixture
 def credit_market(model):
@@ -36,6 +36,7 @@ def deposit_market(model):
     market.setup()
     return market
 
+
 @pytest.fixture
 def union(model, credit_market):
     # Given
@@ -44,6 +45,7 @@ def union(model, credit_market):
     union.credit_market = credit_market
     union.monetary_authority = Mock()
     return union
+
 
 @pytest.fixture
 def country(model, union, deposit_market):
@@ -94,14 +96,13 @@ def country_before_firm_exit(country, firm, founders, bank):
     country.add_company(bank, "B")
     country.fund_company(company1, founder1, 500)
     country.fund_company(company1, founder2, 500)
-    
 
 
 @pytest.mark.usefixtures("country_before_firm_exit")
 def test_firm_exit_with_residual_cash(firm, founders):
     # Given
     household1, household2 = founders
-    
+
     # When
     firm.exit()
 
@@ -112,5 +113,3 @@ def test_firm_exit_with_residual_cash(firm, founders):
     assert household1.account.stocks["equities"] == 0
     assert household2.account.stocks["cash"] == 500
     assert household2.account.stocks["equities"] == 0
-
-

@@ -28,6 +28,7 @@ def firm_before_setup():
     firm = Firm(model)
     return firm
 
+
 def test_has_defaulted_prop(firm_before_setup):
     # Given
     firm = firm_before_setup
@@ -1211,7 +1212,7 @@ def firm_before_exit(firm_with_roles_and_account):
     return firm, roles, account
 
 
-@pytest.mark.parametrize('net_worth, defaulted', [(90, True), (150, False)])
+@pytest.mark.parametrize("net_worth, defaulted", [(90, True), (150, False)])
 def test_exit_when_bankrupt(firm_before_exit, net_worth, defaulted):
     # Given
     firm, *_ = firm_before_exit
@@ -1267,4 +1268,3 @@ def test_exit_transfer_residual_cash_to_founders(firm_before_exit):
 
     # Then
     role.transfer_residual_cash.assert_called_with(founder, 200)
-

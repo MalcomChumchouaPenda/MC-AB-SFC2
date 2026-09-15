@@ -292,7 +292,6 @@ class Firm(EcoAgent):
                 amount = share["value"] * cash / total_shares
                 role.transfer_residual_cash(founder, amount)
 
-
     #
     # History
     #

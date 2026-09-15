@@ -128,7 +128,6 @@ def test_has_companies_list(country_before_setup):
     assert isinstance(country.companies, AgentDList)
 
 
-
 FakeAuthority = Mock()
 
 
@@ -229,7 +228,6 @@ def test_add_fiscal_authority_add_account(country_without_fiscal_auth):
     country.add_account.assert_called_with(govt)
 
 
-
 def test_add_fiscal_authority_links_to_cb_account(country_without_fiscal_auth):
     # Given
     govt = Mock()
@@ -240,7 +238,6 @@ def test_add_fiscal_authority_links_to_cb_account(country_without_fiscal_auth):
 
     # Then
     assert govt.cb_account is country.monetary_authority.account
-
 
 
 FakeCitizen = Mock()
@@ -287,7 +284,6 @@ def test_add_citizen_registers_citizen(country_without_citizens):
 def test_add_citizen_add_account(country_without_citizens):
     # Given
     country = country_without_citizens
-    union = country.union
     household = Mock()
 
     # When

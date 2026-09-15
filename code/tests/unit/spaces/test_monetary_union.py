@@ -256,6 +256,7 @@ def union_with_authority(union_without_authority):
     union.monetary_authority = authority
     return union, authority
 
+
 def test_transfer_cash_between_agents_updates_accounts(union_with_authority):
     # Given
     source, target = Mock(), Mock()

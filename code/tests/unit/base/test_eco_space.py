@@ -253,6 +253,7 @@ def test_remove_role_un_registers_role(space_with_role):
 
 FakeAccount = Mock()
 
+
 @pytest.fixture
 def space_with_accounts(monkeypatch, space_before_setup):
     # Given
