@@ -16,9 +16,17 @@ def test_is_eco_space():
     assert issubclass(MonetaryUnion, EcoSpace)
 
 
+FakeGoodMarket = Mock()
+FakeCreditMarket = Mock()
+FakeBondMarket = Mock()
+
+
 @pytest.fixture
-def union_before_setup():
+def union_before_setup(monkeypatch):
     # Given
+    monkeypatch.setattr("model.spaces.monetary_union.GoodsMarket", FakeGoodMarket)
+    monkeypatch.setattr("model.spaces.monetary_union.CreditMarket", FakeCreditMarket)
+    monkeypatch.setattr("model.spaces.monetary_union.BondMarket", FakeBondMarket)
     model = Mock()
     union = MonetaryUnion(model)
     return union
@@ -51,12 +59,13 @@ def test_has_monetary_authority_ref(union_before_setup):
     assert union.monetary_authority is None
 
 
+
 # ---------------------------------------------------
-# SPACES SET/REF TESTS
+# SPACES
 # ----------------------------------------------------
 
 
-def test_has_good_market_ref(union_before_setup):
+def test_setup_creates_good_market(union_before_setup):
     # Given
     union = union_before_setup
 
@@ -64,10 +73,12 @@ def test_has_good_market_ref(union_before_setup):
     union.setup()
 
     # Then
-    assert union.good_market is None
+    assert union.good_market is FakeGoodMarket.return_value
+    assert union.good_market.setup.called
+    assert union.good_market.tradable is True
 
 
-def test_has_bond_market_ref(union_before_setup):
+def test_setup_creates_credit_market(union_before_setup):
     # Given
     union = union_before_setup
 
@@ -75,10 +86,11 @@ def test_has_bond_market_ref(union_before_setup):
     union.setup()
 
     # Then
-    assert union.bond_market is None
+    assert union.credit_market is FakeCreditMarket.return_value
+    assert union.credit_market.setup.called
 
 
-def test_has_credit_market_ref(union_before_setup):
+def test_setup_creates_bond_market(union_before_setup):
     # Given
     union = union_before_setup
 
@@ -86,7 +98,9 @@ def test_has_credit_market_ref(union_before_setup):
     union.setup()
 
     # Then
-    assert union.credit_market is None
+    assert union.bond_market is FakeBondMarket.return_value
+    assert union.bond_market.setup.called
+
 
 
 # ---------------------------------------------------

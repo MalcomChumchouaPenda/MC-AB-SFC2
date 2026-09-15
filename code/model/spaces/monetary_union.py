@@ -1,6 +1,9 @@
 from agentpy import AgentDList
 from model.base import EcoSpace, EcoAccount
 from model.roles.monetary_authority import MonetaryAuthority
+from model.spaces.good_market import GoodsMarket
+from model.spaces.credit_market import CreditMarket
+from model.spaces.bond_market import BondMarket
 
 
 class MonetaryUnion(EcoSpace):
@@ -11,10 +14,17 @@ class MonetaryUnion(EcoSpace):
         self.average_inflation = 0
         self.discount_rate = 0
         self.monetary_authority = None
-        self.good_market = None
-        self.bond_market = None
-        self.credit_market = None
 
+        model = self.model
+        self.good_market = GoodsMarket(model)
+        self.good_market.setup()
+        self.good_market.tradable = True
+        self.credit_market = CreditMarket(model)
+        self.credit_market.setup()
+        self.bond_market = BondMarket(model)
+        self.bond_market.setup()
+
+        
     #
     # Role / Account management
     #

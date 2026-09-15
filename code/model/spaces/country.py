@@ -4,6 +4,9 @@ from model.roles.citizen import Citizen
 from model.roles.company import Company
 from model.roles.monetary_authority import MonetaryAuthority
 from model.roles.fiscal_authority import FiscalAuthority
+from model.spaces.good_market import GoodsMarket
+from model.spaces.labor_market import LaborMarket
+from model.spaces.deposit_market import DepositMarket
 
 
 class Country(EcoSpace):
@@ -25,9 +28,13 @@ class Country(EcoSpace):
 
         # sub spaces
         self.union = None
-        self.good_market = None
-        self.labor_market = None
-        self.deposit_market = None
+        self.good_market = GoodsMarket(model)
+        self.good_market.setup()
+        self.good_market.tradable = False
+        self.labor_market = LaborMarket(model)
+        self.labor_market.setup()
+        self.deposit_market = DepositMarket(model)
+        self.deposit_market.setup()
 
     #
     # Role management

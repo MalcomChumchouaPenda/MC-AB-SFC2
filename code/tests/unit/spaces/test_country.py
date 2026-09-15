@@ -16,9 +16,17 @@ def test_is_eco_space():
     assert issubclass(Country, EcoSpace)
 
 
+FakeGoodMarket = Mock()
+FakeLaborMarket = Mock()
+FakeDepositMarket = Mock()
+
+
 @pytest.fixture
-def country_before_setup():
+def country_before_setup(monkeypatch):
     # Given
+    monkeypatch.setattr("model.spaces.country.GoodsMarket", FakeGoodMarket)
+    monkeypatch.setattr("model.spaces.country.LaborMarket", FakeLaborMarket)
+    monkeypatch.setattr("model.spaces.country.DepositMarket", FakeDepositMarket)
     model = Mock()
     country = Country(model)
     return country
@@ -77,6 +85,48 @@ def test_has_tax_rate(country_before_setup):
 
     # Then
     assert country.tax_rate == 0
+
+
+# ---------------------------------------------------
+# SPACES
+# ----------------------------------------------------
+
+
+def test_setup_creates_good_market(country_before_setup):
+    # Given
+    country = country_before_setup
+
+    # When
+    country.setup()
+
+    # Then
+    assert country.good_market is FakeGoodMarket.return_value
+    assert country.good_market.setup.called
+    assert country.good_market.tradable is False
+
+
+def test_setup_creates_labor_market(country_before_setup):
+    # Given
+    country = country_before_setup
+
+    # When
+    country.setup()
+
+    # Then
+    assert country.labor_market is FakeLaborMarket.return_value
+    assert country.labor_market.setup.called
+
+
+def test_setup_creates_deposit_market(country_before_setup):
+    # Given
+    country = country_before_setup
+
+    # When
+    country.setup()
+
+    # Then
+    assert country.deposit_market is FakeDepositMarket.return_value
+    assert country.deposit_market.setup.called
 
 
 # ---------------------------------------------------
@@ -399,39 +449,6 @@ def test_has_monetary_union_ref(country_before_setup):
 
     # Then
     assert country.union is None
-
-
-def test_has_good_market_ref(country_before_setup):
-    # Given
-    country = country_before_setup
-
-    # When
-    country.setup()
-
-    # Then
-    assert country.good_market is None
-
-
-def test_has_labor_market_ref(country_before_setup):
-    # Given
-    country = country_before_setup
-
-    # When
-    country.setup()
-
-    # Then
-    assert country.labor_market is None
-
-
-def test_has_deposit_market_ref(country_before_setup):
-    # Given
-    country = country_before_setup
-
-    # When
-    country.setup()
-
-    # Then
-    assert country.deposit_market is None
 
 
 # ---------------------------------------------------
