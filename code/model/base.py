@@ -67,53 +67,6 @@ class EcoRole(Object):
         self.agent.account.clear_flows()
 
 
-class EcoSpace(Network):
-    """
-    Classe de base des espaces d'interaction.
-
-    Un espace contient des rôles qui correspondent
-    à ses noeuds.
-    """
-
-    def setup(self):
-        self.roles = {}
-        self.root_space = None
-        self.sub_spaces = {}
-
-    def add_space(self, sub_space, name):
-        sub_space.root_space = self
-        self.sub_spaces[name] = sub_space
-
-    def evolve(self):
-        for sub_space in self.sub_spaces.values():
-            sub_space.update_state()
-            sub_space.clear_defaults()
-        self.update_state()
-        self.clear_defaults()
-
-    def update_state(self):
-        raise NotImplementedError
-
-    def clear_defaults(self):
-        raise NotImplementedError
-
-    def add_role(self, kind, agent, name):
-        role = kind(self.model)
-        role.setup()
-        role.name = name
-        role.space = self
-        role.agent = agent
-        agent.roles[name] = role
-        self.graph.add_node(role)
-        return role
-
-    def remove_role(self, role):
-        name = role.name
-        agent = role.agent
-        agent.roles.pop(name)
-        self.graph.remove_node(role)
-
-
 class EcoAccount(Object):
 
     def setup(self):
@@ -157,3 +110,61 @@ class EcoAccount(Object):
 
     def clear_flows(self):
         self.flows.clear()
+
+
+class EcoSpace(Network):
+    """
+    Classe de base des espaces d'interaction.
+
+    Un espace contient des rôles qui correspondent
+    à ses noeuds.
+    """
+
+    def setup(self):
+        self.roles = {}
+        self.root_space = None
+        self.sub_spaces = {}
+        self.accounts = AgentDList(self.model)
+
+
+    def add_account(self, agent):
+        account = EcoAccount(agent.model)
+        account.setup()
+        account.agent = agent
+        agent.account = account
+        self.accounts.append(account)
+        return account
+    
+    def add_space(self, sub_space, name):
+        sub_space.root_space = self
+        self.sub_spaces[name] = sub_space
+
+    def evolve(self):
+        for sub_space in self.sub_spaces.values():
+            sub_space.update_state()
+            sub_space.clear_defaults()
+        self.update_state()
+        self.clear_defaults()
+
+    def update_state(self):
+        raise NotImplementedError
+
+    def clear_defaults(self):
+        raise NotImplementedError
+
+    def add_role(self, kind, agent, name):
+        role = kind(self.model)
+        role.setup()
+        role.name = name
+        role.space = self
+        role.agent = agent
+        agent.roles[name] = role
+        self.graph.add_node(role)
+        return role
+
+    def remove_role(self, role):
+        name = role.name
+        agent = role.agent
+        agent.roles.pop(name)
+        self.graph.remove_node(role)
+

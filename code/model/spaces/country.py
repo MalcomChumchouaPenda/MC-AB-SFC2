@@ -34,21 +34,21 @@ class Country(EcoSpace):
     #
     def add_fiscal_authority(self, agent):
         role = self.add_role(FiscalAuthority, agent, "fiscal_authority")
-        self.union.add_account(agent)
         self.fiscal_authority = role
+        self.add_account(agent)
         return role
 
     def add_monetary_authority(self, agent):
         role = self.add_role(MonetaryAuthority, agent, "monetary_authority")
-        self.union.add_account(agent)
         self.monetary_authority = role
+        self.add_account(agent)
         return role
 
     def add_citizen(self, agent):
         role = self.add_role(Citizen, agent, "citizen")
         agent.cb_account = self.monetary_authority.account
-        self.union.add_account(agent)
         self.citizens.append(role)
+        self.add_account(agent)
         return role
 
     def add_company(self, agent, sector):
@@ -56,7 +56,7 @@ class Country(EcoSpace):
         role.sector = sector
         agent.cb_account = self.monetary_authority.account
         self.companies.append(role)
-        self.union.add_account(agent)
+        self.add_account(agent)
         return role
 
     #

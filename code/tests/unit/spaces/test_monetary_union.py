@@ -24,17 +24,6 @@ def union_before_setup():
     return union
 
 
-def test_has_accounts_dlist(union_before_setup):
-    # Given
-    union = union_before_setup
-
-    # When
-    union.setup()
-
-    # Then
-    assert isinstance(union.accounts, AgentDList)
-
-
 def test_has_discount_rate(union_before_setup):
     # Given
     union = union_before_setup
@@ -122,17 +111,15 @@ def test_has_average_inflation_prop(union_before_setup):
 
 
 FakeAuthority = Mock()
-FakeAccount = Mock()
 
 
 @pytest.fixture
 def union_without_authority(monkeypatch, union_before_setup):
     # Given
     monkeypatch.setattr("model.spaces.monetary_union.MonetaryAuthority", FakeAuthority)
-    monkeypatch.setattr("model.spaces.monetary_union.EcoAccount", FakeAccount)
     union = union_before_setup
+    union.add_account = Mock()
     union.add_role = Mock()
-    union.accounts = []
     return union
 
 
@@ -161,7 +148,7 @@ def test_add_monetary_authority_registers_role(union_without_authority):
     assert union.monetary_authority is role
 
 
-def test_add_monetary_authority_create_new_account(union_without_authority):
+def test_add_monetary_authority_add_account(union_without_authority):
     # Given
     cb = Mock()
     union = union_without_authority
@@ -170,57 +157,7 @@ def test_add_monetary_authority_create_new_account(union_without_authority):
     union.add_monetary_authority(cb)
 
     # Then
-    FakeAccount.assert_called_with(cb.model)
-
-
-def test_add_account_register_new_account(union_without_authority):
-    # Given
-    cb = Mock()
-    union = union_without_authority
-
-    # When
-    role = union.add_monetary_authority(cb)
-
-    # Then
-    assert role.account in union.accounts
-    assert role.account is cb.account
-    assert role.account.agent == cb
-
-
-@pytest.fixture
-def union_with_authority(union_without_authority):
-    # Given
-    authority = Mock()
-    union = union_without_authority
-    union.monetary_authority = authority
-    return union, authority
-
-
-def test_add_account_create_new_account(union_with_authority):
-    # Given
-    agent = Mock()
-    union, _ = union_with_authority
-
-    # When
-    account = union.add_account(agent)
-
-    # Then
-    FakeAccount.assert_called_with(agent.model)
-    assert account is FakeAccount.return_value
-
-
-def test_add_account_register_new_account(union_with_authority):
-    # Given
-    agent = Mock()
-    union, _ = union_with_authority
-
-    # When
-    account = union.add_account(agent)
-
-    # Then
-    assert account in union.accounts
-    assert account is agent.account
-    assert account.agent == agent
+    union.add_account.assert_called_with(cb)
 
 
 # ---------------------------------------------------
@@ -310,6 +247,14 @@ def test_place_bank_add_lender_role(union_before_creation):
 # CASH TRANSFER
 # ----------------------------------------------------
 
+
+@pytest.fixture
+def union_with_authority(union_without_authority):
+    # Given
+    authority = Mock()
+    union = union_without_authority
+    union.monetary_authority = authority
+    return union, authority
 
 def test_transfer_cash_between_agents_updates_accounts(union_with_authority):
     # Given

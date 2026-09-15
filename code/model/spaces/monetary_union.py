@@ -10,7 +10,6 @@ class MonetaryUnion(EcoSpace):
         self.gdp = 0
         self.average_inflation = 0
         self.discount_rate = 0
-        self.accounts = AgentDList(self.model)
         self.monetary_authority = None
         self.good_market = None
         self.bond_market = None
@@ -22,20 +21,9 @@ class MonetaryUnion(EcoSpace):
     def add_monetary_authority(self, agent):
         role = self.add_role(MonetaryAuthority, agent, "monetary_authority")
         self.monetary_authority = role
-        self._create_account(agent)
+        self.add_account(agent)
         return role
-
-    def add_account(self, agent):
-        account = self._create_account(agent)
-        agent.cb_account = self.monetary_authority.account
-        return account
-
-    def _create_account(self, agent):
-        account = EcoAccount(agent.model)
-        account.agent = agent
-        agent.account = account
-        self.accounts.append(account)
-        return account
+    
 
     #
     # Firm creation

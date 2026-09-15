@@ -138,6 +138,7 @@ def country_without_authorities(monkeypatch, country_before_setup):
     monkeypatch.setattr("model.spaces.country.MonetaryAuthority", FakeAuthority1)
     monkeypatch.setattr("model.spaces.country.FiscalAuthority", FakeAuthority2)
     country = country_before_setup
+    country.add_account = Mock()
     country.add_role = Mock()
     country.union = Mock()
     return country
@@ -178,7 +179,7 @@ def test_add_monetary_authority_add_account(country_without_authorities):
     country.add_monetary_authority(cb)
 
     # Then
-    union.add_account.assert_called_with(cb)
+    country.add_account.assert_called_with(cb)
 
 
 def test_add_fiscal_authority_add_appropriate_role(country_without_authorities):
@@ -216,7 +217,7 @@ def test_add_fiscal_authority_add_account(country_without_authorities):
     country.add_fiscal_authority(govt)
 
     # Then
-    union.add_account.assert_called_with(govt)
+    country.add_account.assert_called_with(govt)
 
 
 FakeCitizen = Mock()
@@ -227,6 +228,7 @@ def country_without_citizens(monkeypatch, country_before_setup):
     # Given
     monkeypatch.setattr("model.spaces.country.Citizen", FakeCitizen)
     country = country_before_setup
+    country.add_account = Mock()
     country.add_role = Mock()
     country.citizens = []
     country.union = Mock()
@@ -269,7 +271,7 @@ def test_add_citizen_add_account(country_without_citizens):
     country.add_citizen(household)
 
     # Then
-    union.add_account.assert_called_with(household)
+    country.add_account.assert_called_with(household)
 
 
 def test_add_citizen_links_to_cb_account(country_without_citizens):
@@ -293,6 +295,7 @@ def country_without_companies(monkeypatch, country_before_setup):
     # Given
     monkeypatch.setattr("model.spaces.country.Company", FakeCompany)
     country = country_before_setup
+    country.add_account = Mock()
     country.add_role = Mock()
     country.union = Mock()
     country.companies = []
@@ -347,7 +350,7 @@ def test_add_company_add_account(country_without_companies):
     country.add_company(agent, sector="X")
 
     # Then
-    union.add_account.assert_called_with(agent)
+    country.add_account.assert_called_with(agent)
 
 
 def test_add_company_links_to_cb_account(country_without_companies):
