@@ -35,7 +35,6 @@ def union_before_setup(monkeypatch):
     return union
 
 
-
 def test_has_policy_maker_ref(union_before_setup):
     # Given
     union = union_before_setup
@@ -45,7 +44,6 @@ def test_has_policy_maker_ref(union_before_setup):
 
     # Then
     assert union.policy_maker is None
-
 
 
 def test_has_policy_implementer_dlist(union_before_setup):
@@ -194,7 +192,9 @@ FakeImplementer = Mock()
 @pytest.fixture
 def union_without_policy_impl(monkeypatch, union_before_setup):
     # Given
-    monkeypatch.setattr("model.spaces.monetary_union.PolicyImplementer", FakeImplementer)
+    monkeypatch.setattr(
+        "model.spaces.monetary_union.PolicyImplementer", FakeImplementer
+    )
     union = union_before_setup
     union.policy_implementers = []
     union.add_role = Mock()

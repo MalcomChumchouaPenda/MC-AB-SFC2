@@ -13,7 +13,7 @@ def test_is_eco_role():
 
     # Assert
     assert issubclass(PolicyImplementer, EcoRole)
-    
+
 
 @pytest.fixture
 def role_before_setup():
@@ -47,7 +47,6 @@ def test_get_discount_rate_from_space(role_with_space):
 
     # Then
     assert perceived == 0.03
-
 
 
 # ---------------------------------------------------

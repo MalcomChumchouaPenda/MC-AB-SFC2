@@ -1,5 +1,6 @@
 from model.base import EcoRole
 
+
 class PolicyImplementer(EcoRole):
 
     def get_discount_rate(self):

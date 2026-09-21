@@ -162,7 +162,6 @@ def test_determine_discount_rate_changes_lag_values(cb_as_policy_maker):
     assert cb.discount_rate == 0.03
 
 
-
 @pytest.fixture
 def cb_as_policy_impl(cb_with_roles_and_account):
     # Given

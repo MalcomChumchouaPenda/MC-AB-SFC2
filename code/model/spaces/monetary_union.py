@@ -44,7 +44,7 @@ class MonetaryUnion(EcoSpace):
         role = self.add_role(PolicyMaker, agent, "policy_maker")
         self.policy_maker = role
         return role
-    
+
     def add_policy_implementer(self, agent):
         role = self.add_role(PolicyImplementer, agent, "policy_implementer")
         self.policy_implementers.append(role)
