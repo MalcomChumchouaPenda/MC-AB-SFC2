@@ -95,18 +95,28 @@ def test_dont_buy_foreign_bonds(cb_as_bond_buyer):
 
 
 @pytest.fixture
-def cb_as_authority(cb_before_setup):
+def cb_with_roles_and_account(cb_before_setup):
+    # Given
+    roles = {}
+    account = Mock(stocks={}, flows={})
+    cb = cb_before_setup
+    cb.account = account
+    cb.roles = roles
+    return cb, roles, account
+
+
+@pytest.fixture
+def cb_as_policy_maker(cb_with_roles_and_account):
     # Given
     role = Mock()
-    cb = cb_before_setup
-    cb.account = Mock(stocks={}, flows={})
-    cb.roles = {"monetary_authority": role}
+    cb, roles, _ = cb_with_roles_and_account
+    roles["policy_maker"] = role
     return cb, role
 
 
-def test_calc_discount_rate(cb_as_authority):
+def test_calc_discount_rate(cb_as_policy_maker):
     # Given
-    cb, _ = cb_as_authority
+    cb, _ = cb_as_policy_maker
     cb.average_inflation = 0.04
     cb.prev_discount_rate = 0.03
     cb.p.long_run_rate = 0.02
@@ -121,9 +131,9 @@ def test_calc_discount_rate(cb_as_authority):
     assert discount_rate == pytest.approx(0.04)
 
 
-def test_determine_discount_rate(cb_as_authority):
+def test_determine_discount_rate(cb_as_policy_maker):
     # Given
-    cb, role = cb_as_authority
+    cb, role = cb_as_policy_maker
     cb.prev_discount_rate = 0.0
     cb.discount_rate = 0.0
     cb.calc_discount_rate = Mock(return_value=0.02)
@@ -136,9 +146,9 @@ def test_determine_discount_rate(cb_as_authority):
     assert cb.discount_rate == 0.02
 
 
-def test_determine_discount_rate_changes_lag_values(cb_as_authority):
+def test_determine_discount_rate_changes_lag_values(cb_as_policy_maker):
     # Given
-    cb, role = cb_as_authority
+    cb, role = cb_as_policy_maker
     cb.prev_discount_rate = 0.01
     cb.discount_rate = 0.02
     cb.calc_discount_rate = Mock(return_value=0.03)
@@ -152,12 +162,22 @@ def test_determine_discount_rate_changes_lag_values(cb_as_authority):
     assert cb.discount_rate == 0.03
 
 
-def test_implement_discount_rate(cb_as_authority):
+
+@pytest.fixture
+def cb_as_policy_impl(cb_with_roles_and_account):
     # Given
-    cb, role = cb_as_authority
+    role = Mock()
+    cb, roles, _ = cb_with_roles_and_account
+    roles["policy_implementer"] = role
+    return cb, role
+
+
+def test_implement_discount_rate(cb_as_policy_impl):
+    # Given
+    cb, role = cb_as_policy_impl
     cb.prev_discount_rate = 0.0
     cb.discount_rate = 0.0
-    role.get_union_discount_rate.return_value = 0.05
+    role.get_discount_rate.return_value = 0.05
 
     # When
     cb.implement_discount_rate()
@@ -166,12 +186,12 @@ def test_implement_discount_rate(cb_as_authority):
     assert cb.discount_rate == 0.05
 
 
-def test_implement_discount_rate_changes_lag_values(cb_as_authority):
+def test_implement_discount_rate_changes_lag_values(cb_as_policy_impl):
     # Given
-    cb, role = cb_as_authority
+    cb, role = cb_as_policy_impl
     cb.prev_discount_rate = 0.01
     cb.discount_rate = 0.02
-    role.get_union_discount_rate.return_value = 0.03
+    role.get_discount_rate.return_value = 0.03
 
     # When
     cb.implement_discount_rate()
@@ -184,6 +204,15 @@ def test_implement_discount_rate_changes_lag_values(cb_as_authority):
 # ---------------------------------------------------
 # PROFIT TRANSFER
 # ----------------------------------------------------
+
+
+@pytest.fixture
+def cb_as_authority(cb_with_roles_and_account):
+    # Given
+    role = Mock()
+    cb, roles, _ = cb_with_roles_and_account
+    roles["monetary_authority"] = role
+    return cb, role
 
 
 def test_calc_profit(cb_as_authority):

@@ -47,14 +47,14 @@ class CentralBank(EcoAgent):
         )
 
     def determine_discount_rate(self):
-        role = self.roles["monetary_authority"]
+        role = self.roles["policy_maker"]
         old_discount_rate = self.discount_rate
         self.average_inflation = role.get_average_inflation()
         self.discount_rate = self.calc_discount_rate()
         self.prev_discount_rate = old_discount_rate
 
     def implement_discount_rate(self):
-        role = self.roles["monetary_authority"]
+        role = self.roles["policy_implementer"]
         old_discount_rate = self.discount_rate
-        self.discount_rate = role.get_union_discount_rate()
+        self.discount_rate = role.get_discount_rate()
         self.prev_discount_rate = old_discount_rate

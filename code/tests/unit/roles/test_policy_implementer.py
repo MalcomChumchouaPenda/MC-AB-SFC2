@@ -1,0 +1,55 @@
+import pytest
+from unittest.mock import Mock
+from model.roles.policy_implementer import PolicyImplementer
+
+# ---------------------------------------------------
+# ARCHITECTURE TESTS
+# ----------------------------------------------------
+
+
+def test_is_eco_role():
+    # Given
+    from model.base import EcoRole
+
+    # Assert
+    assert issubclass(PolicyImplementer, EcoRole)
+    
+
+@pytest.fixture
+def role_before_setup():
+    # Given
+    model = Mock()
+    role = PolicyImplementer(model)
+    return role
+
+
+# ---------------------------------------------------
+# PERCEPTION TESTS
+# ----------------------------------------------------
+
+
+@pytest.fixture
+def role_with_space(role_before_setup):
+    # Given
+    space = Mock()
+    role = role_before_setup
+    role.space = space
+    return role, space
+
+
+def test_get_discount_rate_from_space(role_with_space):
+    # Given
+    role, space = role_with_space
+    space.policy_maker.discount_rate = 0.03
+
+    # When
+    perceived = role.get_discount_rate()
+
+    # Then
+    assert perceived == 0.03
+
+
+
+# ---------------------------------------------------
+# ACTIONS TESTS
+# ----------------------------------------------------

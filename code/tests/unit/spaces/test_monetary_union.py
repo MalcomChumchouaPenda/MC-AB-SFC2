@@ -35,7 +35,8 @@ def union_before_setup(monkeypatch):
     return union
 
 
-def test_has_discount_rate(union_before_setup):
+
+def test_has_policy_maker_ref(union_before_setup):
     # Given
     union = union_before_setup
 
@@ -43,15 +44,11 @@ def test_has_discount_rate(union_before_setup):
     union.setup()
 
     # Then
-    assert union.discount_rate == 0
+    assert union.policy_maker is None
 
 
-# ---------------------------------------------------
-# ROLES SET/REF TESTS
-# ----------------------------------------------------
 
-
-def test_has_monetary_authority_ref(union_before_setup):
+def test_has_policy_implementer_dlist(union_before_setup):
     # Given
     union = union_before_setup
 
@@ -59,7 +56,7 @@ def test_has_monetary_authority_ref(union_before_setup):
     union.setup()
 
     # Then
-    assert union.monetary_authority is None
+    assert isinstance(union.policy_implementers, AgentDList)
 
 
 # ---------------------------------------------------
@@ -154,54 +151,79 @@ def test_has_average_inflation_prop(union_before_setup):
 # ----------------------------------------------------
 
 
-FakeAuthority = Mock()
+FakeMaker = Mock()
 
 
 @pytest.fixture
-def union_without_authority(monkeypatch, union_before_setup):
+def union_without_policy_maker(monkeypatch, union_before_setup):
     # Given
-    monkeypatch.setattr("model.spaces.monetary_union.MonetaryAuthority", FakeAuthority)
+    monkeypatch.setattr("model.spaces.monetary_union.PolicyMaker", FakeMaker)
     union = union_before_setup
-    union.add_account = Mock()
     union.add_role = Mock()
     return union
 
 
-def test_add_monetary_authority_add_appropriate_role(union_without_authority):
+def test_add_policy_maker_add_appropriate_role(union_without_policy_maker):
     # Given
     cb = Mock()
-    union = union_without_authority
+    union = union_without_policy_maker
 
     # When
-    role = union.add_monetary_authority(cb)
+    role = union.add_policy_maker(cb)
 
     # Then
-    union.add_role.assert_called_with(FakeAuthority, cb, "monetary_authority")
+    union.add_role.assert_called_with(FakeMaker, cb, "policy_maker")
     assert role == union.add_role.return_value
 
 
-def test_add_monetary_authority_registers_role(union_without_authority):
+def test_add_policy_maker_registers_role(union_without_policy_maker):
     # Given
     cb = Mock()
-    union = union_without_authority
+    union = union_without_policy_maker
 
     # When
-    role = union.add_monetary_authority(cb)
+    role = union.add_policy_maker(cb)
 
     # Then
-    assert union.monetary_authority is role
+    assert union.policy_maker is role
 
 
-def test_add_monetary_authority_add_account(union_without_authority):
+FakeImplementer = Mock()
+
+
+@pytest.fixture
+def union_without_policy_impl(monkeypatch, union_before_setup):
+    # Given
+    monkeypatch.setattr("model.spaces.monetary_union.PolicyImplementer", FakeImplementer)
+    union = union_before_setup
+    union.policy_implementers = []
+    union.add_role = Mock()
+    return union
+
+
+def test_add_policy_implementer_add_appropriate_role(union_without_policy_impl):
     # Given
     cb = Mock()
-    union = union_without_authority
+    union = union_without_policy_impl
 
     # When
-    union.add_monetary_authority(cb)
+    role = union.add_policy_implementer(cb)
 
     # Then
-    union.add_account.assert_called_with(cb)
+    union.add_role.assert_called_with(FakeImplementer, cb, "policy_implementer")
+    assert role == union.add_role.return_value
+
+
+def test_add_policy_implementer_registers_role(union_without_policy_impl):
+    # Given
+    cb = Mock()
+    union = union_without_policy_impl
+
+    # When
+    role = union.add_policy_implementer(cb)
+
+    # Then
+    assert union.policy_implementers == [role]
 
 
 # ---------------------------------------------------
@@ -293,18 +315,18 @@ def test_place_bank_add_lender_role(union_before_creation):
 
 
 @pytest.fixture
-def union_with_authority(union_without_authority):
+def union_with_policy_maker(union_without_policy_maker):
     # Given
     authority = Mock()
-    union = union_without_authority
+    union = union_without_policy_maker
     union.monetary_authority = authority
     return union, authority
 
 
-def test_transfer_cash_between_agents_updates_accounts(union_with_authority):
+def test_transfer_cash_between_agents_updates_accounts(union_with_policy_maker):
     # Given
     source, target = Mock(), Mock()
-    union, _ = union_with_authority
+    union, _ = union_with_policy_maker
 
     # When
     union.transfer_cash(source, target, 100)

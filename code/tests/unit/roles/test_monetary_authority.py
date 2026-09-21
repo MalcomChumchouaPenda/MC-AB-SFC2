@@ -41,6 +41,12 @@ def test_expose_discount_rate_from_agent(authority_before_setup):
 # ----------------------------------------------------
 
 
+
+# ---------------------------------------------------
+# ACTIONS TESTS
+# ----------------------------------------------------
+
+
 @pytest.fixture
 def authority_with_space(authority_before_setup):
     # Given
@@ -48,35 +54,6 @@ def authority_with_space(authority_before_setup):
     authority = authority_before_setup
     authority.space = space
     return authority, space
-
-
-def test_get_union_discount_rate_from_space(authority_with_space):
-    # Given
-    authority, space = authority_with_space
-    space.union.monetary_authority.discount_rate = 0.03
-
-    # When
-    perceived = authority.get_union_discount_rate()
-
-    # Then
-    assert perceived == 0.03
-
-
-def test_get_average_inflation_from_space(authority_with_space):
-    # Given
-    authority, space = authority_with_space
-    space.average_inflation = 0.03
-
-    # When
-    perceived = authority.get_average_inflation()
-
-    # Then
-    assert perceived == 0.03
-
-
-# ---------------------------------------------------
-# ACTIONS TESTS
-# ----------------------------------------------------
 
 
 def test_transfer_profits_with_space(authority_with_space):

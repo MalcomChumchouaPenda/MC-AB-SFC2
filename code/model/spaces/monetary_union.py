@@ -1,6 +1,7 @@
 from agentpy import AgentDList
 from model.base import EcoSpace, EcoAccount
-from model.roles.monetary_authority import MonetaryAuthority
+from model.roles.policy_maker import PolicyMaker
+from model.roles.policy_implementer import PolicyImplementer
 from model.spaces.country import Country
 from model.spaces.good_market import GoodsMarket
 from model.spaces.credit_market import CreditMarket
@@ -13,8 +14,8 @@ class MonetaryUnion(EcoSpace):
         super().setup()
         self.gdp = 0
         self.average_inflation = 0
-        self.discount_rate = 0
-        self.monetary_authority = None
+        self.policy_maker = None
+        self.policy_implementers = AgentDList(self.model)
         self._setup_countries(self.model)
         self._setup_markets(self.model)
 
@@ -39,10 +40,14 @@ class MonetaryUnion(EcoSpace):
     #
     # Role / Account management
     #
-    def add_monetary_authority(self, agent):
-        role = self.add_role(MonetaryAuthority, agent, "monetary_authority")
-        self.monetary_authority = role
-        self.add_account(agent)
+    def add_policy_maker(self, agent):
+        role = self.add_role(PolicyMaker, agent, "policy_maker")
+        self.policy_maker = role
+        return role
+    
+    def add_policy_implementer(self, agent):
+        role = self.add_role(PolicyImplementer, agent, "policy_implementer")
+        self.policy_implementers.append(role)
         return role
 
     #
