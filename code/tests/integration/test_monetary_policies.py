@@ -10,6 +10,7 @@ from model.spaces.country import Country
 def model():
     # Given
     model = Mock()
+    model.p.K = 1
     model.p.xi = 0.5
     model.p.xi_deltap = 1.5
     model.p.long_run_rate = 0.02
@@ -18,26 +19,18 @@ def model():
 
 
 @pytest.fixture
-def country(model):
-    # Given
-    country = Country(model)
-    country.setup()
-    return country
-
-
-@pytest.fixture
-def union(model, country):
+def union(model):
     # Given
     union = MonetaryUnion(model)
     union.setup()
-    country.union = union
     return union
 
 
 @pytest.fixture
-def national_cb(model, country):
+def national_cb(model, union):
     cb = CentralBank(model)
     cb.setup()
+    country = union.countries[0]
     country.add_monetary_authority(cb)
     return cb
 

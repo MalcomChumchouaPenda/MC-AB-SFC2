@@ -905,7 +905,7 @@ def test_create_bank_add_and_fund_company(country_before_creation, share):
     country.fund_company.assert_called_with(company, share["founder"], 5)
 
 
-def test_create_bank_add_bank_role(country_before_creation, share):
+def test_create_bank_add_deposit_bank_role(country_before_creation, share):
     # Given
     bank = Mock()
     country = country_before_creation
@@ -914,7 +914,7 @@ def test_create_bank_add_bank_role(country_before_creation, share):
     country.create_bank(bank, [share])
 
     # Then
-    country.deposit_market.add_bank.assert_called_with(bank)
+    country.deposit_market.add_deposit_bank.assert_called_with(bank)
 
 
 def test_create_bank_place_bank_in_union(country_before_creation, share):

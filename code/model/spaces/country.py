@@ -169,7 +169,7 @@ class Country(EcoSpace):
             amount = share["amount"]
             self.fund_company(company, founder, amount)
         self.union.place_bank(bank)
-        self.deposit_market.add_bank(bank)
+        self.deposit_market.add_deposit_bank(bank)
 
     #
     # Profit transfers

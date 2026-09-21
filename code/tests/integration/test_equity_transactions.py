@@ -21,9 +21,9 @@ def country(model):
     country = Country(model)
     country.setup()
     country.union = Mock()
-    country.labor_market = Mock()
-    country.deposit_market = Mock()
-    country.good_market = Mock()
+    # country.labor_market = Mock()
+    # country.deposit_market = Mock()
+    # country.good_market = Mock()
     country.monetary_authority = Mock()
     return country
 
@@ -39,11 +39,6 @@ def household(model):
 @pytest.fixture
 def country_before_allocation(country, household):
     # Given
-    def add_account(agent):
-        agent.account = EcoAccount(country.model)
-        agent.account.setup()
-
-    country.union.add_account = add_account
     country.add_citizen(household)
     household.roles["depositor"] = Mock()
     return country
@@ -82,9 +77,6 @@ def founders(model):
         hh = Household(model)
         hh.setup()
         hh.roles["depositor"] = Mock()
-        hh.account = EcoAccount(model)
-        hh.account.setup()
-        hh.account.stocks["cash"] = 400
         hh.desired_equity = 300 - i * 100
         founders.append(hh)
     return founders
@@ -96,12 +88,7 @@ def country_before_investment(country, founders):
     for founder in founders:
         role = country.add_citizen(founder)
         role.resid_equity = founder.desired_equity
-
-    def add_account(agent):
-        agent.account = EcoAccount(country.model)
-        agent.account.setup()
-
-    country.union.add_account = add_account
+        founder.account.stocks["cash"] = 400
     return country
 
 
@@ -189,11 +176,6 @@ def bank(model):
 @pytest.fixture
 def country_before_distribution(country, firm, bank, household):
     # Given
-    def add_account(agent):
-        agent.account = EcoAccount(country.model)
-        agent.account.setup()
-
-    country.union.add_account = add_account
     founder = country.add_citizen(household)
     company1 = country.add_company(firm, "FT")
     company2 = country.add_company(bank, "B")

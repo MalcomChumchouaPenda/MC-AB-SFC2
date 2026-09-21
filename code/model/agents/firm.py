@@ -271,8 +271,9 @@ class Firm(EcoAgent):
 
     def _withdraw_residual_deposits(self):
         amount = self.account.stocks["deposits"]
-        role = self.roles["depositor"]
-        role.withdraw_deposits(amount)
+        if amount > 0:
+            role = self.roles["depositor"]
+            role.withdraw_deposits(amount)
 
     def _make_loan_defaults(self):
         role = self.roles["borrower"]

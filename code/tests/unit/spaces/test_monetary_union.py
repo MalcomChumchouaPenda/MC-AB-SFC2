@@ -19,6 +19,7 @@ def test_is_eco_space():
 FakeGoodMarket = Mock()
 FakeCreditMarket = Mock()
 FakeBondMarket = Mock()
+FakeCountry = Mock()
 
 
 @pytest.fixture
@@ -27,7 +28,9 @@ def union_before_setup(monkeypatch):
     monkeypatch.setattr("model.spaces.monetary_union.GoodsMarket", FakeGoodMarket)
     monkeypatch.setattr("model.spaces.monetary_union.CreditMarket", FakeCreditMarket)
     monkeypatch.setattr("model.spaces.monetary_union.BondMarket", FakeBondMarket)
+    monkeypatch.setattr("model.spaces.monetary_union.Country", FakeCountry)
     model = Mock()
+    model.p.K = 0
     union = MonetaryUnion(model)
     return union
 
@@ -102,6 +105,34 @@ def test_setup_creates_bond_market(union_before_setup):
     assert union.bond_market.setup.called
 
 
+def test_setup_creates_countries(union_before_setup):
+    # Given
+    union = union_before_setup
+    union.p.K = 2
+
+    # When
+    union.setup()
+
+    # Then
+    assert len(union.countries) == 2
+    for i in range(2):
+        assert union.countries[i] is FakeCountry.return_value
+        assert union.countries[i].setup.called
+
+
+def test_setup_create_links_with_countries(union_before_setup):
+    # Given
+    country = Mock()
+    FakeCountry.return_value = country
+    union = union_before_setup
+    union.p.K = 1
+
+    # When
+    union.setup()
+
+    # Then
+    assert union is country.union
+    
 
 # ---------------------------------------------------
 # DYNAMIC STATE TESTS
