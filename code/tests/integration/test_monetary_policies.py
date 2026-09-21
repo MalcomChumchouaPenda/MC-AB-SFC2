@@ -1,9 +1,7 @@
 import pytest
 from unittest.mock import Mock
-from model.base import EcoAccount
 from model.agents.central_bank import CentralBank
 from model.spaces.monetary_union import MonetaryUnion
-from model.spaces.country import Country
 
 
 @pytest.fixture
@@ -30,8 +28,7 @@ def union(model):
 def national_cb(model, union):
     cb = CentralBank(model)
     cb.setup()
-    country = union.countries[0]
-    country.add_monetary_authority(cb)
+    union.add_policy_implementer(cb)
     return cb
 
 
@@ -39,7 +36,7 @@ def national_cb(model, union):
 def union_cb(model, union):
     cb = CentralBank(model)
     cb.setup()
-    union.add_monetary_authority(cb)
+    union.add_policy_maker(cb)
     return cb
 
 
