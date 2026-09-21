@@ -41,7 +41,6 @@ def bank(model):
     return bank
 
 
-
 @pytest.fixture
 def country_with_bank_and_founders(union, bank, model):
     # Given
@@ -52,7 +51,7 @@ def country_with_bank_and_founders(union, bank, model):
         household = Household(model)
         household.setup()
         founder = country.add_citizen(household)
-        share = {"founder":founder, "amount":50}
+        share = {"founder": founder, "amount": 50}
         shares.append(share)
         founders.append(founder)
         founder.account.stocks["cash"] = 50
@@ -63,20 +62,19 @@ def country_with_bank_and_founders(union, bank, model):
 @pytest.fixture
 def country_with_firm_and_founders(country_with_bank_and_founders, firm, model):
     # Given
-    country, _ , founders = country_with_bank_and_founders
+    country, _, founders = country_with_bank_and_founders
     founders = []
     shares = []
     for _ in range(2):
         household = Household(model)
         household.setup()
         founder = country.add_citizen(household)
-        share = {"founder":founder, "amount":50}
+        share = {"founder": founder, "amount": 50}
         shares.append(share)
         founders.append(founder)
         founder.account.stocks["cash"] = 50
     country.create_firm(firm, shares, tradable=True)
     return country, firm, founders
-
 
 
 def test_firm_exit_with_residual_cash(country_with_firm_and_founders):

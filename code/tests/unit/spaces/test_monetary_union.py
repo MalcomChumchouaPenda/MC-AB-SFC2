@@ -62,7 +62,6 @@ def test_has_monetary_authority_ref(union_before_setup):
     assert union.monetary_authority is None
 
 
-
 # ---------------------------------------------------
 # SPACES
 # ----------------------------------------------------
@@ -132,7 +131,7 @@ def test_setup_create_links_with_countries(union_before_setup):
 
     # Then
     assert union is country.union
-    
+
 
 # ---------------------------------------------------
 # DYNAMIC STATE TESTS

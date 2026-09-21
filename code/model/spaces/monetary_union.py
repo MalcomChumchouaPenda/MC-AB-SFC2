@@ -18,7 +18,6 @@ class MonetaryUnion(EcoSpace):
         self._setup_countries(self.model)
         self._setup_markets(self.model)
 
-
     def _setup_countries(self, model):
         countries = []
         for _ in range(model.p.K):
@@ -37,8 +36,6 @@ class MonetaryUnion(EcoSpace):
         self.bond_market = BondMarket(model)
         self.bond_market.setup()
 
-
-        
     #
     # Role / Account management
     #
