@@ -27,7 +27,6 @@ class Country(EcoSpace):
         self.fiscal_authority = None
 
         # sub spaces
-        self.union = None
         self.add_space(GoodsMarket, "good_market", tradable=False)
         self.add_space(LaborMarket, "labor_market")
         self.add_space(DepositMarket, "deposit_market")
@@ -39,20 +38,20 @@ class Country(EcoSpace):
     def add_fiscal_authority(self, agent):
         role = self.add_role(FiscalAuthority, agent, "fiscal_authority")
         agent.cb_account = self.monetary_authority.account
-        self.union.add_account(agent)
+        self.env.add_account(agent)
         self.fiscal_authority = role
         return role
 
     def add_monetary_authority(self, agent):
         role = self.add_role(MonetaryAuthority, agent, "monetary_authority")
-        self.union.add_account(agent)
+        self.env.add_account(agent)
         self.monetary_authority = role
         return role
 
     def add_citizen(self, agent):
         role = self.add_role(Citizen, agent, "citizen")
         agent.cb_account = self.monetary_authority.account
-        self.union.add_account(agent)
+        self.env.add_account(agent)
         self.citizens.append(role)
         return role
 
@@ -60,7 +59,7 @@ class Country(EcoSpace):
         role = self.add_role(Company, agent, "company")
         role.sector = sector
         agent.cb_account = self.monetary_authority.account
-        self.union.add_account(agent)
+        self.env.add_account(agent)
         self.companies.append(role)
         return role
 
@@ -150,7 +149,7 @@ class Country(EcoSpace):
             self.fund_company(company, founder, amount)
 
     def _place_firm(self, firm, tradable):
-        self.union.place_firm(firm, tradable=tradable)
+        self.env.place_firm(firm, tradable=tradable)
         self.spaces["deposit_market"].add_depositor(firm)
         self.spaces["labor_market"].add_employer(firm)
         if not tradable:
@@ -165,7 +164,7 @@ class Country(EcoSpace):
             founder = share["founder"]
             amount = share["amount"]
             self.fund_company(company, founder, amount)
-        self.union.place_bank(bank)
+        self.env.place_bank(bank)
         self.spaces["deposit_market"].add_deposit_bank(bank)
 
     #

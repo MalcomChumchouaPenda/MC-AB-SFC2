@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import Mock
 from model.base import EcoAccount
-from model.spaces.country import Country
+from model.spaces.monetary_union import MonetaryUnion
 from model.agents.firm import Firm
 from model.agents.bank import Bank
 from model.agents.household import Household
@@ -12,6 +12,7 @@ from model.agents.government import Government
 def model():
     # Given
     model = Mock()
+    model.p.K = 1
     model.p.dmax = 0.05
     model.p.tax_min = 0.10
     model.p.tax_max = 0.50
@@ -30,14 +31,21 @@ def govt(model):
     return govt
 
 
+
 @pytest.fixture
-def country(model):
+def union(model):
     # Given
-    country = Country(model)
-    country.setup()
-    country.union = Mock()
-    country.spaces["good_market"] = Mock()
+    union = MonetaryUnion(model)
+    union.setup()
+    return union
+
+
+@pytest.fixture
+def country(union):
+    # Given
+    country = union.spaces["country_0"]
     country.monetary_authority = Mock()
+    country.spaces["good_market"] = Mock()
     return country
 
 
@@ -95,11 +103,6 @@ def bank(model):
 @pytest.fixture
 def country_before_tax_payment(country, govt, household, firm, bank):
     # Given
-    def add_account(agent):
-        agent.account = EcoAccount(country.model)
-        agent.account.setup()
-
-    country.union.add_account = add_account
     country.add_fiscal_authority(govt)
     country.add_citizen(household)
     country.add_company(firm, "FT")

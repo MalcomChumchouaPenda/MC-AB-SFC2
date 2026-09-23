@@ -176,8 +176,8 @@ The relationships between these namespaces have been implemented according to th
 ```python
 # exemple d'espaces emboites
 
-union = model.monetary_union            # access a l'univers
-country = union.countries[n]                      # acces au pays n
+union = model.monetary_union                      # access a l'univers
+country = union.spaces["country_1"]               # acces au pays 1
 credit_market = union.spaces["credit_market"]     # acces au marche commun du credit
 good_market = country.spaces["good_market"]       # acces au marche national des biens
 

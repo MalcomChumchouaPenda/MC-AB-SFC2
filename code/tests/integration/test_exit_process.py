@@ -21,7 +21,7 @@ def union(model):
     union = MonetaryUnion(model)
     union.setup()
     union.monetary_authority = Mock()
-    union.countries[0].monetary_authority = Mock()
+    union.spaces["country_0"].monetary_authority = Mock()
     return union
 
 
@@ -44,7 +44,7 @@ def bank(model):
 @pytest.fixture
 def country_with_bank_and_founders(union, bank, model):
     # Given
-    country = union.countries[0]
+    country = union.spaces["country_0"]
     founders = []
     shares = []
     for _ in range(2):

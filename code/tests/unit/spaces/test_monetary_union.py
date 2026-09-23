@@ -105,24 +105,9 @@ def test_setup_creates_countries(union_before_setup):
     union.setup()
 
     # Then
-    assert len(union.countries) == 2
     for i in range(2):
-        assert union.countries[i] is FakeCountry.return_value
-        assert union.countries[i].setup.called
+        union.add_space.assert_any_call(FakeCountry, f"country_{i}")
 
-
-def test_setup_create_links_with_countries(union_before_setup):
-    # Given
-    country = Mock()
-    FakeCountry.return_value = country
-    union = union_before_setup
-    union.p.K = 1
-
-    # When
-    union.setup()
-
-    # Then
-    assert union is country.union
 
 
 # ---------------------------------------------------
@@ -344,7 +329,7 @@ def test_transfer_cash_between_agents_updates_accounts(union_with_policy_maker):
 def test_update_average_inflation(union_before_setup):
     # Given
     union = union_before_setup
-    union.countries = {i: Mock(inflation=0.05, gdp=100) for i in range(5)}
+    union.spaces = {f"country_{i}": Mock(inflation=0.05, gdp=100) for i in range(5)}
 
     # When
     union.update_average_inflation()

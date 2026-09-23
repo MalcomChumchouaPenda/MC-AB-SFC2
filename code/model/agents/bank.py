@@ -16,7 +16,6 @@ class Bank(EcoAgent):
         self.net_worth = 0
         self.credit_capacity = 0
         self.defaulted = False
-        self.country = None
 
         # accointances
         self.central_bank = None

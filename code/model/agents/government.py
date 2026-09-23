@@ -29,7 +29,6 @@ class Government(EcoAgent):
         self.gdp = 0
         self.budget_deficit = 0
         self.budget_surplus = 0
-        self.country = None
 
         # accointances
         self.central_bank = None

@@ -36,7 +36,6 @@ class Firm(EcoAgent):
 
         # other props
         self.variety = 0.0
-        self.country = 0
         self.defaulted = False
 
     #

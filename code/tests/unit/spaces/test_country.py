@@ -33,16 +33,6 @@ def country_before_setup(monkeypatch):
     return country
 
 
-def test_has_monetary_union_ref(country_before_setup):
-    # Given
-    country = country_before_setup
-
-    # When
-    country.setup()
-
-    # Then
-    assert country.union is None
-
 
 def test_has_inflation(country_before_setup):
     # Given
@@ -184,7 +174,7 @@ def country_without_monetary_auth(monkeypatch, country_before_setup):
     monkeypatch.setattr("model.spaces.country.MonetaryAuthority", FakeAuthority)
     country = country_before_setup
     country.add_role = Mock()
-    country.union = Mock()
+    country.env = Mock()
     return country
 
 
@@ -216,14 +206,14 @@ def test_add_monetary_authority_registers_authority(country_without_monetary_aut
 def test_add_monetary_authority_add_account(country_without_monetary_auth):
     # Given
     country = country_without_monetary_auth
-    union = country.union
+    env = country.env
     cb = Mock()
 
     # When
     country.add_monetary_authority(cb)
 
     # Then
-    union.add_account.assert_called_with(cb)
+    env.add_account.assert_called_with(cb)
 
 
 @pytest.fixture
@@ -232,7 +222,7 @@ def country_without_fiscal_auth(monkeypatch, country_before_setup):
     monkeypatch.setattr("model.spaces.country.FiscalAuthority", FakeAuthority)
     country = country_before_setup
     country.add_role = Mock()
-    country.union = Mock()
+    country.env = Mock()
     country.monetary_authority = Mock()
     return country
 
@@ -265,14 +255,14 @@ def test_add_fiscal_authority_registers_authority(country_without_fiscal_auth):
 def test_add_fiscal_authority_add_account(country_without_fiscal_auth):
     # Given
     country = country_without_fiscal_auth
-    union = country.union
+    env = country.env
     govt = Mock()
 
     # When
     country.add_fiscal_authority(govt)
 
     # Then
-    union.add_account.assert_called_with(govt)
+    env.add_account.assert_called_with(govt)
 
 
 def test_add_fiscal_authority_links_to_cb_account(country_without_fiscal_auth):
@@ -297,7 +287,7 @@ def country_without_citizens(monkeypatch, country_before_setup):
     country = country_before_setup
     country.add_role = Mock()
     country.citizens = []
-    country.union = Mock()
+    country.env = Mock()
     country.monetary_authority = Mock()
     return country
 
@@ -330,14 +320,14 @@ def test_add_citizen_registers_citizen(country_without_citizens):
 def test_add_citizen_add_account(country_without_citizens):
     # Given
     country = country_without_citizens
-    union = country.union
+    env = country.env
     household = Mock()
 
     # When
     country.add_citizen(household)
 
     # Then
-    union.add_account.assert_called_with(household)
+    env.add_account.assert_called_with(household)
 
 
 def test_add_citizen_links_to_cb_account(country_without_citizens):
@@ -362,7 +352,7 @@ def country_without_companies(monkeypatch, country_before_setup):
     monkeypatch.setattr("model.spaces.country.Company", FakeCompany)
     country = country_before_setup
     country.add_role = Mock()
-    country.union = Mock()
+    country.env = Mock()
     country.companies = []
     country.monetary_authority = Mock()
     return country
@@ -408,14 +398,14 @@ def test_add_company_register_sector(country_without_companies):
 def test_add_company_add_account(country_without_companies):
     # Given
     country = country_without_companies
-    union = country.union
+    env = country.env
     agent = Mock()
 
     # When
     country.add_company(agent, sector="X")
 
     # Then
-    union.add_account.assert_called_with(agent)
+    env.add_account.assert_called_with(agent)
 
 
 def test_add_company_links_to_cb_account(country_without_companies):
@@ -431,20 +421,6 @@ def test_add_company_links_to_cb_account(country_without_companies):
     assert agent.cb_account is authority.account
 
 
-# ---------------------------------------------------
-# SUB OR ROOT SPACES
-# ----------------------------------------------------
-
-
-def test_has_monetary_union_ref(country_before_setup):
-    # Given
-    country = country_before_setup
-
-    # When
-    country.setup()
-
-    # Then
-    assert country.union is None
 
 
 # ---------------------------------------------------
@@ -789,7 +765,7 @@ def country_before_creation(country_before_setup):
     country = country_before_setup
     country.add_company = Mock()
     country.fund_company = Mock()
-    country.union = Mock()
+    country.env = Mock()
     country.spaces["good_market"] = Mock()
     country.spaces["labor_market"] = Mock()
     country.spaces["deposit_market"] = Mock()
@@ -872,7 +848,7 @@ def test_create_firm_add_depositor_role(country_before_creation, share, tradable
 
 
 @pytest.mark.parametrize("tradable", [True, False])
-def test_create_firm_place_firm_in_union(country_before_creation, share, tradable):
+def test_create_firm_place_firm_in_env(country_before_creation, share, tradable):
     # Given
     firm = Mock()
     country = country_before_creation
@@ -881,7 +857,7 @@ def test_create_firm_place_firm_in_union(country_before_creation, share, tradabl
     country.create_firm(firm, [share], tradable=tradable)
 
     # Then
-    country.union.place_firm.assert_called_with(firm, tradable=tradable)
+    country.env.place_firm.assert_called_with(firm, tradable=tradable)
 
 
 # ---------------------------------------------------
@@ -917,7 +893,7 @@ def test_create_bank_add_deposit_bank_role(country_before_creation, share):
     market.add_deposit_bank.assert_called_with(bank)
 
 
-def test_create_bank_place_bank_in_union(country_before_creation, share):
+def test_create_bank_place_bank_in_env(country_before_creation, share):
     # Given
     bank = Mock()
     country = country_before_creation
@@ -926,7 +902,7 @@ def test_create_bank_place_bank_in_union(country_before_creation, share):
     country.create_bank(bank, [share])
 
     # Then
-    country.union.place_bank.assert_called_with(bank)
+    country.env.place_bank.assert_called_with(bank)
 
 
 # ---------------------------------------------------

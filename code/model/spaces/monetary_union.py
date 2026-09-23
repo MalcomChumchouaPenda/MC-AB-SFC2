@@ -20,13 +20,8 @@ class MonetaryUnion(EcoEnv):
         self._setup_markets()
 
     def _setup_countries(self, model):
-        countries = []
-        for _ in range(model.p.K):
-            country = Country(model)
-            country.setup()
-            country.union = self
-            countries.append(country)
-        self.countries = countries
+        for k in range(model.p.K):
+            self.add_space(Country, f"country_{k}")
 
     def _setup_markets(self):
         self.add_space(GoodsMarket, "good_market", tradable=True)
@@ -72,7 +67,7 @@ class MonetaryUnion(EcoEnv):
     # Evolution
     #
     def update_average_inflation(self):
-        countries = self.countries
-        gdps = [c.gdp for c in countries.values()]
-        weighted_inflations = [c.gdp * c.inflation for c in countries.values()]
+        countries = [s for k, s in self.spaces.items() if k.startswith("country")]
+        gdps = [c.gdp for c in countries]
+        weighted_inflations = [c.gdp * c.inflation for c in countries]
         self.average_inflation = sum(weighted_inflations) / sum(gdps)
