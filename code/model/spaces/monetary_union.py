@@ -17,7 +17,7 @@ class MonetaryUnion(EcoEnv):
         self.policy_maker = None
         self.policy_implementers = AgentDList(self.model)
         self._setup_countries(self.model)
-        self._setup_markets(self.model)
+        self._setup_markets()
 
     def _setup_countries(self, model):
         countries = []
@@ -28,11 +28,10 @@ class MonetaryUnion(EcoEnv):
             countries.append(country)
         self.countries = countries
 
-    def _setup_markets(self, model):
+    def _setup_markets(self):
         self.add_space(GoodsMarket, "good_market", tradable=True)
         self.add_space(CreditMarket, "credit_market")
-        self.bond_market = BondMarket(model)
-        self.bond_market.setup()
+        self.add_space(BondMarket, "bond_market")
 
     #
     # Role / Account management
@@ -60,7 +59,7 @@ class MonetaryUnion(EcoEnv):
     #
     def place_bank(self, bank):
         self.spaces["credit_market"].add_lender(bank)
-        self.bond_market.add_buyer(bank)
+        self.spaces["bond_market"].add_buyer(bank)
 
     #
     # Cash transactions

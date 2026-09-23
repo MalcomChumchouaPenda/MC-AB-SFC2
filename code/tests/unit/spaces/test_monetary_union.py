@@ -93,8 +93,7 @@ def test_setup_creates_bond_market(union_before_setup):
     union.setup()
 
     # Then
-    assert union.bond_market is FakeBondMarket.return_value
-    assert union.bond_market.setup.called
+    union.add_space.assert_any_call(FakeBondMarket, "bond_market")
 
 
 def test_setup_creates_countries(union_before_setup):
@@ -236,7 +235,7 @@ def union_before_creation(union_before_setup):
     union.add_company = Mock()
     union.fund_company = Mock()
     union.spaces["good_market"] = Mock()
-    union.bond_market = Mock()
+    union.spaces["bond_market"] = Mock()
     union.spaces["credit_market"] = Mock()
     return union
 
@@ -288,12 +287,13 @@ def test_place_bank_add_bond_buyer(union_before_creation):
     # Given
     bank = Mock()
     union = union_before_creation
+    market = union.spaces["bond_market"]
 
     # When
     union.place_bank(bank)
 
     # Then
-    union.bond_market.add_buyer.assert_called_with(bank)
+    market.add_buyer.assert_called_with(bank)
 
 
 def test_place_bank_add_lender_role(union_before_creation):
