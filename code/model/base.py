@@ -122,15 +122,15 @@ class EcoSpace(Network):
 
     def setup(self):
         self.roles = {}
-        self.root_space = None
-        self.sub_spaces = {}
+        self.env = None
+        self.spaces = {}
 
     def add_space(self, sub_space, name):
-        sub_space.root_space = self
-        self.sub_spaces[name] = sub_space
+        sub_space.env = self
+        self.spaces[name] = sub_space
 
     def evolve(self):
-        for sub_space in self.sub_spaces.values():
+        for sub_space in self.spaces.values():
             sub_space.update_state()
             sub_space.clear_defaults()
         self.update_state()

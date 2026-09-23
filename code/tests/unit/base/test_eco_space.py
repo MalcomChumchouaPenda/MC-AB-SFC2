@@ -21,7 +21,7 @@ def space_before_setup():
     return space
 
 
-def test_has_root_space_ref(space_before_setup):
+def test_has_env_ref(space_before_setup):
     # Given
     space = space_before_setup
 
@@ -29,7 +29,7 @@ def test_has_root_space_ref(space_before_setup):
     space.setup()
 
     # Then
-    assert space.root_space is None
+    assert space.env is None
 
 
 def test_has_sub_spaces_dict(space_before_setup):
@@ -40,7 +40,7 @@ def test_has_sub_spaces_dict(space_before_setup):
     space.setup()
 
     # Then
-    assert space.sub_spaces == {}
+    assert space.spaces == {}
 
 
 # ---------------------------------------------------
@@ -53,21 +53,21 @@ def space_with_sub_spaces(space_before_setup):
     # Given
     sub_spaces = {}
     space = space_before_setup
-    space.sub_spaces = sub_spaces
+    space.spaces = sub_spaces
     return space, sub_spaces
 
 
 def test_add_space_register_sub_space(space_with_sub_spaces):
     # Given
     space, sub_spaces = space_with_sub_spaces
-    new_space = Mock(root_space=None)
+    new_space = Mock(env=None)
 
     # When
     space.add_space(new_space, "fake_market")
 
     # Then
     assert sub_spaces["fake_market"] == new_space
-    assert space is new_space.root_space
+    assert space is new_space.env
 
 
 # ---------------------------------------------------
@@ -88,7 +88,7 @@ def test_evolve_update_all_state(space_before_evolution):
     # Given
     sub_space = Mock()
     space = space_before_evolution
-    space.sub_spaces["fake_market"] = sub_space
+    space.spaces["fake_market"] = sub_space
 
     # When
     space.evolve()
@@ -102,7 +102,7 @@ def test_evolve_clear_all_defaults(space_before_evolution):
     # Given
     sub_space = Mock()
     space = space_before_evolution
-    space.sub_spaces["fake_market"] = sub_space
+    space.spaces["fake_market"] = sub_space
 
     # When
     space.evolve()
