@@ -51,47 +51,52 @@ class EcoRole(AgentNode):
         self.agent.bank_id = account
 
 
-class EcoAccount(AttrDict):
+class EcoAccount:
 
-    STOCK_NAMES = (
-        "deposits",
-        "loans",
-        "inventories",
-        "bonds",
-        "cash",
-        "advances",
-        "equities",
-    )
+    def __init__(self):
+        super().__init__()
+        self.stocks = {
+            "deposits": 0.0,
+            "loans": 0.0,
+            "inventories": 0.0,
+            "bonds": 0.0,
+            "cash": 0.0,
+            "advances": 0.0,
+            "equities": 0.0,
+        }
+        self.flows = {
+            "consumption": 0.0,
+            "wages": 0.0,
+            "public_transfers": 0.0,
+            "taxes": 0.0,
+            "dep_interests": 0.0,
+            "loan_interests": 0.0,
+            "loan_defaults": 0.0,
+            "bond_interests": 0.0,
+            "cash_interests": 0.0,
+            "adv_interests": 0.0,
+            "dividends": 0.0,
+            "profit_transfers": 0.0,
+        }
 
-    FLOW_NAMES = (
-        "consumption",
-        "wages",
-        "public_transfers",
-        "taxes",
-        "dep_interests",
-        "loan_interests",
-        "loan_defaults",
-        "bond_interests",
-        "cash_interests",
-        "adv_interests",
-        "dividends",
-        "profit_transfers",
-    )
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        for name in self.STOCK_NAMES + self.FLOW_NAMES:
-            self[name] = 0
+    def incr_stock(self, name, amount):
+        self.stocks[name] += amount
 
-    def debit(self, name, amount):
-        self[name] -= amount
+    def decr_stock(self, name, amount):
+        self.stocks[name] -= amount
 
-    def credit(self, name, amount):
-        self[name] += amount
+
+    def incr_flow(self, name, amount):
+        self.flows[name] += amount
+        
+    def decr_flow(self, name, amount):
+        self.flows[name] -= amount
 
     def clear_flows(self):
-        for name in self.FLOW_NAMES:
-            self[name] = 0
+        flows = self.flows
+        for name in flows.keys():
+            flows[name] = 0
 
 
 class EcoSpace(Network):
@@ -136,11 +141,19 @@ class EcoSpace(Network):
         self.accounts[agent.id] = account
         return account
 
-    def transfer(self, item, source, target, amount):
+    def transfer_stock(self, category, source, target, amount):
         if self.env is not None:
-            self.env.transfer(item, source, target, amount)
-        self.accounts[source].debit(item, amount)
-        self.accounts[target].credit(item, amount)
+            self.env.transfer_stock(category, source, target, amount)
+        else:
+            self.accounts[source].decr_stock(category, amount)
+            self.accounts[target].incr_stock(category, amount)
+
+    def record_flow(self, category, source, target, amount):
+        if self.env is not None:
+            self.env.record_flow(category, source, target, amount)
+        else:
+            self.accounts[source].decr_flow(category, amount)
+            self.accounts[target].incr_flow(category, amount)
 
     #
     # Space management

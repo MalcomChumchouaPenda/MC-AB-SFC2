@@ -294,7 +294,7 @@ FakeAccount = Mock()
 
 
 @pytest.fixture
-def space_with_no_accounts(monkeypatch, space_before_setup):
+def space_without_accounts(monkeypatch, space_before_setup):
     # Given
     monkeypatch.setattr("model.base.EcoAccount", FakeAccount)
     space = space_before_setup
@@ -302,10 +302,10 @@ def space_with_no_accounts(monkeypatch, space_before_setup):
     return space
 
 
-def test_add_account_create_new_account(space_with_no_accounts):
+def test_add_account_create_new_account(space_without_accounts):
     # Given
     agent = Mock(id=1)
-    space = space_with_no_accounts
+    space = space_without_accounts
 
     # When
     account = space.add_account(agent)
@@ -315,10 +315,10 @@ def test_add_account_create_new_account(space_with_no_accounts):
     assert account is FakeAccount.return_value
 
 
-def test_add_account_registers_new_account(space_with_no_accounts):
+def test_add_account_registers_new_account(space_without_accounts):
     # Given
     agent = Mock(id=1)
-    space = space_with_no_accounts
+    space = space_without_accounts
 
     # When
     account = space.add_account(agent)
@@ -328,10 +328,10 @@ def test_add_account_registers_new_account(space_with_no_accounts):
     assert account is agent.account
 
 
-def test_add_account_delegates_process_to_env(space_with_no_accounts):
+def test_add_account_delegates_process_to_env(space_without_accounts):
     # Given
     env, agent = Mock(), Mock(id=1)
-    space = space_with_no_accounts
+    space = space_without_accounts
     space.env = env
 
     # When
@@ -342,10 +342,10 @@ def test_add_account_delegates_process_to_env(space_with_no_accounts):
     assert env.add_account.return_value is account
 
 
-def test_add_account_doesnt_register_env_account(space_with_no_accounts):
+def test_add_account_doesnt_register_env_account(space_without_accounts):
     # Given
     env, agent = Mock(), Mock(id=1)
-    space = space_with_no_accounts
+    space = space_without_accounts
     space.env = env
 
     # When
@@ -356,46 +356,84 @@ def test_add_account_doesnt_register_env_account(space_with_no_accounts):
 
 
 @pytest.fixture
-def space_with_two_accounts(space_before_setup):
+def space_with_accounts(space_before_setup):
     # Given
-    source, target = 1, 2
+    accounts = {i: Mock() for i in range(2)}
     space = space_before_setup
-    space.accounts = {source: Mock(), target: Mock()}
-    return space, source, target
+    space.accounts = accounts
+    return space, accounts
 
 
-def test_transfer_debit_source_account_with_no_env(space_with_two_accounts):
+def test_transfer_stock_decr_source_account_stock(space_with_accounts):
     # Given
-    space, source, target = space_with_two_accounts
-    account = space.accounts[source]
+    source, target = 0, 1
+    space, accounts = space_with_accounts
 
     # When
-    space.transfer("x", source, target, 100)
+    space.transfer_stock("x", source, target, 100)
 
     # Then
-    account.debit.assert_called_with("x", 100)
+    accounts[source].decr_stock.assert_called_with("x", 100)
 
 
-def test_transfer_credit_target_account_with_no_env(space_with_two_accounts):
+def test_transfer_stock_incr_target_account_stock(space_with_accounts):
     # Given
-    space, source, target = space_with_two_accounts
-    account = space.accounts[target]
+    source, target = 0, 1
+    space, accounts = space_with_accounts
 
     # When
-    space.transfer("x", source, target, 100)
+    space.transfer_stock("x", source, target, 100)
 
     # Then
-    account.credit.assert_called_with("x", 100)
+    accounts[target].incr_stock.assert_called_with("x", 100)
 
 
-def test_transfer_uses_env_method(space_with_two_accounts):
+def test_transfer_stock_uses_env_method(space_with_accounts):
     # Given
     env = Mock()
-    space, source, target = space_with_two_accounts
+    space, _ = space_with_accounts
     space.env = env
 
     # When
-    space.transfer("x", source, target, 100)
+    space.transfer_stock("x", 1, 2, 100)
 
     # Then
-    env.transfer.assert_called_with("x", source, target, 100)
+    env.transfer_stock.assert_called_with("x", 1, 2, 100)
+
+
+def test_record_flow_decr_source_account_flow(space_with_accounts):
+    # Given
+    source, target = 0, 1
+    space, accounts = space_with_accounts
+
+    # When
+    space.record_flow("x", source, target, 100)
+
+    # Then
+    accounts[source].decr_flow.assert_called_with("x", 100)
+
+
+def test_record_flow_incr_target_account_flow(space_with_accounts):
+    # Given
+    source, target = 0, 1
+    space, accounts = space_with_accounts
+
+    # When
+    space.record_flow("x", source, target, 100)
+
+    # Then
+    accounts[target].incr_flow.assert_called_with("x", 100)
+
+
+def test_record_flow_uses_available_env_method(space_with_accounts):
+    # Given
+    env = Mock()
+    source, target = 0, 1
+    space, _ = space_with_accounts
+    space.env = env
+
+    # When
+    space.record_flow("x", source, target, 100)
+
+    # Then
+    env.record_flow.assert_called_with("x", source, target, 100)

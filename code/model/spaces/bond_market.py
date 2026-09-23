@@ -41,7 +41,6 @@ class BondMarket(EcoSpace):
 
     def buy_bonds(self, buyer, issuer, number):
         amount = issuer.bond_value * number
-        print(amount)
         issuer.bond_number -= number
         issuer.debit_stock("bonds", amount)
         issuer.credit_stock("cash", amount)
