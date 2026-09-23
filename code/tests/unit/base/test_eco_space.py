@@ -358,61 +358,50 @@ def test_add_account_doesnt_register_env_account(space_with_no_accounts):
 
 
 @pytest.fixture
-def space_with_account_id(space_before_setup):
+def space_with_two_accounts(space_before_setup):
     # Given
-    account_id = 1
+    source, target =  1,  2
     space = space_before_setup
-    space.accounts = {account_id:Mock()}
-    return space, account_id
+    space.accounts = {source:Mock(), target:Mock()}
+    return space, source, target
 
 
-def test_debit_account_with_no_env(space_with_account_id):
+def test_transfer_debit_source_account_with_no_env(space_with_two_accounts):
     # Given
-    space, account_id = space_with_account_id
-    account = space.accounts[account_id]
+    space, source, target = space_with_two_accounts
+    account = space.accounts[source]
 
     # When
-    space.debit(account_id, "x", 100)
+    space.transfer("x", source, target, 100)
 
     # Then
     account.debit.assert_called_with("x", 100)
 
 
-def test_debit_account_with_env(space_with_account_id):
+
+def test_transfer_credit_target_account_with_no_env(space_with_two_accounts):
     # Given
-    env = Mock()
-    space, account_id = space_with_account_id
-    space.env = env
+    space, source, target = space_with_two_accounts
+    account = space.accounts[target]
 
     # When
-    space.debit(account_id, "x", 100)
-
-    # Then
-    env.debit.assert_called_with(account_id, "x", 100)
-
-
-def test_credit_account_with_no_env(space_with_account_id):
-    # Given
-    space, account_id = space_with_account_id
-    account = space.accounts[account_id]
-
-    # When
-    space.credit(account_id, "x", 100)
+    space.transfer("x", source, target, 100)
 
     # Then
     account.credit.assert_called_with("x", 100)
 
 
-def test_credit_account_with_env(space_with_account_id):
+def test_transfer_uses_env_method(space_with_two_accounts):
     # Given
     env = Mock()
-    space, account_id = space_with_account_id
+    space, source, target = space_with_two_accounts
     space.env = env
 
     # When
-    space.credit(account_id, "x", 100)
+    space.transfer("x", source, target, 100)
 
     # Then
-    env.credit.assert_called_with(account_id, "x", 100)
+    env.transfer.assert_called_with("x", source, target, 100)
+
 
 

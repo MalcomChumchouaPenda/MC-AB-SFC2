@@ -143,15 +143,11 @@ class EcoSpace(Network):
         return account
 
 
-    def debit(self, account_id, item, amount):
+    def transfer(self, item, source, target, amount):
         if self.env is not None:
-            self.env.debit(account_id, item, amount)
-        self.accounts[account_id].debit(item, amount)
-
-    def credit(self, account_id, item, amount):
-        if self.env is not None:
-            self.env.credit(account_id, item, amount)
-        self.accounts[account_id].credit(item, amount)
+            self.env.transfer(item, source, target, amount)
+        self.accounts[source].debit(item, amount)
+        self.accounts[target].credit(item, amount)
 
     #
     # Space management
