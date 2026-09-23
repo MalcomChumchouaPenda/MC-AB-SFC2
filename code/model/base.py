@@ -79,17 +79,21 @@ class EcoAccount:
             "profit_transfers": 0.0,
         }
 
-
+    #
+    # stocks accounting
+    #
     def incr_stock(self, name, amount):
         self.stocks[name] += amount
 
     def decr_stock(self, name, amount):
         self.stocks[name] -= amount
 
-
+    #
+    # flows accounting
+    #
     def incr_flow(self, name, amount):
         self.flows[name] += amount
-        
+
     def decr_flow(self, name, amount):
         self.flows[name] -= amount
 

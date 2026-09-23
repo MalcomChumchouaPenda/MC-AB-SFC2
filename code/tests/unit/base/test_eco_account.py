@@ -54,6 +54,7 @@ def test_has_flow_names_constant(account):
 # STOCKS ACCOUNTING
 # ----------------------------------------------------
 
+
 @pytest.fixture
 def account_with_stocks(account):
     # Given
@@ -84,10 +85,10 @@ def test_decr_stock_decreases_amount(account_with_stocks):
     assert stocks["cash"] == -100
 
 
-
 # ---------------------------------------------------
 # FLOWS ACCOUNTING
 # ----------------------------------------------------
+
 
 @pytest.fixture
 def account_with_flows(account):
