@@ -3,8 +3,8 @@ from model.base import EcoRole
 
 class Producer(EcoRole):
 
-    def setup(self):
-        super().setup()
+    def __init__(self, agent, env):
+        super().__init__(agent, env)
         self.price = 0
         self.productivity = 0
         self.inventories = 0

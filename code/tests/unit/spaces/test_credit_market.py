@@ -203,8 +203,8 @@ def test_grant_loan_updates_accounts(market_with_participants):
     # Then
     borrower.debit_stock.assert_any_call("loans", 500)
     borrower.credit_stock.assert_any_call("deposits", 500)
-    borrower.bank_account.debit_stock.assert_any_call("deposits", 500)
-    borrower.bank_account.credit_stock.assert_any_call("cash", 500)
+    borrower.bank_id.debit_stock.assert_any_call("deposits", 500)
+    borrower.bank_id.credit_stock.assert_any_call("cash", 500)
     lender.debit_stock.assert_any_call("cash", 500)
     lender.credit_stock.assert_any_call("loans", 500)
 
@@ -272,8 +272,8 @@ def test_repay_loans_updates_accounts(market_with_loan):
     borrower.credit_stock.assert_any_call("loans", 100)
     borrower.debit_flow.assert_any_call("loan_interests", 10)
     borrower.debit_stock.assert_any_call("deposits", 110)
-    borrower.bank_account.credit_stock.assert_any_call("deposits", 110)
-    borrower.bank_account.debit_stock.assert_any_call("cash", 110)
+    borrower.bank_id.credit_stock.assert_any_call("deposits", 110)
+    borrower.bank_id.debit_stock.assert_any_call("cash", 110)
     lender.credit_stock.assert_any_call("cash", 110)
     lender.debit_stock.assert_any_call("loans", 100)
     lender.credit_flow.assert_any_call("loan_interests", 10)
@@ -336,8 +336,8 @@ def test_request_advances_updates_accounts(market_with_union):
     # Then
     lender.credit_stock.assert_any_call("cash", 100)
     lender.debit_stock.assert_any_call("advances", 100)
-    lender.cb_account.debit_stock.assert_any_call("cash", 100)
-    lender.cb_account.credit_stock.assert_any_call("advances", 100)
+    lender.cb_id.debit_stock.assert_any_call("cash", 100)
+    lender.cb_id.credit_stock.assert_any_call("advances", 100)
 
 
 def test_repay_advances_updates_accounts(market_with_union):
@@ -352,6 +352,6 @@ def test_repay_advances_updates_accounts(market_with_union):
     lender.debit_stock.assert_any_call("cash", 110)
     lender.credit_stock.assert_any_call("advances", 100)
     lender.debit_flow.assert_any_call("adv_interests", 10)
-    lender.cb_account.credit_stock.assert_any_call("cash", 110)
-    lender.cb_account.debit_stock.assert_any_call("advances", 100)
-    lender.cb_account.credit_flow.assert_any_call("adv_interests", 10)
+    lender.cb_id.credit_stock.assert_any_call("cash", 110)
+    lender.cb_id.debit_stock.assert_any_call("advances", 100)
+    lender.cb_id.credit_flow.assert_any_call("adv_interests", 10)

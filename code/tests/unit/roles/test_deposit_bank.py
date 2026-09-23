@@ -16,36 +16,24 @@ def test_is_eco_role():
 
 
 @pytest.fixture
-def role_before_setup():
+def role_with_env():
     # Given
-    model = Mock()
-    role = DepositBank(model)
-    return role
+    agent, env = Mock(), Mock()
+    role = DepositBank(agent, env)
+    return role, env
 
 
-def test_has_defaulted(role_before_setup):
+def test_has_defaulted(role_with_env):
     # Given
-    role = role_before_setup
+    role, _ = role_with_env
 
-    # When
-    role.setup()
-
-    # Then
+    # Assert
     assert role.defaulted is False
 
 
 # ---------------------------------------------------
 # PERCEPTION TESTS
 # ----------------------------------------------------
-
-
-@pytest.fixture
-def role_with_env(role_before_setup):
-    # Given
-    env = Mock()
-    role = role_before_setup
-    role.env = env
-    return role, env
 
 
 def test_find_deposit_accounts_from_env(role_with_env):

@@ -17,33 +17,27 @@ def test_is_eco_role():
 
 
 @pytest.fixture
-def employer_before_setup():
+def role_with_env():
     # Given
-    model = Mock()
-    employer = Employer(model)
-    return employer
+    agent, env = Mock(), Mock()
+    role = Employer(agent, env)
+    return role, env
 
 
-def test_has_wage_prop(employer_before_setup):
+def test_has_wage_prop(role_with_env):
     # Given
-    employer = employer_before_setup
+    role, _ = role_with_env
 
-    # When
-    employer.setup()
-
-    # Then
-    assert employer.wage == 0
+    # Assert
+    assert role.wage == 0
 
 
-def test_has_labor_demand_prop(employer_before_setup):
+def test_has_labor_demand_prop(role_with_env):
     # Given
-    employer = employer_before_setup
+    role, _ = role_with_env
 
-    # When
-    employer.setup()
-
-    # Then
-    assert employer.labor_demand == 0
+    # Assert
+    assert role.labor_demand == 0
 
 
 # ---------------------------------------------------
@@ -51,36 +45,27 @@ def test_has_labor_demand_prop(employer_before_setup):
 # ----------------------------------------------------
 
 
-@pytest.fixture
-def employer_with_env(employer_before_setup):
+def test_get_unemployment(role_with_env):
     # Given
-    env = Mock()
-    employer = employer_before_setup
-    employer.env = env
-    return employer, env
-
-
-def test_get_unemployment(employer_with_env):
-    # Given
-    employer, env = employer_with_env
+    role, env = role_with_env
     env.unemployment = 0.12
 
     # When
-    perceived = employer.get_unemployment()
+    perceived = role.get_unemployment()
 
     # Then
     assert perceived == 0.12
 
 
-def test_get_jobs(employer_with_env):
+def test_get_jobs(role_with_env):
     # Given
-    employer, env = employer_with_env
+    role, env = role_with_env
 
     # When
-    jobs = employer.get_jobs()
+    jobs = role.get_jobs()
 
     # Then
-    env.find_jobs.assert_called_with(employer)
+    env.find_jobs.assert_called_with(role)
     assert jobs == env.find_jobs.return_value
 
 

@@ -16,11 +16,11 @@ def test_is_eco_role():
 
 
 @pytest.fixture
-def guarantee_before_setup():
+def role_with_env():
     # Given
-    model = Mock()
-    guarantee = DepositGuarantee(model)
-    return guarantee
+    agent, env = Mock(), Mock()
+    role = DepositGuarantee(agent, env)
+    return role, env
 
 
 # ---------------------------------------------------
@@ -28,34 +28,25 @@ def guarantee_before_setup():
 # ----------------------------------------------------
 
 
-@pytest.fixture
-def guarantee_with_env(guarantee_before_setup):
+def test_find_defaulted_banks_from_env(role_with_env):
     # Given
-    env = Mock()
-    guarantee = guarantee_before_setup
-    guarantee.env = env
-    return guarantee, env
-
-
-def test_find_defaulted_banks_from_env(guarantee_with_env):
-    # Given
-    guarantee, env = guarantee_with_env
+    role, env = role_with_env
 
     # When
-    found = guarantee.find_defaulted_banks()
+    found = role.find_defaulted_banks()
 
     # Then
     env.find_defaulted_banks.assert_called_with()
     assert found == env.find_defaulted_banks.return_value
 
 
-def test_find_deposit_accounts_from_env(guarantee_with_env):
+def test_find_deposit_accounts_from_env(role_with_env):
     # Given
-    guarantee, env = guarantee_with_env
+    role, env = role_with_env
     bank = Mock()
 
     # When
-    found = guarantee.find_deposit_accounts(bank)
+    found = role.find_deposit_accounts(bank)
 
     # Then
     env.find_deposit_accounts.assert_called_with(bank)
@@ -67,13 +58,13 @@ def test_find_deposit_accounts_from_env(guarantee_with_env):
 # ----------------------------------------------------
 
 
-def test_reimburse_deposits_into_env(guarantee_with_env):
+def test_reimburse_deposits_into_env(role_with_env):
     # Given
-    guarantee, env = guarantee_with_env
+    role, env = role_with_env
     depositor = Mock()
 
     # When
-    guarantee.reimburse_deposits(depositor, 200)
+    role.reimburse_deposits(depositor, 200)
 
     # Then
-    env.reimburse_deposits.assert_called_with(guarantee, depositor, 200)
+    env.reimburse_deposits.assert_called_with(role, depositor, 200)

@@ -16,44 +16,35 @@ def test_is_eco_role():
 
 
 @pytest.fixture
-def issuer_before_setup():
+def role_with_env():
     # Given
-    model = Mock()
-    issuer = BondIssuer(model)
-    return issuer
+    agent, env = Mock(), Mock()
+    role = BondIssuer(agent, env)
+    return role, env
 
 
-def test_has_default_debt_ratio(issuer_before_setup):
+def test_has_default_debt_ratio(role_with_env):
     # Given
-    issuer = issuer_before_setup
+    role, _ = role_with_env
 
-    # When
-    issuer.setup()
-
-    # Then
-    assert issuer.debt_ratio == 0.0
+    # Assert
+    assert role.debt_ratio == 0.0
 
 
-def test_has_default_bond_number(issuer_before_setup):
+def test_has_default_bond_number(role_with_env):
     # Given
-    issuer = issuer_before_setup
+    role, _ = role_with_env
 
-    # When
-    issuer.setup()
-
-    # Then
-    assert issuer.bond_number == 0.0
+    # Assert
+    assert role.bond_number == 0.0
 
 
-def test_has_default_bond_value(issuer_before_setup):
+def test_has_default_bond_value(role_with_env):
     # Given
-    issuer = issuer_before_setup
+    role, _ = role_with_env
 
-    # When
-    issuer.setup()
-
-    # Then
-    assert issuer.bond_value == 0.0
+    # Assert
+    assert role.bond_value == 0.0
 
 
 # ---------------------------------------------------
@@ -61,36 +52,28 @@ def test_has_default_bond_value(issuer_before_setup):
 # ----------------------------------------------------
 
 
-@pytest.fixture
-def issuer_with_env(issuer_before_setup):
-    # Given
-    env = Mock()
-    issuer = issuer_before_setup
-    issuer.env = env
-    return issuer, env
 
-
-def test_get_discount_rate(issuer_with_env):
+def test_get_discount_rate(role_with_env):
     # Given
-    issuer, env = issuer_with_env
+    role, env = role_with_env
     env.discount_rate = 0.05
 
     # When
-    result = issuer.get_discount_rate()
+    result = role.get_discount_rate()
 
     # Then
     assert result == 0.05
 
 
-def test_find_bonds(issuer_with_env):
+def test_find_bonds(role_with_env):
     # Given
-    issuer, env = issuer_with_env
+    role, env = role_with_env
 
     # When
-    result = issuer.find_bonds()
+    result = role.find_bonds()
 
     # Then
-    env.find_bonds.assert_called_once_with(issuer)
+    env.find_bonds.assert_called_once_with(role)
     assert result == env.find_bonds.return_value
 
 
@@ -99,13 +82,13 @@ def test_find_bonds(issuer_with_env):
 # ----------------------------------------------------
 
 
-def test_repay_bond_use_env_method(issuer_with_env):
+def test_repay_bond_use_env_method(role_with_env):
     # Given
     buyer = Mock()
-    issuer, env = issuer_with_env
+    role, env = role_with_env
 
     # When
-    issuer.repay_bonds(buyer, 100, 10)
+    role.repay_bonds(buyer, 100, 10)
 
     # Then
-    env.repay_bonds.assert_called_with(buyer, issuer, 100, 10)
+    env.repay_bonds.assert_called_with(buyer, role, 100, 10)

@@ -16,18 +16,18 @@ def test_is_eco_role():
 
 
 @pytest.fixture
-def role_before_setup():
+def role_with_env():
     # Given
-    model = Mock()
-    role = PolicyMaker(model)
-    return role
+    agent, env = Mock(), Mock()
+    role = PolicyMaker(agent, env)
+    return role, env
 
 
-def test_expose_discount_rate_from_agent(role_before_setup):
+def test_expose_discount_rate_from_agent(role_with_env):
     # Given
-    agent = Mock(discount_rate=0.02)
-    role = role_before_setup
-    role.agent = agent
+    role, _ = role_with_env
+    agent = role.agent
+    agent.discount_rate = 0.02
 
     # When
     perceived = role.discount_rate
@@ -40,14 +40,6 @@ def test_expose_discount_rate_from_agent(role_before_setup):
 # PERCEPTION TESTS
 # ----------------------------------------------------
 
-
-@pytest.fixture
-def role_with_env(role_before_setup):
-    # Given
-    env = Mock()
-    role = role_before_setup
-    role.env = env
-    return role, env
 
 
 def test_get_average_inflation_from_env(role_with_env):

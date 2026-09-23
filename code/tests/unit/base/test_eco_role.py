@@ -1,121 +1,114 @@
 import pytest
-from agentpy.objects import Object
+from agentpy import AgentNode
 from unittest.mock import Mock
 from model.base import EcoRole
+
 
 # ---------------------------------------------------
 # ARCHITECTURE TESTS
 # ----------------------------------------------------
 
 
-def test_is_agentpy_object():
+def test_is_agentpy_agentnode():
     # Assert
-    assert issubclass(EcoRole, Object)
+    assert issubclass(EcoRole, AgentNode)
+
+
+def test_requires_agent_and_env():
+    #  Assert
+    with pytest.raises(TypeError, match="'agent' and 'env'"):
+        EcoRole()
+
 
 
 @pytest.fixture
-def role_before_setup():
+def role_with_agent_and_env():
     # Given
-    model = Mock()
-    role = EcoRole(model)
-    return role
+    agent, env = Mock(), Mock()
+    role = EcoRole(agent, env)
+    return role, agent, env
 
 
-def test_has_name_attr(role_before_setup):
+def test_has_agent_ref(role_with_agent_and_env):
     # Given
-    role = role_before_setup
+    role, agent, _ = role_with_agent_and_env
 
-    # When
-    role.setup()
+    # Assert
+    assert role.agent is agent
 
-    # Then
+
+def test_has_env_ref(role_with_agent_and_env):
+    # Given
+    role, _, env = role_with_agent_and_env
+
+    # Assert
+    assert role.env is env
+
+
+def test_has_label_attr(role_with_agent_and_env):
+    # Given
+    role, agent, _ = role_with_agent_and_env
+
+    # Assert
+    assert role.label == agent.id
+    
+
+def test_has_name_attr(role_with_agent_and_env):
+    # Given
+    role, *_ = role_with_agent_and_env
+
+    # Assert
     assert role.name == ""
 
 
-def test_has_agent_ref(role_before_setup):
+def test_expose_agent_id(role_with_agent_and_env):
     # Given
-    role = role_before_setup
+    role, agent, _ = role_with_agent_and_env
 
     # When
-    role.setup()
+    exposed = role.id
 
     # Then
-    assert role.agent is None
+    assert exposed is agent.id
 
 
-def test_has_space_ref(role_before_setup):
+def test_expose_agent_central_bank_id(role_with_agent_and_env):
     # Given
-    role = role_before_setup
+    role, agent, _ = role_with_agent_and_env
 
     # When
-    role.setup()
+    exposed = role.cb_id
 
     # Then
-    assert role.env is None
+    assert exposed is agent.cb_id
 
 
-# ---------------------------------------------------
-# ROLE ACCOUNT ACCESS TESTS
-# ----------------------------------------------------
-
-
-@pytest.fixture
-def role_with_agent(role_before_setup):
+def test_expose_agent_deposit_bank_id(role_with_agent_and_env):
     # Given
-    agent = Mock()
-    role = role_before_setup
-    role.agent = agent
-    return role, agent
-
-
-def test_expose_agent_account(role_with_agent):
-    # Given
-    role, agent = role_with_agent
+    role, agent, _ = role_with_agent_and_env
 
     # When
-    exposed = role.account
+    exposed = role.bank_id
 
     # Then
-    assert exposed is agent.account
+    assert exposed is agent.bank_id
 
 
-def test_expose_agent_central_bank_account(role_with_agent):
+def test_change_agent_deposit_bank_id(role_with_agent_and_env):
     # Given
-    role, agent = role_with_agent
-
-    # When
-    exposed = role.cb_account
-
-    # Then
-    assert exposed is agent.cb_account
-
-
-def test_expose_agent_deposit_bank_account(role_with_agent):
-    # Given
-    role, agent = role_with_agent
-
-    # When
-    exposed = role.bank_account
-
-    # Then
-    assert exposed is agent.bank_account
-
-
-def test_change_agent_deposit_bank_account(role_with_agent):
-    # Given
-    role, agent = role_with_agent
+    role, agent, _ = role_with_agent_and_env
     new_account = Mock()
 
     # When
-    role.bank_account = new_account
+    role.bank_id = new_account
 
     # Then
-    assert agent.bank_account is new_account
+    assert agent.bank_id is new_account
 
 
-def test_expose_agent_country_id(role_with_agent):
+def test_expose_agent_country_id(role_with_agent_and_env):
     # Given
-    role, agent = role_with_agent
+    role, agent, _ = role_with_agent_and_env
 
     # When
     agent.country_id = 2
@@ -124,70 +117,3 @@ def test_expose_agent_country_id(role_with_agent):
     assert role.country_id == 2
 
 
-# ---------------------------------------------------
-# ACCOUNTING TESTS
-# ----------------------------------------------------
-
-
-@pytest.fixture
-def role_with_account(role_before_setup):
-    # Given
-    account = Mock()
-    role = role_before_setup
-    role.agent = Mock(account=account)
-    return role, account
-
-
-def test_debit_stock_decrease_amount(role_with_account):
-    # Given
-    role, account = role_with_account
-
-    # When
-    role.debit_stock("cash", 100)
-
-    # Then
-    account.debit_stock.assert_called_with("cash", 100)
-
-
-def test_credit_stock_increase_amount(role_with_account):
-    # Given
-    role, account = role_with_account
-
-    # When
-    role.credit_stock("cash", 100)
-
-    # Then
-    account.credit_stock.assert_called_with("cash", 100)
-
-
-def test_debit_flow_decrease_amount(role_with_account):
-    # Given
-    role, account = role_with_account
-
-    # When
-    role.debit_flow("consumption", 100)
-
-    # Then
-    account.debit_flow.assert_called_with("consumption", 100)
-
-
-def test_credit_flow_increase_amount(role_with_account):
-    # Given
-    role, account = role_with_account
-
-    # When
-    role.credit_flow("consumption", 100)
-
-    # Then
-    account.credit_flow.assert_called_with("consumption", 100)
-
-
-def test_clear_flows_clear_all_keys(role_with_account):
-    # Given
-    role, account = role_with_account
-
-    # When
-    role.clear_flows()
-
-    # Then
-    account.clear_flows.assert_called_with()

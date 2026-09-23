@@ -1,5 +1,4 @@
-from agentpy import Agent, Network, AgentDList, AttrDict
-from agentpy.objects import Object
+from agentpy import Agent, Network, AgentNode, AttrDict
 
 
 class EcoAgent(Agent):
@@ -13,11 +12,11 @@ class EcoAgent(Agent):
         self.roles = {}
         self.country_id = 0
         self.account = None
-        self.cb_account = None
-        self.bank_account = None
+        self.cb_id = None
+        self.bank_id = None
 
 
-class EcoRole(Object):
+class EcoRole(AgentNode):
     """
     Classe de base des rôles économiques.
 
@@ -25,31 +24,32 @@ class EcoRole(Object):
     et un adaptateur vers un espace d'interaction.
     """
 
-    def setup(self):
-        super().setup()
-        self.agent = None
-        self.env = None
+    def __init__(self, agent, env):
+        super().__init__(label=agent.id)
+        self.agent = agent
+        self.env = env
         self.name = ""
+
 
     @property
     def country_id(self):
         return self.agent.country_id
 
     @property
-    def account(self):
-        return self.agent.account
+    def id(self):
+        return self.agent.id
 
     @property
-    def cb_account(self):
-        return self.agent.cb_account
+    def cb_id(self):
+        return self.agent.cb_id
 
     @property
-    def bank_account(self):
-        return self.agent.bank_account
+    def bank_id(self):
+        return self.agent.bank_id
 
-    @bank_account.setter
-    def bank_account(self, account):
-        self.agent.bank_account = account
+    @bank_id.setter
+    def bank_id(self, account):
+        self.agent.bank_id = account
 
     def debit_stock(self, name, amount):
         self.agent.account.debit_stock(name, amount)
@@ -133,13 +133,11 @@ class EcoSpace(Network):
     # Role management
     #
     def add_role(self, kind, agent, name):
-        role = kind(self.model)
-        role.setup()
+        role = kind(agent, self)
         role.name = name
-        role.env = self
-        role.agent = agent
         agent.roles[name] = role
         self.graph.add_node(role)
+        self.positions[agent] = role
         return role
 
     def remove_role(self, role):

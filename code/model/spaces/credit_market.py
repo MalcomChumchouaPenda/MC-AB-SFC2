@@ -39,8 +39,8 @@ class CreditMarket(EcoSpace):
         borrower.loan_demand -= amount
         borrower.debit_stock("loans", amount)
         borrower.credit_stock("deposits", amount)
-        borrower.bank_account.debit_stock("deposits", amount)
-        borrower.bank_account.credit_stock("cash", amount)
+        borrower.bank_id.debit_stock("deposits", amount)
+        borrower.bank_id.credit_stock("cash", amount)
         lender.debit_stock("cash", amount)
         lender.credit_stock("loans", amount)
         self.graph.add_edge(borrower, lender, amount=amount, rate=rate)
@@ -59,8 +59,8 @@ class CreditMarket(EcoSpace):
         borrower.credit_stock("loans", principal)
         borrower.debit_flow("loan_interests", interests)
         borrower.debit_stock("deposits", total)
-        borrower.bank_account.credit_stock("deposits", total)
-        borrower.bank_account.debit_stock("cash", total)
+        borrower.bank_id.credit_stock("deposits", total)
+        borrower.bank_id.debit_stock("cash", total)
         lender.credit_stock("cash", total)
         lender.debit_stock("loans", principal)
         lender.credit_flow("loan_interests", interests)
@@ -79,14 +79,14 @@ class CreditMarket(EcoSpace):
     def request_advances(self, lender, amount):
         lender.debit_stock("advances", amount)
         lender.credit_stock("cash", amount)
-        lender.cb_account.credit_stock("advances", amount)
-        lender.cb_account.debit_stock("cash", amount)
+        lender.cb_id.credit_stock("advances", amount)
+        lender.cb_id.debit_stock("cash", amount)
 
     def repay_advances(self, lender, principal, interests):
         total = principal + interests
         lender.debit_stock("cash", total)
         lender.credit_stock("advances", principal)
         lender.debit_flow("adv_interests", interests)
-        lender.cb_account.credit_stock("cash", total)
-        lender.cb_account.debit_stock("advances", principal)
-        lender.cb_account.credit_flow("adv_interests", interests)
+        lender.cb_id.credit_stock("cash", total)
+        lender.cb_id.debit_stock("advances", principal)
+        lender.cb_id.credit_flow("adv_interests", interests)

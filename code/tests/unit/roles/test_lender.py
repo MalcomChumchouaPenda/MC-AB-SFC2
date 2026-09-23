@@ -16,22 +16,19 @@ def test_is_eco_role():
 
 
 @pytest.fixture
-def lender_before_setup():
+def role_with_env():
     # Given
-    model = Mock()
-    lender = Lender(model)
-    return lender
+    agent, env = Mock(), Mock()
+    role = Lender(agent, env)
+    return role, env
 
 
-def test_has_loan_applicants_list(lender_before_setup):
+def test_has_loan_applicants_list(role_with_env):
     # Given
-    lender = lender_before_setup
+    role, _ = role_with_env
 
-    # When
-    lender.setup()
-
-    # Then
-    assert lender.loan_applicants == []
+    # Assert
+    assert role.loan_applicants == []
 
 
 # ---------------------------------------------------
@@ -39,57 +36,48 @@ def test_has_loan_applicants_list(lender_before_setup):
 # ----------------------------------------------------
 
 
-def test_receive_request(lender_before_setup):
+def test_receive_request(role_with_env):
     # Given
     borrower = Mock()
-    lender = lender_before_setup
-    lender.loan_applicants = []
+    role, _ = role_with_env
+    role.loan_applicants = []
 
     # When
-    lender.receive_request(borrower)
+    role.receive_request(borrower)
 
     # Then
-    assert lender.loan_applicants == [borrower]
+    assert role.loan_applicants == [borrower]
 
 
-@pytest.fixture
-def lender_with_env(lender_before_setup):
-    # Given
-    env = Mock()
-    lender = lender_before_setup
-    lender.env = env
-    return lender, env
-
-
-def test_grant_loan(lender_with_env):
+def test_grant_loan(role_with_env):
     # Given
     borrower = Mock()
-    lender, env = lender_with_env
+    role, env = role_with_env
 
     # When
-    lender.grant_loan(borrower, 100, 0.04)
+    role.grant_loan(borrower, 100, 0.04)
 
     # Then
-    env.grant_loan.assert_called_with(lender, borrower, 100, 0.04)
+    env.grant_loan.assert_called_with(role, borrower, 100, 0.04)
 
 
-def test_request_advances(lender_with_env):
+def test_request_advances(role_with_env):
     # Given
-    lender, env = lender_with_env
+    role, env = role_with_env
 
     # When
-    lender.request_advances(100)
+    role.request_advances(100)
 
     # Then
-    env.request_advances.assert_called_with(lender, 100)
+    env.request_advances.assert_called_with(role, 100)
 
 
-def test_repay_advances(lender_with_env):
+def test_repay_advances(role_with_env):
     # Given
-    lender, env = lender_with_env
+    role, env = role_with_env
 
     # When
-    lender.repay_advances(100, 10)
+    role.repay_advances(100, 10)
 
     # Then
-    env.repay_advances.assert_called_with(lender, 100, 10)
+    env.repay_advances.assert_called_with(role, 100, 10)

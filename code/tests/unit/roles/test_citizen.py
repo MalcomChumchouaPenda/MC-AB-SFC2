@@ -17,22 +17,19 @@ def test_is_eco_role():
 
 
 @pytest.fixture
-def citizen_before_setup():
+def role_with_env():
     # Given
-    model = Mock()
-    citizen = Citizen(model)
-    return citizen
+    agent, env = Mock(), Mock()
+    role = Citizen(agent, env)
+    return role, env
 
 
-def test_has_residual_equity_prop(citizen_before_setup):
+def test_has_residual_equity_prop(role_with_env):
     # Given
-    citizen = citizen_before_setup
+    role, _ = role_with_env
 
-    # When
-    citizen.setup()
-
-    # Then
-    assert citizen.resid_equity == 0
+    # Assert
+    assert role.resid_equity == 0
 
 
 # ---------------------------------------------------
@@ -40,84 +37,75 @@ def test_has_residual_equity_prop(citizen_before_setup):
 # ----------------------------------------------------
 
 
-@pytest.fixture
-def citizen_with_env(citizen_before_setup):
+def test_get_prob_failure(role_with_env):
     # Given
-    env = Mock()
-    citizen = citizen_before_setup
-    citizen.env = env
-    return citizen, env
-
-
-def test_get_prob_failure(citizen_with_env):
-    # Given
-    citizen, env = citizen_with_env
+    role, env = role_with_env
     env.prob_failure = 0.12
 
     # When
-    perceived = citizen.get_prob_failure()
+    perceived = role.get_prob_failure()
 
     # Then
     assert perceived == 0.12
 
 
-def test_find_investors_use_env_method(citizen_with_env):
+def test_find_investors_use_env_method(role_with_env):
     # Given
     expected = [Mock() for _ in range(10)]
-    citizen, env = citizen_with_env
+    role, env = role_with_env
     env.find_investors.return_value = expected
 
     # When
-    investors = citizen.find_investors()
+    investors = role.find_investors()
 
     # Then
-    env.find_investors.assert_called_with(initiator=citizen)
+    env.find_investors.assert_called_with(initiator=role)
     assert investors == expected
 
 
-def test_get_bank_number_ratio_from_env(citizen_with_env):
+def test_get_bank_number_ratio_from_env(role_with_env):
     # Given
-    citizen, env = citizen_with_env
+    role, env = role_with_env
     env.calc_bank_number_ratio.return_value = 0.5
 
     # When
-    ratio = citizen.get_bank_number_ratio()
+    ratio = role.get_bank_number_ratio()
 
     # Then
     assert ratio == 0.5
 
 
-def test_get_bank_equity_ratio_from_env(citizen_with_env):
+def test_get_bank_equity_ratio_from_env(role_with_env):
     # Given
-    citizen, env = citizen_with_env
+    role, env = role_with_env
     env.calc_bank_equity_ratio.return_value = 0.6
 
     # When
-    ratio = citizen.get_bank_equity_ratio()
+    ratio = role.get_bank_equity_ratio()
 
     # Then
     assert ratio == 0.6
 
 
-def test_get_sector_equity_range_from_env(citizen_with_env):
+def test_get_sector_equity_range_from_env(role_with_env):
     # Given
-    citizen, env = citizen_with_env
+    role, env = role_with_env
     env.calc_sector_equity_range.return_value = (100, 200)
 
     # When
-    range_ = citizen.get_sector_equity_range("X")
+    range_ = role.get_sector_equity_range("X")
 
     # Then
     assert range_ == (100, 200)
 
 
-def test_get_tax_rate(citizen_with_env):
+def test_get_tax_rate(role_with_env):
     # Given
-    citizen, env = citizen_with_env
+    role, env = role_with_env
     env.fiscal_authority.tax_rate = 0.2
 
     # When
-    perceived = citizen.get_tax_rate()
+    perceived = role.get_tax_rate()
 
     # Assert
     assert perceived == 0.2
@@ -129,36 +117,36 @@ def test_get_tax_rate(citizen_with_env):
 
 
 @pytest.mark.parametrize("tradable", [True, False])
-def test_create_firm_uses_env_method(citizen_with_env, tradable):
+def test_create_firm_uses_env_method(role_with_env, tradable):
     # Given
-    citizen, env = citizen_with_env
+    role, env = role_with_env
     firm, share = Mock(), Mock()
 
     # When
-    citizen.create_firm(firm, [share], tradable=tradable)
+    role.create_firm(firm, [share], tradable=tradable)
 
     # Then
     env.create_firm.assert_called_with(firm, [share], tradable)
 
 
-def test_create_bank_uses_env_method(citizen_with_env):
+def test_create_bank_uses_env_method(role_with_env):
     # Given
-    citizen, env = citizen_with_env
+    role, env = role_with_env
     bank, share = Mock(), Mock()
 
     # When
-    citizen.create_bank(bank, [share])
+    role.create_bank(bank, [share])
 
     # Then
     env.create_bank.assert_called_with(bank, [share])
 
 
-def test_pay_taxes_uses_env_method(citizen_with_env):
+def test_pay_taxes_uses_env_method(role_with_env):
     # Given
-    citizen, env = citizen_with_env
+    role, env = role_with_env
 
     # When
-    citizen.pay_taxes(100)
+    role.pay_taxes(100)
 
     # Then
-    env.pay_taxes.assert_called_with(citizen, 100)
+    env.pay_taxes.assert_called_with(role, 100)

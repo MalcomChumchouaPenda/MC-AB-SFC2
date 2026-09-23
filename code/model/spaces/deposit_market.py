@@ -46,7 +46,7 @@ class DepositMarket(EcoSpace):
         depositor.account.debit_stock("cash", amount)
         deposit_bank.account.debit_stock("deposits", amount)
         deposit_bank.account.credit_stock("cash", amount)
-        depositor.bank_account = deposit_bank.account
+        depositor.bank_id = deposit_bank.account
         depositor.deposit_bank = deposit_bank
         self.graph.add_edge(depositor, deposit_bank, amount=amount)
 
@@ -55,9 +55,9 @@ class DepositMarket(EcoSpace):
         amount = self.graph[depositor][deposit_bank]["amount"]
         depositor.account.debit_stock("deposits", amount)
         depositor.account.credit_stock("cash", amount)
-        depositor.bank_account.credit_stock("deposits", amount)
-        depositor.bank_account.debit_stock("cash", amount)
-        depositor.bank_account = None
+        depositor.bank_id.credit_stock("deposits", amount)
+        depositor.bank_id.debit_stock("cash", amount)
+        depositor.bank_id = None
         depositor.deposit_bank = None
         self.graph.remove_edge(depositor, deposit_bank)
 

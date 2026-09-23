@@ -16,25 +16,16 @@ def test_is_eco_role():
 
 
 @pytest.fixture
-def role_before_setup():
+def role_with_env():
     # Given
-    model = Mock()
-    role = PolicyImplementer(model)
-    return role
+    agent, env = Mock(), Mock()
+    role = PolicyImplementer(agent, env)
+    return role, env
 
 
 # ---------------------------------------------------
 # PERCEPTION TESTS
 # ----------------------------------------------------
-
-
-@pytest.fixture
-def role_with_env(role_before_setup):
-    # Given
-    env = Mock()
-    role = role_before_setup
-    role.env = env
-    return role, env
 
 
 def test_get_discount_rate_from_env(role_with_env):

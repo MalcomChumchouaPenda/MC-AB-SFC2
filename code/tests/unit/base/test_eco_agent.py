@@ -43,7 +43,7 @@ def test_has_account_ref(agent_before_setup):
     assert agent.account is None
 
 
-def test_has_central_bank_account_ref(agent_before_setup):
+def test_has_central_bank_id_ref(agent_before_setup):
     # Given
     agent = agent_before_setup
 
@@ -51,10 +51,10 @@ def test_has_central_bank_account_ref(agent_before_setup):
     agent.setup()
 
     # Assert
-    assert agent.cb_account is None
+    assert agent.cb_id is None
 
 
-def test_has_deposit_bank_account_ref(agent_before_setup):
+def test_has_deposit_bank_id_ref(agent_before_setup):
     # Given
     agent = agent_before_setup
 
@@ -62,7 +62,7 @@ def test_has_deposit_bank_account_ref(agent_before_setup):
     agent.setup()
 
     # Assert
-    assert agent.bank_account is None
+    assert agent.bank_id is None
 
 
 def test_has_default_country_id(agent_before_setup):

@@ -264,7 +264,7 @@ def test_add_fiscal_authority_add_account(country_without_fiscal_auth):
     env.add_account.assert_called_with(govt)
 
 
-def test_add_fiscal_authority_links_to_cb_account(country_without_fiscal_auth):
+def test_add_fiscal_authority_links_to_cb_id(country_without_fiscal_auth):
     # Given
     govt = Mock()
     country = country_without_fiscal_auth
@@ -273,7 +273,7 @@ def test_add_fiscal_authority_links_to_cb_account(country_without_fiscal_auth):
     country.add_fiscal_authority(govt)
 
     # Then
-    assert govt.cb_account is country.monetary_authority.account
+    assert govt.cb_id is country.monetary_authority.account
 
 
 FakeCitizen = Mock()
@@ -329,7 +329,7 @@ def test_add_citizen_add_account(country_without_citizens):
     env.add_account.assert_called_with(household)
 
 
-def test_add_citizen_links_to_cb_account(country_without_citizens):
+def test_add_citizen_links_to_cb_id(country_without_citizens):
     # Given
     country = country_without_citizens
     authority = country.monetary_authority
@@ -339,7 +339,7 @@ def test_add_citizen_links_to_cb_account(country_without_citizens):
     country.add_citizen(household)
 
     # Then
-    assert household.cb_account is authority.account
+    assert household.cb_id is authority.account
 
 
 FakeCompany = Mock()
@@ -407,7 +407,7 @@ def test_add_company_add_account(country_without_companies):
     env.add_account.assert_called_with(agent)
 
 
-def test_add_company_links_to_cb_account(country_without_companies):
+def test_add_company_links_to_cb_id(country_without_companies):
     # Given
     country = country_without_companies
     authority = country.monetary_authority
@@ -417,7 +417,7 @@ def test_add_company_links_to_cb_account(country_without_companies):
     country.add_company(agent, sector="X")
 
     # Then
-    assert agent.cb_account is authority.account
+    assert agent.cb_id is authority.account
 
 
 # ---------------------------------------------------

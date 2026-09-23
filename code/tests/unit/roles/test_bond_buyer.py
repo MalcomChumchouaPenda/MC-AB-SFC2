@@ -16,11 +16,11 @@ def test_is_eco_role():
 
 
 @pytest.fixture
-def buyer_before_setup():
+def role_with_env():
     # Given
-    model = Mock()
-    buyer = BondBuyer(model)
-    return buyer
+    agent, env = Mock(), Mock()
+    role = BondBuyer(agent, env)
+    return role, env
 
 
 # ---------------------------------------------------
@@ -28,12 +28,12 @@ def buyer_before_setup():
 # ----------------------------------------------------
 
 
-def test_find_issuers(buyer_with_env):
+def test_find_issuers(role_with_env):
     # Given
-    buyer, env = buyer_with_env
+    role, env = role_with_env
 
     # When
-    result = buyer.find_issuers()
+    result = role.find_issuers()
 
     # Then
     env.find_issuers.assert_called_once_with()
@@ -45,22 +45,13 @@ def test_find_issuers(buyer_with_env):
 # ----------------------------------------------------
 
 
-@pytest.fixture
-def buyer_with_env(buyer_before_setup):
-    # Given
-    env = Mock()
-    buyer = buyer_before_setup
-    buyer.env = env
-    return buyer, env
-
-
-def test_buy_bonds(buyer_with_env):
+def test_buy_bonds(role_with_env):
     # Given
     issuer = Mock()
-    buyer, env = buyer_with_env
+    role, env = role_with_env
 
     # When
-    buyer.buy_bonds(issuer, 2)
+    role.buy_bonds(issuer, 2)
 
     # Then
-    env.buy_bonds.assert_called_with(buyer, issuer, 2)
+    env.buy_bonds.assert_called_with(role, issuer, 2)

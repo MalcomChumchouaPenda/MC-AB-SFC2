@@ -3,8 +3,8 @@ from model.base import EcoRole
 
 class Citizen(EcoRole):
 
-    def setup(self):
-        super().setup()
+    def __init__(self, agent, env):
+        super().__init__(agent, env)
         self.resid_equity = 0
 
     #

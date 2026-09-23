@@ -16,21 +16,21 @@ def test_is_eco_role():
 
 
 @pytest.fixture
-def authority_before_setup():
+def role_with_env():
     # Given
-    model = Mock()
-    authority = MonetaryAuthority(model)
-    return authority
+    agent, env = Mock(), Mock()
+    role = MonetaryAuthority(agent, env)
+    return role, env
 
 
-def test_expose_discount_rate_from_agent(authority_before_setup):
+def test_expose_discount_rate_from_agent(role_with_env):
     # Given
     agent = Mock(discount_rate=0.02)
-    authority = authority_before_setup
-    authority.agent = agent
+    role, _ = role_with_env
+    role.agent = agent
 
     # When
-    perceived = authority.discount_rate
+    perceived = role.discount_rate
 
     # Then
     assert perceived == 0.02
@@ -46,21 +46,12 @@ def test_expose_discount_rate_from_agent(authority_before_setup):
 # ----------------------------------------------------
 
 
-@pytest.fixture
-def authority_with_env(authority_before_setup):
+def test_transfer_profits_with_env(role_with_env):
     # Given
-    env = Mock()
-    authority = authority_before_setup
-    authority.env = env
-    return authority, env
-
-
-def test_transfer_profits_with_env(authority_with_env):
-    # Given
-    authority, env = authority_with_env
+    role, env = role_with_env
 
     # When
-    authority.transfer_profit(200)
+    role.transfer_profit(200)
 
     # Then
     env.transfer_central_bank_profits.assert_called_with(200)

@@ -3,10 +3,6 @@ from model.base import EcoRole
 
 class BondBuyer(EcoRole):
 
-    def setup(self):
-        super().setup()
-        self.loan_applicants = []
-
     #
     # Perceptions
     #

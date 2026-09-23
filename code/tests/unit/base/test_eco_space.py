@@ -198,7 +198,7 @@ def role_with_kind():
 
 def test_add_role_creates_role(space_before_setup, role_with_kind):
     # Given
-    role, role_kind = role_with_kind
+    _, role_kind = role_with_kind
     space = space_before_setup
     agent = Mock(roles={})
 
@@ -206,10 +206,7 @@ def test_add_role_creates_role(space_before_setup, role_with_kind):
     space.add_role(role_kind, agent, "fake_role")
 
     # Then
-    role_kind.assert_called_with(space.model)
-    role.setup.assert_called_with()
-    assert role.env is space
-    assert role.agent is agent
+    role_kind.assert_called_with(agent, space)
 
 
 def test_add_role_returns_role(space_before_setup, role_with_kind):
@@ -237,6 +234,7 @@ def test_add_role_add_graph_node(space_before_setup, role_with_kind):
 
     # Then
     assert graph.has_node(role)
+    assert space.positions[agent] is role
 
 
 def test_add_role_registers_role(space_before_setup, role_with_kind):

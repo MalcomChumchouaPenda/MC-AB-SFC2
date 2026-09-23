@@ -31,7 +31,7 @@ def govt(model, cb):
     govt.roles["fiscal_authority"] = Mock()
     govt.account = EcoAccount(model)
     govt.account.setup()
-    govt.cb_account = cb.account
+    govt.cb_id = cb.account
     return govt
 
 
@@ -42,7 +42,7 @@ def bank(model, cb):
     bank.setup()
     bank.account = EcoAccount(model)
     bank.account.setup()
-    bank.cb_account = cb.account
+    bank.cb_id = cb.account
     return bank
 
 

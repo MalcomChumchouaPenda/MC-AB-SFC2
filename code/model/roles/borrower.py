@@ -3,8 +3,8 @@ from model.base import EcoRole
 
 class Borrower(EcoRole):
 
-    def setup(self):
-        super().setup()
+    def __init__(self, agent, env):
+        super().__init__(agent, env)
         self.loan_demand = 0
         self.net_worth = 0
 

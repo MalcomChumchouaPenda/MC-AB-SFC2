@@ -19,8 +19,8 @@ def bank(model):
     bank.setup()
     bank.account = EcoAccount(model)
     bank.account.setup()
-    bank.cb_account = EcoAccount(model)
-    bank.cb_account.setup()
+    bank.cb_id = EcoAccount(model)
+    bank.cb_id.setup()
     return bank
 
 
@@ -46,8 +46,8 @@ def test_bank_requests_cash_advance(bank):
     # Then
     assert bank.account.stocks["cash"] == 100
     assert bank.account.stocks["advances"] == -50
-    assert bank.cb_account.stocks["cash"] == -50
-    assert bank.cb_account.stocks["advances"] == 50
+    assert bank.cb_id.stocks["cash"] == -50
+    assert bank.cb_id.stocks["advances"] == 50
 
 
 @pytest.mark.usefixtures("market")
@@ -64,6 +64,6 @@ def test_bank_repays_cash_advance(bank):
     assert bank.account.stocks["cash"] == -105
     assert bank.account.stocks["advances"] == 0
     assert bank.account.flows["adv_interests"] == -5
-    assert bank.cb_account.stocks["cash"] == 105
-    assert bank.cb_account.stocks["advances"] == -100
-    assert bank.cb_account.flows["adv_interests"] == 5
+    assert bank.cb_id.stocks["cash"] == 105
+    assert bank.cb_id.stocks["advances"] == -100
+    assert bank.cb_id.flows["adv_interests"] == 5

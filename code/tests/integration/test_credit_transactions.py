@@ -26,8 +26,8 @@ def bank(model):
     bank.roles["company"] = Mock()
     bank.account = EcoAccount(model)
     bank.account.setup()
-    bank.cb_account = EcoAccount(model)
-    bank.cb_account.setup()
+    bank.cb_id = EcoAccount(model)
+    bank.cb_id.setup()
     return bank
 
 
@@ -39,10 +39,10 @@ def firm(model):
     firm.roles["depositor"] = Mock()
     firm.account = EcoAccount(model)
     firm.account.setup()
-    firm.cb_account = EcoAccount(model)
-    firm.cb_account.setup()
-    firm.bank_account = EcoAccount(model)
-    firm.bank_account.setup()
+    firm.cb_id = EcoAccount(model)
+    firm.cb_id.setup()
+    firm.bank_id = EcoAccount(model)
+    firm.bank_id.setup()
     return firm
 
 
@@ -91,8 +91,8 @@ def test_bank_grant_loans(market, firm, bank):
     assert bank.account.stocks["cash"] == -50
     assert firm.account.stocks["loans"] == -50
     assert firm.account.stocks["deposits"] == 50
-    assert firm.bank_account.stocks["deposits"] == -50
-    assert firm.bank_account.stocks["cash"] == 50
+    assert firm.bank_id.stocks["deposits"] == -50
+    assert firm.bank_id.stocks["cash"] == 50
     assert market.graph[lender][borrower]["amount"] == 50
     assert market.graph[lender][borrower]["rate"] == 0.05
 
@@ -102,7 +102,7 @@ def test_firm_repays_loans(market, firm, bank):
     bank.account.stocks["loans"] = 50
     firm.account.stocks["loans"] = -50
     firm.account.stocks["deposits"] = 55
-    firm.bank_account.stocks["deposits"] = -55
+    firm.bank_id.stocks["deposits"] = -55
     borrower, lender = firm.roles["borrower"], bank.roles["lender"]
     market.graph.add_edge(lender, borrower, amount=50, rate=0.1)
 
@@ -116,6 +116,6 @@ def test_firm_repays_loans(market, firm, bank):
     assert firm.account.stocks["loans"] == 0
     assert firm.account.stocks["deposits"] == 0
     assert firm.account.flows["loan_interests"] == -5
-    assert firm.bank_account.stocks["deposits"] == 0
-    assert firm.bank_account.stocks["cash"] == -55
+    assert firm.bank_id.stocks["deposits"] == 0
+    assert firm.bank_id.stocks["cash"] == -55
     assert market.graph[lender][borrower]["amount"] == 0

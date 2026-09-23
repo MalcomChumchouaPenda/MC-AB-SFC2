@@ -253,7 +253,7 @@ def test_link_depositor_registers_deposit_bank_refs(market_with_participants):
 
     # Then
     assert depositor.deposit_bank == deposit_bank
-    assert depositor.bank_account == deposit_bank.account
+    assert depositor.bank_id == deposit_bank.account
 
 
 @pytest.fixture
@@ -262,7 +262,7 @@ def market_with_depositor_amount(market_with_participants):
     market, depositor, deposit_bank = market_with_participants
     market.graph.add_edge(depositor, deposit_bank, amount=100)
     depositor.deposit_bank = deposit_bank
-    depositor.bank_account = Mock()
+    depositor.bank_id = Mock()
     return market, depositor, 100
 
 
@@ -282,7 +282,7 @@ def test_unlink_depositor_remove_graph_edge(market_with_depositor_amount):
 def test_unlink_depositor_updates_accounts(market_with_depositor_amount):
     # Given
     market, depositor, amount = market_with_depositor_amount
-    bank_account = depositor.bank_account
+    bank_id = depositor.bank_id
 
     # When
     market.unlink_depositor_with_bank(depositor)
@@ -290,11 +290,11 @@ def test_unlink_depositor_updates_accounts(market_with_depositor_amount):
     # Then
     depositor.account.credit_stock.assert_any_call("cash", amount)
     depositor.account.debit_stock.assert_any_call("deposits", amount)
-    bank_account.debit_stock.assert_any_call("cash", amount)
-    bank_account.credit_stock.assert_any_call("deposits", amount)
+    bank_id.debit_stock.assert_any_call("cash", amount)
+    bank_id.credit_stock.assert_any_call("deposits", amount)
 
 
-def test_unlink_depositor_change_bank_account_ref(market_with_depositor_amount):
+def test_unlink_depositor_change_bank_id_ref(market_with_depositor_amount):
     # Given
     market, depositor, _ = market_with_depositor_amount
 
@@ -302,7 +302,7 @@ def test_unlink_depositor_change_bank_account_ref(market_with_depositor_amount):
     market.unlink_depositor_with_bank(depositor)
 
     # Then
-    assert depositor.bank_account is None
+    assert depositor.bank_id is None
     assert depositor.deposit_bank is None
 
 

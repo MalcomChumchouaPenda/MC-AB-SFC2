@@ -16,24 +16,24 @@ def test_is_eco_role():
 
 
 @pytest.fixture
-def authority_before_setup():
+def role_with_env():
     # Given
-    model = Mock()
-    authority = FiscalAuthority(model)
-    return authority
+    agent, env = Mock(), Mock()
+    role = FiscalAuthority(agent, env)
+    return role, env
 
 
-def test_expose_tax_rate_from_agent(authority_before_setup):
+def test_expose_tax_rate_from_agent(role_with_env):
     # Given
     agent = Mock()
-    authority = authority_before_setup
-    authority.agent = agent
+    role, _ = role_with_env
+    role.agent = agent
 
     # When
     agent.tax_rate = 0.02
 
     # Then
-    assert authority.tax_rate == 0.02
+    assert role.tax_rate == 0.02
 
 
 # ---------------------------------------------------
@@ -41,67 +41,58 @@ def test_expose_tax_rate_from_agent(authority_before_setup):
 # ----------------------------------------------------
 
 
-@pytest.fixture
-def authority_with_env(authority_before_setup):
+def test_get_gdp_from_env(role_with_env):
     # Given
-    env = Mock()
-    authority = authority_before_setup
-    authority.env = env
-    return authority, env
-
-
-def test_get_gdp_from_env(authority_with_env):
-    # Given
-    authority, env = authority_with_env
+    role, env = role_with_env
     env.gdp = 500
 
     # When
-    perceived = authority.get_gdp()
+    perceived = role.get_gdp()
 
     # Then
     assert perceived == 500
 
 
 @pytest.fixture
-def authority_with_good_market(authority_before_setup):
+def role_with_good_market(role_with_env):
     # Given
     market = Mock()
     env = Mock(spaces={"good_market": market})
-    authority = authority_before_setup
-    authority.env = env
-    return authority, market
+    role, _ = role_with_env
+    role.env = env
+    return role, market
 
 
-def test_get_average_price_from_env(authority_with_good_market):
+def test_get_average_price_from_env(role_with_good_market):
     # Given
-    authority, market = authority_with_good_market
+    role, market = role_with_good_market
     market.average_price = 1.5
 
     # When
-    perceived = authority.get_average_price()
+    perceived = role.get_average_price()
 
     # Then
     assert perceived == 1.5
 
 
-def test_get_average_productivity_from_env(authority_with_good_market):
+def test_get_average_productivity_from_env(role_with_good_market):
     # Given
-    authority, market = authority_with_good_market
+    role, market = role_with_good_market
     market.average_prod = 1.0
 
     # When
-    perceived = authority.get_average_productivity()
+    perceived = role.get_average_productivity()
 
     # Then
     assert perceived == 1.0
 
 
-def test_find_citizens_from_env(authority_with_env):
+def test_find_citizens_from_env(role_with_env):
     # Given
-    authority, env = authority_with_env
+    role, env = role_with_env
 
     # When
-    perceived = authority.find_citizens()
+    perceived = role.find_citizens()
 
     # Then
     assert perceived == env.find_citizens.return_value
@@ -112,13 +103,13 @@ def test_find_citizens_from_env(authority_with_env):
 # ----------------------------------------------------
 
 
-def test_pay_public_transfers_from_env(authority_with_env):
+def test_pay_public_transfers_from_env(role_with_env):
     # Given
     citizen = Mock()
-    authority, env = authority_with_env
+    role, env = role_with_env
 
     # When
-    authority.pay_public_transfers(citizen, 100)
+    role.pay_public_transfers(citizen, 100)
 
     # Then
-    env.pay_public_transfers(authority, citizen, 100)
+    env.pay_public_transfers(role, citizen, 100)

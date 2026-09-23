@@ -16,22 +16,19 @@ def test_is_eco_role():
 
 
 @pytest.fixture
-def worker_before_setup():
+def role_with_env():
     # Given
-    model = Mock()
-    worker = Worker(model)
-    return worker
+    agent, env = Mock(), Mock()
+    role = Worker(agent, env)
+    return role, env
 
 
-def test_has_unit_labor_supply_prop(worker_before_setup):
+def test_has_unit_labor_supply_prop(role_with_env):
     # Given
-    worker = worker_before_setup
+    role, _ = role_with_env
 
-    # When
-    worker.setup()
-
-    # Then
-    assert worker.labor_supply == 1.0
+    # Assert
+    assert role.labor_supply == 1.0
 
 
 # ---------------------------------------------------
@@ -39,45 +36,36 @@ def test_has_unit_labor_supply_prop(worker_before_setup):
 # ----------------------------------------------------
 
 
-def test_get_labor_sold(worker_before_setup):
+def test_get_labor_sold(role_with_env):
     # Given
-    worker = worker_before_setup
-    worker.labor_supply = 0.6
+    role, _ = role_with_env
+    role.labor_supply = 0.6
 
     # When
-    result = worker.labor_sold
+    result = role.labor_sold
 
     # Then
     assert result == 0.4
 
 
-@pytest.fixture
-def worker_with_env(worker_before_setup):
+def test_get_unemployment(role_with_env):
     # Given
-    env = Mock()
-    worker = worker_before_setup
-    worker.env = env
-    return worker, env
-
-
-def test_get_unemployment(worker_with_env):
-    # Given
-    worker, env = worker_with_env
+    role, env = role_with_env
     env.unemployment = 0.12
 
     # When
-    perceived = worker.get_unemployment()
+    perceived = role.get_unemployment()
 
     # Then
     assert perceived == 0.12
 
 
-def test_find_employers_uses_env_method(worker_with_env):
+def test_find_employers_uses_env_method(role_with_env):
     # Given
-    worker, env = worker_with_env
+    role, env = role_with_env
 
     # When
-    found = worker.find_employers(5)
+    found = role.find_employers(5)
 
     # Then
     env.find_employers.assert_called_with(5)
@@ -89,13 +77,13 @@ def test_find_employers_uses_env_method(worker_with_env):
 # ----------------------------------------------------
 
 
-def test_accept_job_uses_hire_method(worker_with_env):
+def test_accept_job_uses_hire_method(role_with_env):
     # Given
     employer = Mock()
-    worker, env = worker_with_env
+    role, env = role_with_env
 
     # When
-    worker.accept_job(employer, 0.5)
+    role.accept_job(employer, 0.5)
 
     # Then
-    env.hire_worker.assert_called_with(worker, employer, 0.5)
+    env.hire_worker.assert_called_with(role, employer, 0.5)
