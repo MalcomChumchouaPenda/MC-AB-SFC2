@@ -29,8 +29,7 @@ class Country(EcoSpace):
         # sub spaces
         self.union = None
         self.add_space(GoodsMarket, "good_market", tradable=False)
-        self.labor_market = LaborMarket(model)
-        self.labor_market.setup()
+        self.add_space(LaborMarket, "labor_market")
         self.deposit_market = DepositMarket(model)
         self.deposit_market.setup()
 
@@ -153,7 +152,7 @@ class Country(EcoSpace):
     def _place_firm(self, firm, tradable):
         self.union.place_firm(firm, tradable=tradable)
         self.deposit_market.add_depositor(firm)
-        self.labor_market.add_employer(firm)
+        self.spaces["labor_market"].add_employer(firm)
         if not tradable:
             self.spaces["good_market"].add_producer(firm)
 

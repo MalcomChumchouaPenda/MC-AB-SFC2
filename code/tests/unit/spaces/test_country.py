@@ -101,7 +101,7 @@ def test_setup_creates_good_market(country_before_setup):
     country.setup()
 
     # Then
-    country.add_space.assert_called_with(FakeGoodMarket, "good_market", tradable=False)
+    country.add_space.assert_any_call(FakeGoodMarket, "good_market", tradable=False)
 
 
 def test_setup_creates_labor_market(country_before_setup):
@@ -112,8 +112,7 @@ def test_setup_creates_labor_market(country_before_setup):
     country.setup()
 
     # Then
-    assert country.labor_market is FakeLaborMarket.return_value
-    assert country.labor_market.setup.called
+    country.add_space.assert_any_call(FakeLaborMarket, "labor_market")
 
 
 def test_setup_creates_deposit_market(country_before_setup):
@@ -793,7 +792,7 @@ def country_before_creation(country_before_setup):
     country.fund_company = Mock()
     country.union = Mock()
     country.spaces["good_market"] = Mock()
-    country.labor_market = Mock()
+    country.spaces["labor_market"] = Mock()
     country.deposit_market = Mock()
     return country
 
@@ -836,12 +835,13 @@ def test_create_non_trad_firm_in_goods_market(country_before_creation, share):
     # Given
     firm = Mock()
     country = country_before_creation
+    market = country.spaces["good_market"]
 
     # When
     country.create_firm(firm, [share], tradable=False)
 
     # Then
-    country.spaces["good_market"].add_producer.assert_called_with(firm)
+    market.add_producer.assert_called_with(firm)
 
 
 @pytest.mark.parametrize("tradable", [True, False])
@@ -849,12 +849,13 @@ def test_create_firm_add_employer_role(country_before_creation, share, tradable)
     # Given
     firm = Mock()
     country = country_before_creation
+    market = country.spaces["labor_market"]
 
     # When
     country.create_firm(firm, [share], tradable=tradable)
 
     # Then
-    country.labor_market.add_employer.assert_called_with(firm)
+    market.add_employer.assert_called_with(firm)
 
 
 @pytest.mark.parametrize("tradable", [True, False])
