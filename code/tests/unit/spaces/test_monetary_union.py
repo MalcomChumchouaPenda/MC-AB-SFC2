@@ -72,7 +72,7 @@ def test_setup_add_tradable_good_market(union_before_setup):
 
     # Then
     union.add_space.assert_any_call(FakeGoodMarket, "good_market", tradable=True)
-    
+
 
 def test_setup_creates_credit_market(union_before_setup):
     # Given
@@ -107,7 +107,6 @@ def test_setup_creates_countries(union_before_setup):
     # Then
     for i in range(2):
         union.add_space.assert_any_call(FakeCountry, f"country_{i}")
-
 
 
 # ---------------------------------------------------

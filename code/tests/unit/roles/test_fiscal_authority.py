@@ -66,7 +66,7 @@ def test_get_gdp_from_space(authority_with_space):
 def authority_with_good_market(authority_before_setup):
     # Given
     market = Mock()
-    space = Mock(spaces={"good_market":market})
+    space = Mock(spaces={"good_market": market})
     authority = authority_before_setup
     authority.space = space
     return authority, market

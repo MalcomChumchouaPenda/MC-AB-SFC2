@@ -168,4 +168,3 @@ class EcoSpace(Network):
         agent = role.agent
         agent.roles.pop(name)
         self.graph.remove_node(role)
-

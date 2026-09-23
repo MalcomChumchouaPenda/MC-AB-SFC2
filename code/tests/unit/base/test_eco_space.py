@@ -68,7 +68,6 @@ def space_with_sub_spaces(space_before_setup):
     return space, sub_spaces
 
 
-
 def test_add_space_creates_space(space_with_sub_spaces):
     # Given
     fake_space = Mock()
@@ -95,7 +94,7 @@ def test_add_space_creates_with_kwargs(space_with_sub_spaces):
     # Then
     fake_kind.assert_called_with(space.model, x=1, y=2)
     assert fake_space.env is space
-    
+
 
 def test_add_space_returns_new_space(space_with_sub_spaces):
     # Given
@@ -342,4 +341,3 @@ def test_add_account_setup_new_account(space_with_accounts):
 
     # Then
     assert account.setup.called
-

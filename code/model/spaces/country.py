@@ -31,7 +31,6 @@ class Country(EcoSpace):
         self.add_space(LaborMarket, "labor_market")
         self.add_space(DepositMarket, "deposit_market")
 
-
     #
     # Role management
     #

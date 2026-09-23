@@ -31,7 +31,6 @@ def govt(model):
     return govt
 
 
-
 @pytest.fixture
 def union(model):
     # Given

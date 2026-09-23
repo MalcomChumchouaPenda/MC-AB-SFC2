@@ -30,7 +30,6 @@ def cb(model):
     return cb
 
 
-
 @pytest.fixture
 def union(model):
     # Given
@@ -45,7 +44,6 @@ def country(union):
     country = union.spaces["country_0"]
     country.monetary_authority = Mock()
     return country
-
 
 
 @pytest.fixture

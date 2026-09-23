@@ -33,7 +33,6 @@ def country_before_setup(monkeypatch):
     return country
 
 
-
 def test_has_inflation(country_before_setup):
     # Given
     country = country_before_setup
@@ -419,8 +418,6 @@ def test_add_company_links_to_cb_account(country_without_companies):
 
     # Then
     assert agent.cb_account is authority.account
-
-
 
 
 # ---------------------------------------------------
