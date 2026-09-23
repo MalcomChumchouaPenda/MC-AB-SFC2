@@ -43,7 +43,7 @@ def test_has_sub_spaces_dict(space_before_setup):
     assert space.spaces == {}
 
 
-def test_has_accounts_list(space_before_setup):
+def test_has_accounts_dict(space_before_setup):
     # Given
     space = space_before_setup
 
@@ -51,7 +51,8 @@ def test_has_accounts_list(space_before_setup):
     space.setup()
 
     # Then
-    assert isinstance(space.accounts, list)
+    assert space.accounts == {}
+
 
 
 # ---------------------------------------------------
@@ -289,25 +290,25 @@ def test_remove_role_un_registers_role(space_with_role):
 
 
 # ---------------------------------------------------
-# ACCOUNT MANAGEMENT TESTS
+# ACCOUNT MANAGEMENT
 # ----------------------------------------------------
 
 FakeAccount = Mock()
 
 
 @pytest.fixture
-def space_with_accounts(monkeypatch, space_before_setup):
+def space_with_no_accounts(monkeypatch, space_before_setup):
     # Given
     monkeypatch.setattr("model.base.EcoAccount", FakeAccount)
     space = space_before_setup
-    space.accounts = []
+    space.accounts = {}
     return space
 
 
-def test_add_account_create_new_account(space_with_accounts):
+def test_add_account_create_new_account(space_with_no_accounts):
     # Given
-    agent = Mock()
-    space = space_with_accounts
+    agent = Mock(id=1)
+    space = space_with_no_accounts
 
     # When
     account = space.add_account(agent)
@@ -317,27 +318,103 @@ def test_add_account_create_new_account(space_with_accounts):
     assert account is FakeAccount.return_value
 
 
-def test_add_account_register_new_account(space_with_accounts):
+def test_add_account_registers_new_account(space_with_no_accounts):
     # Given
-    agent = Mock()
-    space = space_with_accounts
+    agent = Mock(id=1)
+    space = space_with_no_accounts
 
     # When
     account = space.add_account(agent)
 
     # Then
-    assert account in space.accounts
+    assert account == space.accounts[agent.id]
     assert account is agent.account
     assert account.agent == agent
 
 
-def test_add_account_setup_new_account(space_with_accounts):
+def test_add_account_setup_new_account(space_with_no_accounts):
     # Given
-    agent = Mock()
-    space = space_with_accounts
+    agent = Mock(id=1)
+    space = space_with_no_accounts
 
     # When
     account = space.add_account(agent)
 
     # Then
     assert account.setup.called
+
+
+def test_add_account_delegates_process_to_env(space_with_no_accounts):
+    # Given
+    env, agent = Mock(), Mock(id=1)
+    space = space_with_no_accounts
+    space.env = env
+
+    # When
+    account = space.add_account(agent)
+
+    # Then
+    env.add_account.assert_called_with(agent)
+    assert env.add_account.return_value is account
+
+
+def test_add_account_doesnt_register_env_account(space_with_no_accounts):
+    # Given
+    env, agent = Mock(), Mock(id=1)
+    space = space_with_no_accounts
+    space.env = env
+
+    # When
+    space.add_account(agent)
+
+    # Then
+    assert agent.id not in space.accounts
+
+
+
+@pytest.fixture
+def space_with_two_accounts(space_before_setup):
+    # Given
+    source, target = 1, 2
+    space = space_before_setup
+    space.accounts = {source:Mock(), target:Mock()}
+    return space, source, target
+
+
+def test_transfer_debit_source_account(space_with_two_accounts):
+    # Given
+    space, source, target = space_with_two_accounts
+    source_account = space.accounts[source]
+
+    # When
+    space.transfer("x", source, target, 100)
+
+    # Then
+    source_account.debit.assert_called_with("x", 100)
+
+
+def test_transfer_credit_target_account(space_with_two_accounts):
+    # Given
+    space, source, target = space_with_two_accounts
+    target_account = space.accounts[target]
+
+    # When
+    space.transfer("x", source, target, 100)
+
+    # Then
+    target_account.credit.assert_called_with("x", 100)
+
+
+def test_transfer_delegates_process_to_env(space_with_two_accounts):
+    # Given
+    env = Mock()
+    space, source, target = space_with_two_accounts
+    space.env = env
+
+    # When
+    space.transfer("x", source, target, 100)
+
+    # Then
+    env.transfer.assert_called_with("x", source, target, 100)
+
+

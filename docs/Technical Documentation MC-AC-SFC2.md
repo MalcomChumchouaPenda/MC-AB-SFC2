@@ -122,6 +122,10 @@ The relationships between these objects have been implemented according to the f
 - each space contains homogeneous sets of stock items or roles
 - each role has references to its stock items
 
+spaces follow composite pattern and chain of respponsability pattern to:
+
+* ensure thatonly one space is the universe
+* ensure that only one space handle concrete transfer and account
 
 ```python
 # exemple d'espace avec roles et stocks

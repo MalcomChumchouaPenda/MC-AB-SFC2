@@ -124,16 +124,52 @@ class EcoSpace(Network):
         self.roles = {}
         self.env = None
         self.spaces = {}
-        self.accounts = []
+        self.accounts = {}
 
+
+    #
+    # Role management
+    #
+    def add_role(self, kind, agent, name):
+        role = kind(self.model)
+        role.setup()
+        role.name = name
+        role.env = self
+        role.agent = agent
+        agent.roles[name] = role
+        self.graph.add_node(role)
+        return role
+
+    def remove_role(self, role):
+        name = role.name
+        agent = role.agent
+        agent.roles.pop(name)
+        self.graph.remove_node(role)
+
+    #
+    # Account management
+    #
     def add_account(self, agent):
+        if self.env is not None:
+            return self.env.add_account(agent)
         account = EcoAccount(agent.model)
         account.setup()
         account.agent = agent
         agent.account = account
-        self.accounts.append(account)
+        self.accounts[agent.id] = account
         return account
 
+
+    def transfer(self, item, source, target, amount):
+        if self.env is not None:
+            self.env.transfer(item, source, target, amount)
+        self.accounts[source].debit(item, amount)
+        self.accounts[target].credit(item, amount)
+
+
+    #
+    # Space management
+    #
     def add_space(self, kind, name, **kwargs):
         sub_space = kind(self.model, **kwargs)
         sub_space.env = self
@@ -152,19 +188,3 @@ class EcoSpace(Network):
 
     def clear_defaults(self):
         raise NotImplementedError
-
-    def add_role(self, kind, agent, name):
-        role = kind(self.model)
-        role.setup()
-        role.name = name
-        role.env = self
-        role.agent = agent
-        agent.roles[name] = role
-        self.graph.add_node(role)
-        return role
-
-    def remove_role(self, role):
-        name = role.name
-        agent = role.agent
-        agent.roles.pop(name)
-        self.graph.remove_node(role)
