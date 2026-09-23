@@ -3,7 +3,6 @@ from agentpy import AgentNode
 from unittest.mock import Mock
 from model.base import EcoRole
 
-
 # ---------------------------------------------------
 # ARCHITECTURE TESTS
 # ----------------------------------------------------
@@ -18,7 +17,6 @@ def test_requires_agent_and_env():
     #  Assert
     with pytest.raises(TypeError, match="'agent' and 'env'"):
         EcoRole()
-
 
 
 @pytest.fixture
@@ -51,7 +49,7 @@ def test_has_label_attr(role_with_agent_and_env):
 
     # Assert
     assert role.label == agent.id
-    
+
 
 def test_has_name_attr(role_with_agent_and_env):
     # Given
@@ -115,5 +113,3 @@ def test_expose_agent_country_id(role_with_agent_and_env):
 
     # Then
     assert role.country_id == 2
-
-

@@ -44,7 +44,6 @@ def test_has_flow_names_constant():
     )
 
 
-
 def test_contains_initial_value_for_each_stock(monkeypatch):
     # Given
     monkeypatch.setattr(EcoAccount, "STOCK_NAMES", ["x", "y"])
@@ -67,7 +66,6 @@ def test_contains_initial_value_for_each_flow(monkeypatch):
 
     # Then
     assert account == {"a": 0, "b": 0}
-
 
 
 # ---------------------------------------------------

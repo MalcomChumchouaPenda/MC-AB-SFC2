@@ -52,7 +52,6 @@ def test_has_default_bond_value(role_with_env):
 # ----------------------------------------------------
 
 
-
 def test_get_discount_rate(role_with_env):
     # Given
     role, env = role_with_env

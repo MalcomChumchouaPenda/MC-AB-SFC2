@@ -41,7 +41,6 @@ def test_expose_discount_rate_from_agent(role_with_env):
 # ----------------------------------------------------
 
 
-
 def test_get_average_inflation_from_env(role_with_env):
     # Given
     role, env = role_with_env

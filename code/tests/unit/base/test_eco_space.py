@@ -54,7 +54,6 @@ def test_has_accounts_dict(space_before_setup):
     assert space.accounts == {}
 
 
-
 # ---------------------------------------------------
 # SUB SPACES MANAGEMENT TESTS
 # ----------------------------------------------------
@@ -356,13 +355,12 @@ def test_add_account_doesnt_register_env_account(space_with_no_accounts):
     assert agent.id not in space.accounts
 
 
-
 @pytest.fixture
 def space_with_two_accounts(space_before_setup):
     # Given
-    source, target =  1,  2
+    source, target = 1, 2
     space = space_before_setup
-    space.accounts = {source:Mock(), target:Mock()}
+    space.accounts = {source: Mock(), target: Mock()}
     return space, source, target
 
 
@@ -376,7 +374,6 @@ def test_transfer_debit_source_account_with_no_env(space_with_two_accounts):
 
     # Then
     account.debit.assert_called_with("x", 100)
-
 
 
 def test_transfer_credit_target_account_with_no_env(space_with_two_accounts):
@@ -402,6 +399,3 @@ def test_transfer_uses_env_method(space_with_two_accounts):
 
     # Then
     env.transfer.assert_called_with("x", source, target, 100)
-
-
-

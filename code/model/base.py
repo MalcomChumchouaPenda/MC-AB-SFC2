@@ -30,7 +30,6 @@ class EcoRole(AgentNode):
         self.env = env
         self.name = ""
 
-
     @property
     def country_id(self):
         return self.agent.country_id
@@ -62,7 +61,6 @@ class EcoAccount(AttrDict):
         "cash",
         "advances",
         "equities",
-
     )
 
     FLOW_NAMES = (
@@ -78,7 +76,6 @@ class EcoAccount(AttrDict):
         "adv_interests",
         "dividends",
         "profit_transfers",
-
     )
 
     def __init__(self, *args, **kwargs):
@@ -86,13 +83,11 @@ class EcoAccount(AttrDict):
         for name in self.STOCK_NAMES + self.FLOW_NAMES:
             self[name] = 0
 
-
     def debit(self, name, amount):
         self[name] -= amount
 
     def credit(self, name, amount):
         self[name] += amount
-
 
     def clear_flows(self):
         for name in self.FLOW_NAMES:
@@ -112,7 +107,6 @@ class EcoSpace(Network):
         self.env = None
         self.spaces = {}
         self.accounts = {}
-
 
     #
     # Role management
@@ -141,7 +135,6 @@ class EcoSpace(Network):
         agent.account = account
         self.accounts[agent.id] = account
         return account
-
 
     def transfer(self, item, source, target, amount):
         if self.env is not None:

@@ -80,6 +80,3 @@ def test_buy_goods_uses_env_method(role_with_env):
 
     # Then
     env.buy_goods.assert_called_with(role, supplier, 10)
-
-
-
