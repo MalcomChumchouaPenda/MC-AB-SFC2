@@ -52,18 +52,18 @@ def test_has_labor_demand_prop(employer_before_setup):
 
 
 @pytest.fixture
-def employer_with_space(employer_before_setup):
+def employer_with_env(employer_before_setup):
     # Given
-    space = Mock()
+    env = Mock()
     employer = employer_before_setup
-    employer.env = space
-    return employer, space
+    employer.env = env
+    return employer, env
 
 
-def test_get_unemployment(employer_with_space):
+def test_get_unemployment(employer_with_env):
     # Given
-    employer, space = employer_with_space
-    space.unemployment = 0.12
+    employer, env = employer_with_env
+    env.unemployment = 0.12
 
     # When
     perceived = employer.get_unemployment()
@@ -72,16 +72,16 @@ def test_get_unemployment(employer_with_space):
     assert perceived == 0.12
 
 
-def test_get_jobs(employer_with_space):
+def test_get_jobs(employer_with_env):
     # Given
-    employer, space = employer_with_space
+    employer, env = employer_with_env
 
     # When
     jobs = employer.get_jobs()
 
     # Then
-    space.find_jobs.assert_called_with(employer)
-    assert jobs == space.find_jobs.return_value
+    env.find_jobs.assert_called_with(employer)
+    assert jobs == env.find_jobs.return_value
 
 
 # ---------------------------------------------------

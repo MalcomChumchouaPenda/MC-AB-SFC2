@@ -51,36 +51,36 @@ def test_has_default_net_worth(borrower_before_setup):
 
 
 @pytest.fixture
-def borrower_with_space(borrower_before_setup):
+def borrower_with_env(borrower_before_setup):
     # Given
-    space = Mock()
+    env = Mock()
     borrower = borrower_before_setup
-    borrower.env = space
-    return borrower, space
+    borrower.env = env
+    return borrower, env
 
 
-def test_find_lenders(borrower_with_space):
+def test_find_lenders(borrower_with_env):
     # Given
-    borrower, space = borrower_with_space
+    borrower, env = borrower_with_env
 
     # When
     result = borrower.find_lenders()
 
     # Then
-    space.find_lenders.assert_called_once_with()
-    assert result == space.find_lenders.return_value
+    env.find_lenders.assert_called_once_with()
+    assert result == env.find_lenders.return_value
 
 
-def test_find_loans(borrower_with_space):
+def test_find_loans(borrower_with_env):
     # Given
-    borrower, space = borrower_with_space
+    borrower, env = borrower_with_env
 
     # When
     result = borrower.find_loans()
 
     # Then
-    space.find_loans.assert_called_once_with(borrower)
-    assert result == space.find_loans.return_value
+    env.find_loans.assert_called_once_with(borrower)
+    assert result == env.find_loans.return_value
 
 
 # ---------------------------------------------------
@@ -100,25 +100,25 @@ def test_request_loans_use_lender_method(borrower_before_setup):
     lender.receive_request.assert_called_with(borrower)
 
 
-def test_repay_loans_use_space_method(borrower_with_space):
+def test_repay_loans_use_env_method(borrower_with_env):
     # Given
     lender = Mock()
-    borrower, space = borrower_with_space
+    borrower, env = borrower_with_env
 
     # When
     borrower.repay_loans(lender, 100, 10)
 
     # Then
-    space.repay_loans.assert_called_with(borrower, lender, 100, 10)
+    env.repay_loans.assert_called_with(borrower, lender, 100, 10)
 
 
-def test_make_defaults_use_space_method(borrower_with_space):
+def test_make_defaults_use_env_method(borrower_with_env):
     # Given
     lender = Mock()
-    borrower, space = borrower_with_space
+    borrower, env = borrower_with_env
 
     # When
     borrower.make_defaults(lender, 100)
 
     # Then
-    space.make_defaults.assert_called_with(borrower, lender, 100)
+    env.make_defaults.assert_called_with(borrower, lender, 100)

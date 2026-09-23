@@ -1,6 +1,5 @@
 import pytest
-from unittest.mock import Mock, MagicMock
-from networkx import Graph
+from unittest.mock import Mock
 from model.roles.worker import Worker
 
 # ---------------------------------------------------
@@ -53,18 +52,18 @@ def test_get_labor_sold(worker_before_setup):
 
 
 @pytest.fixture
-def worker_with_space(worker_before_setup):
+def worker_with_env(worker_before_setup):
     # Given
-    space = Mock()
+    env = Mock()
     worker = worker_before_setup
-    worker.env = space
-    return worker, space
+    worker.env = env
+    return worker, env
 
 
-def test_get_unemployment(worker_with_space):
+def test_get_unemployment(worker_with_env):
     # Given
-    worker, space = worker_with_space
-    space.unemployment = 0.12
+    worker, env = worker_with_env
+    env.unemployment = 0.12
 
     # When
     perceived = worker.get_unemployment()
@@ -73,16 +72,16 @@ def test_get_unemployment(worker_with_space):
     assert perceived == 0.12
 
 
-def test_find_employers_uses_space_method(worker_with_space):
+def test_find_employers_uses_env_method(worker_with_env):
     # Given
-    worker, space = worker_with_space
+    worker, env = worker_with_env
 
     # When
     found = worker.find_employers(5)
 
     # Then
-    space.find_employers.assert_called_with(5)
-    assert found == space.find_employers.return_value
+    env.find_employers.assert_called_with(5)
+    assert found == env.find_employers.return_value
 
 
 # ---------------------------------------------------
@@ -90,13 +89,13 @@ def test_find_employers_uses_space_method(worker_with_space):
 # ----------------------------------------------------
 
 
-def test_accept_job_uses_hire_method(worker_with_space):
+def test_accept_job_uses_hire_method(worker_with_env):
     # Given
     employer = Mock()
-    worker, space = worker_with_space
+    worker, env = worker_with_env
 
     # When
     worker.accept_job(employer, 0.5)
 
     # Then
-    space.hire_worker.assert_called_with(worker, employer, 0.5)
+    env.hire_worker.assert_called_with(worker, employer, 0.5)

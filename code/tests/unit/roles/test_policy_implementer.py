@@ -29,18 +29,18 @@ def role_before_setup():
 
 
 @pytest.fixture
-def role_with_space(role_before_setup):
+def role_with_env(role_before_setup):
     # Given
-    space = Mock()
+    env = Mock()
     role = role_before_setup
-    role.env = space
-    return role, space
+    role.env = env
+    return role, env
 
 
-def test_get_discount_rate_from_space(role_with_space):
+def test_get_discount_rate_from_env(role_with_env):
     # Given
-    role, space = role_with_space
-    space.policy_maker.discount_rate = 0.03
+    role, env = role_with_env
+    env.policy_maker.discount_rate = 0.03
 
     # When
     perceived = role.get_discount_rate()

@@ -42,18 +42,18 @@ def test_expose_tax_rate_from_agent(authority_before_setup):
 
 
 @pytest.fixture
-def authority_with_space(authority_before_setup):
+def authority_with_env(authority_before_setup):
     # Given
-    space = Mock()
+    env = Mock()
     authority = authority_before_setup
-    authority.env = space
-    return authority, space
+    authority.env = env
+    return authority, env
 
 
-def test_get_gdp_from_space(authority_with_space):
+def test_get_gdp_from_env(authority_with_env):
     # Given
-    authority, space = authority_with_space
-    space.gdp = 500
+    authority, env = authority_with_env
+    env.gdp = 500
 
     # When
     perceived = authority.get_gdp()
@@ -66,13 +66,13 @@ def test_get_gdp_from_space(authority_with_space):
 def authority_with_good_market(authority_before_setup):
     # Given
     market = Mock()
-    space = Mock(spaces={"good_market": market})
+    env = Mock(spaces={"good_market": market})
     authority = authority_before_setup
-    authority.env = space
+    authority.env = env
     return authority, market
 
 
-def test_get_average_price_from_space(authority_with_good_market):
+def test_get_average_price_from_env(authority_with_good_market):
     # Given
     authority, market = authority_with_good_market
     market.average_price = 1.5
@@ -84,7 +84,7 @@ def test_get_average_price_from_space(authority_with_good_market):
     assert perceived == 1.5
 
 
-def test_get_average_productivity_from_space(authority_with_good_market):
+def test_get_average_productivity_from_env(authority_with_good_market):
     # Given
     authority, market = authority_with_good_market
     market.average_prod = 1.0
@@ -96,15 +96,15 @@ def test_get_average_productivity_from_space(authority_with_good_market):
     assert perceived == 1.0
 
 
-def test_find_citizens_from_space(authority_with_space):
+def test_find_citizens_from_env(authority_with_env):
     # Given
-    authority, space = authority_with_space
+    authority, env = authority_with_env
 
     # When
     perceived = authority.find_citizens()
 
     # Then
-    assert perceived == space.find_citizens.return_value
+    assert perceived == env.find_citizens.return_value
 
 
 # ---------------------------------------------------
@@ -112,13 +112,13 @@ def test_find_citizens_from_space(authority_with_space):
 # ----------------------------------------------------
 
 
-def test_pay_public_transfers_from_space(authority_with_space):
+def test_pay_public_transfers_from_env(authority_with_env):
     # Given
     citizen = Mock()
-    authority, space = authority_with_space
+    authority, env = authority_with_env
 
     # When
     authority.pay_public_transfers(citizen, 100)
 
     # Then
-    space.pay_public_transfers(authority, citizen, 100)
+    env.pay_public_transfers(authority, citizen, 100)

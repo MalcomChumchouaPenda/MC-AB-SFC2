@@ -62,18 +62,18 @@ def test_has_defaulted(company_before_setup):
 
 
 @pytest.fixture
-def company_with_space(company_before_setup):
+def company_with_env(company_before_setup):
     # Given
-    space = Mock()
+    env = Mock()
     company = company_before_setup
-    company.env = space
-    return company, space
+    company.env = env
+    return company, env
 
 
-def test_get_average_wage(company_with_space):
+def test_get_average_wage(company_with_env):
     # Given
-    company, space = company_with_space
-    space.average_wage = 15.0
+    company, env = company_with_env
+    env.average_wage = 15.0
 
     # When
     perceived = company.get_average_wage()
@@ -82,22 +82,22 @@ def test_get_average_wage(company_with_space):
     assert perceived == 15.0
 
 
-def test_get_equity_shares_from_space(company_with_space):
+def test_get_equity_shares_from_env(company_with_env):
     # Given
-    company, space = company_with_space
+    company, env = company_with_env
 
     # When
     found = company.get_equity_shares()
 
     # Assert
-    space.find_equity_shares.assert_called_with(company)
-    assert found == space.find_equity_shares.return_value
+    env.find_equity_shares.assert_called_with(company)
+    assert found == env.find_equity_shares.return_value
 
 
-def test_get_tax_rate(company_with_space):
+def test_get_tax_rate(company_with_env):
     # Given
-    company, space = company_with_space
-    space.fiscal_authority.tax_rate = 0.2
+    company, env = company_with_env
+    env.fiscal_authority.tax_rate = 0.2
 
     # When
     perceived = company.get_tax_rate()
@@ -106,10 +106,10 @@ def test_get_tax_rate(company_with_space):
     assert perceived == 0.2
 
 
-def test_get_discount_rate(company_with_space):
+def test_get_discount_rate(company_with_env):
     # Given
-    company, space = company_with_space
-    space.monetary_authority.discount_rate = 0.05
+    company, env = company_with_env
+    env.monetary_authority.discount_rate = 0.05
 
     # When
     perceived = company.get_discount_rate()
@@ -123,48 +123,48 @@ def test_get_discount_rate(company_with_space):
 # ----------------------------------------------------
 
 
-def test_pay_dividends(company_with_space):
+def test_pay_dividends(company_with_env):
     # Given
-    company, space = company_with_space
+    company, env = company_with_env
     founder = Mock()
 
     # When
     company.pay_dividends(founder, 50)
 
     # Then
-    space.pay_dividends.assert_called_with(company, founder, 50)
+    env.pay_dividends.assert_called_with(company, founder, 50)
 
 
-def test_pay_taxes_uses_space_method(company_with_space):
+def test_pay_taxes_uses_env_method(company_with_env):
     # Given
-    company, space = company_with_space
+    company, env = company_with_env
 
     # When
     company.pay_taxes(50)
 
     # Then
-    space.pay_taxes.assert_called_with(company, 50)
+    env.pay_taxes.assert_called_with(company, 50)
 
 
-def test_update_equity_share_uses_space_method(company_with_space):
+def test_update_equity_share_uses_env_method(company_with_env):
     # Given
-    company, space = company_with_space
+    company, env = company_with_env
     founder = Mock()
 
     # When
     company.update_equity_share(founder, -50)
 
     # Then
-    space.update_equity_share.assert_called_with(company, founder, -50)
+    env.update_equity_share.assert_called_with(company, founder, -50)
 
 
-def test_transfer_residual_cash_uses_space_method(company_with_space):
+def test_transfer_residual_cash_uses_env_method(company_with_env):
     # Given
-    company, space = company_with_space
+    company, env = company_with_env
     founder = Mock()
 
     # When
     company.transfer_residual_cash(founder, 50)
 
     # Then
-    space.transfer_residual_cash.assert_called_with(company, founder, 50)
+    env.transfer_residual_cash.assert_called_with(company, founder, 50)

@@ -28,16 +28,16 @@ def buyer_before_setup():
 # ----------------------------------------------------
 
 
-def test_find_issuers(buyer_with_space):
+def test_find_issuers(buyer_with_env):
     # Given
-    buyer, space = buyer_with_space
+    buyer, env = buyer_with_env
 
     # When
     result = buyer.find_issuers()
 
     # Then
-    space.find_issuers.assert_called_once_with()
-    assert result == space.find_issuers.return_value
+    env.find_issuers.assert_called_once_with()
+    assert result == env.find_issuers.return_value
 
 
 # ---------------------------------------------------
@@ -46,21 +46,21 @@ def test_find_issuers(buyer_with_space):
 
 
 @pytest.fixture
-def buyer_with_space(buyer_before_setup):
+def buyer_with_env(buyer_before_setup):
     # Given
-    space = Mock()
+    env = Mock()
     buyer = buyer_before_setup
-    buyer.env = space
-    return buyer, space
+    buyer.env = env
+    return buyer, env
 
 
-def test_buy_bonds(buyer_with_space):
+def test_buy_bonds(buyer_with_env):
     # Given
     issuer = Mock()
-    buyer, space = buyer_with_space
+    buyer, env = buyer_with_env
 
     # When
     buyer.buy_bonds(issuer, 2)
 
     # Then
-    space.buy_bonds.assert_called_with(buyer, issuer, 2)
+    env.buy_bonds.assert_called_with(buyer, issuer, 2)

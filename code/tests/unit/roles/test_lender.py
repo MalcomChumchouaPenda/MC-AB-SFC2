@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import Mock
-from model.spaces.credit_market import Lender
+from model.roles.lender import Lender
 
 # ---------------------------------------------------
 # ARCHITECTURE TESTS
@@ -53,43 +53,43 @@ def test_receive_request(lender_before_setup):
 
 
 @pytest.fixture
-def lender_with_space(lender_before_setup):
+def lender_with_env(lender_before_setup):
     # Given
-    space = Mock()
+    env = Mock()
     lender = lender_before_setup
-    lender.env = space
-    return lender, space
+    lender.env = env
+    return lender, env
 
 
-def test_grant_loan(lender_with_space):
+def test_grant_loan(lender_with_env):
     # Given
     borrower = Mock()
-    lender, space = lender_with_space
+    lender, env = lender_with_env
 
     # When
     lender.grant_loan(borrower, 100, 0.04)
 
     # Then
-    space.grant_loan.assert_called_with(lender, borrower, 100, 0.04)
+    env.grant_loan.assert_called_with(lender, borrower, 100, 0.04)
 
 
-def test_request_advances(lender_with_space):
+def test_request_advances(lender_with_env):
     # Given
-    lender, space = lender_with_space
+    lender, env = lender_with_env
 
     # When
     lender.request_advances(100)
 
     # Then
-    space.request_advances.assert_called_with(lender, 100)
+    env.request_advances.assert_called_with(lender, 100)
 
 
-def test_repay_advances(lender_with_space):
+def test_repay_advances(lender_with_env):
     # Given
-    lender, space = lender_with_space
+    lender, env = lender_with_env
 
     # When
     lender.repay_advances(100, 10)
 
     # Then
-    space.repay_advances.assert_called_with(lender, 100, 10)
+    env.repay_advances.assert_called_with(lender, 100, 10)

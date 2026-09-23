@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import Mock
-from model.spaces.good_market import Consumer
+from model.roles.consumer import Consumer
 
 # ---------------------------------------------------
 # ARCHITECTURE TESTS
@@ -40,18 +40,18 @@ def test_expose_preference_attr(consumer_before_setup):
 
 
 @pytest.fixture
-def consumer_with_space(consumer_before_setup):
+def consumer_with_env(consumer_before_setup):
     # Given
-    space = Mock()
+    env = Mock()
     consumer = consumer_before_setup
-    consumer.env = space
-    return consumer, space
+    consumer.env = env
+    return consumer, env
 
 
-def test_get_average_price(consumer_with_space):
+def test_get_average_price(consumer_with_env):
     # Given
-    consumer, space = consumer_with_space
-    space.average_price = 25
+    consumer, env = consumer_with_env
+    env.average_price = 25
 
     # When
     average_price = consumer.get_average_price()
@@ -60,17 +60,17 @@ def test_get_average_price(consumer_with_space):
     assert average_price == 25
 
 
-def test_find_suppliers_uses_space_method(consumer_with_space):
+def test_find_suppliers_uses_env_method(consumer_with_env):
     # Given
     suppliers = [Mock() for _ in range(2)]
-    consumer, space = consumer_with_space
-    space.find_suppliers.return_value = suppliers
+    consumer, env = consumer_with_env
+    env.find_suppliers.return_value = suppliers
 
     # When
     found = consumer.find_suppliers(5)
 
     # Then
-    space.find_suppliers.assert_called_with(5)
+    env.find_suppliers.assert_called_with(5)
     assert found == suppliers
 
 
@@ -79,47 +79,16 @@ def test_find_suppliers_uses_space_method(consumer_with_space):
 # ----------------------------------------------------
 
 
-def test_buy_goods_uses_space_method(consumer_with_space):
+def test_buy_goods_uses_env_method(consumer_with_env):
     # Given
     supplier = Mock()
-    consumer, space = consumer_with_space
+    consumer, env = consumer_with_env
 
     # When
     consumer.buy_goods(supplier, 10)
 
     # Then
-    space.buy_goods.assert_called_with(consumer, supplier, 10)
+    env.buy_goods.assert_called_with(consumer, supplier, 10)
 
 
-# def test_get_tradable_demand(consumer):
-#     # Given
-#     space = consumer.space
-#     space.tradable = True
-#     household = consumer.agent
-#     household.desired_trad_cons = 40
-#     household.desired_non_trad_cons = 60
 
-#     # Assert
-#     assert consumer.demand == 40
-
-
-# def test_get_non_tradable_demand(consumer):
-#     # Given
-#     space = consumer.space
-#     space.tradable = False
-#     household = consumer.agent
-#     household.desired_trad_cons = 40
-#     household.desired_non_trad_cons = 60
-
-#     # Assert
-#     assert consumer.demand == 60
-
-
-# @pytest.fixture
-# def consumer_with_demand(monkeypatch):
-#     # Given
-#     demand = PropertyMock(return_value=500)
-#     monkeypatch.setattr(Consumer, "demand", demand)
-#     space = Mock()
-#     household = Mock(id=1)
-#     return Consumer(household, space)

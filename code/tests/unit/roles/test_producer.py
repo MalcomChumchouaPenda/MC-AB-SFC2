@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import Mock
-from model.spaces.good_market import Producer
+from model.roles.producer import Producer
 
 # ---------------------------------------------------
 # ARCHITECTURE TESTS
@@ -73,18 +73,18 @@ def test_expose_variety_attr(producer_before_setup):
 
 
 @pytest.fixture
-def producer_with_space(producer_before_setup):
+def producer_with_env(producer_before_setup):
     # Given
-    space = Mock()
+    env = Mock()
     producer = producer_before_setup
-    producer.env = space
-    return producer, space
+    producer.env = env
+    return producer, env
 
 
-def test_get_average_price(producer_with_space):
+def test_get_average_price(producer_with_env):
     # Given
-    producer, space = producer_with_space
-    space.average_price = 15
+    producer, env = producer_with_env
+    env.average_price = 15
 
     # When
     average_price = producer.get_average_price()
@@ -93,10 +93,10 @@ def test_get_average_price(producer_with_space):
     assert average_price == 15
 
 
-def test_get_average_productivity(producer_with_space):
+def test_get_average_productivity(producer_with_env):
     # Given
-    producer, space = producer_with_space
-    space.average_prod = 2.5
+    producer, env = producer_with_env
+    env.average_prod = 2.5
 
     # When
     average_productiviy = producer.get_average_productivity()

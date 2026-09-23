@@ -42,18 +42,18 @@ def test_expose_discount_rate_from_agent(role_before_setup):
 
 
 @pytest.fixture
-def role_with_space(role_before_setup):
+def role_with_env(role_before_setup):
     # Given
-    space = Mock()
+    env = Mock()
     role = role_before_setup
-    role.env = space
-    return role, space
+    role.env = env
+    return role, env
 
 
-def test_get_average_inflation_from_space(role_with_space):
+def test_get_average_inflation_from_env(role_with_env):
     # Given
-    role, space = role_with_space
-    space.average_inflation = 0.03
+    role, env = role_with_env
+    env.average_inflation = 0.03
 
     # When
     perceived = role.get_average_inflation()

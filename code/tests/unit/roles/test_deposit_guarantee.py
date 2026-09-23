@@ -29,37 +29,37 @@ def guarantee_before_setup():
 
 
 @pytest.fixture
-def guarantee_with_space(guarantee_before_setup):
+def guarantee_with_env(guarantee_before_setup):
     # Given
-    space = Mock()
+    env = Mock()
     guarantee = guarantee_before_setup
-    guarantee.env = space
-    return guarantee, space
+    guarantee.env = env
+    return guarantee, env
 
 
-def test_find_defaulted_banks_from_space(guarantee_with_space):
+def test_find_defaulted_banks_from_env(guarantee_with_env):
     # Given
-    guarantee, space = guarantee_with_space
+    guarantee, env = guarantee_with_env
 
     # When
     found = guarantee.find_defaulted_banks()
 
     # Then
-    space.find_defaulted_banks.assert_called_with()
-    assert found == space.find_defaulted_banks.return_value
+    env.find_defaulted_banks.assert_called_with()
+    assert found == env.find_defaulted_banks.return_value
 
 
-def test_find_deposit_accounts_from_space(guarantee_with_space):
+def test_find_deposit_accounts_from_env(guarantee_with_env):
     # Given
-    guarantee, space = guarantee_with_space
+    guarantee, env = guarantee_with_env
     bank = Mock()
 
     # When
     found = guarantee.find_deposit_accounts(bank)
 
     # Then
-    space.find_deposit_accounts.assert_called_with(bank)
-    assert found == space.find_deposit_accounts.return_value
+    env.find_deposit_accounts.assert_called_with(bank)
+    assert found == env.find_deposit_accounts.return_value
 
 
 # ---------------------------------------------------
@@ -67,13 +67,13 @@ def test_find_deposit_accounts_from_space(guarantee_with_space):
 # ----------------------------------------------------
 
 
-def test_reimburse_deposits_into_space(guarantee_with_space):
+def test_reimburse_deposits_into_env(guarantee_with_env):
     # Given
-    guarantee, space = guarantee_with_space
+    guarantee, env = guarantee_with_env
     depositor = Mock()
 
     # When
     guarantee.reimburse_deposits(depositor, 200)
 
     # Then
-    space.reimburse_deposits.assert_called_with(guarantee, depositor, 200)
+    env.reimburse_deposits.assert_called_with(guarantee, depositor, 200)

@@ -47,20 +47,20 @@ def test_expose_discount_rate_from_agent(authority_before_setup):
 
 
 @pytest.fixture
-def authority_with_space(authority_before_setup):
+def authority_with_env(authority_before_setup):
     # Given
-    space = Mock()
+    env = Mock()
     authority = authority_before_setup
-    authority.env = space
-    return authority, space
+    authority.env = env
+    return authority, env
 
 
-def test_transfer_profits_with_space(authority_with_space):
+def test_transfer_profits_with_env(authority_with_env):
     # Given
-    authority, space = authority_with_space
+    authority, env = authority_with_env
 
     # When
     authority.transfer_profit(200)
 
     # Then
-    space.transfer_central_bank_profits.assert_called_with(200)
+    env.transfer_central_bank_profits.assert_called_with(200)
