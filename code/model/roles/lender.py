@@ -14,10 +14,10 @@ class Lender(EcoRole):
         self.loan_applicants.append(applicant)
 
     def grant_loan(self, borrower, amount, rate):
-        self.space.grant_loan(self, borrower, amount, rate)
+        self.env.grant_loan(self, borrower, amount, rate)
 
     def request_advances(self, amount):
-        self.space.request_advances(self, amount)
+        self.env.request_advances(self, amount)
 
     def repay_advances(self, principal, interests):
-        self.space.repay_advances(self, principal, interests)
+        self.env.repay_advances(self, principal, interests)

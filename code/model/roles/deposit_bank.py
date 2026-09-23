@@ -12,10 +12,10 @@ class DepositBank(EcoRole):
     #
 
     def find_deposit_accounts(self):
-        return self.space.find_deposit_accounts(self)
+        return self.env.find_deposit_accounts(self)
 
     #
     # Actions
     #
     def pay_interests(self, depositor, amount):
-        self.space.pay_interests(self, depositor, amount)
+        self.env.pay_interests(self, depositor, amount)

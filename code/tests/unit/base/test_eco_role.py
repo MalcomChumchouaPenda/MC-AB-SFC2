@@ -51,7 +51,7 @@ def test_has_space_ref(role_before_setup):
     role.setup()
 
     # Then
-    assert role.space is None
+    assert role.env is None
 
 
 # ---------------------------------------------------

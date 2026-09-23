@@ -126,8 +126,8 @@ The relationships between these objects have been implemented according to the f
 ```python
 # exemple d'espace avec roles et stocks
 
-bond_market = bond.space            # acces au marche d'emission du bond
-bond_market = bond_issuer.space     # acces au marche de l'emetteur de bond
+bond_market = bond.env              # acces au marche d'emission du bond
+bond_market = bond_issuer.env       # acces au marche de l'emetteur de bond
 bond = bond_issuer.bonds[b]         # acces au bond achete par la banque b
 bond = bond_market.bonds[g, b]      # acces au bond emis par g et achete par b
 bond_buyer = bond_market.buyers[0]  # acces au premier acheteur de bond

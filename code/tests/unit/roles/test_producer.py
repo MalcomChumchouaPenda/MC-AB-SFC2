@@ -77,7 +77,7 @@ def producer_with_space(producer_before_setup):
     # Given
     space = Mock()
     producer = producer_before_setup
-    producer.space = space
+    producer.env = space
     return producer, space
 
 

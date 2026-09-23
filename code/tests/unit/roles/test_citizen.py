@@ -45,7 +45,7 @@ def citizen_with_space(citizen_before_setup):
     # Given
     space = Mock()
     citizen = citizen_before_setup
-    citizen.space = space
+    citizen.env = space
     return citizen, space
 
 

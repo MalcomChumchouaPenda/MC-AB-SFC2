@@ -15,28 +15,28 @@ class Company(EcoRole):
     #
 
     def get_equity_shares(self):
-        return self.space.find_equity_shares(self)
+        return self.env.find_equity_shares(self)
 
     def get_average_wage(self):
-        return self.space.average_wage
+        return self.env.average_wage
 
     def get_tax_rate(self):
-        return self.space.fiscal_authority.tax_rate
+        return self.env.fiscal_authority.tax_rate
 
     def get_discount_rate(self):
-        return self.space.monetary_authority.discount_rate
+        return self.env.monetary_authority.discount_rate
 
     #
     #  Actions methods
     #
     def update_equity_share(self, founder, variation):
-        self.space.update_equity_share(self, founder, variation)
+        self.env.update_equity_share(self, founder, variation)
 
     def pay_dividends(self, founder, amount):
-        self.space.pay_dividends(self, founder, amount)
+        self.env.pay_dividends(self, founder, amount)
 
     def pay_taxes(self, amount):
-        self.space.pay_taxes(self, amount)
+        self.env.pay_taxes(self, amount)
 
     def transfer_residual_cash(self, founder, amount):
-        self.space.transfer_residual_cash(self, founder, amount)
+        self.env.transfer_residual_cash(self, founder, amount)

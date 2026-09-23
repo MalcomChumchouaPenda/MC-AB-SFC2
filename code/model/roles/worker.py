@@ -16,14 +16,14 @@ class Worker(EcoRole):
         return 1.0 - self.labor_supply
 
     def get_unemployment(self):
-        return self.space.unemployment
+        return self.env.unemployment
 
     #
     # actions method
     #
 
     def find_employers(self, psi):
-        return self.space.find_employers(psi)
+        return self.env.find_employers(psi)
 
     def accept_job(self, employer, quantity):
-        self.space.hire_worker(self, employer, quantity)
+        self.env.hire_worker(self, employer, quantity)

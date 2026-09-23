@@ -12,10 +12,10 @@ class Borrower(EcoRole):
     # Perceptions
     #
     def find_lenders(self):
-        return self.space.find_lenders()
+        return self.env.find_lenders()
 
     def find_loans(self):
-        return self.space.find_loans(self)
+        return self.env.find_loans(self)
 
     #
     # Actions
@@ -24,7 +24,7 @@ class Borrower(EcoRole):
         lender.receive_request(self)
 
     def repay_loans(self, lender, principal, interests):
-        self.space.repay_loans(self, lender, principal, interests)
+        self.env.repay_loans(self, lender, principal, interests)
 
     def make_defaults(self, lender, amount):
-        self.space.make_defaults(self, lender, amount)
+        self.env.make_defaults(self, lender, amount)

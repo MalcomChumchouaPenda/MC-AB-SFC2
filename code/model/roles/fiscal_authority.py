@@ -8,16 +8,16 @@ class FiscalAuthority(EcoRole):
         return self.agent.tax_rate
 
     def get_gdp(self):
-        return self.space.gdp
+        return self.env.gdp
 
     def get_average_price(self):
-        return self.space.spaces["good_market"].average_price
+        return self.env.spaces["good_market"].average_price
 
     def get_average_productivity(self):
-        return self.space.spaces["good_market"].average_prod
+        return self.env.spaces["good_market"].average_prod
 
     def find_citizens(self):
-        return self.space.find_citizens()
+        return self.env.find_citizens()
 
     def pay_public_transfers(self, citizen, amount):
-        self.space.pay_public_transfers(self, citizen, amount)
+        self.env.pay_public_transfers(self, citizen, amount)

@@ -8,4 +8,4 @@ class MonetaryAuthority(EcoRole):
         return self.agent.discount_rate
 
     def transfer_profit(self, amount):
-        self.space.transfer_central_bank_profits(amount)
+        self.env.transfer_central_bank_profits(amount)

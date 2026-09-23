@@ -44,7 +44,7 @@ def role_with_space(role_before_setup):
     # Given
     space = Mock()
     role = role_before_setup
-    role.space = space
+    role.env = space
     return role, space
 
 

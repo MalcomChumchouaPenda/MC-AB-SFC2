@@ -56,7 +56,7 @@ def employer_with_space(employer_before_setup):
     # Given
     space = Mock()
     employer = employer_before_setup
-    employer.space = space
+    employer.env = space
     return employer, space
 
 

@@ -44,7 +44,7 @@ def consumer_with_space(consumer_before_setup):
     # Given
     space = Mock()
     consumer = consumer_before_setup
-    consumer.space = space
+    consumer.env = space
     return consumer, space
 
 

@@ -11,16 +11,16 @@ class Consumer(EcoRole):
     # perception
     #
     def find_suppliers(self, psi):
-        return self.space.find_suppliers(psi)
+        return self.env.find_suppliers(psi)
 
     def get_average_price(self):
-        return self.space.average_price
+        return self.env.average_price
 
     #
     # actions
     #
     def buy_goods(self, supplier, quantity):
-        self.space.buy_goods(self, supplier, quantity)
+        self.env.buy_goods(self, supplier, quantity)
 
     # def buy_goods(self, suppliers):
     #     cash = self.agent.cash

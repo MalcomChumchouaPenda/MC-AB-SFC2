@@ -55,7 +55,7 @@ def borrower_with_space(borrower_before_setup):
     # Given
     space = Mock()
     borrower = borrower_before_setup
-    borrower.space = space
+    borrower.env = space
     return borrower, space
 
 

@@ -66,7 +66,7 @@ def issuer_with_space(issuer_before_setup):
     # Given
     space = Mock()
     issuer = issuer_before_setup
-    issuer.space = space
+    issuer.env = space
     return issuer, space
 
 

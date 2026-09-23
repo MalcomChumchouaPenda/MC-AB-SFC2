@@ -57,7 +57,7 @@ def lender_with_space(lender_before_setup):
     # Given
     space = Mock()
     lender = lender_before_setup
-    lender.space = space
+    lender.env = space
     return lender, space
 
 

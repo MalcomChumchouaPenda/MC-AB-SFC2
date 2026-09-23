@@ -57,7 +57,7 @@ def worker_with_space(worker_before_setup):
     # Given
     space = Mock()
     worker = worker_before_setup
-    worker.space = space
+    worker.env = space
     return worker, space
 
 

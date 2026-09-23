@@ -33,7 +33,7 @@ def depositor_with_space(depositor_before_setup):
     # Given
     space = Mock()
     depositor = depositor_before_setup
-    depositor.space = space
+    depositor.env = space
     return depositor, space
 
 

@@ -12,7 +12,7 @@ class Employer(EcoRole):
     # perceptions method
     #
     def get_unemployment(self):
-        return self.space.unemployment
+        return self.env.unemployment
 
     def get_jobs(self):
-        return self.space.find_jobs(self)
+        return self.env.find_jobs(self)

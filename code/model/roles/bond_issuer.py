@@ -13,13 +13,13 @@ class BondIssuer(EcoRole):
     # Perceptions
     #
     def find_bonds(self):
-        return self.space.find_bonds(self)
+        return self.env.find_bonds(self)
 
     def get_discount_rate(self):
-        return self.space.discount_rate
+        return self.env.discount_rate
 
     #
     # Actions
     #
     def repay_bonds(self, buyer, principal, interests):
-        self.space.repay_bonds(buyer, self, principal, interests)
+        self.env.repay_bonds(buyer, self, principal, interests)

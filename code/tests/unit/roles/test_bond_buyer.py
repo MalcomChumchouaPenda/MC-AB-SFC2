@@ -50,7 +50,7 @@ def buyer_with_space(buyer_before_setup):
     # Given
     space = Mock()
     buyer = buyer_before_setup
-    buyer.space = space
+    buyer.env = space
     return buyer, space
 
 

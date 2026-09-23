@@ -207,7 +207,7 @@ def test_add_role_creates_role(space_before_setup, role_with_kind):
     # Then
     role_kind.assert_called_with(space.model)
     role.setup.assert_called_with()
-    assert role.space is space
+    assert role.env is space
     assert role.agent is agent
 
 

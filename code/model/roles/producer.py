@@ -17,10 +17,10 @@ class Producer(EcoRole):
     # Perceptions
     #
     def get_average_price(self):
-        return self.space.average_price
+        return self.env.average_price
 
     def get_average_productivity(self):
-        return self.space.average_prod
+        return self.env.average_prod
 
     # Actions
     def produce_goods(self, labor):

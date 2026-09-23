@@ -51,7 +51,7 @@ def authority_with_space(authority_before_setup):
     # Given
     space = Mock()
     authority = authority_before_setup
-    authority.space = space
+    authority.env = space
     return authority, space
 
 

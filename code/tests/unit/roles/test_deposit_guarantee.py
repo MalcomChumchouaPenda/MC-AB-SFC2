@@ -33,7 +33,7 @@ def guarantee_with_space(guarantee_before_setup):
     # Given
     space = Mock()
     guarantee = guarantee_before_setup
-    guarantee.space = space
+    guarantee.env = space
     return guarantee, space
 
 

@@ -28,7 +28,7 @@ class EcoRole(Object):
     def setup(self):
         super().setup()
         self.agent = None
-        self.space = None
+        self.env = None
         self.name = ""
 
     @property
@@ -157,7 +157,7 @@ class EcoSpace(Network):
         role = kind(self.model)
         role.setup()
         role.name = name
-        role.space = self
+        role.env = self
         role.agent = agent
         agent.roles[name] = role
         self.graph.add_node(role)

@@ -66,7 +66,7 @@ def company_with_space(company_before_setup):
     # Given
     space = Mock()
     company = company_before_setup
-    company.space = space
+    company.env = space
     return company, space
 
 

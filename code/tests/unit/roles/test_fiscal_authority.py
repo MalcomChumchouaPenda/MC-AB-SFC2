@@ -46,7 +46,7 @@ def authority_with_space(authority_before_setup):
     # Given
     space = Mock()
     authority = authority_before_setup
-    authority.space = space
+    authority.env = space
     return authority, space
 
 
@@ -68,7 +68,7 @@ def authority_with_good_market(authority_before_setup):
     market = Mock()
     space = Mock(spaces={"good_market": market})
     authority = authority_before_setup
-    authority.space = space
+    authority.env = space
     return authority, market
 
 
