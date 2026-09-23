@@ -6,11 +6,11 @@ from model.roles.producer import Producer
 
 class GoodsMarket(EcoSpace):
 
-    def setup(self):
+    def setup(self, tradable=False):
         super().setup()
 
         # state
-        self.tradable = False
+        self.tradable = tradable
         self.average_price_prev = 0
         self.average_price = 0
         self.average_prod = 0

@@ -57,17 +57,59 @@ def space_with_sub_spaces(space_before_setup):
     return space, sub_spaces
 
 
-def test_add_space_register_sub_space(space_with_sub_spaces):
+
+def test_add_space_creates_space(space_with_sub_spaces):
     # Given
-    space, sub_spaces = space_with_sub_spaces
-    new_space = Mock(env=None)
+    fake_space = Mock()
+    fake_kind = Mock(return_value=fake_space)
+    space, _ = space_with_sub_spaces
 
     # When
-    space.add_space(new_space, "fake_market")
+    space.add_space(fake_kind, "fake_space")
 
     # Then
-    assert sub_spaces["fake_market"] == new_space
-    assert space is new_space.env
+    fake_kind.assert_called_with(space.model)
+    assert fake_space.env is space
+
+
+def test_add_space_creates_with_kwargs(space_with_sub_spaces):
+    # Given
+    fake_space = Mock()
+    fake_kind = Mock(return_value=fake_space)
+    space, _ = space_with_sub_spaces
+
+    # When
+    space.add_space(fake_kind, "fake_space", x=1, y=2)
+
+    # Then
+    fake_kind.assert_called_with(space.model, x=1, y=2)
+    assert fake_space.env is space
+    
+
+def test_add_space_returns_new_space(space_with_sub_spaces):
+    # Given
+    fake_space = Mock()
+    fake_kind = Mock(return_value=fake_space)
+    space, _ = space_with_sub_spaces
+
+    # When
+    result = space.add_space(fake_kind, "fake_space")
+
+    # Then
+    assert result is fake_space
+
+
+def test_add_space_registers_sub_space(space_with_sub_spaces):
+    # Given
+    fake_space = Mock()
+    fake_kind = Mock(return_value=fake_space)
+    space, sub_spaces = space_with_sub_spaces
+
+    # When
+    space.add_space(fake_kind, "fake_space")
+
+    # Then
+    assert sub_spaces["fake_space"] == fake_space
 
 
 # ---------------------------------------------------

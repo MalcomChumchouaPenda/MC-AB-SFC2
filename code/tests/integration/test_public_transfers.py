@@ -38,7 +38,6 @@ def country(model):
     country.union = Mock()
     country.labor_market = Mock()
     country.deposit_market = Mock()
-    country.good_market = Mock()
     country.monetary_authority = Mock()
     return country
 

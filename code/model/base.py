@@ -125,9 +125,11 @@ class EcoSpace(Network):
         self.env = None
         self.spaces = {}
 
-    def add_space(self, sub_space, name):
+    def add_space(self, kind, name, **kwargs):
+        sub_space = kind(self.model, **kwargs)
         sub_space.env = self
         self.spaces[name] = sub_space
+        return sub_space
 
     def evolve(self):
         for sub_space in self.spaces.values():

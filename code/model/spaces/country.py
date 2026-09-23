@@ -28,9 +28,7 @@ class Country(EcoSpace):
 
         # sub spaces
         self.union = None
-        self.good_market = GoodsMarket(model)
-        self.good_market.setup()
-        self.good_market.tradable = False
+        self.add_space(GoodsMarket, "good_market", tradable=False)
         self.labor_market = LaborMarket(model)
         self.labor_market.setup()
         self.deposit_market = DepositMarket(model)
@@ -157,7 +155,7 @@ class Country(EcoSpace):
         self.deposit_market.add_depositor(firm)
         self.labor_market.add_employer(firm)
         if not tradable:
-            self.good_market.add_producer(firm)
+            self.spaces["good_market"].add_producer(firm)
 
     #
     # Bank creation
@@ -208,5 +206,5 @@ class Country(EcoSpace):
         companies = self.companies
         defaults = companies.select(companies.defaulted == True)
         self.prob_failure = len(defaults) / max(1, len(companies))
-        self.inflation = self.good_market.calc_inflation()
-        self.gdp = self.good_market.calc_gdp()
+        self.inflation = self.spaces["good_market"].calc_inflation()
+        self.gdp = self.spaces["good_market"].calc_gdp()

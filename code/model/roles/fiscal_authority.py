@@ -11,10 +11,10 @@ class FiscalAuthority(EcoRole):
         return self.space.gdp
 
     def get_average_price(self):
-        return self.space.good_market.average_price
+        return self.space.spaces["good_market"].average_price
 
     def get_average_productivity(self):
-        return self.space.good_market.average_prod
+        return self.space.spaces["good_market"].average_prod
 
     def find_citizens(self):
         return self.space.find_citizens()

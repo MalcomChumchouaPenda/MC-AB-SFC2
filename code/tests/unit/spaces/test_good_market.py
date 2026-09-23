@@ -24,15 +24,15 @@ def market_before_setup():
     return market
 
 
-def test_has_tradable_attr(market_before_setup):
+def test_has_tradable_arg(market_before_setup):
     # Given
     market = market_before_setup
 
     # When
-    market.setup()
+    market.setup(tradable=True)
 
     # Then
-    assert market.tradable is False
+    assert market.tradable is True
 
 
 def test_has_average_price_attr(market_before_setup):

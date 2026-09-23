@@ -29,6 +29,7 @@ def country_before_setup(monkeypatch):
     monkeypatch.setattr("model.spaces.country.DepositMarket", FakeDepositMarket)
     model = Mock()
     country = Country(model)
+    country.add_space = Mock()
     return country
 
 
@@ -100,9 +101,7 @@ def test_setup_creates_good_market(country_before_setup):
     country.setup()
 
     # Then
-    assert country.good_market is FakeGoodMarket.return_value
-    assert country.good_market.setup.called
-    assert country.good_market.tradable is False
+    country.add_space.assert_called_with(FakeGoodMarket, "good_market", tradable=False)
 
 
 def test_setup_creates_labor_market(country_before_setup):
@@ -793,7 +792,7 @@ def country_before_creation(country_before_setup):
     country.add_company = Mock()
     country.fund_company = Mock()
     country.union = Mock()
-    country.good_market = Mock()
+    country.spaces["good_market"] = Mock()
     country.labor_market = Mock()
     country.deposit_market = Mock()
     return country
@@ -830,7 +829,7 @@ def test_dont_create_trad_firm_in_goods_market(country_before_creation, share):
     country.create_firm(firm, [share], tradable=True)
 
     # Then
-    country.good_market.add_producer.assert_not_called()
+    country.spaces["good_market"].add_producer.assert_not_called()
 
 
 def test_create_non_trad_firm_in_goods_market(country_before_creation, share):
@@ -842,7 +841,7 @@ def test_create_non_trad_firm_in_goods_market(country_before_creation, share):
     country.create_firm(firm, [share], tradable=False)
 
     # Then
-    country.good_market.add_producer.assert_called_with(firm)
+    country.spaces["good_market"].add_producer.assert_called_with(firm)
 
 
 @pytest.mark.parametrize("tradable", [True, False])
@@ -974,7 +973,7 @@ def test_transfer_residual_cash_of_company(country_before_setup):
 def country_before_update(country_before_setup, make_dlist):
     # Given
     country = country_before_setup
-    country.good_market = Mock()
+    country.spaces["good_market"] = Mock()
     country.gdp = 0
     country.companies = make_dlist()
     return country
@@ -983,7 +982,7 @@ def country_before_update(country_before_setup, make_dlist):
 def test_update_state_updates_gdp(country_before_update):
     # Given
     country = country_before_update
-    country.good_market.calc_gdp.return_value = 100
+    country.spaces["good_market"].calc_gdp.return_value = 100
 
     # When
     country.update_state()
@@ -995,7 +994,7 @@ def test_update_state_updates_gdp(country_before_update):
 def test_update_state_updates_inflation(country_before_update):
     # Given
     country = country_before_update
-    country.good_market.calc_inflation.return_value = 0.2
+    country.spaces["good_market"].calc_inflation.return_value = 0.2
 
     # When
     country.update_state()

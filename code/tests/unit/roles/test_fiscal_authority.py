@@ -62,10 +62,20 @@ def test_get_gdp_from_space(authority_with_space):
     assert perceived == 500
 
 
-def test_get_average_price_from_space(authority_with_space):
+@pytest.fixture
+def authority_with_good_market(authority_before_setup):
     # Given
-    authority, space = authority_with_space
-    space.good_market.average_price = 1.5
+    market = Mock()
+    space = Mock(spaces={"good_market":market})
+    authority = authority_before_setup
+    authority.space = space
+    return authority, market
+
+
+def test_get_average_price_from_space(authority_with_good_market):
+    # Given
+    authority, market = authority_with_good_market
+    market.average_price = 1.5
 
     # When
     perceived = authority.get_average_price()
@@ -74,10 +84,10 @@ def test_get_average_price_from_space(authority_with_space):
     assert perceived == 1.5
 
 
-def test_get_average_productivity_from_space(authority_with_space):
+def test_get_average_productivity_from_space(authority_with_good_market):
     # Given
-    authority, space = authority_with_space
-    space.good_market.average_prod = 1.0
+    authority, market = authority_with_good_market
+    market.average_prod = 1.0
 
     # When
     perceived = authority.get_average_productivity()

@@ -32,6 +32,7 @@ def union_before_setup(monkeypatch):
     model = Mock()
     model.p.K = 0
     union = MonetaryUnion(model)
+    union.add_space = Mock()
     return union
 
 
@@ -62,7 +63,7 @@ def test_has_policy_implementer_dlist(union_before_setup):
 # ----------------------------------------------------
 
 
-def test_setup_creates_good_market(union_before_setup):
+def test_setup_add_tradable_good_market(union_before_setup):
     # Given
     union = union_before_setup
 
@@ -70,10 +71,8 @@ def test_setup_creates_good_market(union_before_setup):
     union.setup()
 
     # Then
-    assert union.good_market is FakeGoodMarket.return_value
-    assert union.good_market.setup.called
-    assert union.good_market.tradable is True
-
+    union.add_space.assert_called_with(FakeGoodMarket, "good_market", tradable=True)
+    
 
 def test_setup_creates_credit_market(union_before_setup):
     # Given
@@ -237,7 +236,7 @@ def union_before_creation(union_before_setup):
     union = union_before_setup
     union.add_company = Mock()
     union.fund_company = Mock()
-    union.good_market = Mock()
+    union.spaces["good_market"] = Mock()
     union.bond_market = Mock()
     union.credit_market = Mock()
     return union
@@ -252,7 +251,7 @@ def test_place_trad_firm_in_goods_market(union_before_creation):
     union.place_firm(firm, tradable=True)
 
     # Then
-    union.good_market.add_producer.assert_called_with(firm)
+    union.spaces["good_market"].add_producer.assert_called_with(firm)
 
 
 def test_dont_place_non_trad_firm_in_goods_market(union_before_creation):
@@ -264,7 +263,7 @@ def test_dont_place_non_trad_firm_in_goods_market(union_before_creation):
     union.place_firm(firm, tradable=False)
 
     # Then
-    union.good_market.add_producer.assert_not_called()
+    union.spaces["good_market"].add_producer.assert_not_called()
 
 
 @pytest.mark.parametrize("tradable", [True, False])
