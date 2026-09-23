@@ -43,17 +43,6 @@ def test_has_sub_spaces_dict(space_before_setup):
     assert space.sub_spaces == {}
 
 
-def test_has_accounts_dlist(space_before_setup):
-    # Given
-    space = space_before_setup
-
-    # When
-    space.setup()
-
-    # Then
-    assert isinstance(space.accounts, AgentDList)
-
-
 # ---------------------------------------------------
 # SUB SPACES MANAGEMENT TESTS
 # ----------------------------------------------------
@@ -247,56 +236,3 @@ def test_remove_role_un_registers_role(space_with_role):
     assert len(agent.roles) == 0
 
 
-# ---------------------------------------------------
-# ACCOUNT MANAGEMENT TESTS
-# ----------------------------------------------------
-
-FakeAccount = Mock()
-
-
-@pytest.fixture
-def space_with_accounts(monkeypatch, space_before_setup):
-    # Given
-    monkeypatch.setattr("model.base.EcoAccount", FakeAccount)
-    space = space_before_setup
-    space.accounts = []
-    return space
-
-
-def test_add_account_create_new_account(space_with_accounts):
-    # Given
-    agent = Mock()
-    space = space_with_accounts
-
-    # When
-    account = space.add_account(agent)
-
-    # Then
-    FakeAccount.assert_called_with(agent.model)
-    assert account is FakeAccount.return_value
-
-
-def test_add_account_register_new_account(space_with_accounts):
-    # Given
-    agent = Mock()
-    space = space_with_accounts
-
-    # When
-    account = space.add_account(agent)
-
-    # Then
-    assert account in space.accounts
-    assert account is agent.account
-    assert account.agent == agent
-
-
-def test_add_account_setup_new_account(space_with_accounts):
-    # Given
-    agent = Mock()
-    space = space_with_accounts
-
-    # When
-    account = space.add_account(agent)
-
-    # Then
-    assert account.setup.called

@@ -1,5 +1,5 @@
 from agentpy import AgentDList
-from model.base import EcoSpace, EcoAccount
+from model.base import EcoEnv
 from model.roles.policy_maker import PolicyMaker
 from model.roles.policy_implementer import PolicyImplementer
 from model.spaces.country import Country
@@ -8,7 +8,7 @@ from model.spaces.credit_market import CreditMarket
 from model.spaces.bond_market import BondMarket
 
 
-class MonetaryUnion(EcoSpace):
+class MonetaryUnion(EcoEnv):
 
     def setup(self):
         super().setup()

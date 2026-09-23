@@ -124,15 +124,6 @@ class EcoSpace(Network):
         self.roles = {}
         self.root_space = None
         self.sub_spaces = {}
-        self.accounts = AgentDList(self.model)
-
-    def add_account(self, agent):
-        account = EcoAccount(agent.model)
-        account.setup()
-        account.agent = agent
-        agent.account = account
-        self.accounts.append(account)
-        return account
 
     def add_space(self, sub_space, name):
         sub_space.root_space = self
@@ -166,3 +157,18 @@ class EcoSpace(Network):
         agent = role.agent
         agent.roles.pop(name)
         self.graph.remove_node(role)
+
+
+class EcoEnv(EcoSpace):
+    
+    def setup(self):
+        super().setup()
+        self.accounts = AgentDList(self.model)
+
+    def add_account(self, agent):
+        account = EcoAccount(agent.model)
+        account.setup()
+        account.agent = agent
+        agent.account = account
+        self.accounts.append(account)
+        return account

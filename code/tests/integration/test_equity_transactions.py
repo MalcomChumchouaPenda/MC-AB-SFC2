@@ -1,8 +1,7 @@
 import pytest
 from unittest.mock import Mock
 from agentpy import Model
-from model.base import EcoAccount
-from model.spaces.country import Country
+from model.spaces.monetary_union import MonetaryUnion
 from model.agents.household import Household
 from model.agents.firm import Firm
 from model.agents.bank import Bank
@@ -12,18 +11,22 @@ from model.agents.bank import Bank
 def model():
     # Given
     model = Model()
+    model.p.K = 1
     return model
 
 
 @pytest.fixture
-def country(model):
+def union(model):
     # Given
-    country = Country(model)
-    country.setup()
-    country.union = Mock()
-    # country.labor_market = Mock()
-    # country.deposit_market = Mock()
-    # country.good_market = Mock()
+    union = MonetaryUnion(model)
+    union.setup()
+    return union
+
+
+@pytest.fixture
+def country(union):
+    # Given
+    country = union.countries[0]
     country.monetary_authority = Mock()
     return country
 

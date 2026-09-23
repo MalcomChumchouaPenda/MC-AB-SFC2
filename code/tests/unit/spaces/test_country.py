@@ -186,7 +186,6 @@ def country_without_monetary_auth(monkeypatch, country_before_setup):
     # Given
     monkeypatch.setattr("model.spaces.country.MonetaryAuthority", FakeAuthority)
     country = country_before_setup
-    country.add_account = Mock()
     country.add_role = Mock()
     country.union = Mock()
     return country
@@ -220,13 +219,14 @@ def test_add_monetary_authority_registers_authority(country_without_monetary_aut
 def test_add_monetary_authority_add_account(country_without_monetary_auth):
     # Given
     country = country_without_monetary_auth
+    union = country.union
     cb = Mock()
 
     # When
     country.add_monetary_authority(cb)
 
     # Then
-    country.add_account.assert_called_with(cb)
+    union.add_account.assert_called_with(cb)
 
 
 @pytest.fixture
@@ -234,7 +234,6 @@ def country_without_fiscal_auth(monkeypatch, country_before_setup):
     # Given
     monkeypatch.setattr("model.spaces.country.FiscalAuthority", FakeAuthority)
     country = country_before_setup
-    country.add_account = Mock()
     country.add_role = Mock()
     country.union = Mock()
     country.monetary_authority = Mock()
@@ -269,13 +268,14 @@ def test_add_fiscal_authority_registers_authority(country_without_fiscal_auth):
 def test_add_fiscal_authority_add_account(country_without_fiscal_auth):
     # Given
     country = country_without_fiscal_auth
+    union = country.union
     govt = Mock()
 
     # When
     country.add_fiscal_authority(govt)
 
     # Then
-    country.add_account.assert_called_with(govt)
+    union.add_account.assert_called_with(govt)
 
 
 def test_add_fiscal_authority_links_to_cb_account(country_without_fiscal_auth):
@@ -298,7 +298,6 @@ def country_without_citizens(monkeypatch, country_before_setup):
     # Given
     monkeypatch.setattr("model.spaces.country.Citizen", FakeCitizen)
     country = country_before_setup
-    country.add_account = Mock()
     country.add_role = Mock()
     country.citizens = []
     country.union = Mock()
@@ -334,13 +333,14 @@ def test_add_citizen_registers_citizen(country_without_citizens):
 def test_add_citizen_add_account(country_without_citizens):
     # Given
     country = country_without_citizens
+    union = country.union
     household = Mock()
 
     # When
     country.add_citizen(household)
 
     # Then
-    country.add_account.assert_called_with(household)
+    union.add_account.assert_called_with(household)
 
 
 def test_add_citizen_links_to_cb_account(country_without_citizens):
@@ -364,7 +364,6 @@ def country_without_companies(monkeypatch, country_before_setup):
     # Given
     monkeypatch.setattr("model.spaces.country.Company", FakeCompany)
     country = country_before_setup
-    country.add_account = Mock()
     country.add_role = Mock()
     country.union = Mock()
     country.companies = []
@@ -419,7 +418,7 @@ def test_add_company_add_account(country_without_companies):
     country.add_company(agent, sector="X")
 
     # Then
-    country.add_account.assert_called_with(agent)
+    union.add_account.assert_called_with(agent)
 
 
 def test_add_company_links_to_cb_account(country_without_companies):
