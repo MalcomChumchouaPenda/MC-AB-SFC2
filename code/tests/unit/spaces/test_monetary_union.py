@@ -8,12 +8,12 @@ from model.spaces.monetary_union import MonetaryUnion
 # ----------------------------------------------------
 
 
-def test_is_eco_env():
+def test_is_eco_space():
     # Given
-    from model.base import EcoEnv
+    from model.base import EcoSpace
 
     # Assert
-    assert issubclass(MonetaryUnion, EcoEnv)
+    assert issubclass(MonetaryUnion, EcoSpace)
 
 
 FakeGoodMarket = Mock()
