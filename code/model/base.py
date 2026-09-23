@@ -51,21 +51,6 @@ class EcoRole(AgentNode):
     def bank_id(self, account):
         self.agent.bank_id = account
 
-    def debit_stock(self, name, amount):
-        self.agent.account.debit_stock(name, amount)
-
-    def credit_stock(self, name, amount):
-        self.agent.account.credit_stock(name, amount)
-
-    def debit_flow(self, name, amount):
-        self.agent.account.debit_flow(name, amount)
-
-    def credit_flow(self, name, amount):
-        self.agent.account.credit_flow(name, amount)
-
-    def clear_flows(self):
-        self.agent.account.clear_flows()
-
 
 class EcoAccount(AttrDict):
 
@@ -158,12 +143,15 @@ class EcoSpace(Network):
         return account
 
 
-    def transfer(self, item, source, target, amount):
+    def debit(self, account_id, item, amount):
         if self.env is not None:
-            self.env.transfer(item, source, target, amount)
-        self.accounts[source].debit(item, amount)
-        self.accounts[target].credit(item, amount)
+            self.env.debit(account_id, item, amount)
+        self.accounts[account_id].debit(item, amount)
 
+    def credit(self, account_id, item, amount):
+        if self.env is not None:
+            self.env.credit(account_id, item, amount)
+        self.accounts[account_id].credit(item, amount)
 
     #
     # Space management

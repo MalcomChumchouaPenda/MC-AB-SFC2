@@ -358,48 +358,61 @@ def test_add_account_doesnt_register_env_account(space_with_no_accounts):
 
 
 @pytest.fixture
-def space_with_two_accounts(space_before_setup):
+def space_with_account_id(space_before_setup):
     # Given
-    source, target = 1, 2
+    account_id = 1
     space = space_before_setup
-    space.accounts = {source:Mock(), target:Mock()}
-    return space, source, target
+    space.accounts = {account_id:Mock()}
+    return space, account_id
 
 
-def test_transfer_debit_source_account(space_with_two_accounts):
+def test_debit_account_with_no_env(space_with_account_id):
     # Given
-    space, source, target = space_with_two_accounts
-    source_account = space.accounts[source]
+    space, account_id = space_with_account_id
+    account = space.accounts[account_id]
 
     # When
-    space.transfer("x", source, target, 100)
+    space.debit(account_id, "x", 100)
 
     # Then
-    source_account.debit.assert_called_with("x", 100)
+    account.debit.assert_called_with("x", 100)
 
 
-def test_transfer_credit_target_account(space_with_two_accounts):
-    # Given
-    space, source, target = space_with_two_accounts
-    target_account = space.accounts[target]
-
-    # When
-    space.transfer("x", source, target, 100)
-
-    # Then
-    target_account.credit.assert_called_with("x", 100)
-
-
-def test_transfer_delegates_process_to_env(space_with_two_accounts):
+def test_debit_account_with_env(space_with_account_id):
     # Given
     env = Mock()
-    space, source, target = space_with_two_accounts
+    space, account_id = space_with_account_id
     space.env = env
 
     # When
-    space.transfer("x", source, target, 100)
+    space.debit(account_id, "x", 100)
 
     # Then
-    env.transfer.assert_called_with("x", source, target, 100)
+    env.debit.assert_called_with(account_id, "x", 100)
+
+
+def test_credit_account_with_no_env(space_with_account_id):
+    # Given
+    space, account_id = space_with_account_id
+    account = space.accounts[account_id]
+
+    # When
+    space.credit(account_id, "x", 100)
+
+    # Then
+    account.credit.assert_called_with("x", 100)
+
+
+def test_credit_account_with_env(space_with_account_id):
+    # Given
+    env = Mock()
+    space, account_id = space_with_account_id
+    space.env = env
+
+    # When
+    space.credit(account_id, "x", 100)
+
+    # Then
+    env.credit.assert_called_with(account_id, "x", 100)
 
 
