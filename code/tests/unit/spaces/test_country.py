@@ -123,8 +123,7 @@ def test_setup_creates_deposit_market(country_before_setup):
     country.setup()
 
     # Then
-    assert country.deposit_market is FakeDepositMarket.return_value
-    assert country.deposit_market.setup.called
+    country.add_space.assert_any_call(FakeDepositMarket, "deposit_market")
 
 
 # ---------------------------------------------------
@@ -793,7 +792,7 @@ def country_before_creation(country_before_setup):
     country.union = Mock()
     country.spaces["good_market"] = Mock()
     country.spaces["labor_market"] = Mock()
-    country.deposit_market = Mock()
+    country.spaces["deposit_market"] = Mock()
     return country
 
 
@@ -863,12 +862,13 @@ def test_create_firm_add_depositor_role(country_before_creation, share, tradable
     # Given
     firm = Mock()
     country = country_before_creation
+    market = country.spaces["deposit_market"]
 
     # When
     country.create_firm(firm, [share], tradable=tradable)
 
     # Then
-    country.deposit_market.add_depositor.assert_called_with(firm)
+    market.add_depositor.assert_called_with(firm)
 
 
 @pytest.mark.parametrize("tradable", [True, False])
@@ -908,12 +908,13 @@ def test_create_bank_add_deposit_bank_role(country_before_creation, share):
     # Given
     bank = Mock()
     country = country_before_creation
+    market = country.spaces["deposit_market"]
 
     # When
     country.create_bank(bank, [share])
 
     # Then
-    country.deposit_market.add_deposit_bank.assert_called_with(bank)
+    market.add_deposit_bank.assert_called_with(bank)
 
 
 def test_create_bank_place_bank_in_union(country_before_creation, share):

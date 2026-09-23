@@ -30,8 +30,8 @@ class Country(EcoSpace):
         self.union = None
         self.add_space(GoodsMarket, "good_market", tradable=False)
         self.add_space(LaborMarket, "labor_market")
-        self.deposit_market = DepositMarket(model)
-        self.deposit_market.setup()
+        self.add_space(DepositMarket, "deposit_market")
+
 
     #
     # Role management
@@ -151,7 +151,7 @@ class Country(EcoSpace):
 
     def _place_firm(self, firm, tradable):
         self.union.place_firm(firm, tradable=tradable)
-        self.deposit_market.add_depositor(firm)
+        self.spaces["deposit_market"].add_depositor(firm)
         self.spaces["labor_market"].add_employer(firm)
         if not tradable:
             self.spaces["good_market"].add_producer(firm)
@@ -166,7 +166,7 @@ class Country(EcoSpace):
             amount = share["amount"]
             self.fund_company(company, founder, amount)
         self.union.place_bank(bank)
-        self.deposit_market.add_deposit_bank(bank)
+        self.spaces["deposit_market"].add_deposit_bank(bank)
 
     #
     # Profit transfers
