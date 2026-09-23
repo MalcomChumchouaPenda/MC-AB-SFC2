@@ -314,7 +314,7 @@ def test_add_account_create_new_account(space_with_no_accounts):
     account = space.add_account(agent)
 
     # Then
-    FakeAccount.assert_called_with(agent.model)
+    FakeAccount.assert_called_with()
     assert account is FakeAccount.return_value
 
 
@@ -329,19 +329,6 @@ def test_add_account_registers_new_account(space_with_no_accounts):
     # Then
     assert account == space.accounts[agent.id]
     assert account is agent.account
-    assert account.agent == agent
-
-
-def test_add_account_setup_new_account(space_with_no_accounts):
-    # Given
-    agent = Mock(id=1)
-    space = space_with_no_accounts
-
-    # When
-    account = space.add_account(agent)
-
-    # Then
-    assert account.setup.called
 
 
 def test_add_account_delegates_process_to_env(space_with_no_accounts):

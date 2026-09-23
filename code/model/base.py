@@ -1,4 +1,4 @@
-from agentpy import Agent, Network, AgentDList
+from agentpy import Agent, Network, AgentDList, AttrDict
 from agentpy.objects import Object
 
 
@@ -67,49 +67,51 @@ class EcoRole(Object):
         self.agent.account.clear_flows()
 
 
-class EcoAccount(Object):
+class EcoAccount(AttrDict):
 
-    def setup(self):
-        super().setup()
-        self.agent = None
-        self.stocks = {
-            "deposits": 0,
-            "loans": 0,
-            "inventories": 0,
-            "bonds": 0,
-            "cash": 0,
-            "advances": 0,
-            "equities": 0,
-        }
-        self.flows = {
-            "consumption": 0,
-            "wages": 0,
-            "public_transfers": 0,
-            "taxes": 0,
-            "dep_interests": 0,
-            "loan_interests": 0,
-            "loan_defaults": 0,
-            "bond_interests": 0,
-            "cash_interests": 0,
-            "adv_interests": 0,
-            "dividends": 0,
-            "profit_transfers": 0,
-        }
+    STOCK_NAMES = (
+        "deposits",
+        "loans",
+        "inventories",
+        "bonds",
+        "cash",
+        "advances",
+        "equities",
 
-    def debit_stock(self, name, amount):
-        self.stocks[name] = self.stocks.get(name, 0) - amount
+    )
 
-    def credit_stock(self, name, amount):
-        self.stocks[name] = self.stocks.get(name, 0) + amount
+    FLOW_NAMES = (
+        "consumption",
+        "wages",
+        "public_transfers",
+        "taxes",
+        "dep_interests",
+        "loan_interests",
+        "loan_defaults",
+        "bond_interests",
+        "cash_interests",
+        "adv_interests",
+        "dividends",
+        "profit_transfers",
 
-    def debit_flow(self, name, amount):
-        self.flows[name] = self.flows.get(name, 0) - amount
+    )
 
-    def credit_flow(self, name, amount):
-        self.flows[name] = self.flows.get(name, 0) + amount
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for name in self.STOCK_NAMES + self.FLOW_NAMES:
+            self[name] = 0
+
+
+    def debit(self, name, amount):
+        self[name] -= amount
+
+    def credit(self, name, amount):
+        self[name] += amount
+
 
     def clear_flows(self):
-        self.flows.clear()
+        for name in self.FLOW_NAMES:
+            self[name] = 0
 
 
 class EcoSpace(Network):
@@ -152,9 +154,7 @@ class EcoSpace(Network):
     def add_account(self, agent):
         if self.env is not None:
             return self.env.add_account(agent)
-        account = EcoAccount(agent.model)
-        account.setup()
-        account.agent = agent
+        account = EcoAccount()
         agent.account = account
         self.accounts[agent.id] = account
         return account
