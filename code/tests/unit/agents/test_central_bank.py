@@ -59,13 +59,13 @@ def cb_as_bond_buyer(cb_before_setup):
     role = Mock()
     cb = cb_before_setup
     cb.roles = {"bond_buyer": role}
-    cb.country = 1
+    cb.country_id = 1
     return cb, role
 
 
 def test_buy_all_domestic_remaining_bonds(cb_as_bond_buyer):
     # Given
-    issuer = Mock(country=1, bond_number=5)
+    issuer = Mock(country_id=1, bond_number=5)
     cb, role = cb_as_bond_buyer
     role.find_issuers.return_value = [issuer]
 
@@ -78,7 +78,7 @@ def test_buy_all_domestic_remaining_bonds(cb_as_bond_buyer):
 
 def test_dont_buy_foreign_bonds(cb_as_bond_buyer):
     # Given
-    issuer = Mock(country=2, bond_number=5)
+    issuer = Mock(country_id=2, bond_number=5)
     cb, role = cb_as_bond_buyer
     role.find_issuers.return_value = [issuer]
 

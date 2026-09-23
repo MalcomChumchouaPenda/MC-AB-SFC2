@@ -156,7 +156,7 @@ def test_bank_buy_bonds(market, govt, bank):
 
 def test_central_bank_buy_remaining_bonds(market, govt, cb):
     # Given
-    govt.country = cb.country = 1
+    govt.country_id = cb.country_id = 1
     buyer_role = cb.roles["bond_buyer"]
     issuer_role = govt.roles["bond_issuer"]
     issuer_role.bond_value = 5.0

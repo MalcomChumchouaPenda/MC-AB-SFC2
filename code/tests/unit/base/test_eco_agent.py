@@ -65,7 +65,7 @@ def test_has_deposit_bank_account_ref(agent_before_setup):
     assert agent.bank_account is None
 
 
-def test_has_default_country(agent_before_setup):
+def test_has_default_country_id(agent_before_setup):
     # Given
     agent = agent_before_setup
 
@@ -73,4 +73,4 @@ def test_has_default_country(agent_before_setup):
     agent.setup()
 
     # Then
-    assert agent.country == 0
+    assert agent.country_id == 0

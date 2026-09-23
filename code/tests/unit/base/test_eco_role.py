@@ -113,15 +113,15 @@ def test_change_agent_deposit_bank_account(role_with_agent):
     assert agent.bank_account is new_account
 
 
-def test_expose_agent_country(role_with_agent):
+def test_expose_agent_country_id(role_with_agent):
     # Given
     role, agent = role_with_agent
 
     # When
-    agent.country = 2
+    agent.country_id = 2
 
     # Then
-    assert role.country == 2
+    assert role.country_id == 2
 
 
 # ---------------------------------------------------

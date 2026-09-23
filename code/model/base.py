@@ -11,7 +11,7 @@ class EcoAgent(Agent):
 
     def setup(self):
         self.roles = {}
-        self.country = 0
+        self.country_id = 0
         self.account = None
         self.cb_account = None
         self.bank_account = None
@@ -32,8 +32,8 @@ class EcoRole(Object):
         self.name = ""
 
     @property
-    def country(self):
-        return self.agent.country
+    def country_id(self):
+        return self.agent.country_id
 
     @property
     def account(self):
