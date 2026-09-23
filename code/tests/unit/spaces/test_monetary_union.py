@@ -71,7 +71,7 @@ def test_setup_add_tradable_good_market(union_before_setup):
     union.setup()
 
     # Then
-    union.add_space.assert_called_with(FakeGoodMarket, "good_market", tradable=True)
+    union.add_space.assert_any_call(FakeGoodMarket, "good_market", tradable=True)
     
 
 def test_setup_creates_credit_market(union_before_setup):
@@ -82,8 +82,7 @@ def test_setup_creates_credit_market(union_before_setup):
     union.setup()
 
     # Then
-    assert union.credit_market is FakeCreditMarket.return_value
-    assert union.credit_market.setup.called
+    union.add_space.assert_any_call(FakeCreditMarket, "credit_market")
 
 
 def test_setup_creates_bond_market(union_before_setup):
@@ -238,7 +237,7 @@ def union_before_creation(union_before_setup):
     union.fund_company = Mock()
     union.spaces["good_market"] = Mock()
     union.bond_market = Mock()
-    union.credit_market = Mock()
+    union.spaces["credit_market"] = Mock()
     return union
 
 
@@ -271,12 +270,13 @@ def test_place_firm_add_borrower_role(union_before_creation, tradable):
     # Given
     firm = Mock()
     union = union_before_creation
+    market = union.spaces["credit_market"]
 
     # When
     union.place_firm(firm, tradable=tradable)
 
     # Then
-    union.credit_market.add_borrower.assert_called_with(firm)
+    market.add_borrower.assert_called_with(firm)
 
 
 # ---------------------------------------------------
@@ -300,12 +300,13 @@ def test_place_bank_add_lender_role(union_before_creation):
     # Given
     bank = Mock()
     union = union_before_creation
+    market = union.spaces["credit_market"]
 
     # When
     union.place_bank(bank)
 
     # Then
-    union.credit_market.add_lender.assert_called_with(bank)
+    market.add_lender.assert_called_with(bank)
 
 
 # ---------------------------------------------------

@@ -30,8 +30,7 @@ class MonetaryUnion(EcoEnv):
 
     def _setup_markets(self, model):
         self.add_space(GoodsMarket, "good_market", tradable=True)
-        self.credit_market = CreditMarket(model)
-        self.credit_market.setup()
+        self.add_space(CreditMarket, "credit_market")
         self.bond_market = BondMarket(model)
         self.bond_market.setup()
 
@@ -52,7 +51,7 @@ class MonetaryUnion(EcoEnv):
     # Firm creation
     #
     def place_firm(self, firm, tradable):
-        self.credit_market.add_borrower(firm)
+        self.spaces["credit_market"].add_borrower(firm)
         if tradable:
             self.spaces["good_market"].add_producer(firm)
 
@@ -60,7 +59,7 @@ class MonetaryUnion(EcoEnv):
     # Bank creation
     #
     def place_bank(self, bank):
-        self.credit_market.add_lender(bank)
+        self.spaces["credit_market"].add_lender(bank)
         self.bond_market.add_buyer(bank)
 
     #
