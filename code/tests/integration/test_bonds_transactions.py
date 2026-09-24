@@ -1,6 +1,6 @@
-import pytest
 from unittest.mock import Mock
-from model.base import EcoAccount
+import pytest
+from agentpy import Model
 from model.agents.bank import Bank
 from model.agents.central_bank import CentralBank
 from model.agents.government import Government
@@ -10,54 +10,53 @@ from model.spaces.bond_market import BondMarket
 @pytest.fixture
 def model():
     # Given
-    return Mock()
+    model = Model()
+    return model
 
 
 @pytest.fixture
 def cb(model):
     # Given
     cb = CentralBank(model)
-    cb.setup()
-    cb.account = EcoAccount(model)
-    cb.account.setup()
     return cb
 
 
 @pytest.fixture
-def govt(model, cb):
+def govt(model):
     # Given
     govt = Government(model)
-    govt.setup()
     govt.roles["fiscal_authority"] = Mock()
-    govt.account = EcoAccount(model)
-    govt.account.setup()
-    govt.cb_id = cb.account
     return govt
 
 
 @pytest.fixture
-def bank(model, cb):
+def bank(model):
     # Given
     bank = Bank(model)
-    bank.setup()
-    bank.account = EcoAccount(model)
-    bank.account.setup()
-    bank.cb_id = cb.account
     return bank
 
 
 @pytest.fixture
-def market(model, govt, bank, cb):
+def market(model):
     # Given
     market = BondMarket(model)
-    market.setup()
-    market.add_issuer(govt)
-    market.add_buyer(bank)
-    market.add_buyer(cb)
     return market
 
 
-@pytest.mark.usefixtures("market")
+@pytest.fixture
+def before_transactions(market, govt, bank, cb):
+    # Given
+    market.add_issuer(govt)
+    market.add_buyer(bank)
+    market.add_buyer(cb)
+    market.add_account(govt)
+    market.add_account(bank)
+    market.add_account(cb)
+    bank.cb_id = cb.id
+    govt.cb_id = cb.id
+
+
+@pytest.mark.usefixtures("before_transactions")
 def test_government_issues_bonds(govt):
     # Given
     govt.budget_deficit = 200
@@ -73,6 +72,7 @@ def test_government_issues_bonds(govt):
     assert govt.roles["bond_issuer"].debt_ratio == 0.15
 
 
+@pytest.mark.usefixtures("before_transactions")
 def test_government_update_bond_rate(govt):
     # Given
     govt.roles["fiscal_authority"].get_gdp.return_value = 1000
@@ -87,6 +87,7 @@ def test_government_update_bond_rate(govt):
     assert govt.bond_rate == 0.042
 
 
+@pytest.mark.usefixtures("before_transactions")
 def test_government_repay_bonds_to_bank(market, govt, bank):
     # Given
     bank.account.stocks["bonds"] = 100
@@ -109,6 +110,7 @@ def test_government_repay_bonds_to_bank(market, govt, bank):
     assert market.graph[issuer_role][buyer_role]["amount"] == 0
 
 
+@pytest.mark.usefixtures("before_transactions")
 def test_government_repay_bonds_to_central_bank(market, govt, cb):
     # Given
     cb.account.stocks["bonds"] = 100
@@ -131,6 +133,7 @@ def test_government_repay_bonds_to_central_bank(market, govt, cb):
     assert market.graph[issuer_role][buyer_role]["amount"] == 0
 
 
+@pytest.mark.usefixtures("before_transactions")
 def test_bank_buy_bonds(market, govt, bank):
     # Given
     govt.p.mu2 = 0.1
@@ -154,6 +157,7 @@ def test_bank_buy_bonds(market, govt, bank):
     assert market.graph[issuer_role][buyer_role]["amount"] == 50
 
 
+@pytest.mark.usefixtures("before_transactions")
 def test_central_bank_buy_remaining_bonds(market, govt, cb):
     # Given
     govt.country_id = cb.country_id = 1

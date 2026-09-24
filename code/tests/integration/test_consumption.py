@@ -1,7 +1,6 @@
-import pytest
 from unittest.mock import Mock
+import pytest
 from agentpy import Model
-from model.base import EcoAccount
 from model.agents.firm import Firm
 from model.agents.household import Household
 from model.spaces.good_market import GoodsMarket
@@ -20,10 +19,6 @@ def model():
 def household(model):
     # Given
     household = Household(model)
-    household.setup()
-    household.account = EcoAccount(model)
-    household.account.setup()
-    household.account.stocks["cash"] = 100
     return household
 
 
@@ -31,20 +26,17 @@ def household(model):
 def firm(model):
     # Given
     firm = Firm(model)
-    firm.setup()
-    firm.account = EcoAccount(model)
-    firm.account.setup()
     return firm
 
 
 @pytest.fixture
 def trad_market(model, household, firm):
     # Given
-    market = GoodsMarket(model)
-    market.setup()
-    market.tradable = True
+    market = GoodsMarket(model, tradable=True)
     market.add_consumer(household)
     market.add_producer(firm)
+    market.add_account(firm)
+    market.add_account(household)
     return market
 
 
@@ -72,11 +64,11 @@ def test_household_consume_tradable_goods(trad_market, household, firm):
 @pytest.fixture
 def non_trad_market(model, household, firm):
     # Given
-    market = GoodsMarket(model)
-    market.setup()
-    market.tradable = False
+    market = GoodsMarket(model, tradable=False)
     market.add_consumer(household)
     market.add_producer(firm)
+    market.add_account(firm)
+    market.add_account(household)
     return market
 
 
@@ -107,27 +99,29 @@ def firms(model):
     firms = []
     for _ in range(2):
         firm = Firm(model)
-        firm.setup()
         firm.variety = 0.5
-        firm.account = EcoAccount(model)
-        firm.account.setup()
         firms.append(firm)
     return firms
 
+@pytest.fixture
+def markets(model):
+    markets = []
+    for tradable in [True, False]:
+        market = GoodsMarket(model, tradable=tradable)
+        market.average_price = 10
+        markets.append(market)
+    return markets
+
 
 @pytest.fixture
-def markets_with_inventories(model, household, firms):
-    markets = []
-    for i, tradable in enumerate([True, False]):
-        market = GoodsMarket(model)
-        market.setup()
-        market.tradable = tradable
-        market.average_price = 10
+def markets_with_inventories(markets, household, firms):
+    for i, market in enumerate(markets):
         market.add_consumer(household)
-        markets.append(market)
+        market.add_account(firms[i])
+        market.add_account(household)
         producer_role = market.add_producer(firms[i])
-        producer_role.price = 10
         producer_role.inventories = 10
+        producer_role.price = 10
     return markets
 
 

@@ -113,3 +113,15 @@ def test_expose_agent_country_id(role_with_agent_and_env):
 
     # Then
     assert role.country_id == 2
+
+
+def test_expose_agent_account_stocks(role_with_agent_and_env):
+    # Given
+    role, agent, _ = role_with_agent_and_env
+
+    # When
+    agent.account.stocks = {"x":0}
+
+    # Then
+    assert role.stocks == {"x":0}
+

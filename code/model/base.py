@@ -50,6 +50,10 @@ class EcoRole(AgentNode):
     def bank_id(self, account):
         self.agent.bank_id = account
 
+    @property
+    def stocks(self):
+        return self.agent.account.stocks
+
 
 class EcoAccount:
 

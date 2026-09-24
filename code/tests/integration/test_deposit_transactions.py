@@ -1,6 +1,6 @@
-import pytest
 from unittest.mock import Mock
-from model.base import EcoAccount
+import pytest
+from agentpy import Model
 from model.agents.bank import Bank
 from model.agents.firm import Firm
 from model.agents.government import Government
@@ -10,7 +10,7 @@ from model.spaces.deposit_market import DepositMarket
 @pytest.fixture
 def model():
     # Given
-    model = Mock()
+    model = Model()
     model.p.zeta = 0.8
     return model
 
@@ -19,9 +19,6 @@ def model():
 def bank(model):
     # Given
     bank = Bank(model)
-    bank.setup()
-    bank.account = EcoAccount(model)
-    bank.account.setup()
     return bank
 
 
@@ -29,24 +26,27 @@ def bank(model):
 def firm(model):
     # Given
     firm = Firm(model)
-    firm.setup()
-    firm.account = EcoAccount(model)
-    firm.account.setup()
     return firm
 
 
 @pytest.fixture
-def market_with_participants(model, firm, bank):
+def market(model):
     # Given
     market = DepositMarket(model)
-    market.setup()
+    return market
+
+
+@pytest.fixture
+def before_transactions(market, firm, bank):
+    # Given
     deposit_bank = market.add_deposit_bank(bank)
     depositor = market.add_depositor(firm)
+    market.add_account(bank)
+    market.add_account(firm)
     market.link_depositor_to_bank(depositor, deposit_bank, 2000)
-    return market, firm, bank
 
 
-@pytest.mark.usefixtures("market_with_participants")
+@pytest.mark.usefixtures("before_transactions")
 def test_bank_pays_deposit_interest_to_firm(firm, bank):
     # Given
     bank.deposit_rate = 0.02
@@ -65,25 +65,22 @@ def test_bank_pays_deposit_interest_to_firm(firm, bank):
 def govt(model):
     # Given
     govt = Government(model)
-    govt.setup()
-    govt.account = EcoAccount(model)
-    govt.account.setup()
     return govt
 
 
 @pytest.fixture
-def market_with_guarantee(model, firm, bank, govt):
+def before_reimbursement(market, firm, bank, govt):
     # Given
-    market = DepositMarket(model)
-    market.setup()
     deposit_bank = market.add_deposit_bank(bank)
     depositor = market.add_depositor(firm)
-    market.link_depositor_to_bank(depositor, deposit_bank, 2000)
+    market.add_account(govt)
+    market.add_account(bank)
+    market.add_account(firm)
     market.add_deposit_guarantee(govt)
-    return market, firm, bank
+    market.link_depositor_to_bank(depositor, deposit_bank, 2000)
 
 
-@pytest.mark.usefixtures("market_with_guarantee")
+@pytest.mark.usefixtures("before_reimbursement")
 def test_government_reimburse_deposits(govt, firm, bank):
     # Given
     firm.account.stocks["cash"] = 0

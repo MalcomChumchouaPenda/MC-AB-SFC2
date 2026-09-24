@@ -1,29 +1,29 @@
-import pytest
 from unittest.mock import Mock
+import pytest
+from agentpy import Model
 from model.agents.household import Household
 from model.spaces.labor_market import LaborMarket
 
 
 @pytest.fixture
-def model():
-    model = Mock()
+def model(monkeypatch):
+    model = Model()
     model.p.delta = 0.1
     model.p.upsilon = 1.0
     model.p.upsilon_h = 1.0
+    monkeypatch.setattr(model, "nprandom", Mock())
     return model
 
 
 @pytest.fixture
 def market(model):
     market = LaborMarket(model)
-    market.setup()
     return market
 
 
 @pytest.fixture
 def household(model):
     household = Household(model)
-    household.setup()
     household.reservation_wage = 100
     return household
 

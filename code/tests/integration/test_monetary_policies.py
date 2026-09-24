@@ -1,5 +1,6 @@
-import pytest
 from unittest.mock import Mock
+import pytest
+from agentpy import Model
 from model.agents.central_bank import CentralBank
 from model.spaces.monetary_union import MonetaryUnion
 
@@ -7,7 +8,7 @@ from model.spaces.monetary_union import MonetaryUnion
 @pytest.fixture
 def model():
     # Given
-    model = Mock()
+    model = Model()
     model.p.K = 1
     model.p.xi = 0.5
     model.p.xi_deltap = 1.5

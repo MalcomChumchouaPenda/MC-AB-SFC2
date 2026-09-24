@@ -1,5 +1,5 @@
-import pytest
 from unittest.mock import Mock
+import pytest
 from agentpy import Model
 from model.spaces.monetary_union import MonetaryUnion
 from model.agents.household import Household
@@ -19,7 +19,6 @@ def model():
 def union(model):
     # Given
     union = MonetaryUnion(model)
-    union.setup()
     return union
 
 
@@ -35,21 +34,19 @@ def country(union):
 def household(model):
     # Given
     household = Household(model)
-    household.setup()
     return household
 
 
 @pytest.fixture
-def country_before_allocation(country, household):
+def before_allocation(country, household):
     # Given
     country.add_citizen(household)
+    country.add_account(household)
     household.roles["depositor"] = Mock()
-    return country
 
-
-def test_household_portfolio_allocation(country_before_allocation, household):
+@pytest.mark.usefixtures("before_allocation")
+def test_household_portfolio_allocation(country, household):
     # Given
-    country = country_before_allocation
     country.prob_failure = 0.0
     role = household.roles["depositor"]
     role.get_deposit_rate.return_value = 0.05
@@ -78,7 +75,6 @@ def founders(model):
     founders = []
     for i in range(2):
         hh = Household(model)
-        hh.setup()
         hh.roles["depositor"] = Mock()
         hh.desired_equity = 300 - i * 100
         founders.append(hh)
@@ -86,21 +82,20 @@ def founders(model):
 
 
 @pytest.fixture
-def country_before_investment(country, founders):
+def before_investment(country, founders):
     # Given
     for founder in founders:
         role = country.add_citizen(founder)
         role.resid_equity = founder.desired_equity
         founder.account.stocks["cash"] = 400
-    return country
 
 
-def test_household_creates_new_firm(country_before_investment, founders):
+@pytest.mark.usefixtures("before_investment")
+def test_household_creates_new_firm(country, founders):
     # Given
     household1, household2 = founders
     citizen1 = household1.roles["citizen"]
     citizen2 = household2.roles["citizen"]
-    country = country_before_investment
     companies = country.companies
 
     # When
@@ -109,22 +104,22 @@ def test_household_creates_new_firm(country_before_investment, founders):
     # Then
     assert len(companies) == 1
     assert isinstance(companies[0].agent, Firm)
-    assert companies[0].account.stocks["equities"] == -500
-    assert companies[0].account.stocks["cash"] == 500
-    assert citizen1.account.stocks["equities"] == 300
-    assert citizen1.account.stocks["cash"] == 100
-    assert citizen2.account.stocks["equities"] == 200
-    assert citizen2.account.stocks["cash"] == 200
+    assert companies[0].stocks["equities"] == -500
+    assert companies[0].stocks["cash"] == 500
+    assert citizen1.stocks["equities"] == 300
+    assert citizen1.stocks["cash"] == 100
+    assert citizen2.stocks["equities"] == 200
+    assert citizen2.stocks["cash"] == 200
     assert country.graph[citizen1][companies[0]]["value"] == 300
     assert country.graph[citizen2][companies[0]]["value"] == 200
 
 
-def test_household_creates_new_bank(country_before_investment, founders):
+@pytest.mark.usefixtures("before_investment")
+def test_household_creates_new_bank(country, founders):
     # Given
     household1, household2 = founders
     citizen1 = household1.roles["citizen"]
     citizen2 = household2.roles["citizen"]
-    country = country_before_investment
     companies = country.companies
     companies.extend([Mock(equity=100, sector="F") for _ in range(5)])
 
@@ -134,22 +129,22 @@ def test_household_creates_new_bank(country_before_investment, founders):
     # Then
     assert len(companies) == 6
     assert isinstance(companies[-1].agent, Bank)
-    assert companies[-1].account.stocks["equities"] == -500
-    assert companies[-1].account.stocks["cash"] == 500
-    assert citizen1.account.stocks["equities"] == 300
-    assert citizen1.account.stocks["cash"] == 100
-    assert citizen2.account.stocks["equities"] == 200
-    assert citizen2.account.stocks["cash"] == 200
+    assert companies[-1].stocks["equities"] == -500
+    assert companies[-1].stocks["cash"] == 500
+    assert citizen1.stocks["equities"] == 300
+    assert citizen1.stocks["cash"] == 100
+    assert citizen2.stocks["equities"] == 200
+    assert citizen2.stocks["cash"] == 200
     assert country.graph[citizen1][companies[-1]]["value"] == 300
     assert country.graph[citizen2][companies[-1]]["value"] == 200
 
 
-def test_household_makes_deposits(country_before_investment, founders):
+@pytest.mark.usefixtures("before_investment")
+def test_household_makes_deposits(country, founders):
     # Given
     household1, household2 = founders
     citizen2 = household2.roles["citizen"]
     citizen2.resid_equity = household2.desired_equity = 0
-    country = country_before_investment
     companies = country.companies
 
     # When
@@ -164,7 +159,6 @@ def test_household_makes_deposits(country_before_investment, founders):
 def firm(model):
     # Given
     firm = Firm(model)
-    firm.setup()
     return firm
 
 
@@ -172,12 +166,11 @@ def firm(model):
 def bank(model):
     # Given
     bank = Bank(model)
-    bank.setup()
     return bank
 
 
 @pytest.fixture
-def country_before_distribution(country, firm, bank, household):
+def before_distribution(country, firm, bank, household):
     # Given
     founder = country.add_citizen(household)
     company1 = country.add_company(firm, "FT")
@@ -186,7 +179,7 @@ def country_before_distribution(country, firm, bank, household):
     country.fund_company(company2, founder, 500)
 
 
-@pytest.mark.usefixtures("country_before_distribution")
+@pytest.mark.usefixtures("before_distribution")
 def test_firm_pay_dividends(firm, household):
     # Given
     household.account.stocks["cash"] = 0
@@ -204,7 +197,7 @@ def test_firm_pay_dividends(firm, household):
     assert household.account.flows["dividends"] == 200
 
 
-@pytest.mark.usefixtures("country_before_distribution")
+@pytest.mark.usefixtures("before_distribution")
 def test_bank_pay_dividends(bank, household):
     # Given
     household.account.stocks["cash"] = 0
@@ -222,7 +215,7 @@ def test_bank_pay_dividends(bank, household):
     assert household.account.flows["dividends"] == 100
 
 
-@pytest.mark.usefixtures("country_before_distribution")
+@pytest.mark.usefixtures("before_distribution")
 def test_firm_update_net_worth(firm, household):
     # Given
     firm.net_worth = 1000
@@ -241,7 +234,7 @@ def test_firm_update_net_worth(firm, household):
     assert household.account.stocks["equities"] == 1200
 
 
-@pytest.mark.usefixtures("country_before_distribution")
+@pytest.mark.usefixtures("before_distribution")
 def test_bank_update_net_worth(bank, household):
     # Given
     bank.net_worth = 800

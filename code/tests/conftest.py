@@ -1,6 +1,7 @@
 import os
 import sys
 import pytest
+import itertools
 from unittest.mock import Mock
 from agentpy import AgentDList
 
@@ -9,13 +10,6 @@ while "tests" in root_dir:
     root_dir = os.path.dirname(root_dir)
 if root_dir not in sys.path:
     sys.path.append(root_dir)
-
-
-@pytest.fixture
-def fake_model():
-    model = Mock(t=0)
-    model.random = Mock()
-    return model
 
 
 @pytest.fixture

@@ -1,13 +1,13 @@
-import pytest
 from unittest.mock import Mock
-from model.base import EcoAccount
+import pytest
+from agentpy import Model
 from model.agents.firm import Firm
 
 
 @pytest.fixture
 def model():
     # Given
-    model = Mock()
+    model = Model()
     model.p.theta = 0.20
     return model
 

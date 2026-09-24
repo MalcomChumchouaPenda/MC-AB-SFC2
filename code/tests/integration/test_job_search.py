@@ -1,14 +1,15 @@
-import pytest
 from unittest.mock import Mock
+import pytest
+from agentpy import Model
+from model.spaces.labor_market import LaborMarket
 from model.agents.household import Household
 from model.agents.firm import Firm
-from model.spaces.labor_market import LaborMarket
 
 
 @pytest.fixture
 def model():
     # Given
-    model = Mock()
+    model = Model()
     model.p.psi = 2
     random = model.random
     random.sample = Mock(side_effect=lambda pop, k: pop[:k])

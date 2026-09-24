@@ -148,7 +148,7 @@ class Government(EcoAgent):
     def issue_deposit_guarantee_bonds(self):
         guarantee_role = self.roles["deposit_guarantee"]
         defaults = guarantee_role.find_defaulted_banks()
-        needs = sum([b.account.stocks["deposits"] for b in defaults])
+        needs = sum([b.stocks["deposits"] for b in defaults])
         self.bond_supply += abs(needs)
         self._defaults = defaults
         issuer_role = self.roles["bond_issuer"]

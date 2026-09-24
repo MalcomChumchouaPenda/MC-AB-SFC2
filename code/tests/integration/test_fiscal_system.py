@@ -1,6 +1,6 @@
-import pytest
 from unittest.mock import Mock
-from model.base import EcoAccount
+import pytest
+from agentpy import Model
 from model.spaces.monetary_union import MonetaryUnion
 from model.agents.firm import Firm
 from model.agents.bank import Bank
@@ -9,9 +9,9 @@ from model.agents.government import Government
 
 
 @pytest.fixture
-def model():
-    # Given
-    model = Mock()
+def model(monkeypatch):
+    # Given 
+    model = Model()
     model.p.K = 1
     model.p.dmax = 0.05
     model.p.tax_min = 0.10
@@ -19,7 +19,8 @@ def model():
     model.p.g_min = 0.05
     model.p.g_max = 0.20
     model.p.delta = 0.10
-    model.random.uniform.return_value = 0.05
+    uniform = Mock(return_value=0.05)
+    monkeypatch.setattr(model.random, "uniform", uniform)
     return model
 
 

@@ -227,7 +227,7 @@ def test_link_depositor_registers_deposit_bank_refs(market_with_participants):
 
     # Then
     assert depositor.deposit_bank == deposit_bank
-    assert depositor.bank_id == deposit_bank.account
+    assert depositor.bank_id == deposit_bank.id
 
 
 @pytest.fixture
@@ -236,7 +236,7 @@ def market_with_depositor_amount(market_with_participants):
     market, depositor, deposit_bank = market_with_participants
     market.graph.add_edge(depositor, deposit_bank, amount=100)
     depositor.deposit_bank = deposit_bank
-    depositor.bank_id = Mock()
+    depositor.bank_id = deposit_bank.id
     return market, depositor, 100
 
 

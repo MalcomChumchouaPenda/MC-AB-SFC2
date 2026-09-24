@@ -1,28 +1,33 @@
+from unittest.mock import Mock
 import pytest
-from unittest.mock import Mock, PropertyMock
-from model.base import EcoAccount
+from agentpy import Model
+from model.base import EcoSpace
 from model.agents.bank import Bank
 from model.agents.firm import Firm
-from model.agents.government import Government
 
 
 @pytest.fixture
 def model():
     # Given
-    model = Mock()
+    model = Model()
     model.p.rho = 0.10
     return model
 
 
 @pytest.fixture
-def firm(model):
+def space(model):
+    # Given
+    space = EcoSpace(model)
+    return space
+
+
+@pytest.fixture
+def firm(model, space):
     # Given
     firm = Firm(model)
-    firm.setup()
     firm.roles["company"] = Mock()
     firm.roles["producer"] = Mock()
-    firm.account = EcoAccount(model)
-    firm.account.setup()
+    space.add_account(firm)
     return firm
 
 
@@ -49,13 +54,11 @@ def test_firm_compute_profit_distribution(firm):
 
 
 @pytest.fixture
-def bank(model):
+def bank(model, space):
     # Given
     bank = Bank(model)
-    bank.setup()
     bank.roles["company"] = Mock()
-    bank.account = EcoAccount(model)
-    bank.account.setup()
+    space.add_account(bank)
     return bank
 
 

@@ -42,7 +42,7 @@ class DepositMarket(EcoSpace):
         return banks.select(banks.defaulted == True)
 
     def link_depositor_to_bank(self, depositor, deposit_bank, amount=0):
-        depositor.bank_id = deposit_bank.account
+        depositor.bank_id = deposit_bank.id
         depositor.deposit_bank = deposit_bank
         self.transfer_stock("cash", depositor.id, deposit_bank.id, amount)
         self.transfer_stock("deposits", deposit_bank.id, depositor.id, amount)

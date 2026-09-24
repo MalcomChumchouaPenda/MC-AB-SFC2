@@ -1,6 +1,6 @@
-import pytest
 from unittest.mock import Mock
-from model.base import EcoAccount
+import pytest
+from agentpy import Model
 from model.agents.firm import Firm
 from model.spaces.good_market import GoodsMarket
 
@@ -8,7 +8,7 @@ from model.spaces.good_market import GoodsMarket
 @pytest.fixture
 def model():
     # Given
-    model = Mock()
+    model = Model()
     model.p.gamma = 0.1
     model.p.nu = 1
     model.p.delta = 0.2
@@ -19,18 +19,16 @@ def model():
 def firm(model):
     # Given
     firm = Firm(model)
-    firm.setup()
-    firm.account = EcoAccount(model)
-    firm.account.setup()
     return firm
 
 
 @pytest.fixture
-def market(model, firm):
+def market(monkeypatch, model, firm):
     # Given
     market = GoodsMarket(model)
-    market.setup()
     market.add_producer(firm)
+    market.add_account(firm)
+    monkeypatch.setattr(market.model, "nprandom", Mock())
     return market
 
 

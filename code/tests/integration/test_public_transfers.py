@@ -1,5 +1,6 @@
-import pytest
 from unittest.mock import Mock
+import pytest
+from agentpy import Model
 from model.spaces.monetary_union import MonetaryUnion
 from model.agents.government import Government
 from model.agents.central_bank import CentralBank
@@ -9,7 +10,7 @@ from model.agents.household import Household
 @pytest.fixture
 def model():
     # Given
-    model = Mock()
+    model = Model()
     model.p.K = 1
     return model
 

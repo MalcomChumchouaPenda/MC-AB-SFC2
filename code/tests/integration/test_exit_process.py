@@ -1,5 +1,5 @@
-import pytest
 from unittest.mock import Mock
+import pytest
 from agentpy import Model
 from model.spaces.monetary_union import MonetaryUnion
 from model.agents.household import Household
@@ -19,7 +19,6 @@ def model():
 def union(model):
     # Given
     union = MonetaryUnion(model)
-    union.setup()
     union.monetary_authority = Mock()
     union.spaces["country_0"].monetary_authority = Mock()
     return union
@@ -37,7 +36,6 @@ def firm(model):
 def bank(model):
     # Given
     bank = Bank(model)
-    bank.setup()
     return bank
 
 
@@ -54,7 +52,7 @@ def country_with_bank_and_founders(union, bank, model):
         share = {"founder": founder, "amount": 50}
         shares.append(share)
         founders.append(founder)
-        founder.account.stocks["cash"] = 50
+        founder.stocks["cash"] = 50
     country.create_bank(bank, shares)
     return country, bank, founders
 
@@ -72,7 +70,7 @@ def country_with_firm_and_founders(country_with_bank_and_founders, firm, model):
         share = {"founder": founder, "amount": 50}
         shares.append(share)
         founders.append(founder)
-        founder.account.stocks["cash"] = 50
+        founder.stocks["cash"] = 50
     country.create_firm(firm, shares, tradable=True)
     return country, firm, founders
 
@@ -88,7 +86,7 @@ def test_firm_exit_with_residual_cash(country_with_firm_and_founders):
     # Then
     assert firm.account.stocks["cash"] == 0
     assert firm.account.stocks["equities"] == 0
-    assert founders[0].account.stocks["cash"] == 50
-    assert founders[0].account.stocks["equities"] == 0
-    assert founders[1].account.stocks["cash"] == 50
-    assert founders[1].account.stocks["equities"] == 0
+    assert founders[0].stocks["cash"] == 50
+    assert founders[0].stocks["equities"] == 0
+    assert founders[1].stocks["cash"] == 50
+    assert founders[1].stocks["equities"] == 0
