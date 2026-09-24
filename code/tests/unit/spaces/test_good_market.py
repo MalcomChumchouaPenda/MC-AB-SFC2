@@ -1,6 +1,7 @@
 import pytest
 from unittest.mock import Mock, MagicMock
 from agentpy import AgentDList
+from model.base import EcoSpace
 from model.spaces.good_market import GoodsMarket
 
 # ---------------------------------------------------
@@ -9,62 +10,42 @@ from model.spaces.good_market import GoodsMarket
 
 
 def test_is_eco_space():
-    # Given
-    from model.base import EcoSpace
-
     # Assert
     assert issubclass(GoodsMarket, EcoSpace)
 
 
-@pytest.fixture
-def market_before_setup():
+@pytest.mark.parametrize("arg", [True, False])
+def test_has_tradable_arg(arg):
     # Given
     model = Mock()
-    market = GoodsMarket(model)
-    return market
-
-
-def test_has_tradable_arg(market_before_setup):
-    # Given
-    market = market_before_setup
 
     # When
-    market.setup(tradable=True)
+    market = GoodsMarket(model, tradable=arg)
 
     # Then
-    assert market.tradable is True
+    assert market.tradable is arg
 
 
-def test_has_average_price_attr(market_before_setup):
+@pytest.fixture
+def market():
     # Given
-    market = market_before_setup
+    model = Mock()
+    return GoodsMarket(model)
 
-    # When
-    market.setup()
 
-    # Then
+
+def test_has_average_price_attr(market):
+    # Assert
     assert market.average_price == 0
 
 
-def test_has_previous_average_price_attr(market_before_setup):
-    # Given
-    market = market_before_setup
-
-    # When
-    market.setup()
-
-    # Then
+def test_has_previous_average_price_attr(market):
+    # Assert
     assert market.average_price_prev == 0
 
 
-def test_has_average_productivity_attr(market_before_setup):
-    # Given
-    market = market_before_setup
-
-    # When
-    market.setup()
-
-    # Then
+def test_has_average_productivity_attr(market):
+    # Assert
     assert market.average_prod == 0
 
 
@@ -73,25 +54,13 @@ def test_has_average_productivity_attr(market_before_setup):
 # ----------------------------------------------------
 
 
-def test_has_consumers_list(market_before_setup):
-    # Given
-    market = market_before_setup
-
-    # When
-    market.setup()
-
-    # Then
+def test_has_consumers_list(market):
+    # Assert
     assert isinstance(market.consumers, AgentDList)
 
 
-def test_has_producers_list(market_before_setup):
-    # Given
-    market = market_before_setup
-
-    # When
-    market.setup()
-
-    # Then
+def test_has_producers_list(market):
+    # Assert
     assert isinstance(market.producers, AgentDList)
 
 
@@ -104,10 +73,9 @@ FakeConsumer = Mock()
 
 
 @pytest.fixture
-def market_without_consumers(monkeypatch, market_before_setup):
+def market_without_consumers(monkeypatch, market):
     # Given
     monkeypatch.setattr("model.spaces.good_market.Consumer", FakeConsumer)
-    market = market_before_setup
     market.add_role = Mock()
     market.consumers = []
     return market
@@ -159,10 +127,9 @@ FakeProducer = Mock()
 
 
 @pytest.fixture
-def market_without_producers(monkeypatch, market_before_setup):
+def market_without_producers(monkeypatch, market):
     # Given
     monkeypatch.setattr("model.spaces.good_market.Producer", FakeProducer)
-    market = market_before_setup
     market.add_role = Mock()
     market.producers = []
     return market
@@ -209,12 +176,11 @@ def market():
 
 
 @pytest.fixture
-def market_with_producers(market_before_setup):
+def market_with_producers(market):
     # Given
     producers = MagicMock()
     producers.__len__.return_value = 1
     producers.random.return_value = []
-    market = market_before_setup
     market.producers = producers
     return market, producers
 
@@ -245,27 +211,36 @@ def test_find_suppliers_with_psi_params(market_with_producers, psi, expected):
     producers.random.assert_called_with(expected)
 
 
-def test_buy_goods_updates_accounts(market_before_setup):
+
+@pytest.fixture
+def market_before_purchase(market):
     # Given
-    market = market_before_setup
-    producer = Mock(price=10, inventories=100)
+    market.transfer_stock = Mock()
+    market.record_flow = Mock()
+    return market
+
+
+def test_buy_goods_updates_accounts(market_before_purchase):
+    # Given
     consumer = Mock()
+    producer = Mock(price=10, inventories=100)
+    market = market_before_purchase
+    transfer_stock = market.transfer_stock
+    record_flow = market.record_flow
 
     # When
     market.buy_goods(consumer, producer, 5)
 
     # Then
-    consumer.debit_stock.assert_any_call("cash", 50)
-    consumer.debit_flow.assert_any_call("consumption", 50)
-    producer.credit_stock.assert_any_call("cash", 50)
-    producer.credit_flow.assert_any_call("consumption", 50)
+    transfer_stock.assert_any_call("cash", consumer.id, producer.id, 50)
+    record_flow.assert_any_call("consumption", consumer.id, producer.id, 50)
 
 
-def test_buy_goods_decrease_inventories(market_before_setup):
+def test_buy_goods_decrease_inventories(market_before_purchase):
     # Given
-    market = market_before_setup
-    producer = Mock(price=10, inventories=100)
     consumer = Mock()
+    producer = Mock(price=10, inventories=100)
+    market = market_before_purchase
 
     # When
     market.buy_goods(consumer, producer, 5)
@@ -280,10 +255,9 @@ def test_buy_goods_decrease_inventories(market_before_setup):
 
 
 @pytest.fixture
-def market_before_update(market_before_setup, make_dlist):
+def market_before_update(market, make_dlist):
     # Given
     producers = [Mock(price=0, productivity=0) for _ in range(5)]
-    market = market_before_setup
     market.average_price_prev = 0
     market.average_price = 0
     market.average_prod = 0

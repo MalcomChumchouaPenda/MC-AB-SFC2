@@ -1,6 +1,7 @@
 import pytest
 from agentpy import AgentDList
 from unittest.mock import Mock
+from model.base import EcoSpace
 from model.spaces.monetary_union import MonetaryUnion
 
 # ---------------------------------------------------
@@ -9,9 +10,6 @@ from model.spaces.monetary_union import MonetaryUnion
 
 
 def test_is_eco_space():
-    # Given
-    from model.base import EcoSpace
-
     # Assert
     assert issubclass(MonetaryUnion, EcoSpace)
 
@@ -23,39 +21,23 @@ FakeCountry = Mock()
 
 
 @pytest.fixture
-def union_before_setup(monkeypatch):
+def union(monkeypatch):
     # Given
     monkeypatch.setattr("model.spaces.monetary_union.GoodsMarket", FakeGoodMarket)
     monkeypatch.setattr("model.spaces.monetary_union.CreditMarket", FakeCreditMarket)
     monkeypatch.setattr("model.spaces.monetary_union.BondMarket", FakeBondMarket)
-    monkeypatch.setattr("model.spaces.monetary_union.Country", FakeCountry)
+    monkeypatch.setattr("model.spaces.monetary_union.Country", FakeCountry)    
+    monkeypatch.setattr(MonetaryUnion, "add_space", Mock())
     model = Mock()
-    model.p.K = 0
+    model.p.K = 2
     union = MonetaryUnion(model)
-    union.add_space = Mock()
     return union
 
 
-def test_has_policy_maker_ref(union_before_setup):
-    # Given
-    union = union_before_setup
+def test_has_average_inflation_prop(union):
+    # Assert
+    assert union.average_inflation == 0.0
 
-    # When
-    union.setup()
-
-    # Then
-    assert union.policy_maker is None
-
-
-def test_has_policy_implementer_dlist(union_before_setup):
-    # Given
-    union = union_before_setup
-
-    # When
-    union.setup()
-
-    # Then
-    assert isinstance(union.policy_implementers, AgentDList)
 
 
 # ---------------------------------------------------
@@ -63,81 +45,56 @@ def test_has_policy_implementer_dlist(union_before_setup):
 # ----------------------------------------------------
 
 
-def test_setup_add_tradable_good_market(union_before_setup):
-    # Given
-    union = union_before_setup
-
-    # When
-    union.setup()
-
-    # Then
+def test_setup_creates_tradable_good_market(union):
+    # Assert
     union.add_space.assert_any_call(FakeGoodMarket, "good_market", tradable=True)
 
 
-def test_setup_creates_credit_market(union_before_setup):
-    # Given
-    union = union_before_setup
-
-    # When
-    union.setup()
-
-    # Then
+def test_setup_creates_credit_market(union):
+    # Assert
     union.add_space.assert_any_call(FakeCreditMarket, "credit_market")
 
 
-def test_setup_creates_bond_market(union_before_setup):
-    # Given
-    union = union_before_setup
-
-    # When
-    union.setup()
-
-    # Then
+def test_setup_creates_bond_market(union):
+    # Assert
     union.add_space.assert_any_call(FakeBondMarket, "bond_market")
 
 
-def test_setup_creates_countries(union_before_setup):
-    # Given
-    union = union_before_setup
-    union.p.K = 2
+def test_setup_creates_countries(union):
+    # Assert
+    union.add_space.assert_any_call(FakeCountry, "country_0")
+    union.add_space.assert_any_call(FakeCountry, "country_1")
 
-    # When
-    union.setup()
 
-    # Then
-    for i in range(2):
-        union.add_space.assert_any_call(FakeCountry, f"country_{i}")
 
 
 # ---------------------------------------------------
-# DYNAMIC STATE TESTS
+# ROLES ACCESS
 # ----------------------------------------------------
 
+def test_has_policy_maker_ref(union):
+    # Assert
+    assert union.policy_maker is None
 
-def test_has_average_inflation_prop(union_before_setup):
-    # Given
-    union = union_before_setup
 
-    # When
-    union.setup()
-
-    # Then
-    assert union.average_inflation == 0.0
+def test_has_policy_implementer_dlist(union):
+    # Assert
+    assert isinstance(union.policy_implementers, AgentDList)
 
 
 # ---------------------------------------------------
-# ROLES / ACCOUNT MANAGEMENT TESTS
+# ROLES MANAGEMENT
 # ----------------------------------------------------
 
 
 FakeMaker = Mock()
+FakeImplementer = Mock()
 
 
 @pytest.fixture
-def union_without_policy_maker(monkeypatch, union_before_setup):
+def union_without_policy_maker(monkeypatch, union):
     # Given
     monkeypatch.setattr("model.spaces.monetary_union.PolicyMaker", FakeMaker)
-    union = union_before_setup
     union.add_role = Mock()
     return union
 
@@ -167,16 +124,13 @@ def test_add_policy_maker_registers_role(union_without_policy_maker):
     assert union.policy_maker is role
 
 
-FakeImplementer = Mock()
-
 
 @pytest.fixture
-def union_without_policy_impl(monkeypatch, union_before_setup):
+def union_without_policy_impl(monkeypatch, union):
     # Given
     monkeypatch.setattr(
         "model.spaces.monetary_union.PolicyImplementer", FakeImplementer
     )
-    union = union_before_setup
     union.policy_implementers = []
     union.add_role = Mock()
     return union
@@ -213,9 +167,8 @@ def test_add_policy_implementer_registers_role(union_without_policy_impl):
 
 
 @pytest.fixture
-def union_before_creation(union_before_setup):
+def union_before_creation(union):
     # Given
-    union = union_before_setup
     union.add_company = Mock()
     union.fund_company = Mock()
     union.spaces["good_market"] = Mock()
@@ -307,27 +260,13 @@ def union_with_policy_maker(union_without_policy_maker):
     return union, authority
 
 
-def test_transfer_cash_between_agents_updates_accounts(union_with_policy_maker):
-    # Given
-    source, target = Mock(), Mock()
-    union, _ = union_with_policy_maker
-
-    # When
-    union.transfer_cash(source, target, 100)
-
-    # Then
-    source.account.debit_stock.assert_any_call("cash", 100)
-    target.account.credit_stock.assert_any_call("cash", 100)
-
-
 # ---------------------------------------------------
 # INFLATION
 # ----------------------------------------------------
 
 
-def test_update_average_inflation(union_before_setup):
+def test_update_average_inflation(union):
     # Given
-    union = union_before_setup
     union.spaces = {f"country_{i}": Mock(inflation=0.05, gdp=100) for i in range(5)}
 
     # When

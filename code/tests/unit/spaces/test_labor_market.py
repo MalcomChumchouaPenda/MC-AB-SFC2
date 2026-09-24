@@ -1,6 +1,7 @@
 import pytest
 from unittest.mock import Mock, MagicMock
 from agentpy import AgentDList
+from model.base import EcoSpace
 from model.spaces.labor_market import LaborMarket
 
 # ---------------------------------------------------
@@ -9,79 +10,55 @@ from model.spaces.labor_market import LaborMarket
 
 
 def test_is_eco_space():
-    # Given
-    from model.base import EcoSpace
-
     # Assert
     assert issubclass(LaborMarket, EcoSpace)
 
 
 @pytest.fixture
-def market_before_setup():
+def market():
     # Given
     model = Mock()
-    market = LaborMarket(model)
-    return market
+    return LaborMarket(model)
 
 
-def test_has_average_wage_prop(market_before_setup):
-    # Given
-    market = market_before_setup
-
-    # When
-    market.setup()
-
-    # Then
+def test_has_average_wage_prop(market):
+    # Assert
     assert market.average_wage == 0
 
 
-def test_has_unemployment_prop(market_before_setup):
-    # Given
-    market = market_before_setup
-
-    # When
-    market.setup()
-
-    # Then
+def test_has_unemployment_prop(market):
+    # Assert
     assert market.unemployment == 0.0
 
 
 # ---------------------------------------------------
-# ROLES
+# ROLES ACCESS
 # ----------------------------------------------------
 
 
-def test_has_workers_list(market_before_setup):
-    # Given
-    market = market_before_setup
-
-    # When
-    market.setup()
-
-    # Then
+def test_has_workers_list(market):
+    # Assert
     assert isinstance(market.workers, AgentDList)
 
 
-def test_has_employers_list(market_before_setup):
-    # Given
-    market = market_before_setup
-
-    # When
-    market.setup()
-
-    # Then
+def test_has_employers_list(market):
+    # Assert
     assert isinstance(market.employers, AgentDList)
 
 
-class FakeWorker(Mock):
-    pass
+# ---------------------------------------------------
+# ROLES MANAGEMENT
+# ----------------------------------------------------
+
+
+FakeWorker = Mock()
+FakeEmployer = Mock()
 
 
 @pytest.fixture
-def market_without_workers(monkeypatch, market_before_setup):
+def market_without_workers(monkeypatch, market):
     # Given
     monkeypatch.setattr("model.spaces.labor_market.Worker", FakeWorker)
-    market = market_before_setup
     market.add_role = Mock()
     market.workers = []
     return market
@@ -112,15 +89,11 @@ def test_add_worker_registers_worker(market_without_workers):
     assert market.workers == [role]
 
 
-class FakeEmployer(Mock):
-    pass
-
 
 @pytest.fixture
-def market_without_employers(monkeypatch, market_before_setup):
+def market_without_employers(monkeypatch, market):
     # Given
     monkeypatch.setattr("model.spaces.labor_market.Employer", FakeEmployer)
-    market = market_before_setup
     market.add_role = Mock()
     market.employers = []
     return market
@@ -157,12 +130,11 @@ def test_add_employer_registers_employer(market_without_employers):
 
 
 @pytest.fixture
-def market_with_employers(market_before_setup):
+def market_with_employers(market):
     # Given
     employers = MagicMock()
     employers.__len__.return_value = 1
     employers.random.return_value = []
-    market = market_before_setup
     market.employers = employers
     return market, employers
 
@@ -193,17 +165,10 @@ def test_find_employers_with_psi_params(market_with_employers, psi, expected):
     employers.random.assert_called_with(expected)
 
 
-@pytest.fixture
-def market_with_employer(market_before_setup):
+
+def test_hire_worker_add_edge(market):
     # Given
-    market = market_before_setup
     employer = Mock(wage=20, labor_demand=10)
-    return market, employer
-
-
-def test_hire_worker_add_edge(market_with_employer):
-    # Given
-    market, employer = market_with_employer
     worker = Mock(labor_supply=1.0)
     graph = market.graph
     graph.add_nodes_from([employer, worker])
@@ -218,10 +183,10 @@ def test_hire_worker_add_edge(market_with_employer):
     assert graph[worker][employer]["quantity"] == 0.9
 
 
-def test_hire_worker_reduces_labor_demand(market_with_employer):
+def test_hire_worker_reduces_labor_demand(market):
     # Given
     worker = Mock(labor_supply=1.0)
-    market, employer = market_with_employer
+    employer = Mock(wage=20, labor_demand=10)
     market.graph.add_nodes_from([employer, worker])
 
     # When
@@ -231,10 +196,10 @@ def test_hire_worker_reduces_labor_demand(market_with_employer):
     assert employer.labor_demand == pytest.approx(9.1)
 
 
-def test_hire_worker_reduces_labor_supply(market_with_employer):
+def test_hire_worker_reduces_labor_supply(market):
     # Given
     worker = Mock(labor_supply=1.0)
-    market, employer = market_with_employer
+    employer = Mock(wage=20, labor_demand=10)
     market.graph.add_nodes_from([employer, worker])
 
     # When
@@ -250,10 +215,9 @@ def test_hire_worker_reduces_labor_supply(market_with_employer):
 
 
 @pytest.fixture
-def market_with_participants(market_before_setup):
+def market_with_participants(market):
     # Given
     employer, worker = Mock(), Mock()
-    market = market_before_setup
     market.graph.add_nodes_from([employer, worker])
     return market, employer, worker
 
@@ -278,9 +242,8 @@ def test_find_jobs(market_with_participants):
 
 
 @pytest.fixture
-def market_before_update(market_before_setup, make_dlist):
+def market_before_update(market, make_dlist):
     # Given
-    market = market_before_setup
     market.average_wage = 0
     market.unemployment = 0
     market.employers = make_dlist()

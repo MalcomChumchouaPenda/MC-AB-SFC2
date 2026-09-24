@@ -43,10 +43,8 @@ class GoodsMarket(EcoSpace):
     def buy_goods(self, consumer, producer, quantity):
         producer.inventories -= quantity
         amount = quantity * producer.price
-        producer.credit_flow("consumption", amount)
-        producer.credit_stock("cash", amount)
-        consumer.debit_flow("consumption", amount)
-        consumer.debit_stock("cash", amount)
+        self.transfer_stock("cash", consumer.id, producer.id, amount)
+        self.record_flow("consumption", consumer.id, producer.id, amount)
 
     #
     #   Evolution

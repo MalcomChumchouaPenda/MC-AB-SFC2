@@ -29,7 +29,7 @@ class MonetaryUnion(EcoSpace):
         self.add_space(BondMarket, "bond_market")
 
     #
-    # Role / Account management
+    # Role management
     #
     def add_policy_maker(self, agent):
         role = self.add_role(PolicyMaker, agent, "policy_maker")
@@ -55,13 +55,6 @@ class MonetaryUnion(EcoSpace):
     def place_bank(self, bank):
         self.spaces["credit_market"].add_lender(bank)
         self.spaces["bond_market"].add_buyer(bank)
-
-    #
-    # Cash transactions
-    #
-    def transfer_cash(self, source, target, amount):
-        source.account.debit_stock("cash", amount)
-        target.account.credit_stock("cash", amount)
 
     #
     # Evolution
