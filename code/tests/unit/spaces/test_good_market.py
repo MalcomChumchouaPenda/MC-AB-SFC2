@@ -33,7 +33,6 @@ def market():
     return GoodsMarket(model)
 
 
-
 def test_has_average_price_attr(market):
     # Assert
     assert market.average_price == 0
@@ -209,7 +208,6 @@ def test_find_suppliers_with_psi_params(market_with_producers, psi, expected):
 
     # Then
     producers.random.assert_called_with(expected)
-
 
 
 @pytest.fixture

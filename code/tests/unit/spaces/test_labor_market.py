@@ -89,7 +89,6 @@ def test_add_worker_registers_worker(market_without_workers):
     assert market.workers == [role]
 
 
-
 @pytest.fixture
 def market_without_employers(monkeypatch, market):
     # Given
@@ -163,7 +162,6 @@ def test_find_employers_with_psi_params(market_with_employers, psi, expected):
 
     # Then
     employers.random.assert_called_with(expected)
-
 
 
 def test_hire_worker_add_edge(market):

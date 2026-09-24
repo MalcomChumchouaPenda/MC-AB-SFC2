@@ -26,7 +26,7 @@ def union(monkeypatch):
     monkeypatch.setattr("model.spaces.monetary_union.GoodsMarket", FakeGoodMarket)
     monkeypatch.setattr("model.spaces.monetary_union.CreditMarket", FakeCreditMarket)
     monkeypatch.setattr("model.spaces.monetary_union.BondMarket", FakeBondMarket)
-    monkeypatch.setattr("model.spaces.monetary_union.Country", FakeCountry)    
+    monkeypatch.setattr("model.spaces.monetary_union.Country", FakeCountry)
     monkeypatch.setattr(MonetaryUnion, "add_space", Mock())
     model = Mock()
     model.p.K = 2
@@ -37,7 +37,6 @@ def union(monkeypatch):
 def test_has_average_inflation_prop(union):
     # Assert
     assert union.average_inflation == 0.0
-
 
 
 # ---------------------------------------------------
@@ -66,11 +65,10 @@ def test_setup_creates_countries(union):
     union.add_space.assert_any_call(FakeCountry, "country_1")
 
 
-
-
 # ---------------------------------------------------
 # ROLES ACCESS
 # ----------------------------------------------------
+
 
 def test_has_policy_maker_ref(union):
     # Assert
@@ -122,7 +120,6 @@ def test_add_policy_maker_registers_role(union_without_policy_maker):
 
     # Then
     assert union.policy_maker is role
-
 
 
 @pytest.fixture

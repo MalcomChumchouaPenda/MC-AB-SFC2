@@ -68,7 +68,6 @@ class DepositMarket(EcoSpace):
         self.transfer_stock("cash", guarantee.id, depositor.id, amount)
         self.transfer_stock("deposits", depositor.id, bank_id, amount)
 
-
     def make_deposits(self, depositor, amount):
         bank_id = depositor.deposit_bank.id
         self.transfer_stock("cash", depositor.id, bank_id, amount)

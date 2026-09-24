@@ -16,17 +16,11 @@ class MonetaryUnion(EcoSpace):
         self.average_inflation = 0
         self.policy_maker = None
         self.policy_implementers = AgentDList(self.model)
-        self._setup_countries(self.model)
-        self._setup_markets()
-
-    def _setup_countries(self, model):
-        for k in range(model.p.K):
-            self.add_space(Country, f"country_{k}")
-
-    def _setup_markets(self):
         self.add_space(GoodsMarket, "good_market", tradable=True)
         self.add_space(CreditMarket, "credit_market")
         self.add_space(BondMarket, "bond_market")
+        for k in range(self.model.p.K):
+            self.add_space(Country, f"country_{k}")
 
     #
     # Role management
