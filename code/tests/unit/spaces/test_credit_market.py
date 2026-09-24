@@ -1,6 +1,7 @@
 import pytest
 from unittest.mock import Mock
 from agentpy import AgentDList
+from model.base import EcoSpace
 from model.spaces.credit_market import CreditMarket
 
 # ---------------------------------------------------
@@ -9,41 +10,37 @@ from model.spaces.credit_market import CreditMarket
 
 
 def test_is_eco_space():
-    # Given
-    from model.base import EcoSpace
-
     # Assert
     assert issubclass(CreditMarket, EcoSpace)
 
 
 @pytest.fixture
-def market_before_setup():
+def market():
     # Given
     model = Mock()
     market = CreditMarket(model)
     return market
 
 
-def test_has_monetary_union_ref(market_before_setup):
+def test_has_lenders_list(market):
+    # Assert
+    assert isinstance(market.lenders, AgentDList)
+
+
+def test_has_borrowers_list(market):
+    # Assert
+    assert isinstance(market.borrowers, AgentDList)
+
+
+def test_expose_discount_rate(market):
     # Given
-    market = market_before_setup
+    market.env = Mock(discount_rate=0.05)
 
     # When
-    market.setup()
+    exposed = market.discount_rate
 
     # Then
-    assert market.monetary_union is None
-
-
-def test_expose_discount_rate(market_before_setup):
-    # Given
-    market = market_before_setup
-
-    # When
-    market.monetary_union = Mock(discount_rate=0.05)
-
-    # Then
-    assert market.discount_rate == 0.05
+    assert exposed == 0.05
 
 
 # ---------------------------------------------------
@@ -51,37 +48,14 @@ def test_expose_discount_rate(market_before_setup):
 # ----------------------------------------------------
 
 
-def test_has_lenders_list(market_before_setup):
-    # Given
-    market = market_before_setup
-
-    # When
-    market.setup()
-
-    # Then
-    assert isinstance(market.lenders, AgentDList)
-
-
-def test_has_borrowers_list(market_before_setup):
-    # Given
-    market = market_before_setup
-
-    # When
-    market.setup()
-
-    # Then
-    assert isinstance(market.borrowers, AgentDList)
-
-
-class FakeLender(Mock):
-    pass
+FakeLender = Mock()
+FakeBorrower = Mock()
 
 
 @pytest.fixture
-def market_without_lenders(monkeypatch, market_before_setup):
+def market_without_lenders(monkeypatch, market):
     # Given
     monkeypatch.setattr("model.spaces.credit_market.Lender", FakeLender)
-    market = market_before_setup
     market.add_role = Mock()
     market.lenders = []
     return market
@@ -112,15 +86,10 @@ def test_add_lender_registers_lender(market_without_lenders):
     assert market.lenders == [role]
 
 
-class FakeBorrower(Mock):
-    pass
-
-
 @pytest.fixture
-def market_without_borrowers(monkeypatch, market_before_setup):
+def market_without_borrowers(monkeypatch, market):
     # Given
     monkeypatch.setattr("model.spaces.credit_market.Borrower", FakeBorrower)
-    market = market_before_setup
     market.add_role = Mock()
     market.borrowers = []
     return market
@@ -156,10 +125,9 @@ def test_add_borrower_registers_borrower(market_without_borrowers):
 # ----------------------------------------------------
 
 
-def test_find_lenders(market_before_setup, make_dlist):
+def test_find_lenders(market, make_dlist):
     # Given
     lender = Mock()
-    market = market_before_setup
     market.lenders = make_dlist([lender])
 
     # When
@@ -170,11 +138,12 @@ def test_find_lenders(market_before_setup, make_dlist):
 
 
 @pytest.fixture
-def market_with_participants(market_before_setup):
+def market_with_participants(market):
     # Given
     lender = Mock()
     borrower = Mock(loan_demand=0)
-    market = market_before_setup
+    market.transfer_stock = Mock()
+    market.record_flow = Mock()
     market.graph.add_nodes_from([borrower, lender])
     return market, borrower, lender
 
@@ -196,17 +165,15 @@ def test_grant_loan_creates_graph_edge(market_with_participants):
 def test_grant_loan_updates_accounts(market_with_participants):
     # Given
     market, borrower, lender = market_with_participants
+    transfer_stock = market.transfer_stock
 
     # When
     market.grant_loan(lender, borrower, 500, 0.05)
 
     # Then
-    borrower.debit_stock.assert_any_call("loans", 500)
-    borrower.credit_stock.assert_any_call("deposits", 500)
-    borrower.bank_id.debit_stock.assert_any_call("deposits", 500)
-    borrower.bank_id.credit_stock.assert_any_call("cash", 500)
-    lender.debit_stock.assert_any_call("cash", 500)
-    lender.credit_stock.assert_any_call("loans", 500)
+    transfer_stock.assert_any_call("loans", borrower.id, lender.id, 500)
+    transfer_stock.assert_any_call("deposits", borrower.bank_id, borrower.id, 500)
+    transfer_stock.assert_any_call("cash", lender.id, borrower.bank_id, 500)
 
 
 def test_grant_loan_reduces_loan_demand(market_with_participants):
@@ -264,19 +231,17 @@ def test_repay_loans_updates_graph_edge(market_with_loan):
 def test_repay_loans_updates_accounts(market_with_loan):
     # Given
     market, borrower, lender = market_with_loan
+    transfer_stock = market.transfer_stock
+    record_flow = market.record_flow
 
     # When
     market.repay_loans(borrower, lender, 100, 10)
 
     # Then
-    borrower.credit_stock.assert_any_call("loans", 100)
-    borrower.debit_flow.assert_any_call("loan_interests", 10)
-    borrower.debit_stock.assert_any_call("deposits", 110)
-    borrower.bank_id.credit_stock.assert_any_call("deposits", 110)
-    borrower.bank_id.debit_stock.assert_any_call("cash", 110)
-    lender.credit_stock.assert_any_call("cash", 110)
-    lender.debit_stock.assert_any_call("loans", 100)
-    lender.credit_flow.assert_any_call("loan_interests", 10)
+    transfer_stock.assert_any_call("loans", lender.id, borrower.id, 100)
+    transfer_stock.assert_any_call("cash", borrower.bank_id, lender.id, 110)
+    transfer_stock.assert_any_call("deposits", borrower.id, borrower.bank_id, 110)
+    record_flow.assert_any_call("loan_interests", borrower.id, lender.id, 10)
 
 
 def test_make_defaults_updates_graph_edge(market_with_loan):
@@ -295,15 +260,15 @@ def test_make_defaults_updates_graph_edge(market_with_loan):
 def test_make_defaults_updates_accounts(market_with_loan):
     # Given
     market, borrower, lender = market_with_loan
+    transfer_stock = market.transfer_stock
+    record_flow = market.record_flow
 
     # When
     market.make_defaults(borrower, lender, 100)
 
     # Then
-    borrower.credit_stock.assert_any_call("loans", 100)
-    borrower.debit_flow.assert_any_call("loan_defaults", 100)
-    lender.debit_stock.assert_any_call("loans", 100)
-    lender.credit_flow.assert_any_call("loan_defaults", 100)
+    transfer_stock.assert_any_call("loans", lender.id, borrower.id, 100)
+    record_flow.assert_any_call("loan_defaults", lender.id, borrower.id, 100)
 
 
 # ---------------------------------------------------
@@ -311,47 +276,29 @@ def test_make_defaults_updates_accounts(market_with_loan):
 # ----------------------------------------------------
 
 
-@pytest.fixture
-def market_with_union(market_before_setup):
-    # Given
-    union = Mock()
-    market = market_before_setup
-    market.monetary_union = union
-    return market, union
-
-
-# ---------------------------------------------------
-# CASH ADVANCE REQUEST / REPAYMENT
-# ----------------------------------------------------
-
-
-def test_request_advances_updates_accounts(market_with_union):
+def test_request_advances_updates_accounts(market):
     # Given
     lender = Mock()
-    market, _ = market_with_union
+    transfer_stock = market.transfer_stock = Mock()
 
     # When
     market.request_advances(lender, 100)
 
     # Then
-    lender.credit_stock.assert_any_call("cash", 100)
-    lender.debit_stock.assert_any_call("advances", 100)
-    lender.cb_id.debit_stock.assert_any_call("cash", 100)
-    lender.cb_id.credit_stock.assert_any_call("advances", 100)
+    transfer_stock.assert_any_call("cash", lender.cb_id, lender.id, 100)
+    transfer_stock.assert_any_call("advances", lender.id, lender.cb_id, 100)
 
 
-def test_repay_advances_updates_accounts(market_with_union):
+def test_repay_advances_updates_accounts(market):
     # Given
     lender = Mock()
-    market, _ = market_with_union
+    transfer_stock = market.transfer_stock = Mock()
+    record_flow = market.record_flow = Mock()
 
     # When
     market.repay_advances(lender, 100, 10)
 
     # Then
-    lender.debit_stock.assert_any_call("cash", 110)
-    lender.credit_stock.assert_any_call("advances", 100)
-    lender.debit_flow.assert_any_call("adv_interests", 10)
-    lender.cb_id.credit_stock.assert_any_call("cash", 110)
-    lender.cb_id.debit_stock.assert_any_call("advances", 100)
-    lender.cb_id.credit_flow.assert_any_call("adv_interests", 10)
+    transfer_stock.assert_any_call("cash", lender.id, lender.cb_id, 110)
+    transfer_stock.assert_any_call("advances", lender.cb_id, lender.id, 100)
+    record_flow.assert_any_call("adv_interests", lender.id, lender.cb_id, 10)

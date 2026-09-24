@@ -42,48 +42,41 @@ class DepositMarket(EcoSpace):
         return banks.select(banks.defaulted == True)
 
     def link_depositor_to_bank(self, depositor, deposit_bank, amount=0):
-        depositor.account.credit_stock("deposits", amount)
-        depositor.account.debit_stock("cash", amount)
-        deposit_bank.account.debit_stock("deposits", amount)
-        deposit_bank.account.credit_stock("cash", amount)
         depositor.bank_id = deposit_bank.account
         depositor.deposit_bank = deposit_bank
+        self.transfer_stock("cash", depositor.id, deposit_bank.id, amount)
+        self.transfer_stock("deposits", deposit_bank.id, depositor.id, amount)
         self.graph.add_edge(depositor, deposit_bank, amount=amount)
 
     def unlink_depositor_with_bank(self, depositor):
+        bank_id = depositor.bank_id
         deposit_bank = depositor.deposit_bank
         amount = self.graph[depositor][deposit_bank]["amount"]
-        depositor.account.debit_stock("deposits", amount)
-        depositor.account.credit_stock("cash", amount)
-        depositor.bank_id.credit_stock("deposits", amount)
-        depositor.bank_id.debit_stock("cash", amount)
         depositor.bank_id = None
         depositor.deposit_bank = None
+        self.transfer_stock("cash", bank_id, depositor.id, amount)
+        self.transfer_stock("deposits", depositor.id, bank_id, amount)
         self.graph.remove_edge(depositor, deposit_bank)
 
     def pay_interests(self, deposit_bank, depositor, amount):
-        depositor.account.credit_stock("deposits", amount)
-        depositor.account.credit_flow("dep_interests", amount)
-        deposit_bank.debit_stock("deposits", amount)
-        deposit_bank.debit_flow("dep_interests", amount)
+        self.transfer_stock("deposits", deposit_bank.id, depositor.id, amount)
+        self.record_flow("dep_interests", deposit_bank.id, depositor.id, amount)
         self.graph[depositor][deposit_bank]["amount"] += amount
 
     def reimburse_deposits(self, guarantee, depositor, amount):
-        depositor.account.debit_stock("deposits", amount)
-        depositor.account.credit_stock("cash", amount)
-        depositor.deposit_bank.credit_stock("deposits", amount)
-        guarantee.account.debit_stock("cash", amount)
+        bank_id = depositor.deposit_bank.id
+        self.transfer_stock("cash", guarantee.id, depositor.id, amount)
+        self.transfer_stock("deposits", depositor.id, bank_id, amount)
+
 
     def make_deposits(self, depositor, amount):
-        depositor.account.credit_stock("deposits", amount)
-        depositor.account.debit_stock("cash", amount)
-        depositor.deposit_bank.debit_stock("deposits", amount)
-        depositor.deposit_bank.credit_stock("cash", amount)
+        bank_id = depositor.deposit_bank.id
+        self.transfer_stock("cash", depositor.id, bank_id, amount)
+        self.transfer_stock("deposits", bank_id, depositor.id, amount)
         self.graph[depositor][depositor.deposit_bank]["amount"] += amount
 
     def withdraw_deposits(self, depositor, amount):
-        depositor.account.debit_stock("deposits", amount)
-        depositor.account.credit_stock("cash", amount)
-        depositor.deposit_bank.credit_stock("deposits", amount)
-        depositor.deposit_bank.debit_stock("cash", amount)
+        bank_id = depositor.deposit_bank.id
+        self.transfer_stock("cash", bank_id, depositor.id, amount)
+        self.transfer_stock("deposits", depositor.id, bank_id, amount)
         self.graph[depositor][depositor.deposit_bank]["amount"] -= amount

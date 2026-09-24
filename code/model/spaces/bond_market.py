@@ -42,18 +42,13 @@ class BondMarket(EcoSpace):
     def buy_bonds(self, buyer, issuer, number):
         amount = issuer.bond_value * number
         issuer.bond_number -= number
-        issuer.debit_stock("bonds", amount)
-        issuer.credit_stock("cash", amount)
-        buyer.credit_stock("bonds", amount)
-        buyer.debit_stock("cash", amount)
+        self.transfer_stock("bonds", issuer.id, buyer.id, amount)
+        self.transfer_stock("cash", buyer.id, issuer.id, amount)
         self.graph.add_edge(issuer, buyer, amount=amount)
 
     def repay_bonds(self, buyer, issuer, principal, interests):
         repayment = principal + interests
-        issuer.debit_flow("bond_interests", interests)
-        issuer.credit_stock("bonds", principal)
-        issuer.debit_stock("cash", repayment)
-        buyer.credit_flow("bond_interests", interests)
-        buyer.debit_stock("bonds", principal)
-        buyer.credit_stock("cash", repayment)
+        self.transfer_stock("bonds", buyer.id, issuer.id, principal)
+        self.transfer_stock("cash", issuer.id, buyer.id, repayment)
+        self.record_flow("bond_interests", issuer.id, buyer.id, interests)
         self.graph[issuer][buyer]["amount"] -= principal

@@ -8,13 +8,12 @@ class CreditMarket(EcoSpace):
 
     def setup(self):
         super().setup()
-        self.monetary_union = None
         self.lenders = AgentDList(self.model)
         self.borrowers = AgentDList(self.model)
 
     @property
     def discount_rate(self):
-        return self.monetary_union.discount_rate
+        return self.env.discount_rate
 
     #
     # Roles management
@@ -37,12 +36,9 @@ class CreditMarket(EcoSpace):
 
     def grant_loan(self, lender, borrower, amount, rate):
         borrower.loan_demand -= amount
-        borrower.debit_stock("loans", amount)
-        borrower.credit_stock("deposits", amount)
-        borrower.bank_id.debit_stock("deposits", amount)
-        borrower.bank_id.credit_stock("cash", amount)
-        lender.debit_stock("cash", amount)
-        lender.credit_stock("loans", amount)
+        self.transfer_stock("loans", borrower.id, lender.id, amount)
+        self.transfer_stock("deposits", borrower.bank_id, borrower.id, amount)
+        self.transfer_stock("cash", lender.id, borrower.bank_id, amount)
         self.graph.add_edge(borrower, lender, amount=amount, rate=rate)
 
     #
@@ -56,37 +52,26 @@ class CreditMarket(EcoSpace):
 
     def repay_loans(self, borrower, lender, principal, interests):
         total = principal + interests
-        borrower.credit_stock("loans", principal)
-        borrower.debit_flow("loan_interests", interests)
-        borrower.debit_stock("deposits", total)
-        borrower.bank_id.credit_stock("deposits", total)
-        borrower.bank_id.debit_stock("cash", total)
-        lender.credit_stock("cash", total)
-        lender.debit_stock("loans", principal)
-        lender.credit_flow("loan_interests", interests)
+        self.transfer_stock("loans", lender.id, borrower.id, principal)
+        self.transfer_stock("cash", borrower.bank_id, lender.id, total)
+        self.transfer_stock("deposits", borrower.id, borrower.bank_id, total)
+        self.record_flow("loan_interests", borrower.id, lender.id, interests)
         self.graph[borrower][lender]["amount"] -= principal
 
     def make_defaults(self, borrower, lender, amount):
-        borrower.debit_flow("loan_defaults", amount)
-        borrower.credit_stock("loans", amount)
-        lender.credit_flow("loan_defaults", amount)
-        lender.debit_stock("loans", amount)
+        self.transfer_stock("loans", lender.id, borrower.id, amount)
+        self.record_flow("loan_defaults", lender.id, borrower.id, amount)
         self.graph[borrower][lender]["amount"] -= amount
 
     #
     # Cash advances
     #
     def request_advances(self, lender, amount):
-        lender.debit_stock("advances", amount)
-        lender.credit_stock("cash", amount)
-        lender.cb_id.credit_stock("advances", amount)
-        lender.cb_id.debit_stock("cash", amount)
+        self.transfer_stock("cash", lender.cb_id, lender.id, amount)
+        self.transfer_stock("advances", lender.id, lender.cb_id, amount)
 
     def repay_advances(self, lender, principal, interests):
         total = principal + interests
-        lender.debit_stock("cash", total)
-        lender.credit_stock("advances", principal)
-        lender.debit_flow("adv_interests", interests)
-        lender.cb_id.credit_stock("cash", total)
-        lender.cb_id.debit_stock("advances", principal)
-        lender.cb_id.credit_flow("adv_interests", interests)
+        self.transfer_stock("cash", lender.id, lender.cb_id, total)
+        self.transfer_stock("advances", lender.cb_id, lender.id, principal)
+        self.record_flow("adv_interests", lender.id, lender.cb_id, interests)

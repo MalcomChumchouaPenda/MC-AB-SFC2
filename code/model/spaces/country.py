@@ -98,15 +98,13 @@ class Country(EcoSpace):
         return investors
 
     def fund_company(self, company, founder, amount):
+        founder.resid_equity -= amount
         if self.graph.has_edge(company, founder):
             self.graph[company][founder]["value"] += amount
         else:
             self.graph.add_edge(company, founder, value=amount)
-        company.debit_stock("equities", amount)
-        company.credit_stock("cash", amount)
-        founder.credit_stock("equities", amount)
-        founder.debit_stock("cash", amount)
-        founder.resid_equity -= amount
+        self.transfer_stock("cash", founder.id, company.id, amount)
+        self.transfer_stock("equities", company.id, founder.id, amount)
 
     #
     # Dividends and losses
@@ -118,22 +116,18 @@ class Country(EcoSpace):
         ]
 
     def update_equity_share(self, company, founder, variation):
-        company.debit_stock("equities", variation)
-        founder.credit_stock("equities", variation)
+        self.transfer_stock("equities", company.id, founder.id, variation)
+        self.record_flow("profit_transfers", company.id, founder.id, variation)
         self.graph[company][founder]["value"] += variation
 
     def pay_dividends(self, company, founder, amount):
-        company.debit_flow("dividends", amount)
-        company.debit_stock("cash", amount)
-        founder.credit_flow("dividends", amount)
-        founder.credit_stock("cash", amount)
+        self.transfer_stock("cash", company.id, founder.id, amount)
+        self.record_flow("dividends", company.id, founder.id, amount)
 
     def pay_taxes(self, payer, amount):
-        payer.debit_flow("taxes", amount)
-        payer.debit_stock("cash", amount)
-        authority = self.fiscal_authority
-        authority.credit_flow("taxes", amount)
-        authority.credit_stock("cash", amount)
+        auth_id = self.fiscal_authority.id
+        self.transfer_stock("cash", payer.id, auth_id, amount)
+        self.record_flow("taxes", payer.id, auth_id, amount)
 
     #
     # Firm creation
@@ -170,10 +164,10 @@ class Country(EcoSpace):
     # Profit transfers
     #
     def transfer_central_bank_profits(self, amount):
-        self.fiscal_authority.credit_flow("profit_transfers", amount)
-        self.fiscal_authority.credit_stock("cash", amount)
-        self.monetary_authority.debit_flow("profit_transfers", amount)
-        self.monetary_authority.debit_stock("cash", amount)
+        source = self.monetary_authority.id
+        target = self.fiscal_authority.id
+        self.transfer_stock("cash", source, target, amount)
+        self.record_flow("profit_transfers", source, target, amount)
 
     #
     # Public transfers
@@ -182,19 +176,15 @@ class Country(EcoSpace):
         return list(self.citizens)
 
     def pay_public_transfers(self, authority, citizen, amount):
-        citizen.credit_flow("public_transfers", amount)
-        citizen.credit_stock("cash", amount)
-        authority.debit_flow("public_transfers", amount)
-        authority.debit_stock("cash", amount)
+        self.transfer_stock("cash", authority.id, citizen.id, amount)
+        self.record_flow("public_transfers", authority.id, citizen.id, amount)
 
     #
     # Residual transfers
     #
     def transfer_residual_cash(self, company, founder, amount):
-        company.credit_stock("equities", amount)
-        company.debit_stock("cash", amount)
-        founder.debit_stock("equities", amount)
-        founder.credit_stock("cash", amount)
+        self.transfer_stock("cash", company.id, founder.id, amount)
+        self.transfer_stock("equities", founder.id, company.id, amount)
 
     #
     # Evolution

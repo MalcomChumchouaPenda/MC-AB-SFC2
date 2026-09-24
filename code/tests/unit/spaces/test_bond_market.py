@@ -1,6 +1,7 @@
 import pytest
-from unittest.mock import Mock
+from unittest.mock import Mock, call
 from agentpy import AgentDList
+from model.base import EcoSpace
 from model.spaces.bond_market import BondMarket
 
 # ---------------------------------------------------
@@ -9,57 +10,41 @@ from model.spaces.bond_market import BondMarket
 
 
 def test_is_agentpy_object():
-    # Given
-    from model.base import EcoSpace
-
     # Assert
     assert issubclass(BondMarket, EcoSpace)
 
 
 @pytest.fixture
-def market_before_setup():
+def market():
     # Given
     model = Mock()
     market = BondMarket(model)
     return market
 
 
-# ---------------------------------------------------
-# ROLES
-# ----------------------------------------------------
-
-
-def test_has_buyers_list(market_before_setup):
-    # Given
-    market = market_before_setup
-
-    # When
-    market.setup()
-
-    # Then
+def test_has_buyers_list(market):
+    # Assert
     assert isinstance(market.buyers, AgentDList)
 
 
-def test_has_issuers_list(market_before_setup):
-    # Given
-    market = market_before_setup
-
-    # When
-    market.setup()
-
-    # Then
+def test_has_issuers_list(market):
+    # Assert
     assert isinstance(market.issuers, AgentDList)
 
 
-class FakeBuyer(Mock):
-    pass
+# ---------------------------------------------------
+# ROLES MANAGEMENT
+# ----------------------------------------------------
+
+
+FakeBuyer = Mock()
+FakeIssuer = Mock()
 
 
 @pytest.fixture
-def market_without_buyers(monkeypatch, market_before_setup):
+def market_without_buyers(monkeypatch, market):
     # Given
     monkeypatch.setattr("model.spaces.bond_market.BondBuyer", FakeBuyer)
-    market = market_before_setup
     market.add_role = Mock()
     market.buyers = []
     return market
@@ -90,15 +75,10 @@ def test_add_buyer_registers_buyer(market_without_buyers):
     assert market.buyers == [role]
 
 
-class FakeIssuer(Mock):
-    pass
-
-
 @pytest.fixture
-def market_without_issuers(monkeypatch, market_before_setup):
+def market_without_issuers(monkeypatch, market):
     # Given
     monkeypatch.setattr("model.spaces.bond_market.BondIssuer", FakeIssuer)
-    market = market_before_setup
     market.add_role = Mock()
     market.issuers = []
     return market
@@ -135,10 +115,9 @@ def test_add_issuer_registers_issuer(market_without_issuers):
 
 
 @pytest.fixture
-def market_with_issuers(market_before_setup, make_dlist):
+def market_with_issuers(market, make_dlist):
     # Given
     issuers = make_dlist()
-    market = market_before_setup
     market.issuers = issuers
     return market, issuers
 
@@ -157,10 +136,9 @@ def test_find_issuers_return_issuer_with_bonds(market_with_issuers):
     assert found == [eligible]
 
 
-def test_find_bonds_returns_bonds_edge(market_before_setup):
+def test_find_bonds_returns_bonds_edge(market):
     # Given
     issuer, buyer, other = Mock(), Mock(), Mock()
-    market = market_before_setup
     graph = market.graph
     graph.add_edge(issuer, buyer, amount=100)
     graph.add_edge(other, buyer, amount=200)
@@ -178,11 +156,12 @@ def test_find_bonds_returns_bonds_edge(market_before_setup):
 
 
 @pytest.fixture
-def market_with_participants(market_before_setup):
+def market_with_participants(market):
     # Given
     buyer = Mock()
     issuer = Mock(debt_ratio=0, bond_value=100, bond_number=1)
-    market = market_before_setup
+    market.transfer_stock = Mock()
+    market.record_flow = Mock()
     return market, issuer, buyer
 
 
@@ -203,16 +182,15 @@ def test_buy_bonds_creates_graph_edge(market_with_participants):
 def test_buy_bonds_updates_accounts(market_with_participants):
     # Given
     market, issuer, buyer = market_with_participants
+    transfer_stock = market.transfer_stock
     issuer.bond_value = 100
 
     # When
     market.buy_bonds(buyer, issuer, 2)
 
     # Then
-    issuer.debit_stock.assert_called_with("bonds", 200)
-    issuer.credit_stock.assert_called_with("cash", 200)
-    buyer.credit_stock.assert_called_with("bonds", 200)
-    buyer.debit_stock.assert_called_with("cash", 200)
+    transfer_stock.assert_any_call("bonds", issuer.id, buyer.id, 200)
+    transfer_stock.assert_any_call("cash", buyer.id, issuer.id, 200)
 
 
 def test_buy_bonds_reduces_bond_supply(market_with_participants):
@@ -228,12 +206,13 @@ def test_buy_bonds_reduces_bond_supply(market_with_participants):
 
 
 @pytest.fixture
-def market_with_purchase(market_before_setup):
+def market_with_purchase(market):
     # Given
     buyer = Mock()
     issuer = Mock()
-    market = market_before_setup
     market.graph.add_edge(buyer, issuer, amount=0)
+    market.transfer_stock = Mock()
+    market.record_flow = Mock()
     return market, issuer, buyer
 
 
@@ -253,14 +232,13 @@ def test_repay_bond_creates_graph_edge(market_with_purchase):
 def test_repay_bond_updates_accounts(market_with_purchase):
     # Given
     market, issuer, buyer = market_with_purchase
+    transfer_stock = market.transfer_stock
+    record_flow = market.record_flow
 
     # When
     market.repay_bonds(buyer, issuer, 100, 10)
 
     # Then
-    issuer.debit_flow.assert_called_with("bond_interests", 10)
-    issuer.credit_stock.assert_called_with("bonds", 100)
-    issuer.debit_stock.assert_called_with("cash", 110)
-    buyer.credit_flow.assert_called_with("bond_interests", 10)
-    buyer.debit_stock.assert_called_with("bonds", 100)
-    buyer.credit_stock.assert_called_with("cash", 110)
+    transfer_stock.assert_any_call("bonds", buyer.id, issuer.id, 100)
+    transfer_stock.assert_any_call("cash", issuer.id, buyer.id, 110)
+    record_flow.assert_any_call("bond_interests", issuer.id, buyer.id, 10)

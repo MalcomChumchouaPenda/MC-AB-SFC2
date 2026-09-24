@@ -22,156 +22,94 @@ FakeDepositMarket = Mock()
 
 
 @pytest.fixture
-def country_before_setup(monkeypatch):
+def country(monkeypatch):
     # Given
     monkeypatch.setattr("model.spaces.country.GoodsMarket", FakeGoodMarket)
     monkeypatch.setattr("model.spaces.country.LaborMarket", FakeLaborMarket)
     monkeypatch.setattr("model.spaces.country.DepositMarket", FakeDepositMarket)
-    model = Mock()
-    country = Country(model)
-    country.add_space = Mock()
+    monkeypatch.setattr(Country, "add_space", Mock())
+    country = Country(model=Mock())
     return country
 
 
-def test_has_inflation(country_before_setup):
-    # Given
-    country = country_before_setup
-
-    # When
-    country.setup()
-
-    # Then
+def test_has_inflation(country):
+    # Assert
     assert country.inflation == 0
 
 
-def test_has_gdp(country_before_setup):
-    # Given
-    country = country_before_setup
-
-    # When
-    country.setup()
-
-    # Then
+def test_has_gdp(country):
+    # Assert
     assert country.gdp == 0
 
 
-def test_has_prob_failure(country_before_setup):
-    # Given
-    country = country_before_setup
-
-    # When
-    country.setup()
-
-    # Then
+def test_has_prob_failure(country):
+    # Assert
     assert country.prob_failure == 0
 
 
-def test_has_tax_rate(country_before_setup):
-    # Given
-    country = country_before_setup
-
-    # When
-    country.setup()
-
-    # Then
+def test_has_tax_rate(country):
+    # Assert
     assert country.tax_rate == 0
 
 
 # ---------------------------------------------------
-# SPACES
+# SPACES CREATION
 # ----------------------------------------------------
 
 
-def test_setup_creates_good_market(country_before_setup):
-    # Given
-    country = country_before_setup
-
-    # When
-    country.setup()
-
-    # Then
+def test_setup_creates_good_market(country):
+    # Assert
     country.add_space.assert_any_call(FakeGoodMarket, "good_market", tradable=False)
 
 
-def test_setup_creates_labor_market(country_before_setup):
-    # Given
-    country = country_before_setup
-
-    # When
-    country.setup()
-
-    # Then
+def test_setup_creates_labor_market(country):
+    # Assert
     country.add_space.assert_any_call(FakeLaborMarket, "labor_market")
 
 
-def test_setup_creates_deposit_market(country_before_setup):
-    # Given
-    country = country_before_setup
-
-    # When
-    country.setup()
-
-    # Then
+def test_setup_creates_deposit_market(country):
+    # Assert
     country.add_space.assert_any_call(FakeDepositMarket, "deposit_market")
 
 
 # ---------------------------------------------------
-# ROLES
+# ROLES ACCESS
 # ----------------------------------------------------
 
 
-def test_has_fiscal_authority_ref(country_before_setup):
-    # Given
-    country = country_before_setup
-
-    # When
-    country.setup()
-
-    # Then
+def test_has_fiscal_authority_ref(country):
+    # Assert
     assert country.fiscal_authority is None
 
 
-def test_has_monetary_authority_ref(country_before_setup):
-    # Given
-    country = country_before_setup
-
-    # When
-    country.setup()
-
-    # Then
+def test_has_monetary_authority_ref(country):
+    # Assert
     assert country.monetary_authority is None
 
 
-def test_has_citizens_list(country_before_setup):
-    # Given
-    country = country_before_setup
-
-    # When
-    country.setup()
-
-    # Then
+def test_has_citizens_list(country):
+    # Assert
     assert isinstance(country.citizens, AgentDList)
 
 
-def test_has_companies_list(country_before_setup):
-    # Given
-    country = country_before_setup
-
-    # When
-    country.setup()
-
-    # Then
+def test_has_companies_list(country):
+    # Assert
     assert isinstance(country.companies, AgentDList)
 
 
+# ---------------------------------------------------
+# ROLES MANAGEMENT
+# ----------------------------------------------------
+
 FakeAuthority = Mock()
+FakeCitizen = Mock()
+FakeCompany = Mock()
 
 
 @pytest.fixture
-def country_without_monetary_auth(monkeypatch, country_before_setup):
+def country_without_monetary_auth(monkeypatch, country):
     # Given
     monkeypatch.setattr("model.spaces.country.MonetaryAuthority", FakeAuthority)
-    country = country_before_setup
     country.add_role = Mock()
     country.env = Mock()
     return country
@@ -216,10 +154,9 @@ def test_add_monetary_authority_add_account(country_without_monetary_auth):
 
 
 @pytest.fixture
-def country_without_fiscal_auth(monkeypatch, country_before_setup):
+def country_without_fiscal_auth(monkeypatch, country):
     # Given
     monkeypatch.setattr("model.spaces.country.FiscalAuthority", FakeAuthority)
-    country = country_before_setup
     country.add_role = Mock()
     country.env = Mock()
     country.monetary_authority = Mock()
@@ -276,14 +213,10 @@ def test_add_fiscal_authority_links_to_cb_id(country_without_fiscal_auth):
     assert govt.cb_id is country.monetary_authority.account
 
 
-FakeCitizen = Mock()
-
-
 @pytest.fixture
-def country_without_citizens(monkeypatch, country_before_setup):
+def country_without_citizens(monkeypatch, country):
     # Given
     monkeypatch.setattr("model.spaces.country.Citizen", FakeCitizen)
-    country = country_before_setup
     country.add_role = Mock()
     country.citizens = []
     country.env = Mock()
@@ -342,14 +275,10 @@ def test_add_citizen_links_to_cb_id(country_without_citizens):
     assert household.cb_id is authority.account
 
 
-FakeCompany = Mock()
-
-
 @pytest.fixture
-def country_without_companies(monkeypatch, country_before_setup):
+def country_without_companies(monkeypatch, country):
     # Given
     monkeypatch.setattr("model.spaces.country.Company", FakeCompany)
-    country = country_before_setup
     country.add_role = Mock()
     country.env = Mock()
     country.companies = []
@@ -421,53 +350,14 @@ def test_add_company_links_to_cb_id(country_without_companies):
 
 
 # ---------------------------------------------------
-# LAG INDICATORS
-# ----------------------------------------------------
-
-
-def test_has_inflation_prop(country_before_setup):
-    # Given
-    country = country_before_setup
-
-    # When
-    country.setup()
-
-    # Then
-    assert country.inflation == 0.0
-
-
-def test_has_gdp_prop(country_before_setup):
-    # Given
-    country = country_before_setup
-
-    # When
-    country.setup()
-
-    # Then
-    assert country.gdp == 0
-
-
-def test_has_prob_failure_prop(country_before_setup):
-    # Given
-    country = country_before_setup
-
-    # When
-    country.setup()
-
-    # Then
-    assert country.prob_failure == 0.0
-
-
-# ---------------------------------------------------
 # CURRENT INDICATORS
 # ----------------------------------------------------
 
 
 @pytest.fixture
-def country_with_companies(country_before_setup, make_dlist):
+def country_with_companies(country, make_dlist):
     # Given
     companies = make_dlist()
-    country = country_before_setup
     country.companies = companies
     return country, companies
 
@@ -558,11 +448,12 @@ def test_calc_sector_equity_range_if_empty_sector(country_with_companies):
 
 
 @pytest.fixture
-def country_with_citizens(country_before_setup, make_dlist):
+def country_with_citizens(country, make_dlist):
     # Given
     citizens = make_dlist([Mock(resid_equity=100) for _ in range(2)])
-    country = country_before_setup
     country.citizens = citizens
+    country.transfer_stock = Mock()
+    country.record_flow = Mock()
     return country, citizens
 
 
@@ -606,40 +497,40 @@ def test_find_citizens(country_with_citizens):
 def test_pay_public_transfers_updates_accounts(country_with_citizens):
     # Given
     country, citizens = country_with_citizens
-    authority = Mock()
+    transfer_stock = country.transfer_stock
+    record_flow = country.record_flow
+    auth = Mock()
 
     # When
-    country.pay_public_transfers(authority, citizens[0], 10)
+    country.pay_public_transfers(auth, citizens[0], 10)
 
     # Then
-    citizens[0].credit_flow.assert_any_call("public_transfers", 10)
-    citizens[0].credit_stock.assert_any_call("cash", 10)
-    authority.debit_flow.assert_any_call("public_transfers", 10)
-    authority.debit_stock.assert_any_call("cash", 10)
+    transfer_stock.assert_any_call("cash", auth.id, citizens[0].id, 10)
+    record_flow.assert_any_call("public_transfers", auth.id, citizens[0].id, 10)
 
 
 @pytest.fixture
-def country_with_company_and_founder(country_before_setup):
+def country_with_company_and_founder(country):
     # Given
     company = Mock()
     founder = Mock(resid_equity=0)
-    country = country_before_setup
     country.graph.add_edge(company, founder, value=0)
+    country.transfer_stock = Mock()
+    country.record_flow = Mock()
     return country, company, founder
 
 
 def test_fund_company_updates_accounts(country_with_company_and_founder):
     # Given
     country, company, founder = country_with_company_and_founder
+    transfer_stock = country.transfer_stock
 
     # When
     country.fund_company(company, founder, 100)
 
     # Then
-    company.debit_stock.assert_any_call("equities", 100)
-    company.credit_stock.assert_any_call("cash", 100)
-    founder.credit_stock.assert_any_call("equities", 100)
-    founder.debit_stock.assert_any_call("cash", 100)
+    transfer_stock.assert_any_call("cash", founder.id, company.id, 100)
+    transfer_stock.assert_any_call("equities", company.id, founder.id, 100)
 
 
 def test_fund_company_adds_graph_edge(country_with_company_and_founder):
@@ -701,43 +592,44 @@ def test_find_equity_shares(country_with_company_and_founder):
 def test_pay_dividends_updates_accounts(country_with_company_and_founder):
     # Given
     country, company, founder = country_with_company_and_founder
+    transfer_stock = country.transfer_stock
+    record_flow = country.record_flow
 
     # When
     country.pay_dividends(company, founder, 10)
 
     # Then
-    company.debit_flow.assert_any_call("dividends", 10)
-    company.debit_stock.assert_any_call("cash", 10)
-    founder.credit_flow.assert_any_call("dividends", 10)
-    founder.credit_stock.assert_any_call("cash", 10)
+    transfer_stock.assert_any_call("cash", company.id, founder.id, 10)
+    record_flow.assert_any_call("dividends", company.id, founder.id, 10)
 
 
-def test_pay_taxes_updates_accounts(country_before_setup):
+def test_pay_taxes_updates_accounts(country):
     # Given
-    payer, authority = Mock(), Mock()
-    country = country_before_setup
-    country.fiscal_authority = authority
+    payer, auth = Mock(), Mock()
+    country.fiscal_authority = auth
+    transfer_stock = country.transfer_stock = Mock()
+    record_flow = country.record_flow = Mock()
 
     # When
     country.pay_taxes(payer, 10)
 
     # Then
-    payer.debit_flow.assert_any_call("taxes", 10)
-    payer.debit_stock.assert_any_call("cash", 10)
-    authority.credit_flow.assert_any_call("taxes", 10)
-    authority.credit_stock.assert_any_call("cash", 10)
+    transfer_stock.assert_any_call("cash", payer.id, auth.id, 10)
+    record_flow.assert_any_call("taxes", payer.id, auth.id, 10)
 
 
 def test_update_equity_share_updates_accounts(country_with_company_and_founder):
     # Given
     country, company, founder = country_with_company_and_founder
+    transfer_stock = country.transfer_stock
+    record_flow = country.record_flow
 
     # When
     country.update_equity_share(company, founder, -10)
 
     # Then
-    company.debit_stock.assert_any_call("equities", -10)
-    founder.credit_stock.assert_any_call("equities", -10)
+    transfer_stock.assert_any_call("equities", company.id, founder.id, -10)
+    record_flow.assert_any_call("profit_transfers", company.id, founder.id, -10)
 
 
 def test_update_equity_share_updates_graph_edge(country_with_company_and_founder):
@@ -757,9 +649,8 @@ def test_update_equity_share_updates_graph_edge(country_with_company_and_founder
 
 
 @pytest.fixture
-def country_before_creation(country_before_setup):
+def country_before_creation(country):
     # Given
-    country = country_before_setup
     country.add_company = Mock()
     country.fund_company = Mock()
     country.env = Mock()
@@ -907,36 +798,43 @@ def test_create_bank_place_bank_in_env(country_before_creation, share):
 # ----------------------------------------------------
 
 
-def test_transfer_profits_to_government(country_before_setup):
+@pytest.fixture
+def country_before_transfers(country):
     # Given
-    fiscal_auth, monetary_auth = Mock(), Mock()
-    country = country_before_setup
-    country.fiscal_authority = fiscal_auth
-    country.monetary_authority = monetary_auth
+    country.transfer_stock = Mock()
+    country.record_flow = Mock()
+    return country
+
+
+def test_transfer_profits_to_government(country_before_transfers):
+    # Given
+    auth1, auth2 = Mock(), Mock()
+    country = country_before_transfers
+    country.fiscal_authority = auth1
+    country.monetary_authority = auth2
+    transfer_stock = country.transfer_stock
+    record_flow = country.record_flow
 
     # When
     country.transfer_central_bank_profits(100)
 
     # Then
-    fiscal_auth.credit_stock.assert_any_call("cash", 100)
-    fiscal_auth.credit_flow.assert_any_call("profit_transfers", 100)
-    monetary_auth.debit_stock.assert_any_call("cash", 100)
-    monetary_auth.debit_flow.assert_any_call("profit_transfers", 100)
+    transfer_stock.assert_any_call("cash", auth2.id, auth1.id, 100)
+    record_flow.assert_any_call("profit_transfers", auth2.id, auth1.id, 100)
 
 
-def test_transfer_residual_cash_of_company(country_before_setup):
+def test_transfer_residual_cash_of_company(country_before_transfers):
     # Given
     company, founder = Mock(), Mock()
-    country = country_before_setup
+    country = country_before_transfers
+    transfer_stock = country.transfer_stock
 
     # When
     country.transfer_residual_cash(company, founder, 100)
 
     # Then
-    founder.credit_stock.assert_any_call("cash", 100)
-    founder.debit_stock.assert_any_call("equities", 100)
-    company.debit_stock.assert_any_call("cash", 100)
-    company.credit_stock.assert_any_call("equities", 100)
+    transfer_stock.assert_any_call("cash", company.id, founder.id, 100)
+    transfer_stock.assert_any_call("equities", founder.id, company.id, 100)
 
 
 # ---------------------------------------------------
@@ -945,12 +843,11 @@ def test_transfer_residual_cash_of_company(country_before_setup):
 
 
 @pytest.fixture
-def country_before_update(country_before_setup, make_dlist):
+def country_before_update(country, make_dlist):
     # Given
-    country = country_before_setup
     country.spaces["good_market"] = Mock()
-    country.gdp = 0
     country.companies = make_dlist()
+    country.gdp = 0
     return country
 
 
