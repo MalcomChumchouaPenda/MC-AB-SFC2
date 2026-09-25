@@ -120,8 +120,7 @@ def test_expose_agent_account_stocks(role_with_agent_and_env):
     role, agent, _ = role_with_agent_and_env
 
     # When
-    agent.account.stocks = {"x":0}
+    agent.account.stocks = {"x": 0}
 
     # Then
-    assert role.stocks == {"x":0}
-
+    assert role.stocks == {"x": 0}

@@ -6,7 +6,6 @@ from model.agents.central_bank import CentralBank
 from model.spaces.credit_market import CreditMarket
 
 
-
 @pytest.fixture
 def model():
     # Given

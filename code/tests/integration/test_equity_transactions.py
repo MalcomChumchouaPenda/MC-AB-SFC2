@@ -44,6 +44,7 @@ def before_allocation(country, household):
     country.add_account(household)
     household.roles["depositor"] = Mock()
 
+
 @pytest.mark.usefixtures("before_allocation")
 def test_household_portfolio_allocation(country, household):
     # Given

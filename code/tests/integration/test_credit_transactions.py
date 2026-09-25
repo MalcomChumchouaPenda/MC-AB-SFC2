@@ -42,6 +42,7 @@ def market(model):
     market = CreditMarket(model)
     return market
 
+
 @pytest.fixture
 def before_transactions(market, firm, banks):
     # Given

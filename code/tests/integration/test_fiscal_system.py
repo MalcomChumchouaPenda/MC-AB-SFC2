@@ -10,7 +10,7 @@ from model.agents.government import Government
 
 @pytest.fixture
 def model(monkeypatch):
-    # Given 
+    # Given
     model = Model()
     model.p.K = 1
     model.p.dmax = 0.05

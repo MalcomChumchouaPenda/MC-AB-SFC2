@@ -103,6 +103,7 @@ def firms(model):
         firms.append(firm)
     return firms
 
+
 @pytest.fixture
 def markets(model):
     markets = []
