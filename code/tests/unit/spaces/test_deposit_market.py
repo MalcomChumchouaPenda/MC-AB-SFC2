@@ -1,6 +1,5 @@
 import pytest
 from unittest.mock import Mock
-from agentpy import AgentDList
 from model.base import EcoSpace
 from model.spaces.deposit_market import DepositMarket
 
@@ -20,26 +19,6 @@ def market():
     model = Mock()
     market = DepositMarket(model)
     return market
-
-
-# ---------------------------------------------------
-# ROLES ACCESS
-# ----------------------------------------------------
-
-
-def test_has_deposit_banks_list(market):
-    # Assert
-    assert isinstance(market.deposit_banks, AgentDList)
-
-
-def test_has_depositors_list(market):
-    # Assert
-    assert isinstance(market.depositors, AgentDList)
-
-
-def test_has_deposit_guarantee_ref(market):
-    # Assert
-    assert market.deposit_guarantee is None
 
 
 # ---------------------------------------------------

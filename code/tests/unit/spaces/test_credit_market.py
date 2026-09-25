@@ -1,6 +1,5 @@
 import pytest
 from unittest.mock import Mock
-from agentpy import AgentDList
 from model.base import EcoSpace
 from model.spaces.credit_market import CreditMarket
 
@@ -20,16 +19,6 @@ def market():
     model = Mock()
     market = CreditMarket(model)
     return market
-
-
-def test_has_lenders_list(market):
-    # Assert
-    assert isinstance(market.lenders, AgentDList)
-
-
-def test_has_borrowers_list(market):
-    # Assert
-    assert isinstance(market.borrowers, AgentDList)
 
 
 def test_expose_discount_rate(market):
@@ -53,18 +42,18 @@ FakeBorrower = Mock()
 
 
 @pytest.fixture
-def market_without_lenders(monkeypatch, market):
+def market_without_roles(monkeypatch, market):
     # Given
+    monkeypatch.setattr("model.spaces.credit_market.Borrower", FakeBorrower)
     monkeypatch.setattr("model.spaces.credit_market.Lender", FakeLender)
     market.add_role = Mock()
-    market.lenders = []
     return market
 
 
-def test_add_lender_add_appropriate_role(market_without_lenders):
+def test_add_lender_add_appropriate_role(market_without_roles):
     # Given
     agent = Mock()
-    market = market_without_lenders
+    market = market_without_roles
 
     # When
     role = market.add_lender(agent)
@@ -74,31 +63,11 @@ def test_add_lender_add_appropriate_role(market_without_lenders):
     assert role == market.add_role.return_value
 
 
-def test_add_lender_registers_lender(market_without_lenders):
+
+def test_add_borrower_add_appropriate_role(market_without_roles):
     # Given
     agent = Mock()
-    market = market_without_lenders
-
-    # When
-    role = market.add_lender(agent)
-
-    # Then
-    assert market.lenders == [role]
-
-
-@pytest.fixture
-def market_without_borrowers(monkeypatch, market):
-    # Given
-    monkeypatch.setattr("model.spaces.credit_market.Borrower", FakeBorrower)
-    market.add_role = Mock()
-    market.borrowers = []
-    return market
-
-
-def test_add_borrower_add_appropriate_role(market_without_borrowers):
-    # Given
-    agent = Mock()
-    market = market_without_borrowers
+    market = market_without_roles
 
     # When
     role = market.add_borrower(agent)
@@ -108,16 +77,6 @@ def test_add_borrower_add_appropriate_role(market_without_borrowers):
     assert role == market.add_role.return_value
 
 
-def test_add_borrower_registers_borrower(market_without_borrowers):
-    # Given
-    agent = Mock()
-    market = market_without_borrowers
-
-    # When
-    role = market.add_borrower(agent)
-
-    # Then
-    assert market.borrowers == [role]
 
 
 # ---------------------------------------------------

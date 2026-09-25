@@ -6,10 +6,6 @@ from model.roles.borrower import Borrower
 
 class CreditMarket(EcoSpace):
 
-    def setup(self):
-        super().setup()
-        self.lenders = AgentDList(self.model)
-        self.borrowers = AgentDList(self.model)
 
     @property
     def discount_rate(self):
@@ -19,14 +15,10 @@ class CreditMarket(EcoSpace):
     # Roles management
     #
     def add_borrower(self, agent):
-        role = self.add_role(Borrower, agent, "borrower")
-        self.borrowers.append(role)
-        return role
+        return self.add_role(Borrower, agent, "borrower")
 
     def add_lender(self, agent):
-        role = self.add_role(Lender, agent, "lender")
-        self.lenders.append(role)
-        return role
+        return self.add_role(Lender, agent, "lender")
 
     #
     # Loan matching

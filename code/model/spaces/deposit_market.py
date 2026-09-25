@@ -7,12 +7,6 @@ from model.roles.deposit_guarantee import DepositGuarantee
 
 class DepositMarket(EcoSpace):
 
-    def setup(self):
-        super().setup()
-        self.deposit_banks = AgentDList(self.model)
-        self.depositors = AgentDList(self.model)
-        self.deposit_guarantee = None
-
     def add_depositor(self, agent):
         role = self.add_role(Depositor, agent, "depositor")
         self.depositors.append(role)
