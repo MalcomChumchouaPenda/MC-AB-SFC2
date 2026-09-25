@@ -169,49 +169,49 @@ def market_with_participants(market):
     return market, depositor, deposit_bank
 
 
-def test_link_depositor_creates_graph_edge(market_with_participants):
+def test_join_deposit_bank_creates_graph_edge(market_with_participants):
     # Given
     market, depositor, deposit_bank = market_with_participants
     graph = market.graph
 
     # When
-    market.link_depositor_to_bank(depositor, deposit_bank)
+    market.join_deposit_bank(depositor, deposit_bank)
 
     # Then
     assert graph.has_edge(depositor, deposit_bank)
 
 
-def test_link_depositor_with_initial_amount(market_with_participants):
+def test_join_deposit_bank_with_initial_amount(market_with_participants):
     # Given
     market, depositor, deposit_bank = market_with_participants
     graph = market.graph
 
     # When
-    market.link_depositor_to_bank(depositor, deposit_bank, amount=500)
+    market.join_deposit_bank(depositor, deposit_bank, amount=500)
 
     # Then
     assert graph[depositor][deposit_bank]["amount"] == 500
 
 
-def test_link_depositor_updates_accounts(market_with_participants):
+def test_join_deposit_bank_updates_accounts(market_with_participants):
     # Given
     market, depositor, deposit_bank = market_with_participants
     transfer_stock = market.transfer_stock
 
     # When
-    market.link_depositor_to_bank(depositor, deposit_bank, amount=500)
+    market.join_deposit_bank(depositor, deposit_bank, amount=500)
 
     # Then
     transfer_stock.assert_any_call("cash", depositor.id, deposit_bank.id, 500)
     transfer_stock.assert_any_call("deposits", deposit_bank.id, depositor.id, 500)
 
 
-def test_link_depositor_registers_deposit_bank_refs(market_with_participants):
+def test_join_deposit_bank_registers_deposit_bank_refs(market_with_participants):
     # Given
     market, depositor, deposit_bank = market_with_participants
 
     # When
-    market.link_depositor_to_bank(depositor, deposit_bank)
+    market.join_deposit_bank(depositor, deposit_bank)
 
     # Then
     assert depositor.deposit_bank == deposit_bank
@@ -228,39 +228,39 @@ def market_with_depositor_amount(market_with_participants):
     return market, depositor, 100
 
 
-def test_unlink_depositor_remove_graph_edge(market_with_depositor_amount):
+def test_leave_deposit_bank_remove_graph_edge(market_with_depositor_amount):
     # Given
     market, depositor, _ = market_with_depositor_amount
     deposit_bank = depositor.deposit_bank
     graph = market.graph
 
     # When
-    market.unlink_depositor_with_bank(depositor)
+    market.leave_deposit_bank(depositor)
 
     # Then
     assert not graph.has_edge(depositor, deposit_bank)
 
 
-def test_unlink_depositor_updates_accounts(market_with_depositor_amount):
+def test_leave_deposit_bank_updates_accounts(market_with_depositor_amount):
     # Given
     market, depositor, amount = market_with_depositor_amount
     transfer_stock = market.transfer_stock
     bank_id = depositor.bank_id
 
     # When
-    market.unlink_depositor_with_bank(depositor)
+    market.leave_deposit_bank(depositor)
 
     # Then
     transfer_stock.assert_any_call("cash", bank_id, depositor.id, amount)
     transfer_stock.assert_any_call("deposits", depositor.id, bank_id, amount)
 
 
-def test_unlink_depositor_change_bank_id_ref(market_with_depositor_amount):
+def test_leave_deposit_bank_change_bank_id_ref(market_with_depositor_amount):
     # Given
     market, depositor, _ = market_with_depositor_amount
 
     # When
-    market.unlink_depositor_with_bank(depositor)
+    market.leave_deposit_bank(depositor)
 
     # Then
     assert depositor.bank_id is None

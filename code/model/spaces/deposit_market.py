@@ -28,14 +28,14 @@ class DepositMarket(EcoSpace):
         self.deposit_guarantee = role
         return role
 
-    def link_depositor_to_bank(self, depositor, deposit_bank, amount=0):
+    def join_deposit_bank(self, depositor, deposit_bank, amount=0):
         depositor.bank_id = deposit_bank.id
         depositor.deposit_bank = deposit_bank
         self.transfer_stock("cash", depositor.id, deposit_bank.id, amount)
         self.transfer_stock("deposits", deposit_bank.id, depositor.id, amount)
         self.graph.add_edge(depositor, deposit_bank, amount=amount)
 
-    def unlink_depositor_with_bank(self, depositor):
+    def leave_deposit_bank(self, depositor):
         bank_id = depositor.bank_id
         deposit_bank = depositor.deposit_bank
         amount = self.graph[depositor][deposit_bank]["amount"]

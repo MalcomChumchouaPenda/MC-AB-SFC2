@@ -41,7 +41,7 @@ def before_transactions(market, firm, bank):
     # Given
     deposit_bank = market.add_deposit_bank(bank)
     depositor = market.add_depositor(firm)
-    market.link_depositor_to_bank(depositor, deposit_bank, 2000)
+    market.join_deposit_bank(depositor, deposit_bank, 2000)
 
 
 @pytest.mark.usefixtures("before_transactions")
@@ -72,7 +72,7 @@ def before_reimbursement(market, firm, bank, govt):
     deposit_bank = market.add_deposit_bank(bank)
     depositor = market.add_depositor(firm)
     market.add_deposit_guarantee(govt)
-    market.link_depositor_to_bank(depositor, deposit_bank, 2000)
+    market.join_deposit_bank(depositor, deposit_bank, 2000)
 
 
 @pytest.mark.usefixtures("before_reimbursement")

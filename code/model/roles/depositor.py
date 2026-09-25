@@ -23,5 +23,5 @@ class Depositor(EcoRole):
 
     def choose_bank(self, deposit_bank, amount=0):
         if self.deposit_bank is not None:
-            self.env.unlink_depositor_with_bank(self)
-        self.env.link_depositor_to_bank(self, deposit_bank, amount)
+            self.env.leave_deposit_bank(self)
+        self.env.join_deposit_bank(self, deposit_bank, amount)

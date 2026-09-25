@@ -91,7 +91,7 @@ def test_choose_bank_into_env(role_with_env):
     role.choose_bank(deposit_bank)
 
     # Then
-    env.link_depositor_to_bank.assert_called_with(role, deposit_bank, 0)
+    env.join_deposit_bank.assert_called_with(role, deposit_bank, 0)
 
 
 def test_choose_bank_with_initial_amount(role_with_env):
@@ -104,7 +104,7 @@ def test_choose_bank_with_initial_amount(role_with_env):
     role.choose_bank(deposit_bank, amount=100)
 
     # Then
-    env.link_depositor_to_bank.assert_called_with(role, deposit_bank, 100)
+    env.join_deposit_bank.assert_called_with(role, deposit_bank, 100)
 
 
 def test_choose_bank_to_switch_bank(role_with_env):
@@ -118,5 +118,5 @@ def test_choose_bank_to_switch_bank(role_with_env):
     role.choose_bank(new_deposit_bank)
 
     # Then
-    env.unlink_depositor_with_bank.assert_called_with(role)
-    env.link_depositor_to_bank.assert_called_with(role, new_deposit_bank, 0)
+    env.leave_deposit_bank.assert_called_with(role)
+    env.join_deposit_bank.assert_called_with(role, new_deposit_bank, 0)
