@@ -110,62 +110,20 @@ def test_add_space_registers_sub_space(space_with_sub_spaces):
 
 
 # ---------------------------------------------------
-# EVOLUTION TESTS
-# ----------------------------------------------------
-
-
-@pytest.fixture
-def space_before_evolution(space_with_sub_spaces):
-    # Given
-    space, _ = space_with_sub_spaces
-    space.update_state = Mock()
-    space.clear_defaults = Mock()
-    return space
-
-
-def test_evolve_update_all_state(space_before_evolution):
-    # Given
-    sub_space = Mock()
-    space = space_before_evolution
-    space.spaces["fake_market"] = sub_space
-
-    # When
-    space.evolve()
-
-    # Then
-    space.update_state.assert_called_once()
-    sub_space.update_state.assert_called_once()
-
-
-def test_evolve_clear_all_defaults(space_before_evolution):
-    # Given
-    sub_space = Mock()
-    space = space_before_evolution
-    space.spaces["fake_market"] = sub_space
-
-    # When
-    space.evolve()
-
-    # Then
-    space.clear_defaults.assert_called_once()
-    sub_space.clear_defaults.assert_called_once()
-
-
-def test_update_state_is_not_implemented(space):
-    # Assert
-    with pytest.raises(NotImplementedError):
-        space.update_state()
-
-
-def test_clear_defaults_is_not_implemented(space):
-    # Assert
-    with pytest.raises(NotImplementedError):
-        space.clear_defaults()
-
-
-# ---------------------------------------------------
 # ROLE MANAGEMENT TESTS
 # ----------------------------------------------------
+
+
+def test_get_default_roles_as_agentdlist(space):
+    # Given
+    name = "fake_role"
+
+    # When
+    result = space.roles[name]
+
+    # Then
+    assert isinstance(result, list)
+    assert len(result) == 0
 
 
 @pytest.fixture
@@ -225,7 +183,7 @@ def test_add_role_registers_role(space, role_with_kind):
     # Then
     assert role.name == "fake_role"
     assert agent.roles["fake_role"] is role
-    assert space.roles["fake_role"] == [role]
+    assert list(space.roles["fake_role"]) == [role]
 
 
 @pytest.fixture
@@ -263,6 +221,53 @@ def test_remove_role_un_registers_role(space_with_role):
     # Then
     assert len(agent.roles) == 0
     assert len(space.roles[role.name]) == 0
+
+
+@pytest.fixture
+def space_with_roles(space, monkeypatch):
+    # Given
+    roles = [Mock() for _ in range(2)]
+    space.roles = {"fake_role": roles}
+    monkeypatch.setattr(space.model, "nprandom", Mock())
+    return space, roles
+
+
+def test_find_all_roles(space_with_roles):
+    # Given
+    space, roles = space_with_roles
+
+    # When
+    result = space.find_all_roles("fake_role")
+
+    # Then
+    assert result == roles
+    assert result is not roles
+
+
+def test_find_one_role(space_with_roles):
+    # Given
+    space, roles = space_with_roles
+
+    # When
+    result = space.find_one_role("fake_role")
+
+    # Then
+    assert result == roles[0]
+
+
+@pytest.mark.parametrize("i, j", [(1, 1), (2, 2), (3, 2)])
+def test_find_random_role(space_with_roles, i, j):
+    # Given
+    space, roles = space_with_roles
+    random = space.model.nprandom
+    random.choice.side_effect = lambda a, size: a[:size]
+
+    # When
+    result = space.find_random_role("fake_role", i)
+
+    # Then
+    random.choice.assert_called_with(roles, size=j)
+    assert result == roles[:j]
 
 
 # ---------------------------------------------------
@@ -443,3 +448,57 @@ def test_record_flow_uses_available_env_method(space_with_accounts):
 
     # Then
     env.record_flow.assert_called_with("x", source, target, 100)
+
+
+# ---------------------------------------------------
+# EVOLUTION TESTS
+# ----------------------------------------------------
+
+
+@pytest.fixture
+def space_before_evolution(space_with_sub_spaces):
+    # Given
+    space, _ = space_with_sub_spaces
+    space.update_state = Mock()
+    space.clear_defaults = Mock()
+    return space
+
+
+def test_evolve_update_all_state(space_before_evolution):
+    # Given
+    sub_space = Mock()
+    space = space_before_evolution
+    space.spaces["fake_market"] = sub_space
+
+    # When
+    space.evolve()
+
+    # Then
+    space.update_state.assert_called_once()
+    sub_space.update_state.assert_called_once()
+
+
+def test_evolve_clear_all_defaults(space_before_evolution):
+    # Given
+    sub_space = Mock()
+    space = space_before_evolution
+    space.spaces["fake_market"] = sub_space
+
+    # When
+    space.evolve()
+
+    # Then
+    space.clear_defaults.assert_called_once()
+    sub_space.clear_defaults.assert_called_once()
+
+
+def test_update_state_is_not_implemented(space):
+    # Assert
+    with pytest.raises(NotImplementedError):
+        space.update_state()
+
+
+def test_clear_defaults_is_not_implemented(space):
+    # Assert
+    with pytest.raises(NotImplementedError):
+        space.clear_defaults()

@@ -51,10 +51,6 @@ class EcoRole(AgentNode):
     def bank_id(self, account):
         self.agent.bank_id = account
 
-    # @property
-    # def stocks(self):
-    #     return self.agent.account.stocks
-
 
 class EcoAccount:
 
@@ -140,6 +136,18 @@ class EcoSpace(Network):
         agent.roles.pop(name)
         self.roles[name].remove(role)
         self.graph.remove_node(role)
+
+    def find_all_roles(self, name):
+        return list(self.roles[name])
+
+    def find_one_role(self, name):
+        return self.roles[name][0]
+
+    def find_random_role(self, name, size):
+        roles = self.roles[name]
+        random = self.model.nprandom
+        min_size = min(size, len(roles))
+        return random.choice(roles, size=min_size)
 
     #
     # Account management

@@ -7,6 +7,7 @@ from model.roles.worker import Worker
 class LaborMarket(EcoSpace):
 
     def setup(self):
+        super().setup()
         self.average_wage = 0
         self.unemployment = 0
         self.employers = AgentDList(self.model)
