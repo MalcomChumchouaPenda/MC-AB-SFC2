@@ -23,7 +23,7 @@ class Worker(EcoRole):
     #
 
     def find_employers(self, psi):
-        return self.env.find_employers(psi)
+        return self.env.find_random_roles("employer", psi)
 
     def accept_job(self, employer, quantity):
         self.env.hire_worker(self, employer, quantity)

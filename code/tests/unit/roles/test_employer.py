@@ -1,6 +1,5 @@
 import pytest
 from unittest.mock import Mock
-from networkx import Graph
 from model.roles.employer import Employer
 
 # ---------------------------------------------------
@@ -60,13 +59,15 @@ def test_get_unemployment(role_with_env):
 def test_get_jobs(role_with_env):
     # Given
     role, env = role_with_env
+    job = {"worker": Mock(), "quantity": 0.4, "wage": 10}
+    env.find_links.return_value = [job]
 
     # When
-    jobs = role.get_jobs()
+    found = role.get_jobs()
 
     # Then
-    env.find_jobs.assert_called_with(role)
-    assert jobs == env.find_jobs.return_value
+    env.find_links.assert_called_with(role, "worker")
+    assert found == [job]
 
 
 # ---------------------------------------------------

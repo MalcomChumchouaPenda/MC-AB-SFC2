@@ -15,4 +15,4 @@ class Employer(EcoRole):
         return self.env.unemployment
 
     def get_jobs(self):
-        return self.env.find_jobs(self)
+        return self.env.find_links(self, "worker")

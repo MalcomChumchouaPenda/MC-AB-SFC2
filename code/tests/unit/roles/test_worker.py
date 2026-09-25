@@ -60,16 +60,19 @@ def test_get_unemployment(role_with_env):
     assert perceived == 0.12
 
 
-def test_find_employers_uses_env_method(role_with_env):
+def test_find_employers_get_random_founders(role_with_env, make_dlist):
     # Given
+    employers = [Mock() for _ in range(5)]
+    employers = make_dlist(employers)
     role, env = role_with_env
+    env.find_random_roles.return_value = employers
 
     # When
     found = role.find_employers(5)
 
     # Then
-    env.find_employers.assert_called_with(5)
-    assert found == env.find_employers.return_value
+    env.find_random_roles.assert_called_with("employer", 5)
+    assert found == employers
 
 
 # ---------------------------------------------------

@@ -9,7 +9,7 @@ class Consumer(EcoRole):
 
     #
     # perception
-    #    
+    #
     def find_suppliers(self, psi):
         return self.env.find_random_roles("producer", psi)
 

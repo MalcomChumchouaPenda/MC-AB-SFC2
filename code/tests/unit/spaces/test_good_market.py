@@ -174,7 +174,6 @@ def market():
     return market
 
 
-
 @pytest.fixture
 def market_before_purchase(market):
     # Given

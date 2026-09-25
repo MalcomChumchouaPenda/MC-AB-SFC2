@@ -66,7 +66,6 @@ def test_find_suppliers_get_random_founders(role_with_env, make_dlist):
     assert found == suppliers
 
 
-
 # ---------------------------------------------------
 # ACTION TESTS
 # ----------------------------------------------------
