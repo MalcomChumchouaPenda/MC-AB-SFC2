@@ -1,7 +1,7 @@
 from unittest.mock import Mock
 from collections import defaultdict
 import pytest
-from agentpy import Network
+from agentpy import Model, Network, AgentDList
 from model.base import EcoSpace
 
 # ---------------------------------------------------
@@ -15,9 +15,9 @@ def test_is_agentpy_network():
 
 
 @pytest.fixture
-def space():
+def space(fake_model):
     # Given
-    model = Mock()
+    model = fake_model
     space = EcoSpace(model)
     return space
 
@@ -122,7 +122,7 @@ def test_get_default_roles_as_agentdlist(space):
     result = space.roles[name]
 
     # Then
-    assert isinstance(result, list)
+    assert isinstance(result, AgentDList)
     assert len(result) == 0
 
 
@@ -258,9 +258,10 @@ def test_remove_role_un_registers_role(space_with_role):
 
 
 @pytest.fixture
-def space_with_roles(space, monkeypatch):
+def space_with_roles(space, monkeypatch, make_dlist):
     # Given
     roles = [Mock() for _ in range(2)]
+    roles = make_dlist(roles)
     space.roles = {"fake_role": roles}
     monkeypatch.setattr(space.model, "nprandom", Mock())
     return space, roles
@@ -274,7 +275,8 @@ def test_find_all_roles(space_with_roles):
     result = space.find_all_roles("fake_role")
 
     # Then
-    assert result == roles
+    assert list(result) == list(roles)
+    assert isinstance(result, AgentDList)
     assert result is not roles
 
 
@@ -293,15 +295,16 @@ def test_find_one_role(space_with_roles):
 def test_find_random_role(space_with_roles, i, j):
     # Given
     space, roles = space_with_roles
-    random = space.model.nprandom
-    random.choice.side_effect = lambda a, size: a[:size]
 
     # When
     result = space.find_random_role("fake_role", i)
+    print(list(result))
+    print(list(roles))
 
     # Then
-    random.choice.assert_called_with(roles, size=j)
-    assert result == roles[:j]
+    assert len(result) == j
+    assert isinstance(result, AgentDList)
+    assert all(role in roles for role in result)
 
 
 # ---------------------------------------------------
@@ -322,7 +325,6 @@ def space_without_accounts(monkeypatch, space):
 def test_add_account_create_new_account(space_without_accounts):
     # Given
     space = space_without_accounts
-    model = space.model
     agent = Mock(id=1)
 
     # When

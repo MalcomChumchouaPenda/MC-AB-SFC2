@@ -1,5 +1,5 @@
 from collections import defaultdict
-from agentpy import Agent, Network, AgentNode, AgentList
+from agentpy import Agent, Network, AgentNode, AgentDList
 from model.constants import STOCK_NAMES, FLOW_NAMES
 
 
@@ -96,7 +96,7 @@ class EcoSpace(Network):
         self.env = None
         self.spaces = {}
         self.accounts = {}
-        self.roles = defaultdict(lambda: [])
+        self.roles = defaultdict(lambda: AgentDList(self.model))
 
     #
     # Role management
@@ -120,16 +120,15 @@ class EcoSpace(Network):
         self.graph.remove_node(role)
 
     def find_all_roles(self, name):
-        return list(self.roles[name])
+        return AgentDList(self.model, self.roles[name])
 
     def find_one_role(self, name):
         return self.roles[name][0]
 
     def find_random_role(self, name, size):
         roles = self.roles[name]
-        random = self.model.nprandom
         min_size = min(size, len(roles))
-        return random.choice(roles, size=min_size)
+        return roles.random(n=min_size).to_dlist()
 
     #
     # Account management

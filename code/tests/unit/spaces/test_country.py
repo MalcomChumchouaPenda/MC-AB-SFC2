@@ -20,13 +20,13 @@ FakeDepositMarket = Mock()
 
 
 @pytest.fixture
-def country(monkeypatch):
+def country(monkeypatch, fake_model):
     # Given
     monkeypatch.setattr("model.spaces.country.GoodsMarket", FakeGoodMarket)
     monkeypatch.setattr("model.spaces.country.LaborMarket", FakeLaborMarket)
     monkeypatch.setattr("model.spaces.country.DepositMarket", FakeDepositMarket)
     monkeypatch.setattr(Country, "add_space", Mock())
-    country = Country(model=Mock())
+    country = Country(model=fake_model)
     return country
 
 
@@ -348,9 +348,10 @@ def test_calc_sector_equity_range_if_empty_sector(country_with_companies):
 
 
 @pytest.fixture
-def country_with_citizens(country):
+def country_with_citizens(country, make_dlist):
     # Given
     citizens = [Mock(resid_equity=100) for _ in range(2)]
+    citizens = make_dlist(citizens)
     country.roles = {"citizen": citizens}
     country.transfer_stock = Mock()
     country.record_flow = Mock()
@@ -391,7 +392,7 @@ def test_find_citizens(country_with_citizens):
     result = country.find_citizens()
 
     # Then
-    assert result == list(citizens)
+    assert list(result) == list(citizens)
 
 
 def test_pay_public_transfers_updates_accounts(country_with_citizens):
