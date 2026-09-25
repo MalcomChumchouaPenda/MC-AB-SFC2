@@ -28,29 +28,35 @@ def role_with_env():
 # ----------------------------------------------------
 
 
-def test_find_defaults_from_env(role_with_env):
+def test_find_defaults_from_env(role_with_env, make_dlist):
     # Given
     role, env = role_with_env
+    bad = Mock(defaulted=True, id=1)
+    good = Mock(defaulted=False, id=2)
+    env.find_all_roles.return_value = make_dlist([bad, good])
+    env.get_stock = lambda x, y: -100 * y if x == "deposits" else 0
 
     # When
     found = role.find_defaults()
 
     # Then
-    env.find_defaults.assert_called_with()
-    assert found == env.find_defaults.return_value
+    env.find_all_roles.assert_called_with("deposit_bank")
+    assert found == [{"bank": bad, "amount": -100}]
 
 
 def test_find_deposits_from_env(role_with_env):
     # Given
     role, env = role_with_env
+    deposit = {"depositor": Mock(), "amount": 100}
+    env.find_links.return_value = [deposit]
     bank = Mock()
 
     # When
     found = role.find_deposits(bank)
 
     # Then
-    env.find_deposits.assert_called_with(bank)
-    assert found == env.find_deposits.return_value
+    env.find_links.assert_called_with(bank, "depositor")
+    assert found == [deposit]
 
 
 # ---------------------------------------------------

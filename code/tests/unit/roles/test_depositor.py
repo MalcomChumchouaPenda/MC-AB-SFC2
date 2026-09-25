@@ -28,16 +28,18 @@ def role_with_env():
 # ----------------------------------------------------
 
 
-def test_find_deposit_banks_from_env(role_with_env):
+def test_find_deposit_banks_from_env(role_with_env, make_dlist):
     # Given
+    deposit_bank = Mock()
     role, env = role_with_env
+    env.find_all_roles.return_value = make_dlist([deposit_bank])
 
     # When
     found = role.find_deposit_banks()
 
     # Then
-    env.find_deposit_banks.assert_called_with()
-    assert found == env.find_deposit_banks.return_value
+    env.find_all_roles.assert_called_with("deposit_bank")
+    assert list(found) == [deposit_bank]
 
 
 def test_get_deposit_rate_from_deposit_bank(role_with_env):

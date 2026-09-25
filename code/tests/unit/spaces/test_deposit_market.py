@@ -159,18 +159,6 @@ def test_add_deposit_guarantee_registers_role(market_without_dep_guarantee):
 # ----------------------------------------------------
 
 
-def test_find_deposit_banks(market, make_dlist):
-    # Given
-    deposit_bank = Mock()
-    market.deposit_banks = make_dlist([deposit_bank])
-
-    # When
-    sample = market.find_deposit_banks()
-
-    # Then
-    assert sample == [deposit_bank]
-
-
 @pytest.fixture
 def market_with_participants(market):
     # Given
@@ -341,34 +329,6 @@ def test_withdraw_deposits_transfers_cash(market_with_depositor_amount):
 # ---------------------------------------------------
 # DEPOSIT REPAYMENT / REIMBURSEMENT
 # ----------------------------------------------------
-
-
-def test_find_deposits(market_with_participants):
-    # Given
-    other = Mock()
-    market, depositor, deposit_bank = market_with_participants
-    market.graph.add_edge(deposit_bank, depositor, amount=100)
-    market.graph.add_edge(other, depositor, amount=200)
-
-    # When
-    deposit_accounts = market.find_deposits(deposit_bank)
-
-    # Then
-    assert deposit_accounts == [{"depositor": depositor, "amount": 100}]
-
-
-def test_find_defaults(market, make_dlist):
-    # Given
-    deposit_bank1 = Mock(defaulted=True, id=1)
-    deposit_bank2 = Mock(defaulted=False, id=2)
-    market.deposit_banks = make_dlist([deposit_bank1, deposit_bank2])
-    market.get_stock = lambda x, y: -100 * y if x == "deposits" else 0
-
-    # When
-    result = market.find_defaults()
-
-    # Then
-    assert result == [{"bank": deposit_bank1, "amount": -100}]
 
 
 def test_pay_interests_updates_accounts(market_with_depositor_amount):

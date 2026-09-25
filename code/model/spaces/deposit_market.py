@@ -28,25 +28,6 @@ class DepositMarket(EcoSpace):
         self.deposit_guarantee = role
         return role
 
-    def find_deposits(self, bank):
-        return [
-            dict(depositor=depositor, **data)
-            for _, depositor, data in self.graph.edges(bank, data=True)
-        ]
-
-    def find_deposit_banks(self):
-        return list(self.deposit_banks)
-
-    def find_defaults(self):
-        defaults = []
-        for role in self.deposit_banks:
-            if not role.defaulted:
-                continue
-            amount = self.get_stock("deposits", role.id)
-            default = dict(bank=role, amount=amount)
-            defaults.append(default)
-        return defaults
-
     def link_depositor_to_bank(self, depositor, deposit_bank, amount=0):
         depositor.bank_id = deposit_bank.id
         depositor.deposit_bank = deposit_bank

@@ -7,7 +7,7 @@ class Depositor(EcoRole):
     # Perceptions
     #
     def find_deposit_banks(self):
-        return self.env.find_deposit_banks()
+        return self.env.find_all_roles("deposit_bank")
 
     def get_deposit_rate(self):
         return self.deposit_bank.deposit_rate
