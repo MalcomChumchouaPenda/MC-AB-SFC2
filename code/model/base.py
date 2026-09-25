@@ -50,9 +50,9 @@ class EcoRole(AgentNode):
     def bank_id(self, account):
         self.agent.bank_id = account
 
-    @property
-    def stocks(self):
-        return self.agent.account.stocks
+    # @property
+    # def stocks(self):
+    #     return self.agent.account.stocks
 
 
 class EcoAccount:
@@ -148,6 +148,11 @@ class EcoSpace(Network):
         agent.account = account
         self.accounts[agent.id] = account
         return account
+
+    def get_stock(self, category, account_id):
+        if self.env is not None:
+            return self.env.get_stock(category, account_id)
+        return self.accounts[account_id].stocks[category]
 
     def transfer_stock(self, category, source, target, amount):
         if self.env is not None:

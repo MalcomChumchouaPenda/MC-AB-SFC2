@@ -26,7 +26,7 @@ class Bank(EcoAgent):
 
     def pay_deposit_interests(self):
         role = self.roles["deposit_bank"]
-        for deposit in role.find_deposit_accounts():
+        for deposit in role.find_deposits():
             amount = self.deposit_rate * deposit["amount"]
             role.pay_interests(deposit["depositor"], amount)
 

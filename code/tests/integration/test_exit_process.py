@@ -27,57 +27,40 @@ def union(model):
 @pytest.fixture
 def firm(model):
     # Given
-    firm = Firm(model)
-    firm.setup()
-    return firm
+    return Firm(model)
 
 
 @pytest.fixture
 def bank(model):
     # Given
-    bank = Bank(model)
-    return bank
+    return Bank(model)
 
 
 @pytest.fixture
-def country_with_bank_and_founders(union, bank, model):
+def households(model):
+    # Given
+    return [Household(model) for _ in range(2)]
+
+
+@pytest.fixture
+def country_with_firm_and_founders(union, firm, households):
     # Given
     country = union.spaces["country_0"]
     founders = []
     shares = []
-    for _ in range(2):
-        household = Household(model)
-        household.setup()
+    for household in households:
         founder = country.add_citizen(household)
         share = {"founder": founder, "amount": 50}
         shares.append(share)
         founders.append(founder)
-        founder.stocks["cash"] = 50
-    country.create_bank(bank, shares)
-    return country, bank, founders
-
-
-@pytest.fixture
-def country_with_firm_and_founders(country_with_bank_and_founders, firm, model):
-    # Given
-    country, _, founders = country_with_bank_and_founders
-    founders = []
-    shares = []
-    for _ in range(2):
-        household = Household(model)
-        household.setup()
-        founder = country.add_citizen(household)
-        share = {"founder": founder, "amount": 50}
-        shares.append(share)
-        founders.append(founder)
-        founder.stocks["cash"] = 50
+        household.account.stocks["cash"] = 50
     country.create_firm(firm, shares, tradable=True)
     return country, firm, founders
 
 
 def test_firm_exit_with_residual_cash(country_with_firm_and_founders):
     # Given
-    _, firm, founders = country_with_firm_and_founders
+    country, firm, founders = country_with_firm_and_founders
     firm.wage_offer = 100
 
     # When
@@ -86,7 +69,6 @@ def test_firm_exit_with_residual_cash(country_with_firm_and_founders):
     # Then
     assert firm.account.stocks["cash"] == 0
     assert firm.account.stocks["equities"] == 0
-    assert founders[0].stocks["cash"] == 50
-    assert founders[0].stocks["equities"] == 0
-    assert founders[1].stocks["cash"] == 50
-    assert founders[1].stocks["equities"] == 0
+    for founder in founders:
+        assert country.get_stock("cash", founder.id) == 50
+        assert country.get_stock("equities", founder.id) == 0

@@ -36,16 +36,16 @@ def test_has_defaulted(role_with_env):
 # ----------------------------------------------------
 
 
-def test_find_deposit_accounts_from_env(role_with_env):
+def test_find_deposits_from_env(role_with_env):
     # Given
     role, env = role_with_env
 
     # When
-    found = role.find_deposit_accounts()
+    found = role.find_deposits()
 
     # Then
-    env.find_deposit_accounts.assert_called_with(role)
-    assert found == env.find_deposit_accounts.return_value
+    env.find_deposits.assert_called_with(role)
+    assert found == env.find_deposits.return_value
 
 
 # ---------------------------------------------------

@@ -546,9 +546,8 @@ def test_issue_deposit_guarantee_bonds(govt_as_deposit_guarantee):
     # Given
     govt, role = govt_as_deposit_guarantee
     govt.bond_supply = 200
-    deposit_bank = Mock()
-    deposit_bank.stocks = {"deposits": -100}
-    role.find_defaulted_banks.return_value = [deposit_bank]
+    default = {"bank": Mock(), "amount": -100}
+    role.find_defaults.return_value = [default]
 
     # When
     govt.issue_deposit_guarantee_bonds()
@@ -562,30 +561,30 @@ def test_issue_deposit_guarantee_bonds(govt_as_deposit_guarantee):
 def test_issue_deposit_guarantee_bonds_registers_defaults(govt_as_deposit_guarantee):
     # Given
     govt, role = govt_as_deposit_guarantee
-    deposit_bank = Mock()
-    deposit_bank.stocks = {"deposits": -100}
-    role.find_defaulted_banks.return_value = [deposit_bank]
+    default = {"bank": Mock(), "amount": -100}
+    role.find_defaults.return_value = [default]
 
     # When
     govt.issue_deposit_guarantee_bonds()
 
     # Then
-    assert govt._defaults == [deposit_bank]
+    assert govt._defaults == [default]
 
 
 def test_reimburse_deposits(govt_as_deposit_guarantee):
     # Given
     bank, client = Mock(), Mock()
+    default = {"bank": bank, "amount": -100}
     deposits = [{"depositor": client, "amount": 100}]
     govt, role = govt_as_deposit_guarantee
-    govt._defaults = [bank]
-    role.find_deposit_accounts.return_value = deposits
+    govt._defaults = [default]
+    role.find_deposits.return_value = deposits
 
     # When
     govt.reimburse_deposits()
 
     # Then
-    role.find_deposit_accounts.assert_called_with(bank)
+    role.find_deposits.assert_called_with(bank)
     role.reimburse_deposits.assert_called_with(client, 100)
 
 

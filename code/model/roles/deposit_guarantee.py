@@ -6,11 +6,11 @@ class DepositGuarantee(EcoRole):
     #
     # Perceptions
     #
-    def find_defaulted_banks(self):
-        return self.env.find_defaulted_banks()
+    def find_defaults(self):
+        return self.env.find_defaults()
 
-    def find_deposit_accounts(self, deposit_bank):
-        return self.env.find_deposit_accounts(deposit_bank)
+    def find_deposits(self, deposit_bank):
+        return self.env.find_deposits(deposit_bank)
 
     #
     # Actions

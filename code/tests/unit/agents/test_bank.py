@@ -129,7 +129,7 @@ def test_update_deposit_rate_as_fraction_of_discount_rate(bank_before_setup):
 def test_pay_deposit_interests_to_all_clients(bank_before_setup):
     # Given
     role, client = Mock(), Mock()
-    role.find_deposit_accounts.return_value = [{"depositor": client, "amount": 100}]
+    role.find_deposits.return_value = [{"depositor": client, "amount": 100}]
     bank = bank_before_setup
     bank.deposit_rate = 0.05
     bank.roles["deposit_bank"] = role
@@ -138,7 +138,7 @@ def test_pay_deposit_interests_to_all_clients(bank_before_setup):
     bank.pay_deposit_interests()
 
     # Then
-    role.find_deposit_accounts.assert_called_once_with()
+    role.find_deposits.assert_called_once_with()
     role.pay_interests.assert_called_once_with(client, 5.0)
 
 

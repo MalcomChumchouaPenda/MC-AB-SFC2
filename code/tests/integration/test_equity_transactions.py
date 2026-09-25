@@ -105,12 +105,12 @@ def test_household_creates_new_firm(country, founders):
     # Then
     assert len(companies) == 1
     assert isinstance(companies[0].agent, Firm)
-    assert companies[0].stocks["equities"] == -500
-    assert companies[0].stocks["cash"] == 500
-    assert citizen1.stocks["equities"] == 300
-    assert citizen1.stocks["cash"] == 100
-    assert citizen2.stocks["equities"] == 200
-    assert citizen2.stocks["cash"] == 200
+    assert household1.account.stocks["equities"] == 300
+    assert household1.account.stocks["cash"] == 100
+    assert household2.account.stocks["equities"] == 200
+    assert household2.account.stocks["cash"] == 200
+    assert country.get_stock("equities", companies[0].id) == -500
+    assert country.get_stock("cash", companies[0].id) == 500
     assert country.graph[citizen1][companies[0]]["value"] == 300
     assert country.graph[citizen2][companies[0]]["value"] == 200
 
@@ -130,12 +130,12 @@ def test_household_creates_new_bank(country, founders):
     # Then
     assert len(companies) == 6
     assert isinstance(companies[-1].agent, Bank)
-    assert companies[-1].stocks["equities"] == -500
-    assert companies[-1].stocks["cash"] == 500
-    assert citizen1.stocks["equities"] == 300
-    assert citizen1.stocks["cash"] == 100
-    assert citizen2.stocks["equities"] == 200
-    assert citizen2.stocks["cash"] == 200
+    assert household1.account.stocks["equities"] == 300
+    assert household1.account.stocks["cash"] == 100
+    assert household2.account.stocks["equities"] == 200
+    assert household2.account.stocks["cash"] == 200
+    assert country.get_stock("equities", companies[-1].id) == -500
+    assert country.get_stock("cash", companies[-1].id) == 500
     assert country.graph[citizen1][companies[-1]]["value"] == 300
     assert country.graph[citizen2][companies[-1]]["value"] == 200
 

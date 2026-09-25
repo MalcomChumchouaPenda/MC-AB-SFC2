@@ -343,7 +343,7 @@ def test_withdraw_deposits_transfers_cash(market_with_depositor_amount):
 # ----------------------------------------------------
 
 
-def test_find_deposit_accounts(market_with_participants):
+def test_find_deposits(market_with_participants):
     # Given
     other = Mock()
     market, depositor, deposit_bank = market_with_participants
@@ -351,23 +351,24 @@ def test_find_deposit_accounts(market_with_participants):
     market.graph.add_edge(other, depositor, amount=200)
 
     # When
-    deposit_accounts = market.find_deposit_accounts(deposit_bank)
+    deposit_accounts = market.find_deposits(deposit_bank)
 
     # Then
     assert deposit_accounts == [{"depositor": depositor, "amount": 100}]
 
 
-def test_find_defaulted_banks(market, make_dlist):
+def test_find_defaults(market, make_dlist):
     # Given
-    deposit_bank1 = Mock(defaulted=True)
-    deposit_bank2 = Mock(defaulted=False)
+    deposit_bank1 = Mock(defaulted=True, id=1)
+    deposit_bank2 = Mock(defaulted=False, id=2)
     market.deposit_banks = make_dlist([deposit_bank1, deposit_bank2])
+    market.get_stock = lambda x, y: -100 * y if x == "deposits" else 0
 
     # When
-    sample = market.find_defaulted_banks()
+    result = market.find_defaults()
 
     # Then
-    assert sample == [deposit_bank1]
+    assert result == [{"bank": deposit_bank1, "amount": -100}]
 
 
 def test_pay_interests_updates_accounts(market_with_depositor_amount):

@@ -28,29 +28,29 @@ def role_with_env():
 # ----------------------------------------------------
 
 
-def test_find_defaulted_banks_from_env(role_with_env):
+def test_find_defaults_from_env(role_with_env):
     # Given
     role, env = role_with_env
 
     # When
-    found = role.find_defaulted_banks()
+    found = role.find_defaults()
 
     # Then
-    env.find_defaulted_banks.assert_called_with()
-    assert found == env.find_defaulted_banks.return_value
+    env.find_defaults.assert_called_with()
+    assert found == env.find_defaults.return_value
 
 
-def test_find_deposit_accounts_from_env(role_with_env):
+def test_find_deposits_from_env(role_with_env):
     # Given
     role, env = role_with_env
     bank = Mock()
 
     # When
-    found = role.find_deposit_accounts(bank)
+    found = role.find_deposits(bank)
 
     # Then
-    env.find_deposit_accounts.assert_called_with(bank)
-    assert found == env.find_deposit_accounts.return_value
+    env.find_deposits.assert_called_with(bank)
+    assert found == env.find_deposits.return_value
 
 
 # ---------------------------------------------------

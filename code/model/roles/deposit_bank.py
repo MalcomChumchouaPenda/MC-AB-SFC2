@@ -11,8 +11,8 @@ class DepositBank(EcoRole):
     # Perceptions
     #
 
-    def find_deposit_accounts(self):
-        return self.env.find_deposit_accounts(self)
+    def find_deposits(self):
+        return self.env.find_deposits(self)
 
     #
     # Actions
