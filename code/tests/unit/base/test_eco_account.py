@@ -14,40 +14,37 @@ def test_is_not_agentpy_object():
 
 
 @pytest.fixture
-def account():
+def stock_and_flow_names(monkeypatch):
     # Given
-    return EcoAccount()
+    stock_names = ["x", "y"]
+    flow_names = ["a", "b"]
+    monkeypatch.setattr("model.base.STOCK_NAMES", stock_names)
+    monkeypatch.setattr("model.base.FLOW_NAMES", flow_names)
+    return stock_names, flow_names
 
 
-def test_has_stock_names_constant(account):
-    # Assert
-    assert account.stocks == {
-        "deposits": 0.0,
-        "loans": 0.0,
-        "inventories": 0.0,
-        "bonds": 0.0,
-        "cash": 0.0,
-        "advances": 0.0,
-        "equities": 0.0,
-    }
+def test_creates_default_stocks(stock_and_flow_names):
+    # Given
+    stock_names, _ = stock_and_flow_names
+
+    # When
+    account = EcoAccount()
+
+    # Then
+    for name in stock_names:
+        assert account.stocks[name] == 0.0
 
 
-def test_has_flow_names_constant(account):
-    # Assert
-    assert account.flows == {
-        "consumption": 0.0,
-        "wages": 0.0,
-        "public_transfers": 0.0,
-        "taxes": 0.0,
-        "dep_interests": 0.0,
-        "loan_interests": 0.0,
-        "loan_defaults": 0.0,
-        "bond_interests": 0.0,
-        "cash_interests": 0.0,
-        "adv_interests": 0.0,
-        "dividends": 0.0,
-        "profit_transfers": 0.0,
-    }
+def test_creates_default_flows(stock_and_flow_names):
+    # Given
+    _, flow_names = stock_and_flow_names
+
+    # When
+    account = EcoAccount()
+
+    # Then
+    for name in flow_names:
+        assert account.flows[name] == 0.0
 
 
 # ---------------------------------------------------
@@ -56,9 +53,18 @@ def test_has_flow_names_constant(account):
 
 
 @pytest.fixture
-def account_with_stocks(account):
+def account_with_nothing(monkeypatch):
+    # Given
+    monkeypatch.setattr("model.base.STOCK_NAMES", [])
+    monkeypatch.setattr("model.base.FLOW_NAMES", [])
+    return EcoAccount()
+
+
+@pytest.fixture
+def account_with_stocks(account_with_nothing):
     # Given
     stocks = {"cash": 0}
+    account = account_with_nothing
     account.stocks = stocks
     return account, stocks
 
@@ -91,9 +97,10 @@ def test_decr_stock_decreases_amount(account_with_stocks):
 
 
 @pytest.fixture
-def account_with_flows(account):
+def account_with_flows(account_with_nothing):
     # Given
     flows = {"consumption": 0}
+    account = account_with_nothing
     account.flows = flows
     return account, flows
 

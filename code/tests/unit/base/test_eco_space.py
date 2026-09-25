@@ -321,8 +321,9 @@ def space_without_accounts(monkeypatch, space):
 
 def test_add_account_create_new_account(space_without_accounts):
     # Given
-    agent = Mock(id=1)
     space = space_without_accounts
+    model = space.model
+    agent = Mock(id=1)
 
     # When
     account = space.add_account(agent)

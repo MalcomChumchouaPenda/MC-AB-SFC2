@@ -80,7 +80,6 @@ def test_setup_creates_deposit_market(country):
     country.add_space.assert_any_call(FakeDepositMarket, "deposit_market")
 
 
-
 # ---------------------------------------------------
 # ROLES MANAGEMENT
 # ----------------------------------------------------
@@ -124,7 +123,6 @@ def test_add_monetary_authority_registers_authority(country_without_authorities)
 
     # Then
     assert country.monetary_authority is role
-
 
 
 def test_add_fiscal_authority_add_appropriate_role(country_without_authorities):
@@ -226,7 +224,6 @@ def test_add_company_add_appropriate_role(country_without_companies):
     assert role == country.add_role.return_value
 
 
-
 def test_add_company_register_sector(country_without_companies):
     # Given
     agent = Mock()
@@ -261,7 +258,7 @@ def test_add_company_links_to_cb_id(country_without_companies):
 def country_with_companies(country):
     # Given
     companies = []
-    country.roles = {"company":companies}
+    country.roles = {"company": companies}
     return country, companies
 
 
@@ -354,7 +351,7 @@ def test_calc_sector_equity_range_if_empty_sector(country_with_companies):
 def country_with_citizens(country):
     # Given
     citizens = [Mock(resid_equity=100) for _ in range(2)]
-    country.roles = {"citizen":citizens}
+    country.roles = {"citizen": citizens}
     country.transfer_stock = Mock()
     country.record_flow = Mock()
     return country, citizens
@@ -749,7 +746,7 @@ def test_transfer_residual_cash_of_company(country_before_transfers):
 def country_before_update(country):
     # Given
     country.spaces["good_market"] = Mock()
-    country.roles = {"company":[]}
+    country.roles = {"company": []}
     country.gdp = 0
     return country
 

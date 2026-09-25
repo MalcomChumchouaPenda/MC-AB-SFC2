@@ -97,10 +97,7 @@ class Country(EcoSpace):
     #
     def find_equity_shares(self, company):
         edges = self.graph.edges(company, data=True)
-        return [
-            {"founder": founder, **data}
-            for _, founder, data in edges
-        ]
+        return [{"founder": founder, **data} for _, founder, data in edges]
 
     def update_equity_share(self, company, founder, variation):
         self.transfer_stock("equities", company.id, founder.id, variation)
