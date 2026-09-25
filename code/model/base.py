@@ -1,4 +1,5 @@
-from agentpy import Agent, Network, AgentNode, AttrDict
+from collections import defaultdict
+from agentpy import Agent, Network, AgentNode
 
 
 class EcoAgent(Agent):
@@ -116,10 +117,10 @@ class EcoSpace(Network):
     """
 
     def setup(self):
-        self.roles = {}
         self.env = None
         self.spaces = {}
         self.accounts = {}
+        self.roles = defaultdict(lambda: [])
 
     #
     # Role management
@@ -128,14 +129,16 @@ class EcoSpace(Network):
         role = kind(agent, self)
         role.name = name
         agent.roles[name] = role
-        self.graph.add_node(role)
+        self.roles[name].append(role)
         self.positions[agent] = role
+        self.graph.add_node(role)
         return role
 
     def remove_role(self, role):
         name = role.name
         agent = role.agent
         agent.roles.pop(name)
+        self.roles[name].remove(role)
         self.graph.remove_node(role)
 
     #

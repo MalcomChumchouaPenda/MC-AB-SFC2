@@ -1,6 +1,7 @@
-import pytest
 from unittest.mock import Mock
-from agentpy import Network, AgentDList
+from collections import defaultdict
+import pytest
+from agentpy import Network
 from model.base import EcoSpace
 
 # ---------------------------------------------------
@@ -34,6 +35,11 @@ def test_has_sub_spaces_dict(space):
 def test_has_accounts_dict(space):
     # Assert
     assert space.accounts == {}
+
+
+def test_has_roles_default_dict(space):
+    # Assert
+    assert isinstance(space.roles, defaultdict)
 
 
 # ---------------------------------------------------
@@ -219,6 +225,7 @@ def test_add_role_registers_role(space, role_with_kind):
     # Then
     assert role.name == "fake_role"
     assert agent.roles["fake_role"] is role
+    assert space.roles["fake_role"] == [role]
 
 
 @pytest.fixture
@@ -226,6 +233,7 @@ def space_with_role(space):
     # Given
     agent, role = Mock(), Mock()
     space.graph.add_node(role)
+    space.roles = {"fake_role": [role]}
     agent.roles = {"fake_role": role}
     role.name = "fake_role"
     role.agent = agent
@@ -254,6 +262,7 @@ def test_remove_role_un_registers_role(space_with_role):
 
     # Then
     assert len(agent.roles) == 0
+    assert len(space.roles[role.name]) == 0
 
 
 # ---------------------------------------------------
