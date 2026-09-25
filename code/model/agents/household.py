@@ -181,6 +181,7 @@ class Household(EcoAgent):
         if self.desired_equity > 0:
             sector = self.choose_investment_sector()
             investors = self.find_potential_investors()
+            print(investors)
             required_equity = self.calc_initial_equity(sector)
             collected_equity = self.desired_equity
             initiator = self.roles["citizen"]

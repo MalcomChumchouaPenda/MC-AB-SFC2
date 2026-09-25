@@ -63,7 +63,6 @@ def test_add_lender_add_appropriate_role(market_without_roles):
     assert role == market.add_role.return_value
 
 
-
 def test_add_borrower_add_appropriate_role(market_without_roles):
     # Given
     agent = Mock()
@@ -75,8 +74,6 @@ def test_add_borrower_add_appropriate_role(market_without_roles):
     # Then
     market.add_role.assert_called_with(FakeBorrower, agent, "borrower")
     assert role == market.add_role.return_value
-
-
 
 
 # ---------------------------------------------------

@@ -32,18 +32,19 @@ FakeGuarantee = Mock()
 
 
 @pytest.fixture
-def market_without_deposit_banks(monkeypatch, market):
+def market_without_roles(monkeypatch, market):
     # Given
     monkeypatch.setattr("model.spaces.deposit_market.DepositBank", FakeBank)
+    monkeypatch.setattr("model.spaces.deposit_market.Depositor", FakeDepositor)
+    monkeypatch.setattr("model.spaces.deposit_market.DepositGuarantee", FakeGuarantee)
     market.add_role = Mock()
-    market.deposit_banks = []
     return market
 
 
-def test_add_deposit_bank_add_appropriate_role(market_without_deposit_banks):
+def test_add_deposit_bank_add_appropriate_role(market_without_roles):
     # Given
     agent = Mock()
-    market = market_without_deposit_banks
+    market = market_without_roles
 
     # When
     role = market.add_deposit_bank(agent)
@@ -53,31 +54,10 @@ def test_add_deposit_bank_add_appropriate_role(market_without_deposit_banks):
     assert role == market.add_role.return_value
 
 
-def test_add_deposit_bank_registers_deposit_bank(market_without_deposit_banks):
+def test_add_depositor_add_appropriate_role(market_without_roles):
     # Given
     agent = Mock()
-    market = market_without_deposit_banks
-
-    # When
-    role = market.add_deposit_bank(agent)
-
-    # Then
-    assert market.deposit_banks == [role]
-
-
-@pytest.fixture
-def market_without_depositors(monkeypatch, market):
-    # Given
-    monkeypatch.setattr("model.spaces.deposit_market.Depositor", FakeDepositor)
-    market.add_role = Mock()
-    market.depositors = []
-    return market
-
-
-def test_add_depositor_add_appropriate_role(market_without_depositors):
-    # Given
-    agent = Mock()
-    market = market_without_depositors
+    market = market_without_roles
 
     # When
     role = market.add_depositor(agent)
@@ -87,31 +67,10 @@ def test_add_depositor_add_appropriate_role(market_without_depositors):
     assert role == market.add_role.return_value
 
 
-def test_add_depositor_registers_depositor(market_without_depositors):
+def test_add_deposit_guarantee_add_new_role(market_without_roles):
     # Given
     agent = Mock()
-    market = market_without_depositors
-
-    # When
-    role = market.add_depositor(agent)
-
-    # Then
-    assert market.depositors == [role]
-
-
-@pytest.fixture
-def market_without_dep_guarantee(monkeypatch, market):
-    # Given
-    monkeypatch.setattr("model.spaces.deposit_market.DepositGuarantee", FakeGuarantee)
-    market.add_role = Mock()
-    market.deposit_guarantee = None
-    return market
-
-
-def test_add_deposit_guarantee_add_new_role(market_without_dep_guarantee):
-    # Given
-    agent = Mock()
-    market = market_without_dep_guarantee
+    market = market_without_roles
 
     # When
     role = market.add_deposit_guarantee(agent)
@@ -119,18 +78,6 @@ def test_add_deposit_guarantee_add_new_role(market_without_dep_guarantee):
     # Then
     market.add_role.assert_called_with(FakeGuarantee, agent, "deposit_guarantee")
     assert role == market.add_role.return_value
-
-
-def test_add_deposit_guarantee_registers_role(market_without_dep_guarantee):
-    # Given
-    agent = Mock()
-    market = market_without_dep_guarantee
-
-    # When
-    role = market.add_deposit_guarantee(agent)
-
-    # Then
-    assert market.deposit_guarantee == role
 
 
 # ---------------------------------------------------

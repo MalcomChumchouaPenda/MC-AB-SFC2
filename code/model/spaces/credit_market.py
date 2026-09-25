@@ -6,7 +6,6 @@ from model.roles.borrower import Borrower
 
 class CreditMarket(EcoSpace):
 
-
     @property
     def discount_rate(self):
         return self.env.discount_rate

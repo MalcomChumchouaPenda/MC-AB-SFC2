@@ -61,7 +61,7 @@ def test_find_investors_with_residual_equity(role_with_env, make_dlist):
     investors = role.find_investors()
 
     # Then
-    env.find_all_roles.assert_called_with("citizens")
+    env.find_all_roles.assert_called_with("citizen")
     assert list(investors) == [eligible]
 
 

@@ -8,19 +8,13 @@ from model.roles.deposit_guarantee import DepositGuarantee
 class DepositMarket(EcoSpace):
 
     def add_depositor(self, agent):
-        role = self.add_role(Depositor, agent, "depositor")
-        self.depositors.append(role)
-        return role
+        return self.add_role(Depositor, agent, "depositor")
 
     def add_deposit_bank(self, bank):
-        role = self.add_role(DepositBank, bank, "deposit_bank")
-        self.deposit_banks.append(role)
-        return role
+        return self.add_role(DepositBank, bank, "deposit_bank")
 
     def add_deposit_guarantee(self, agent):
-        role = self.add_role(DepositGuarantee, agent, "deposit_guarantee")
-        self.deposit_guarantee = role
-        return role
+        return self.add_role(DepositGuarantee, agent, "deposit_guarantee")
 
     def join_deposit_bank(self, depositor, deposit_bank, amount=0):
         depositor.bank_id = deposit_bank.id

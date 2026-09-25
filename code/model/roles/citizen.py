@@ -14,7 +14,7 @@ class Citizen(EcoRole):
         return self.env.prob_failure
 
     def find_investors(self):
-        citizens = self.env.find_all_roles("citizens")
+        citizens = self.env.find_all_roles("citizen")
         investors = citizens.select(citizens.resid_equity > 0)
         if self in investors:
             investors.remove(self)
