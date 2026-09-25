@@ -1,5 +1,5 @@
 from collections import defaultdict
-from agentpy import Agent, Network, AgentNode
+from agentpy import Agent, Network, AgentNode, AgentList
 
 
 class EcoAgent(Agent):

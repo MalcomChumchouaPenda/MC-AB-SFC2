@@ -96,7 +96,7 @@ def test_household_creates_new_firm(country, founders):
     household1, household2 = founders
     citizen1 = household1.roles["citizen"]
     citizen2 = household2.roles["citizen"]
-    companies = country.companies
+    companies = country.roles["company"]
 
     # When
     household1.invest_equity()
@@ -120,7 +120,7 @@ def test_household_creates_new_bank(country, founders):
     household1, household2 = founders
     citizen1 = household1.roles["citizen"]
     citizen2 = household2.roles["citizen"]
-    companies = country.companies
+    companies = country.roles["company"]
     companies.extend([Mock(equity=100, sector="F") for _ in range(5)])
 
     # # When
@@ -145,7 +145,7 @@ def test_household_makes_deposits(country, founders):
     household1, household2 = founders
     citizen2 = household2.roles["citizen"]
     citizen2.resid_equity = household2.desired_equity = 0
-    companies = country.companies
+    companies = country.roles["company"]
 
     # When
     household1.invest_equity()

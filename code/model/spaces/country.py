@@ -1,4 +1,4 @@
-from agentpy import AgentDList
+from agentpy import AgentDList, AgentList
 from model.base import EcoSpace
 from model.roles.citizen import Citizen
 from model.roles.company import Company
@@ -13,20 +13,12 @@ class Country(EcoSpace):
 
     def setup(self):
         super().setup()
-        model = self.model
         self.gdp = 0
         self.inflation = 0
         self.prob_failure = 0
-
         self.tax_rate = 0
-
-        # roles
-        self.citizens = AgentDList(model)
-        self.companies = AgentDList(model)
         self.monetary_authority = None
         self.fiscal_authority = None
-
-        # sub spaces
         self.add_space(GoodsMarket, "good_market", tradable=False)
         self.add_space(LaborMarket, "labor_market")
         self.add_space(DepositMarket, "deposit_market")
@@ -36,37 +28,31 @@ class Country(EcoSpace):
     #
     def add_fiscal_authority(self, agent):
         role = self.add_role(FiscalAuthority, agent, "fiscal_authority")
-        agent.cb_id = self.monetary_authority.account
-        self.env.add_account(agent)
+        agent.cb_id = self.monetary_authority.id
         self.fiscal_authority = role
         return role
 
     def add_monetary_authority(self, agent):
         role = self.add_role(MonetaryAuthority, agent, "monetary_authority")
-        self.env.add_account(agent)
         self.monetary_authority = role
         return role
 
     def add_citizen(self, agent):
         role = self.add_role(Citizen, agent, "citizen")
-        agent.cb_id = self.monetary_authority.account
-        self.env.add_account(agent)
-        self.citizens.append(role)
+        agent.cb_id = self.monetary_authority.id
         return role
 
     def add_company(self, agent, sector):
+        agent.cb_id = self.monetary_authority.id
         role = self.add_role(Company, agent, "company")
         role.sector = sector
-        agent.cb_id = self.monetary_authority.account
-        self.env.add_account(agent)
-        self.companies.append(role)
         return role
 
     #
     # Current indicators
     #
     def calc_bank_number_ratio(self):
-        companies = self.companies
+        companies = AgentList(self.model, self.roles["company"])
         firm_sector = companies.select([c.sector[0] == "F" for c in companies])
         if len(firm_sector) == 0:
             return 1.0
@@ -74,7 +60,7 @@ class Country(EcoSpace):
         return len(bank_sector) / len(firm_sector)
 
     def calc_bank_equity_ratio(self):
-        companies = self.companies
+        companies = AgentList(self.model, self.roles["company"])
         firm_sector = companies.select([c.sector[0] == "F" for c in companies])
         if len(firm_sector) == 0:
             return 1.0
@@ -82,7 +68,7 @@ class Country(EcoSpace):
         return sum(bank_sector.equity) / sum(firm_sector.equity)
 
     def calc_sector_equity_range(self, sector):
-        equities = [c.equity for c in self.companies if c.sector == sector]
+        equities = [c.equity for c in self.roles["company"] if c.sector == sector]
         if len(equities) == 0:
             return None
         return min(equities), max(equities)
@@ -91,7 +77,7 @@ class Country(EcoSpace):
     # Equity investment
     #
     def find_investors(self, initiator=None):
-        citizens = self.citizens
+        citizens = AgentList(self.model, self.roles["citizen"])
         investors = citizens.select(citizens.resid_equity > 0)
         if initiator in investors:
             investors.remove(initiator)
@@ -110,9 +96,10 @@ class Country(EcoSpace):
     # Dividends and losses
     #
     def find_equity_shares(self, company):
+        edges = self.graph.edges(company, data=True)
         return [
             {"founder": founder, **data}
-            for _, founder, data in self.graph.edges(company, data=True)
+            for _, founder, data in edges
         ]
 
     def update_equity_share(self, company, founder, variation):
@@ -173,7 +160,7 @@ class Country(EcoSpace):
     # Public transfers
     #
     def find_citizens(self):
-        return list(self.citizens)
+        return self.find_all_roles("citizen")
 
     def pay_public_transfers(self, authority, citizen, amount):
         self.transfer_stock("cash", authority.id, citizen.id, amount)
@@ -190,7 +177,7 @@ class Country(EcoSpace):
     # Evolution
     #
     def update_state(self):
-        companies = self.companies
+        companies = AgentList(self.model, self.roles["company"])
         defaults = companies.select(companies.defaulted == True)
         self.prob_failure = len(defaults) / max(1, len(companies))
         self.inflation = self.spaces["good_market"].calc_inflation()

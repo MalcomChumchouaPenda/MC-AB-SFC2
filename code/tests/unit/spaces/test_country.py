@@ -1,6 +1,7 @@
 import pytest
 from agentpy import AgentDList
 from unittest.mock import Mock
+from model.base import EcoSpace
 from model.spaces.country import Country
 
 # ---------------------------------------------------
@@ -9,9 +10,6 @@ from model.spaces.country import Country
 
 
 def test_is_eco_space():
-    # Given
-    from model.base import EcoSpace
-
     # Assert
     assert issubclass(Country, EcoSpace)
 
@@ -52,6 +50,16 @@ def test_has_tax_rate(country):
     assert country.tax_rate == 0
 
 
+def test_has_fiscal_authority_ref(country):
+    # Assert
+    assert country.fiscal_authority is None
+
+
+def test_has_monetary_authority_ref(country):
+    # Assert
+    assert country.monetary_authority is None
+
+
 # ---------------------------------------------------
 # SPACES CREATION
 # ----------------------------------------------------
@@ -72,66 +80,44 @@ def test_setup_creates_deposit_market(country):
     country.add_space.assert_any_call(FakeDepositMarket, "deposit_market")
 
 
-# ---------------------------------------------------
-# ROLES ACCESS
-# ----------------------------------------------------
-
-
-def test_has_fiscal_authority_ref(country):
-    # Assert
-    assert country.fiscal_authority is None
-
-
-def test_has_monetary_authority_ref(country):
-    # Assert
-    assert country.monetary_authority is None
-
-
-def test_has_citizens_list(country):
-    # Assert
-    assert isinstance(country.citizens, AgentDList)
-
-
-def test_has_companies_list(country):
-    # Assert
-    assert isinstance(country.companies, AgentDList)
-
 
 # ---------------------------------------------------
 # ROLES MANAGEMENT
 # ----------------------------------------------------
 
-FakeAuthority = Mock()
+FakeAuthority1 = Mock()
+FakeAuthority2 = Mock()
 FakeCitizen = Mock()
 FakeCompany = Mock()
 
 
 @pytest.fixture
-def country_without_monetary_auth(monkeypatch, country):
+def country_without_authorities(monkeypatch, country):
     # Given
-    monkeypatch.setattr("model.spaces.country.MonetaryAuthority", FakeAuthority)
+    monkeypatch.setattr("model.spaces.country.MonetaryAuthority", FakeAuthority1)
+    monkeypatch.setattr("model.spaces.country.FiscalAuthority", FakeAuthority2)
     country.add_role = Mock()
     country.env = Mock()
     return country
 
 
-def test_add_monetary_authority_add_appropriate_role(country_without_monetary_auth):
+def test_add_monetary_authority_add_appropriate_role(country_without_authorities):
     # Given
     cb = Mock()
-    country = country_without_monetary_auth
+    country = country_without_authorities
 
     # When
     role = country.add_monetary_authority(cb)
 
     # Then
-    country.add_role.assert_called_with(FakeAuthority, cb, "monetary_authority")
+    country.add_role.assert_called_with(FakeAuthority1, cb, "monetary_authority")
     assert role == country.add_role.return_value
 
 
-def test_add_monetary_authority_registers_authority(country_without_monetary_auth):
+def test_add_monetary_authority_registers_authority(country_without_authorities):
     # Given
     cb = Mock()
-    country = country_without_monetary_auth
+    country = country_without_authorities
 
     # When
     role = country.add_monetary_authority(cb)
@@ -140,46 +126,26 @@ def test_add_monetary_authority_registers_authority(country_without_monetary_aut
     assert country.monetary_authority is role
 
 
-def test_add_monetary_authority_add_account(country_without_monetary_auth):
-    # Given
-    country = country_without_monetary_auth
-    env = country.env
-    cb = Mock()
 
-    # When
-    country.add_monetary_authority(cb)
-
-    # Then
-    env.add_account.assert_called_with(cb)
-
-
-@pytest.fixture
-def country_without_fiscal_auth(monkeypatch, country):
-    # Given
-    monkeypatch.setattr("model.spaces.country.FiscalAuthority", FakeAuthority)
-    country.add_role = Mock()
-    country.env = Mock()
-    country.monetary_authority = Mock()
-    return country
-
-
-def test_add_fiscal_authority_add_appropriate_role(country_without_fiscal_auth):
+def test_add_fiscal_authority_add_appropriate_role(country_without_authorities):
     # Given
     govt = Mock()
-    country = country_without_fiscal_auth
+    country = country_without_authorities
+    country.monetary_authority = Mock()
 
     # When
     role = country.add_fiscal_authority(govt)
 
     # Then
-    country.add_role.assert_called_with(FakeAuthority, govt, "fiscal_authority")
+    country.add_role.assert_called_with(FakeAuthority2, govt, "fiscal_authority")
     assert role == country.add_role.return_value
 
 
-def test_add_fiscal_authority_registers_authority(country_without_fiscal_auth):
+def test_add_fiscal_authority_registers_authority(country_without_authorities):
     # Given
     govt = Mock()
-    country = country_without_fiscal_auth
+    country = country_without_authorities
+    country.monetary_authority = Mock()
 
     # When
     role = country.add_fiscal_authority(govt)
@@ -188,39 +154,26 @@ def test_add_fiscal_authority_registers_authority(country_without_fiscal_auth):
     assert country.fiscal_authority is role
 
 
-def test_add_fiscal_authority_add_account(country_without_fiscal_auth):
+def test_add_fiscal_authority_links_to_cb_id(country_without_authorities):
     # Given
-    country = country_without_fiscal_auth
-    env = country.env
     govt = Mock()
+    country = country_without_authorities
+    country.monetary_authority = Mock()
 
     # When
     country.add_fiscal_authority(govt)
 
     # Then
-    env.add_account.assert_called_with(govt)
-
-
-def test_add_fiscal_authority_links_to_cb_id(country_without_fiscal_auth):
-    # Given
-    govt = Mock()
-    country = country_without_fiscal_auth
-
-    # When
-    country.add_fiscal_authority(govt)
-
-    # Then
-    assert govt.cb_id is country.monetary_authority.account
+    assert govt.cb_id is country.monetary_authority.id
 
 
 @pytest.fixture
 def country_without_citizens(monkeypatch, country):
     # Given
     monkeypatch.setattr("model.spaces.country.Citizen", FakeCitizen)
-    country.add_role = Mock()
-    country.citizens = []
-    country.env = Mock()
     country.monetary_authority = Mock()
+    country.add_role = Mock()
+    country.env = Mock()
     return country
 
 
@@ -237,31 +190,6 @@ def test_add_citizen_add_appropriate_role(country_without_citizens):
     assert role == country.add_role.return_value
 
 
-def test_add_citizen_registers_citizen(country_without_citizens):
-    # Given
-    household = Mock()
-    country = country_without_citizens
-
-    # When
-    role = country.add_citizen(household)
-
-    # Then
-    assert country.citizens == [role]
-
-
-def test_add_citizen_add_account(country_without_citizens):
-    # Given
-    country = country_without_citizens
-    env = country.env
-    household = Mock()
-
-    # When
-    country.add_citizen(household)
-
-    # Then
-    env.add_account.assert_called_with(household)
-
-
 def test_add_citizen_links_to_cb_id(country_without_citizens):
     # Given
     country = country_without_citizens
@@ -272,17 +200,16 @@ def test_add_citizen_links_to_cb_id(country_without_citizens):
     country.add_citizen(household)
 
     # Then
-    assert household.cb_id is authority.account
+    assert household.cb_id is authority.id
 
 
 @pytest.fixture
 def country_without_companies(monkeypatch, country):
     # Given
     monkeypatch.setattr("model.spaces.country.Company", FakeCompany)
+    country.monetary_authority = Mock()
     country.add_role = Mock()
     country.env = Mock()
-    country.companies = []
-    country.monetary_authority = Mock()
     return country
 
 
@@ -299,17 +226,6 @@ def test_add_company_add_appropriate_role(country_without_companies):
     assert role == country.add_role.return_value
 
 
-def test_add_company_register_company(country_without_companies):
-    # Given
-    agent = Mock()
-    country = country_without_companies
-
-    # When
-    role = country.add_company(agent, sector="X")
-
-    # Then
-    assert country.companies == [role]
-
 
 def test_add_company_register_sector(country_without_companies):
     # Given
@@ -323,19 +239,6 @@ def test_add_company_register_sector(country_without_companies):
     assert role.sector == "X"
 
 
-def test_add_company_add_account(country_without_companies):
-    # Given
-    country = country_without_companies
-    env = country.env
-    agent = Mock()
-
-    # When
-    country.add_company(agent, sector="X")
-
-    # Then
-    env.add_account.assert_called_with(agent)
-
-
 def test_add_company_links_to_cb_id(country_without_companies):
     # Given
     country = country_without_companies
@@ -346,7 +249,7 @@ def test_add_company_links_to_cb_id(country_without_companies):
     country.add_company(agent, sector="X")
 
     # Then
-    assert agent.cb_id is authority.account
+    assert agent.cb_id is authority.id
 
 
 # ---------------------------------------------------
@@ -355,10 +258,10 @@ def test_add_company_links_to_cb_id(country_without_companies):
 
 
 @pytest.fixture
-def country_with_companies(country, make_dlist):
+def country_with_companies(country):
     # Given
-    companies = make_dlist()
-    country.companies = companies
+    companies = []
+    country.roles = {"company":companies}
     return country, companies
 
 
@@ -448,10 +351,10 @@ def test_calc_sector_equity_range_if_empty_sector(country_with_companies):
 
 
 @pytest.fixture
-def country_with_citizens(country, make_dlist):
+def country_with_citizens(country):
     # Given
-    citizens = make_dlist([Mock(resid_equity=100) for _ in range(2)])
-    country.citizens = citizens
+    citizens = [Mock(resid_equity=100) for _ in range(2)]
+    country.roles = {"citizen":citizens}
     country.transfer_stock = Mock()
     country.record_flow = Mock()
     return country, citizens
@@ -843,10 +746,10 @@ def test_transfer_residual_cash_of_company(country_before_transfers):
 
 
 @pytest.fixture
-def country_before_update(country, make_dlist):
+def country_before_update(country):
     # Given
     country.spaces["good_market"] = Mock()
-    country.companies = make_dlist()
+    country.roles = {"company":[]}
     country.gdp = 0
     return country
 
@@ -880,7 +783,7 @@ def test_update_state_updates_prob_failure(country_before_update):
     defaults = [Mock(defaulted=True) for _ in range(5)]
     others = [Mock(defaulted=False) for _ in range(5)]
     country = country_before_update
-    country.companies.extend(defaults + others)
+    country.roles["company"].extend(defaults + others)
 
     # When
     country.update_state()
