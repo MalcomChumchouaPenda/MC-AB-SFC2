@@ -308,6 +308,55 @@ def test_find_random_role(space_with_roles, i, j):
 
 
 # ---------------------------------------------------
+# LINKS/NEIGHBORS MANAGEMENT
+# ----------------------------------------------------
+
+
+@pytest.fixture
+def space_with_edges(space):
+    # Given
+    roles = [Mock() for _ in range(3)]
+    graph = space.graph
+    graph.add_edge(roles[0], roles[1], variable=10)
+    graph.add_edge(roles[0], roles[2], variable=20)
+    return space, roles
+
+
+def test_find_neighbors_returns_role_agent_list(space_with_edges):
+    # Given
+    space, roles = space_with_edges
+
+    # When
+    result = space.find_neighbors(roles[1])
+
+    # Then
+    assert isinstance(result, AgentDList)
+    assert list(result) == [roles[0]]
+
+
+def test_find_links_returns_edge_data_list(space_with_edges):
+    # Given
+    space, roles = space_with_edges
+
+    # When
+    result = space.find_links(roles[1])
+
+    # Then
+    assert result == [{"neighbor": roles[0], "variable": 10}]
+
+
+def test_find_links_use_neighbor_name(space_with_edges):
+    # Given
+    space, roles = space_with_edges
+
+    # When
+    result = space.find_links(roles[1], neighbor_name="supplier")
+
+    # Then
+    assert result == [{"supplier": roles[0], "variable": 10}]
+
+
+# ---------------------------------------------------
 # ACCOUNT MANAGEMENT
 # ----------------------------------------------------
 

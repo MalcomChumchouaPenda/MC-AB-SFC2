@@ -131,6 +131,24 @@ class EcoSpace(Network):
         return roles.random(n=min_size).to_dlist()
 
     #
+    # Links/neighbors management
+    #
+
+    def find_neighbors(self, role):
+        edges = self.graph.edges(role)
+        neighbors = [neighbor for _, neighbor in edges]
+        return AgentDList(self.model, neighbors)
+
+    def find_links(self, role, neighbor_name="neighbor"):
+        links = []
+        edges = self.graph.edges(role, data=True)
+        for _, neighbor, data in edges:
+            link = {neighbor_name: neighbor}
+            link.update(data)
+            links.append(link)
+        return links
+
+    #
     # Account management
     #
     def add_account(self, agent):

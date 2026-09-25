@@ -72,7 +72,6 @@ class Country(EcoSpace):
             else:
                 firm_sector.append(company)
         return bank_sector, firm_sector
-    
 
     def calc_sector_equity_range(self, sector):
         equities = [c.equity for c in self.roles["company"] if c.sector == sector]
