@@ -125,7 +125,7 @@ class EcoSpace(Network):
     def find_one_role(self, name):
         return self.roles[name][0]
 
-    def find_random_role(self, name, size):
+    def find_random_roles(self, name, size):
         roles = self.roles[name]
         min_size = min(size, len(roles))
         return roles.random(n=min_size).to_dlist()

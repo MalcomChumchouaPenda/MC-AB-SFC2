@@ -51,18 +51,20 @@ def test_get_average_price(role_with_env):
     assert average_price == 25
 
 
-def test_find_suppliers_uses_env_method(role_with_env):
+def test_find_suppliers_get_random_founders(role_with_env, make_dlist):
     # Given
     suppliers = [Mock() for _ in range(2)]
+    suppliers = make_dlist(suppliers)
     role, env = role_with_env
-    env.find_suppliers.return_value = suppliers
+    env.find_random_roles.return_value = suppliers
 
     # When
     found = role.find_suppliers(5)
 
     # Then
-    env.find_suppliers.assert_called_with(5)
+    env.find_random_roles.assert_called_with("producer", 5)
     assert found == suppliers
+
 
 
 # ---------------------------------------------------

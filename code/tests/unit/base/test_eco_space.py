@@ -292,12 +292,12 @@ def test_find_one_role(space_with_roles):
 
 
 @pytest.mark.parametrize("i, j", [(1, 1), (2, 2), (3, 2)])
-def test_find_random_role(space_with_roles, i, j):
+def test_find_random_roles(space_with_roles, i, j):
     # Given
     space, roles = space_with_roles
 
     # When
-    result = space.find_random_role("fake_role", i)
+    result = space.find_random_roles("fake_role", i)
     print(list(result))
     print(list(roles))
 

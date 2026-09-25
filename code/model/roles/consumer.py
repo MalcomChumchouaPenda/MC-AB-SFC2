@@ -9,9 +9,9 @@ class Consumer(EcoRole):
 
     #
     # perception
-    #
+    #    
     def find_suppliers(self, psi):
-        return self.env.find_suppliers(psi)
+        return self.env.find_random_roles("producer", psi)
 
     def get_average_price(self):
         return self.env.average_price

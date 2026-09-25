@@ -174,41 +174,6 @@ def market():
     return market
 
 
-@pytest.fixture
-def market_with_producers(market):
-    # Given
-    producers = MagicMock()
-    producers.__len__.return_value = 1
-    producers.random.return_value = []
-    market.producers = producers
-    return market, producers
-
-
-def test_find_suppliers_get_random_founders(market_with_producers):
-    # Given
-    expected = [Mock() for _ in range(10)]
-    market, producers = market_with_producers
-    producers.random.return_value = expected
-
-    # When
-    found = market.find_suppliers(5)
-
-    # Then
-    assert found == expected
-
-
-@pytest.mark.parametrize("psi, expected", [(5, 5), (15, 10)])
-def test_find_suppliers_with_psi_params(market_with_producers, psi, expected):
-    # Given
-    market, producers = market_with_producers
-    producers.__len__.return_value = 10
-
-    # When
-    market.find_suppliers(psi)
-
-    # Then
-    producers.random.assert_called_with(expected)
-
 
 @pytest.fixture
 def market_before_purchase(market):

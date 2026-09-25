@@ -36,10 +36,6 @@ class GoodsMarket(EcoSpace):
     #
     # Reactions
     #
-    def find_suppliers(self, psi):
-        producers = self.producers
-        return producers.random(min(psi, len(producers)))
-
     def buy_goods(self, consumer, producer, quantity):
         producer.inventories -= quantity
         amount = quantity * producer.price
