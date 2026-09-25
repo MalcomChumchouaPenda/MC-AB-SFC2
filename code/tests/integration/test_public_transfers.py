@@ -19,7 +19,6 @@ def model():
 def govt(model):
     # Given
     govt = Government(model)
-    govt.setup()
     return govt
 
 
@@ -27,7 +26,6 @@ def govt(model):
 def cb(model):
     # Given
     cb = CentralBank(model)
-    cb.setup()
     return cb
 
 
@@ -35,7 +33,6 @@ def cb(model):
 def union(model):
     # Given
     union = MonetaryUnion(model)
-    union.setup()
     return union
 
 
@@ -78,7 +75,6 @@ def households(model):
     households = []
     for _ in range(4):
         household = Household(model)
-        household.setup()
         households.append(household)
     return households
 

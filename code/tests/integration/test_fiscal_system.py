@@ -28,7 +28,6 @@ def model(monkeypatch):
 def govt(model):
     # Given
     govt = Government(model)
-    govt.setup()
     return govt
 
 
@@ -36,7 +35,6 @@ def govt(model):
 def union(model):
     # Given
     union = MonetaryUnion(model)
-    union.setup()
     return union
 
 
@@ -80,7 +78,6 @@ def test_government_updates_fiscal_policy(govt, country_before_fiscal_policy):
 def household(model):
     # Given
     household = Household(model)
-    household.setup()
     return household
 
 
@@ -88,7 +85,6 @@ def household(model):
 def firm(model):
     # Given
     firm = Firm(model)
-    firm.setup()
     return firm
 
 
@@ -96,7 +92,6 @@ def firm(model):
 def bank(model):
     # Given
     bank = Bank(model)
-    bank.setup()
     return bank
 
 

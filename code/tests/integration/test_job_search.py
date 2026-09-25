@@ -20,7 +20,6 @@ def model():
 def market(model):
     # Given
     market = LaborMarket(model)
-    market.setup()
     return market
 
 
@@ -28,7 +27,6 @@ def market(model):
 def household(model, market):
     # Given
     household = Household(model)
-    household.setup()
     market.add_worker(household)
     return household
 
@@ -41,7 +39,6 @@ def employers(model, market):
     demands = [0.4, 0.8, 0.8]
     for wage, demand in zip(wages, demands):
         firm = Firm(model)
-        firm.setup()
         employer = market.add_employer(firm)
         employer.labor_demand = demand
         employer.wage = wage

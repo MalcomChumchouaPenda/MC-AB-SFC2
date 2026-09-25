@@ -4,7 +4,7 @@ from unittest.mock import Mock
 from model.agents.bank import Bank
 
 # ---------------------------------------------------
-# ENTITY HIERARCHY
+# ARCHITECTURE TESTS
 # ----------------------------------------------------
 
 
@@ -16,93 +16,41 @@ def test_is_eco_agent():
     assert issubclass(Bank, EcoAgent)
 
 
-# ---------------------------------------------------
-# DEFAULT STATE
-# ----------------------------------------------------
-
-
 @pytest.fixture
-def bank_before_setup():
+def bank():
     # Given
     model = Mock()
     bank = Bank(model)
     return bank
 
 
-@pytest.fixture
-def bank_with_roles_and_account(bank_before_setup):
-    # Given
-    roles = {}
-    account = Mock(stocks={}, flows={})
-    bank = bank_before_setup
-    bank.account = account
-    bank.roles = roles
-    return bank, roles, account
-
-
-def test_has_default_deposit_rate(bank_before_setup):
-    # Given
-    bank = bank_before_setup
-
-    # When
-    bank.setup()
-
-    # Then
+def test_has_default_deposit_rate(bank):
+    # Assert
     assert bank.deposit_rate == 0
 
 
-def test_has_default_taxes_payable(bank_before_setup):
-    # Given
-    bank = bank_before_setup
-
-    # When
-    bank.setup()
-
-    # Then
+def test_has_default_taxes_payable(bank):
+    # Assert
     assert bank.taxes_payable == 0
 
 
-def test_has_default_dividends_payable(bank_before_setup):
-    # Given
-    bank = bank_before_setup
-
-    # When
-    bank.setup()
-
-    # Then
+def test_has_default_dividends_payable(bank):
+    # Assert
     assert bank.dividends_payable == 0
 
 
-def test_has_default_credit_capacity(bank_before_setup):
-    # Given
-    bank = bank_before_setup
-
-    # When
-    bank.setup()
-
-    # Then
+def test_has_default_credit_capacity(bank):
+    # Assert
     assert bank.credit_capacity == 0
 
 
-def test_has_default_net_worth(bank_before_setup):
-    # Given
-    bank = bank_before_setup
-
-    # When
-    bank.setup()
-
-    # Then
+def test_has_default_net_worth(bank):
+    # Assert
     assert bank.net_worth == 0
 
 
-def test_has_default_defaulted(bank_before_setup):
-    # Given
-    bank = bank_before_setup
-
-    # When
-    bank.setup()
-
-    # Then
+def test_has_default_defaulted(bank):
+    # Assert
     assert bank.defaulted == False
 
 
@@ -111,11 +59,10 @@ def test_has_default_defaulted(bank_before_setup):
 # ----------------------------------------------------
 
 
-def test_update_deposit_rate_as_fraction_of_discount_rate(bank_before_setup):
+def test_update_deposit_rate_as_fraction_of_discount_rate(bank):
     # Given
     company = Mock()
     company.get_discount_rate.return_value = 0.05
-    bank = bank_before_setup
     bank.roles["company"] = company
     bank.p.zeta = 0.8
 
@@ -126,11 +73,10 @@ def test_update_deposit_rate_as_fraction_of_discount_rate(bank_before_setup):
     assert bank.deposit_rate == pytest.approx(0.04)
 
 
-def test_pay_deposit_interests_to_all_clients(bank_before_setup):
+def test_pay_deposit_interests_to_all_clients(bank):
     # Given
     role, client = Mock(), Mock()
     role.find_deposits.return_value = [{"depositor": client, "amount": 100}]
-    bank = bank_before_setup
     bank.deposit_rate = 0.05
     bank.roles["deposit_bank"] = role
 
@@ -147,6 +93,16 @@ def test_pay_deposit_interests_to_all_clients(bank_before_setup):
 # ----------------------------------------------------
 
 
+@pytest.fixture
+def bank_with_roles_and_account(bank):
+    # Given
+    roles = {}
+    account = Mock(stocks={}, flows={})
+    bank.account = account
+    bank.roles = roles
+    return bank, roles, account
+
+
 def test_calc_credit_capacity(bank_with_roles_and_account):
     # Given
     bank, _, account = bank_with_roles_and_account
@@ -160,9 +116,8 @@ def test_calc_credit_capacity(bank_with_roles_and_account):
     assert result == pytest.approx(1000)
 
 
-def test_calc_loan_probability(bank_before_setup):
+def test_calc_loan_probability(bank):
     # Given
-    bank = bank_before_setup
     bank.p.iota_l = 1
     borrower = Mock(loan_demand=100, net_worth=200)
 
@@ -173,11 +128,10 @@ def test_calc_loan_probability(bank_before_setup):
     assert probability == pytest.approx(math.exp(-0.5))
 
 
-def test_calc_loan_rate(bank_before_setup):
+def test_calc_loan_rate(bank):
     # Given
     company = Mock()
     company.get_discount_rate.return_value = 0.05
-    bank = bank_before_setup
     bank.p.chi = 0.02
     bank.roles["company"] = company
     borrower = Mock(loan_demand=100, net_worth=200)
@@ -508,9 +462,8 @@ def test_calc_dividends(bank_as_taxpayer, profit, expected):
     assert dividends == expected
 
 
-def test_compute_profit_distribution(bank_before_setup):
+def test_compute_profit_distribution(bank):
     # Given
-    bank = bank_before_setup
     bank.calc_profit = Mock(return_value=100)
     bank.calc_taxes = Mock(return_value=20)
     bank.calc_dividends = Mock(return_value=30)

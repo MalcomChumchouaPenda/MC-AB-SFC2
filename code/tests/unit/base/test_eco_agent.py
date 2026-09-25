@@ -14,63 +14,33 @@ def test_is_agentpy_agent():
 
 
 @pytest.fixture
-def agent_before_setup():
+def agent():
     # Given
     model = Mock()
     agent = EcoAgent(model)
     return agent
 
 
-def test_has_roles_dict(agent_before_setup):
-    # Given
-    agent = agent_before_setup
-
-    # When
-    agent.setup()
-
+def test_has_roles_dict(agent):
     # Assert
     assert agent.roles == {}
 
 
-def test_has_account_ref(agent_before_setup):
-    # Given
-    agent = agent_before_setup
-
-    # When
-    agent.setup()
-
+def test_has_account_ref(agent):
     # Assert
     assert agent.account is None
 
 
-def test_has_central_bank_id_ref(agent_before_setup):
-    # Given
-    agent = agent_before_setup
-
-    # When
-    agent.setup()
-
+def test_has_central_bank_id_ref(agent):
     # Assert
     assert agent.cb_id is None
 
 
-def test_has_deposit_bank_id_ref(agent_before_setup):
-    # Given
-    agent = agent_before_setup
-
-    # When
-    agent.setup()
-
+def test_has_deposit_bank_id_ref(agent):
     # Assert
     assert agent.bank_id is None
 
 
-def test_has_default_country_id(agent_before_setup):
-    # Given
-    agent = agent_before_setup
-
-    # When
-    agent.setup()
-
-    # Then
+def test_has_default_country_id(agent):
+    # Assert
     assert agent.country_id == 0

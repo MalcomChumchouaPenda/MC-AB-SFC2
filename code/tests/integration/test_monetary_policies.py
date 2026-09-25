@@ -21,14 +21,12 @@ def model():
 def union(model):
     # Given
     union = MonetaryUnion(model)
-    union.setup()
     return union
 
 
 @pytest.fixture
 def national_cb(model, union):
     cb = CentralBank(model)
-    cb.setup()
     union.add_policy_implementer(cb)
     return cb
 
@@ -36,7 +34,6 @@ def national_cb(model, union):
 @pytest.fixture
 def union_cb(model, union):
     cb = CentralBank(model)
-    cb.setup()
     union.add_policy_maker(cb)
     return cb
 

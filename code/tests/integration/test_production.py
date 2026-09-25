@@ -16,7 +16,6 @@ def model():
 def firm(model):
     # Given
     firm = Firm(model)
-    firm.setup()
     firm.roles["producer"] = Mock()
     return firm
 

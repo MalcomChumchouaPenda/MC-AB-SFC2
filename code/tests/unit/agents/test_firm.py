@@ -22,230 +22,110 @@ def test_is_eco_agent():
 
 
 @pytest.fixture
-def firm_before_setup():
+def firm():
     # Given
     model = Mock()
     firm = Firm(model)
     return firm
 
 
-def test_has_defaulted_prop(firm_before_setup):
-    # Given
-    firm = firm_before_setup
-
-    # When
-    firm.setup()
-
-    # Then
+def test_has_defaulted_prop(firm):
+    # Assert
     assert firm.defaulted is False
 
 
-def test_has_default_rd_expenditure(firm_before_setup):
-    # Given
-    firm = firm_before_setup
-
-    # When
-    firm.setup()
-
-    # Then
+def test_has_default_rd_expenditure(firm):
+    # Assert
     assert firm.rd == 0
 
 
-def test_has_default_price_offered(firm_before_setup):
-    # Given
-    firm = firm_before_setup
-
-    # When
-    firm.setup()
-
-    # Then
+def test_has_default_price_offered(firm):
+    # Assert
     assert firm.price == 0
 
 
-def test_has_default_wage_offered(firm_before_setup):
-    # Given
-    firm = firm_before_setup
-
-    # When
-    firm.setup()
-
-    # Then
+def test_has_default_wage_offered(firm):
+    # Assert
     assert firm.wage_offer == 0
 
 
-def test_has_default_expected_sales(firm_before_setup):
-    # Given
-    firm = firm_before_setup
-
-    # When
-    firm.setup()
-
-    # Then
+def test_has_default_expected_sales(firm):
+    # Assert
     assert firm.expected_sales == 0
 
 
-def test_has_default_desired_labor(firm_before_setup):
-    # Given
-    firm = firm_before_setup
-
-    # When
-    firm.setup()
-
-    # Then
+def test_has_default_desired_labor(firm):
+    # Assert
     assert firm.desired_labor == 0
 
 
-def test_has_default_desired_output(firm_before_setup):
-    # Given
-    firm = firm_before_setup
-
-    # When
-    firm.setup()
-
-    # Then
+def test_has_default_desired_output(firm):
+    # Assert
     assert firm.desired_output == 0
 
 
-def test_has_default_desired_loans(firm_before_setup):
-    # Given
-    firm = firm_before_setup
-
-    # When
-    firm.setup()
-
-    # Then
+def test_has_default_desired_loans(firm):
+    # Assert
     assert firm.desired_loans == 0
 
 
-def test_has_default_desired_rd_expense(firm_before_setup):
-    # Given
-    firm = firm_before_setup
-
-    # When
-    firm.setup()
-
-    # Then
+def test_has_default_desired_rd_expense(firm):
+    # Assert
     assert firm.desired_rd == 0
 
 
-def test_has_default_taxes_payable(firm_before_setup):
-    # Given
-    firm = firm_before_setup
-
-    # When
-    firm.setup()
-
-    # Then
+def test_has_default_taxes_payable(firm):
+    # Assert
     assert firm.taxes_payable == 0
 
 
-def test_has_default_dividends_payable(firm_before_setup):
-    # Given
-    firm = firm_before_setup
-
-    # When
-    firm.setup()
-
-    # Then
+def test_has_default_dividends_payable(firm):
+    # Assert
     assert firm.dividends_payable == 0
 
 
-def test_has_default_variety(firm_before_setup):
-    # Given
-    firm = firm_before_setup
-
-    # When
-    firm.setup()
-
-    # Then
+def test_has_default_variety(firm):
+    # Assert
     assert firm.variety == 0.0
 
 
-def test_has_default_net_worth(firm_before_setup):
-    # Given
-    firm = firm_before_setup
-
-    # When
-    firm.setup()
-
-    # Then
+def test_has_default_net_worth(firm):
+    # Assert
     assert firm.net_worth == 0.0
 
 
-def test_has_default_net_cash_flow(firm_before_setup):
-    # Given
-    firm = firm_before_setup
-
-    # When
-    firm.setup()
-
-    # Then
+def test_has_default_net_cash_flow(firm):
+    # Assert
     assert firm.net_cash_flow == 0.0
 
 
-def test_has_default_prev_sales(firm_before_setup):
-    # Given
-    firm = firm_before_setup
-
-    # When
-    firm.setup()
-
-    # Then
+def test_has_default_prev_sales(firm):
+    # Assert
     assert firm.prev_sales == 0
 
 
-def test_has_default_prev_output(firm_before_setup):
-    # Given
-    firm = firm_before_setup
-
-    # When
-    firm.setup()
-
-    # Then
+def test_has_default_prev_output(firm):
+    # Assert
     assert firm.prev_output == 0
 
 
-def test_has_default_prev_expected_sales(firm_before_setup):
-    # Given
-    firm = firm_before_setup
-
-    # When
-    firm.setup()
-
-    # Then
+def test_has_default_prev_expected_sales(firm):
+    # Assert
     assert firm.prev_expected_sales == 0
 
 
-def test_has_default_prev_inventories(firm_before_setup):
-    # Given
-    firm = firm_before_setup
-
-    # When
-    firm.setup()
-
-    # Then
+def test_has_default_prev_inventories(firm):
+    # Assert
     assert firm.prev_inventories == 0
 
 
-def test_has_default_prev_labor(firm_before_setup):
-    # Given
-    firm = firm_before_setup
-
-    # When
-    firm.setup()
-
-    # Then
+def test_has_default_prev_labor(firm):
+    # Assert
     assert firm.prev_labor == 0
 
 
-def test_has_default_prev_desired_labor(firm_before_setup):
-    # Given
-    firm = firm_before_setup
-
-    # When
-    firm.setup()
-
-    # Then
+def test_has_default_prev_desired_labor(firm):
+    # Assert
     assert firm.prev_desired_labor == 0
 
 
@@ -255,19 +135,17 @@ def test_has_default_prev_desired_labor(firm_before_setup):
 
 
 @pytest.fixture
-def firm_with_roles_and_account(firm_before_setup):
+def firm_with_roles_and_account(firm):
     # Given
     roles = {}
     account = Mock(stocks={}, flows={})
-    firm = firm_before_setup
     firm.account = account
     firm.roles = roles
     return firm, roles, account
 
 
-def test_plan_production_by_two_steps(firm_before_setup):
+def test_plan_production_by_two_steps(firm):
     # Given
-    firm = firm_before_setup
     firm.calc_desired_output = Mock(side_effect=setattr(firm, "desired_output", 10))
     firm.calc_labor_demand = Mock(side_effect=setattr(firm, "desired_output", 20))
 
@@ -461,9 +339,8 @@ def test_calc_revision_probability(firm_with_roles_and_account):
 
 
 @pytest.fixture
-def hiring_firm(firm_before_setup):
+def hiring_firm(firm):
     # Given
-    firm = firm_before_setup
     firm.p.delta = 0.9
     firm.wage_offer = 10.0
     firm.calc_revision_probability = Mock(return_value=0)
@@ -577,9 +454,8 @@ def test_can_choose_to_not_decreases_wage(hiring_firm):
 # ----------------------------------------------------
 
 
-def test_calc_desired_rd(firm_before_setup):
+def test_calc_desired_rd(firm):
     # Given
-    firm = firm_before_setup
     firm.p.gamma = 0.1
     firm.wage_offer = 10
     firm.desired_labor = 50
@@ -1048,9 +924,8 @@ def test_calc_dividends(firm_as_tax_payer, taxable, taxes, expected):
     assert dividends == pytest.approx(expected)
 
 
-def test_compute_profit_distribution(firm_before_setup):
+def test_compute_profit_distribution(firm):
     # Given
-    firm = firm_before_setup
     firm.calc_net_cash_flow = Mock(return_value=90)
     firm.calc_profit = Mock(return_value=100)
     firm.calc_taxes = Mock(return_value=20)

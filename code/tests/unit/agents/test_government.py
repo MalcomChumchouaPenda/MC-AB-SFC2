@@ -19,109 +19,55 @@ def test_is_eco_agent():
 # DEFAULT STATE
 # ----------------------------------------------------
 @pytest.fixture
-def govt_before_setup():
+def govt():
     # Given
     model = Mock()
     govt = Government(model)
     return govt
 
 
-def test_has_tax_rate(govt_before_setup):
-    # Given
-    govt = govt_before_setup
-
-    # When
-    govt.setup()
-
-    # Then
+def test_has_tax_rate(govt):
+    # Assert
     assert govt.tax_rate == 0
 
 
-def test_has_bond_rate(govt_before_setup):
-    # Given
-    govt = govt_before_setup
-
-    # When
-    govt.setup()
-
-    # Then
+def test_has_bond_rate(govt):
+    # Assert
     assert govt.bond_rate == 0
 
 
-def test_has_public_spending(govt_before_setup):
-    # Given
-    govt = govt_before_setup
-
-    # When
-    govt.setup()
-
-    # Then
+def test_has_public_spending(govt):
+    # Assert
     assert govt.public_spending == 0
 
 
-def test_has_desired_public_spending(govt_before_setup):
-    # Given
-    govt = govt_before_setup
-
-    # When
-    govt.setup()
-
-    # Then
+def test_has_desired_public_spending(govt):
+    # Assert
     assert govt.desired_public_spending == 0
 
 
-def test_has_new_public_debt(govt_before_setup):
-    # Given
-    govt = govt_before_setup
-
-    # When
-    govt.setup()
-
-    # Then
+def test_has_new_public_debt(govt):
+    # Assert
     assert govt.new_public_debt == 0
 
 
-def test_has_budget_deficit(govt_before_setup):
-    # Given
-    govt = govt_before_setup
-
-    # When
-    govt.setup()
-
-    # Then
+def test_has_budget_deficit(govt):
+    # Assert
     assert govt.budget_deficit == 0
 
 
-def test_has_budget_surplus(govt_before_setup):
-    # Given
-    govt = govt_before_setup
-
-    # When
-    govt.setup()
-
-    # Then
+def test_has_budget_surplus(govt):
+    # Assert
     assert govt.budget_surplus == 0
 
 
-def test_has_prev_public_spending(govt_before_setup):
-    # Given
-    govt = govt_before_setup
-
-    # When
-    govt.setup()
-
-    # Then
+def test_has_prev_public_spending(govt):
+    # Assert
     assert govt.prev_public_spending == 0
 
 
-def test_has_prev_budget_surplus(govt_before_setup):
-    # Given
-    govt = govt_before_setup
-
-    # When
-    govt.setup()
-
-    # Then
+def test_has_prev_budget_surplus(govt):
+    # Assert
     assert govt.prev_budget_surplus == 0
 
 
@@ -131,11 +77,10 @@ def test_has_prev_budget_surplus(govt_before_setup):
 
 
 @pytest.fixture
-def govt_with_roles_and_account(govt_before_setup):
+def govt_with_roles_and_account(govt):
     # Given
     roles = {}
     account = Mock(stocks={}, flows={})
-    govt = govt_before_setup
     govt.account = account
     govt.roles = roles
     return govt, roles, account
@@ -250,9 +195,8 @@ def test_calc_and_records_desired_public_spending(govt_as_authority):
 
 
 @pytest.mark.parametrize("tax_rate, expected", [(0.38, 0.40), (0.58, 0.50)])
-def test_tax_rate_is_bounded(govt_before_setup, tax_rate, expected):
+def test_tax_rate_is_bounded(govt, tax_rate, expected):
     # Given
-    govt = govt_before_setup
     govt.tax_rate = tax_rate
     govt.p.tax_min = 0.40
     govt.p.tax_max = 0.50
@@ -588,9 +532,8 @@ def test_reimburse_deposits(govt_as_deposit_guarantee):
     role.reimburse_deposits.assert_called_with(client, 100)
 
 
-def test_update_public_spending_history(govt_before_setup):
+def test_update_public_spending_history(govt):
     # Given
-    govt = govt_before_setup
     govt.public_spending = 200
     govt.prev_public_spending = 150
 
@@ -601,9 +544,8 @@ def test_update_public_spending_history(govt_before_setup):
     assert govt.prev_public_spending == 200
 
 
-def test_update_budget_history(govt_before_setup):
+def test_update_budget_history(govt):
     # Given
-    govt = govt_before_setup
     govt.budget_surplus = 100
     govt.prev_budget_surplus = 0
 

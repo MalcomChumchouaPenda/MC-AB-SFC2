@@ -19,32 +19,20 @@ def test_is_eco_agent():
 # DEFAULT STATE
 # ----------------------------------------------------
 @pytest.fixture
-def cb_before_setup():
+def cb():
     # Given
     model = Mock()
     cb = CentralBank(model)
     return cb
 
 
-def test_has_default_previous_discount_rate(cb_before_setup):
-    # Given
-    cb = cb_before_setup
-
-    # When
-    cb.setup()
-
-    # Then
+def test_has_default_previous_discount_rate(cb):
+    # Assert
     assert cb.prev_discount_rate == 0
 
 
-def test_has_default_discount_rate(cb_before_setup):
-    # Given
-    cb = cb_before_setup
-
-    # When
-    cb.setup()
-
-    # Then
+def test_has_default_discount_rate(cb):
+    # Assert
     assert cb.discount_rate == 0
 
 
@@ -54,10 +42,9 @@ def test_has_default_discount_rate(cb_before_setup):
 
 
 @pytest.fixture
-def cb_as_bond_buyer(cb_before_setup):
+def cb_as_bond_buyer(cb):
     # Given
     role = Mock()
-    cb = cb_before_setup
     cb.roles = {"bond_buyer": role}
     cb.country_id = 1
     return cb, role
@@ -95,11 +82,10 @@ def test_dont_buy_foreign_bonds(cb_as_bond_buyer):
 
 
 @pytest.fixture
-def cb_with_roles_and_account(cb_before_setup):
+def cb_with_roles_and_account(cb):
     # Given
     roles = {}
     account = Mock(stocks={}, flows={})
-    cb = cb_before_setup
     cb.account = account
     cb.roles = roles
     return cb, roles, account

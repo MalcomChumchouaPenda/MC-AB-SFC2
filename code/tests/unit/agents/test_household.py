@@ -22,120 +22,60 @@ def test_is_eco_agent():
 
 
 @pytest.fixture
-def hh_before_setup():
+def household():
     # Given
     model = Mock()
     household = Household(model)
     return household
 
 
-def test_has_default_labor_supply(hh_before_setup):
-    # Given
-    household = hh_before_setup
-
-    # When
-    household.setup()
-
-    # Then
+def test_has_default_labor_supply(household):
+    # Assert
     assert household.labor_supply == 1.0
 
 
-def test_has_default_preference(hh_before_setup):
-    # Given
-    household = hh_before_setup
-
-    # When
-    household.setup()
-
-    # Then
+def test_has_default_preference(household):
+    # Assert
     assert household.preference == 0
 
 
-def test_has_default_reservation_wage(hh_before_setup):
-    # Given
-    household = hh_before_setup
-
-    # When
-    household.setup()
-
-    # Then
+def test_has_default_reservation_wage(household):
+    # Assert
     assert household.reservation_wage == 0
 
 
-def test_has_default_expected_consumption(hh_before_setup):
-    # Given
-    household = hh_before_setup
-
-    # When
-    household.setup()
-
-    # Then
+def test_has_default_expected_consumption(household):
+    # Assert
     assert household.expected_consumption == 0
 
 
-def test_has_default_desired_consumption(hh_before_setup):
-    # Given
-    household = hh_before_setup
-
-    # When
-    household.setup()
-
-    # Then
+def test_has_default_desired_consumption(household):
+    # Assert
     assert household.desired_consumption == 0
 
 
-def test_has_default_desired_equity(hh_before_setup):
-    # Given
-    household = hh_before_setup
-
-    # When
-    household.setup()
-
-    # Then
+def test_has_default_desired_equity(household):
+    # Assert
     assert household.desired_equity == 0
 
 
-def test_has_default_desired_deposits(hh_before_setup):
-    # Given
-    household = hh_before_setup
-
-    # When
-    household.setup()
-
-    # Then
+def test_has_default_desired_deposits(household):
+    # Assert
     assert household.desired_deposits == 0
 
 
-def test_has_default_desired_investment_sector(hh_before_setup):
-    # Given
-    household = hh_before_setup
-
-    # When
-    household.setup()
-
-    # Then
+def test_has_default_desired_investment_sector(household):
+    # Assert
     assert household.desired_investment_sector is None
 
 
-def test_has_default_net_worth(hh_before_setup):
-    # Given
-    household = hh_before_setup
-
-    # When
-    household.setup()
-
-    # Then
+def test_has_default_net_worth(household):
+    # Assert
     assert household.net_worth == 0
 
 
-def test_has_default_incomes(hh_before_setup):
-    # Given
-    household = hh_before_setup
-
-    # When
-    household.setup()
-
-    # Then
+def test_has_default_incomes(household):
+    # Assert
     assert household.income == 0
     assert household.disposable_income == 0
 
@@ -146,11 +86,10 @@ def test_has_default_incomes(hh_before_setup):
 
 
 @pytest.fixture
-def hh_with_roles_and_account(hh_before_setup):
+def hh_with_roles_and_account(household):
     # Given
     roles = {}
     account = Mock(stocks={}, flows={})
-    household = hh_before_setup
     household.roles = roles
     household.account = account
     return household, roles, account

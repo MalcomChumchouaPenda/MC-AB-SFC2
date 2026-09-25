@@ -31,7 +31,6 @@ def banks(model):
 def firm(model):
     # Given
     firm = Firm(model)
-    firm.setup()
     firm.roles["depositor"] = Mock()
     return firm
 
