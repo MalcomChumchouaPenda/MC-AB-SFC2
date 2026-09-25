@@ -22,16 +22,6 @@ def market():
     return market
 
 
-def test_has_buyers_list(market):
-    # Assert
-    assert isinstance(market.buyers, AgentDList)
-
-
-def test_has_issuers_list(market):
-    # Assert
-    assert isinstance(market.issuers, AgentDList)
-
-
 # ---------------------------------------------------
 # ROLES MANAGEMENT
 # ----------------------------------------------------
@@ -42,18 +32,18 @@ FakeIssuer = Mock()
 
 
 @pytest.fixture
-def market_without_buyers(monkeypatch, market):
+def market_without_roles(monkeypatch, market):
     # Given
     monkeypatch.setattr("model.spaces.bond_market.BondBuyer", FakeBuyer)
+    monkeypatch.setattr("model.spaces.bond_market.BondIssuer", FakeIssuer)
     market.add_role = Mock()
-    market.buyers = []
     return market
 
 
-def test_add_buyer_add_appropriate_role(market_without_buyers):
+def test_add_buyer_add_appropriate_role(market_without_roles):
     # Given
     agent = Mock()
-    market = market_without_buyers
+    market = market_without_roles
 
     # When
     role = market.add_buyer(agent)
@@ -63,31 +53,10 @@ def test_add_buyer_add_appropriate_role(market_without_buyers):
     assert role == market.add_role.return_value
 
 
-def test_add_buyer_registers_buyer(market_without_buyers):
+def test_add_issuer_add_appropriate_role(market_without_roles):
     # Given
     agent = Mock()
-    market = market_without_buyers
-
-    # When
-    role = market.add_buyer(agent)
-
-    # Then
-    assert market.buyers == [role]
-
-
-@pytest.fixture
-def market_without_issuers(monkeypatch, market):
-    # Given
-    monkeypatch.setattr("model.spaces.bond_market.BondIssuer", FakeIssuer)
-    market.add_role = Mock()
-    market.issuers = []
-    return market
-
-
-def test_add_issuer_add_appropriate_role(market_without_issuers):
-    # Given
-    agent = Mock()
-    market = market_without_issuers
+    market = market_without_roles
 
     # When
     role = market.add_issuer(agent)
@@ -97,37 +66,16 @@ def test_add_issuer_add_appropriate_role(market_without_issuers):
     assert role == market.add_role.return_value
 
 
-def test_add_issuer_registers_issuer(market_without_issuers):
-    # Given
-    agent = Mock()
-    market = market_without_issuers
-
-    # When
-    role = market.add_issuer(agent)
-
-    # Then
-    assert market.issuers == [role]
-
-
 # ---------------------------------------------------
 # BONDS MATCHING
 # ----------------------------------------------------
 
 
-@pytest.fixture
-def market_with_issuers(market, make_dlist):
-    # Given
-    issuers = make_dlist()
-    market.issuers = issuers
-    return market, issuers
-
-
-def test_find_issuers_return_issuer_with_bonds(market_with_issuers):
+def test_find_issuers_return_issuer_with_bonds(market):
     # Given
     eligible = Mock(bond_number=1)
     ineligible = Mock(bond_number=0)
-    market, issuers = market_with_issuers
-    issuers.extend([eligible, ineligible])
+    market.roles["bond_issuer"] = [eligible, ineligible]
 
     # When
     found = market.find_issuers()
