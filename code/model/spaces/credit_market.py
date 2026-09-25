@@ -31,8 +31,6 @@ class CreditMarket(EcoSpace):
     #
     # Loan matching
     #
-    def find_lenders(self):
-        return list(self.lenders)
 
     def grant_loan(self, lender, borrower, amount, rate):
         borrower.loan_demand -= amount
@@ -44,12 +42,6 @@ class CreditMarket(EcoSpace):
     #
     # Loan repayment
     #
-    def find_loans(self, borrower):
-        return [
-            dict(lender=lender, **data)
-            for _, lender, data in self.graph.edges(borrower, data=True)
-        ]
-
     def repay_loans(self, borrower, lender, principal, interests):
         total = principal + interests
         self.transfer_stock("loans", lender.id, borrower.id, principal)

@@ -44,28 +44,32 @@ def test_has_default_net_worth(role_with_env):
 # ----------------------------------------------------
 
 
-def test_find_lenders(role_with_env):
+def test_find_lenders(role_with_env, make_dlist):
     # Given
+    lender = Mock()
     role, env = role_with_env
+    env.find_all_roles.return_value = make_dlist([lender])
 
     # When
     result = role.find_lenders()
 
     # Then
-    env.find_lenders.assert_called_once_with()
-    assert result == env.find_lenders.return_value
+    env.find_all_roles.assert_called_with("lender")
+    assert list(result) == [lender]
 
 
 def test_find_loans(role_with_env):
     # Given
     role, env = role_with_env
+    loan = {"lender": Mock(), "amount": 100, "rate": 0.01}
+    env.find_links.return_value = [loan]
 
     # When
     result = role.find_loans()
 
     # Then
-    env.find_loans.assert_called_once_with(role)
-    assert result == env.find_loans.return_value
+    env.find_links.assert_called_with(role, neighbor_name="lender")
+    assert result == [loan]
 
 
 # ---------------------------------------------------

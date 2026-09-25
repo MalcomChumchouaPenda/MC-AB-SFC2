@@ -12,10 +12,10 @@ class Borrower(EcoRole):
     # Perceptions
     #
     def find_lenders(self):
-        return self.env.find_lenders()
+        return self.env.find_all_roles("lender")
 
     def find_loans(self):
-        return self.env.find_loans(self)
+        return self.env.find_links(self, neighbor_name="lender")
 
     #
     # Actions

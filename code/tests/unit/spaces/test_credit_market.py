@@ -125,18 +125,6 @@ def test_add_borrower_registers_borrower(market_without_borrowers):
 # ----------------------------------------------------
 
 
-def test_find_lenders(market, make_dlist):
-    # Given
-    lender = Mock()
-    market.lenders = make_dlist([lender])
-
-    # When
-    sample = market.find_lenders()
-
-    # Then
-    assert sample == [lender]
-
-
 @pytest.fixture
 def market_with_participants(market):
     # Given
@@ -191,20 +179,6 @@ def test_grant_loan_reduces_loan_demand(market_with_participants):
 # ---------------------------------------------------
 # LOAN REPAYMENT
 # ----------------------------------------------------
-
-
-def test_find_loans(market_with_participants):
-    # Given
-    other = Mock()
-    market, borrower, lender = market_with_participants
-    market.graph.add_edge(lender, borrower, amount=100, rate=0.01)
-    market.graph.add_edge(lender, other, amount=200, rate=0.05)
-
-    # When
-    loans = market.find_loans(borrower)
-
-    # Then
-    assert loans == [{"lender": lender, "amount": 100, "rate": 0.01}]
 
 
 @pytest.fixture
