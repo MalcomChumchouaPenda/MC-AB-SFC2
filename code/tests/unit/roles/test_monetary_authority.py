@@ -23,17 +23,12 @@ def role_with_env():
     return role, env
 
 
-def test_expose_discount_rate_from_agent(role_with_env):
+def test_has_discount_rate_prop(role_with_env):
     # Given
-    agent = Mock(discount_rate=0.02)
     role, _ = role_with_env
-    role.agent = agent
 
-    # When
-    perceived = role.discount_rate
-
-    # Then
-    assert perceived == 0.02
+    # Assert
+    assert role.discount_rate == 0.0
 
 
 # ---------------------------------------------------
@@ -44,6 +39,14 @@ def test_expose_discount_rate_from_agent(role_with_env):
 # ---------------------------------------------------
 # ACTIONS TESTS
 # ----------------------------------------------------
+
+
+@pytest.fixture
+def role_with_env():
+    # Given
+    agent, env = Mock(), Mock()
+    role = MonetaryAuthority(agent, env)
+    return role, env
 
 
 def test_transfer_profits_with_env(role_with_env):

@@ -23,19 +23,6 @@ def role_with_env():
     return role, env
 
 
-def test_expose_discount_rate_from_agent(role_with_env):
-    # Given
-    role, _ = role_with_env
-    agent = role.agent
-    agent.discount_rate = 0.02
-
-    # When
-    perceived = role.discount_rate
-
-    # Then
-    assert perceived == 0.02
-
-
 # ---------------------------------------------------
 # PERCEPTION TESTS
 # ----------------------------------------------------
@@ -53,6 +40,30 @@ def test_get_average_inflation_from_env(role_with_env):
     assert perceived == 0.03
 
 
+def test_get_discount_rate_from_env(role_with_env):
+    # Given
+    role, env = role_with_env
+    env.discount_rate = 0.03
+
+    # When
+    perceived = role.get_discount_rate()
+
+    # Then
+    assert perceived == 0.03
+
+
 # ---------------------------------------------------
 # ACTIONS TESTS
 # ----------------------------------------------------
+
+
+def test_set_discount_rate_into_env(role_with_env):
+    # Given
+    role, env = role_with_env
+    env.discount_rate = 0.0
+
+    # When
+    role.set_discount_rate(0.02)
+
+    # Then
+    assert env.discount_rate == 0.02

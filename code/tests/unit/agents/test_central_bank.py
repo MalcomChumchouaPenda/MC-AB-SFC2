@@ -31,11 +31,6 @@ def test_has_default_previous_discount_rate(cb):
     assert cb.prev_discount_rate == 0
 
 
-def test_has_default_discount_rate(cb):
-    # Assert
-    assert cb.discount_rate == 0
-
-
 # ---------------------------------------------------
 # BONDS PURCHASES
 # ----------------------------------------------------
@@ -96,19 +91,20 @@ def cb_as_policy_maker(cb_with_roles_and_account):
     # Given
     role = Mock()
     cb, roles, _ = cb_with_roles_and_account
+    roles["monetary_authority"] = Mock()
     roles["policy_maker"] = role
     return cb, role
 
 
 def test_calc_discount_rate(cb_as_policy_maker):
     # Given
-    cb, _ = cb_as_policy_maker
-    cb.average_inflation = 0.04
+    cb, role = cb_as_policy_maker
     cb.prev_discount_rate = 0.03
     cb.p.long_run_rate = 0.02
     cb.p.xi = 0.5
     cb.p.xi_deltap = 1.5
     cb.p.inflation_target = 0.02
+    role.get_average_inflation.return_value = 0.04
 
     # When
     discount_rate = cb.calc_discount_rate()
@@ -121,69 +117,55 @@ def test_determine_discount_rate(cb_as_policy_maker):
     # Given
     cb, role = cb_as_policy_maker
     cb.prev_discount_rate = 0.0
-    cb.discount_rate = 0.0
     cb.calc_discount_rate = Mock(return_value=0.02)
-    role.get_average_inflation.return_value = 0.05
+    role.get_discount_rate.return_value = 0.0
 
     # When
     cb.determine_discount_rate()
 
     # Then
-    assert cb.discount_rate == 0.02
+    role.set_discount_rate.assert_called_with(0.02)
 
 
 def test_determine_discount_rate_changes_lag_values(cb_as_policy_maker):
     # Given
     cb, role = cb_as_policy_maker
     cb.prev_discount_rate = 0.01
-    cb.discount_rate = 0.02
     cb.calc_discount_rate = Mock(return_value=0.03)
-    role.get_average_inflation.return_value = 0.0
+    role.get_discount_rate.return_value = 0.02
 
     # When
     cb.determine_discount_rate()
 
     # Then
     assert cb.prev_discount_rate == 0.02
-    assert cb.discount_rate == 0.03
 
 
-@pytest.fixture
-def cb_as_policy_impl(cb_with_roles_and_account):
+def test_implement_discount_rate(cb_as_policy_maker):
     # Given
-    role = Mock()
-    cb, roles, _ = cb_with_roles_and_account
-    roles["policy_implementer"] = role
-    return cb, role
-
-
-def test_implement_discount_rate(cb_as_policy_impl):
-    # Given
-    cb, role = cb_as_policy_impl
+    cb, maker_role = cb_as_policy_maker
     cb.prev_discount_rate = 0.0
-    cb.discount_rate = 0.0
-    role.get_discount_rate.return_value = 0.05
+    auth_role = cb.roles["monetary_authority"]
+    maker_role.get_discount_rate.return_value = 0.05
 
     # When
     cb.implement_discount_rate()
 
     # Then
-    assert cb.discount_rate == 0.05
+    assert auth_role.discount_rate == 0.05
 
 
-def test_implement_discount_rate_changes_lag_values(cb_as_policy_impl):
+def test_implement_discount_rate_changes_lag_values(cb_as_policy_maker):
     # Given
-    cb, role = cb_as_policy_impl
+    cb, role = cb_as_policy_maker
     cb.prev_discount_rate = 0.01
-    cb.discount_rate = 0.02
-    role.get_discount_rate.return_value = 0.03
+    role.get_discount_rate.return_value = 0.02
 
     # When
     cb.implement_discount_rate()
 
     # Then
     assert cb.prev_discount_rate == 0.02
-    assert cb.discount_rate == 0.03
 
 
 # ---------------------------------------------------

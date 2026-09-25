@@ -1,7 +1,5 @@
-from agentpy import AgentDList
 from model.base import EcoSpace
 from model.roles.policy_maker import PolicyMaker
-from model.roles.policy_implementer import PolicyImplementer
 from model.spaces.country import Country
 from model.spaces.good_market import GoodsMarket
 from model.spaces.credit_market import CreditMarket
@@ -14,8 +12,7 @@ class MonetaryUnion(EcoSpace):
         super().setup()
         self.gdp = 0
         self.average_inflation = 0
-        self.policy_maker = None
-        self.policy_implementers = AgentDList(self.model)
+        self.discount_rate = 0.0
         self.add_space(GoodsMarket, "good_market", tradable=True)
         self.add_space(CreditMarket, "credit_market")
         self.add_space(BondMarket, "bond_market")
@@ -26,14 +23,7 @@ class MonetaryUnion(EcoSpace):
     # Role management
     #
     def add_policy_maker(self, agent):
-        role = self.add_role(PolicyMaker, agent, "policy_maker")
-        self.policy_maker = role
-        return role
-
-    def add_policy_implementer(self, agent):
-        role = self.add_role(PolicyImplementer, agent, "policy_implementer")
-        self.policy_implementers.append(role)
-        return role
+        return self.add_role(PolicyMaker, agent, "policy_maker")
 
     #
     # Firm creation

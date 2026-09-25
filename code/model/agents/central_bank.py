@@ -8,7 +8,6 @@ class CentralBank(EcoAgent):
     def setup(self):
         super().setup()
         self.prev_discount_rate = 0
-        self.discount_rate = 0
 
     #
     # Bond purchases
@@ -38,7 +37,8 @@ class CentralBank(EcoAgent):
     #
     def calc_discount_rate(self):
         p = self.model.p
-        average_inflation = self.average_inflation
+        role = self.roles["policy_maker"]
+        average_inflation = role.get_average_inflation()
         inflation_gap = average_inflation - p.inflation_target
         return (
             (1 - p.xi) * p.long_run_rate
@@ -48,13 +48,14 @@ class CentralBank(EcoAgent):
 
     def determine_discount_rate(self):
         role = self.roles["policy_maker"]
-        old_discount_rate = self.discount_rate
-        self.average_inflation = role.get_average_inflation()
-        self.discount_rate = self.calc_discount_rate()
+        old_discount_rate = role.get_discount_rate()
+        new_discount_rate = self.calc_discount_rate()
+        role.set_discount_rate(new_discount_rate)
         self.prev_discount_rate = old_discount_rate
 
     def implement_discount_rate(self):
-        role = self.roles["policy_implementer"]
-        old_discount_rate = self.discount_rate
-        self.discount_rate = role.get_discount_rate()
-        self.prev_discount_rate = old_discount_rate
+        maker_role = self.roles["policy_maker"]
+        discount_rate = maker_role.get_discount_rate()
+        auth_role = self.roles["monetary_authority"]
+        auth_role.discount_rate = discount_rate
+        self.prev_discount_rate = discount_rate

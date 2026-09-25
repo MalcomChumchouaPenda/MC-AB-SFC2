@@ -1,5 +1,4 @@
 import pytest
-from agentpy import AgentDList
 from unittest.mock import Mock
 from model.base import EcoSpace
 from model.spaces.monetary_union import MonetaryUnion
@@ -39,6 +38,11 @@ def test_has_average_inflation_prop(union):
     assert union.average_inflation == 0.0
 
 
+def test_has_discount_rate_prop(union):
+    # Assert
+    assert union.discount_rate == 0.0
+
+
 # ---------------------------------------------------
 # SPACES
 # ----------------------------------------------------
@@ -66,41 +70,25 @@ def test_setup_creates_countries(union):
 
 
 # ---------------------------------------------------
-# ROLES ACCESS
-# ----------------------------------------------------
-
-
-def test_has_policy_maker_ref(union):
-    # Assert
-    assert union.policy_maker is None
-
-
-def test_has_policy_implementer_dlist(union):
-    # Assert
-    assert isinstance(union.policy_implementers, AgentDList)
-
-
-# ---------------------------------------------------
 # ROLES MANAGEMENT
 # ----------------------------------------------------
 
 
 FakeMaker = Mock()
-FakeImplementer = Mock()
 
 
 @pytest.fixture
-def union_without_policy_maker(monkeypatch, union):
+def union_without_roles(monkeypatch, union):
     # Given
     monkeypatch.setattr("model.spaces.monetary_union.PolicyMaker", FakeMaker)
     union.add_role = Mock()
     return union
 
 
-def test_add_policy_maker_add_appropriate_role(union_without_policy_maker):
+def test_add_policy_maker_add_appropriate_role(union_without_roles):
     # Given
     cb = Mock()
-    union = union_without_policy_maker
+    union = union_without_roles
 
     # When
     role = union.add_policy_maker(cb)
@@ -108,54 +96,6 @@ def test_add_policy_maker_add_appropriate_role(union_without_policy_maker):
     # Then
     union.add_role.assert_called_with(FakeMaker, cb, "policy_maker")
     assert role == union.add_role.return_value
-
-
-def test_add_policy_maker_registers_role(union_without_policy_maker):
-    # Given
-    cb = Mock()
-    union = union_without_policy_maker
-
-    # When
-    role = union.add_policy_maker(cb)
-
-    # Then
-    assert union.policy_maker is role
-
-
-@pytest.fixture
-def union_without_policy_impl(monkeypatch, union):
-    # Given
-    monkeypatch.setattr(
-        "model.spaces.monetary_union.PolicyImplementer", FakeImplementer
-    )
-    union.policy_implementers = []
-    union.add_role = Mock()
-    return union
-
-
-def test_add_policy_implementer_add_appropriate_role(union_without_policy_impl):
-    # Given
-    cb = Mock()
-    union = union_without_policy_impl
-
-    # When
-    role = union.add_policy_implementer(cb)
-
-    # Then
-    union.add_role.assert_called_with(FakeImplementer, cb, "policy_implementer")
-    assert role == union.add_role.return_value
-
-
-def test_add_policy_implementer_registers_role(union_without_policy_impl):
-    # Given
-    cb = Mock()
-    union = union_without_policy_impl
-
-    # When
-    role = union.add_policy_implementer(cb)
-
-    # Then
-    assert union.policy_implementers == [role]
 
 
 # ---------------------------------------------------
@@ -241,20 +181,6 @@ def test_place_bank_add_lender_role(union_before_creation):
 
     # Then
     market.add_lender.assert_called_with(bank)
-
-
-# ---------------------------------------------------
-# CASH TRANSFER
-# ----------------------------------------------------
-
-
-@pytest.fixture
-def union_with_policy_maker(union_without_policy_maker):
-    # Given
-    authority = Mock()
-    union = union_without_policy_maker
-    union.monetary_authority = authority
-    return union, authority
 
 
 # ---------------------------------------------------
