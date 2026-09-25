@@ -339,18 +339,7 @@ def test_find_links_returns_edge_data_list(space_with_edges):
     space, roles = space_with_edges
 
     # When
-    result = space.find_links(roles[1])
-
-    # Then
-    assert result == [{"neighbor": roles[0], "variable": 10}]
-
-
-def test_find_links_use_neighbor_name(space_with_edges):
-    # Given
-    space, roles = space_with_edges
-
-    # When
-    result = space.find_links(roles[1], neighbor_name="supplier")
+    result = space.find_links(roles[1], "supplier")
 
     # Then
     assert result == [{"supplier": roles[0], "variable": 10}]

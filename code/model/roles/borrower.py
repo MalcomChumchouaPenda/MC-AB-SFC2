@@ -15,7 +15,7 @@ class Borrower(EcoRole):
         return self.env.find_all_roles("lender")
 
     def find_loans(self):
-        return self.env.find_links(self, neighbor_name="lender")
+        return self.env.find_links(self, "lender")
 
     #
     # Actions

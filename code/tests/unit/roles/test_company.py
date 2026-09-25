@@ -74,7 +74,7 @@ def test_get_equity_shares_from_env(role_with_env):
     found = role.get_equity_shares()
 
     # Assert
-    env.find_links.assert_called_with(role, neighbor_name="founder")
+    env.find_links.assert_called_with(role, "founder")
     assert found == [share]
 
 

@@ -139,7 +139,7 @@ class EcoSpace(Network):
         neighbors = [neighbor for _, neighbor in edges]
         return AgentDList(self.model, neighbors)
 
-    def find_links(self, role, neighbor_name="neighbor"):
+    def find_links(self, role, neighbor_name):
         links = []
         edges = self.graph.edges(role, data=True)
         for _, neighbor, data in edges:
