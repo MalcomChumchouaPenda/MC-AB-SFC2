@@ -49,9 +49,6 @@ def before_transactions(market, govt, bank, cb):
     market.add_issuer(govt)
     market.add_buyer(bank)
     market.add_buyer(cb)
-    market.add_account(govt)
-    market.add_account(bank)
-    market.add_account(cb)
     bank.cb_id = cb.id
     govt.cb_id = cb.id
 

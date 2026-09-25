@@ -125,6 +125,8 @@ class EcoSpace(Network):
         role = kind(agent, self)
         role.name = name
         agent.roles[name] = role
+        if agent.account is None:
+            self.add_account(agent)
         self.roles[name].append(role)
         self.positions[agent] = role
         self.graph.add_node(role)

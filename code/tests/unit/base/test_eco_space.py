@@ -134,10 +134,18 @@ def role_with_kind():
     return role, role_kind
 
 
-def test_add_role_creates_role(space, role_with_kind):
+@pytest.fixture
+def space_and_agent(space):
+    # Given
+    agent = Mock(roles={})
+    space.add_account = Mock()
+    return space, agent
+
+
+def test_add_role_creates_role(space_and_agent, role_with_kind):
     # Given
     _, role_kind = role_with_kind
-    agent = Mock(roles={})
+    space, agent = space_and_agent
 
     # When
     space.add_role(role_kind, agent, "fake_role")
@@ -146,10 +154,10 @@ def test_add_role_creates_role(space, role_with_kind):
     role_kind.assert_called_with(agent, space)
 
 
-def test_add_role_returns_role(space, role_with_kind):
+def test_add_role_returns_role(space_and_agent, role_with_kind):
     # Given
     role, role_kind = role_with_kind
-    agent = Mock(roles={})
+    space, agent = space_and_agent
 
     # When
     result = space.add_role(role_kind, agent, "fake_role")
@@ -158,10 +166,10 @@ def test_add_role_returns_role(space, role_with_kind):
     assert result is role
 
 
-def test_add_role_add_graph_node(space, role_with_kind):
+def test_add_role_add_graph_node(space_and_agent, role_with_kind):
     # Given
     role, role_kind = role_with_kind
-    agent = Mock(roles={})
+    space, agent = space_and_agent
     graph = space.graph
 
     # When
@@ -172,10 +180,10 @@ def test_add_role_add_graph_node(space, role_with_kind):
     assert space.positions[agent] is role
 
 
-def test_add_role_registers_role(space, role_with_kind):
+def test_add_role_registers_role(space_and_agent, role_with_kind):
     # Given
     role, role_kind = role_with_kind
-    agent = Mock(roles={})
+    space, agent = space_and_agent
 
     # When
     space.add_role(role_kind, agent, "fake_role")
@@ -184,6 +192,32 @@ def test_add_role_registers_role(space, role_with_kind):
     assert role.name == "fake_role"
     assert agent.roles["fake_role"] is role
     assert list(space.roles["fake_role"]) == [role]
+
+
+def test_add_role_creates_account_if_no_account(space_and_agent, role_with_kind):
+    # Given
+    _, role_kind = role_with_kind
+    space, agent = space_and_agent
+    agent.account = None
+
+    # When
+    space.add_role(role_kind, agent, "fake_role")
+
+    # Then
+    space.add_account.assert_called_with(agent)
+
+
+def test_add_role_doesnt_create_account_if_account(space_and_agent, role_with_kind):
+    # Given
+    _, role_kind = role_with_kind
+    space, agent = space_and_agent
+    agent.account = Mock()
+
+    # When
+    space.add_role(role_kind, agent, "fake_role")
+
+    # Then
+    space.add_account.assert_not_called()
 
 
 @pytest.fixture

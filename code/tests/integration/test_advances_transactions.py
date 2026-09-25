@@ -37,7 +37,6 @@ def before_transactions(market, bank, cb):
     # Given
     bank.cb_id = cb.id
     market.add_lender(bank)
-    market.add_account(bank)
     market.add_account(cb)
 
 

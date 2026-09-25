@@ -41,7 +41,6 @@ def household(model):
 def before_allocation(country, household):
     # Given
     country.add_citizen(household)
-    country.add_account(household)
     household.roles["depositor"] = Mock()
 
 

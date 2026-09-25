@@ -47,10 +47,8 @@ def market(model):
 def before_transactions(market, firm, banks):
     # Given
     market.add_lender(banks[0])
-    market.add_borrower(firm)
-    market.add_account(firm)
-    market.add_account(banks[0])
     market.add_account(banks[1])
+    market.add_borrower(firm)
     firm.bank_id = banks[1].id
     return market
 

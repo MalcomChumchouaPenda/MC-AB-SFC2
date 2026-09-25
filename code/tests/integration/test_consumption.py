@@ -3,13 +3,14 @@ import pytest
 from agentpy import Model
 from model.agents.firm import Firm
 from model.agents.household import Household
-from model.spaces.good_market import GoodsMarket
+from model.spaces.monetary_union import MonetaryUnion
 
 
 @pytest.fixture
 def model():
     # Given
     model = Model()
+    model.p.K = 1
     model.p.psi = 2
     model.p.beta = 1
     return model
@@ -30,13 +31,18 @@ def firm(model):
 
 
 @pytest.fixture
-def trad_market(model, household, firm):
+def union(model):
     # Given
-    market = GoodsMarket(model, tradable=True)
+    union = MonetaryUnion(model)
+    return union
+
+
+@pytest.fixture
+def trad_market(union, household, firm):
+    # Given
+    market = union.spaces["good_market"]
     market.add_consumer(household)
     market.add_producer(firm)
-    market.add_account(firm)
-    market.add_account(household)
     return market
 
 
@@ -62,13 +68,12 @@ def test_household_consume_tradable_goods(trad_market, household, firm):
 
 
 @pytest.fixture
-def non_trad_market(model, household, firm):
+def non_trad_market(union, household, firm):
     # Given
-    market = GoodsMarket(model, tradable=False)
+    country = union.spaces["country_0"]
+    market = country.spaces["good_market"]
     market.add_consumer(household)
     market.add_producer(firm)
-    market.add_account(firm)
-    market.add_account(household)
     return market
 
 
@@ -105,21 +110,19 @@ def firms(model):
 
 
 @pytest.fixture
-def markets(model):
-    markets = []
-    for tradable in [True, False]:
-        market = GoodsMarket(model, tradable=tradable)
-        market.average_price = 10
-        markets.append(market)
-    return markets
+def markets(union):
+    trad_market = union.spaces["good_market"]
+    trad_market.average_price = 10
+    country = union.spaces["country_0"]
+    non_trad_market = country.spaces["good_market"]
+    non_trad_market.average_price = 10
+    return [trad_market, non_trad_market]
 
 
 @pytest.fixture
 def markets_with_inventories(markets, household, firms):
     for i, market in enumerate(markets):
         market.add_consumer(household)
-        market.add_account(firms[i])
-        market.add_account(household)
         producer_role = market.add_producer(firms[i])
         producer_role.inventories = 10
         producer_role.price = 10
