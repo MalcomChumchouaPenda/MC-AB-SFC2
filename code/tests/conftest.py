@@ -17,6 +17,7 @@ def fake_model():
     model = Model()
     return model
 
+
 @pytest.fixture
 def make_dlist(fake_model):
     def f(content=[]):

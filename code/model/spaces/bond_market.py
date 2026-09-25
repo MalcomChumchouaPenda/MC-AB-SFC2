@@ -19,7 +19,8 @@ class BondMarket(EcoSpace):
     #
 
     def find_issuers(self):
-        return [role for role in self.roles["bond_issuer"] if role.bond_number > 0]
+        issuers = self.find_all_roles("bond_issuer")
+        return issuers.select(issuers.bond_number > 0)
 
     def find_bonds(self, issuer):
         edges = self.graph.edges(issuer, data=True)

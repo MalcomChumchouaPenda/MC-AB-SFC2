@@ -22,4 +22,3 @@ def test_contains_agents_collection(model):
 def test_contains_spaces_collection(model):
     # Assert
     assert isinstance(model.spaces, dict)
-

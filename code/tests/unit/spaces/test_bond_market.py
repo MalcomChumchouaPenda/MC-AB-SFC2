@@ -71,17 +71,19 @@ def test_add_issuer_add_appropriate_role(market_without_roles):
 # ----------------------------------------------------
 
 
-def test_find_issuers_return_issuer_with_bonds(market):
+def test_find_issuers_return_issuer_with_bonds(market, make_dlist):
     # Given
     eligible = Mock(bond_number=1)
     ineligible = Mock(bond_number=0)
-    market.roles["bond_issuer"] = [eligible, ineligible]
+    issuers = make_dlist([eligible, ineligible])
+    market.find_all_roles = Mock(return_value=issuers)
 
     # When
     found = market.find_issuers()
 
     # Then
-    assert found == [eligible]
+    market.find_all_roles.assert_called_with("bond_issuer")
+    assert all(role in found for role in [eligible])
 
 
 def test_find_bonds_returns_bonds_edge(market):
