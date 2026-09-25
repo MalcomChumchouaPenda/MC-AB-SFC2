@@ -358,43 +358,6 @@ def country_with_citizens(country, make_dlist):
     return country, citizens
 
 
-def test_find_investors_with_positive_residual_equity(country_with_citizens):
-    # Given
-    country, citizens = country_with_citizens
-    citizens[0].resid_equity = 0
-    eligible = citizens[1]
-
-    # When
-    investors = country.find_investors()
-
-    # Then
-    assert investors == [eligible]
-
-
-def test_find_investors_excludes_initiator(country_with_citizens):
-    # Given
-    country, citizens = country_with_citizens
-    initiator = citizens[0]
-    eligible = citizens[1]
-
-    # When
-    investors = country.find_investors(initiator=initiator)
-
-    # Then
-    assert investors == [eligible]
-
-
-def test_find_citizens(country_with_citizens):
-    # Given
-    country, citizens = country_with_citizens
-
-    # When
-    result = country.find_citizens()
-
-    # Then
-    assert list(result) == list(citizens)
-
-
 def test_pay_public_transfers_updates_accounts(country_with_citizens):
     # Given
     country, citizens = country_with_citizens
@@ -474,20 +437,6 @@ def test_fund_company_reduces_resid_equity(country_with_company_and_founder):
 # ---------------------------------------------------
 #  DIVIDENDS AND TAXES
 # ----------------------------------------------------
-
-
-def test_find_equity_shares(country_with_company_and_founder):
-    # Given
-    other = Mock()
-    country, company, founder = country_with_company_and_founder
-    country.graph.add_edge(company, founder, value=60)
-    country.graph.add_edge(other, founder, value=40)
-
-    # When
-    found = country.find_equity_shares(company)
-
-    # Assert
-    assert found == [{"founder": founder, "value": 60}]
 
 
 def test_pay_dividends_updates_accounts(country_with_company_and_founder):

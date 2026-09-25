@@ -67,13 +67,15 @@ def test_get_average_wage(role_with_env):
 def test_get_equity_shares_from_env(role_with_env):
     # Given
     role, env = role_with_env
+    share = {"founder": Mock(), "value": 60}
+    env.find_links = Mock(return_value=[share])
 
     # When
     found = role.get_equity_shares()
 
     # Assert
-    env.find_equity_shares.assert_called_with(role)
-    assert found == env.find_equity_shares.return_value
+    env.find_links.assert_called_with(role, neighbor_name="founder")
+    assert found == [share]
 
 
 def test_get_tax_rate(role_with_env):

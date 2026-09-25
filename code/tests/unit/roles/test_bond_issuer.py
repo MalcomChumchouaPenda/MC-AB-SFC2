@@ -66,8 +66,8 @@ def test_get_discount_rate(role_with_env):
 
 def test_find_bonds_returns_buyer_and_amount(role_with_env):
     # Given
-    bond_item = {"buyer": Mock(), "amount": 100}
     role, env = role_with_env
+    bond_item = {"buyer": Mock(), "amount": 100}
     env.find_links.return_value = [bond_item]
 
     # When

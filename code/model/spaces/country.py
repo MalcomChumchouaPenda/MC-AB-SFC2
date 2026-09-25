@@ -26,15 +26,15 @@ class Country(EcoSpace):
     #
     # Role management
     #
+    def add_monetary_authority(self, agent):
+        role = self.add_role(MonetaryAuthority, agent, "monetary_authority")
+        self.monetary_authority = role
+        return role
+
     def add_fiscal_authority(self, agent):
         role = self.add_role(FiscalAuthority, agent, "fiscal_authority")
         agent.cb_id = self.monetary_authority.id
         self.fiscal_authority = role
-        return role
-
-    def add_monetary_authority(self, agent):
-        role = self.add_role(MonetaryAuthority, agent, "monetary_authority")
-        self.monetary_authority = role
         return role
 
     def add_citizen(self, agent):
@@ -82,12 +82,6 @@ class Country(EcoSpace):
     #
     # Equity investment
     #
-    def find_investors(self, initiator=None):
-        citizens = AgentList(self.model, self.roles["citizen"])
-        investors = citizens.select(citizens.resid_equity > 0)
-        if initiator in investors:
-            investors.remove(initiator)
-        return investors
 
     def fund_company(self, company, founder, amount):
         founder.resid_equity -= amount
@@ -101,9 +95,6 @@ class Country(EcoSpace):
     #
     # Dividends and losses
     #
-    def find_equity_shares(self, company):
-        edges = self.graph.edges(company, data=True)
-        return [{"founder": founder, **data} for _, founder, data in edges]
 
     def update_equity_share(self, company, founder, variation):
         self.transfer_stock("equities", company.id, founder.id, variation)
@@ -162,9 +153,6 @@ class Country(EcoSpace):
     #
     # Public transfers
     #
-    def find_citizens(self):
-        return self.find_all_roles("citizen")
-
     def pay_public_transfers(self, authority, citizen, amount):
         self.transfer_stock("cash", authority.id, citizen.id, amount)
         self.record_flow("public_transfers", authority.id, citizen.id, amount)

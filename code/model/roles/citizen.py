@@ -14,7 +14,11 @@ class Citizen(EcoRole):
         return self.env.prob_failure
 
     def find_investors(self):
-        return self.env.find_investors(initiator=self)
+        citizens = self.env.find_all_roles("citizens")
+        investors = citizens.select(citizens.resid_equity > 0)
+        if self in investors:
+            investors.remove(self)
+        return investors
 
     def get_bank_number_ratio(self):
         return self.env.calc_bank_number_ratio()

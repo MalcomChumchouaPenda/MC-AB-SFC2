@@ -49,18 +49,34 @@ def test_get_prob_failure(role_with_env):
     assert perceived == 0.12
 
 
-def test_find_investors_use_env_method(role_with_env):
+def test_find_investors_with_residual_equity(role_with_env, make_dlist):
     # Given
-    expected = [Mock() for _ in range(10)]
     role, env = role_with_env
-    env.find_investors.return_value = expected
+    eligible = Mock(resid_equity=10)
+    ineligible = Mock(resid_equity=0)
+    citizens = make_dlist([eligible, ineligible])
+    env.find_all_roles = Mock(return_value=citizens)
 
     # When
     investors = role.find_investors()
 
     # Then
-    env.find_investors.assert_called_with(initiator=role)
-    assert investors == expected
+    env.find_all_roles.assert_called_with("citizens")
+    assert list(investors) == [eligible]
+
+
+def test_find_investors_excludes_initiator(role_with_env, make_dlist):
+    # Given
+    role, env = role_with_env
+    eligible = Mock(resid_equity=10)
+    citizens = make_dlist([eligible, role])
+    env.find_all_roles = Mock(return_value=citizens)
+
+    # When
+    investors = role.find_investors()
+
+    # Then
+    assert list(investors) == [eligible]
 
 
 def test_get_bank_number_ratio_from_env(role_with_env):

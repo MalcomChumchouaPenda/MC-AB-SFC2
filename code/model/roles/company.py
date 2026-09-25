@@ -15,7 +15,7 @@ class Company(EcoRole):
     #
 
     def get_equity_shares(self):
-        return self.env.find_equity_shares(self)
+        return self.env.find_links(self, neighbor_name="founder")
 
     def get_average_wage(self):
         return self.env.average_wage

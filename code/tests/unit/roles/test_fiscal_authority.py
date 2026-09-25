@@ -87,15 +87,18 @@ def test_get_average_productivity_from_env(role_with_good_market):
     assert perceived == 1.0
 
 
-def test_find_citizens_from_env(role_with_env):
+def test_find_citizens_from_env(role_with_env, make_dlist):
     # Given
     role, env = role_with_env
+    citizens = make_dlist([Mock() for _ in range(5)])
+    env.find_all_roles = Mock(return_value=citizens)
 
     # When
     perceived = role.find_citizens()
 
     # Then
-    assert perceived == env.find_citizens.return_value
+    env.find_all_roles.assert_called_with("citizen")
+    assert list(perceived) == list(citizens)
 
 
 # ---------------------------------------------------
