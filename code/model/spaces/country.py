@@ -52,20 +52,27 @@ class Country(EcoSpace):
     # Current indicators
     #
     def calc_bank_number_ratio(self):
-        companies = AgentList(self.model, self.roles["company"])
-        firm_sector = companies.select([c.sector[0] == "F" for c in companies])
+        bank_sector, firm_sector = self._split_bank_firm_sectors()
         if len(firm_sector) == 0:
             return 1.0
-        bank_sector = companies.select(companies.sector == "B")
         return len(bank_sector) / len(firm_sector)
 
     def calc_bank_equity_ratio(self):
-        companies = AgentList(self.model, self.roles["company"])
-        firm_sector = companies.select([c.sector[0] == "F" for c in companies])
+        bank_sector, firm_sector = self._split_bank_firm_sectors()
         if len(firm_sector) == 0:
             return 1.0
-        bank_sector = companies.select(companies.sector == "B")
         return sum(bank_sector.equity) / sum(firm_sector.equity)
+
+    def _split_bank_firm_sectors(self):
+        firm_sector = AgentDList(self.model)
+        bank_sector = AgentDList(self.model)
+        for company in self.roles["company"]:
+            if company.sector == "B":
+                bank_sector.append(company)
+            else:
+                firm_sector.append(company)
+        return bank_sector, firm_sector
+    
 
     def calc_sector_equity_range(self, sector):
         equities = [c.equity for c in self.roles["company"] if c.sector == sector]

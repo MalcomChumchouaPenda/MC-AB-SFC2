@@ -255,9 +255,9 @@ def test_add_company_links_to_cb_id(country_without_companies):
 
 
 @pytest.fixture
-def country_with_companies(country):
+def country_with_companies(country, make_dlist):
     # Given
-    companies = []
+    companies = make_dlist()
     country.roles = {"company": companies}
     return country, companies
 
@@ -744,10 +744,10 @@ def test_transfer_residual_cash_of_company(country_before_transfers):
 
 
 @pytest.fixture
-def country_before_update(country):
+def country_before_update(country, make_dlist):
     # Given
     country.spaces["good_market"] = Mock()
-    country.roles = {"company": []}
+    country.roles = {"company": make_dlist()}
     country.gdp = 0
     return country
 
