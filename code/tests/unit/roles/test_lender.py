@@ -1,5 +1,6 @@
 import pytest
 from unittest.mock import Mock
+from model.base import EcoRole
 from model.roles.lender import Lender
 
 # ---------------------------------------------------
@@ -8,25 +9,18 @@ from model.roles.lender import Lender
 
 
 def test_is_eco_role():
-    # Given
-    from model.base import EcoRole
-
     # Assert
     assert issubclass(Lender, EcoRole)
 
 
 @pytest.fixture
-def role_with_env():
+def role():
     # Given
     agent, env = Mock(), Mock()
-    role = Lender(agent, env)
-    return role, env
+    return Lender(agent, env)
 
 
-def test_has_loan_applicants_list(role_with_env):
-    # Given
-    role, _ = role_with_env
-
+def test_has_loan_applicants_list(role):
     # Assert
     assert role.loan_applicants == []
 
@@ -36,10 +30,9 @@ def test_has_loan_applicants_list(role_with_env):
 # ----------------------------------------------------
 
 
-def test_receive_request(role_with_env):
+def test_receive_request(role):
     # Given
     borrower = Mock()
-    role, _ = role_with_env
     role.loan_applicants = []
 
     # When
@@ -49,10 +42,10 @@ def test_receive_request(role_with_env):
     assert role.loan_applicants == [borrower]
 
 
-def test_grant_loan(role_with_env):
+def test_grant_loan(role):
     # Given
     borrower = Mock()
-    role, env = role_with_env
+    env = role.env
 
     # When
     role.grant_loan(borrower, 100, 0.04)
@@ -61,9 +54,9 @@ def test_grant_loan(role_with_env):
     env.grant_loan.assert_called_with(role, borrower, 100, 0.04)
 
 
-def test_request_advances(role_with_env):
+def test_request_advances(role):
     # Given
-    role, env = role_with_env
+    env = role.env
 
     # When
     role.request_advances(100)
@@ -72,9 +65,9 @@ def test_request_advances(role_with_env):
     env.request_advances.assert_called_with(role, 100)
 
 
-def test_repay_advances(role_with_env):
+def test_repay_advances(role):
     # Given
-    role, env = role_with_env
+    env = role.env
 
     # When
     role.repay_advances(100, 10)

@@ -1,5 +1,6 @@
 import pytest
 from unittest.mock import Mock
+from model.base import EcoRole
 from model.roles.bond_issuer import BondIssuer
 
 # ---------------------------------------------------
@@ -8,41 +9,28 @@ from model.roles.bond_issuer import BondIssuer
 
 
 def test_is_eco_role():
-    # Given
-    from model.base import EcoRole
-
     # Assert
     assert issubclass(BondIssuer, EcoRole)
 
 
 @pytest.fixture
-def role_with_env():
+def role():
     # Given
     agent, env = Mock(), Mock()
-    role = BondIssuer(agent, env)
-    return role, env
+    return BondIssuer(agent, env)
 
 
-def test_has_default_debt_ratio(role_with_env):
-    # Given
-    role, _ = role_with_env
-
+def test_has_default_debt_ratio(role):
     # Assert
     assert role.debt_ratio == 0.0
 
 
-def test_has_default_bond_number(role_with_env):
-    # Given
-    role, _ = role_with_env
-
+def test_has_default_bond_number(role):
     # Assert
     assert role.bond_number == 0.0
 
 
-def test_has_default_bond_value(role_with_env):
-    # Given
-    role, _ = role_with_env
-
+def test_has_default_bond_value(role):
     # Assert
     assert role.bond_value == 0.0
 
@@ -52,9 +40,9 @@ def test_has_default_bond_value(role_with_env):
 # ----------------------------------------------------
 
 
-def test_get_discount_rate(role_with_env):
+def test_get_discount_rate(role):
     # Given
-    role, env = role_with_env
+    env = role.env
     env.discount_rate = 0.05
 
     # When
@@ -64,18 +52,18 @@ def test_get_discount_rate(role_with_env):
     assert result == 0.05
 
 
-def test_find_bonds_returns_buyer_and_amount(role_with_env):
+def test_find_bonds_returns_buyer_and_amount(role):
     # Given
-    role, env = role_with_env
-    bond_item = {"buyer": Mock(), "amount": 100}
-    env.find_links.return_value = [bond_item]
+    bond = Mock()
+    env = role.env
+    env.find_links.return_value = [bond]
 
     # When
     result = role.find_bonds()
 
     # Then
     env.find_links.assert_called_with(role, "buyer")
-    assert result == [bond_item]
+    assert result == [bond]
 
 
 # ---------------------------------------------------
@@ -83,10 +71,10 @@ def test_find_bonds_returns_buyer_and_amount(role_with_env):
 # ----------------------------------------------------
 
 
-def test_repay_bond_use_env_method(role_with_env):
+def test_repay_bond_use_env_method(role):
     # Given
     buyer = Mock()
-    role, env = role_with_env
+    env = role.env
 
     # When
     role.repay_bonds(buyer, 100, 10)

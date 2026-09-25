@@ -1,5 +1,6 @@
 import pytest
 from unittest.mock import Mock
+from model.base import EcoRole
 from model.roles.depositor import Depositor
 
 # ---------------------------------------------------
@@ -8,19 +9,15 @@ from model.roles.depositor import Depositor
 
 
 def test_is_eco_role():
-    # Given
-    from model.base import EcoRole
-
     # Assert
     assert issubclass(Depositor, EcoRole)
 
 
 @pytest.fixture
-def role_with_env():
+def role():
     # Given
     agent, env = Mock(), Mock()
-    role = Depositor(agent, env)
-    return role, env
+    return Depositor(agent, env)
 
 
 # ---------------------------------------------------
@@ -28,23 +25,20 @@ def role_with_env():
 # ----------------------------------------------------
 
 
-def test_find_deposit_banks_from_env(role_with_env, make_dlist):
+def test_find_deposit_banks_from_env(role):
     # Given
-    deposit_bank = Mock()
-    role, env = role_with_env
-    env.find_all_roles.return_value = make_dlist([deposit_bank])
+    env = role.env
 
     # When
     found = role.find_deposit_banks()
 
     # Then
     env.find_all_roles.assert_called_with("deposit_bank")
-    assert list(found) == [deposit_bank]
+    assert found == env.find_all_roles.return_value
 
 
-def test_get_deposit_rate_from_deposit_bank(role_with_env):
+def test_get_deposit_rate_from_deposit_bank(role):
     # Given
-    role, _ = role_with_env
     role.deposit_bank = Mock(deposit_rate=0.01)
 
     # When
@@ -59,9 +53,9 @@ def test_get_deposit_rate_from_deposit_bank(role_with_env):
 # ----------------------------------------------------
 
 
-def test_make_deposits_into_env(role_with_env):
+def test_make_deposits_into_env(role):
     # Given
-    role, env = role_with_env
+    env = role.env
 
     # When
     role.make_deposits(200)
@@ -70,9 +64,9 @@ def test_make_deposits_into_env(role_with_env):
     env.make_deposits.assert_called_with(role, 200)
 
 
-def test_withdraw_deposits_into_env(role_with_env):
+def test_withdraw_deposits_into_env(role):
     # Given
-    role, env = role_with_env
+    env = role.env
 
     # When
     role.withdraw_deposits(200)
@@ -81,9 +75,9 @@ def test_withdraw_deposits_into_env(role_with_env):
     env.withdraw_deposits.assert_called_with(role, 200)
 
 
-def test_choose_bank_into_env(role_with_env):
+def test_choose_bank_into_env(role):
     # Given
-    role, env = role_with_env
+    env = role.env
     role.deposit_bank = None
     deposit_bank = Mock()
 
@@ -94,9 +88,9 @@ def test_choose_bank_into_env(role_with_env):
     env.join_deposit_bank.assert_called_with(role, deposit_bank, 0)
 
 
-def test_choose_bank_with_initial_amount(role_with_env):
+def test_choose_bank_with_initial_amount(role):
     # Given
-    role, env = role_with_env
+    env = role.env
     role.deposit_bank = None
     deposit_bank = Mock()
 
@@ -107,12 +101,12 @@ def test_choose_bank_with_initial_amount(role_with_env):
     env.join_deposit_bank.assert_called_with(role, deposit_bank, 100)
 
 
-def test_choose_bank_to_switch_bank(role_with_env):
+def test_choose_bank_to_switch_bank(role):
     # Given
     old_deposit_bank = Mock()
     new_deposit_bank = Mock()
-    role, env = role_with_env
     role.deposit_bank = old_deposit_bank
+    env = role.env
 
     # When
     role.choose_bank(new_deposit_bank)

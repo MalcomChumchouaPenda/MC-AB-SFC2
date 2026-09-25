@@ -1,5 +1,6 @@
 import pytest
 from unittest.mock import Mock
+from model.base import EcoRole
 from model.roles.deposit_guarantee import DepositGuarantee
 
 # ---------------------------------------------------
@@ -8,19 +9,15 @@ from model.roles.deposit_guarantee import DepositGuarantee
 
 
 def test_is_eco_role():
-    # Given
-    from model.base import EcoRole
-
     # Assert
     assert issubclass(DepositGuarantee, EcoRole)
 
 
 @pytest.fixture
-def role_with_env():
+def role():
     # Given
     agent, env = Mock(), Mock()
-    role = DepositGuarantee(agent, env)
-    return role, env
+    return DepositGuarantee(agent, env)
 
 
 # ---------------------------------------------------
@@ -28,11 +25,11 @@ def role_with_env():
 # ----------------------------------------------------
 
 
-def test_find_defaults_from_env(role_with_env, make_dlist):
+def test_find_defaults_from_env(role, make_dlist):
     # Given
-    role, env = role_with_env
     bad = Mock(defaulted=True, id=1)
     good = Mock(defaulted=False, id=2)
+    env = role.env
     env.find_all_roles.return_value = make_dlist([bad, good])
     env.get_stock = lambda x, y: -100 * y if x == "deposits" else 0
 
@@ -44,19 +41,17 @@ def test_find_defaults_from_env(role_with_env, make_dlist):
     assert found == [{"bank": bad, "amount": -100}]
 
 
-def test_find_deposits_from_env(role_with_env):
+def test_find_deposits_from_env(role):
     # Given
-    role, env = role_with_env
-    deposit = {"depositor": Mock(), "amount": 100}
-    env.find_links.return_value = [deposit]
     bank = Mock()
+    env = role.env
 
     # When
     found = role.find_deposits(bank)
 
     # Then
     env.find_links.assert_called_with(bank, "depositor")
-    assert found == [deposit]
+    assert found == env.find_links.return_value
 
 
 # ---------------------------------------------------
@@ -64,9 +59,9 @@ def test_find_deposits_from_env(role_with_env):
 # ----------------------------------------------------
 
 
-def test_reimburse_deposits_into_env(role_with_env):
+def test_reimburse_deposits_into_env(role):
     # Given
-    role, env = role_with_env
+    env = role.env
     depositor = Mock()
 
     # When

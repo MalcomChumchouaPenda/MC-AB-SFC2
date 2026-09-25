@@ -1,5 +1,6 @@
 import pytest
 from unittest.mock import Mock
+from model.base import EcoRole
 from model.roles.employer import Employer
 
 # ---------------------------------------------------
@@ -8,33 +9,23 @@ from model.roles.employer import Employer
 
 
 def test_is_eco_role():
-    # Given
-    from model.base import EcoRole
-
     # Assert
     assert issubclass(Employer, EcoRole)
 
 
 @pytest.fixture
-def role_with_env():
+def role():
     # Given
     agent, env = Mock(), Mock()
-    role = Employer(agent, env)
-    return role, env
+    return Employer(agent, env)
 
 
-def test_has_wage_prop(role_with_env):
-    # Given
-    role, _ = role_with_env
-
+def test_has_wage_prop(role):
     # Assert
     assert role.wage == 0
 
 
-def test_has_labor_demand_prop(role_with_env):
-    # Given
-    role, _ = role_with_env
-
+def test_has_labor_demand_prop(role):
     # Assert
     assert role.labor_demand == 0
 
@@ -44,9 +35,9 @@ def test_has_labor_demand_prop(role_with_env):
 # ----------------------------------------------------
 
 
-def test_get_unemployment(role_with_env):
+def test_get_unemployment(role):
     # Given
-    role, env = role_with_env
+    env = role.env
     env.unemployment = 0.12
 
     # When
@@ -56,18 +47,16 @@ def test_get_unemployment(role_with_env):
     assert perceived == 0.12
 
 
-def test_get_jobs(role_with_env):
+def test_get_jobs(role):
     # Given
-    role, env = role_with_env
-    job = {"worker": Mock(), "quantity": 0.4, "wage": 10}
-    env.find_links.return_value = [job]
+    env = role.env
 
     # When
     found = role.get_jobs()
 
     # Then
     env.find_links.assert_called_with(role, "worker")
-    assert found == [job]
+    assert found == env.find_links.return_value
 
 
 # ---------------------------------------------------

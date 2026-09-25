@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import Mock
-from agentpy import AgentDList
+from model.base import EcoRole
 from model.roles.citizen import Citizen
 
 # ---------------------------------------------------
@@ -9,25 +9,18 @@ from model.roles.citizen import Citizen
 
 
 def test_is_eco_role():
-    # Given
-    from model.base import EcoRole
-
     # Assert
     assert issubclass(Citizen, EcoRole)
 
 
 @pytest.fixture
-def role_with_env():
+def role():
     # Given
     agent, env = Mock(), Mock()
-    role = Citizen(agent, env)
-    return role, env
+    return Citizen(agent, env)
 
 
-def test_has_residual_equity_prop(role_with_env):
-    # Given
-    role, _ = role_with_env
-
+def test_has_residual_equity_prop(role):
     # Assert
     assert role.resid_equity == 0
 
@@ -37,9 +30,9 @@ def test_has_residual_equity_prop(role_with_env):
 # ----------------------------------------------------
 
 
-def test_get_prob_failure(role_with_env):
+def test_get_prob_failure(role):
     # Given
-    role, env = role_with_env
+    env = role.env
     env.prob_failure = 0.12
 
     # When
@@ -49,12 +42,12 @@ def test_get_prob_failure(role_with_env):
     assert perceived == 0.12
 
 
-def test_find_investors_with_residual_equity(role_with_env, make_dlist):
+def test_find_investors_with_residual_equity(role, make_dlist):
     # Given
-    role, env = role_with_env
     eligible = Mock(resid_equity=10)
     ineligible = Mock(resid_equity=0)
     citizens = make_dlist([eligible, ineligible])
+    env = role.env
     env.find_all_roles = Mock(return_value=citizens)
 
     # When
@@ -65,11 +58,11 @@ def test_find_investors_with_residual_equity(role_with_env, make_dlist):
     assert list(investors) == [eligible]
 
 
-def test_find_investors_excludes_initiator(role_with_env, make_dlist):
+def test_find_investors_excludes_initiator(role, make_dlist):
     # Given
-    role, env = role_with_env
     eligible = Mock(resid_equity=10)
     citizens = make_dlist([eligible, role])
+    env = role.env
     env.find_all_roles = Mock(return_value=citizens)
 
     # When
@@ -79,9 +72,9 @@ def test_find_investors_excludes_initiator(role_with_env, make_dlist):
     assert list(investors) == [eligible]
 
 
-def test_get_bank_number_ratio_from_env(role_with_env):
+def test_get_bank_number_ratio_from_env(role):
     # Given
-    role, env = role_with_env
+    env = role.env
     env.calc_bank_number_ratio.return_value = 0.5
 
     # When
@@ -91,9 +84,9 @@ def test_get_bank_number_ratio_from_env(role_with_env):
     assert ratio == 0.5
 
 
-def test_get_bank_equity_ratio_from_env(role_with_env):
+def test_get_bank_equity_ratio_from_env(role):
     # Given
-    role, env = role_with_env
+    env = role.env
     env.calc_bank_equity_ratio.return_value = 0.6
 
     # When
@@ -103,9 +96,9 @@ def test_get_bank_equity_ratio_from_env(role_with_env):
     assert ratio == 0.6
 
 
-def test_get_sector_equity_range_from_env(role_with_env):
+def test_get_sector_equity_range_from_env(role):
     # Given
-    role, env = role_with_env
+    env = role.env
     env.calc_sector_equity_range.return_value = (100, 200)
 
     # When
@@ -115,9 +108,9 @@ def test_get_sector_equity_range_from_env(role_with_env):
     assert range_ == (100, 200)
 
 
-def test_get_tax_rate(role_with_env):
+def test_get_tax_rate(role):
     # Given
-    role, env = role_with_env
+    env = role.env
     env.fiscal_authority.tax_rate = 0.2
 
     # When
@@ -133,9 +126,9 @@ def test_get_tax_rate(role_with_env):
 
 
 @pytest.mark.parametrize("tradable", [True, False])
-def test_create_firm_uses_env_method(role_with_env, tradable):
+def test_create_firm_uses_env_method(role, tradable):
     # Given
-    role, env = role_with_env
+    env = role.env
     firm, share = Mock(), Mock()
 
     # When
@@ -145,9 +138,9 @@ def test_create_firm_uses_env_method(role_with_env, tradable):
     env.create_firm.assert_called_with(firm, [share], tradable)
 
 
-def test_create_bank_uses_env_method(role_with_env):
+def test_create_bank_uses_env_method(role):
     # Given
-    role, env = role_with_env
+    env = role.env
     bank, share = Mock(), Mock()
 
     # When
@@ -157,9 +150,9 @@ def test_create_bank_uses_env_method(role_with_env):
     env.create_bank.assert_called_with(bank, [share])
 
 
-def test_pay_taxes_uses_env_method(role_with_env):
+def test_pay_taxes_uses_env_method(role):
     # Given
-    role, env = role_with_env
+    env = role.env
 
     # When
     role.pay_taxes(100)

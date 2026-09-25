@@ -1,5 +1,6 @@
 import pytest
 from unittest.mock import Mock
+from model.base import EcoRole
 from model.roles.monetary_authority import MonetaryAuthority
 
 # ---------------------------------------------------
@@ -8,25 +9,18 @@ from model.roles.monetary_authority import MonetaryAuthority
 
 
 def test_is_eco_role():
-    # Given
-    from model.base import EcoRole
-
     # Assert
     assert issubclass(MonetaryAuthority, EcoRole)
 
 
 @pytest.fixture
-def role_with_env():
+def role():
     # Given
     agent, env = Mock(), Mock()
-    role = MonetaryAuthority(agent, env)
-    return role, env
+    return MonetaryAuthority(agent, env)
 
 
-def test_has_discount_rate_prop(role_with_env):
-    # Given
-    role, _ = role_with_env
-
+def test_has_discount_rate_prop(role):
     # Assert
     assert role.discount_rate == 0.0
 
@@ -41,17 +35,9 @@ def test_has_discount_rate_prop(role_with_env):
 # ----------------------------------------------------
 
 
-@pytest.fixture
-def role_with_env():
+def test_transfer_profits_with_env(role):
     # Given
-    agent, env = Mock(), Mock()
-    role = MonetaryAuthority(agent, env)
-    return role, env
-
-
-def test_transfer_profits_with_env(role_with_env):
-    # Given
-    role, env = role_with_env
+    env = role.env
 
     # When
     role.transfer_profit(200)

@@ -1,5 +1,6 @@
 import pytest
 from unittest.mock import Mock
+from model.base import EcoRole
 from model.roles.producer import Producer
 
 # ---------------------------------------------------
@@ -8,54 +9,41 @@ from model.roles.producer import Producer
 
 
 def test_is_eco_role():
-    # Given
-    from model.base import EcoRole
-
     # Assert
     assert issubclass(Producer, EcoRole)
 
 
 @pytest.fixture
-def role_with_env():
+def role():
     # Given
     agent, env = Mock(), Mock()
-    role = Producer(agent, env)
-    return role, env
+    return Producer(agent, env)
 
 
-def test_has_price_attr(role_with_env):
-    # Given
-    role, _ = role_with_env
-
+def test_has_price_attr(role):
     # Assert
     assert role.price == 0
 
 
-def test_has_productivity_attr(role_with_env):
-    # Given
-    role, _ = role_with_env
-
+def test_has_productivity_attr(role):
     # Assert
     assert role.productivity == 0
 
 
-def test_has_inventories_attr(role_with_env):
-    # Given
-    role, _ = role_with_env
-
+def test_has_inventories_attr(role):
     # Assert
     assert role.inventories == 0
 
 
-def test_expose_variety_attr(role_with_env):
+def test_expose_variety_attr(role):
     # Given
-    role, _ = role_with_env
+    role.agent.variety = 0.5
 
     # When
-    role.agent = Mock(variety=0.5)
+    exposed = role.variety
 
-    # Assert
-    assert role.variety == 0.5
+    # Then
+    assert exposed == 0.5
 
 
 # ---------------------------------------------------
@@ -63,9 +51,9 @@ def test_expose_variety_attr(role_with_env):
 # ----------------------------------------------------
 
 
-def test_get_average_price(role_with_env):
+def test_get_average_price(role):
     # Given
-    role, env = role_with_env
+    env = role.env
     env.average_price = 15
 
     # When
@@ -75,9 +63,9 @@ def test_get_average_price(role_with_env):
     assert average_price == 15
 
 
-def test_get_average_productivity(role_with_env):
+def test_get_average_productivity(role):
     # Given
-    role, env = role_with_env
+    env = role.env
     env.average_prod = 2.5
 
     # When
@@ -92,9 +80,8 @@ def test_get_average_productivity(role_with_env):
 # ----------------------------------------------------
 
 
-def test_get_produce_goods_increases_inventories(role_with_env):
+def test_get_produce_goods_increases_inventories(role):
     # Given
-    role, _ = role_with_env
     role.productivity = 2.0
     role.inventories = 5.0
 

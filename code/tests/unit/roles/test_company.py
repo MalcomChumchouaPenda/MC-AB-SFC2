@@ -1,5 +1,6 @@
 import pytest
 from unittest.mock import Mock
+from model.base import EcoRole
 from model.roles.company import Company
 
 # ---------------------------------------------------
@@ -8,41 +9,28 @@ from model.roles.company import Company
 
 
 def test_is_eco_role():
-    # Given
-    from model.base import EcoRole
-
     # Assert
     assert issubclass(Company, EcoRole)
 
 
 @pytest.fixture
-def role_with_env():
+def role():
     # Given
     agent, env = Mock(), Mock()
-    role = Company(agent, env)
-    return role, env
+    return Company(agent, env)
 
 
-def test_has_sector(role_with_env):
-    # Given
-    role, _ = role_with_env
-
+def test_has_sector(role):
     # Assert
     assert role.sector == ""
 
 
-def test_has_net_worth(role_with_env):
-    # Given
-    role, _ = role_with_env
-
+def test_has_net_worth(role):
     # Assert
     assert role.net_worth == 0
 
 
-def test_has_defaulted(role_with_env):
-    # Given
-    role, _ = role_with_env
-
+def test_has_defaulted(role):
     # Assert
     assert role.defaulted is False
 
@@ -52,9 +40,9 @@ def test_has_defaulted(role_with_env):
 # ----------------------------------------------------
 
 
-def test_get_average_wage(role_with_env):
+def test_get_average_wage(role):
     # Given
-    role, env = role_with_env
+    env = role.env
     env.average_wage = 15.0
 
     # When
@@ -64,23 +52,21 @@ def test_get_average_wage(role_with_env):
     assert perceived == 15.0
 
 
-def test_get_equity_shares_from_env(role_with_env):
+def test_get_equity_shares_from_env(role):
     # Given
-    role, env = role_with_env
-    share = {"founder": Mock(), "value": 60}
-    env.find_links = Mock(return_value=[share])
+    env = role.env
 
     # When
     found = role.get_equity_shares()
 
     # Assert
     env.find_links.assert_called_with(role, "founder")
-    assert found == [share]
+    assert found == env.find_links.return_value
 
 
-def test_get_tax_rate(role_with_env):
+def test_get_tax_rate(role):
     # Given
-    role, env = role_with_env
+    env = role.env
     env.fiscal_authority.tax_rate = 0.2
 
     # When
@@ -90,9 +76,9 @@ def test_get_tax_rate(role_with_env):
     assert perceived == 0.2
 
 
-def test_get_discount_rate(role_with_env):
+def test_get_discount_rate(role):
     # Given
-    role, env = role_with_env
+    env = role.env
     env.monetary_authority.discount_rate = 0.05
 
     # When
@@ -107,9 +93,9 @@ def test_get_discount_rate(role_with_env):
 # ----------------------------------------------------
 
 
-def test_pay_dividends(role_with_env):
+def test_pay_dividends(role):
     # Given
-    role, env = role_with_env
+    env = role.env
     founder = Mock()
 
     # When
@@ -119,9 +105,9 @@ def test_pay_dividends(role_with_env):
     env.pay_dividends.assert_called_with(role, founder, 50)
 
 
-def test_pay_taxes_uses_env_method(role_with_env):
+def test_pay_taxes_uses_env_method(role):
     # Given
-    role, env = role_with_env
+    env = role.env
 
     # When
     role.pay_taxes(50)
@@ -130,9 +116,9 @@ def test_pay_taxes_uses_env_method(role_with_env):
     env.pay_taxes.assert_called_with(role, 50)
 
 
-def test_update_equity_share_uses_env_method(role_with_env):
+def test_update_equity_share_uses_env_method(role):
     # Given
-    role, env = role_with_env
+    env = role.env
     founder = Mock()
 
     # When
@@ -142,9 +128,9 @@ def test_update_equity_share_uses_env_method(role_with_env):
     env.update_equity_share.assert_called_with(role, founder, -50)
 
 
-def test_transfer_residual_cash_uses_env_method(role_with_env):
+def test_transfer_residual_cash_uses_env_method(role):
     # Given
-    role, env = role_with_env
+    env = role.env
     founder = Mock()
 
     # When

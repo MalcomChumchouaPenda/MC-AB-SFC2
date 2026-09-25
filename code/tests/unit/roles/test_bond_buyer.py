@@ -1,5 +1,6 @@
 import pytest
 from unittest.mock import Mock
+from model.base import EcoRole
 from model.roles.bond_buyer import BondBuyer
 
 # ---------------------------------------------------
@@ -8,19 +9,15 @@ from model.roles.bond_buyer import BondBuyer
 
 
 def test_is_eco_role():
-    # Given
-    from model.base import EcoRole
-
     # Assert
     assert issubclass(BondBuyer, EcoRole)
 
 
 @pytest.fixture
-def role_with_env():
+def role():
     # Given
     agent, env = Mock(), Mock()
-    role = BondBuyer(agent, env)
-    return role, env
+    return BondBuyer(agent, env)
 
 
 # ---------------------------------------------------
@@ -28,12 +25,12 @@ def role_with_env():
 # ----------------------------------------------------
 
 
-def test_find_issuers_with_positive_bond_number(role_with_env, make_dlist):
+def test_find_issuers_with_positive_bond_number(role, make_dlist):
     # Given
-    role, env = role_with_env
     eligible = Mock(bond_number=1)
     ineligible = Mock(bond_number=0)
     issuers = make_dlist([eligible, ineligible])
+    env = role.env
     env.find_all_roles = Mock(return_value=issuers)
 
     # When
@@ -49,10 +46,10 @@ def test_find_issuers_with_positive_bond_number(role_with_env, make_dlist):
 # ----------------------------------------------------
 
 
-def test_buy_bonds(role_with_env):
+def test_buy_bonds(role):
     # Given
     issuer = Mock()
-    role, env = role_with_env
+    env = role.env
 
     # When
     role.buy_bonds(issuer, 2)

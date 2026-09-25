@@ -1,5 +1,6 @@
 import pytest
 from unittest.mock import Mock
+from model.base import EcoRole
 from model.roles.deposit_bank import DepositBank
 
 # ---------------------------------------------------
@@ -8,25 +9,18 @@ from model.roles.deposit_bank import DepositBank
 
 
 def test_is_eco_role():
-    # Given
-    from model.base import EcoRole
-
     # Assert
     assert issubclass(DepositBank, EcoRole)
 
 
 @pytest.fixture
-def role_with_env():
+def role():
     # Given
     agent, env = Mock(), Mock()
-    role = DepositBank(agent, env)
-    return role, env
+    return DepositBank(agent, env)
 
 
-def test_has_defaulted(role_with_env):
-    # Given
-    role, _ = role_with_env
-
+def test_has_defaulted(role):
     # Assert
     assert role.defaulted is False
 
@@ -36,18 +30,16 @@ def test_has_defaulted(role_with_env):
 # ----------------------------------------------------
 
 
-def test_find_deposits_from_env(role_with_env):
+def test_find_deposits_from_env(role):
     # Given
-    role, env = role_with_env
-    deposit = {"depositor": Mock(), "amount": 100}
-    env.find_links.return_value = [deposit]
+    env = role.env
 
     # When
     found = role.find_deposits()
 
     # Then
     env.find_links.assert_called_with(role, "depositor")
-    assert found == [deposit]
+    assert found == env.find_links.return_value
 
 
 # ---------------------------------------------------
@@ -55,9 +47,9 @@ def test_find_deposits_from_env(role_with_env):
 # ----------------------------------------------------
 
 
-def test_pay_interests_into_env(role_with_env):
+def test_pay_interests_into_env(role):
     # Given
-    role, env = role_with_env
+    env = role.env
     depositor = Mock()
 
     # When

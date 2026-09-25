@@ -1,5 +1,6 @@
 import pytest
 from unittest.mock import Mock
+from model.base import EcoRole
 from model.roles.fiscal_authority import FiscalAuthority
 
 # ---------------------------------------------------
@@ -8,32 +9,26 @@ from model.roles.fiscal_authority import FiscalAuthority
 
 
 def test_is_eco_role():
-    # Given
-    from model.base import EcoRole
-
     # Assert
     assert issubclass(FiscalAuthority, EcoRole)
 
 
 @pytest.fixture
-def role_with_env():
+def role():
     # Given
     agent, env = Mock(), Mock()
-    role = FiscalAuthority(agent, env)
-    return role, env
+    return FiscalAuthority(agent, env)
 
 
-def test_expose_tax_rate_from_agent(role_with_env):
+def test_expose_tax_rate_from_agent(role):
     # Given
-    agent = Mock()
-    role, _ = role_with_env
-    role.agent = agent
+    role.agent.tax_rate = 0.02
 
     # When
-    agent.tax_rate = 0.02
+    exposed = role.tax_rate
 
     # Then
-    assert role.tax_rate == 0.02
+    assert exposed == 0.02
 
 
 # ---------------------------------------------------
@@ -41,9 +36,9 @@ def test_expose_tax_rate_from_agent(role_with_env):
 # ----------------------------------------------------
 
 
-def test_get_gdp_from_env(role_with_env):
+def test_get_gdp_from_env(role):
     # Given
-    role, env = role_with_env
+    env = role.env
     env.gdp = 500
 
     # When
@@ -54,12 +49,11 @@ def test_get_gdp_from_env(role_with_env):
 
 
 @pytest.fixture
-def role_with_good_market(role_with_env):
+def role_with_good_market(role):
     # Given
     market = Mock()
-    env = Mock(spaces={"good_market": market})
-    role, _ = role_with_env
-    role.env = env
+    env = role.env
+    env.spaces = {"good_market": market}
     return role, market
 
 
@@ -87,18 +81,16 @@ def test_get_average_productivity_from_env(role_with_good_market):
     assert perceived == 1.0
 
 
-def test_find_citizens_from_env(role_with_env, make_dlist):
+def test_find_citizens_from_env(role):
     # Given
-    role, env = role_with_env
-    citizens = make_dlist([Mock() for _ in range(5)])
-    env.find_all_roles = Mock(return_value=citizens)
+    env = role.env
 
     # When
     perceived = role.find_citizens()
 
     # Then
     env.find_all_roles.assert_called_with("citizen")
-    assert list(perceived) == list(citizens)
+    assert perceived == env.find_all_roles.return_value
 
 
 # ---------------------------------------------------
@@ -106,10 +98,10 @@ def test_find_citizens_from_env(role_with_env, make_dlist):
 # ----------------------------------------------------
 
 
-def test_pay_public_transfers_from_env(role_with_env):
+def test_pay_public_transfers_from_env(role):
     # Given
     citizen = Mock()
-    role, env = role_with_env
+    env = role.env
 
     # When
     role.pay_public_transfers(citizen, 100)

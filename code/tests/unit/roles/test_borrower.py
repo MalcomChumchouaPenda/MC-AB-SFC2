@@ -1,5 +1,6 @@
 import pytest
 from unittest.mock import Mock
+from model.base import EcoRole
 from model.roles.borrower import Borrower
 
 # ---------------------------------------------------
@@ -8,33 +9,23 @@ from model.roles.borrower import Borrower
 
 
 def test_is_eco_role():
-    # Given
-    from model.base import EcoRole
-
     # Assert
     assert issubclass(Borrower, EcoRole)
 
 
 @pytest.fixture
-def role_with_env():
+def role():
     # Given
     agent, env = Mock(), Mock()
-    role = Borrower(agent, env)
-    return role, env
+    return Borrower(agent, env)
 
 
-def test_has_default_loan_demand(role_with_env):
-    # Given
-    role, _ = role_with_env
-
+def test_has_default_loan_demand(role):
     # Assert
     assert role.loan_demand == 0.0
 
 
-def test_has_default_net_worth(role_with_env):
-    # Given
-    role, _ = role_with_env
-
+def test_has_default_net_worth(role):
     # Assert
     assert role.net_worth == 0.0
 
@@ -44,10 +35,10 @@ def test_has_default_net_worth(role_with_env):
 # ----------------------------------------------------
 
 
-def test_find_lenders(role_with_env, make_dlist):
+def test_find_lenders(role, make_dlist):
     # Given
     lender = Mock()
-    role, env = role_with_env
+    env = role.env
     env.find_all_roles.return_value = make_dlist([lender])
 
     # When
@@ -58,10 +49,10 @@ def test_find_lenders(role_with_env, make_dlist):
     assert list(result) == [lender]
 
 
-def test_find_loans(role_with_env):
+def test_find_loans(role):
     # Given
-    role, env = role_with_env
-    loan = {"lender": Mock(), "amount": 100, "rate": 0.01}
+    loan = Mock()
+    env = role.env
     env.find_links.return_value = [loan]
 
     # When
@@ -77,10 +68,9 @@ def test_find_loans(role_with_env):
 # ----------------------------------------------------
 
 
-def test_request_loans_use_lender_method(role_with_env):
+def test_request_loans_use_lender_method(role):
     # Given
     lender = Mock()
-    role, _ = role_with_env
 
     # When
     role.request_loans(lender)
@@ -89,10 +79,10 @@ def test_request_loans_use_lender_method(role_with_env):
     lender.receive_request.assert_called_with(role)
 
 
-def test_repay_loans_use_env_method(role_with_env):
+def test_repay_loans_use_env_method(role):
     # Given
     lender = Mock()
-    role, env = role_with_env
+    env = role.env
 
     # When
     role.repay_loans(lender, 100, 10)
@@ -101,10 +91,10 @@ def test_repay_loans_use_env_method(role_with_env):
     env.repay_loans.assert_called_with(role, lender, 100, 10)
 
 
-def test_make_defaults_use_env_method(role_with_env):
+def test_make_defaults_use_env_method(role):
     # Given
     lender = Mock()
-    role, env = role_with_env
+    env = role.env
 
     # When
     role.make_defaults(lender, 100)

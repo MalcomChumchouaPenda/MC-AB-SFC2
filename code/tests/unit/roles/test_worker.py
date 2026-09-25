@@ -1,5 +1,6 @@
 import pytest
 from unittest.mock import Mock
+from model.base import EcoRole
 from model.roles.worker import Worker
 
 # ---------------------------------------------------
@@ -8,25 +9,18 @@ from model.roles.worker import Worker
 
 
 def test_is_eco_role():
-    # Given
-    from model.base import EcoRole
-
     # Assert
     assert issubclass(Worker, EcoRole)
 
 
 @pytest.fixture
-def role_with_env():
+def role():
     # Given
     agent, env = Mock(), Mock()
-    role = Worker(agent, env)
-    return role, env
+    return Worker(agent, env)
 
 
-def test_has_unit_labor_supply_prop(role_with_env):
-    # Given
-    role, _ = role_with_env
-
+def test_has_unit_labor_supply_prop(role):
     # Assert
     assert role.labor_supply == 1.0
 
@@ -36,9 +30,8 @@ def test_has_unit_labor_supply_prop(role_with_env):
 # ----------------------------------------------------
 
 
-def test_get_labor_sold(role_with_env):
+def test_get_labor_sold(role):
     # Given
-    role, _ = role_with_env
     role.labor_supply = 0.6
 
     # When
@@ -48,9 +41,9 @@ def test_get_labor_sold(role_with_env):
     assert result == 0.4
 
 
-def test_get_unemployment(role_with_env):
+def test_get_unemployment(role):
     # Given
-    role, env = role_with_env
+    env = role.env
     env.unemployment = 0.12
 
     # When
@@ -60,11 +53,10 @@ def test_get_unemployment(role_with_env):
     assert perceived == 0.12
 
 
-def test_find_employers_get_random_founders(role_with_env, make_dlist):
+def test_find_employers_get_random_founders(role):
     # Given
-    employers = [Mock() for _ in range(5)]
-    employers = make_dlist(employers)
-    role, env = role_with_env
+    employers = Mock()
+    env = role.env
     env.find_random_roles.return_value = employers
 
     # When
@@ -80,10 +72,10 @@ def test_find_employers_get_random_founders(role_with_env, make_dlist):
 # ----------------------------------------------------
 
 
-def test_accept_job_uses_hire_method(role_with_env):
+def test_accept_job_uses_hire_method(role):
     # Given
     employer = Mock()
-    role, env = role_with_env
+    env = role.env
 
     # When
     role.accept_job(employer, 0.5)

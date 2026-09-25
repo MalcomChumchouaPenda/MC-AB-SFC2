@@ -1,5 +1,6 @@
 import pytest
 from unittest.mock import Mock
+from model.base import EcoRole
 from model.roles.consumer import Consumer
 
 # ---------------------------------------------------
@@ -8,30 +9,26 @@ from model.roles.consumer import Consumer
 
 
 def test_is_eco_role():
-    # Given
-    from model.base import EcoRole
-
     # Assert
     assert issubclass(Consumer, EcoRole)
 
 
 @pytest.fixture
-def role_with_env():
+def role():
     # Given
     agent, env = Mock(), Mock()
-    role = Consumer(agent, env)
-    return role, env
+    return Consumer(agent, env)
 
 
-def test_expose_preference_attr(role_with_env):
+def test_expose_preference_attr(role):
     # Given
-    role, _ = role_with_env
+    role.agent.preference = 0.1
 
     # When
-    role.agent = Mock(preference=0.1)
+    exposed = role.preference
 
     # Then
-    assert role.preference == 0.1
+    assert exposed == 0.1
 
 
 # ---------------------------------------------------
@@ -39,9 +36,9 @@ def test_expose_preference_attr(role_with_env):
 # ----------------------------------------------------
 
 
-def test_get_average_price(role_with_env):
+def test_get_average_price(role):
     # Given
-    role, env = role_with_env
+    env = role.env
     env.average_price = 25
 
     # When
@@ -51,19 +48,16 @@ def test_get_average_price(role_with_env):
     assert average_price == 25
 
 
-def test_find_suppliers_get_random_founders(role_with_env, make_dlist):
+def test_find_suppliers_get_random_founders(role):
     # Given
-    suppliers = [Mock() for _ in range(2)]
-    suppliers = make_dlist(suppliers)
-    role, env = role_with_env
-    env.find_random_roles.return_value = suppliers
+    env = role.env
 
     # When
     found = role.find_suppliers(5)
 
     # Then
     env.find_random_roles.assert_called_with("producer", 5)
-    assert found == suppliers
+    assert found == env.find_random_roles.return_value
 
 
 # ---------------------------------------------------
@@ -71,10 +65,10 @@ def test_find_suppliers_get_random_founders(role_with_env, make_dlist):
 # ----------------------------------------------------
 
 
-def test_buy_goods_uses_env_method(role_with_env):
+def test_buy_goods_uses_env_method(role):
     # Given
     supplier = Mock()
-    role, env = role_with_env
+    env = role.env
 
     # When
     role.buy_goods(supplier, 10)
