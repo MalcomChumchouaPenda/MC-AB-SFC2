@@ -15,16 +15,8 @@ class BondMarket(EcoSpace):
         return self.add_role(BondBuyer, agent, "bond_buyer")
 
     #
-    # Bonds matching
+    # Bonds transactions
     #
-
-    def find_issuers(self):
-        issuers = self.find_all_roles("bond_issuer")
-        return issuers.select(issuers.bond_number > 0)
-
-    def find_bonds(self, issuer):
-        edges = self.graph.edges(issuer, data=True)
-        return [dict(buyer=buyer, **data) for _, buyer, data in edges]
 
     def buy_bonds(self, buyer, issuer, number):
         amount = issuer.bond_value * number

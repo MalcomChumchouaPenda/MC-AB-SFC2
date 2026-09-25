@@ -67,40 +67,6 @@ def test_add_issuer_add_appropriate_role(market_without_roles):
 
 
 # ---------------------------------------------------
-# BONDS MATCHING
-# ----------------------------------------------------
-
-
-def test_find_issuers_return_issuer_with_bonds(market, make_dlist):
-    # Given
-    eligible = Mock(bond_number=1)
-    ineligible = Mock(bond_number=0)
-    issuers = make_dlist([eligible, ineligible])
-    market.find_all_roles = Mock(return_value=issuers)
-
-    # When
-    found = market.find_issuers()
-
-    # Then
-    market.find_all_roles.assert_called_with("bond_issuer")
-    assert all(role in found for role in [eligible])
-
-
-def test_find_bonds_returns_bonds_edge(market):
-    # Given
-    issuer, buyer, other = Mock(), Mock(), Mock()
-    graph = market.graph
-    graph.add_edge(issuer, buyer, amount=100)
-    graph.add_edge(other, buyer, amount=200)
-
-    # When
-    result = market.find_bonds(issuer)
-
-    # Then
-    assert result == [{"buyer": buyer, "amount": 100}]
-
-
-# ---------------------------------------------------
 # BONDS TRANSACTION
 # ----------------------------------------------------
 

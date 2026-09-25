@@ -13,7 +13,7 @@ class BondIssuer(EcoRole):
     # Perceptions
     #
     def find_bonds(self):
-        return self.env.find_bonds(self)
+        return self.env.find_links(self, neighbor_name="buyer")
 
     def get_discount_rate(self):
         return self.env.discount_rate

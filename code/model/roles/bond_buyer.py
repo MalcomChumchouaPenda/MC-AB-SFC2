@@ -7,7 +7,8 @@ class BondBuyer(EcoRole):
     # Perceptions
     #
     def find_issuers(self):
-        return self.env.find_issuers()
+        issuers = self.env.find_all_roles("bond_issuer")
+        return issuers.select(issuers.bond_number > 0)
 
     #
     #   Actions

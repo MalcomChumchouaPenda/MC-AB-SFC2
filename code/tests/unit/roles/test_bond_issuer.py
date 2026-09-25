@@ -64,16 +64,18 @@ def test_get_discount_rate(role_with_env):
     assert result == 0.05
 
 
-def test_find_bonds(role_with_env):
+def test_find_bonds_returns_buyer_and_amount(role_with_env):
     # Given
+    bond_item = {"buyer": Mock(), "amount": 100}
     role, env = role_with_env
+    env.find_links.return_value = [bond_item]
 
     # When
     result = role.find_bonds()
 
     # Then
-    env.find_bonds.assert_called_once_with(role)
-    assert result == env.find_bonds.return_value
+    env.find_links.assert_called_with(role, neighbor_name="buyer")
+    assert result == [bond_item]
 
 
 # ---------------------------------------------------

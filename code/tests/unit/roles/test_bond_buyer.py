@@ -28,16 +28,19 @@ def role_with_env():
 # ----------------------------------------------------
 
 
-def test_find_issuers(role_with_env):
+def test_find_issuers_with_positive_bond_number(role_with_env, make_dlist):
     # Given
+    issuers = [Mock(bond_number=i) for i in range(2)]
+    issuers = make_dlist(issuers)
     role, env = role_with_env
+    env.find_all_roles = Mock(return_value=issuers)
 
     # When
     result = role.find_issuers()
 
     # Then
-    env.find_issuers.assert_called_once_with()
-    assert result == env.find_issuers.return_value
+    env.find_all_roles.assert_called_with("bond_issuer")
+    assert list(result) == [issuers[1]]
 
 
 # ---------------------------------------------------
