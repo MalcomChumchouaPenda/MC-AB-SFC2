@@ -9,7 +9,7 @@ from model.base import EcoSpace
 # ----------------------------------------------------
 
 
-def test_is_agentpy_network():
+def test_inherits_from_agentpy_network():
     # Assert
     assert issubclass(EcoSpace, Network)
 

@@ -8,7 +8,7 @@ from model.spaces.credit_market import CreditMarket
 # ----------------------------------------------------
 
 
-def test_is_eco_space():
+def test_inherits_from_eco_space():
     # Assert
     assert issubclass(CreditMarket, EcoSpace)
 

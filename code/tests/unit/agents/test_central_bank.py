@@ -7,7 +7,7 @@ from model.agents.central_bank import CentralBank
 # ----------------------------------------------------
 
 
-def test_is_eco_agent():
+def test_inherits_from_eco_agent():
     # Given
     from model.base import EcoAgent
 

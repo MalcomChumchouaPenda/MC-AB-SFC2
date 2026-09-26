@@ -8,7 +8,7 @@ from model.base import EcoAccount
 # ----------------------------------------------------
 
 
-def test_is_not_agentpy_object():
+def test_doesnt_inherit_from_agentpy_object():
     # Assert
     assert not issubclass(EcoAccount, Object)
 
@@ -63,7 +63,7 @@ def account_with_nothing(monkeypatch):
 @pytest.fixture
 def account_with_stocks(account_with_nothing):
     # Given
-    stocks = {"cash": 0}
+    stocks = {"x": 0}
     account = account_with_nothing
     account.stocks = stocks
     return account, stocks
@@ -74,10 +74,10 @@ def test_incr_stock_increases_amount(account_with_stocks):
     account, stocks = account_with_stocks
 
     # When
-    account.incr_stock("cash", 100)
+    account.incr_stock("x", 100)
 
     # Then
-    assert stocks["cash"] == 100
+    assert stocks["x"] == 100
 
 
 def test_decr_stock_decreases_amount(account_with_stocks):
@@ -85,10 +85,10 @@ def test_decr_stock_decreases_amount(account_with_stocks):
     account, stocks = account_with_stocks
 
     # When
-    account.decr_stock("cash", 100)
+    account.decr_stock("x", 100)
 
     # Then
-    assert stocks["cash"] == -100
+    assert stocks["x"] == -100
 
 
 # ---------------------------------------------------
@@ -99,7 +99,7 @@ def test_decr_stock_decreases_amount(account_with_stocks):
 @pytest.fixture
 def account_with_flows(account_with_nothing):
     # Given
-    flows = {"consumption": 0}
+    flows = {"a": 0}
     account = account_with_nothing
     account.flows = flows
     return account, flows
@@ -110,10 +110,10 @@ def test_incr_flow_increases_amount(account_with_flows):
     account, flows = account_with_flows
 
     # When
-    account.incr_flow("consumption", 100)
+    account.incr_flow("a", 100)
 
     # Then
-    assert flows["consumption"] == 100
+    assert flows["a"] == 100
 
 
 def test_decr_flow_decreases_amount(account_with_flows):
@@ -121,19 +121,19 @@ def test_decr_flow_decreases_amount(account_with_flows):
     account, flows = account_with_flows
 
     # When
-    account.decr_flow("consumption", 100)
+    account.decr_flow("a", 100)
 
     # Then
-    assert flows["consumption"] == -100
+    assert flows["a"] == -100
 
 
 def test_clear_flows_reset_amount(account_with_flows):
     # Given
     account, flows = account_with_flows
-    flows["consumption"] = 500
+    flows["a"] = 500
 
     # When
     account.clear_flows()
 
     # Then
-    assert flows["consumption"] == 0
+    assert flows["a"] == 0

@@ -8,7 +8,7 @@ from model.roles.deposit_guarantee import DepositGuarantee
 # ----------------------------------------------------
 
 
-def test_is_eco_role():
+def test_inherits_from_eco_role():
     # Assert
     assert issubclass(DepositGuarantee, EcoRole)
 

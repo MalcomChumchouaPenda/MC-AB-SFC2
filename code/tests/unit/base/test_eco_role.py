@@ -8,7 +8,7 @@ from model.base import EcoRole
 # ----------------------------------------------------
 
 
-def test_is_agentpy_agentnode():
+def test_inherits_from_agentpy_agentnode():
     # Assert
     assert issubclass(EcoRole, AgentNode)
 

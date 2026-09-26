@@ -9,7 +9,7 @@ from model.spaces.good_market import GoodsMarket
 # ----------------------------------------------------
 
 
-def test_is_eco_space():
+def test_inherits_from_eco_space():
     # Assert
     assert issubclass(GoodsMarket, EcoSpace)
 

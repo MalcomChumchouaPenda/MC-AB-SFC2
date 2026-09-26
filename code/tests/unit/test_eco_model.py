@@ -3,7 +3,7 @@ import agentpy as ap
 from model.tools import EcoModel
 
 
-def test_is_agentpy_model():
+def test_inherits_from_agentpy_model():
     # Assert
     assert issubclass(EcoModel, ap.Model)
 

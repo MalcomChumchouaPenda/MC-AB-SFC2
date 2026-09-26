@@ -9,7 +9,7 @@ from model.spaces.bond_market import BondMarket
 # ----------------------------------------------------
 
 
-def test_is_agentpy_object():
+def test_inherits_from_agentpy_object():
     # Assert
     assert issubclass(BondMarket, EcoSpace)
 
