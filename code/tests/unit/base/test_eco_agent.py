@@ -2,7 +2,6 @@ import pytest
 from model.base import EcoAgent
 from unittest.mock import Mock
 
-
 # ---------------------------------------------------
 # ARCHITECTURE
 # ----------------------------------------------------

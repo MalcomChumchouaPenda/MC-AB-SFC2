@@ -5,6 +5,7 @@ from model.tools import EcoModel
 # ARCHITECTURE
 # ----------------------------------------------------
 
+
 def test_inherits_from_agentpy_model():
     # Given
     from agentpy import Model
