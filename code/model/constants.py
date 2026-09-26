@@ -1,14 +1,18 @@
-STOCK_NAMES = (
+
+REAL_ASSETS = (
+    "inventories",
+)
+
+FINANCIAL_ASSETS = (
     "deposits",
     "loans",
-    "inventories",
     "bonds",
     "cash",
     "advances",
     "equities",
 )
 
-FLOW_NAMES = (
+TRANSACTIONS = (
     "consumption",
     "wages",
     "public_transfers",

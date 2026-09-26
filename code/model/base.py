@@ -1,6 +1,6 @@
 from collections import defaultdict
 from agentpy import Agent, Network, AgentNode, AgentDList
-from model.constants import STOCK_NAMES, FLOW_NAMES
+from model.constants import FINANCIAL_ASSETS, REAL_ASSETS, TRANSACTIONS
 
 
 class EcoAgent(Agent):
@@ -57,8 +57,8 @@ class EcoAccount:
 
     def __init__(self):
         super().__init__()
-        self.stocks = {name: 0.0 for name in STOCK_NAMES}
-        self.flows = {name: 0.0 for name in FLOW_NAMES}
+        self.stocks = {name: 0.0 for name in FINANCIAL_ASSETS + REAL_ASSETS}
+        self.flows = {name: 0.0 for name in TRANSACTIONS}
 
     #
     # stocks accounting

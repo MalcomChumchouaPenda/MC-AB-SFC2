@@ -19,9 +19,15 @@ def test_inherits_from_agentpy_agentnode():
 
 
 def test_requires_agent_and_env():
-    #  Assert
-    with pytest.raises(TypeError, match="'agent' and 'env'"):
+    # Given
+    required = "'agent' and 'env'"
+
+    #  When
+    with pytest.raises(TypeError) as error:
         EcoRole()
+
+    # Then
+    assert required in str(error)
 
 
 @pytest.fixture

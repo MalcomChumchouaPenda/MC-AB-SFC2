@@ -17,38 +17,30 @@ def test_doesnt_inherit_from_agentpy_object():
     assert not is_derived
 
 
-@pytest.fixture
-def stock_and_flow_names(monkeypatch):
-    # Given
-    stock_names = ["x", "y"]
-    flow_names = ["a", "b"]
-    monkeypatch.setattr("model.base.STOCK_NAMES", stock_names)
-    monkeypatch.setattr("model.base.FLOW_NAMES", flow_names)
-    return stock_names, flow_names
 
-
-def test_creates_default_stocks(stock_and_flow_names):
+def test_creates_default_stocks(fake_model, monkeypatch):
     # Given
-    stock_names, _ = stock_and_flow_names
+    model = fake_model
+    monkeypatch.setattr("model.base.FINANCIAL_ASSETS", ["x", "y"])
+    monkeypatch.setattr("model.base.REAL_ASSETS", ["z"])
 
     # When
     account = EcoAccount()
 
     # Then
-    for name in stock_names:
-        assert account.stocks[name] == 0.0
+    assert account.stocks == {"x":0.0, "y":0.0, "z":0.0}
 
 
-def test_creates_default_flows(stock_and_flow_names):
+def test_creates_default_flows(fake_model, monkeypatch):
     # Given
-    _, flow_names = stock_and_flow_names
+    model = fake_model
+    monkeypatch.setattr("model.base.TRANSACTIONS", ["a", "b"])
 
     # When
     account = EcoAccount()
 
     # Then
-    for name in flow_names:
-        assert account.flows[name] == 0.0
+    assert account.flows == {"a":0.0, "b":0.0}
 
 
 # ---------------------------------------------------
@@ -57,18 +49,18 @@ def test_creates_default_flows(stock_and_flow_names):
 
 
 @pytest.fixture
-def account_with_nothing(monkeypatch):
+def account(monkeypatch):
     # Given
-    monkeypatch.setattr("model.base.STOCK_NAMES", [])
-    monkeypatch.setattr("model.base.FLOW_NAMES", [])
+    monkeypatch.setattr("model.base.FINANCIAL_ASSETS", [])
+    monkeypatch.setattr("model.base.REAL_ASSETS", [])
+    monkeypatch.setattr("model.base.TRANSACTIONS", [])
     return EcoAccount()
 
 
 @pytest.fixture
-def account_with_stocks(account_with_nothing):
+def account_with_stocks(account):
     # Given
-    stocks = {"x": 0}
-    account = account_with_nothing
+    stocks = {"x":0.0}
     account.stocks = stocks
     return account, stocks
 
@@ -101,10 +93,9 @@ def test_decr_stock_decreases_amount(account_with_stocks):
 
 
 @pytest.fixture
-def account_with_flows(account_with_nothing):
+def account_with_flows(account):
     # Given
     flows = {"a": 0}
-    account = account_with_nothing
     account.flows = flows
     return account, flows
 
