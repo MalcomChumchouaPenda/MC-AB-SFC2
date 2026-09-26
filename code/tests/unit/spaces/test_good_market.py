@@ -38,17 +38,17 @@ def market():
     return GoodsMarket(model)
 
 
-def test_initializes_average_price_attr(market):
+def test_initializes_average_price(market):
     # Assert
     assert market.average_price == 0
 
 
-def test_initializes_previous_average_price_attr(market):
+def test_initializes_previous_average_price(market):
     # Assert
     assert market.average_price_prev == 0
 
 
-def test_initializes_average_productivity_attr(market):
+def test_initializes_average_productivity(market):
     # Assert
     assert market.average_prod == 0
 

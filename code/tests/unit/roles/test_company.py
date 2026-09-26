@@ -18,25 +18,37 @@ def test_inherits_from_eco_role():
     assert is_derived
 
 
-@pytest.fixture
-def role():
+
+def test_initializes_sector():
     # Given
     agent, env = Mock(), Mock()
-    return Company(agent, env)
 
+    # When
+    role = Company(agent, env)
 
-def test_initializes_sector(role):
-    # Assert
+    # Then
     assert role.sector == ""
 
 
-def test_initializes_net_worth(role):
-    # Assert
+def test_initializes_net_worth():
+    # Given
+    agent, env = Mock(), Mock()
+
+    # When
+    role = Company(agent, env)
+
+    # Then
     assert role.net_worth == 0
 
 
-def test_initializes_defaulted(role):
-    # Assert
+def test_initializes_defaulted():
+    # Given
+    agent, env = Mock(), Mock()
+
+    # When
+    role = Company(agent, env)
+
+    # Then
     assert role.defaulted is False
 
 
@@ -44,6 +56,12 @@ def test_initializes_defaulted(role):
 #  PERCEPTIONS
 # ----------------------------------------------------
 
+
+@pytest.fixture
+def role():
+    # Given
+    agent, env = Mock(), Mock()
+    return Company(agent, env)
 
 def test_get_average_wage(role):
     # Given

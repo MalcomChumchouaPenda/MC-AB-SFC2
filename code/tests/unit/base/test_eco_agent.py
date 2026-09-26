@@ -26,26 +26,56 @@ def agent():
     return agent
 
 
-def test_initializes_roles_dict(agent):
-    # Assert
+def test_initializes_roles_dict(fake_model):
+    # Given
+    model = fake_model
+
+    # When
+    agent = EcoAgent(model)
+
+    # Then
     assert agent.roles == {}
 
 
-def test_initializes_account_ref(agent):
-    # Assert
+def test_initializes_account(fake_model):
+    # Given
+    model = fake_model
+
+    # When
+    agent = EcoAgent(model)
+
+    # Then
     assert agent.account is None
 
 
-def test_initializes_central_bank_id_ref(agent):
-    # Assert
+def test_initializes_central_bank_id(fake_model):
+    # Given
+    model = fake_model
+
+    # When
+    agent = EcoAgent(model)
+
+    # Then
     assert agent.cb_id is None
 
 
-def test_initializes_deposit_bank_id_ref(agent):
-    # Assert
+def test_initializes_deposit_bank_id(fake_model):
+    # Given
+    model = fake_model
+
+    # When
+    agent = EcoAgent(model)
+
+    # Then
     assert agent.bank_id is None
 
 
-def test_initializes_country_id(agent):
-    # Assert
+def test_initializes_country_id(fake_model):
+    # Given
+    model = fake_model
+
+    # When
+    agent = EcoAgent(model)
+
+    # Then
     assert agent.country_id == 0

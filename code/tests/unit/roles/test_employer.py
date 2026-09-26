@@ -1,6 +1,5 @@
 import pytest
 from unittest.mock import Mock
-from model.base import EcoRole
 from model.roles.employer import Employer
 
 # ---------------------------------------------------
@@ -19,20 +18,25 @@ def test_inherits_from_eco_role():
     assert is_derived
 
 
-@pytest.fixture
-def role():
+def test_initializes_wage():
     # Given
     agent, env = Mock(), Mock()
-    return Employer(agent, env)
 
+    # When
+    role = Employer(agent, env)
 
-def test_initializes_wage(role):
-    # Assert
+    # Then
     assert role.wage == 0
 
 
-def test_initializes_labor_demand(role):
-    # Assert
+def test_initializes_labor_demand():
+    # Given
+    agent, env = Mock(), Mock()
+
+    # When
+    role = Employer(agent, env)
+
+    # Then
     assert role.labor_demand == 0
 
 
@@ -40,6 +44,12 @@ def test_initializes_labor_demand(role):
 # PERCEPTION TESTS
 # ----------------------------------------------------
 
+
+@pytest.fixture
+def role():
+    # Given
+    agent, env = Mock(), Mock()
+    return Employer(agent, env)
 
 def test_get_unemployment(role):
     # Given

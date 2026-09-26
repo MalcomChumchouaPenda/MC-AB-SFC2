@@ -18,9 +18,8 @@ def test_doesnt_inherit_from_agentpy_object():
 
 
 
-def test_creates_default_stocks(fake_model, monkeypatch):
+def test_creates_default_stocks(monkeypatch):
     # Given
-    model = fake_model
     monkeypatch.setattr("model.base.FINANCIAL_ASSETS", ["x", "y"])
     monkeypatch.setattr("model.base.REAL_ASSETS", ["z"])
 
@@ -31,9 +30,8 @@ def test_creates_default_stocks(fake_model, monkeypatch):
     assert account.stocks == {"x":0.0, "y":0.0, "z":0.0}
 
 
-def test_creates_default_flows(fake_model, monkeypatch):
+def test_creates_default_flows(monkeypatch):
     # Given
-    model = fake_model
     monkeypatch.setattr("model.base.TRANSACTIONS", ["a", "b"])
 
     # When

@@ -54,12 +54,12 @@ def test_initializes_tax_rate(country):
     assert country.tax_rate == 0
 
 
-def test_initializes_fiscal_authority_ref(country):
+def test_initializes_fiscal_authority(country):
     # Assert
     assert country.fiscal_authority is None
 
 
-def test_initializes_monetary_authority_ref(country):
+def test_initializes_monetary_authority(country):
     # Assert
     assert country.monetary_authority is None
 

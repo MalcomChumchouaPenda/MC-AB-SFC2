@@ -18,21 +18,27 @@ def test_inherits_from_eco_role():
     assert is_derived
 
 
-@pytest.fixture
-def role():
+def test_initializes_defaulted():
     # Given
     agent, env = Mock(), Mock()
-    return DepositBank(agent, env)
 
+    # When
+    role = DepositBank(agent, env)
 
-def test_initializes_defaulted(role):
-    # Assert
+    # Then
     assert role.defaulted is False
 
 
 # ---------------------------------------------------
 # PERCEPTION TESTS
 # ----------------------------------------------------
+
+
+@pytest.fixture
+def role():
+    # Given
+    agent, env = Mock(), Mock()
+    return DepositBank(agent, env)
 
 
 def test_find_deposits_from_env(role):

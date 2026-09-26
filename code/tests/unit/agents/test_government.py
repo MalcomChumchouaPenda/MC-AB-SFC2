@@ -18,65 +18,117 @@ def test_inherits_from_eco_agent():
     assert is_derived
 
 
-# ---------------------------------------------------
-# DEFAULT STATE
-# ----------------------------------------------------
-@pytest.fixture
-def govt():
+
+def test_initializes_tax_rate(fake_model):
     # Given
-    model = Mock()
+    model = fake_model
+
+    # When
     govt = Government(model)
-    return govt
 
-
-def test_initializes_tax_rate(govt):
-    # Assert
+    # Then
     assert govt.tax_rate == 0
 
 
-def test_initializes_bond_rate(govt):
-    # Assert
+def test_initializes_bond_rate(fake_model):
+    # Given
+    model = fake_model
+
+    # When
+    govt = Government(model)
+
+    # Then
     assert govt.bond_rate == 0
 
 
-def test_initializes_public_spending(govt):
-    # Assert
+def test_initializes_public_spending(fake_model):
+    # Given
+    model = fake_model
+
+    # When
+    govt = Government(model)
+
+    # Then
     assert govt.public_spending == 0
 
 
-def test_initializes_desired_public_spending(govt):
-    # Assert
+def test_initializes_desired_public_spending(fake_model):
+    # Given
+    model = fake_model
+
+    # When
+    govt = Government(model)
+
+    # Then
     assert govt.desired_public_spending == 0
 
 
-def test_initializes_new_public_debt(govt):
-    # Assert
+def test_initializes_new_public_debt(fake_model):
+    # Given
+    model = fake_model
+
+    # When
+    govt = Government(model)
+
+    # Then
     assert govt.new_public_debt == 0
 
 
-def test_initializes_budget_deficit(govt):
-    # Assert
+def test_initializes_budget_deficit(fake_model):
+    # Given
+    model = fake_model
+
+    # When
+    govt = Government(model)
+
+    # Then
     assert govt.budget_deficit == 0
 
 
-def test_initializes_budget_surplus(govt):
-    # Assert
+def test_initializes_budget_surplus(fake_model):
+    # Given
+    model = fake_model
+
+    # When
+    govt = Government(model)
+
+    # Then
     assert govt.budget_surplus == 0
 
 
-def test_initializes_prev_public_spending(govt):
-    # Assert
+def test_initializes_prev_public_spending(fake_model):
+    # Given
+    model = fake_model
+
+    # When
+    govt = Government(model)
+
+    # Then
     assert govt.prev_public_spending == 0
 
 
-def test_initializes_prev_budget_surplus(govt):
-    # Assert
+def test_initializes_prev_budget_surplus(fake_model):
+    # Given
+    model = fake_model
+
+    # When
+    govt = Government(model)
+
+    # Then
     assert govt.prev_budget_surplus == 0
 
 
 # ---------------------------------------------------
 # PUBLIC TRANSFERS
 # ----------------------------------------------------
+
+@pytest.fixture
+def govt(fake_model):
+    # Given
+    model = fake_model
+    model.random = Mock()
+    model.nprandom = Mock()
+    return Government(model)
 
 
 @pytest.fixture

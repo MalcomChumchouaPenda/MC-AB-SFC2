@@ -18,15 +18,15 @@ def test_inherits_from_eco_role():
     assert is_derived
 
 
-@pytest.fixture
-def role():
+
+def test_initializes_unit_labor_supply():
     # Given
     agent, env = Mock(), Mock()
-    return Worker(agent, env)
 
+    # When
+    role = Worker(agent, env)
 
-def test_initializes_unit_labor_supply(role):
-    # Assert
+    # Then
     assert role.labor_supply == 1.0
 
 
@@ -34,6 +34,12 @@ def test_initializes_unit_labor_supply(role):
 # PERCEPTION TESTS
 # ----------------------------------------------------
 
+
+@pytest.fixture
+def role():
+    # Given
+    agent, env = Mock(), Mock()
+    return Worker(agent, env)
 
 def test_get_labor_sold(role):
     # Given

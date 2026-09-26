@@ -186,7 +186,7 @@ def test_leave_deposit_bank_updates_accounts(market_with_depositor_amount):
     transfer_stock.assert_any_call("deposits", depositor.id, bank_id, amount)
 
 
-def test_leave_deposit_bank_change_bank_id_ref(market_with_depositor_amount):
+def test_leave_deposit_bank_change_bank_id(market_with_depositor_amount):
     # Given
     market, depositor, _ = market_with_depositor_amount
 

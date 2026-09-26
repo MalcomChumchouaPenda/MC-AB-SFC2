@@ -18,15 +18,14 @@ def test_inherits_from_eco_role():
     assert is_derived
 
 
-@pytest.fixture
-def role():
+def test_initializes_discount_rate():
     # Given
     agent, env = Mock(), Mock()
-    return MonetaryAuthority(agent, env)
 
+    # When
+    role = MonetaryAuthority(agent, env)
 
-def test_initializes_discount_rate(role):
-    # Assert
+    # Then
     assert role.discount_rate == 0.0
 
 
@@ -39,6 +38,14 @@ def test_initializes_discount_rate(role):
 # ACTIONS TESTS
 # ----------------------------------------------------
 
+
+
+
+@pytest.fixture
+def role():
+    # Given
+    agent, env = Mock(), Mock()
+    return MonetaryAuthority(agent, env)
 
 def test_transfer_profits_with_env(role):
     # Given

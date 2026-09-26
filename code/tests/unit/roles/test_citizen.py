@@ -18,15 +18,14 @@ def test_inherits_from_eco_role():
     assert is_derived
 
 
-@pytest.fixture
-def role():
+def test_initializes_residual_equity():
     # Given
     agent, env = Mock(), Mock()
-    return Citizen(agent, env)
 
+    # When
+    role = Citizen(agent, env)
 
-def test_initializes_residual_equity(role):
-    # Assert
+    # Then
     assert role.resid_equity == 0
 
 
@@ -34,6 +33,13 @@ def test_initializes_residual_equity(role):
 # PERCEPTION TESTS
 # ----------------------------------------------------
 
+
+
+@pytest.fixture
+def role():
+    # Given
+    agent, env = Mock(), Mock()
+    return Citizen(agent, env)
 
 def test_get_prob_failure(role):
     # Given

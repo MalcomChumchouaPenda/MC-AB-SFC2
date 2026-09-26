@@ -18,19 +18,14 @@ def test_inherits_from_eco_agent():
     assert is_derived
 
 
-# ---------------------------------------------------
-# DEFAULT STATE
-# ----------------------------------------------------
-@pytest.fixture
-def cb():
+def test_initializes_previous_discount_rate(fake_model):
     # Given
-    model = Mock()
+    model = fake_model
+
+    # When
     cb = CentralBank(model)
-    return cb
 
-
-def test_initializes_previous_discount_rate(cb):
-    # Assert
+    # Then
     assert cb.prev_discount_rate == 0
 
 
@@ -40,9 +35,10 @@ def test_initializes_previous_discount_rate(cb):
 
 
 @pytest.fixture
-def cb_as_bond_buyer(cb):
+def cb_as_bond_buyer(fake_model):
     # Given
     role = Mock()
+    cb = CentralBank(fake_model)
     cb.roles = {"bond_buyer": role}
     cb.country_id = 1
     return cb, role
@@ -80,10 +76,11 @@ def test_dont_buy_foreign_bonds(cb_as_bond_buyer):
 
 
 @pytest.fixture
-def cb_with_roles_and_account(cb):
+def cb_with_roles_and_account(fake_model):
     # Given
     roles = {}
     account = Mock(stocks={}, flows={})
+    cb = CentralBank(fake_model)
     cb.account = account
     cb.roles = roles
     return cb, roles, account

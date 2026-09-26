@@ -30,49 +30,54 @@ def test_requires_agent_and_env():
     assert required in str(error)
 
 
-@pytest.fixture
-def role_with_agent_and_env():
+def test_initializes_agent():
     # Given
     agent, env = Mock(), Mock()
+
+    # When
     role = EcoRole(agent, env)
-    return role, agent, env
 
-
-def test_initializes_agent_ref(role_with_agent_and_env):
-    # Given
-    role, agent, _ = role_with_agent_and_env
-
-    # Assert
+    # Then
     assert role.agent is agent
 
 
-def test_initializes_env_ref(role_with_agent_and_env):
+def test_initializes_env():
     # Given
-    role, _, env = role_with_agent_and_env
+    agent, env = Mock(), Mock()
 
-    # Assert
+    # When
+    role = EcoRole(agent, env)
+
+    # Then
     assert role.env is env
 
 
-def test_initializes_label_attr(role_with_agent_and_env):
+def test_initializes_label_with_agent_id():
     # Given
-    role, agent, _ = role_with_agent_and_env
+    agent, env = Mock(), Mock()
 
-    # Assert
+    # When
+    role = EcoRole(agent, env)
+
+    # Then
     assert role.label == agent.id
 
 
-def test_initializes_name_attr(role_with_agent_and_env):
+def test_initializes_name():
     # Given
-    role, *_ = role_with_agent_and_env
+    agent, env = Mock(), Mock()
 
-    # Assert
+    # When
+    role = EcoRole(agent, env)
+
+    # Then
     assert role.name == ""
 
 
-def test_expose_agent_id(role_with_agent_and_env):
+def test_expose_agent_id():
     # Given
-    role, agent, _ = role_with_agent_and_env
+    agent, env = Mock(), Mock()
+    role = EcoRole(agent, env)
 
     # When
     exposed = role.id
@@ -81,9 +86,11 @@ def test_expose_agent_id(role_with_agent_and_env):
     assert exposed is agent.id
 
 
-def test_expose_agent_central_bank_id(role_with_agent_and_env):
+def test_expose_agent_central_bank_id():
     # Given
-    role, agent, _ = role_with_agent_and_env
+    agent, env = Mock(), Mock()
+    role = EcoRole(agent, env)
+
 
     # When
     exposed = role.cb_id
@@ -92,9 +99,11 @@ def test_expose_agent_central_bank_id(role_with_agent_and_env):
     assert exposed is agent.cb_id
 
 
-def test_expose_agent_deposit_bank_id(role_with_agent_and_env):
+def test_expose_agent_deposit_bank_id():
     # Given
-    role, agent, _ = role_with_agent_and_env
+    agent, env = Mock(), Mock()
+    role = EcoRole(agent, env)
+
 
     # When
     exposed = role.bank_id
@@ -103,21 +112,22 @@ def test_expose_agent_deposit_bank_id(role_with_agent_and_env):
     assert exposed is agent.bank_id
 
 
-def test_change_agent_deposit_bank_id(role_with_agent_and_env):
+def test_change_agent_deposit_bank_id():
     # Given
-    role, agent, _ = role_with_agent_and_env
-    new_account = Mock()
+    agent, env = Mock(), Mock()
+    role = EcoRole(agent, env)
 
     # When
-    role.bank_id = new_account
+    role.bank_id = 2
 
     # Then
-    assert agent.bank_id is new_account
+    assert agent.bank_id == 2
 
 
-def test_expose_agent_country_id(role_with_agent_and_env):
+def test_expose_agent_country_id():
     # Given
-    role, agent, _ = role_with_agent_and_env
+    agent, env = Mock(), Mock()
+    role = EcoRole(agent, env)
 
     # When
     agent.country_id = 2

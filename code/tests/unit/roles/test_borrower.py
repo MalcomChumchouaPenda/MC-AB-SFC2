@@ -18,26 +18,39 @@ def test_inherits_from_eco_role():
     assert is_derived
 
 
-@pytest.fixture
-def role():
+def test_initializes_loan_demand():
     # Given
     agent, env = Mock(), Mock()
-    return Borrower(agent, env)
 
+    # When
+    role = Borrower(agent, env)
 
-def test_initializes_loan_demand(role):
-    # Assert
+    # Then
     assert role.loan_demand == 0.0
 
 
-def test_initializes_net_worth(role):
-    # Assert
+def test_initializes_net_worth():
+    # Given
+    agent, env = Mock(), Mock()
+
+    # When
+    role = Borrower(agent, env)
+
+    # Then
     assert role.net_worth == 0.0
 
 
 # ---------------------------------------------------
 # PERCEPTIONS
 # ----------------------------------------------------
+
+
+
+@pytest.fixture
+def role():
+    # Given
+    agent, env = Mock(), Mock()
+    return Borrower(agent, env)
 
 
 def test_find_lenders(role, make_dlist):

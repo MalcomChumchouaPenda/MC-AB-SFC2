@@ -19,116 +19,223 @@ def test_inherits_from_eco_agent():
     assert is_derived
 
 
-# ---------------------------------------------------
-# DEFAULT STATE
-# ----------------------------------------------------
-
-
-@pytest.fixture
-def firm():
+def test_initializes_defaulted(fake_model):
     # Given
-    model = Mock()
+    model = fake_model
+
+    # When
     firm = Firm(model)
-    return firm
 
-
-def test_initializes_defaulted(firm):
-    # Assert
+    # Then
     assert firm.defaulted is False
 
 
-def test_initializes_rd_expenditure(firm):
-    # Assert
+def test_initializes_rd_expenditure(fake_model):
+    # Given
+    model = fake_model
+
+    # When
+    firm = Firm(model)
+
+    # Then
     assert firm.rd == 0
 
 
-def test_initializes_price_offered(firm):
-    # Assert
+def test_initializes_price_offered(fake_model):
+    # Given
+    model = fake_model
+
+    # When
+    firm = Firm(model)
+
+    # Then
     assert firm.price == 0
 
 
-def test_initializes_wage_offered(firm):
-    # Assert
+def test_initializes_wage_offered(fake_model):
+    # Given
+    model = fake_model
+
+    # When
+    firm = Firm(model)
+
+    # Then
     assert firm.wage_offer == 0
 
 
-def test_initializes_expected_sales(firm):
-    # Assert
+def test_initializes_expected_sales(fake_model):
+    # Given
+    model = fake_model
+
+    # When
+    firm = Firm(model)
+
+    # Then
     assert firm.expected_sales == 0
 
 
-def test_initializes_desired_labor(firm):
-    # Assert
+def test_initializes_desired_labor(fake_model):
+    # Given
+    model = fake_model
+
+    # When
+    firm = Firm(model)
+
+    # Then
     assert firm.desired_labor == 0
 
 
-def test_initializes_desired_output(firm):
-    # Assert
+def test_initializes_desired_output(fake_model):
+    # Given
+    model = fake_model
+
+    # When
+    firm = Firm(model)
+
+    # Then
     assert firm.desired_output == 0
 
 
-def test_initializes_desired_loans(firm):
-    # Assert
+def test_initializes_desired_loans(fake_model):
+    # Given
+    model = fake_model
+
+    # When
+    firm = Firm(model)
+
+    # Then
     assert firm.desired_loans == 0
 
 
-def test_initializes_desired_rd_expense(firm):
-    # Assert
+def test_initializes_desired_rd_expense(fake_model):
+    # Given
+    model = fake_model
+
+    # When
+    firm = Firm(model)
+
+    # Then
     assert firm.desired_rd == 0
 
 
-def test_initializes_taxes_payable(firm):
-    # Assert
+def test_initializes_taxes_payable(fake_model):
+    # Given
+    model = fake_model
+
+    # When
+    firm = Firm(model)
+
+    # Then
     assert firm.taxes_payable == 0
 
 
-def test_initializes_dividends_payable(firm):
-    # Assert
+def test_initializes_dividends_payable(fake_model):
+    # Given
+    model = fake_model
+
+    # When
+    firm = Firm(model)
+
+    # Then
     assert firm.dividends_payable == 0
 
 
-def test_initializes_variety(firm):
-    # Assert
+def test_initializes_variety(fake_model):
+    # Given
+    model = fake_model
+
+    # When
+    firm = Firm(model)
+
+    # Then
     assert firm.variety == 0.0
 
 
-def test_initializes_net_worth(firm):
-    # Assert
+def test_initializes_net_worth(fake_model):
+    # Given
+    model = fake_model
+
+    # When
+    firm = Firm(model)
+
+    # Then
     assert firm.net_worth == 0.0
 
 
-def test_initializes_net_cash_flow(firm):
-    # Assert
+def test_initializes_net_cash_flow(fake_model):
+    # Given
+    model = fake_model
+
+    # When
+    firm = Firm(model)
+
+    # Then
     assert firm.net_cash_flow == 0.0
 
 
-def test_initializes_prev_sales(firm):
-    # Assert
+def test_initializes_prev_sales(fake_model):
+    # Given
+    model = fake_model
+
+    # When
+    firm = Firm(model)
+
+    # Then
     assert firm.prev_sales == 0
 
 
-def test_initializes_prev_output(firm):
-    # Assert
+def test_initializes_prev_output(fake_model):
+    # Given
+    model = fake_model
+
+    # When
+    firm = Firm(model)
+
+    # Then
     assert firm.prev_output == 0
 
 
-def test_initializes_prev_expected_sales(firm):
-    # Assert
+def test_initializes_prev_expected_sales(fake_model):
+    # Given
+    model = fake_model
+
+    # When
+    firm = Firm(model)
+
+    # Then
     assert firm.prev_expected_sales == 0
 
 
-def test_initializes_prev_inventories(firm):
-    # Assert
+def test_initializes_prev_inventories(fake_model):
+    # Given
+    model = fake_model
+
+    # When
+    firm = Firm(model)
+
+    # Then
     assert firm.prev_inventories == 0
 
 
-def test_initializes_prev_labor(firm):
-    # Assert
+def test_initializes_prev_labor(fake_model):
+    # Given
+    model = fake_model
+
+    # When
+    firm = Firm(model)
+
+    # Then
     assert firm.prev_labor == 0
 
 
-def test_initializes_prev_desired_labor(firm):
-    # Assert
+def test_initializes_prev_desired_labor(fake_model):
+    # Given
+    model = fake_model
+
+    # When
+    firm = Firm(model)
+
+    # Then
     assert firm.prev_desired_labor == 0
 
 
@@ -138,13 +245,12 @@ def test_initializes_prev_desired_labor(firm):
 
 
 @pytest.fixture
-def firm_with_roles_and_account(firm):
+def firm(fake_model):
     # Given
-    roles = {}
-    account = Mock(stocks={}, flows={})
-    firm.account = account
-    firm.roles = roles
-    return firm, roles, account
+    model = fake_model
+    model.random = Mock()
+    model.nprandom = Mock()
+    return Firm(model)
 
 
 def test_plan_production_by_two_steps(firm):
@@ -159,6 +265,16 @@ def test_plan_production_by_two_steps(firm):
     firm.calc_desired_output.assert_called_once_with()
     firm.calc_labor_demand.assert_called_once_with()
     assert firm.desired_output == 20
+
+
+@pytest.fixture
+def firm_with_roles_and_account(firm):
+    # Given
+    roles = {}
+    account = Mock(stocks={}, flows={})
+    firm.account = account
+    firm.roles = roles
+    return firm, roles, account
 
 
 @pytest.fixture

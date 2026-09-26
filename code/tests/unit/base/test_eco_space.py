@@ -20,31 +20,47 @@ def test_inherits_from_agentpy_network():
     assert is_derived
 
 
-@pytest.fixture
-def space(fake_model):
+def test_initializes_env(fake_model):
     # Given
     model = fake_model
+
+    # When
     space = EcoSpace(model)
-    return space
 
-
-def test_initializes_env_ref(space):
-    # Assert
+    # Then
     assert space.env is None
 
 
-def test_initializes_sub_spaces_dict(space):
-    # Assert
+def test_initializes_sub_spaces_dict(fake_model):
+    # Given
+    model = fake_model
+
+    # When
+    space = EcoSpace(model)
+
+    # Then
     assert space.spaces == {}
 
 
-def test_initializes_accounts_dict(space):
-    # Assert
+def test_initializes_accounts_dict(fake_model):
+    # Given
+    model = fake_model
+
+    # When
+    space = EcoSpace(model)
+
+    # Then
     assert space.accounts == {}
 
 
-def test_initializes_roles_default_dict(space):
-    # Assert
+def test_initializes_roles_default_dict(fake_model):
+    # Given
+    model = fake_model
+
+    # When
+    space = EcoSpace(model)
+
+    # Then
     assert isinstance(space.roles, defaultdict)
 
 
@@ -52,6 +68,12 @@ def test_initializes_roles_default_dict(space):
 # SUB SPACES MANAGEMENT TESTS
 # ----------------------------------------------------
 
+
+@pytest.fixture
+def space(fake_model):
+    # Given
+    model = fake_model
+    return EcoSpace(model)
 
 @pytest.fixture
 def space_with_sub_spaces(space):
@@ -573,13 +595,25 @@ def test_evolve_clear_all_defaults(space_before_evolution):
     sub_space.clear_defaults.assert_called_once()
 
 
-def test_update_state_is_not_implemented(space):
-    # Assert
+def test_update_state_is_not_implemented(fake_model):
+    # Given
+    model = fake_model
+
+    # When
+    space = EcoSpace(model)
+
+    # Then
     with pytest.raises(NotImplementedError):
         space.update_state()
 
 
-def test_clear_defaults_is_not_implemented(space):
-    # Assert
+def test_clear_defaults_is_not_implemented(fake_model):
+    # Given
+    model = fake_model
+
+    # When
+    space = EcoSpace(model)
+
+    # Then
     with pytest.raises(NotImplementedError):
         space.clear_defaults()

@@ -18,29 +18,47 @@ def test_inherits_from_eco_role():
     assert is_derived
 
 
+
+def test_initializes_price():
+    # Given
+    agent, env = Mock(), Mock()
+
+    # When
+    role = Producer(agent, env)
+
+    # Then
+    assert role.price == 0
+
+
+def test_initializes_productivity():
+    # Given
+    agent, env = Mock(), Mock()
+
+    # When
+    role = Producer(agent, env)
+
+    # Then
+    assert role.productivity == 0
+
+
+def test_initializes_inventories():
+    # Given
+    agent, env = Mock(), Mock()
+
+    # When
+    role = Producer(agent, env)
+
+    # Then
+    assert role.inventories == 0
+
+
 @pytest.fixture
 def role():
     # Given
     agent, env = Mock(), Mock()
     return Producer(agent, env)
 
-
-def test_initializes_price_attr(role):
-    # Assert
-    assert role.price == 0
-
-
-def test_initializes_productivity_attr(role):
-    # Assert
-    assert role.productivity == 0
-
-
-def test_initializes_inventories_attr(role):
-    # Assert
-    assert role.inventories == 0
-
-
-def test_expose_variety_attr(role):
+def test_expose_variety(role):
     # Given
     role.agent.variety = 0.5
 

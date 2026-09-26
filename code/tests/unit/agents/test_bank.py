@@ -19,47 +19,85 @@ def test_inherits_from_eco_agent():
     assert is_derived
 
 
-@pytest.fixture
-def bank():
+def test_initializes_deposit_rate(fake_model):
     # Given
-    model = Mock()
+    model = fake_model
+
+    # When
     bank = Bank(model)
-    return bank
 
-
-def test_initializes_deposit_rate(bank):
-    # Assert
+    # Then
     assert bank.deposit_rate == 0
 
 
-def test_initializes_taxes_payable(bank):
-    # Assert
+def test_initializes_taxes_payable(fake_model):
+    # Given
+    model = fake_model
+
+    # When
+    bank = Bank(model)
+
+    # Then
     assert bank.taxes_payable == 0
 
 
-def test_initializes_dividends_payable(bank):
-    # Assert
+def test_initializes_dividends_payable(fake_model):
+    # Given
+    model = fake_model
+
+    # When
+    bank = Bank(model)
+
+    # Then
     assert bank.dividends_payable == 0
 
 
-def test_initializes_credit_capacity(bank):
-    # Assert
+def test_initializes_credit_capacity(fake_model):
+    # Given
+    model = fake_model
+
+    # When
+    bank = Bank(model)
+
+    # Then
     assert bank.credit_capacity == 0
 
 
-def test_initializes_net_worth(bank):
-    # Assert
+def test_initializes_net_worth(fake_model):
+    # Given
+    model = fake_model
+
+    # When
+    bank = Bank(model)
+
+    # Then
     assert bank.net_worth == 0
 
 
-def test_initializes_defaulted(bank):
-    # Assert
+def test_initializes_defaulted(fake_model):
+    # Given
+    model = fake_model
+
+    # When
+    bank = Bank(model)
+
+    # Then
     assert bank.defaulted == False
 
 
 # ---------------------------------------------------
 # DEPOSIT INTERESTS PAYMENT
 # ----------------------------------------------------
+
+
+
+@pytest.fixture
+def bank(fake_model):
+    # Given
+    model = fake_model
+    model.nprandom = Mock()
+    model.random = Mock()
+    return Bank(model)
 
 
 def test_update_deposit_rate_as_fraction_of_discount_rate(bank):

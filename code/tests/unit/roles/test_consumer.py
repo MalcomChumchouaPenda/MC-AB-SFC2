@@ -18,6 +18,7 @@ def test_inherits_from_eco_role():
     assert is_derived
 
 
+
 @pytest.fixture
 def role():
     # Given
@@ -25,7 +26,7 @@ def role():
     return Consumer(agent, env)
 
 
-def test_expose_preference_attr(role):
+def test_expose_preference(role):
     # Given
     role.agent.preference = 0.1
 
@@ -39,6 +40,7 @@ def test_expose_preference_attr(role):
 # ---------------------------------------------------
 # PERCEPTION TESTS
 # ----------------------------------------------------
+
 
 
 def test_get_average_price(role):
