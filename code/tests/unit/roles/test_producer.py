@@ -3,7 +3,7 @@ from unittest.mock import Mock
 from model.roles.producer import Producer
 
 # ---------------------------------------------------
-# ARCHITECTURE TESTS
+# ARCHITECTURE
 # ----------------------------------------------------
 
 

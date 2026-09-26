@@ -3,7 +3,7 @@ from unittest.mock import Mock
 from model.roles.policy_maker import PolicyMaker
 
 # ---------------------------------------------------
-# ARCHITECTURE TESTS
+# ARCHITECTURE
 # ----------------------------------------------------
 
 

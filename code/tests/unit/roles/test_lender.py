@@ -3,7 +3,7 @@ from unittest.mock import Mock
 from model.roles.lender import Lender
 
 # ---------------------------------------------------
-# ARCHITECTURE TESTS
+# ARCHITECTURE
 # ----------------------------------------------------
 
 

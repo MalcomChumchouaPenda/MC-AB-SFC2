@@ -2,7 +2,7 @@ import pytest
 from model.base import EcoAccount
 
 # ---------------------------------------------------
-# ARCHITECTURE TESTS
+# ARCHITECTURE
 # ----------------------------------------------------
 
 

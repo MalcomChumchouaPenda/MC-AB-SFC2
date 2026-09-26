@@ -3,7 +3,7 @@ from unittest.mock import Mock
 from model.spaces.deposit_market import DepositMarket
 
 # ---------------------------------------------------
-# ARCHITECTURE TESTS
+# ARCHITECTURE
 # ----------------------------------------------------
 
 

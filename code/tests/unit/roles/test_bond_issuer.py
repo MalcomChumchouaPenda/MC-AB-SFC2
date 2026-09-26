@@ -3,7 +3,7 @@ from unittest.mock import Mock
 from model.roles.bond_issuer import BondIssuer
 
 # ---------------------------------------------------
-# ARCHITECTURE TESTS
+# ARCHITECTURE
 # ----------------------------------------------------
 
 

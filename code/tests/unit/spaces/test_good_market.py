@@ -4,7 +4,7 @@ from agentpy import AgentDList
 from model.spaces.good_market import GoodsMarket
 
 # ---------------------------------------------------
-# ARCHITECTURE TESTS
+# ARCHITECTURE
 # ----------------------------------------------------
 
 

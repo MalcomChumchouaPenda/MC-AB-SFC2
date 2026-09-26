@@ -3,7 +3,7 @@ from unittest.mock import Mock
 from model.roles.consumer import Consumer
 
 # ---------------------------------------------------
-# ARCHITECTURE TESTS
+# ARCHITECTURE
 # ----------------------------------------------------
 
 

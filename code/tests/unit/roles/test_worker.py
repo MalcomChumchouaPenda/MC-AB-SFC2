@@ -3,7 +3,7 @@ from unittest.mock import Mock
 from model.roles.worker import Worker
 
 # ---------------------------------------------------
-# ARCHITECTURE TESTS
+# ARCHITECTURE
 # ----------------------------------------------------
 
 

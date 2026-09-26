@@ -3,7 +3,7 @@ from unittest.mock import Mock
 from model.roles.citizen import Citizen
 
 # ---------------------------------------------------
-# ARCHITECTURE TESTS
+# ARCHITECTURE
 # ----------------------------------------------------
 
 

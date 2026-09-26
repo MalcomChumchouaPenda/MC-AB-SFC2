@@ -3,7 +3,7 @@ from unittest.mock import Mock
 from model.base import EcoRole
 
 # ---------------------------------------------------
-# ARCHITECTURE TESTS
+# ARCHITECTURE
 # ----------------------------------------------------
 
 

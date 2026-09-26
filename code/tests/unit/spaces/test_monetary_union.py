@@ -3,7 +3,7 @@ from unittest.mock import Mock
 from model.spaces.monetary_union import MonetaryUnion
 
 # ---------------------------------------------------
-# ARCHITECTURE TESTS
+# ARCHITECTURE
 # ----------------------------------------------------
 
 

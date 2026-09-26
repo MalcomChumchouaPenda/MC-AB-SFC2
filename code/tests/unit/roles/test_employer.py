@@ -4,7 +4,7 @@ from model.base import EcoRole
 from model.roles.employer import Employer
 
 # ---------------------------------------------------
-# ARCHITECTURE TESTS
+# ARCHITECTURE
 # ----------------------------------------------------
 
 

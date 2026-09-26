@@ -4,7 +4,7 @@ from model.base import EcoRole
 from model.roles.depositor import Depositor
 
 # ---------------------------------------------------
-# ARCHITECTURE TESTS
+# ARCHITECTURE
 # ----------------------------------------------------
 
 

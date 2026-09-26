@@ -3,7 +3,7 @@ from unittest.mock import Mock
 from model.roles.fiscal_authority import FiscalAuthority
 
 # ---------------------------------------------------
-# ARCHITECTURE TESTS
+# ARCHITECTURE
 # ----------------------------------------------------
 
 

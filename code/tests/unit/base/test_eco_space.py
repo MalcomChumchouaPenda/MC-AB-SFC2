@@ -5,7 +5,7 @@ from agentpy import AgentDList
 from model.base import EcoSpace
 
 # ---------------------------------------------------
-# ARCHITECTURE TESTS
+# ARCHITECTURE
 # ----------------------------------------------------
 
 

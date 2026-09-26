@@ -3,7 +3,7 @@ from unittest.mock import Mock
 from model.spaces.labor_market import LaborMarket
 
 # ---------------------------------------------------
-# ARCHITECTURE TESTS
+# ARCHITECTURE
 # ----------------------------------------------------
 
 

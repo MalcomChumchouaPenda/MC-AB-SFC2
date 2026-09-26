@@ -3,7 +3,7 @@ from unittest.mock import Mock
 from model.roles.borrower import Borrower
 
 # ---------------------------------------------------
-# ARCHITECTURE TESTS
+# ARCHITECTURE
 # ----------------------------------------------------
 
 

@@ -3,7 +3,7 @@ from unittest.mock import Mock
 from model.roles.deposit_bank import DepositBank
 
 # ---------------------------------------------------
-# ARCHITECTURE TESTS
+# ARCHITECTURE
 # ----------------------------------------------------
 
 
