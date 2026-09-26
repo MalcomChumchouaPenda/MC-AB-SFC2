@@ -69,17 +69,17 @@ def test_initializes_monetary_authority_ref(country):
 # ----------------------------------------------------
 
 
-def test_setup_creates_good_market(country):
+def test_creates_good_market(country):
     # Assert
     country.add_space.assert_any_call(FakeGoodMarket, "good_market", tradable=False)
 
 
-def test_setup_creates_labor_market(country):
+def test_creates_labor_market(country):
     # Assert
     country.add_space.assert_any_call(FakeLaborMarket, "labor_market")
 
 
-def test_setup_creates_deposit_market(country):
+def test_creates_deposit_market(country):
     # Assert
     country.add_space.assert_any_call(FakeDepositMarket, "deposit_market")
 

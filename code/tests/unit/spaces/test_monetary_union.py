@@ -61,7 +61,7 @@ def test_initializes_discount_rate(model):
 
 
 @pytest.mark.usefixtures("before_union_creation")
-def test_setup_creates_tradable_good_market(model):
+def test_creates_tradable_good_market(model):
     # When
     union = MonetaryUnion(model)
 
@@ -70,7 +70,7 @@ def test_setup_creates_tradable_good_market(model):
 
 
 @pytest.mark.usefixtures("before_union_creation")
-def test_setup_creates_credit_market(model):
+def test_creates_credit_market(model):
     # When
     union = MonetaryUnion(model)
 
@@ -79,7 +79,7 @@ def test_setup_creates_credit_market(model):
 
 
 @pytest.mark.usefixtures("before_union_creation")
-def test_setup_creates_bond_market(model):
+def test_creates_bond_market(model):
     # When
     union = MonetaryUnion(model)
 
@@ -88,7 +88,7 @@ def test_setup_creates_bond_market(model):
 
 
 @pytest.mark.usefixtures("before_union_creation")
-def test_setup_creates_countries(model):
+def test_creates_countries(model):
     # Given
     model.p.K = 2
 
