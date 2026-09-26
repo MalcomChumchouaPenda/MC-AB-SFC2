@@ -1,16 +1,21 @@
 import pytest
 from unittest.mock import Mock
-from model.base import EcoRole
 from model.roles.deposit_guarantee import DepositGuarantee
 
 # ---------------------------------------------------
-# ARCHITECTURE TESTS
+# ARCHITECTURE
 # ----------------------------------------------------
 
 
 def test_inherits_from_eco_role():
-    # Assert
-    assert issubclass(DepositGuarantee, EcoRole)
+    # Given
+    from model.base import EcoRole
+
+    # When
+    is_derived = issubclass(DepositGuarantee, EcoRole)
+
+    # Then
+    assert is_derived
 
 
 @pytest.fixture

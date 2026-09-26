@@ -1,5 +1,4 @@
 import pytest
-from agentpy import AgentNode
 from unittest.mock import Mock
 from model.base import EcoRole
 
@@ -9,8 +8,14 @@ from model.base import EcoRole
 
 
 def test_inherits_from_agentpy_agentnode():
-    # Assert
-    assert issubclass(EcoRole, AgentNode)
+    # Given
+    from agentpy import AgentNode
+
+    # When
+    is_derived = issubclass(EcoRole, AgentNode)
+
+    # Then
+    assert is_derived
 
 
 def test_requires_agent_and_env():

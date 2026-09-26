@@ -1,7 +1,5 @@
 import pytest
-from agentpy import AgentDList
 from unittest.mock import Mock
-from model.base import EcoSpace
 from model.spaces.country import Country
 
 # ---------------------------------------------------
@@ -10,8 +8,14 @@ from model.spaces.country import Country
 
 
 def test_inherits_from_eco_space():
-    # Assert
-    assert issubclass(Country, EcoSpace)
+    # Given
+    from model.base import EcoSpace
+
+    # When
+    is_derived = issubclass(Country, EcoSpace)
+
+    # Then
+    assert is_derived
 
 
 FakeGoodMarket = Mock()

@@ -1,16 +1,22 @@
 import pytest
-from agentpy import Agent
-from unittest.mock import Mock
 from model.base import EcoAgent
+from unittest.mock import Mock
+
 
 # ---------------------------------------------------
-# ARCHITECTURE TESTS
+# ARCHITECTURE
 # ----------------------------------------------------
 
 
 def test_inherits_from_agentpy_agent():
-    # Assert
-    assert issubclass(EcoAgent, Agent)
+    # Given
+    from agentpy import Agent
+
+    # When
+    is_derived = issubclass(EcoAgent, Agent)
+
+    # Then
+    assert is_derived
 
 
 @pytest.fixture

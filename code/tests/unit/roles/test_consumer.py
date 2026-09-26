@@ -1,6 +1,5 @@
 import pytest
 from unittest.mock import Mock
-from model.base import EcoRole
 from model.roles.consumer import Consumer
 
 # ---------------------------------------------------
@@ -9,8 +8,14 @@ from model.roles.consumer import Consumer
 
 
 def test_inherits_from_eco_role():
-    # Assert
-    assert issubclass(Consumer, EcoRole)
+    # Given
+    from model.base import EcoRole
+
+    # When
+    is_derived = issubclass(Consumer, EcoRole)
+
+    # Then
+    assert is_derived
 
 
 @pytest.fixture

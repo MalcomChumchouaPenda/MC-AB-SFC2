@@ -9,8 +9,14 @@ from model.roles.employer import Employer
 
 
 def test_inherits_from_eco_role():
-    # Assert
-    assert issubclass(Employer, EcoRole)
+    # Given
+    from model.base import EcoRole
+
+    # When
+    is_derived = issubclass(Employer, EcoRole)
+
+    # Then
+    assert is_derived
 
 
 @pytest.fixture

@@ -4,7 +4,7 @@ from unittest.mock import Mock
 from model.agents.household import Household
 
 # ---------------------------------------------------
-# ENTITY HIERARCHY
+# ARCHITECTURE
 # ----------------------------------------------------
 
 
@@ -12,8 +12,11 @@ def test_inherits_from_eco_agent():
     # Given
     from model.base import EcoAgent
 
-    # Assert
-    assert issubclass(Household, EcoAgent)
+    # When
+    is_derived = issubclass(Household, EcoAgent)
+
+    # Then
+    assert is_derived
 
 
 # ---------------------------------------------------

@@ -1,11 +1,19 @@
 import pytest
-import agentpy as ap
 from model.tools import EcoModel
 
+# ---------------------------------------------------
+# ARCHITECTURE
+# ----------------------------------------------------
 
 def test_inherits_from_agentpy_model():
-    # Assert
-    assert issubclass(EcoModel, ap.Model)
+    # Given
+    from agentpy import Model
+
+    # When
+    is_derived = issubclass(EcoModel, Model)
+
+    # Then
+    assert is_derived
 
 
 @pytest.fixture

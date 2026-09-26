@@ -1,6 +1,4 @@
 import pytest
-from unittest.mock import Mock
-from agentpy.objects import Object
 from model.base import EcoAccount
 
 # ---------------------------------------------------
@@ -9,8 +7,14 @@ from model.base import EcoAccount
 
 
 def test_doesnt_inherit_from_agentpy_object():
-    # Assert
-    assert not issubclass(EcoAccount, Object)
+    # Given
+    from agentpy.objects import Object
+
+    # When
+    is_derived = issubclass(EcoAccount, Object)
+
+    # Then
+    assert not is_derived
 
 
 @pytest.fixture

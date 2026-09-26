@@ -1,6 +1,5 @@
 import pytest
 from unittest.mock import Mock
-from model.base import EcoRole
 from model.roles.fiscal_authority import FiscalAuthority
 
 # ---------------------------------------------------
@@ -9,8 +8,14 @@ from model.roles.fiscal_authority import FiscalAuthority
 
 
 def test_inherits_from_eco_role():
-    # Assert
-    assert issubclass(FiscalAuthority, EcoRole)
+    # Given
+    from model.base import EcoRole
+
+    # When
+    is_derived = issubclass(FiscalAuthority, EcoRole)
+
+    # Then
+    assert is_derived
 
 
 @pytest.fixture

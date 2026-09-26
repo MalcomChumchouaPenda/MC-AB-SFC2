@@ -1,6 +1,5 @@
 import pytest
 from unittest.mock import Mock
-from model.base import EcoSpace
 from model.spaces.deposit_market import DepositMarket
 
 # ---------------------------------------------------
@@ -9,8 +8,14 @@ from model.spaces.deposit_market import DepositMarket
 
 
 def test_inherits_from_eco_space():
-    # Assert
-    assert issubclass(DepositMarket, EcoSpace)
+    # Given
+    from model.base import EcoSpace
+
+    # When
+    is_derived = issubclass(DepositMarket, EcoSpace)
+
+    # Then
+    assert is_derived
 
 
 @pytest.fixture

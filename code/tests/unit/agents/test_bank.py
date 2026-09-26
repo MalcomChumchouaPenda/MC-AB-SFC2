@@ -4,7 +4,7 @@ from unittest.mock import Mock
 from model.agents.bank import Bank
 
 # ---------------------------------------------------
-# ARCHITECTURE TESTS
+# ARCHITECTURE
 # ----------------------------------------------------
 
 
@@ -12,8 +12,11 @@ def test_inherits_from_eco_agent():
     # Given
     from model.base import EcoAgent
 
-    # Assert
-    assert issubclass(Bank, EcoAgent)
+    # When
+    is_derived = issubclass(Bank, EcoAgent)
+
+    # Then
+    assert is_derived
 
 
 @pytest.fixture

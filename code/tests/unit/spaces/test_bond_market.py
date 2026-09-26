@@ -1,7 +1,5 @@
 import pytest
-from unittest.mock import Mock, call
-from agentpy import AgentDList
-from model.base import EcoSpace
+from unittest.mock import Mock
 from model.spaces.bond_market import BondMarket
 
 # ---------------------------------------------------
@@ -9,9 +7,15 @@ from model.spaces.bond_market import BondMarket
 # ----------------------------------------------------
 
 
-def test_inherits_from_agentpy_object():
-    # Assert
-    assert issubclass(BondMarket, EcoSpace)
+def test_inherits_from_eco_space():
+    # Given
+    from model.base import EcoSpace
+
+    # When
+    is_derived = issubclass(BondMarket, EcoSpace)
+
+    # Then
+    assert is_derived
 
 
 @pytest.fixture

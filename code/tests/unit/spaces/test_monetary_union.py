@@ -1,6 +1,5 @@
 import pytest
 from unittest.mock import Mock
-from model.base import EcoSpace
 from model.spaces.monetary_union import MonetaryUnion
 
 # ---------------------------------------------------
@@ -9,8 +8,14 @@ from model.spaces.monetary_union import MonetaryUnion
 
 
 def test_inherits_from_eco_space():
-    # Assert
-    assert issubclass(MonetaryUnion, EcoSpace)
+    # Given
+    from model.base import EcoSpace
+
+    # When
+    is_derived = issubclass(MonetaryUnion, EcoSpace)
+
+    # Then
+    assert is_derived
 
 
 FakeGoodMarket = Mock()

@@ -1,7 +1,5 @@
 import pytest
-from unittest.mock import Mock, MagicMock
-from agentpy import AgentDList
-from model.base import EcoSpace
+from unittest.mock import Mock
 from model.spaces.labor_market import LaborMarket
 
 # ---------------------------------------------------
@@ -10,8 +8,14 @@ from model.spaces.labor_market import LaborMarket
 
 
 def test_inherits_from_eco_space():
-    # Assert
-    assert issubclass(LaborMarket, EcoSpace)
+    # Given
+    from model.base import EcoSpace
+
+    # When
+    is_derived = issubclass(LaborMarket, EcoSpace)
+
+    # Then
+    assert is_derived
 
 
 @pytest.fixture

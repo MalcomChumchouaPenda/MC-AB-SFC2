@@ -1,7 +1,6 @@
 import pytest
-from unittest.mock import Mock, MagicMock
+from unittest.mock import Mock
 from agentpy import AgentDList
-from model.base import EcoSpace
 from model.spaces.good_market import GoodsMarket
 
 # ---------------------------------------------------
@@ -10,8 +9,14 @@ from model.spaces.good_market import GoodsMarket
 
 
 def test_inherits_from_eco_space():
-    # Assert
-    assert issubclass(GoodsMarket, EcoSpace)
+    # Given
+    from model.base import EcoSpace
+
+    # When
+    is_derived = issubclass(GoodsMarket, EcoSpace)
+
+    # Then
+    assert is_derived
 
 
 @pytest.mark.parametrize("arg", [True, False])

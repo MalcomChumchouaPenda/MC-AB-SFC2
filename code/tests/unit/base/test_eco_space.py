@@ -1,7 +1,7 @@
 from unittest.mock import Mock
 from collections import defaultdict
 import pytest
-from agentpy import Model, Network, AgentDList
+from agentpy import AgentDList
 from model.base import EcoSpace
 
 # ---------------------------------------------------
@@ -10,8 +10,14 @@ from model.base import EcoSpace
 
 
 def test_inherits_from_agentpy_network():
-    # Assert
-    assert issubclass(EcoSpace, Network)
+    # Given
+    from agentpy import Network
+
+    # When
+    is_derived = issubclass(EcoSpace, Network)
+
+    # Then
+    assert is_derived
 
 
 @pytest.fixture
