@@ -25,12 +25,12 @@ def market():
     return LaborMarket(model)
 
 
-def test_has_average_wage_prop(market):
+def test_initializes_average_wage(market):
     # Assert
     assert market.average_wage == 0
 
 
-def test_has_unemployment_prop(market):
+def test_initializes_unemployment(market):
     # Assert
     assert market.unemployment == 0.0
 

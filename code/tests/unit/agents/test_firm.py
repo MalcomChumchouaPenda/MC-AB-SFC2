@@ -32,102 +32,102 @@ def firm():
     return firm
 
 
-def test_has_defaulted_prop(firm):
+def test_initializes_defaulted(firm):
     # Assert
     assert firm.defaulted is False
 
 
-def test_has_default_rd_expenditure(firm):
+def test_initializes_rd_expenditure(firm):
     # Assert
     assert firm.rd == 0
 
 
-def test_has_default_price_offered(firm):
+def test_initializes_price_offered(firm):
     # Assert
     assert firm.price == 0
 
 
-def test_has_default_wage_offered(firm):
+def test_initializes_wage_offered(firm):
     # Assert
     assert firm.wage_offer == 0
 
 
-def test_has_default_expected_sales(firm):
+def test_initializes_expected_sales(firm):
     # Assert
     assert firm.expected_sales == 0
 
 
-def test_has_default_desired_labor(firm):
+def test_initializes_desired_labor(firm):
     # Assert
     assert firm.desired_labor == 0
 
 
-def test_has_default_desired_output(firm):
+def test_initializes_desired_output(firm):
     # Assert
     assert firm.desired_output == 0
 
 
-def test_has_default_desired_loans(firm):
+def test_initializes_desired_loans(firm):
     # Assert
     assert firm.desired_loans == 0
 
 
-def test_has_default_desired_rd_expense(firm):
+def test_initializes_desired_rd_expense(firm):
     # Assert
     assert firm.desired_rd == 0
 
 
-def test_has_default_taxes_payable(firm):
+def test_initializes_taxes_payable(firm):
     # Assert
     assert firm.taxes_payable == 0
 
 
-def test_has_default_dividends_payable(firm):
+def test_initializes_dividends_payable(firm):
     # Assert
     assert firm.dividends_payable == 0
 
 
-def test_has_default_variety(firm):
+def test_initializes_variety(firm):
     # Assert
     assert firm.variety == 0.0
 
 
-def test_has_default_net_worth(firm):
+def test_initializes_net_worth(firm):
     # Assert
     assert firm.net_worth == 0.0
 
 
-def test_has_default_net_cash_flow(firm):
+def test_initializes_net_cash_flow(firm):
     # Assert
     assert firm.net_cash_flow == 0.0
 
 
-def test_has_default_prev_sales(firm):
+def test_initializes_prev_sales(firm):
     # Assert
     assert firm.prev_sales == 0
 
 
-def test_has_default_prev_output(firm):
+def test_initializes_prev_output(firm):
     # Assert
     assert firm.prev_output == 0
 
 
-def test_has_default_prev_expected_sales(firm):
+def test_initializes_prev_expected_sales(firm):
     # Assert
     assert firm.prev_expected_sales == 0
 
 
-def test_has_default_prev_inventories(firm):
+def test_initializes_prev_inventories(firm):
     # Assert
     assert firm.prev_inventories == 0
 
 
-def test_has_default_prev_labor(firm):
+def test_initializes_prev_labor(firm):
     # Assert
     assert firm.prev_labor == 0
 
 
-def test_has_default_prev_desired_labor(firm):
+def test_initializes_prev_desired_labor(firm):
     # Assert
     assert firm.prev_desired_labor == 0
 

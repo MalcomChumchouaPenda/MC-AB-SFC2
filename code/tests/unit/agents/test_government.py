@@ -29,47 +29,47 @@ def govt():
     return govt
 
 
-def test_has_tax_rate(govt):
+def test_initializes_tax_rate(govt):
     # Assert
     assert govt.tax_rate == 0
 
 
-def test_has_bond_rate(govt):
+def test_initializes_bond_rate(govt):
     # Assert
     assert govt.bond_rate == 0
 
 
-def test_has_public_spending(govt):
+def test_initializes_public_spending(govt):
     # Assert
     assert govt.public_spending == 0
 
 
-def test_has_desired_public_spending(govt):
+def test_initializes_desired_public_spending(govt):
     # Assert
     assert govt.desired_public_spending == 0
 
 
-def test_has_new_public_debt(govt):
+def test_initializes_new_public_debt(govt):
     # Assert
     assert govt.new_public_debt == 0
 
 
-def test_has_budget_deficit(govt):
+def test_initializes_budget_deficit(govt):
     # Assert
     assert govt.budget_deficit == 0
 
 
-def test_has_budget_surplus(govt):
+def test_initializes_budget_surplus(govt):
     # Assert
     assert govt.budget_surplus == 0
 
 
-def test_has_prev_public_spending(govt):
+def test_initializes_prev_public_spending(govt):
     # Assert
     assert govt.prev_public_spending == 0
 
 
-def test_has_prev_budget_surplus(govt):
+def test_initializes_prev_budget_surplus(govt):
     # Assert
     assert govt.prev_budget_surplus == 0
 

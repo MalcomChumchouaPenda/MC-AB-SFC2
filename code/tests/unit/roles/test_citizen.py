@@ -25,7 +25,7 @@ def role():
     return Citizen(agent, env)
 
 
-def test_has_residual_equity_prop(role):
+def test_initializes_residual_equity(role):
     # Assert
     assert role.resid_equity == 0
 

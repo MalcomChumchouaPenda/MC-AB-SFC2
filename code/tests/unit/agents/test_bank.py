@@ -27,32 +27,32 @@ def bank():
     return bank
 
 
-def test_has_default_deposit_rate(bank):
+def test_initializes_deposit_rate(bank):
     # Assert
     assert bank.deposit_rate == 0
 
 
-def test_has_default_taxes_payable(bank):
+def test_initializes_taxes_payable(bank):
     # Assert
     assert bank.taxes_payable == 0
 
 
-def test_has_default_dividends_payable(bank):
+def test_initializes_dividends_payable(bank):
     # Assert
     assert bank.dividends_payable == 0
 
 
-def test_has_default_credit_capacity(bank):
+def test_initializes_credit_capacity(bank):
     # Assert
     assert bank.credit_capacity == 0
 
 
-def test_has_default_net_worth(bank):
+def test_initializes_net_worth(bank):
     # Assert
     assert bank.net_worth == 0
 
 
-def test_has_default_defaulted(bank):
+def test_initializes_defaulted(bank):
     # Assert
     assert bank.defaulted == False
 

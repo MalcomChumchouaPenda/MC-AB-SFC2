@@ -29,7 +29,7 @@ def cb():
     return cb
 
 
-def test_has_default_previous_discount_rate(cb):
+def test_initializes_previous_discount_rate(cb):
     # Assert
     assert cb.prev_discount_rate == 0
 

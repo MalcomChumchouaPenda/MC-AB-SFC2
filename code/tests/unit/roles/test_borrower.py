@@ -25,12 +25,12 @@ def role():
     return Borrower(agent, env)
 
 
-def test_has_default_loan_demand(role):
+def test_initializes_loan_demand(role):
     # Assert
     assert role.loan_demand == 0.0
 
 
-def test_has_default_net_worth(role):
+def test_initializes_net_worth(role):
     # Assert
     assert role.net_worth == 0.0
 

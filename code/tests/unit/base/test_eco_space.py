@@ -28,22 +28,22 @@ def space(fake_model):
     return space
 
 
-def test_has_env_ref(space):
+def test_initializes_env_ref(space):
     # Assert
     assert space.env is None
 
 
-def test_has_sub_spaces_dict(space):
+def test_initializes_sub_spaces_dict(space):
     # Assert
     assert space.spaces == {}
 
 
-def test_has_accounts_dict(space):
+def test_initializes_accounts_dict(space):
     # Assert
     assert space.accounts == {}
 
 
-def test_has_roles_default_dict(space):
+def test_initializes_roles_default_dict(space):
     # Assert
     assert isinstance(space.roles, defaultdict)
 

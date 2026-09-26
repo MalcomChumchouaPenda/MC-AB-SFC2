@@ -26,12 +26,12 @@ def role():
     return Employer(agent, env)
 
 
-def test_has_wage_prop(role):
+def test_initializes_wage(role):
     # Assert
     assert role.wage == 0
 
 
-def test_has_labor_demand_prop(role):
+def test_initializes_labor_demand(role):
     # Assert
     assert role.labor_demand == 0
 

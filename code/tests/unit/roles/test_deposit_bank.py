@@ -25,7 +25,7 @@ def role():
     return DepositBank(agent, env)
 
 
-def test_has_defaulted(role):
+def test_initializes_defaulted(role):
     # Assert
     assert role.defaulted is False
 

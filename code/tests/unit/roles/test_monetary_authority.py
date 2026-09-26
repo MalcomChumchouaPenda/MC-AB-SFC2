@@ -25,7 +25,7 @@ def role():
     return MonetaryAuthority(agent, env)
 
 
-def test_has_discount_rate_prop(role):
+def test_initializes_discount_rate(role):
     # Assert
     assert role.discount_rate == 0.0
 

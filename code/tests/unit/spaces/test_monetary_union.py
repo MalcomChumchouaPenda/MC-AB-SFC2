@@ -43,7 +43,7 @@ def model(fake_model):
 
 
 @pytest.mark.usefixtures("before_union_creation")
-def test_has_average_inflation_prop(model):
+def test_initializes_average_inflation(model):
     # When
     union = MonetaryUnion(model)
 
@@ -52,7 +52,7 @@ def test_has_average_inflation_prop(model):
 
 
 @pytest.mark.usefixtures("before_union_creation")
-def test_has_discount_rate_prop(model):
+def test_initializes_discount_rate(model):
     # When
     union = MonetaryUnion(model)
 

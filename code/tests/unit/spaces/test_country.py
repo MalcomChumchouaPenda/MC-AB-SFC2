@@ -34,32 +34,32 @@ def country(monkeypatch, fake_model):
     return country
 
 
-def test_has_inflation(country):
+def test_initializes_inflation(country):
     # Assert
     assert country.inflation == 0
 
 
-def test_has_gdp(country):
+def test_initializes_gdp(country):
     # Assert
     assert country.gdp == 0
 
 
-def test_has_prob_failure(country):
+def test_initializes_prob_failure(country):
     # Assert
     assert country.prob_failure == 0
 
 
-def test_has_tax_rate(country):
+def test_initializes_tax_rate(country):
     # Assert
     assert country.tax_rate == 0
 
 
-def test_has_fiscal_authority_ref(country):
+def test_initializes_fiscal_authority_ref(country):
     # Assert
     assert country.fiscal_authority is None
 
 
-def test_has_monetary_authority_ref(country):
+def test_initializes_monetary_authority_ref(country):
     # Assert
     assert country.monetary_authority is None
 

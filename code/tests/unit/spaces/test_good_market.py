@@ -20,7 +20,7 @@ def test_inherits_from_eco_space():
 
 
 @pytest.mark.parametrize("arg", [True, False])
-def test_has_tradable_arg(arg):
+def test_initializes_tradable_arg(arg):
     # Given
     model = Mock()
 
@@ -38,17 +38,17 @@ def market():
     return GoodsMarket(model)
 
 
-def test_has_average_price_attr(market):
+def test_initializes_average_price_attr(market):
     # Assert
     assert market.average_price == 0
 
 
-def test_has_previous_average_price_attr(market):
+def test_initializes_previous_average_price_attr(market):
     # Assert
     assert market.average_price_prev == 0
 
 
-def test_has_average_productivity_attr(market):
+def test_initializes_average_productivity_attr(market):
     # Assert
     assert market.average_prod == 0
 
@@ -58,12 +58,12 @@ def test_has_average_productivity_attr(market):
 # ----------------------------------------------------
 
 
-def test_has_consumers_list(market):
+def test_initializes_consumers_list(market):
     # Assert
     assert isinstance(market.consumers, AgentDList)
 
 
-def test_has_producers_list(market):
+def test_initializes_producers_list(market):
     # Assert
     assert isinstance(market.producers, AgentDList)
 

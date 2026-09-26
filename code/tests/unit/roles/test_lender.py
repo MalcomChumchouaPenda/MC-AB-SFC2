@@ -25,7 +25,7 @@ def role():
     return Lender(agent, env)
 
 
-def test_has_loan_applicants_list(role):
+def test_initializes_loan_applicants_list(role):
     # Assert
     assert role.loan_applicants == []
 

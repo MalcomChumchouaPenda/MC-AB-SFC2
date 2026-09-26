@@ -32,52 +32,52 @@ def household():
     return household
 
 
-def test_has_default_labor_supply(household):
+def test_initializes_labor_supply(household):
     # Assert
     assert household.labor_supply == 1.0
 
 
-def test_has_default_preference(household):
+def test_initializes_preference(household):
     # Assert
     assert household.preference == 0
 
 
-def test_has_default_reservation_wage(household):
+def test_initializes_reservation_wage(household):
     # Assert
     assert household.reservation_wage == 0
 
 
-def test_has_default_expected_consumption(household):
+def test_initializes_expected_consumption(household):
     # Assert
     assert household.expected_consumption == 0
 
 
-def test_has_default_desired_consumption(household):
+def test_initializes_desired_consumption(household):
     # Assert
     assert household.desired_consumption == 0
 
 
-def test_has_default_desired_equity(household):
+def test_initializes_desired_equity(household):
     # Assert
     assert household.desired_equity == 0
 
 
-def test_has_default_desired_deposits(household):
+def test_initializes_desired_deposits(household):
     # Assert
     assert household.desired_deposits == 0
 
 
-def test_has_default_desired_investment_sector(household):
+def test_initializes_desired_investment_sector(household):
     # Assert
     assert household.desired_investment_sector is None
 
 
-def test_has_default_net_worth(household):
+def test_initializes_net_worth(household):
     # Assert
     assert household.net_worth == 0
 
 
-def test_has_default_incomes(household):
+def test_initializes_incomes(household):
     # Assert
     assert household.income == 0
     assert household.disposable_income == 0

@@ -25,17 +25,17 @@ def role():
     return Company(agent, env)
 
 
-def test_has_sector(role):
+def test_initializes_sector(role):
     # Assert
     assert role.sector == ""
 
 
-def test_has_net_worth(role):
+def test_initializes_net_worth(role):
     # Assert
     assert role.net_worth == 0
 
 
-def test_has_defaulted(role):
+def test_initializes_defaulted(role):
     # Assert
     assert role.defaulted is False
 

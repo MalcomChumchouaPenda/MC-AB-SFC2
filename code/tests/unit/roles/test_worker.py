@@ -25,7 +25,7 @@ def role():
     return Worker(agent, env)
 
 
-def test_has_unit_labor_supply_prop(role):
+def test_initializes_unit_labor_supply(role):
     # Assert
     assert role.labor_supply == 1.0
 

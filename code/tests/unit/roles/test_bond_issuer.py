@@ -25,17 +25,17 @@ def role():
     return BondIssuer(agent, env)
 
 
-def test_has_default_debt_ratio(role):
+def test_initializes_debt_ratio(role):
     # Assert
     assert role.debt_ratio == 0.0
 
 
-def test_has_default_bond_number(role):
+def test_initializes_bond_number(role):
     # Assert
     assert role.bond_number == 0.0
 
 
-def test_has_default_bond_value(role):
+def test_initializes_bond_value(role):
     # Assert
     assert role.bond_value == 0.0
 

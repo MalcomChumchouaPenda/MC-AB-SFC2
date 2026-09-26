@@ -25,17 +25,17 @@ def role():
     return Producer(agent, env)
 
 
-def test_has_price_attr(role):
+def test_initializes_price_attr(role):
     # Assert
     assert role.price == 0
 
 
-def test_has_productivity_attr(role):
+def test_initializes_productivity_attr(role):
     # Assert
     assert role.productivity == 0
 
 
-def test_has_inventories_attr(role):
+def test_initializes_inventories_attr(role):
     # Assert
     assert role.inventories == 0
 

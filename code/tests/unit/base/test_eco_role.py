@@ -32,7 +32,7 @@ def role_with_agent_and_env():
     return role, agent, env
 
 
-def test_has_agent_ref(role_with_agent_and_env):
+def test_initializes_agent_ref(role_with_agent_and_env):
     # Given
     role, agent, _ = role_with_agent_and_env
 
@@ -40,7 +40,7 @@ def test_has_agent_ref(role_with_agent_and_env):
     assert role.agent is agent
 
 
-def test_has_env_ref(role_with_agent_and_env):
+def test_initializes_env_ref(role_with_agent_and_env):
     # Given
     role, _, env = role_with_agent_and_env
 
@@ -48,7 +48,7 @@ def test_has_env_ref(role_with_agent_and_env):
     assert role.env is env
 
 
-def test_has_label_attr(role_with_agent_and_env):
+def test_initializes_label_attr(role_with_agent_and_env):
     # Given
     role, agent, _ = role_with_agent_and_env
 
@@ -56,7 +56,7 @@ def test_has_label_attr(role_with_agent_and_env):
     assert role.label == agent.id
 
 
-def test_has_name_attr(role_with_agent_and_env):
+def test_initializes_name_attr(role_with_agent_and_env):
     # Given
     role, *_ = role_with_agent_and_env
 
