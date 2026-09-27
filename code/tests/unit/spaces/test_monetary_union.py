@@ -25,25 +25,22 @@ FakeCountry = Mock()
 
 
 @pytest.fixture
-def before_union_creation(monkeypatch):
+def model_before_union_creation(fake_model, monkeypatch):
     # Given
     monkeypatch.setattr("model.spaces.monetary_union.GoodsMarket", FakeGoodMarket)
     monkeypatch.setattr("model.spaces.monetary_union.CreditMarket", FakeCreditMarket)
     monkeypatch.setattr("model.spaces.monetary_union.BondMarket", FakeBondMarket)
     monkeypatch.setattr("model.spaces.monetary_union.Country", FakeCountry)
     monkeypatch.setattr(MonetaryUnion, "add_space", Mock())
-
-
-@pytest.fixture
-def model(fake_model):
-    # Given
     model = fake_model
     model.p.K = 0
     return model
 
 
-@pytest.mark.usefixtures("before_union_creation")
-def test_initializes_average_inflation(model):
+def test_initializes_average_inflation(model_before_union_creation):
+    # Given
+    model = model_before_union_creation
+
     # When
     union = MonetaryUnion(model)
 
@@ -51,8 +48,10 @@ def test_initializes_average_inflation(model):
     assert union.average_inflation == 0.0
 
 
-@pytest.mark.usefixtures("before_union_creation")
-def test_initializes_discount_rate(model):
+def test_initializes_discount_rate(model_before_union_creation):
+    # Given
+    model = model_before_union_creation
+
     # When
     union = MonetaryUnion(model)
 
@@ -60,8 +59,10 @@ def test_initializes_discount_rate(model):
     assert union.discount_rate == 0.0
 
 
-@pytest.mark.usefixtures("before_union_creation")
-def test_creates_tradable_good_market(model):
+def test_creates_tradable_good_market(model_before_union_creation):
+    # Given
+    model = model_before_union_creation
+
     # When
     union = MonetaryUnion(model)
 
@@ -69,8 +70,10 @@ def test_creates_tradable_good_market(model):
     union.add_space.assert_any_call(FakeGoodMarket, "good_market", tradable=True)
 
 
-@pytest.mark.usefixtures("before_union_creation")
-def test_creates_credit_market(model):
+def test_creates_credit_market(model_before_union_creation):
+    # Given
+    model = model_before_union_creation
+
     # When
     union = MonetaryUnion(model)
 
@@ -78,8 +81,10 @@ def test_creates_credit_market(model):
     union.add_space.assert_any_call(FakeCreditMarket, "credit_market")
 
 
-@pytest.mark.usefixtures("before_union_creation")
-def test_creates_bond_market(model):
+def test_creates_bond_market(model_before_union_creation):
+    # Given
+    model = model_before_union_creation
+
     # When
     union = MonetaryUnion(model)
 
@@ -87,9 +92,9 @@ def test_creates_bond_market(model):
     union.add_space.assert_any_call(FakeBondMarket, "bond_market")
 
 
-@pytest.mark.usefixtures("before_union_creation")
-def test_creates_countries(model):
+def test_creates_countries(model_before_union_creation):
     # Given
+    model = model_before_union_creation
     model.p.K = 2
 
     # When
@@ -104,34 +109,40 @@ def test_creates_countries(model):
 # ROLES MANAGEMENT
 # ----------------------------------------------------
 
-
-@pytest.fixture
-def union(model, before_union_creation):
-    # Given
-    _ = before_union_creation
-    return MonetaryUnion(model)
-
-
 FakeMaker = Mock()
 
 
 @pytest.fixture
-def before_role_creation(monkeypatch, union):
+def union_without_roles(monkeypatch, model_before_union_creation):
     # Given
     monkeypatch.setattr("model.spaces.monetary_union.PolicyMaker", FakeMaker)
+    model = model_before_union_creation
+    union = MonetaryUnion(model)
     union.add_role = Mock()
+    return union
 
 
-@pytest.mark.usefixtures("before_role_creation")
-def test_add_policy_maker_add_appropriate_role(union):
+def test_add_policy_maker_creates_proper_role(union_without_roles):
     # Given
     cb = Mock()
+    union = union_without_roles
+
+    # When
+    union.add_policy_maker(cb)
+
+    # Then
+    union.add_role.assert_called_with(FakeMaker, cb, "policy_maker")
+
+
+def test_add_policy_maker_returns_created_role(union_without_roles):
+    # Given
+    cb = Mock()
+    union = union_without_roles
 
     # When
     role = union.add_policy_maker(cb)
 
     # Then
-    union.add_role.assert_called_with(FakeMaker, cb, "policy_maker")
     assert role == union.add_role.return_value
 
 
@@ -141,18 +152,21 @@ def test_add_policy_maker_add_appropriate_role(union):
 
 
 @pytest.fixture
-def before_firm_creation(union):
+def union_before_firm_creation(model_before_union_creation):
     # Given
+    model = model_before_union_creation
+    union = MonetaryUnion(model)
     union.add_company = Mock()
     union.fund_company = Mock()
     union.spaces["good_market"] = Mock()
     union.spaces["credit_market"] = Mock()
+    return union
 
 
-@pytest.mark.usefixtures("before_firm_creation")
-def test_place_trad_firm_in_goods_market(union):
+def test_place_trad_firm_in_goods_market(union_before_firm_creation):
     # Given
     firm = Mock()
+    union = union_before_firm_creation
     market = union.spaces["good_market"]
 
     # When
@@ -162,10 +176,10 @@ def test_place_trad_firm_in_goods_market(union):
     market.add_producer.assert_called_with(firm)
 
 
-@pytest.mark.usefixtures("before_firm_creation")
-def test_dont_place_non_trad_firm_in_goods_market(union):
+def test_dont_place_non_trad_firm_in_goods_market(union_before_firm_creation):
     # Given
     firm = Mock()
+    union = union_before_firm_creation
     market = union.spaces["good_market"]
 
     # When
@@ -175,11 +189,11 @@ def test_dont_place_non_trad_firm_in_goods_market(union):
     market.add_producer.assert_not_called()
 
 
-@pytest.mark.usefixtures("before_firm_creation")
 @pytest.mark.parametrize("tradable", [True, False])
-def test_place_firm_add_borrower_role(union, tradable):
+def test_place_firm_add_borrower_role(union_before_firm_creation, tradable):
     # Given
     firm = Mock()
+    union = union_before_firm_creation
     market = union.spaces["credit_market"]
 
     # When
@@ -195,18 +209,21 @@ def test_place_firm_add_borrower_role(union, tradable):
 
 
 @pytest.fixture
-def before_bank_creation(union):
+def union_before_bank_creation(model_before_union_creation):
     # Given
+    model = model_before_union_creation
+    union = MonetaryUnion(model)
     union.add_company = Mock()
     union.fund_company = Mock()
     union.spaces["bond_market"] = Mock()
     union.spaces["credit_market"] = Mock()
+    return union
 
 
-@pytest.mark.usefixtures("before_bank_creation")
-def test_place_bank_add_bond_buyer(union):
+def test_place_bank_add_bond_buyer(union_before_bank_creation):
     # Given
     bank = Mock()
+    union = union_before_bank_creation
     market = union.spaces["bond_market"]
 
     # When
@@ -216,10 +233,10 @@ def test_place_bank_add_bond_buyer(union):
     market.add_buyer.assert_called_with(bank)
 
 
-@pytest.mark.usefixtures("before_bank_creation")
-def test_place_bank_add_lender_role(union):
+def test_place_bank_add_lender_role(union_before_bank_creation):
     # Given
     bank = Mock()
+    union = union_before_bank_creation
     market = union.spaces["credit_market"]
 
     # When
@@ -234,9 +251,12 @@ def test_place_bank_add_lender_role(union):
 # ----------------------------------------------------
 
 
-def test_update_average_inflation(union):
+def test_update_average_inflation(model_before_union_creation):
     # Given
-    union.spaces = {f"country_{i}": Mock(inflation=0.05, gdp=100) for i in range(5)}
+    countries = {f"country_{i}": Mock(inflation=0.05, gdp=100) for i in range(5)}
+    model = model_before_union_creation
+    union = MonetaryUnion(model)
+    union.spaces = countries
 
     # When
     union.update_average_inflation()

@@ -55,7 +55,7 @@ def market_without_roles(monkeypatch, market):
     return market
 
 
-def test_add_lender_add_appropriate_role(market_without_roles):
+def test_add_lender_creates_proper_role(market_without_roles):
     # Given
     agent = Mock()
     market = market_without_roles
@@ -68,7 +68,7 @@ def test_add_lender_add_appropriate_role(market_without_roles):
     assert role == market.add_role.return_value
 
 
-def test_add_borrower_add_appropriate_role(market_without_roles):
+def test_add_borrower_creates_proper_role(market_without_roles):
     # Given
     agent = Mock()
     market = market_without_roles

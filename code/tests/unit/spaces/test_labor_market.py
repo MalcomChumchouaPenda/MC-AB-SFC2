@@ -45,49 +45,65 @@ def test_initializes_unemployment(fake_model):
 # ----------------------------------------------------
 
 
-@pytest.fixture
-def market():
-    # Given
-    model = Mock()
-    return LaborMarket(model)
-
-
 FakeWorker = Mock()
 FakeEmployer = Mock()
 
 
 @pytest.fixture
-def before_roles_creation(monkeypatch, market):
+def market_without_roles(monkeypatch, fake_model):
     # Given
     monkeypatch.setattr("model.spaces.labor_market.Employer", FakeEmployer)
     monkeypatch.setattr("model.spaces.labor_market.Worker", FakeWorker)
+    market = LaborMarket(fake_model)
     market.add_role = Mock()
-    market.workers = []
+    return market
 
 
-@pytest.mark.usefixtures("before_roles_creation")
-def test_add_worker_add_appropriate_role(market):
+def test_add_worker_creates_proper_role(market_without_roles):
     # Given
     agent = Mock()
+    market = market_without_roles
+
+    # When
+    market.add_worker(agent)
+
+    # Then
+    market.add_role.assert_called_with(FakeWorker, agent, "worker")
+
+
+def test_add_worker_returns_created_role(market_without_roles):
+    # Given
+    agent = Mock()
+    market = market_without_roles
 
     # When
     role = market.add_worker(agent)
 
     # Then
-    market.add_role.assert_called_with(FakeWorker, agent, "worker")
     assert role == market.add_role.return_value
 
 
-@pytest.mark.usefixtures("before_roles_creation")
-def test_add_employer_add_appropriate_role(market):
+def test_add_employer_creates_proper_role(market_without_roles):
     # Given
     agent = Mock()
+    market = market_without_roles
+
+    # When
+    market.add_employer(agent)
+
+    # Then
+    market.add_role.assert_called_with(FakeEmployer, agent, "employer")
+
+
+def test_add_employer_returns_created_role(market_without_roles):
+    # Given
+    agent = Mock()
+    market = market_without_roles
 
     # When
     role = market.add_employer(agent)
 
     # Then
-    market.add_role.assert_called_with(FakeEmployer, agent, "employer")
     assert role == market.add_role.return_value
 
 
@@ -96,28 +112,39 @@ def test_add_employer_add_appropriate_role(market):
 # ----------------------------------------------------
 
 
-def test_hire_worker_add_edge(market):
+@pytest.fixture
+def market_with_participants(market_without_roles):
     # Given
-    employer = Mock(wage=20, labor_demand=10)
-    worker = Mock(labor_supply=1.0)
+    worker = Mock()
+    employer = Mock()
+    market = market_without_roles
+    market.graph.add_nodes_from([employer, worker])
+    return market, employer, worker
+
+
+def test_hire_worker_add_edge(market_with_participants):
+    # Given
+    market, employer, worker = market_with_participants
+    employer.labor_demand = 10
+    employer.wage = 20
+    worker.labor_supply = 1.0
     graph = market.graph
-    graph.add_nodes_from([employer, worker])
 
     # When
     market.hire_worker(worker, employer, 0.9)
 
     # Then
-    assert len(graph.edges) == 1
     assert graph.has_edge(worker, employer)
     assert graph[worker][employer]["wage"] == 20
     assert graph[worker][employer]["quantity"] == 0.9
 
 
-def test_hire_worker_reduces_labor_demand(market):
+def test_hire_worker_reduces_labor_demand(market_with_participants):
     # Given
-    worker = Mock(labor_supply=1.0)
-    employer = Mock(wage=20, labor_demand=10)
-    market.graph.add_nodes_from([employer, worker])
+    market, employer, worker = market_with_participants
+    employer.labor_demand = 10
+    employer.wage = 20
+    worker.labor_supply = 1.0
 
     # When
     market.hire_worker(worker, employer, 0.9)
@@ -126,11 +153,12 @@ def test_hire_worker_reduces_labor_demand(market):
     assert employer.labor_demand == pytest.approx(9.1)
 
 
-def test_hire_worker_reduces_labor_supply(market):
+def test_hire_worker_reduces_labor_supply(market_with_participants):
     # Given
-    worker = Mock(labor_supply=1.0)
-    employer = Mock(wage=20, labor_demand=10)
-    market.graph.add_nodes_from([employer, worker])
+    market, employer, worker = market_with_participants
+    employer.labor_demand = 10
+    employer.wage = 20
+    worker.labor_supply = 1.0
 
     # When
     market.hire_worker(worker, employer, 0.9)
@@ -144,13 +172,6 @@ def test_hire_worker_reduces_labor_supply(market):
 # ----------------------------------------------------
 
 
-@pytest.fixture
-def market_with_participants(market):
-    # Given
-    employer, worker = Mock(), Mock()
-    market.graph.add_nodes_from([employer, worker])
-    return market, employer, worker
-
 
 # ---------------------------------------------------
 # EVOLUTION
@@ -158,8 +179,9 @@ def market_with_participants(market):
 
 
 @pytest.fixture
-def market_before_update(market, make_dlist):
+def market_before_update(market_without_roles, make_dlist):
     # Given
+    market = market_without_roles
     market.average_wage = 0
     market.unemployment = 0
     market.roles = {
