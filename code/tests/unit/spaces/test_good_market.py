@@ -1,6 +1,5 @@
 import pytest
 from unittest.mock import Mock
-from agentpy import AgentDList
 from model.spaces.good_market import GoodsMarket
 
 # ---------------------------------------------------
@@ -29,13 +28,6 @@ def test_initializes_tradable_arg(arg):
 
     # Then
     assert market.tradable is arg
-
-
-@pytest.fixture
-def market():
-    # Given
-    model = Mock()
-    return GoodsMarket(model)
 
 
 def test_initializes_average_price(fake_model):
@@ -72,126 +64,86 @@ def test_initializes_average_productivity(fake_model):
 
 
 # ---------------------------------------------------
-# ROLES SET/REF TESTS
-# ----------------------------------------------------
-
-
-def test_initializes_consumers_list(fake_model):
-    # Given
-    model = fake_model
-
-    # When
-    market = GoodsMarket(model)
-
-    # Then
-    assert isinstance(market.consumers, AgentDList)
-
-
-def test_initializes_producers_list(fake_model):
-    # Given
-    model = fake_model
-
-    # When
-    market = GoodsMarket(model)
-
-    # Then
-    assert isinstance(market.producers, AgentDList)
-
-
-# ---------------------------------------------------
 # ROLES MANAGEMENT TESTS
 # ----------------------------------------------------
 
 
 FakeConsumer = Mock()
-
-
-@pytest.fixture
-def market_without_consumers(monkeypatch, market):
-    # Given
-    monkeypatch.setattr("model.spaces.good_market.Consumer", FakeConsumer)
-    market.add_role = Mock()
-    market.consumers = []
-    return market
-
-
-def test_add_consumer_creates_tradable_consumer_role(market_without_consumers):
-    # Given
-    agent = Mock()
-    market = market_without_consumers
-    market.tradable = True
-
-    # When
-    role = market.add_consumer(agent)
-
-    # Then
-    market.add_role.assert_called_with(FakeConsumer, agent, "trad_consumer")
-    assert role is market.add_role.return_value
-
-
-def test_add_consumer_creates_non_tradable_consumer_role(market_without_consumers):
-    # Given
-    agent = Mock()
-    market = market_without_consumers
-    market.tradable = False
-
-    # When
-    role = market.add_consumer(agent)
-
-    # Then
-    market.add_role.assert_called_with(FakeConsumer, agent, "non_trad_consumer")
-    assert role is market.add_role.return_value
-
-
-@pytest.mark.parametrize("tradable", [True, False])
-def test_add_consumer_registers_role(market_without_consumers, tradable):
-    # Given
-    agent = Mock()
-    market = market_without_consumers
-    market.tradable = tradable
-
-    # When
-    role = market.add_consumer(agent)
-
-    # Then
-    assert market.consumers == [role]
-
-
 FakeProducer = Mock()
 
 
 @pytest.fixture
-def market_without_producers(monkeypatch, market):
+def market_without_roles(monkeypatch, fake_model):
     # Given
+    monkeypatch.setattr("model.spaces.good_market.Consumer", FakeConsumer)
     monkeypatch.setattr("model.spaces.good_market.Producer", FakeProducer)
+    market = GoodsMarket(fake_model)
     market.add_role = Mock()
-    market.producers = []
     return market
 
 
-def test_add_producer_creates_producer_role(market_without_producers):
+def test_add_consumer_creates_tradable_consumer_role(market_without_roles):
     # Given
+    market = market_without_roles
+    market.tradable = True
     agent = Mock()
-    market = market_without_producers
 
     # When
-    role = market.add_producer(agent)
+    market.add_consumer(agent)
 
     # Then
-    market.add_role.assert_called_with(FakeProducer, agent, "producer")
+    market.add_role.assert_called_with(FakeConsumer, agent, "trad_consumer")
+
+
+def test_add_consumer_creates_non_tradable_consumer_role(market_without_roles):
+    # Given
+    market = market_without_roles
+    market.tradable = False
+    agent = Mock()
+
+    # When
+    market.add_consumer(agent)
+
+    # Then
+    market.add_role.assert_called_with(FakeConsumer, agent, "non_trad_consumer")
+
+
+@pytest.mark.parametrize("tradable", [True, False])
+def test_add_consumer_returns_created_role(market_without_roles, tradable):
+    # Given
+    market = market_without_roles
+    market.tradable = tradable
+    agent = Mock()
+
+    # When
+    role = market.add_consumer(agent)
+
+    # Then
     assert role is market.add_role.return_value
 
 
-def test_add_producer_registers_role(market_without_producers):
+def test_add_producer_creates_producer_role(market_without_roles):
     # Given
     agent = Mock()
-    market = market_without_producers
+    market = market_without_roles
+
+    # When
+    market.add_producer(agent)
+
+    # Then
+    market.add_role.assert_called_with(FakeProducer, agent, "producer")
+
+
+def test_add_producer_returns_created_role(market_without_roles):
+    # Given
+    agent = Mock()
+    market = market_without_roles
 
     # When
     role = market.add_producer(agent)
 
     # Then
-    assert market.producers == [role]
+    assert role is market.add_role.return_value
 
 
 # ---------------------------------------------------
@@ -200,44 +152,35 @@ def test_add_producer_registers_role(market_without_producers):
 
 
 @pytest.fixture
-def market():
+def market_before_transaction(market_without_roles):
     # Given
-    model = Mock()
-    random = model.random
-    random.sample = Mock(side_effect=lambda pop, k: pop[:k])
-    market = GoodsMarket(model)
-    return market
-
-
-@pytest.fixture
-def market_before_purchase(market):
-    # Given
+    market = market_without_roles
     market.transfer_stock = Mock()
     market.record_flow = Mock()
+    random = market.model.random
+    random.sample = Mock(side_effect=lambda pop, k: pop[:k])
     return market
 
 
-def test_buy_goods_updates_accounts(market_before_purchase):
+def test_buy_goods_updates_accounts(market_before_transaction):
     # Given
     consumer = Mock()
     producer = Mock(price=10, inventories=100)
-    market = market_before_purchase
-    transfer_stock = market.transfer_stock
-    record_flow = market.record_flow
+    market = market_before_transaction
 
     # When
     market.buy_goods(consumer, producer, 5)
 
     # Then
-    transfer_stock.assert_any_call("cash", consumer.id, producer.id, 50)
-    record_flow.assert_any_call("consumption", consumer.id, producer.id, 50)
+    market.transfer_stock.assert_any_call("cash", consumer.id, producer.id, 50)
+    market.record_flow.assert_any_call("consumption", consumer.id, producer.id, 50)
 
 
-def test_buy_goods_decrease_inventories(market_before_purchase):
+def test_buy_goods_decrease_inventories(market_before_transaction):
     # Given
     consumer = Mock()
     producer = Mock(price=10, inventories=100)
-    market = market_before_purchase
+    market = market_before_transaction
 
     # When
     market.buy_goods(consumer, producer, 5)
@@ -252,20 +195,22 @@ def test_buy_goods_decrease_inventories(market_before_purchase):
 
 
 @pytest.fixture
-def market_before_update(market, make_dlist):
+def market_before_update(market_without_roles, make_dlist):
     # Given
     producers = [Mock(price=0, productivity=0) for _ in range(5)]
-    market.average_price_prev = 0
-    market.average_price = 0
-    market.average_prod = 0
-    market.producers = make_dlist(producers)
+    producers = make_dlist(producers)
+    market = market_without_roles
+    market.roles = {"producer": producers}
     return market
 
 
 def test_update_state_recalc_average_price(market_before_update):
     # Given
     market = market_before_update
-    market.producers.price = 5
+    market.average_price_prev = 0
+    market.average_price = 0
+    market.average_prod = 0
+    market.roles["producer"].price = 5
 
     # When
     market.update_state()
@@ -277,8 +222,10 @@ def test_update_state_recalc_average_price(market_before_update):
 def test_update_state_store_previous_average_price(market_before_update):
     # Given
     market = market_before_update
-    market.producers.price = 5
+    market.average_price_prev = 0
     market.average_price = 6.0
+    market.average_prod = 0
+    market.roles["producer"].price = 5
 
     # When
     market.update_state()
@@ -290,7 +237,10 @@ def test_update_state_store_previous_average_price(market_before_update):
 def test_update_state_recalc_average_productivity(market_before_update):
     # Given
     market = market_before_update
-    market.producers.productivity = 10
+    market.average_price_prev = 0
+    market.average_price = 0
+    market.average_prod = 0
+    market.roles["producer"].productivity = 10
 
     # When
     market.update_state()
@@ -319,13 +269,12 @@ def test_calc_inflation(market_before_update):
 
 def test_calc_gdp(market_before_update):
     # Given
-    producer = Mock()
-    producer.account.stocks = {"consumption": 500}
     market = market_before_update
-    market.producers = [producer]
+    market.get_stock = lambda x, y: 100 if x == "consumption" else 0
+    producers = market.roles["producer"]
 
     # When
     gdp = market.calc_gdp()
 
     # Then
-    assert gdp == pytest.approx(500)
+    assert gdp == 100 * len(producers)

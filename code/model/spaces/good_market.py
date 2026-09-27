@@ -8,29 +8,20 @@ class GoodsMarket(EcoSpace):
 
     def setup(self, tradable=False):
         super().setup()
-
-        # state
         self.tradable = tradable
         self.average_price_prev = 0
         self.average_price = 0
         self.average_prod = 0
 
-        # roles set
-        self.consumers = AgentDList(self.model)
-        self.producers = AgentDList(self.model)
-
     #
     # Roles management
     #
     def add_producer(self, firm):
-        role = self.add_role(Producer, firm, "producer")
-        self.producers.append(role)
-        return role
+        return self.add_role(Producer, firm, "producer")
 
     def add_consumer(self, household):
         name = "trad_consumer" if self.tradable else "non_trad_consumer"
         role = self.add_role(Consumer, household, name)
-        self.consumers.append(role)
         return role
 
     #
@@ -46,7 +37,7 @@ class GoodsMarket(EcoSpace):
     #   Evolution
     #
     def update_state(self):
-        producers = self.producers
+        producers = self.roles["producer"]
         self.average_price_prev = self.average_price
         self.average_price = sum(producers.price) / max(1, len(producers))
         self.average_prod = sum(producers.productivity) / max(1, len(producers))
@@ -57,4 +48,6 @@ class GoodsMarket(EcoSpace):
         return (current_price - prev_price) / prev_price
 
     def calc_gdp(self):
-        return sum(prod.account.stocks.get("consumption", 0) for prod in self.producers)
+        return sum(
+            self.get_stock("consumption", prod.id) for prod in self.roles["producer"]
+        )

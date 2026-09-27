@@ -18,14 +18,6 @@ def test_inherits_from_eco_space():
     assert is_derived
 
 
-@pytest.fixture
-def market():
-    # Given
-    model = Mock()
-    market = DepositMarket(model)
-    return market
-
-
 # ---------------------------------------------------
 # ROLES MANAGEMENT
 # ----------------------------------------------------
@@ -37,11 +29,12 @@ FakeGuarantee = Mock()
 
 
 @pytest.fixture
-def market_without_roles(monkeypatch, market):
+def market_without_roles(monkeypatch, fake_model):
     # Given
     monkeypatch.setattr("model.spaces.deposit_market.DepositBank", FakeBank)
     monkeypatch.setattr("model.spaces.deposit_market.Depositor", FakeDepositor)
     monkeypatch.setattr("model.spaces.deposit_market.DepositGuarantee", FakeGuarantee)
+    market = DepositMarket(fake_model)
     market.add_role = Mock()
     return market
 
@@ -91,9 +84,10 @@ def test_add_deposit_guarantee_add_new_role(market_without_roles):
 
 
 @pytest.fixture
-def market_with_participants(market):
+def market_with_participants(market_without_roles):
     # Given
     depositor, deposit_bank = Mock(), Mock()
+    market = market_without_roles
     market.transfer_stock = Mock()
     market.record_flow = Mock()
     market.graph.add_nodes_from([depositor, deposit_bank])
@@ -127,14 +121,15 @@ def test_join_deposit_bank_with_initial_amount(market_with_participants):
 def test_join_deposit_bank_updates_accounts(market_with_participants):
     # Given
     market, depositor, deposit_bank = market_with_participants
-    transfer_stock = market.transfer_stock
 
     # When
     market.join_deposit_bank(depositor, deposit_bank, amount=500)
 
     # Then
-    transfer_stock.assert_any_call("cash", depositor.id, deposit_bank.id, 500)
-    transfer_stock.assert_any_call("deposits", deposit_bank.id, depositor.id, 500)
+    market.transfer_stock.assert_any_call("cash", depositor.id, deposit_bank.id, 500)
+    market.transfer_stock.assert_any_call(
+        "deposits", deposit_bank.id, depositor.id, 500
+    )
 
 
 def test_join_deposit_bank_registers_deposit_bank_refs(market_with_participants):
@@ -175,15 +170,14 @@ def test_leave_deposit_bank_remove_graph_edge(market_with_depositor_amount):
 def test_leave_deposit_bank_updates_accounts(market_with_depositor_amount):
     # Given
     market, depositor, amount = market_with_depositor_amount
-    transfer_stock = market.transfer_stock
     bank_id = depositor.bank_id
 
     # When
     market.leave_deposit_bank(depositor)
 
     # Then
-    transfer_stock.assert_any_call("cash", bank_id, depositor.id, amount)
-    transfer_stock.assert_any_call("deposits", depositor.id, bank_id, amount)
+    market.transfer_stock.assert_any_call("cash", bank_id, depositor.id, amount)
+    market.transfer_stock.assert_any_call("deposits", depositor.id, bank_id, amount)
 
 
 def test_leave_deposit_bank_change_bank_id(market_with_depositor_amount):
@@ -207,14 +201,15 @@ def test_make_deposits_updates_accounts(market_with_depositor_amount):
     # Given
     market, depositor, _ = market_with_depositor_amount
     deposit_bank = depositor.deposit_bank
-    transfer_stock = market.transfer_stock
 
     # When
     market.make_deposits(depositor, 500)
 
     # Then
-    transfer_stock.assert_any_call("cash", depositor.id, deposit_bank.id, 500)
-    transfer_stock.assert_any_call("deposits", deposit_bank.id, depositor.id, 500)
+    market.transfer_stock.assert_any_call("cash", depositor.id, deposit_bank.id, 500)
+    market.transfer_stock.assert_any_call(
+        "deposits", deposit_bank.id, depositor.id, 500
+    )
 
 
 def test_make_deposits_transfers_cash(market_with_depositor_amount):
@@ -234,14 +229,15 @@ def test_withdraw_deposits_updates_accounts(market_with_depositor_amount):
     # Given
     market, depositor, _ = market_with_depositor_amount
     deposit_bank = depositor.deposit_bank
-    transfer_stock = market.transfer_stock
 
     # When
     market.withdraw_deposits(depositor, 500)
 
     # Then
-    transfer_stock.assert_any_call("cash", deposit_bank.id, depositor.id, 500)
-    transfer_stock.assert_any_call("deposits", depositor.id, deposit_bank.id, 500)
+    market.transfer_stock.assert_any_call("cash", deposit_bank.id, depositor.id, 500)
+    market.transfer_stock.assert_any_call(
+        "deposits", depositor.id, deposit_bank.id, 500
+    )
 
 
 def test_withdraw_deposits_transfers_cash(market_with_depositor_amount):
@@ -266,15 +262,17 @@ def test_pay_interests_updates_accounts(market_with_depositor_amount):
     # Given
     market, depositor, _ = market_with_depositor_amount
     deposit_bank = depositor.deposit_bank
-    transfer_stock = market.transfer_stock
-    record_flow = market.record_flow
 
     # When
     market.pay_interests(deposit_bank, depositor, 10.0)
 
     # Then
-    transfer_stock.assert_any_call("deposits", deposit_bank.id, depositor.id, 10.0)
-    record_flow.assert_any_call("dep_interests", deposit_bank.id, depositor.id, 10.0)
+    market.transfer_stock.assert_any_call(
+        "deposits", deposit_bank.id, depositor.id, 10.0
+    )
+    market.record_flow.assert_any_call(
+        "dep_interests", deposit_bank.id, depositor.id, 10.0
+    )
 
 
 def test_pay_interests_updates_graph_edge(market_with_depositor_amount):
@@ -295,11 +293,10 @@ def test_reimburse_deposits_updates_accounts(market_with_depositor_amount):
     guarantee = Mock()
     market, depositor, _ = market_with_depositor_amount
     deposit_bank = depositor.deposit_bank
-    transfer_stock = market.transfer_stock
 
     # When
     market.reimburse_deposits(guarantee, depositor, 50)
 
     # Then
-    transfer_stock.assert_any_call("cash", guarantee.id, depositor.id, 50)
-    transfer_stock.assert_any_call("deposits", depositor.id, deposit_bank.id, 50)
+    market.transfer_stock.assert_any_call("cash", guarantee.id, depositor.id, 50)
+    market.transfer_stock.assert_any_call("deposits", depositor.id, deposit_bank.id, 50)
