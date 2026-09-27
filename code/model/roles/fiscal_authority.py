@@ -10,6 +10,9 @@ class FiscalAuthority(EcoRole):
     def get_gdp(self):
         return self.env.gdp
 
+    def get_discount_rate(self):
+        return self.env.monetary_authority.discount_rate
+
     def get_average_price(self):
         return self.env.spaces["good_market"].average_price
 

@@ -22,7 +22,7 @@ class BondMarket(EcoSpace):
         amount = issuer.bond_value * number
         issuer.bond_number -= number
         self.transfer_stock("bonds", issuer.id, buyer.id, amount)
-        self.transfer_stock("cash", buyer.id, issuer.id, amount)
+        self.transfer_stock("cash", buyer.id,  issuer.id, amount)
         self.graph.add_edge(issuer, buyer, amount=amount)
 
     def repay_bonds(self, buyer, issuer, principal, interests):

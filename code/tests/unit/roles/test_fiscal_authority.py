@@ -53,6 +53,18 @@ def test_get_gdp_from_env(role):
     assert perceived == 500
 
 
+def test_get_discount_rate_within_env(role):
+    # Given
+    env = role.env
+    env.monetary_authority.discount_rate = 0.02
+
+    # When
+    perceived = role.get_discount_rate()
+
+    # Then
+    assert perceived == 0.02
+
+
 @pytest.fixture
 def role_with_good_market(role):
     # Given
