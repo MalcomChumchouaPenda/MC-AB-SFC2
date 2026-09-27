@@ -56,7 +56,6 @@ def test_initializes_bond_value():
 # ----------------------------------------------------
 
 
-
 @pytest.fixture
 def role():
     # Given

@@ -75,6 +75,7 @@ def space(fake_model):
     model = fake_model
     return EcoSpace(model)
 
+
 @pytest.fixture
 def space_with_sub_spaces(space):
     # Given

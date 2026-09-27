@@ -1,7 +1,6 @@
 import agentpy as ap
 
 
-
 class EcoModel(ap.Model):
     """
     Classe de base du modèle économique.

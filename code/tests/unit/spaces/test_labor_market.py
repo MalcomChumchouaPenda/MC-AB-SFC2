@@ -18,20 +18,25 @@ def test_inherits_from_eco_space():
     assert is_derived
 
 
-@pytest.fixture
-def market():
+def test_initializes_average_wage(fake_model):
     # Given
-    model = Mock()
-    return LaborMarket(model)
+    model = fake_model
 
+    # When
+    market = LaborMarket(model)
 
-def test_initializes_average_wage(market):
-    # Assert
+    # Then
     assert market.average_wage == 0
 
 
-def test_initializes_unemployment(market):
-    # Assert
+def test_initializes_unemployment(fake_model):
+    # Given
+    model = fake_model
+
+    # When
+    market = LaborMarket(model)
+
+    # Then
     assert market.unemployment == 0.0
 
 
@@ -40,24 +45,30 @@ def test_initializes_unemployment(market):
 # ----------------------------------------------------
 
 
+@pytest.fixture
+def market():
+    # Given
+    model = Mock()
+    return LaborMarket(model)
+
+
 FakeWorker = Mock()
 FakeEmployer = Mock()
 
 
 @pytest.fixture
-def market_without_roles(monkeypatch, market):
+def before_roles_creation(monkeypatch, market):
     # Given
     monkeypatch.setattr("model.spaces.labor_market.Employer", FakeEmployer)
     monkeypatch.setattr("model.spaces.labor_market.Worker", FakeWorker)
     market.add_role = Mock()
     market.workers = []
-    return market
 
 
-def test_add_worker_add_appropriate_role(market_without_roles):
+@pytest.mark.usefixtures("before_roles_creation")
+def test_add_worker_add_appropriate_role(market):
     # Given
     agent = Mock()
-    market = market_without_roles
 
     # When
     role = market.add_worker(agent)
@@ -67,10 +78,10 @@ def test_add_worker_add_appropriate_role(market_without_roles):
     assert role == market.add_role.return_value
 
 
-def test_add_employer_add_appropriate_role(market_without_roles):
+@pytest.mark.usefixtures("before_roles_creation")
+def test_add_employer_add_appropriate_role(market):
     # Given
     agent = Mock()
-    market = market_without_roles
 
     # When
     role = market.add_employer(agent)

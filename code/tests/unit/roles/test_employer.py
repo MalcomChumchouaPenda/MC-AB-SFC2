@@ -51,6 +51,7 @@ def role():
     agent, env = Mock(), Mock()
     return Employer(agent, env)
 
+
 def test_get_unemployment(role):
     # Given
     env = role.env

@@ -1,7 +1,4 @@
-
-REAL_ASSETS = (
-    "inventories",
-)
+REAL_ASSETS = ("inventories",)
 
 FINANCIAL_ASSETS = (
     "deposits",

@@ -39,13 +39,12 @@ def test_initializes_discount_rate():
 # ----------------------------------------------------
 
 
-
-
 @pytest.fixture
 def role():
     # Given
     agent, env = Mock(), Mock()
     return MonetaryAuthority(agent, env)
+
 
 def test_transfer_profits_with_env(role):
     # Given

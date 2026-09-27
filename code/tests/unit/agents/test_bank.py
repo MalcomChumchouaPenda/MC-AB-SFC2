@@ -90,7 +90,6 @@ def test_initializes_defaulted(fake_model):
 # ----------------------------------------------------
 
 
-
 @pytest.fixture
 def bank(fake_model):
     # Given

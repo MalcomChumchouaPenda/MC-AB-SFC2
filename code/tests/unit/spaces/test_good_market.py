@@ -38,18 +38,36 @@ def market():
     return GoodsMarket(model)
 
 
-def test_initializes_average_price(market):
-    # Assert
+def test_initializes_average_price(fake_model):
+    # Given
+    model = fake_model
+
+    # When
+    market = GoodsMarket(model)
+
+    # Then
     assert market.average_price == 0
 
 
-def test_initializes_previous_average_price(market):
-    # Assert
+def test_initializes_previous_average_price(fake_model):
+    # Given
+    model = fake_model
+
+    # When
+    market = GoodsMarket(model)
+
+    # Then
     assert market.average_price_prev == 0
 
 
-def test_initializes_average_productivity(market):
-    # Assert
+def test_initializes_average_productivity(fake_model):
+    # Given
+    model = fake_model
+
+    # When
+    market = GoodsMarket(model)
+
+    # Then
     assert market.average_prod == 0
 
 
@@ -58,13 +76,25 @@ def test_initializes_average_productivity(market):
 # ----------------------------------------------------
 
 
-def test_initializes_consumers_list(market):
-    # Assert
+def test_initializes_consumers_list(fake_model):
+    # Given
+    model = fake_model
+
+    # When
+    market = GoodsMarket(model)
+
+    # Then
     assert isinstance(market.consumers, AgentDList)
 
 
-def test_initializes_producers_list(market):
-    # Assert
+def test_initializes_producers_list(fake_model):
+    # Given
+    model = fake_model
+
+    # When
+    market = GoodsMarket(model)
+
+    # Then
     assert isinstance(market.producers, AgentDList)
 
 

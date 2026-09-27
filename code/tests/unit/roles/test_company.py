@@ -18,7 +18,6 @@ def test_inherits_from_eco_role():
     assert is_derived
 
 
-
 def test_initializes_sector():
     # Given
     agent, env = Mock(), Mock()
@@ -63,6 +62,7 @@ def role():
     agent, env = Mock(), Mock()
     return Company(agent, env)
 
+
 def test_get_average_wage(role):
     # Given
     env = role.env
@@ -71,7 +71,7 @@ def test_get_average_wage(role):
     # When
     perceived = role.get_average_wage()
 
-    # Assert
+    # Then
     assert perceived == 15.0
 
 
@@ -82,7 +82,7 @@ def test_get_equity_shares_from_env(role):
     # When
     found = role.get_equity_shares()
 
-    # Assert
+    # Then
     env.find_links.assert_called_with(role, "founder")
     assert found == env.find_links.return_value
 
@@ -95,7 +95,7 @@ def test_get_tax_rate(role):
     # When
     perceived = role.get_tax_rate()
 
-    # Assert
+    # Then
     assert perceived == 0.2
 
 
@@ -107,7 +107,7 @@ def test_get_discount_rate(role):
     # When
     perceived = role.get_discount_rate()
 
-    # Assert
+    # Then
     assert perceived == 0.05
 
 

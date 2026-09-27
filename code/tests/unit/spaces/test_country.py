@@ -24,43 +24,83 @@ FakeDepositMarket = Mock()
 
 
 @pytest.fixture
-def country(monkeypatch, fake_model):
+def before_space_creation(monkeypatch):
     # Given
     monkeypatch.setattr("model.spaces.country.GoodsMarket", FakeGoodMarket)
     monkeypatch.setattr("model.spaces.country.LaborMarket", FakeLaborMarket)
     monkeypatch.setattr("model.spaces.country.DepositMarket", FakeDepositMarket)
     monkeypatch.setattr(Country, "add_space", Mock())
-    country = Country(model=fake_model)
-    return country
 
 
-def test_initializes_inflation(country):
-    # Assert
+@pytest.mark.usefixtures("before_space_creation")
+def test_initializes_inflation(fake_model):
+    # Given
+    model = fake_model
+
+    # When
+    country = Country(model)
+
+    # Then
     assert country.inflation == 0
 
 
-def test_initializes_gdp(country):
-    # Assert
+@pytest.mark.usefixtures("before_space_creation")
+def test_initializes_gdp(fake_model):
+    # Given
+    model = fake_model
+
+    # When
+    country = Country(model)
+
+    # Then
     assert country.gdp == 0
 
 
-def test_initializes_prob_failure(country):
-    # Assert
+@pytest.mark.usefixtures("before_space_creation")
+def test_initializes_prob_failure(fake_model):
+    # Given
+    model = fake_model
+
+    # When
+    country = Country(model)
+
+    # Then
     assert country.prob_failure == 0
 
 
-def test_initializes_tax_rate(country):
-    # Assert
+@pytest.mark.usefixtures("before_space_creation")
+def test_initializes_tax_rate(fake_model):
+    # Given
+    model = fake_model
+
+    # When
+    country = Country(model)
+
+    # Then
     assert country.tax_rate == 0
 
 
-def test_initializes_fiscal_authority(country):
-    # Assert
+@pytest.mark.usefixtures("before_space_creation")
+def test_initializes_fiscal_authority(fake_model):
+    # Given
+    model = fake_model
+
+    # When
+    country = Country(model)
+
+    # Then
     assert country.fiscal_authority is None
 
 
-def test_initializes_monetary_authority(country):
-    # Assert
+@pytest.mark.usefixtures("before_space_creation")
+def test_initializes_monetary_authority(fake_model):
+    # Given
+    model = fake_model
+
+    # When
+    country = Country(model)
+
+    # Then
     assert country.monetary_authority is None
 
 
@@ -69,18 +109,39 @@ def test_initializes_monetary_authority(country):
 # ----------------------------------------------------
 
 
-def test_creates_good_market(country):
-    # Assert
+@pytest.mark.usefixtures("before_space_creation")
+def test_creates_good_market(fake_model):
+    # Given
+    model = fake_model
+
+    # When
+    country = Country(model)
+
+    # Then
     country.add_space.assert_any_call(FakeGoodMarket, "good_market", tradable=False)
 
 
-def test_creates_labor_market(country):
-    # Assert
+@pytest.mark.usefixtures("before_space_creation")
+def test_creates_labor_market(fake_model):
+    # Given
+    model = fake_model
+
+    # When
+    country = Country(model)
+
+    # Then
     country.add_space.assert_any_call(FakeLaborMarket, "labor_market")
 
 
-def test_creates_deposit_market(country):
-    # Assert
+@pytest.mark.usefixtures("before_space_creation")
+def test_creates_deposit_market(fake_model):
+    # Given
+    model = fake_model
+
+    # When
+    country = Country(model)
+
+    # Then
     country.add_space.assert_any_call(FakeDepositMarket, "deposit_market")
 
 
@@ -92,6 +153,14 @@ FakeAuthority1 = Mock()
 FakeAuthority2 = Mock()
 FakeCitizen = Mock()
 FakeCompany = Mock()
+
+
+@pytest.fixture
+def country(fake_model, before_space_creation):
+    # Given
+    _ = before_space_creation
+    country = Country(model=fake_model)
+    return country
 
 
 @pytest.fixture

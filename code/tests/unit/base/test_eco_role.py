@@ -91,7 +91,6 @@ def test_expose_agent_central_bank_id():
     agent, env = Mock(), Mock()
     role = EcoRole(agent, env)
 
-
     # When
     exposed = role.cb_id
 
@@ -103,7 +102,6 @@ def test_expose_agent_deposit_bank_id():
     # Given
     agent, env = Mock(), Mock()
     role = EcoRole(agent, env)
-
 
     # When
     exposed = role.bank_id

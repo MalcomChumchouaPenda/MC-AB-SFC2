@@ -18,7 +18,6 @@ def test_inherits_from_eco_role():
     assert is_derived
 
 
-
 def test_initializes_unit_labor_supply():
     # Given
     agent, env = Mock(), Mock()
@@ -40,6 +39,7 @@ def role():
     # Given
     agent, env = Mock(), Mock()
     return Worker(agent, env)
+
 
 def test_get_labor_sold(role):
     # Given

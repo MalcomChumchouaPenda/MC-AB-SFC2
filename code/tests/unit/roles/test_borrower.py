@@ -45,7 +45,6 @@ def test_initializes_net_worth():
 # ----------------------------------------------------
 
 
-
 @pytest.fixture
 def role():
     # Given

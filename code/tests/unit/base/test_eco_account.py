@@ -17,7 +17,6 @@ def test_doesnt_inherit_from_agentpy_object():
     assert not is_derived
 
 
-
 def test_creates_default_stocks(monkeypatch):
     # Given
     monkeypatch.setattr("model.base.FINANCIAL_ASSETS", ["x", "y"])
@@ -27,7 +26,7 @@ def test_creates_default_stocks(monkeypatch):
     account = EcoAccount()
 
     # Then
-    assert account.stocks == {"x":0.0, "y":0.0, "z":0.0}
+    assert account.stocks == {"x": 0.0, "y": 0.0, "z": 0.0}
 
 
 def test_creates_default_flows(monkeypatch):
@@ -38,7 +37,7 @@ def test_creates_default_flows(monkeypatch):
     account = EcoAccount()
 
     # Then
-    assert account.flows == {"a":0.0, "b":0.0}
+    assert account.flows == {"a": 0.0, "b": 0.0}
 
 
 # ---------------------------------------------------
@@ -58,7 +57,7 @@ def account(monkeypatch):
 @pytest.fixture
 def account_with_stocks(account):
     # Given
-    stocks = {"x":0.0}
+    stocks = {"x": 0.0}
     account.stocks = stocks
     return account, stocks
 

@@ -18,7 +18,6 @@ def test_inherits_from_eco_agent():
     assert is_derived
 
 
-
 def test_initializes_tax_rate(fake_model):
     # Given
     model = fake_model
@@ -121,6 +120,7 @@ def test_initializes_prev_budget_surplus(fake_model):
 # ---------------------------------------------------
 # PUBLIC TRANSFERS
 # ----------------------------------------------------
+
 
 @pytest.fixture
 def govt(fake_model):

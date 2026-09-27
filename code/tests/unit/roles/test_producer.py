@@ -18,7 +18,6 @@ def test_inherits_from_eco_role():
     assert is_derived
 
 
-
 def test_initializes_price():
     # Given
     agent, env = Mock(), Mock()
@@ -57,6 +56,7 @@ def role():
     # Given
     agent, env = Mock(), Mock()
     return Producer(agent, env)
+
 
 def test_expose_variety(role):
     # Given

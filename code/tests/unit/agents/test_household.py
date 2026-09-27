@@ -25,7 +25,7 @@ def test_initializes_labor_supply(fake_model):
 
     # When
     household = Household(model)
-    
+
     # Then
     assert household.labor_supply == 1.0
 
@@ -36,7 +36,7 @@ def test_initializes_preference(fake_model):
 
     # When
     household = Household(model)
-    
+
     # Then
     assert household.preference == 0
 
@@ -47,7 +47,7 @@ def test_initializes_reservation_wage(fake_model):
 
     # When
     household = Household(model)
-    
+
     # Then
     assert household.reservation_wage == 0
 
@@ -58,7 +58,7 @@ def test_initializes_expected_consumption(fake_model):
 
     # When
     household = Household(model)
-    
+
     # Then
     assert household.expected_consumption == 0
 
@@ -69,7 +69,7 @@ def test_initializes_desired_consumption(fake_model):
 
     # When
     household = Household(model)
-    
+
     # Then
     assert household.desired_consumption == 0
 
@@ -80,7 +80,7 @@ def test_initializes_desired_equity(fake_model):
 
     # When
     household = Household(model)
-    
+
     # Then
     assert household.desired_equity == 0
 
@@ -91,7 +91,7 @@ def test_initializes_desired_deposits(fake_model):
 
     # When
     household = Household(model)
-    
+
     # Then
     assert household.desired_deposits == 0
 
@@ -102,7 +102,7 @@ def test_initializes_desired_investment_sector(fake_model):
 
     # When
     household = Household(model)
-    
+
     # Then
     assert household.desired_investment_sector is None
 
@@ -113,7 +113,7 @@ def test_initializes_net_worth(fake_model):
 
     # When
     household = Household(model)
-    
+
     # Then
     assert household.net_worth == 0
 
@@ -124,7 +124,7 @@ def test_initializes_incomes(fake_model):
 
     # When
     household = Household(model)
-    
+
     # Then
     assert household.income == 0
     assert household.disposable_income == 0

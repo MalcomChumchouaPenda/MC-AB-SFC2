@@ -34,12 +34,12 @@ def test_initializes_residual_equity():
 # ----------------------------------------------------
 
 
-
 @pytest.fixture
 def role():
     # Given
     agent, env = Mock(), Mock()
     return Citizen(agent, env)
+
 
 def test_get_prob_failure(role):
     # Given
@@ -127,7 +127,7 @@ def test_get_tax_rate(role):
     # When
     perceived = role.get_tax_rate()
 
-    # Assert
+    # Then
     assert perceived == 0.2
 
 
