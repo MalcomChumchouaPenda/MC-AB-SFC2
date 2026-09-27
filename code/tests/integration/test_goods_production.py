@@ -1,31 +1,32 @@
 from unittest.mock import Mock
 import pytest
-from agentpy import Model
 from model.agents.firm import Firm
+from model.spaces.good_market import GoodsMarket
 
 
 @pytest.fixture
-def model():
+def market(fake_model):
     # Given
-    model = Model()
+    model = fake_model
+    market = GoodsMarket(model)
+    return market
+
+
+@pytest.fixture
+def firm(fake_model, market):
+    # Given
+    model = fake_model
     model.p.theta = 0.20
-    return model
-
-
-@pytest.fixture
-def firm(model):
-    # Given
     firm = Firm(model)
-    firm.roles["producer"] = Mock()
+    market.add_producer(firm)
     return firm
 
 
 def test_production_planning_pipeline(firm):
     # Given
     firm.expected_sales = 150
-    role = firm.roles["producer"]
-    role.inventories = 30
-    role.productivity = 3
+    firm.roles["producer"].inventories = 30
+    firm.roles["producer"].productivity = 3
 
     # When
     firm.plan_production()
