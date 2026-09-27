@@ -56,7 +56,7 @@ def test_clears_link_amount_with_bank(market, govt, bank):
 
     # Then
     assert market.graph[issuer_role][buyer_role]["amount"] == 0
-    
+
 
 def test_decreases_bonds_from_bank(market, govt, bank):
     # Given
@@ -174,5 +174,3 @@ def test_transfers_cash_to_central_bank(market, govt, cb):
     # Then
     assert govt.account.stocks["cash"] == -104.2
     assert cb.account.stocks["cash"] == 104.2
-
-    

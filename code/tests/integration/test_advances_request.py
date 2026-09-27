@@ -2,39 +2,44 @@ from unittest.mock import Mock
 import pytest
 from model.agents.bank import Bank
 from model.agents.central_bank import CentralBank
-from model.spaces.credit_market import CreditMarket
+from model.spaces.monetary_union import MonetaryUnion
 
 
 @pytest.fixture
-def cb(fake_model):
+def country_with_market(fake_model):
     # Given
     model = fake_model
-    return CentralBank(model)
+    model.p.K = 1
+    union = MonetaryUnion(model)
+    country = union.spaces["country_0"]
+    market = union.spaces["credit_market"]
+    return country, market
 
 
 @pytest.fixture
-def bank(fake_model, cb):
+def cb(fake_model, country_with_market):
+    # Given
+    model = fake_model
+    cb = CentralBank(model)
+    country, _ = country_with_market
+    country.add_monetary_authority(cb)
+    return cb
+
+
+@pytest.fixture
+def bank(fake_model, country_with_market, cb):
     # Given
     model = fake_model
     bank = Bank(model)
     bank.cb_id = cb.id
-    bank.roles["company"] = Mock()
+    country, market = country_with_market
+    country.add_company(bank, "B")
+    market.add_lender(bank)
     return bank
 
 
-@pytest.fixture
-def market_participants(fake_model, bank, cb):
+def test_increases_advances(bank, cb):
     # Given
-    model = fake_model
-    market = CreditMarket(model)
-    market.add_lender(bank)
-    market.add_account(cb)
-    return bank, cb
-
-
-def test_increases_advances(market_participants):
-    # Given
-    bank, cb = market_participants
     bank.p.mu2 = 0.10
     bank.account.stocks["cash"] = 40
     bank.account.stocks["deposits"] = 1000
@@ -47,9 +52,8 @@ def test_increases_advances(market_participants):
     assert cb.account.stocks["advances"] == 60
 
 
-def test_transfers_cash(market_participants):
+def test_transfers_cash(bank, cb):
     # Given
-    bank, cb = market_participants
     bank.p.mu2 = 0.10
     bank.account.stocks["cash"] = 40
     bank.account.stocks["deposits"] = 1000
