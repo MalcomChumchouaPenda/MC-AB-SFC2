@@ -184,16 +184,15 @@ def test_repay_loans_updates_graph_edge(market_with_loan):
 def test_repay_loans_updates_accounts(market_with_loan):
     # Given
     market, borrower, lender = market_with_loan
+    bank_id = borrower.bank_id
 
     # When
     market.repay_loans(borrower, lender, 100, 10)
 
     # Then
     market.transfer_stock.assert_any_call("loans", lender.id, borrower.id, 100)
-    market.transfer_stock.assert_any_call("cash", borrower.bank_id, lender.id, 110)
-    market.transfer_stock.assert_any_call(
-        "deposits", borrower.id, borrower.bank_id, 110
-    )
+    market.transfer_stock.assert_any_call("cash", bank_id, lender.id, 110)
+    market.transfer_stock.assert_any_call("deposits", borrower.id, bank_id, 110)
     market.record_flow.assert_any_call("loan_interests", borrower.id, lender.id, 10)
 
 
