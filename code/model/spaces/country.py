@@ -124,7 +124,7 @@ class Country(EcoSpace):
 
     def _place_firm(self, firm, tradable):
         self.env.place_firm(firm, tradable=tradable)
-        self.spaces["deposit_market"].add_depositor(firm)
+        self.spaces["deposit_market"].add_supplier(firm)
         self.spaces["labor_market"].add_employer(firm)
         if not tradable:
             self.spaces["good_market"].add_producer(firm)
@@ -139,7 +139,7 @@ class Country(EcoSpace):
             amount = share["amount"]
             self.fund_company(company, founder, amount)
         self.env.place_bank(bank)
-        self.spaces["deposit_market"].add_deposit_bank(bank)
+        self.spaces["deposit_market"].add_demander(bank)
 
     #
     # Profit transfers

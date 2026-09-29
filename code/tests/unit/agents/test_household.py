@@ -589,7 +589,7 @@ def hh_as_general_consumer(hh_with_roles_and_account):
     # Given
     household, roles, account = hh_with_roles_and_account
     household.consume_good = Mock()
-    roles["depositor"] = Mock()
+    roles["deposit_supplier"] = Mock()
     roles["trad_consumer"] = Mock()
     roles["non_trad_consumer"] = Mock()
     account["cash"] = 0
@@ -635,7 +635,7 @@ def test_consume_with_insufficient_cash(hh_as_general_consumer):
     household.desired_consumption = 100
     account["deposits"] = 100
     account["cash"] = 50
-    role = roles["depositor"]
+    role = roles["deposit_supplier"]
 
     # When
     household.consume()
@@ -652,7 +652,7 @@ def test_consume_with_insufficient_deposits(hh_as_general_consumer):
     household.desired_consumption = 100
     account["deposits"] = 25
     account["cash"] = 50
-    role = roles["depositor"]
+    role = roles["deposit_supplier"]
 
     # When
     household.consume()
@@ -672,7 +672,7 @@ def hh_before_allocation(hh_with_roles_and_account):
     # Given
     household, roles, _ = hh_with_roles_and_account
     roles["citizen"] = Mock()
-    roles["depositor"] = Mock()
+    roles["deposit_supplier"] = Mock()
     return household
 
 
@@ -712,7 +712,7 @@ def test_calc_liquidity_pref_when_equity_is_more_profitable(hh_before_allocation
     household.p.lambda_ = 0.6
     roles = household.roles
     roles["citizen"].get_prob_failure.return_value = 0.10
-    roles["depositor"].get_deposit_rate.return_value = 0.05
+    roles["deposit_supplier"].get_deposit_rate.return_value = 0.05
     expected = 0.6 * math.exp(((10 * (1 - 0.10)) / 100) - 0.05)
 
     # When
@@ -730,7 +730,7 @@ def test_calc_liquidity_pref_when_equity_is_less_profitable(hh_before_allocation
     household.p.lambda_ = 0.7
     roles = household.roles
     roles["citizen"].get_prob_failure.return_value = 0.10
-    roles["depositor"].get_deposit_rate.return_value = 0.05
+    roles["deposit_supplier"].get_deposit_rate.return_value = 0.05
 
     # When
     lp = household.calc_liquidity_preference()
@@ -747,7 +747,7 @@ def test_calc_liquidity_preference_when_no_equity(hh_before_allocation):
     household.p.lambda_ = 0.8
     roles = household.roles
     roles["citizen"].get_prob_failure.return_value = 0.10
-    roles["depositor"].get_deposit_rate.return_value = 0.05
+    roles["deposit_supplier"].get_deposit_rate.return_value = 0.05
 
     # When
     lp = household.calc_liquidity_preference()
@@ -970,17 +970,17 @@ def test_create_company_can_create_bank(hh_before_investment):
 
 
 @pytest.fixture
-def hh_as_depositor(hh_with_roles_and_account):
+def hh_as_deposit_supplier(hh_with_roles_and_account):
     # Given
     role = Mock()
     household, roles, _ = hh_with_roles_and_account
-    roles["depositor"] = role
+    roles["deposit_supplier"] = role
     return household, role
 
 
-def test_make_deposits_with_residual_cash(hh_as_depositor):
+def test_make_deposits_with_residual_cash(hh_as_deposit_supplier):
     # Given
-    household, role = hh_as_depositor
+    household, role = hh_as_deposit_supplier
     household.account["cash"] = 500
 
     # When
@@ -1081,15 +1081,15 @@ def test_invest_equity_does_nothing_when_insufficient_equity(hh_as_investor):
     household.make_deposits.assert_called_with()
 
 
-def test_choose_deposit_bank_opens_account_randomly(hh_as_depositor):
+def test_choose_deposit_demander_opens_account_randomly(hh_as_deposit_supplier):
     # Given
     banks = [Mock() for _ in range(3)]
-    household, role = hh_as_depositor
+    household, role = hh_as_deposit_supplier
     household.model.random.choice.side_effect = lambda x: x[-1]
-    role.find_deposit_banks.return_value = banks
+    role.find_deposit_demanders.return_value = banks
 
     # When
-    household.choose_deposit_bank()
+    household.choose_deposit_demander()
 
     # Then
     role.choose_bank.assert_called_once_with(banks[-1])

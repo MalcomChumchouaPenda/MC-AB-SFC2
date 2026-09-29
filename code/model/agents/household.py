@@ -107,7 +107,7 @@ class Household(EcoAgent):
         if desired_cons > stocks["cash"]:
             needs = desired_cons - stocks["cash"]
             feasible = min(needs, stocks["deposits"])
-            role = self.roles["depositor"]
+            role = self.roles["deposit_supplier"]
             role.withdraw_deposits(feasible)
 
     def consume_good(self, role, target_cons):
@@ -164,7 +164,7 @@ class Household(EcoAgent):
         equity = self.account["equities"]
         dividends = self.account["dividends"]
         default_prob = roles["citizen"].get_prob_failure()
-        deposit_rate = roles["depositor"].get_deposit_rate()
+        deposit_rate = roles["deposit_supplier"].get_deposit_rate()
         profit_ratio = dividends / equity if equity else 0
         if profit_ratio < deposit_rate or equity <= 0:
             return p.lambda_
@@ -233,12 +233,12 @@ class Household(EcoAgent):
 
     def make_deposits(self):
         account = self.account
-        role = self.roles["depositor"]
+        role = self.roles["deposit_supplier"]
         role.make_deposits(account["cash"])
 
-    def choose_deposit_bank(self):
-        role = self.roles["depositor"]
-        banks = role.find_deposit_banks()
+    def choose_deposit_demander(self):
+        role = self.roles["deposit_supplier"]
+        banks = role.find_deposit_demanders()
         if len(banks) > 0:
             random = self.model.random
             new_bank = random.choice(banks)

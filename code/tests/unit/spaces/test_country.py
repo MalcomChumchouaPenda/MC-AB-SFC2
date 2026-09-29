@@ -662,7 +662,7 @@ def test_create_firm_add_employer_role(country_before_creation, share, tradable)
 
 
 @pytest.mark.parametrize("tradable", [True, False])
-def test_create_firm_add_depositor_role(country_before_creation, share, tradable):
+def test_create_firm_add_supplier_role(country_before_creation, share, tradable):
     # Given
     firm = Mock()
     country = country_before_creation
@@ -672,7 +672,7 @@ def test_create_firm_add_depositor_role(country_before_creation, share, tradable
     country.create_firm(firm, [share], tradable=tradable)
 
     # Then
-    market.add_depositor.assert_called_with(firm)
+    market.add_supplier.assert_called_with(firm)
 
 
 @pytest.mark.parametrize("tradable", [True, False])
@@ -708,7 +708,7 @@ def test_create_bank_add_and_fund_company(country_before_creation, share):
     country.fund_company.assert_called_with(company, share["founder"], 5)
 
 
-def test_create_bank_add_deposit_bank_role(country_before_creation, share):
+def test_create_bank_add_demander_role(country_before_creation, share):
     # Given
     bank = Mock()
     country = country_before_creation
@@ -718,7 +718,7 @@ def test_create_bank_add_deposit_bank_role(country_before_creation, share):
     country.create_bank(bank, [share])
 
     # Then
-    market.add_deposit_bank.assert_called_with(bank)
+    market.add_demander.assert_called_with(bank)
 
 
 def test_create_bank_place_bank_in_env(country_before_creation, share):

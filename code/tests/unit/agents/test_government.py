@@ -574,7 +574,7 @@ def test_reimburse_deposits(govt_as_deposit_guarantee):
     # Given
     bank, client = Mock(), Mock()
     default = {"bank": bank, "amount": -100}
-    deposits = [{"depositor": client, "amount": 100}]
+    deposits = [{"deposit_supplier": client, "amount": 100}]
     govt, role = govt_as_deposit_guarantee
     govt._defaults = [default]
     role.find_deposits.return_value = deposits

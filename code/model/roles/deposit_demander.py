@@ -1,7 +1,7 @@
 from model.base import EcoRole
 
 
-class DepositBank(EcoRole):
+class DepositDemander(EcoRole):
 
     def __init__(self, agent, env):
         super().__init__(agent, env)
@@ -12,10 +12,10 @@ class DepositBank(EcoRole):
     #
 
     def find_deposits(self):
-        return self.env.find_links(self, "depositor")
+        return self.env.find_links(self, "deposit_supplier")
 
     #
     # Actions
     #
-    def pay_interests(self, depositor, amount):
-        self.env.pay_interests(self, depositor, amount)
+    def pay_interests(self, deposit_supplier, amount):
+        self.env.pay_interests(self, deposit_supplier, amount)

@@ -25,10 +25,10 @@ class Bank(EcoAgent):
         self.deposit_rate = self.p.zeta * discount_rate
 
     def pay_deposit_interests(self):
-        role = self.roles["deposit_bank"]
+        role = self.roles["deposit_demander"]
         for deposit in role.find_deposits():
             amount = self.deposit_rate * deposit["amount"]
-            role.pay_interests(deposit["depositor"], amount)
+            role.pay_interests(deposit["deposit_supplier"], amount)
 
     def grant_loans(self):
         role = self.roles["lender"]
