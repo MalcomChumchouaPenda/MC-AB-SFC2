@@ -1,6 +1,5 @@
 from unittest.mock import Mock
 import pytest
-from agentpy import Model
 from model.spaces.monetary_union import MonetaryUnion
 from model.agents.household import Household
 from model.agents.firm import Firm

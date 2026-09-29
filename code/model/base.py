@@ -1,4 +1,3 @@
-from collections import defaultdict
 from agentpy import Agent, Network, AgentNode, AgentDList, AttrDict
 from model.accounts import FINANCIAL_ASSETS, REAL_ASSETS, TRANSACTIONS
 
