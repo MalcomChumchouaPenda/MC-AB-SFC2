@@ -83,7 +83,7 @@ class EcoSpace(Network):
     # Role management
     #
     def add_role(self, kind, agent, group, prefix=None):
-        name = prefix + '_' + group if prefix else group
+        name = prefix + "_" + group if prefix else group
         role = self._create_role(kind, agent, group, name)
         if agent.account is None:
             self.add_account(agent)
@@ -104,7 +104,6 @@ class EcoSpace(Network):
     def _add_node(self, agent, role):
         self.positions[agent] = role
         self.graph.add_node(role)
-
 
     def remove_role(self, role):
         name = role.name

@@ -1,4 +1,3 @@
-from agentpy import AgentDList
 from model.base import EcoSpace
 from model.roles.consumer import Consumer
 from model.roles.producer import Producer
@@ -38,7 +37,8 @@ class GoodsMarket(EcoSpace):
     #   Evolution
     #
     def update_state(self):
-        producers = self.roles["producer"]
+        roles = self.roles
+        producers = roles.select(roles.group == "producer")
         self.average_price_prev = self.average_price
         self.average_price = sum(producers.price) / max(1, len(producers))
         self.average_prod = sum(producers.productivity) / max(1, len(producers))
@@ -49,6 +49,6 @@ class GoodsMarket(EcoSpace):
         return (current_price - prev_price) / prev_price
 
     def calc_gdp(self):
-        return sum(
-            self.get_stock("consumption", prod.id) for prod in self.roles["producer"]
-        )
+        roles = self.roles
+        producers = roles.select(roles.group == "producer")
+        return sum(self.get_stock("consumption", i) for i in producers.id)

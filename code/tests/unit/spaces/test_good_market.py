@@ -105,7 +105,9 @@ def test_add_consumer_creates_non_tradable_consumer_role(market_without_roles):
     market.add_consumer(agent)
 
     # Then
-    market.add_role.assert_called_with(FakeConsumer, agent, "consumer", prefix="non_trad")
+    market.add_role.assert_called_with(
+        FakeConsumer, agent, "consumer", prefix="non_trad"
+    )
 
 
 @pytest.mark.parametrize("tradable", [True, False])
@@ -195,22 +197,32 @@ def test_buy_goods_decrease_inventories(market_before_transaction):
 
 
 @pytest.fixture
-def market_before_update(market_without_roles, make_dlist):
+def producers(make_dlist):
     # Given
-    producers = [Mock(price=0, productivity=0) for _ in range(5)]
+    producers = [Mock(id=i) for i in range(5)]
     producers = make_dlist(producers)
+    producers.group = "producer"
+    producers.price = 0
+    producers.productivity = 0
+    return producers
+
+
+@pytest.fixture
+def market_before_update(market_without_roles, producers, make_dlist):
+    # Given
+    others = make_dlist([Mock(group="other") for _ in range(5)])
     market = market_without_roles
-    market.roles = {"producer": producers}
+    market.roles = others + producers
     return market
 
 
-def test_update_state_recalc_average_price(market_before_update):
+def test_update_state_recalc_average_price(market_before_update, producers):
     # Given
     market = market_before_update
     market.average_price_prev = 0
     market.average_price = 0
     market.average_prod = 0
-    market.roles["producer"].price = 5
+    producers.price = 5
 
     # When
     market.update_state()
@@ -219,13 +231,13 @@ def test_update_state_recalc_average_price(market_before_update):
     assert market.average_price == pytest.approx(5.0)
 
 
-def test_update_state_store_previous_average_price(market_before_update):
+def test_update_state_store_previous_average_price(market_before_update, producers):
     # Given
     market = market_before_update
     market.average_price_prev = 0
     market.average_price = 6.0
     market.average_prod = 0
-    market.roles["producer"].price = 5
+    producers.price = 5
 
     # When
     market.update_state()
@@ -234,13 +246,13 @@ def test_update_state_store_previous_average_price(market_before_update):
     assert market.average_price_prev == 6.0
 
 
-def test_update_state_recalc_average_productivity(market_before_update):
+def test_update_state_recalc_average_productivity(market_before_update, producers):
     # Given
     market = market_before_update
     market.average_price_prev = 0
     market.average_price = 0
     market.average_prod = 0
-    market.roles["producer"].productivity = 10
+    producers.productivity = 10
 
     # When
     market.update_state()
@@ -267,11 +279,10 @@ def test_calc_inflation(market_before_update):
     assert inflation == pytest.approx(0.2)
 
 
-def test_calc_gdp(market_before_update):
+def test_calc_gdp(market_before_update, producers):
     # Given
     market = market_before_update
     market.get_stock = lambda x, y: 100 if x == "consumption" else 0
-    producers = market.roles["producer"]
 
     # When
     gdp = market.calc_gdp()
