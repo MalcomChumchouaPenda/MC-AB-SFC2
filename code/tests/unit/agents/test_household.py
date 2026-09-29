@@ -148,7 +148,7 @@ def household(fake_model):
 def hh_with_roles_and_account(household):
     # Given
     roles = {}
-    account = Mock(stocks={}, flows={})
+    account = {}
     household.roles = roles
     household.account = account
     return household, roles, account

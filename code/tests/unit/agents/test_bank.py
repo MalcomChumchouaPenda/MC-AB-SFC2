@@ -137,7 +137,7 @@ def test_pay_deposit_interests_to_all_clients(bank):
 def bank_with_roles_and_account(bank):
     # Given
     roles = {}
-    account = Mock(stocks={}, flows={})
+    account = {}
     bank.account = account
     bank.roles = roles
     return bank, roles, account

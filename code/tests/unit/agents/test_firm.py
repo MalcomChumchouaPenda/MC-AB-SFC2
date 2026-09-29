@@ -271,7 +271,7 @@ def test_plan_production_by_two_steps(firm):
 def firm_with_roles_and_account(firm):
     # Given
     roles = {}
-    account = Mock(stocks={}, flows={})
+    account = {}
     firm.account = account
     firm.roles = roles
     return firm, roles, account

@@ -135,7 +135,7 @@ def govt(fake_model):
 def govt_with_roles_and_account(govt):
     # Given
     roles = {}
-    account = Mock(stocks={}, flows={})
+    account = {}
     govt.account = account
     govt.roles = roles
     return govt, roles, account

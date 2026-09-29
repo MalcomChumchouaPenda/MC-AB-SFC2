@@ -79,7 +79,7 @@ def test_dont_buy_foreign_bonds(cb_as_bond_buyer):
 def cb_with_roles_and_account(fake_model):
     # Given
     roles = {}
-    account = Mock(stocks={}, flows={})
+    account = {}
     cb = CentralBank(fake_model)
     cb.account = account
     cb.roles = roles
