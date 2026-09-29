@@ -79,8 +79,8 @@ def test_increases_loan_interests(firm_with_deposit_bank, bank_with_loan):
     firm.repay_loans()
 
     # Then
-    assert bank.account.flows["loan_interests"] == interests
-    assert firm.account.flows["loan_interests"] == -interests
+    assert bank.account["loan_interests"] == interests
+    assert firm.account["loan_interests"] == -interests
 
 
 def test_decreases_loans_as_stock(firm_with_deposit_bank, bank_with_loan):
@@ -92,8 +92,8 @@ def test_decreases_loans_as_stock(firm_with_deposit_bank, bank_with_loan):
     firm.repay_loans()
 
     # Then
-    assert firm.account.stocks["loans"] == 0
-    assert bank.account.stocks["loans"] == 0
+    assert firm.account["loans"] == 0
+    assert bank.account["loans"] == 0
 
 
 def test_decreases_loan_as_link(markets, firm_with_deposit_bank, bank_with_loan):
@@ -115,28 +115,28 @@ def test_decreases_firm_deposits_as_stock(firm_with_deposit_bank, bank_with_loan
     _, amount, rate = bank_with_loan
     repayment = amount * (1 + rate)
     firm, bank = firm_with_deposit_bank
-    firm_deposits = firm.account.stocks["deposits"]
-    bank_deposits = bank.account.stocks["deposits"]
+    firm_deposits = firm.account["deposits"]
+    bank_deposits = bank.account["deposits"]
 
     # When
     firm.repay_loans()
 
     # Then
-    assert firm.account.stocks["deposits"] == firm_deposits - repayment
-    assert bank.account.stocks["deposits"] == bank_deposits + repayment
+    assert firm.account["deposits"] == firm_deposits - repayment
+    assert bank.account["deposits"] == bank_deposits + repayment
 
 
 def test_transfer_cash_between_banks(firm_with_deposit_bank, bank_with_loan):
     # Given
     bank1, amount, rate = bank_with_loan
     firm, bank2 = firm_with_deposit_bank
-    cash1 = bank1.account.stocks["cash"]
-    cash2 = bank2.account.stocks["cash"]
+    cash1 = bank1.account["cash"]
+    cash2 = bank2.account["cash"]
     repayment = amount * (1 + rate)
 
     # When
     firm.repay_loans()
 
     # Then
-    assert bank2.account.stocks["cash"] == pytest.approx(cash2 - repayment)
-    assert bank1.account.stocks["cash"] == pytest.approx(cash1 + repayment)
+    assert bank2.account["cash"] == pytest.approx(cash2 - repayment)
+    assert bank1.account["cash"] == pytest.approx(cash1 + repayment)

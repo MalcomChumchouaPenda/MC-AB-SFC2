@@ -42,7 +42,7 @@ def banks(fake_model, country):
         bank = Bank(model)
         banks.append(bank)
         country.add_company(bank, "B")
-        bank.account.stocks["equities"] = 100
+        bank.account["equities"] = 100
     return banks
 
 
@@ -92,8 +92,8 @@ def test_increases_firm_loans(firm, bank_with_loan_demand):
     bank.grant_loans()
 
     # Then
-    assert bank.account.stocks["loans"] == amount
-    assert firm.account.stocks["loans"] == -amount
+    assert bank.account["loans"] == amount
+    assert firm.account["loans"] == -amount
 
 
 def test_increases_firm_deposits(firm_with_deposit_bank, bank_with_loan_demand):
@@ -105,8 +105,8 @@ def test_increases_firm_deposits(firm_with_deposit_bank, bank_with_loan_demand):
     credit_bank.grant_loans()
 
     # Then
-    assert firm.account.stocks["deposits"] == amount
-    assert deposit_bank.account.stocks["deposits"] == -amount
+    assert firm.account["deposits"] == amount
+    assert deposit_bank.account["deposits"] == -amount
 
 
 def test_transfers_cash_between_banks(firm_with_deposit_bank, bank_with_loan_demand):
@@ -118,8 +118,8 @@ def test_transfers_cash_between_banks(firm_with_deposit_bank, bank_with_loan_dem
     credit_bank.grant_loans()
 
     # Then
-    assert credit_bank.account.stocks["cash"] == -amount
-    assert deposit_bank.account.stocks["cash"] == amount
+    assert credit_bank.account["cash"] == -amount
+    assert deposit_bank.account["cash"] == amount
 
 
 def test_creates_loan_as_link(firm_with_deposit_bank, bank_with_loan_demand, markets):

@@ -46,7 +46,7 @@ def test_increases_consumption_of_all_goods(household, firms, markets):
     # Given
     markets.average_price = 10
     household.desired_consumption = 100
-    household.account.stocks["cash"] = 100
+    household.account["cash"] = 100
     for firm in firms:
         firm.roles["producer"].inventories = 10
         firm.roles["producer"].price = 10
@@ -55,16 +55,16 @@ def test_increases_consumption_of_all_goods(household, firms, markets):
     household.consume()
 
     # Then
-    assert household.account.flows["consumption"] == -100
-    assert firms[0].account.flows["consumption"] == 60
-    assert firms[1].account.flows["consumption"] == 40
+    assert household.account["consumption"] == -100
+    assert firms[0].account["consumption"] == 60
+    assert firms[1].account["consumption"] == 40
 
 
 def test_transfers_cash_for_all_consumptions(household, firms, markets):
     # Given
     markets.average_price = 10
     household.desired_consumption = 100
-    household.account.stocks["cash"] = 100
+    household.account["cash"] = 100
     for firm in firms:
         firm.roles["producer"].inventories = 10
         firm.roles["producer"].price = 10
@@ -73,16 +73,16 @@ def test_transfers_cash_for_all_consumptions(household, firms, markets):
     household.consume()
 
     # Then
-    assert household.account.stocks["cash"] == 0
-    assert firms[0].account.stocks["cash"] == 60
-    assert firms[1].account.stocks["cash"] == 40
+    assert household.account["cash"] == 0
+    assert firms[0].account["cash"] == 60
+    assert firms[1].account["cash"] == 40
 
 
 def test_reduces_inventories_of_firms(household, firms, markets):
     # Given
     markets.average_price = 10
     household.desired_consumption = 100
-    household.account.stocks["cash"] = 100
+    household.account["cash"] = 100
     for firm in firms:
         firm.roles["producer"].inventories = 10
         firm.roles["producer"].price = 10

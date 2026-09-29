@@ -394,9 +394,9 @@ def hh_as_taxpayer(hh_with_roles_and_account):
 def test_calc_income(hh_as_taxpayer):
     # Given
     household, _ = hh_as_taxpayer
-    household.account.flows["wages"] = 110
-    household.account.flows["dep_interests"] = 20
-    household.account.flows["dividends"] = 30
+    household.account["wages"] = 110
+    household.account["dep_interests"] = 20
+    household.account["dividends"] = 30
 
     # When
     income = household.calc_income()
@@ -409,7 +409,7 @@ def test_calc_disposable_income(hh_as_taxpayer):
     # Given
     household, _ = hh_as_taxpayer
     household.income = 200
-    household.account.flows["public_transfers"] = 50
+    household.account["public_transfers"] = 50
 
     # When
     disposable_income = household.calc_disposable_income()
@@ -456,7 +456,7 @@ def test_calc_consumption_updates_choice(hh_with_roles_and_account):
     household.p.cy = 0.8
     household.p.cd = 0.1
     household.disposable_income = 1000
-    account.stocks["deposits"] = 500
+    account["deposits"] = 500
 
     # When
     consumption = household.calc_consumption()
@@ -474,7 +474,7 @@ def hh_as_specific_consumer(hh_with_roles_and_account):
     role.find_suppliers.return_value = []
     household, _, account = hh_with_roles_and_account
     household.p.psi = 1
-    account.stocks["cash"] = 1000
+    account["cash"] = 1000
     return household, role, account
 
 
@@ -574,7 +574,7 @@ def test_consume_good_with_monetary_constraints(hh_as_specific_consumer):
     ranked = [Mock(price=5, inventories=10) for _ in range(2)]
     household, role, account = hh_as_specific_consumer
     household.rank_suppliers = Mock(return_value=ranked)
-    account.stocks["cash"] = 50
+    account["cash"] = 50
 
     # When
     household.consume_good(role, 100)
@@ -592,8 +592,8 @@ def hh_as_general_consumer(hh_with_roles_and_account):
     roles["depositor"] = Mock()
     roles["trad_consumer"] = Mock()
     roles["non_trad_consumer"] = Mock()
-    account.stocks["cash"] = 0
-    account.stocks["deposits"] = 0
+    account["cash"] = 0
+    account["deposits"] = 0
     return household, roles, account
 
 
@@ -633,8 +633,8 @@ def test_consume_with_insufficient_cash(hh_as_general_consumer):
     household, roles, account = hh_as_general_consumer
     household.p.cT = 0.6
     household.desired_consumption = 100
-    account.stocks["deposits"] = 100
-    account.stocks["cash"] = 50
+    account["deposits"] = 100
+    account["cash"] = 50
     role = roles["depositor"]
 
     # When
@@ -650,8 +650,8 @@ def test_consume_with_insufficient_deposits(hh_as_general_consumer):
     household, roles, account = hh_as_general_consumer
     household.p.cT = 0.6
     household.desired_consumption = 100
-    account.stocks["deposits"] = 25
-    account.stocks["cash"] = 50
+    account["deposits"] = 25
+    account["cash"] = 50
     role = roles["depositor"]
 
     # When
@@ -679,9 +679,9 @@ def hh_before_allocation(hh_with_roles_and_account):
 def test_calc_net_worth(hh_before_allocation):
     # Given
     household = hh_before_allocation
-    household.account.stocks["deposits"] = 200
-    household.account.stocks["equities"] = 300
-    household.account.stocks["cash"] = 500
+    household.account["deposits"] = 200
+    household.account["equities"] = 300
+    household.account["cash"] = 500
 
     # When
     household.calc_net_worth()
@@ -707,8 +707,8 @@ def test_calc_expected_net_worth(hh_before_allocation):
 def test_calc_liquidity_pref_when_equity_is_more_profitable(hh_before_allocation):
     # Given
     household = hh_before_allocation
-    household.account.flows["dividends"] = 10
-    household.account.stocks["equities"] = 100
+    household.account["dividends"] = 10
+    household.account["equities"] = 100
     household.p.lambda_ = 0.6
     roles = household.roles
     roles["citizen"].get_prob_failure.return_value = 0.10
@@ -725,8 +725,8 @@ def test_calc_liquidity_pref_when_equity_is_more_profitable(hh_before_allocation
 def test_calc_liquidity_pref_when_equity_is_less_profitable(hh_before_allocation):
     # Given
     household = hh_before_allocation
-    household.account.flows["dividends"] = 2
-    household.account.stocks["equities"] = 100
+    household.account["dividends"] = 2
+    household.account["equities"] = 100
     household.p.lambda_ = 0.7
     roles = household.roles
     roles["citizen"].get_prob_failure.return_value = 0.10
@@ -742,8 +742,8 @@ def test_calc_liquidity_pref_when_equity_is_less_profitable(hh_before_allocation
 def test_calc_liquidity_preference_when_no_equity(hh_before_allocation):
     # Given
     household = hh_before_allocation
-    household.account.flows["dividends"] = 0
-    household.account.stocks["equities"] = 0
+    household.account["dividends"] = 0
+    household.account["equities"] = 0
     household.p.lambda_ = 0.8
     roles = household.roles
     roles["citizen"].get_prob_failure.return_value = 0.10
@@ -759,7 +759,7 @@ def test_calc_liquidity_preference_when_no_equity(hh_before_allocation):
 def test_choose_portfolio_allocation_calc_net_worth(hh_before_allocation):
     # Given
     household = hh_before_allocation
-    household.account.stocks["equities"] = 80
+    household.account["equities"] = 80
     household.calc_liquidity_preference = Mock(return_value=0.80)
     household.calc_expected_net_worth = Mock(return_value=100)
     household.calc_net_worth = Mock()
@@ -774,7 +774,7 @@ def test_choose_portfolio_allocation_calc_net_worth(hh_before_allocation):
 def test_choose_portfolio_allocation_updates_desired_assets(hh_before_allocation):
     # Given
     household = hh_before_allocation
-    household.account.stocks["equities"] = 20
+    household.account["equities"] = 20
     household.calc_liquidity_preference = Mock(return_value=0.40)
     household.calc_expected_net_worth = Mock(return_value=100)
     household.calc_net_worth = Mock()
@@ -790,7 +790,7 @@ def test_choose_portfolio_allocation_updates_desired_assets(hh_before_allocation
 def test_choose_portfolio_allocation_preserves_existing_equity(hh_before_allocation):
     # Given
     household = hh_before_allocation
-    household.account.stocks["equities"] = 80
+    household.account["equities"] = 80
     household.calc_liquidity_preference = Mock(return_value=0.80)
     household.calc_expected_net_worth = Mock(return_value=100)
     household.calc_net_worth = Mock()
@@ -805,7 +805,7 @@ def test_choose_portfolio_allocation_preserves_existing_equity(hh_before_allocat
 def test_choose_portfolio_allocation_updates_citizen_role(hh_before_allocation):
     # Given
     household = hh_before_allocation
-    household.account.stocks["equities"] = 80
+    household.account["equities"] = 80
     household.calc_liquidity_preference = Mock(return_value=0.80)
     household.calc_expected_net_worth = Mock(return_value=100)
     household.calc_net_worth = Mock()
@@ -981,7 +981,7 @@ def hh_as_depositor(hh_with_roles_and_account):
 def test_make_deposits_with_residual_cash(hh_as_depositor):
     # Given
     household, role = hh_as_depositor
-    household.account.stocks["cash"] = 500
+    household.account["cash"] = 500
 
     # When
     household.make_deposits()
@@ -994,7 +994,7 @@ def test_make_deposits_with_residual_cash(hh_as_depositor):
 def hh_as_investor(hh_before_allocation):
     # Given
     household = hh_before_allocation
-    household.account.stocks["equities"] = 0
+    household.account["equities"] = 0
     household.desired_equity = 100
     household.roles = {"citizen": Mock(resid_equity=100)}
     household.choose_investment_sector = Mock(return_value=None)

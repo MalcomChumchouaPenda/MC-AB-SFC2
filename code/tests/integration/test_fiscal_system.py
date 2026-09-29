@@ -109,19 +109,19 @@ def country_before_tax_payment(country, govt, household, firm, bank):
 def test_household_pay_taxes(household, govt):
     # Given
     govt.tax_rate = 0.10
-    household.account.stocks["cash"] = 1000
-    household.account.flows["wages"] = 550
-    household.account.flows["dividends"] = 50
-    household.account.flows["public_transfers"] = 50
+    household.account["cash"] = 1000
+    household.account["wages"] = 550
+    household.account["dividends"] = 50
+    household.account["public_transfers"] = 50
 
     # When
     household.pay_taxes()
 
     # Then
-    assert household.account.flows["taxes"] == -60
-    assert household.account.stocks["cash"] == 940
-    assert govt.account.flows["taxes"] == 60
-    assert govt.account.stocks["cash"] == 60
+    assert household.account["taxes"] == -60
+    assert household.account["cash"] == 940
+    assert govt.account["taxes"] == 60
+    assert govt.account["cash"] == 60
 
 
 @pytest.mark.usefixtures("country_before_tax_payment")
@@ -129,17 +129,17 @@ def test_firm_pay_taxes(firm, govt):
     # Given
     govt.tax_rate = 0.10
     firm.taxes_payable = 100
-    firm.account.stocks["cash"] = 1000
+    firm.account["cash"] = 1000
 
     # When
     firm.pay_taxes()
 
     # Then
     assert firm.taxes_payable == 0
-    assert firm.account.flows["taxes"] == -100
-    assert firm.account.stocks["cash"] == 900
-    assert govt.account.flows["taxes"] == 100
-    assert govt.account.stocks["cash"] == 100
+    assert firm.account["taxes"] == -100
+    assert firm.account["cash"] == 900
+    assert govt.account["taxes"] == 100
+    assert govt.account["cash"] == 100
 
 
 @pytest.mark.usefixtures("country_before_tax_payment")
@@ -147,14 +147,14 @@ def test_bank_pay_taxes(bank, govt):
     # Given
     govt.tax_rate = 0.10
     bank.taxes_payable = 100
-    bank.account.stocks["cash"] = 1000
+    bank.account["cash"] = 1000
 
     # When
     bank.pay_taxes()
 
     # Then
     assert bank.taxes_payable == 0
-    assert bank.account.flows["taxes"] == -100
-    assert bank.account.stocks["cash"] == 900
-    assert govt.account.flows["taxes"] == 100
-    assert govt.account.stocks["cash"] == 100
+    assert bank.account["taxes"] == -100
+    assert bank.account["cash"] == 900
+    assert govt.account["taxes"] == 100
+    assert govt.account["cash"] == 100

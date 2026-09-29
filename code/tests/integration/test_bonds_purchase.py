@@ -46,8 +46,8 @@ def bank(fake_model, market):
 
 def test_decreases_bond_number_with_bank_purchase(govt, bank):
     # Given
-    bank.account.stocks["cash"] = 150
-    bank.account.stocks["deposits"] = 1000
+    bank.account["cash"] = 150
+    bank.account["deposits"] = 1000
     issuer_role = govt.roles["bond_issuer"]
     issuer_role.bond_value = 5.0
     issuer_role.bond_number = 100
@@ -61,8 +61,8 @@ def test_decreases_bond_number_with_bank_purchase(govt, bank):
 
 def test_creates_link_with_bank_purchase(market, govt, bank):
     # Given
-    bank.account.stocks["cash"] = 150
-    bank.account.stocks["deposits"] = 1000
+    bank.account["cash"] = 150
+    bank.account["deposits"] = 1000
     buyer_role = bank.roles["bond_buyer"]
     issuer_role = govt.roles["bond_issuer"]
     issuer_role.bond_value = 5.0
@@ -77,8 +77,8 @@ def test_creates_link_with_bank_purchase(market, govt, bank):
 
 def test_increases_bonds_with_bank_purchase(govt, bank):
     # Given
-    bank.account.stocks["cash"] = 150
-    bank.account.stocks["deposits"] = 1000
+    bank.account["cash"] = 150
+    bank.account["deposits"] = 1000
     issuer_role = govt.roles["bond_issuer"]
     issuer_role.bond_value = 5.0
     issuer_role.bond_number = 100
@@ -87,14 +87,14 @@ def test_increases_bonds_with_bank_purchase(govt, bank):
     bank.buy_bonds()
 
     # Then
-    assert govt.account.stocks["bonds"] == -50
-    assert bank.account.stocks["bonds"] == 50
+    assert govt.account["bonds"] == -50
+    assert bank.account["bonds"] == 50
 
 
 def test_transfers_cash_from_bank(govt, bank):
     # Given
-    bank.account.stocks["cash"] = 150
-    bank.account.stocks["deposits"] = 1000
+    bank.account["cash"] = 150
+    bank.account["deposits"] = 1000
     issuer_role = govt.roles["bond_issuer"]
     issuer_role.bond_value = 5.0
     issuer_role.bond_number = 100
@@ -103,8 +103,8 @@ def test_transfers_cash_from_bank(govt, bank):
     bank.buy_bonds()
 
     # Then
-    assert govt.account.stocks["cash"] == 50
-    assert bank.account.stocks["cash"] == 100
+    assert govt.account["cash"] == 50
+    assert bank.account["cash"] == 100
 
 
 def test_clears_bond_number_with_central_bank_purchase(govt, cb):
@@ -144,8 +144,8 @@ def test_increases_bonds_with_central_bank_purchase(govt, cb):
     cb.buy_remaining_bonds()
 
     # Then
-    assert cb.account.stocks["bonds"] == 500
-    assert govt.account.stocks["bonds"] == -500
+    assert cb.account["bonds"] == 500
+    assert govt.account["bonds"] == -500
 
 
 def test_transfers_cash_from_central_bank(govt, cb):
@@ -158,5 +158,5 @@ def test_transfers_cash_from_central_bank(govt, cb):
     cb.buy_remaining_bonds()
 
     # Then
-    assert cb.account.stocks["cash"] == -500
-    assert govt.account.stocks["cash"] == 500
+    assert cb.account["cash"] == -500
+    assert govt.account["cash"] == 500

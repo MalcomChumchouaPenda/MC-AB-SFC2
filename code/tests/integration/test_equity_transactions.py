@@ -53,10 +53,10 @@ def test_household_portfolio_allocation(country, household):
     household.p.lambda_ = 0.4
     household.disposable_income = 100
     household.expected_consumption = 50
-    household.account.flows["dividends"] = 2.5
-    household.account.stocks["equities"] = 50
-    household.account.stocks["deposits"] = 0
-    household.account.stocks["cash"] = 0
+    household.account["dividends"] = 2.5
+    household.account["equities"] = 50
+    household.account["deposits"] = 0
+    household.account["cash"] = 0
 
     # When
     household.choose_portfolio_allocation()
@@ -87,7 +87,7 @@ def before_investment(country, founders):
     for founder in founders:
         role = country.add_citizen(founder)
         role.resid_equity = founder.desired_equity
-        founder.account.stocks["cash"] = 400
+        founder.account["cash"] = 400
 
 
 @pytest.mark.usefixtures("before_investment")
@@ -104,10 +104,10 @@ def test_household_creates_new_firm(country, founders):
     # Then
     assert len(companies) == 1
     assert isinstance(companies[0].agent, Firm)
-    assert household1.account.stocks["equities"] == 300
-    assert household1.account.stocks["cash"] == 100
-    assert household2.account.stocks["equities"] == 200
-    assert household2.account.stocks["cash"] == 200
+    assert household1.account["equities"] == 300
+    assert household1.account["cash"] == 100
+    assert household2.account["equities"] == 200
+    assert household2.account["cash"] == 200
     assert country.get_stock("equities", companies[0].id) == -500
     assert country.get_stock("cash", companies[0].id) == 500
     assert country.graph[citizen1][companies[0]]["value"] == 300
@@ -129,10 +129,10 @@ def test_household_creates_new_bank(country, founders):
     # Then
     assert len(companies) == 6
     assert isinstance(companies[-1].agent, Bank)
-    assert household1.account.stocks["equities"] == 300
-    assert household1.account.stocks["cash"] == 100
-    assert household2.account.stocks["equities"] == 200
-    assert household2.account.stocks["cash"] == 200
+    assert household1.account["equities"] == 300
+    assert household1.account["cash"] == 100
+    assert household2.account["equities"] == 200
+    assert household2.account["cash"] == 200
     assert country.get_stock("equities", companies[-1].id) == -500
     assert country.get_stock("cash", companies[-1].id) == 500
     assert country.graph[citizen1][companies[-1]]["value"] == 300
@@ -182,8 +182,8 @@ def before_distribution(country, firm, bank, household):
 @pytest.mark.usefixtures("before_distribution")
 def test_firm_pay_dividends(firm, household):
     # Given
-    household.account.stocks["cash"] = 0
-    firm.account.stocks["cash"] = 1000
+    household.account["cash"] = 0
+    firm.account["cash"] = 1000
     firm.dividends_payable = 200
 
     # When
@@ -191,17 +191,17 @@ def test_firm_pay_dividends(firm, household):
 
     # Then
     assert firm.dividends_payable == 0
-    assert firm.account.flows["dividends"] == -200
-    assert firm.account.stocks["cash"] == 800
-    assert household.account.stocks["cash"] == 200
-    assert household.account.flows["dividends"] == 200
+    assert firm.account["dividends"] == -200
+    assert firm.account["cash"] == 800
+    assert household.account["cash"] == 200
+    assert household.account["dividends"] == 200
 
 
 @pytest.mark.usefixtures("before_distribution")
 def test_bank_pay_dividends(bank, household):
     # Given
-    household.account.stocks["cash"] = 0
-    bank.account.stocks["cash"] = 500
+    household.account["cash"] = 0
+    bank.account["cash"] = 500
     bank.dividends_payable = 100
 
     # When
@@ -209,10 +209,10 @@ def test_bank_pay_dividends(bank, household):
 
     # Then
     assert bank.dividends_payable == 0
-    assert bank.account.flows["dividends"] == -100
-    assert bank.account.stocks["cash"] == 400
-    assert household.account.stocks["cash"] == 100
-    assert household.account.flows["dividends"] == 100
+    assert bank.account["dividends"] == -100
+    assert bank.account["cash"] == 400
+    assert household.account["cash"] == 100
+    assert household.account["dividends"] == 100
 
 
 @pytest.mark.usefixtures("before_distribution")
@@ -222,16 +222,16 @@ def test_firm_update_net_worth(firm, household):
     firm.net_cash_flow = 500
     firm.taxes_payable = 100
     firm.dividends_payable = 200
-    firm.account.stocks["equities"] = -1000
-    household.account.stocks["equities"] = 1000
+    firm.account["equities"] = -1000
+    household.account["equities"] = 1000
 
     # When
     firm.update_net_worth()
 
     # Then
     assert firm.net_worth == 1200
-    assert firm.account.stocks["equities"] == -1200
-    assert household.account.stocks["equities"] == 1200
+    assert firm.account["equities"] == -1200
+    assert household.account["equities"] == 1200
 
 
 @pytest.mark.usefixtures("before_distribution")
@@ -241,13 +241,13 @@ def test_bank_update_net_worth(bank, household):
     bank.profit = 200
     bank.taxes_payable = 50
     bank.dividends_payable = 50
-    bank.account.stocks["equities"] = -800
-    household.account.stocks["equities"] = 800
+    bank.account["equities"] = -800
+    household.account["equities"] = 800
 
     # When
     bank.update_net_worth()
 
     # Then
     assert bank.net_worth == 900
-    assert bank.account.stocks["equities"] == -900
-    assert household.account.stocks["equities"] == 900
+    assert bank.account["equities"] == -900
+    assert household.account["equities"] == 900

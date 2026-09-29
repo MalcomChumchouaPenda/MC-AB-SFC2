@@ -173,9 +173,9 @@ def test_pay_public_transfers(govt_as_authority):
 def test_calc_budget_balance(govt_with_roles_and_account):
     # Given
     govt, _, account = govt_with_roles_and_account
-    account.flows["public_transfers"] = 700
-    account.flows["taxes"] = 1000
-    account.flows["bond_interests"] = 100
+    account["public_transfers"] = 700
+    account["taxes"] = 1000
+    account["bond_interests"] = 100
 
     # When
     balance = govt.calc_budget_balance()
@@ -187,9 +187,9 @@ def test_calc_budget_balance(govt_with_roles_and_account):
 def test_calc_and_records_budget_deficit(govt_with_roles_and_account):
     # Given
     govt, _, account = govt_with_roles_and_account
-    account.flows["public_transfers"] = 600
-    account.flows["taxes"] = 500
-    account.flows["bond_interests"] = 100
+    account["public_transfers"] = 600
+    account["taxes"] = 500
+    account["bond_interests"] = 100
 
     # When
     govt.calc_budget_balance()
@@ -202,9 +202,9 @@ def test_calc_and_records_budget_deficit(govt_with_roles_and_account):
 def test_calc_and_records_budget_surplus(govt_with_roles_and_account):
     # Given
     govt, _, account = govt_with_roles_and_account
-    account.flows["public_transfers"] = 700
-    account.flows["taxes"] = 1000
-    account.flows["bond_interests"] = 100
+    account["public_transfers"] = 700
+    account["taxes"] = 1000
+    account["bond_interests"] = 100
 
     # When
     govt.calc_budget_balance()
@@ -217,9 +217,9 @@ def test_calc_and_records_budget_surplus(govt_with_roles_and_account):
 def test_calc_and_records_with_no_deficit_or_surplus(govt_with_roles_and_account):
     # Given
     govt, _, account = govt_with_roles_and_account
-    account.flows["public_transfers"] = 700
-    account.flows["taxes"] = 800
-    account.flows["bond_interests"] = 100
+    account["public_transfers"] = 700
+    account["taxes"] = 800
+    account["bond_interests"] = 100
 
     # When
     govt.calc_budget_balance()
@@ -399,7 +399,7 @@ def test_calc_new_debt(govt_before_bond_calc):
     govt = govt_before_bond_calc
     govt.budget_deficit = 200
     govt.prev_budget_surplus = 50
-    govt.account.stocks["bonds"] = 1000
+    govt.account["bonds"] = 1000
 
     # When
     new_debt = govt.calc_new_debt()
@@ -413,7 +413,7 @@ def test_calc_new_bonds(govt_before_bond_calc):
     # Given
     govt = govt_before_bond_calc
     govt.new_public_debt = 1150
-    govt.account.stocks["bonds"] = 1000
+    govt.account["bonds"] = 1000
 
     # When
     issuance = govt.calc_new_bonds()
@@ -426,7 +426,7 @@ def test_calc_not_new_bonds_with_enough_bonds(govt_before_bond_calc):
     # Given
     govt = govt_before_bond_calc
     govt.new_public_debt = 900
-    govt.account.stocks["bonds"] = 1000
+    govt.account["bonds"] = 1000
 
     # When
     issuance = govt.calc_new_bonds()
@@ -496,7 +496,7 @@ def test_update_bond_rate(govt_before_repayment):
     # Given
     govt = govt_before_repayment
     govt.p.chi = 0.02
-    govt.account.stocks["bonds"] = 500
+    govt.account["bonds"] = 500
     govt.roles["fiscal_authority"].get_gdp.return_value = 1000
     govt.roles["fiscal_authority"].get_discount_rate.return_value = 0.03
 

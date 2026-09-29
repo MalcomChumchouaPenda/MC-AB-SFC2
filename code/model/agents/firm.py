@@ -68,7 +68,7 @@ class Firm(EcoAgent):
 
         elif self.prev_output + self.prev_inventories > self.prev_sales:
             role = self.roles["producer"]
-            wage_bill = self.account.flows["wages"]
+            wage_bill = self.account["wages"]
             self.expected_sales *= 1 - random.uniform(0, delta)
             self.price *= 1 - random.uniform(0, delta)
             self.price = max(wage_bill / role.productivity, self.price)
@@ -134,7 +134,7 @@ class Firm(EcoAgent):
         return prob
 
     def execute_rd(self):
-        stocks = self.account.stocks
+        stocks = self.account
         labor_constraint = self.labor < self.desired_labor
         financial_constraint = stocks["loans"] < self.desired_loans
         if labor_constraint or financial_constraint:
@@ -152,19 +152,19 @@ class Firm(EcoAgent):
             return
         role = self.roles["borrower"]
         role.loan_demand = self.desired_loans
-        role.net_worth = self.account.stocks["equities"]
+        role.net_worth = self.account["equities"]
         lenders = role.find_lenders()
         for lender in lenders:
             role.request_loans(lender)
 
     def calc_desired_loans(self):
-        deposits = self.account.stocks["deposits"]
+        deposits = self.account["deposits"]
         wage_bill = self.wage_offer * self.desired_labor
         return max(0, wage_bill + self.desired_rd - deposits)
 
     def repay_loans(self):
         role = self.roles["borrower"]
-        stocks = self.account.stocks
+        stocks = self.account
         self._fund_repayments(stocks)
         for loan in role.find_loans():
             deposits = stocks["deposits"]
@@ -200,7 +200,7 @@ class Firm(EcoAgent):
         self.dividends_payable = self.calc_dividends()
 
     def calc_net_cash_flow(self):
-        flows = self.account.flows
+        flows = self.account
         return (
             flows["consumption"]
             + flows["dep_interests"]
@@ -226,7 +226,7 @@ class Firm(EcoAgent):
         return self.p.rho * (self.net_cash_flow - self.taxes_payable)
 
     def update_net_worth(self):
-        stocks = self.account.stocks
+        stocks = self.account
         payable = self.taxes_payable + self.dividends_payable
         self.net_worth += self.net_cash_flow - payable
         self.update_equity_shares(self.net_worth + stocks["equities"])
@@ -269,7 +269,7 @@ class Firm(EcoAgent):
             self._transfer_residual_cash()
 
     def _withdraw_residual_deposits(self):
-        amount = self.account.stocks["deposits"]
+        amount = self.account["deposits"]
         if amount > 0:
             role = self.roles["depositor"]
             role.withdraw_deposits(amount)
@@ -282,7 +282,7 @@ class Firm(EcoAgent):
             role.make_defaults(lender, principal)
 
     def _transfer_residual_cash(self):
-        cash = self.account.stocks["cash"]
+        cash = self.account["cash"]
         if cash > 0:
             role = self.roles["company"]
             shares = role.get_equity_shares()

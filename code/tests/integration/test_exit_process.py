@@ -53,7 +53,7 @@ def country_with_firm_and_founders(union, firm, households):
         share = {"founder": founder, "amount": 50}
         shares.append(share)
         founders.append(founder)
-        household.account.stocks["cash"] = 50
+        household.account["cash"] = 50
     country.create_firm(firm, shares, tradable=True)
     return country, firm, founders
 
@@ -67,8 +67,8 @@ def test_firm_exit_with_residual_cash(country_with_firm_and_founders):
     firm.exit()
 
     # Then
-    assert firm.account.stocks["cash"] == 0
-    assert firm.account.stocks["equities"] == 0
+    assert firm.account["cash"] == 0
+    assert firm.account["equities"] == 0
     for founder in founders:
         assert country.get_stock("cash", founder.id) == 50
         assert country.get_stock("equities", founder.id) == 0

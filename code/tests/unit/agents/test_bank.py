@@ -147,7 +147,7 @@ def test_calc_credit_capacity(bank_with_roles_and_account):
     # Given
     bank, _, account = bank_with_roles_and_account
     bank.p.mu1 = 10
-    account.stocks["equities"] = 100
+    account["equities"] = 100
 
     # When
     result = bank.calc_credit_capacity()
@@ -276,9 +276,9 @@ def test_grant_loans_cleans_loan_applicants_list(bank_as_lender):
 def bank_before_advance(bank_with_roles_and_account):
     bank, roles, account = bank_with_roles_and_account
     bank.p.mu2 = 0.1
-    account.stocks["deposits"] = 1000
-    account.stocks["advances"] = 0
-    account.stocks["cash"] = 0
+    account["deposits"] = 1000
+    account["advances"] = 0
+    account["cash"] = 0
     roles["lender"] = Mock()
     roles["company"] = Mock()
     return bank
@@ -287,7 +287,7 @@ def bank_before_advance(bank_with_roles_and_account):
 def test_doesnot_request_advance_when_sufficient_reserves(bank_before_advance):
     # Given
     bank = bank_before_advance
-    bank.account.stocks["cash"] = 200
+    bank.account["cash"] = 200
     role = bank.roles["lender"]
 
     # When
@@ -300,7 +300,7 @@ def test_doesnot_request_advance_when_sufficient_reserves(bank_before_advance):
 def test_request_advance_when_insufficient_reserves(bank_before_advance):
     # Given
     bank = bank_before_advance
-    bank.account.stocks["cash"] = 50
+    bank.account["cash"] = 50
     role = bank.roles["lender"]
 
     # When
@@ -313,7 +313,7 @@ def test_request_advance_when_insufficient_reserves(bank_before_advance):
 def test_repay_advance_when_insufficient_reserves(bank_before_advance):
     # Given
     bank = bank_before_advance
-    bank.account.stocks["advances"] = -100
+    bank.account["advances"] = -100
     lender_role = bank.roles["lender"]
     company_role = bank.roles["company"]
     company_role.get_discount_rate.return_value = 0.02
@@ -348,7 +348,7 @@ def test_calc_bond_purchases_probability():
 def test_calc_excess_reserves(bank_before_advance, reserves, expected):
     # Given
     bank = bank_before_advance
-    bank.account.stocks["cash"] = reserves
+    bank.account["cash"] = reserves
     bank.p.mu2 = 0.1
 
     # When
@@ -448,12 +448,12 @@ def test_dont_buy_bonds_with_insufficient_reserves(bank_as_bond_buyer, bond_issu
 def test_calc_profit(bank_with_roles_and_account):
     # Given
     bank, _, account = bank_with_roles_and_account
-    account.flows["loan_interests"] = 100
-    account.flows["cash_interests"] = 10
-    account.flows["loan_defaults"] = 20
-    account.flows["adv_interests"] = 10
-    account.flows["dep_interests"] = 40
-    account.flows["bond_interests"] = 30
+    account["loan_interests"] = 100
+    account["cash_interests"] = 10
+    account["loan_defaults"] = 20
+    account["adv_interests"] = 10
+    account["dep_interests"] = 40
+    account["bond_interests"] = 30
 
     # When
     profit = bank.calc_profit()
@@ -467,8 +467,8 @@ def bank_as_taxpayer(bank_with_roles_and_account):
     # Given
     role = Mock()
     bank, roles, account = bank_with_roles_and_account
-    account.flows["taxes"] = 0
-    account.stocks["cash"] = 0
+    account["taxes"] = 0
+    account["cash"] = 0
     roles["company"] = role
     return bank, role
 
@@ -525,7 +525,7 @@ def test_update_net_worth(bank_with_roles_and_account):
     bank.net_worth = 500
     bank.taxes_payable = 50
     bank.dividends_payable = 100
-    bank.account.stocks["equities"] = -500
+    bank.account["equities"] = -500
 
     # When
     bank.update_net_worth()

@@ -53,10 +53,10 @@ def test_bank_pays_deposit_interest_to_firm(firm, bank):
     bank.pay_deposit_interests()
 
     # Then
-    assert firm.account.stocks["deposits"] == 2040
-    assert bank.account.stocks["deposits"] == -2040
-    assert firm.account.flows["dep_interests"] == 40
-    assert bank.account.flows["dep_interests"] == -40
+    assert firm.account["deposits"] == 2040
+    assert bank.account["deposits"] == -2040
+    assert firm.account["dep_interests"] == 40
+    assert bank.account["dep_interests"] == -40
 
 
 @pytest.fixture
@@ -78,8 +78,8 @@ def before_reimbursement(market, firm, bank, govt):
 @pytest.mark.usefixtures("before_reimbursement")
 def test_government_reimburse_deposits(govt, firm, bank):
     # Given
-    firm.account.stocks["cash"] = 0
-    bank.account.stocks["cash"] = 0
+    firm.account["cash"] = 0
+    bank.account["cash"] = 0
     bank.roles["deposit_bank"].defaulted = True
     govt.roles["bond_issuer"] = Mock()
 
@@ -90,8 +90,8 @@ def test_government_reimburse_deposits(govt, firm, bank):
     # Then
     assert govt.roles["bond_issuer"].bond_value == 20
     assert govt.roles["bond_issuer"].bond_number == 100
-    assert govt.account.stocks["cash"] == -2000
-    assert firm.account.stocks["deposits"] == 0
-    assert firm.account.stocks["cash"] == 2000
-    assert bank.account.stocks["deposits"] == 0
-    assert bank.account.stocks["cash"] == 0
+    assert govt.account["cash"] == -2000
+    assert firm.account["deposits"] == 0
+    assert firm.account["cash"] == 2000
+    assert bank.account["deposits"] == 0
+    assert bank.account["cash"] == 0

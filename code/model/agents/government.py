@@ -48,7 +48,7 @@ class Government(EcoAgent):
     # Fiscal policy
     #
     def calc_budget_balance(self):
-        flows = self.account.flows
+        flows = self.account
         balance = flows["taxes"] - flows["public_transfers"] - flows["bond_interests"]
         self.budget_deficit = max(0, -balance)
         self.budget_surplus = max(0, balance)
@@ -113,13 +113,13 @@ class Government(EcoAgent):
         role.bond_number = 100
 
     def calc_new_debt(self):
-        bonds = self.account.stocks["bonds"]
+        bonds = self.account["bonds"]
         new_debt = bonds + self.budget_deficit - self.prev_budget_surplus
         self.new_public_debt = new_debt
         return new_debt
 
     def calc_new_bonds(self):
-        bonds = self.account.stocks["bonds"]
+        bonds = self.account["bonds"]
         return max(0, self.new_public_debt - bonds)
 
     #
@@ -134,7 +134,7 @@ class Government(EcoAgent):
             role.repay_bonds(bond["buyer"], principal, interests)
 
     def update_bond_rate(self):
-        bonds = self.account.stocks["bonds"]
+        bonds = self.account["bonds"]
         role = self.roles["fiscal_authority"]
         gdp = role.get_gdp()
         discount_rate = role.get_discount_rate()

@@ -55,18 +55,18 @@ def country_before_profit_transfers(country, govt, cb):
 @pytest.mark.usefixtures("country_before_profit_transfers")
 def test_central_bank_transfer_profits(govt, cb):
     # Given
-    cb.account.flows["adv_interests"] = 50
-    cb.account.flows["cash_interests"] = 20
-    cb.account.flows["bond_interests"] = 100
+    cb.account["adv_interests"] = 50
+    cb.account["cash_interests"] = 20
+    cb.account["bond_interests"] = 100
 
     # When
     cb.transfer_profit()
 
     # Then
-    assert cb.account.flows["profit_transfers"] == -130
-    assert cb.account.stocks["cash"] == -130
-    assert govt.account.flows["profit_transfers"] == 130
-    assert govt.account.stocks["cash"] == 130
+    assert cb.account["profit_transfers"] == -130
+    assert cb.account["cash"] == -130
+    assert govt.account["profit_transfers"] == 130
+    assert govt.account["cash"] == 130
 
 
 @pytest.fixture
@@ -97,8 +97,8 @@ def test_government_pay_public_transfer_equally(govt, households):
     govt.pay_public_transfers()
 
     # Then
-    assert govt.account.stocks["cash"] == -400
-    assert govt.account.flows["public_transfers"] == -400
+    assert govt.account["cash"] == -400
+    assert govt.account["public_transfers"] == -400
     for household in households:
-        assert household.account.stocks["cash"] == 100
-        assert household.account.flows["public_transfers"] == 100
+        assert household.account["cash"] == 100
+        assert household.account["public_transfers"] == 100

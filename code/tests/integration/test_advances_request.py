@@ -41,26 +41,26 @@ def bank(fake_model, country_with_market, cb):
 def test_increases_advances(bank, cb):
     # Given
     bank.p.mu2 = 0.10
-    bank.account.stocks["cash"] = 40
-    bank.account.stocks["deposits"] = 1000
+    bank.account["cash"] = 40
+    bank.account["deposits"] = 1000
 
     # When
     bank.request_cash_advances()
 
     # Then
-    assert bank.account.stocks["advances"] == -60
-    assert cb.account.stocks["advances"] == 60
+    assert bank.account["advances"] == -60
+    assert cb.account["advances"] == 60
 
 
 def test_transfers_cash(bank, cb):
     # Given
     bank.p.mu2 = 0.10
-    bank.account.stocks["cash"] = 40
-    bank.account.stocks["deposits"] = 1000
+    bank.account["cash"] = 40
+    bank.account["deposits"] = 1000
 
     # When
     bank.request_cash_advances()
 
     # Then
-    assert bank.account.stocks["cash"] == 100
-    assert cb.account.stocks["cash"] == -60
+    assert bank.account["cash"] == 100
+    assert cb.account["cash"] == -60

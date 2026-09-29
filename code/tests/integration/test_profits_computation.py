@@ -36,10 +36,10 @@ def test_firm_compute_profit_distribution(firm):
     firm.roles["company"].get_tax_rate.return_value = 0.25
     firm.roles["producer"].productivity = 2
     firm.roles["producer"].inventories = 60
-    firm.account.flows["dep_interests"] = 30
-    firm.account.flows["consumption"] = 1000
-    firm.account.flows["loan_interests"] = 30
-    firm.account.flows["wages"] = 400
+    firm.account["dep_interests"] = 30
+    firm.account["consumption"] = 1000
+    firm.account["loan_interests"] = 30
+    firm.account["wages"] = 400
     firm.prev_inventories = 50
     firm.wage_offer = 20
 
@@ -65,12 +65,12 @@ def bank(model, space):
 def test_bank_compute_profit_distribution(bank):
     # Given
     bank.roles["company"].get_tax_rate.return_value = 0.25
-    bank.account.flows["bond_interests"] = 20
-    bank.account.flows["dep_interests"] = 30
-    bank.account.flows["loan_interests"] = 100
-    bank.account.flows["cash_interests"] = 10
-    bank.account.flows["loan_defaults"] = 10
-    bank.account.flows["adv_interests"] = 10
+    bank.account["bond_interests"] = 20
+    bank.account["dep_interests"] = 30
+    bank.account["loan_interests"] = 100
+    bank.account["cash_interests"] = 10
+    bank.account["loan_defaults"] = 10
+    bank.account["adv_interests"] = 10
 
     # When
     bank.compute_profit_distribution()

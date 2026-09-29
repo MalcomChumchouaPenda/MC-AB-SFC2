@@ -185,9 +185,9 @@ def cb_as_authority(cb_with_roles_and_account):
 def test_calc_profit(cb_as_authority):
     # Given
     cb, _ = cb_as_authority
-    cb.account.flows["bond_interests"] = 100
-    cb.account.flows["adv_interests"] = 40
-    cb.account.flows["cash_interests"] = 20
+    cb.account["bond_interests"] = 100
+    cb.account["adv_interests"] = 40
+    cb.account["cash_interests"] = 20
 
     # When
     profit = cb.calc_profit()

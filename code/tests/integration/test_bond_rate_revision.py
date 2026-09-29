@@ -33,7 +33,7 @@ def govt_with_country(govt, union):
 def test_sets_govt_bond_rate(govt_with_country):
     # Given
     govt, country = govt_with_country
-    govt.account.stocks["bonds"] = 100
+    govt.account["bonds"] = 100
     govt.p.chi = 0.02
     country.gdp = 1000
     country.monetary_authority.discount_rate = 0.04

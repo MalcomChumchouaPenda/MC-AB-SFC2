@@ -45,8 +45,8 @@ def bank(fake_model, market):
 def test_clears_link_amount_with_bank(market, govt, bank):
     # Given
     govt.bond_rate = 0.042
-    govt.account.stocks["bonds"] = -100
-    bank.account.stocks["bonds"] = 100
+    govt.account["bonds"] = -100
+    bank.account["bonds"] = 100
     buyer_role = bank.roles["bond_buyer"]
     issuer_role = govt.roles["bond_issuer"]
     market.graph.add_edge(issuer_role, buyer_role, amount=100)
@@ -61,8 +61,8 @@ def test_clears_link_amount_with_bank(market, govt, bank):
 def test_decreases_bonds_from_bank(market, govt, bank):
     # Given
     govt.bond_rate = 0.042
-    govt.account.stocks["bonds"] = -100
-    bank.account.stocks["bonds"] = 100
+    govt.account["bonds"] = -100
+    bank.account["bonds"] = 100
     buyer_role = bank.roles["bond_buyer"]
     issuer_role = govt.roles["bond_issuer"]
     market.graph.add_edge(issuer_role, buyer_role, amount=100)
@@ -71,15 +71,15 @@ def test_decreases_bonds_from_bank(market, govt, bank):
     govt.repay_bonds()
 
     # Then
-    assert govt.account.stocks["bonds"] == 0
-    assert bank.account.stocks["bonds"] == 0
+    assert govt.account["bonds"] == 0
+    assert bank.account["bonds"] == 0
 
 
 def test_increases_bond_interests_for_bank(market, govt, bank):
     # Given
     govt.bond_rate = 0.042
-    govt.account.stocks["bonds"] = -100
-    bank.account.stocks["bonds"] = 100
+    govt.account["bonds"] = -100
+    bank.account["bonds"] = 100
     buyer_role = bank.roles["bond_buyer"]
     issuer_role = govt.roles["bond_issuer"]
     market.graph.add_edge(issuer_role, buyer_role, amount=100)
@@ -88,15 +88,15 @@ def test_increases_bond_interests_for_bank(market, govt, bank):
     govt.repay_bonds()
 
     # Then
-    assert govt.account.flows["bond_interests"] == -4.2
-    assert bank.account.flows["bond_interests"] == 4.2
+    assert govt.account["bond_interests"] == -4.2
+    assert bank.account["bond_interests"] == 4.2
 
 
 def test_transfers_cash_to_bank(market, govt, bank):
     # Given
     govt.bond_rate = 0.042
-    govt.account.stocks["bonds"] = -100
-    bank.account.stocks["bonds"] = 100
+    govt.account["bonds"] = -100
+    bank.account["bonds"] = 100
     buyer_role = bank.roles["bond_buyer"]
     issuer_role = govt.roles["bond_issuer"]
     market.graph.add_edge(issuer_role, buyer_role, amount=100)
@@ -105,15 +105,15 @@ def test_transfers_cash_to_bank(market, govt, bank):
     govt.repay_bonds()
 
     # Then
-    assert govt.account.stocks["cash"] == -104.2
-    assert bank.account.stocks["cash"] == 104.2
+    assert govt.account["cash"] == -104.2
+    assert bank.account["cash"] == 104.2
 
 
 def test_clears_link_amount_with_central_bank(market, govt, cb):
     # Given
     govt.bond_rate = 0.042
-    govt.account.stocks["bonds"] = -100
-    cb.account.stocks["bonds"] = 100
+    govt.account["bonds"] = -100
+    cb.account["bonds"] = 100
     buyer_role = cb.roles["bond_buyer"]
     issuer_role = govt.roles["bond_issuer"]
     market.graph.add_edge(issuer_role, buyer_role, amount=100)
@@ -128,8 +128,8 @@ def test_clears_link_amount_with_central_bank(market, govt, cb):
 def test_decreases_bonds_from_central_bank(market, govt, cb):
     # Given
     govt.bond_rate = 0.042
-    govt.account.stocks["bonds"] = -100
-    cb.account.stocks["bonds"] = 100
+    govt.account["bonds"] = -100
+    cb.account["bonds"] = 100
     buyer_role = cb.roles["bond_buyer"]
     issuer_role = govt.roles["bond_issuer"]
     market.graph.add_edge(issuer_role, buyer_role, amount=100)
@@ -138,15 +138,15 @@ def test_decreases_bonds_from_central_bank(market, govt, cb):
     govt.repay_bonds()
 
     # Then
-    assert govt.account.stocks["bonds"] == 0
-    assert cb.account.stocks["bonds"] == 0
+    assert govt.account["bonds"] == 0
+    assert cb.account["bonds"] == 0
 
 
 def test_increases_bond_interests_for_central_bank(market, govt, cb):
     # Given
     govt.bond_rate = 0.042
-    govt.account.stocks["bonds"] = -100
-    cb.account.stocks["bonds"] = 100
+    govt.account["bonds"] = -100
+    cb.account["bonds"] = 100
     buyer_role = cb.roles["bond_buyer"]
     issuer_role = govt.roles["bond_issuer"]
     market.graph.add_edge(issuer_role, buyer_role, amount=100)
@@ -155,15 +155,15 @@ def test_increases_bond_interests_for_central_bank(market, govt, cb):
     govt.repay_bonds()
 
     # Then
-    assert govt.account.flows["bond_interests"] == -4.2
-    assert cb.account.flows["bond_interests"] == 4.2
+    assert govt.account["bond_interests"] == -4.2
+    assert cb.account["bond_interests"] == 4.2
 
 
 def test_transfers_cash_to_central_bank(market, govt, cb):
     # Given
     govt.bond_rate = 0.042
-    govt.account.stocks["bonds"] = -100
-    cb.account.stocks["bonds"] = 100
+    govt.account["bonds"] = -100
+    cb.account["bonds"] = 100
     buyer_role = cb.roles["bond_buyer"]
     issuer_role = govt.roles["bond_issuer"]
     market.graph.add_edge(issuer_role, buyer_role, amount=100)
@@ -172,5 +172,5 @@ def test_transfers_cash_to_central_bank(market, govt, cb):
     govt.repay_bonds()
 
     # Then
-    assert govt.account.stocks["cash"] == -104.2
-    assert cb.account.stocks["cash"] == 104.2
+    assert govt.account["cash"] == -104.2
+    assert cb.account["cash"] == 104.2

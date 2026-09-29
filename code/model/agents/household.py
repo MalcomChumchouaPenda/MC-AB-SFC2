@@ -71,12 +71,12 @@ class Household(EcoAgent):
         role.pay_taxes(taxes)
 
     def calc_income(self):
-        flows = self.account.flows
+        flows = self.account
         return flows["wages"] + flows["dep_interests"] + flows["dividends"]
 
     def calc_disposable_income(self):
         tax_rate = self.roles["citizen"].get_tax_rate()
-        public_transfers = self.account.flows["public_transfers"]
+        public_transfers = self.account["public_transfers"]
         return (1 - tax_rate) * self.income + public_transfers
 
     #
@@ -84,7 +84,7 @@ class Household(EcoAgent):
     #
     def calc_consumption(self):
         p = self.p
-        deposits = self.account.stocks["deposits"]
+        deposits = self.account["deposits"]
         self.desired_consumption = p.cy * self.disposable_income + p.cd * deposits
         return self.desired_consumption
 
@@ -103,7 +103,7 @@ class Household(EcoAgent):
             self.consume_good(role, target_cons)
 
     def _fund_consumption(self, desired_cons):
-        stocks = self.account.stocks
+        stocks = self.account
         if desired_cons > stocks["cash"]:
             needs = desired_cons - stocks["cash"]
             feasible = min(needs, stocks["deposits"])
@@ -111,7 +111,7 @@ class Household(EcoAgent):
             role.withdraw_deposits(feasible)
 
     def consume_good(self, role, target_cons):
-        cash = self.account.stocks["cash"]
+        cash = self.account["cash"]
         average_price = role.get_average_price()
         suppliers = role.find_suppliers(self.p.psi)
         ranked = self.rank_suppliers(suppliers, average_price=average_price)
@@ -152,7 +152,7 @@ class Household(EcoAgent):
         self.calc_net_worth()
         lp = self.calc_liquidity_preference()
         print(lp, self.net_worth)
-        equity = self.account.stocks["equities"]
+        equity = self.account["equities"]
         expected_worth = self.calc_expected_net_worth()
         self.desired_equity = max(equity, (1 - lp) * expected_worth)
         self.desired_deposits = expected_worth - (self.desired_equity - equity)
@@ -161,8 +161,8 @@ class Household(EcoAgent):
     def calc_liquidity_preference(self):
         p = self.p
         roles = self.roles
-        equity = self.account.stocks["equities"]
-        dividends = self.account.flows["dividends"]
+        equity = self.account["equities"]
+        dividends = self.account["dividends"]
         default_prob = roles["citizen"].get_prob_failure()
         deposit_rate = roles["depositor"].get_deposit_rate()
         profit_ratio = dividends / equity if equity else 0
@@ -171,7 +171,7 @@ class Household(EcoAgent):
         return p.lambda_ * math.exp(profit_ratio * (1 - default_prob) - deposit_rate)
 
     def calc_net_worth(self):
-        stocks = self.account.stocks
+        stocks = self.account
         self.net_worth = stocks["deposits"] + stocks["equities"] + stocks["cash"]
 
     def calc_expected_net_worth(self):
@@ -234,7 +234,7 @@ class Household(EcoAgent):
     def make_deposits(self):
         account = self.account
         role = self.roles["depositor"]
-        role.make_deposits(account.stocks["cash"])
+        role.make_deposits(account["cash"])
 
     def choose_deposit_bank(self):
         role = self.roles["depositor"]

@@ -38,7 +38,7 @@ def test_firm_innovation_process(firm, market):
     firm.labor = 100
     firm.desired_rd = 100
     firm.desired_loans = 100
-    firm.account.stocks["loans"] = 100
+    firm.account["loans"] = 100
     firm.roles["producer"].productivity = 10
     market.average_prod = 10
     market.average_price = 10
@@ -60,7 +60,7 @@ def test_firm_imitation_process(firm, market):
     firm.labor = 100
     firm.desired_rd = 100
     firm.desired_loans = 100
-    firm.account.stocks["loans"] = 100
+    firm.account["loans"] = 100
     firm.roles["producer"].productivity = 10
     market.average_prod = 15
     market.average_price = 10

@@ -445,7 +445,10 @@ def test_add_account_doesnt_register_env_account(space_without_accounts):
 @pytest.fixture
 def space_with_accounts(space):
     # Given
-    accounts = {i: Mock() for i in range(2)}
+    accounts = {}
+    for i in range(2):
+        account = dict(x=0)
+        accounts[i] = account
     space.accounts = accounts
     return space, accounts
 
@@ -459,7 +462,7 @@ def test_transfer_stock_decr_source_account_stock(space_with_accounts):
     space.transfer_stock("x", source, target, 100)
 
     # Then
-    accounts[source].decr_stock.assert_called_with("x", 100)
+    assert accounts[source]["x"] == -100
 
 
 def test_transfer_stock_incr_target_account_stock(space_with_accounts):
@@ -471,7 +474,7 @@ def test_transfer_stock_incr_target_account_stock(space_with_accounts):
     space.transfer_stock("x", source, target, 100)
 
     # Then
-    accounts[target].incr_stock.assert_called_with("x", 100)
+    assert accounts[target]["x"] == 100
 
 
 def test_transfer_stock_uses_env_method(space_with_accounts):
@@ -491,8 +494,7 @@ def test_get_stock_returns_identified_account_stock(space_with_accounts):
     # Given
     account_id = 1
     space, accounts = space_with_accounts
-    account = accounts[account_id]
-    account.stocks = {"x": 100}
+    accounts[account_id]["x"] = 100
 
     # When
     value = space.get_stock("x", account_id)
@@ -504,7 +506,7 @@ def test_get_stock_returns_identified_account_stock(space_with_accounts):
 def test_get_stock_uses_env_method(space_with_accounts):
     # Given
     env = Mock()
-    space, a_ = space_with_accounts
+    space, _ = space_with_accounts
     space.env = env
     account_id = 1
 
@@ -525,7 +527,7 @@ def test_make_transaction_decr_source_account_flow(space_with_accounts):
     space.make_transaction("x", source, target, 100)
 
     # Then
-    accounts[source].decr_flow.assert_called_with("x", 100)
+    assert accounts[source]["x"] == -100
 
 
 def test_make_transaction_incr_target_account_flow(space_with_accounts):
@@ -537,7 +539,7 @@ def test_make_transaction_incr_target_account_flow(space_with_accounts):
     space.make_transaction("x", source, target, 100)
 
     # Then
-    accounts[target].incr_flow.assert_called_with("x", 100)
+    assert accounts[target]["x"] == 100
 
 
 def test_make_transaction_uses_available_env_method(space_with_accounts):

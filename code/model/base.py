@@ -1,5 +1,5 @@
 from collections import defaultdict
-from agentpy import Agent, Network, AgentNode, AgentDList
+from agentpy import Agent, Network, AgentNode, AgentDList, AttrDict
 from model.constants import FINANCIAL_ASSETS, REAL_ASSETS, TRANSACTIONS
 
 
@@ -53,35 +53,16 @@ class EcoRole(AgentNode):
         self.agent.bank_id = account
 
 
-class EcoAccount:
+class EcoAccount(AttrDict):
 
-    def __init__(self):
-        super().__init__()
-        self.stocks = {name: 0.0 for name in FINANCIAL_ASSETS + REAL_ASSETS}
-        self.flows = {name: 0.0 for name in TRANSACTIONS}
-
-    #
-    # stocks accounting
-    #
-    def incr_stock(self, name, amount):
-        self.stocks[name] += amount
-
-    def decr_stock(self, name, amount):
-        self.stocks[name] -= amount
-
-    #
-    # flows accounting
-    #
-    def incr_flow(self, name, amount):
-        self.flows[name] += amount
-
-    def decr_flow(self, name, amount):
-        self.flows[name] -= amount
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for name in FINANCIAL_ASSETS + REAL_ASSETS + TRANSACTIONS:
+            self[name] = 0.0
 
     def clear_flows(self):
-        flows = self.flows
-        for name in flows.keys():
-            flows[name] = 0
+        for name in TRANSACTIONS:
+            self[name] = 0
 
 
 class EcoSpace(Network):
@@ -162,21 +143,21 @@ class EcoSpace(Network):
     def get_stock(self, category, account_id):
         if self.env is not None:
             return self.env.get_stock(category, account_id)
-        return self.accounts[account_id].stocks[category]
+        return self.accounts[account_id][category]
 
     def transfer_stock(self, category, source, target, amount):
         if self.env is not None:
             self.env.transfer_stock(category, source, target, amount)
         else:
-            self.accounts[source].decr_stock(category, amount)
-            self.accounts[target].incr_stock(category, amount)
+            self.accounts[source][category] -= amount
+            self.accounts[target][category] += amount
 
     def make_transaction(self, category, source, target, amount):
         if self.env is not None:
             self.env.make_transaction(category, source, target, amount)
         else:
-            self.accounts[source].decr_flow(category, amount)
-            self.accounts[target].incr_flow(category, amount)
+            self.accounts[source][category] -= amount
+            self.accounts[target][category] += amount
 
     #
     # Space management

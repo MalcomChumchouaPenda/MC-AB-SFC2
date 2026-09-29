@@ -282,7 +282,7 @@ def firm_before_production(firm_with_roles_and_account):
     # Given
     role = Mock(inventories=0)
     firm, roles, account = firm_with_roles_and_account
-    account.stocks["inventories"] = 0
+    account["inventories"] = 0
     roles["producer"] = role
     return firm
 
@@ -356,7 +356,7 @@ def pricing_firm(firm_with_roles_and_account):
     firm.p.delta = 0.1
     firm.price = 10
     firm.expected_sales = 100
-    account.flows["wages"] = 10
+    account["wages"] = 10
     roles["producer"] = role
     return firm
 
@@ -595,7 +595,7 @@ def test_execute_rd_without_constraints(firm_with_roles_and_account):
     firm.desired_labor = 50
     firm.labor = 50
     firm.desired_loans = 200
-    account.stocks["loans"] = 200
+    account["loans"] = 200
 
     # When
     firm.execute_rd()
@@ -611,7 +611,7 @@ def test_execute_rd_with_labor_constraint(firm_with_roles_and_account):
     firm.desired_labor = 100
     firm.labor = 80
     firm.desired_loans = 200
-    account.stocks["loans"] = 200
+    account["loans"] = 200
 
     # When
     firm.execute_rd()
@@ -627,7 +627,7 @@ def test_execute_rd_with_financial_constraint(firm_with_roles_and_account):
     firm.desired_labor = 50
     firm.labor = 50
     firm.desired_loans = 200
-    account.stocks["loans"] = 100
+    account["loans"] = 100
 
     # When
     firm.execute_rd()
@@ -785,14 +785,14 @@ def firm_before_borrowing(firm_with_roles_and_account):
     firm.wage_offer = 10
     firm.desired_labor = 10
     firm.desired_rd = 50
-    account.stocks["deposits"] = 0
+    account["deposits"] = 0
     return firm
 
 
 def test_calc_desired_loans_when_external_finance_needed(firm_before_borrowing):
     # Given
     firm = firm_before_borrowing
-    firm.account.stocks["deposits"] = 20
+    firm.account["deposits"] = 20
 
     # When
     result = firm.calc_desired_loans()
@@ -804,7 +804,7 @@ def test_calc_desired_loans_when_external_finance_needed(firm_before_borrowing):
 def test_calc_desired_loans_when_internal_funds_are_sufficient(firm_before_borrowing):
     # Given
     firm = firm_before_borrowing
-    firm.account.stocks["deposits"] = 150
+    firm.account["deposits"] = 150
 
     # When
     result = firm.calc_desired_loans()
@@ -820,7 +820,7 @@ def firm_as_borrower(firm_with_roles_and_account):
     role.find_lenders.return_value = []
     firm, roles, account = firm_with_roles_and_account
     firm.calc_desired_loans = Mock(return_value=10)
-    account.stocks["equities"] = 100
+    account["equities"] = 100
     roles["borrower"] = role
     return firm, role
 
@@ -854,7 +854,7 @@ def test_request_loans_and_set_loan_demand(firm_as_borrower):
 def test_request_loans_and_registers_networth(firm_as_borrower):
     # Given
     firm, role = firm_as_borrower
-    firm.account.stocks["equities"] = 200
+    firm.account["equities"] = 200
     firm.calc_desired_loans.return_value = 100
 
     # When
@@ -900,9 +900,9 @@ def firm_after_borrowing(firm_with_roles_and_account):
     role = Mock()
     role.find_loans.return_value = []
     firm, roles, account = firm_with_roles_and_account
-    account.stocks["deposits"] = 100
-    account.stocks["loans"] = 100
-    account.stocks["cash"] = 100
+    account["deposits"] = 100
+    account["loans"] = 100
+    account["cash"] = 100
     roles["depositor"] = Mock()
     roles["borrower"] = role
     return firm, roles, account
@@ -912,9 +912,9 @@ def firm_after_borrowing(firm_with_roles_and_account):
 def test_repay_loans_after_making_deposits(firm_after_borrowing, cash, expected):
     # Given
     firm, roles, account = firm_after_borrowing
-    account.stocks["deposits"] = 20
-    account.stocks["cash"] = cash
-    account.stocks["loans"] = 100
+    account["deposits"] = 20
+    account["cash"] = cash
+    account["loans"] = 100
     role = roles["depositor"]
 
     # When
@@ -929,7 +929,7 @@ def test_repay_loans_to_all_lenders(firm_after_borrowing):
     lender = object()
     loan = {"lender": lender, "amount": 100, "rate": 0.1}
     firm, roles, account = firm_after_borrowing
-    account.stocks["deposits"] = 200
+    account["deposits"] = 200
     role = roles["borrower"]
     role.find_loans.return_value = [loan]
 
@@ -946,7 +946,7 @@ def test_repay_loans_with_available_deposits(firm_after_borrowing, fund, default
     lender = object()
     loan = {"lender": lender, "amount": 100, "rate": 0.1}
     firm, roles, account = firm_after_borrowing
-    account.stocks["deposits"] = fund
+    account["deposits"] = fund
     role = roles["borrower"]
     role.find_loans.return_value = [loan]
 
@@ -967,10 +967,10 @@ def test_repay_loans_with_available_deposits(firm_after_borrowing, fund, default
 def test_calc_net_cash_flow(firm_with_roles_and_account, sales, expected):
     # Given
     firm, _, account = firm_with_roles_and_account
-    account.flows["consumption"] = sales
-    account.flows["loan_interests"] = 20
-    account.flows["wages"] = 390
-    account.flows["dep_interests"] = 10
+    account["consumption"] = sales
+    account["loan_interests"] = 20
+    account["wages"] = 390
+    account["dep_interests"] = 10
 
     # When
     net_cash_flow = firm.calc_net_cash_flow()
@@ -1009,7 +1009,7 @@ def firm_as_tax_payer(firm_with_roles_and_account):
     # Given
     role = Mock()
     firm, roles, _ = firm_with_roles_and_account
-    firm.account.flows["taxes"] = 0
+    firm.account["taxes"] = 0
     roles["company"] = role
     return firm, role
 
@@ -1091,7 +1091,7 @@ def test_update_net_worth(firm_with_roles_and_account):
     firm.net_cash_flow = 500
     firm.taxes_payable = 100
     firm.dividends_payable = 200
-    firm.account.stocks["equities"] = -1000
+    firm.account["equities"] = -1000
 
     # When
     firm.update_net_worth()
@@ -1200,9 +1200,9 @@ def firm_before_exit(firm_with_roles_and_account):
     roles["company"] = role2
     roles["borrower"] = role1
     roles["depositor"] = Mock()
-    account.stocks["deposits"] = 0
-    account.stocks["loans"] = 0
-    account.stocks["cash"] = 0
+    account["deposits"] = 0
+    account["loans"] = 0
+    account["cash"] = 0
     return firm, roles, account
 
 
@@ -1223,7 +1223,7 @@ def test_exit_when_bankrupt(firm_before_exit, net_worth, defaulted):
 def test_exit_withdraws_residual_deposits(firm_before_exit):
     # Given
     firm, roles, account = firm_before_exit
-    account.stocks["deposits"] = 100
+    account["deposits"] = 100
     role = roles["depositor"]
 
     # When
@@ -1236,7 +1236,7 @@ def test_exit_withdraws_residual_deposits(firm_before_exit):
 def test_exit_doesnt_withdraw_with_no_deposit(firm_before_exit):
     # Given
     firm, roles, account = firm_before_exit
-    account.stocks["deposits"] = 0
+    account["deposits"] = 0
     role = roles["depositor"]
 
     # When
@@ -1279,7 +1279,7 @@ def test_exit_transfer_residual_cash_to_founders(firm_before_exit):
     founder = object()
     share = {"founder": founder, "value": 1000}
     firm, roles, account = firm_before_exit
-    account.stocks["cash"] = 200
+    account["cash"] = 200
     role = roles["company"]
     role.get_equity_shares.return_value = [share]
 

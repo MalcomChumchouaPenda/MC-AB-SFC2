@@ -49,7 +49,7 @@ class Bank(EcoAgent):
         role.loan_applicants = []
 
     def calc_credit_capacity(self):
-        equity = self.account.stocks["equities"]
+        equity = self.account["equities"]
         return equity * self.p.mu1
 
     def calc_loan_probability(self, borrower):
@@ -65,7 +65,7 @@ class Bank(EcoAgent):
     # Cash advances
     #
     def request_cash_advances(self):
-        stocks = self.account.stocks
+        stocks = self.account
         required = self.p.mu2 * stocks["deposits"]
         shortage = max(required - stocks["cash"], 0)
         if shortage > 0:
@@ -74,7 +74,7 @@ class Bank(EcoAgent):
 
     def repay_cash_advances(self):
         discount_rate = self.roles["company"].get_discount_rate()
-        principal = abs(self.account.stocks["advances"])
+        principal = abs(self.account["advances"])
         if principal > 0:
             interests = discount_rate * principal
             role = self.roles["lender"]
@@ -104,7 +104,7 @@ class Bank(EcoAgent):
         return bond_issuers
 
     def calc_excess_reserves(self):
-        stocks = self.account.stocks
+        stocks = self.account
         required = self.p.mu2 * stocks["deposits"]
         return max(stocks["cash"] - required, 0)
 
@@ -121,7 +121,7 @@ class Bank(EcoAgent):
         self.dividends_payable = self.calc_dividends()
 
     def calc_profit(self):
-        flows = self.account.flows
+        flows = self.account
         return (
             flows["loan_interests"]
             + flows["bond_interests"]
@@ -143,7 +143,7 @@ class Bank(EcoAgent):
         return self.p.rho * (self.profit - self.taxes_payable)
 
     def update_net_worth(self):
-        stocks = self.account.stocks
+        stocks = self.account
         self.net_worth += self.profit - self.taxes_payable - self.dividends_payable
         self.update_equity_shares(self.net_worth + stocks["equities"])
         return self.net_worth

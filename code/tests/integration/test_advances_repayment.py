@@ -1,4 +1,3 @@
-from unittest.mock import Mock
 import pytest
 from model.agents.bank import Bank
 from model.agents.central_bank import CentralBank
@@ -40,41 +39,41 @@ def bank(fake_model, country_with_market, cb):
 
 def test_decreases_advances(bank, cb):
     # Given
-    bank.account.stocks["advances"] = -100
-    cb.account.stocks["advances"] = 100
+    bank.account["advances"] = -100
+    cb.account["advances"] = 100
     cb.roles["monetary_authority"].discount_rate = 0.05
 
     # When
     bank.repay_cash_advances()
 
     # Then
-    assert bank.account.stocks["advances"] == 0
-    assert cb.account.stocks["advances"] == 0
+    assert bank.account["advances"] == 0
+    assert cb.account["advances"] == 0
 
 
 def test_increases_advance_interests(bank, cb):
     # Given
-    bank.account.stocks["advances"] = -100
-    cb.account.stocks["advances"] = 100
+    bank.account["advances"] = -100
+    cb.account["advances"] = 100
     cb.roles["monetary_authority"].discount_rate = 0.05
 
     # When
     bank.repay_cash_advances()
 
     # Then
-    assert bank.account.flows["adv_interests"] == -5
-    assert cb.account.flows["adv_interests"] == 5
+    assert bank.account["adv_interests"] == -5
+    assert cb.account["adv_interests"] == 5
 
 
 def test_transfers_cash(bank, cb):
     # Given
-    bank.account.stocks["advances"] = -100
-    cb.account.stocks["advances"] = 100
+    bank.account["advances"] = -100
+    cb.account["advances"] = 100
     cb.roles["monetary_authority"].discount_rate = 0.05
 
     # When
     bank.repay_cash_advances()
 
     # Then
-    assert bank.account.stocks["cash"] == -105
-    assert cb.account.stocks["cash"] == 105
+    assert bank.account["cash"] == -105
+    assert cb.account["cash"] == 105
