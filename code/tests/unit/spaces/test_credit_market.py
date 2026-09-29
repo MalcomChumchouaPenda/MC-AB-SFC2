@@ -109,7 +109,7 @@ def market_with_participants(market_without_roles):
     borrower = Mock(loan_demand=0)
     market = market_without_roles
     market.transfer_stock = Mock()
-    market.record_flow = Mock()
+    market.make_transaction = Mock()
     market.graph.add_nodes_from([borrower, lender])
     return market, borrower, lender
 
@@ -193,7 +193,7 @@ def test_repay_loans_updates_accounts(market_with_loan):
     market.transfer_stock.assert_any_call("loans", lender.id, borrower.id, 100)
     market.transfer_stock.assert_any_call("cash", bank_id, lender.id, 110)
     market.transfer_stock.assert_any_call("deposits", borrower.id, bank_id, 110)
-    market.record_flow.assert_any_call("loan_interests", borrower.id, lender.id, 10)
+    market.make_transaction.assert_any_call("loan_interests", borrower.id, lender.id, 10)
 
 
 def test_make_defaults_updates_graph_edge(market_with_loan):
@@ -218,7 +218,7 @@ def test_make_defaults_updates_accounts(market_with_loan):
 
     # Then
     market.transfer_stock.assert_any_call("loans", lender.id, borrower.id, 100)
-    market.record_flow.assert_any_call("loan_defaults", lender.id, borrower.id, 100)
+    market.make_transaction.assert_any_call("loan_defaults", lender.id, borrower.id, 100)
 
 
 # ---------------------------------------------------
@@ -248,4 +248,4 @@ def test_repay_advances_updates_accounts(market_with_participants):
     # Then
     market.transfer_stock.assert_any_call("cash", lender.id, lender.cb_id, 110)
     market.transfer_stock.assert_any_call("advances", lender.cb_id, lender.id, 100)
-    market.record_flow.assert_any_call("adv_interests", lender.id, lender.cb_id, 10)
+    market.make_transaction.assert_any_call("adv_interests", lender.id, lender.cb_id, 10)

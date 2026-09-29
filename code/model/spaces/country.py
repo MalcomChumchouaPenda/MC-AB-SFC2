@@ -98,17 +98,17 @@ class Country(EcoSpace):
 
     def update_equity_share(self, company, founder, variation):
         self.transfer_stock("equities", company.id, founder.id, variation)
-        self.record_flow("profit_transfers", company.id, founder.id, variation)
+        self.make_transaction("profit_transfers", company.id, founder.id, variation)
         self.graph[company][founder]["value"] += variation
 
     def pay_dividends(self, company, founder, amount):
         self.transfer_stock("cash", company.id, founder.id, amount)
-        self.record_flow("dividends", company.id, founder.id, amount)
+        self.make_transaction("dividends", company.id, founder.id, amount)
 
     def pay_taxes(self, payer, amount):
         auth_id = self.fiscal_authority.id
         self.transfer_stock("cash", payer.id, auth_id, amount)
-        self.record_flow("taxes", payer.id, auth_id, amount)
+        self.make_transaction("taxes", payer.id, auth_id, amount)
 
     #
     # Firm creation
@@ -148,14 +148,14 @@ class Country(EcoSpace):
         source = self.monetary_authority.id
         target = self.fiscal_authority.id
         self.transfer_stock("cash", source, target, amount)
-        self.record_flow("profit_transfers", source, target, amount)
+        self.make_transaction("profit_transfers", source, target, amount)
 
     #
     # Public transfers
     #
     def pay_public_transfers(self, authority, citizen, amount):
         self.transfer_stock("cash", authority.id, citizen.id, amount)
-        self.record_flow("public_transfers", authority.id, citizen.id, amount)
+        self.make_transaction("public_transfers", authority.id, citizen.id, amount)
 
     #
     # Residual transfers

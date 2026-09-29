@@ -38,12 +38,12 @@ class CreditMarket(EcoSpace):
         self.transfer_stock("loans", lender.id, borrower.id, principal)
         self.transfer_stock("cash", borrower.bank_id, lender.id, total)
         self.transfer_stock("deposits", borrower.id, borrower.bank_id, total)
-        self.record_flow("loan_interests", borrower.id, lender.id, interests)
+        self.make_transaction("loan_interests", borrower.id, lender.id, interests)
         self.graph[borrower][lender]["amount"] -= principal
 
     def make_defaults(self, borrower, lender, amount):
         self.transfer_stock("loans", lender.id, borrower.id, amount)
-        self.record_flow("loan_defaults", lender.id, borrower.id, amount)
+        self.make_transaction("loan_defaults", lender.id, borrower.id, amount)
         self.graph[borrower][lender]["amount"] -= amount
 
     #
@@ -57,4 +57,4 @@ class CreditMarket(EcoSpace):
         total = principal + interests
         self.transfer_stock("cash", lender.id, lender.cb_id, total)
         self.transfer_stock("advances", lender.cb_id, lender.id, principal)
-        self.record_flow("adv_interests", lender.id, lender.cb_id, interests)
+        self.make_transaction("adv_interests", lender.id, lender.cb_id, interests)

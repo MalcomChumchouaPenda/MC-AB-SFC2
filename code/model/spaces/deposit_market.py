@@ -35,7 +35,7 @@ class DepositMarket(EcoSpace):
 
     def pay_interests(self, deposit_bank, depositor, amount):
         self.transfer_stock("deposits", deposit_bank.id, depositor.id, amount)
-        self.record_flow("dep_interests", deposit_bank.id, depositor.id, amount)
+        self.make_transaction("dep_interests", deposit_bank.id, depositor.id, amount)
         self.graph[depositor][deposit_bank]["amount"] += amount
 
     def reimburse_deposits(self, guarantee, depositor, amount):

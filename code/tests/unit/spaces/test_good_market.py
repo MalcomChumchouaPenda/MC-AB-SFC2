@@ -156,7 +156,7 @@ def market_before_transaction(market_without_roles):
     # Given
     market = market_without_roles
     market.transfer_stock = Mock()
-    market.record_flow = Mock()
+    market.make_transaction = Mock()
     random = market.model.random
     random.sample = Mock(side_effect=lambda pop, k: pop[:k])
     return market
@@ -173,7 +173,7 @@ def test_buy_goods_updates_accounts(market_before_transaction):
 
     # Then
     market.transfer_stock.assert_any_call("cash", consumer.id, producer.id, 50)
-    market.record_flow.assert_any_call("consumption", consumer.id, producer.id, 50)
+    market.make_transaction.assert_any_call("consumption", consumer.id, producer.id, 50)
 
 
 def test_buy_goods_decrease_inventories(market_before_transaction):

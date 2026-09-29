@@ -516,31 +516,31 @@ def test_get_stock_uses_env_method(space_with_accounts):
     assert value == env.get_stock.return_value
 
 
-def test_record_flow_decr_source_account_flow(space_with_accounts):
+def test_make_transaction_decr_source_account_flow(space_with_accounts):
     # Given
     source, target = 0, 1
     space, accounts = space_with_accounts
 
     # When
-    space.record_flow("x", source, target, 100)
+    space.make_transaction("x", source, target, 100)
 
     # Then
     accounts[source].decr_flow.assert_called_with("x", 100)
 
 
-def test_record_flow_incr_target_account_flow(space_with_accounts):
+def test_make_transaction_incr_target_account_flow(space_with_accounts):
     # Given
     source, target = 0, 1
     space, accounts = space_with_accounts
 
     # When
-    space.record_flow("x", source, target, 100)
+    space.make_transaction("x", source, target, 100)
 
     # Then
     accounts[target].incr_flow.assert_called_with("x", 100)
 
 
-def test_record_flow_uses_available_env_method(space_with_accounts):
+def test_make_transaction_uses_available_env_method(space_with_accounts):
     # Given
     env = Mock()
     source, target = 0, 1
@@ -548,10 +548,10 @@ def test_record_flow_uses_available_env_method(space_with_accounts):
     space.env = env
 
     # When
-    space.record_flow("x", source, target, 100)
+    space.make_transaction("x", source, target, 100)
 
     # Then
-    env.record_flow.assert_called_with("x", source, target, 100)
+    env.make_transaction.assert_called_with("x", source, target, 100)
 
 
 # ---------------------------------------------------

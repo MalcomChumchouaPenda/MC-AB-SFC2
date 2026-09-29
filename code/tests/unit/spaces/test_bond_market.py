@@ -97,7 +97,7 @@ def market_with_participants(market_without_roles):
     issuer = Mock()
     market = market_without_roles
     market.transfer_stock = Mock()
-    market.record_flow = Mock()
+    market.make_transaction = Mock()
     return market, issuer, buyer
 
 
@@ -177,4 +177,4 @@ def test_repay_bond_updates_accounts(market_with_purchase):
     # Then
     market.transfer_stock.assert_any_call("bonds", buyer.id, issuer.id, 100)
     market.transfer_stock.assert_any_call("cash", issuer.id, buyer.id, 110)
-    market.record_flow.assert_any_call("bond_interests", issuer.id, buyer.id, 10)
+    market.make_transaction.assert_any_call("bond_interests", issuer.id, buyer.id, 10)

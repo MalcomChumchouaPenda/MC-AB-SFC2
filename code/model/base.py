@@ -171,9 +171,9 @@ class EcoSpace(Network):
             self.accounts[source].decr_stock(category, amount)
             self.accounts[target].incr_stock(category, amount)
 
-    def record_flow(self, category, source, target, amount):
+    def make_transaction(self, category, source, target, amount):
         if self.env is not None:
-            self.env.record_flow(category, source, target, amount)
+            self.env.make_transaction(category, source, target, amount)
         else:
             self.accounts[source].decr_flow(category, amount)
             self.accounts[target].incr_flow(category, amount)

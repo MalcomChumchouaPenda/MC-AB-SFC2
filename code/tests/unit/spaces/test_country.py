@@ -447,7 +447,7 @@ def country_before_transaction(country_without_roles):
     # Given
     country = country_without_roles
     country.transfer_stock = Mock()
-    country.record_flow = Mock()
+    country.make_transaction = Mock()
     return country
 
 
@@ -462,7 +462,7 @@ def test_pay_public_transfers_updates_accounts(country_before_transaction):
 
     # Then
     country.transfer_stock.assert_any_call("cash", auth.id, citizen.id, 10)
-    country.record_flow.assert_any_call("public_transfers", auth.id, citizen.id, 10)
+    country.make_transaction.assert_any_call("public_transfers", auth.id, citizen.id, 10)
 
 
 @pytest.fixture
@@ -540,7 +540,7 @@ def test_pay_taxes_updates_accounts(country_before_transaction):
 
     # Then
     country.transfer_stock.assert_any_call("cash", payer.id, auth.id, 10)
-    country.record_flow.assert_any_call("taxes", payer.id, auth.id, 10)
+    country.make_transaction.assert_any_call("taxes", payer.id, auth.id, 10)
 
 
 def test_pay_dividends_updates_accounts(country_with_company_and_founder):
@@ -552,7 +552,7 @@ def test_pay_dividends_updates_accounts(country_with_company_and_founder):
 
     # Then
     country.transfer_stock.assert_any_call("cash", company.id, founder.id, 10)
-    country.record_flow.assert_any_call("dividends", company.id, founder.id, 10)
+    country.make_transaction.assert_any_call("dividends", company.id, founder.id, 10)
 
 
 def test_update_equity_share_updates_accounts(country_with_company_and_founder):
@@ -564,7 +564,7 @@ def test_update_equity_share_updates_accounts(country_with_company_and_founder):
 
     # Then
     country.transfer_stock.assert_any_call("equities", company.id, founder.id, -10)
-    country.record_flow.assert_any_call("profit_transfers", company.id, founder.id, -10)
+    country.make_transaction.assert_any_call("profit_transfers", company.id, founder.id, -10)
 
 
 def test_update_equity_share_updates_graph_edge(country_with_company_and_founder):
@@ -746,7 +746,7 @@ def test_transfer_profits_to_government(country_before_transaction):
 
     # Then
     country.transfer_stock.assert_any_call("cash", auth2.id, auth1.id, 100)
-    country.record_flow.assert_any_call("profit_transfers", auth2.id, auth1.id, 100)
+    country.make_transaction.assert_any_call("profit_transfers", auth2.id, auth1.id, 100)
 
 
 def test_transfer_residual_cash_of_company(country_before_transaction):

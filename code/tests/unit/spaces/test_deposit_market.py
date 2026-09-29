@@ -89,7 +89,7 @@ def market_with_participants(market_without_roles):
     depositor, deposit_bank = Mock(), Mock()
     market = market_without_roles
     market.transfer_stock = Mock()
-    market.record_flow = Mock()
+    market.make_transaction = Mock()
     market.graph.add_nodes_from([depositor, deposit_bank])
     return market, depositor, deposit_bank
 
@@ -270,7 +270,7 @@ def test_pay_interests_updates_accounts(market_with_depositor_amount):
     market.transfer_stock.assert_any_call(
         "deposits", deposit_bank.id, depositor.id, 10.0
     )
-    market.record_flow.assert_any_call(
+    market.make_transaction.assert_any_call(
         "dep_interests", deposit_bank.id, depositor.id, 10.0
     )
 

@@ -29,5 +29,5 @@ class BondMarket(EcoSpace):
         repayment = principal + interests
         self.transfer_stock("bonds", buyer.id, issuer.id, principal)
         self.transfer_stock("cash", issuer.id, buyer.id, repayment)
-        self.record_flow("bond_interests", issuer.id, buyer.id, interests)
+        self.make_transaction("bond_interests", issuer.id, buyer.id, interests)
         self.graph[issuer][buyer]["amount"] -= principal
