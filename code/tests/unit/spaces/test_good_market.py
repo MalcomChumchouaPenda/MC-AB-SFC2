@@ -92,7 +92,7 @@ def test_add_consumer_creates_tradable_consumer_role(market_without_roles):
     market.add_consumer(agent)
 
     # Then
-    market.add_role.assert_called_with(FakeConsumer, agent, "trad_consumer")
+    market.add_role.assert_called_with(FakeConsumer, agent, "consumer", prefix="trad")
 
 
 def test_add_consumer_creates_non_tradable_consumer_role(market_without_roles):
@@ -105,7 +105,7 @@ def test_add_consumer_creates_non_tradable_consumer_role(market_without_roles):
     market.add_consumer(agent)
 
     # Then
-    market.add_role.assert_called_with(FakeConsumer, agent, "non_trad_consumer")
+    market.add_role.assert_called_with(FakeConsumer, agent, "consumer", prefix="non_trad")
 
 
 @pytest.mark.parametrize("tradable", [True, False])

@@ -20,8 +20,9 @@ class GoodsMarket(EcoSpace):
         return self.add_role(Producer, firm, "producer")
 
     def add_consumer(self, household):
-        name = "trad_consumer" if self.tradable else "non_trad_consumer"
-        role = self.add_role(Consumer, household, name)
+        group = "consumer"
+        prefix = "trad" if self.tradable else "non_trad"
+        role = self.add_role(Consumer, household, group, prefix=prefix)
         return role
 
     #

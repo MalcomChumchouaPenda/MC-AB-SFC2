@@ -234,6 +234,19 @@ def test_add_role_initializes_group(space_and_agent, role_with_kind):
     assert role.group == "fake_role"
 
 
+def test_add_role_initializes_name_with_prefix(space_and_agent, role_with_kind):
+    # Given
+    role, role_kind = role_with_kind
+    space, agent = space_and_agent
+
+    # When
+    space.add_role(role_kind, agent, "fake_role", prefix="any")
+
+    # Then
+    assert role.name == "any_fake_role"
+    assert role.group == "fake_role"
+
+
 def test_add_role_registers_role(space_and_agent, role_with_kind):
     # Given
     role, role_kind = role_with_kind
