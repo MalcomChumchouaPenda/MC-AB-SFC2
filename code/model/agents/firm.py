@@ -174,7 +174,7 @@ class Firm(EcoAgent):
         needs = max(0, stocks["loans"] - stocks["deposits"])
         if needs > 0:
             feasible = min(stocks["cash"], needs)
-            role = self.roles["deposit_supplier"]
+            role = self.roles["depositor"]
             role.make_deposits(feasible)
 
     def _pay_lender(self, role, loan, deposits):
@@ -271,7 +271,7 @@ class Firm(EcoAgent):
     def _withdraw_residual_deposits(self):
         amount = self.account["deposits"]
         if amount > 0:
-            role = self.roles["deposit_supplier"]
+            role = self.roles["depositor"]
             role.withdraw_deposits(amount)
 
     def _make_loan_defaults(self):

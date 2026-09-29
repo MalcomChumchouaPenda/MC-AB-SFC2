@@ -53,9 +53,9 @@ def firm(fake_model):
 @pytest.fixture
 def firm_with_deposit_bank(firm, banks, markets):
     # Given
-    supplier = markets[1].add_supplier(firm)
-    demander = markets[1].add_demander(banks[1])
-    markets[1].join_bank(supplier, demander, amount=100)
+    supplier = markets[1].add_depositor(firm)
+    deposit_bank = markets[1].add_deposit_bank(banks[1])
+    markets[1].join_deposit_bank(supplier, deposit_bank, amount=100)
     return firm, banks[1]
 
 

@@ -55,19 +55,19 @@ def firm(fake_model):
 
 
 @pytest.fixture
-def firm_with_deposit_demander(firm, banks, markets):
+def firm_with_deposit_bank(firm, banks, markets):
     # Given
-    deposit_supplier = markets[1].add_supplier(firm)
-    deposit_demander = markets[1].add_demander(banks[1])
-    markets[1].join_bank(deposit_supplier, deposit_demander)
+    depositor = markets[1].add_depositor(firm)
+    deposit_bank = markets[1].add_deposit_bank(banks[1])
+    markets[1].join_deposit_bank(depositor, deposit_bank)
     return firm, banks[1]
 
 
 @pytest.fixture
-def firm_with_loan_demand(firm_with_deposit_demander, markets):
+def firm_with_loan_demand(firm_with_deposit_bank, markets):
     # Given
     amount = 50
-    firm, _ = firm_with_deposit_demander
+    firm, _ = firm_with_deposit_bank
     borrower = markets[0].add_borrower(firm)
     borrower.loan_demand = amount
     borrower.net_worth = 100
@@ -96,9 +96,9 @@ def test_increases_firm_loans(firm, bank_with_loan_demand):
     assert firm.account["loans"] == -amount
 
 
-def test_increases_firm_deposits(firm_with_deposit_demander, bank_with_loan_demand):
+def test_increases_firm_deposits(firm_with_deposit_bank, bank_with_loan_demand):
     # Given
-    firm, deposit_demander = firm_with_deposit_demander
+    firm, deposit_bank = firm_with_deposit_bank
     credit_bank, amount = bank_with_loan_demand
 
     # When
@@ -106,14 +106,14 @@ def test_increases_firm_deposits(firm_with_deposit_demander, bank_with_loan_dema
 
     # Then
     assert firm.account["deposits"] == amount
-    assert deposit_demander.account["deposits"] == -amount
+    assert deposit_bank.account["deposits"] == -amount
 
 
 def test_transfers_cash_between_banks(
-    firm_with_deposit_demander, bank_with_loan_demand
+    firm_with_deposit_bank, bank_with_loan_demand
 ):
     # Given
-    _, deposit_demander = firm_with_deposit_demander
+    _, deposit_bank = firm_with_deposit_bank
     credit_bank, amount = bank_with_loan_demand
 
     # When
@@ -121,15 +121,15 @@ def test_transfers_cash_between_banks(
 
     # Then
     assert credit_bank.account["cash"] == -amount
-    assert deposit_demander.account["cash"] == amount
+    assert deposit_bank.account["cash"] == amount
 
 
 def test_creates_loan_as_link(
-    firm_with_deposit_demander, bank_with_loan_demand, markets
+    firm_with_deposit_bank, bank_with_loan_demand, markets
 ):
     # Given
     bank, amount = bank_with_loan_demand
-    firm, _ = firm_with_deposit_demander
+    firm, _ = firm_with_deposit_bank
     firm_role = firm.roles["borrower"]
     bank_role = bank.roles["lender"]
 

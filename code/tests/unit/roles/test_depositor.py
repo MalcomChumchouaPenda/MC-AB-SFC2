@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import Mock
 from model.base import EcoRole
-from model.roles.deposit_supplier import DepositSupplier
+from model.roles.depositor import DepositSupplier
 
 # ---------------------------------------------------
 # ARCHITECTURE
@@ -31,21 +31,21 @@ def role():
 # ----------------------------------------------------
 
 
-def test_find_deposit_demanders_from_env(role):
+def test_find_deposit_banks_from_env(role):
     # Given
     env = role.env
 
     # When
-    found = role.find_deposit_demanders()
+    found = role.find_deposit_banks()
 
     # Then
-    env.find_all_roles.assert_called_with("deposit_demander")
+    env.find_all_roles.assert_called_with("deposit_bank")
     assert found == env.find_all_roles.return_value
 
 
-def test_get_deposit_rate_from_deposit_demander(role):
+def test_get_deposit_rate_from_deposit_bank(role):
     # Given
-    role.deposit_demander = Mock(deposit_rate=0.01)
+    role.deposit_bank = Mock(deposit_rate=0.01)
 
     # When
     perceived = role.get_deposit_rate()
@@ -84,39 +84,39 @@ def test_withdraw_deposits_into_env(role):
 def test_choose_bank_into_env(role):
     # Given
     env = role.env
-    role.deposit_demander = None
-    deposit_demander = Mock()
+    role.deposit_bank = None
+    deposit_bank = Mock()
 
     # When
-    role.choose_bank(deposit_demander)
+    role.choose_bank(deposit_bank)
 
     # Then
-    env.join_bank.assert_called_with(role, deposit_demander, 0)
+    env.join_deposit_bank.assert_called_with(role, deposit_bank, 0)
 
 
 def test_choose_bank_with_initial_amount(role):
     # Given
     env = role.env
-    role.deposit_demander = None
-    deposit_demander = Mock()
+    role.deposit_bank = None
+    deposit_bank = Mock()
 
     # When
-    role.choose_bank(deposit_demander, amount=100)
+    role.choose_bank(deposit_bank, amount=100)
 
     # Then
-    env.join_bank.assert_called_with(role, deposit_demander, 100)
+    env.join_deposit_bank.assert_called_with(role, deposit_bank, 100)
 
 
 def test_choose_bank_to_switch_bank(role):
     # Given
-    old_deposit_demander = Mock()
-    new_deposit_demander = Mock()
-    role.deposit_demander = old_deposit_demander
+    old_deposit_bank = Mock()
+    new_deposit_bank = Mock()
+    role.deposit_bank = old_deposit_bank
     env = role.env
 
     # When
-    role.choose_bank(new_deposit_demander)
+    role.choose_bank(new_deposit_bank)
 
     # Then
-    env.leave_bank.assert_called_with(role)
-    env.join_bank.assert_called_with(role, new_deposit_demander, 0)
+    env.leave_deposit_bank.assert_called_with(role)
+    env.join_deposit_bank.assert_called_with(role, new_deposit_bank, 0)

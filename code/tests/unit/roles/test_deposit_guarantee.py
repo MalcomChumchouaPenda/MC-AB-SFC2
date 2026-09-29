@@ -42,7 +42,7 @@ def test_find_defaults_from_env(role, make_dlist):
     found = role.find_defaults()
 
     # Then
-    env.find_all_roles.assert_called_with("deposit_demander")
+    env.find_all_roles.assert_called_with("deposit_bank")
     assert found == [{"bank": bad, "amount": -100}]
 
 
@@ -55,7 +55,7 @@ def test_find_deposits_from_env(role):
     found = role.find_deposits(bank)
 
     # Then
-    env.find_links.assert_called_with(bank, "deposit_supplier")
+    env.find_links.assert_called_with(bank, "depositor")
     assert found == env.find_links.return_value
 
 
@@ -67,10 +67,10 @@ def test_find_deposits_from_env(role):
 def test_reimburse_deposits_into_env(role):
     # Given
     env = role.env
-    deposit_supplier = Mock()
+    depositor = Mock()
 
     # When
-    role.reimburse_deposits(deposit_supplier, 200)
+    role.reimburse_deposits(depositor, 200)
 
     # Then
-    env.reimburse_deposits.assert_called_with(role, deposit_supplier, 200)
+    env.reimburse_deposits.assert_called_with(role, depositor, 200)

@@ -903,7 +903,7 @@ def firm_after_borrowing(firm_with_roles_and_account):
     account["deposits"] = 100
     account["loans"] = 100
     account["cash"] = 100
-    roles["deposit_supplier"] = Mock()
+    roles["depositor"] = Mock()
     roles["borrower"] = role
     return firm, roles, account
 
@@ -915,7 +915,7 @@ def test_repay_loans_after_making_deposits(firm_after_borrowing, cash, expected)
     account["deposits"] = 20
     account["cash"] = cash
     account["loans"] = 100
-    role = roles["deposit_supplier"]
+    role = roles["depositor"]
 
     # When
     firm.repay_loans()
@@ -1199,7 +1199,7 @@ def firm_before_exit(firm_with_roles_and_account):
     firm.net_worth = 50
     roles["company"] = role2
     roles["borrower"] = role1
-    roles["deposit_supplier"] = Mock()
+    roles["depositor"] = Mock()
     account["deposits"] = 0
     account["loans"] = 0
     account["cash"] = 0
@@ -1224,7 +1224,7 @@ def test_exit_withdraws_residual_deposits(firm_before_exit):
     # Given
     firm, roles, account = firm_before_exit
     account["deposits"] = 100
-    role = roles["deposit_supplier"]
+    role = roles["depositor"]
 
     # When
     firm.exit()
@@ -1237,7 +1237,7 @@ def test_exit_doesnt_withdraw_with_no_deposit(firm_before_exit):
     # Given
     firm, roles, account = firm_before_exit
     account["deposits"] = 0
-    role = roles["deposit_supplier"]
+    role = roles["depositor"]
 
     # When
     firm.exit()

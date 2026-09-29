@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import Mock
-from model.roles.deposit_demander import DepositDemander
+from model.roles.deposit_bank import DepositDemander
 
 # ---------------------------------------------------
 # ARCHITECTURE
@@ -49,7 +49,7 @@ def test_find_deposits_from_env(role):
     found = role.find_deposits()
 
     # Then
-    env.find_links.assert_called_with(role, "deposit_supplier")
+    env.find_links.assert_called_with(role, "depositor")
     assert found == env.find_links.return_value
 
 
@@ -61,10 +61,10 @@ def test_find_deposits_from_env(role):
 def test_pay_interests_into_env(role):
     # Given
     env = role.env
-    deposit_supplier = Mock()
+    depositor = Mock()
 
     # When
-    role.pay_interests(deposit_supplier, 200)
+    role.pay_interests(depositor, 200)
 
     # Then
-    env.pay_interests.assert_called_with(role, deposit_supplier, 200)
+    env.pay_interests.assert_called_with(role, depositor, 200)

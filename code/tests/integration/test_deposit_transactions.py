@@ -39,9 +39,9 @@ def market(model):
 @pytest.fixture
 def before_transactions(market, firm, bank):
     # Given
-    deposit_demander = market.add_demander(bank)
-    deposit_supplier = market.add_supplier(firm)
-    market.join_bank(deposit_supplier, deposit_demander, 2000)
+    depositor = market.add_depositor(firm)
+    deposit_bank = market.add_deposit_bank(bank)
+    market.join_deposit_bank(depositor, deposit_bank, 2000)
 
 
 @pytest.mark.usefixtures("before_transactions")
@@ -69,10 +69,10 @@ def govt(model):
 @pytest.fixture
 def before_reimbursement(market, firm, bank, govt):
     # Given
-    deposit_demander = market.add_demander(bank)
-    deposit_supplier = market.add_supplier(firm)
+    deposit_bank = market.add_deposit_bank(bank)
+    depositor = market.add_depositor(firm)
     market.add_guarantee(govt)
-    market.join_bank(deposit_supplier, deposit_demander, 2000)
+    market.join_deposit_bank(depositor, deposit_bank, 2000)
 
 
 @pytest.mark.usefixtures("before_reimbursement")
@@ -80,7 +80,7 @@ def test_government_reimburse_deposits(govt, firm, bank):
     # Given
     firm.account["cash"] = 0
     bank.account["cash"] = 0
-    bank.roles["deposit_demander"].defaulted = True
+    bank.roles["deposit_bank"].defaulted = True
     govt.roles["bond_issuer"] = Mock()
 
     # When

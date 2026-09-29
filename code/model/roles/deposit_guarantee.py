@@ -9,7 +9,7 @@ class DepositGuarantee(EcoRole):
     def find_defaults(self):
         env = self.env
         defaults = []
-        for role in env.find_all_roles("deposit_demander"):
+        for role in env.find_all_roles("deposit_bank"):
             if not role.defaulted:
                 continue
             amount = env.get_stock("deposits", role.id)
@@ -17,11 +17,11 @@ class DepositGuarantee(EcoRole):
             defaults.append(default)
         return defaults
 
-    def find_deposits(self, deposit_demander):
-        return self.env.find_links(deposit_demander, "deposit_supplier")
+    def find_deposits(self, deposit_bank):
+        return self.env.find_links(deposit_bank, "depositor")
 
     #
     # Actions
     #
-    def reimburse_deposits(self, deposit_supplier, amount):
-        self.env.reimburse_deposits(self, deposit_supplier, amount)
+    def reimburse_deposits(self, depositor, amount):
+        self.env.reimburse_deposits(self, depositor, amount)

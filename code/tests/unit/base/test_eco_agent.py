@@ -59,7 +59,7 @@ def test_initializes_central_bank_id(fake_model):
     assert agent.cb_id is None
 
 
-def test_initializes_deposit_demander_id(fake_model):
+def test_initializes_deposit_bank_id(fake_model):
     # Given
     model = fake_model
 

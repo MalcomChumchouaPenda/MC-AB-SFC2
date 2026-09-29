@@ -43,14 +43,14 @@ def household(model):
 def before_allocation(country, household):
     # Given
     country.add_citizen(household)
-    household.roles["deposit_supplier"] = Mock()
+    household.roles["depositor"] = Mock()
 
 
 @pytest.mark.usefixtures("before_allocation")
 def test_household_portfolio_allocation(country, household):
     # Given
     country.prob_failure = 0.0
-    role = household.roles["deposit_supplier"]
+    role = household.roles["depositor"]
     role.get_deposit_rate.return_value = 0.05
     household.p.lambda_ = 0.4
     household.disposable_income = 100
@@ -77,7 +77,7 @@ def founders(model):
     founders = []
     for i in range(2):
         hh = Household(model)
-        hh.roles["deposit_supplier"] = Mock()
+        hh.roles["depositor"] = Mock()
         hh.desired_equity = 300 - i * 100
         founders.append(hh)
     return founders
@@ -157,7 +157,7 @@ def test_household_makes_deposits(founders, model):
     household1.invest_equity()
 
     # Then
-    household1.roles["deposit_supplier"].make_deposits.assert_called_with(400)
+    household1.roles["depositor"].make_deposits.assert_called_with(400)
     assert len(firms) == 0
     assert len(banks) == 0
 

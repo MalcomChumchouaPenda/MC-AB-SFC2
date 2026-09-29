@@ -12,10 +12,10 @@ class DepositDemander(EcoRole):
     #
 
     def find_deposits(self):
-        return self.env.find_links(self, "deposit_supplier")
+        return self.env.find_links(self, "depositor")
 
     #
     # Actions
     #
-    def pay_interests(self, deposit_supplier, amount):
-        self.env.pay_interests(self, deposit_supplier, amount)
+    def pay_interests(self, depositor, amount):
+        self.env.pay_interests(self, depositor, amount)
