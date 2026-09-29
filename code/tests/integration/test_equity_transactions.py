@@ -8,10 +8,12 @@ from model.agents.bank import Bank
 
 
 @pytest.fixture
-def model():
+def model(fake_model, make_dlist):
     # Given
-    model = Model()
+    model = fake_model
     model.p.K = 1
+    model.firms = make_dlist()
+    model.banks = make_dlist()
     return model
 
 
@@ -91,68 +93,73 @@ def before_investment(country, founders):
 
 
 @pytest.mark.usefixtures("before_investment")
-def test_household_creates_new_firm(country, founders):
+def test_household_creates_new_firm(country, founders, model):
     # Given
     household1, household2 = founders
     citizen1 = household1.roles["citizen"]
     citizen2 = household2.roles["citizen"]
-    companies = country.roles["company"]
+    firms = model.firms
+    positions = country.positions
 
     # When
     household1.invest_equity()
 
     # Then
-    assert len(companies) == 1
-    assert isinstance(companies[0].agent, Firm)
+    assert len(firms) == 1
+    assert isinstance(firms[0], Firm)
     assert household1.account["equities"] == 300
     assert household1.account["cash"] == 100
     assert household2.account["equities"] == 200
     assert household2.account["cash"] == 200
-    assert country.get_stock("equities", companies[0].id) == -500
-    assert country.get_stock("cash", companies[0].id) == 500
-    assert country.graph[citizen1][companies[0]]["value"] == 300
-    assert country.graph[citizen2][companies[0]]["value"] == 200
+    assert country.get_stock("equities", firms[0].id) == -500
+    assert country.get_stock("cash", firms[0].id) == 500
+    assert country.graph[citizen1][positions[firms[0]]]["value"] == 300
+    assert country.graph[citizen2][positions[firms[0]]]["value"] == 200
 
 
 @pytest.mark.usefixtures("before_investment")
-def test_household_creates_new_bank(country, founders):
+def test_household_creates_new_bank(country, founders, model):
     # Given
     household1, household2 = founders
     citizen1 = household1.roles["citizen"]
     citizen2 = household2.roles["citizen"]
-    companies = country.roles["company"]
-    companies.extend([Mock(equity=100, sector="F") for _ in range(5)])
+    positions = country.positions
+    banks = model.banks
+    roles = country.roles
+    roles.extend([Mock(equity=100, sector="F", group="company") for _ in range(5)])
 
     # # When
     household1.invest_equity()
 
     # Then
-    assert len(companies) == 6
-    assert isinstance(companies[-1].agent, Bank)
+    assert len(banks) == 1
+    assert isinstance(banks[0], Bank)
     assert household1.account["equities"] == 300
     assert household1.account["cash"] == 100
     assert household2.account["equities"] == 200
     assert household2.account["cash"] == 200
-    assert country.get_stock("equities", companies[-1].id) == -500
-    assert country.get_stock("cash", companies[-1].id) == 500
-    assert country.graph[citizen1][companies[-1]]["value"] == 300
-    assert country.graph[citizen2][companies[-1]]["value"] == 200
+    assert country.get_stock("equities", banks[0].id) == -500
+    assert country.get_stock("cash", banks[0].id) == 500
+    assert country.graph[citizen1][positions[banks[0]]]["value"] == 300
+    assert country.graph[citizen2][positions[banks[0]]]["value"] == 200
 
 
 @pytest.mark.usefixtures("before_investment")
-def test_household_makes_deposits(country, founders):
+def test_household_makes_deposits(founders, model):
     # Given
     household1, household2 = founders
     citizen2 = household2.roles["citizen"]
     citizen2.resid_equity = household2.desired_equity = 0
-    companies = country.roles["company"]
+    banks = model.banks
+    firms = model.firms
 
     # When
     household1.invest_equity()
 
     # Then
     household1.roles["deposit_supplier"].make_deposits.assert_called_with(400)
-    assert len(companies) == 0
+    assert len(firms) == 0
+    assert len(banks) == 0
 
 
 @pytest.fixture

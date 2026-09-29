@@ -1,7 +1,7 @@
 from unittest.mock import Mock
 from collections import defaultdict
 import pytest
-from agentpy import AgentDList
+from agentpy import AgentDList, AgentList
 from model.base import EcoSpace
 
 # ---------------------------------------------------
@@ -53,7 +53,7 @@ def test_initializes_accounts_dict(fake_model):
     assert space.accounts == {}
 
 
-def test_initializes_roles_default_dict(fake_model):
+def test_initializes_roles_agent_dlist(fake_model):
     # Given
     model = fake_model
 
@@ -61,7 +61,7 @@ def test_initializes_roles_default_dict(fake_model):
     space = EcoSpace(model)
 
     # Then
-    assert isinstance(space.roles, defaultdict)
+    assert isinstance(space.roles, AgentDList)
 
 
 # ---------------------------------------------------
@@ -143,18 +143,6 @@ def test_add_space_registers_sub_space(space_with_sub_spaces):
 # ----------------------------------------------------
 
 
-def test_get_default_roles_as_agentdlist(space):
-    # Given
-    name = "fake_role"
-
-    # When
-    result = space.roles[name]
-
-    # Then
-    assert isinstance(result, AgentDList)
-    assert len(result) == 0
-
-
 @pytest.fixture
 def role_with_kind():
     # Given
@@ -164,11 +152,24 @@ def role_with_kind():
 
 
 @pytest.fixture
-def space_and_agent(space):
+def space_and_agent(space, make_dlist):
     # Given
     agent = Mock(roles={})
+    space.roles = make_dlist()
     space.add_account = Mock()
     return space, agent
+
+
+def test_add_role_creates_role(space_and_agent, role_with_kind):
+    # Given
+    _, role_kind = role_with_kind
+    space, agent = space_and_agent
+
+    # When
+    space.add_role(role_kind, agent, "fake_role")
+
+    # Then
+    role_kind.assert_called_with(agent, space)
 
 
 def test_add_role_creates_role(space_and_agent, role_with_kind):
@@ -209,7 +210,7 @@ def test_add_role_add_graph_node(space_and_agent, role_with_kind):
     assert space.positions[agent] is role
 
 
-def test_add_role_registers_role(space_and_agent, role_with_kind):
+def test_add_role_initializes_name(space_and_agent, role_with_kind):
     # Given
     role, role_kind = role_with_kind
     space, agent = space_and_agent
@@ -219,8 +220,31 @@ def test_add_role_registers_role(space_and_agent, role_with_kind):
 
     # Then
     assert role.name == "fake_role"
-    assert agent.roles["fake_role"] is role
-    assert list(space.roles["fake_role"]) == [role]
+
+
+def test_add_role_initializes_group(space_and_agent, role_with_kind):
+    # Given
+    role, role_kind = role_with_kind
+    space, agent = space_and_agent
+
+    # When
+    space.add_role(role_kind, agent, "fake_role")
+
+    # Then
+    assert role.group == "fake_role"
+
+
+def test_add_role_registers_role(space_and_agent, role_with_kind):
+    # Given
+    role, role_kind = role_with_kind
+    space, agent = space_and_agent
+
+    # When
+    space.add_role(role_kind, agent, "fake_role")
+
+    # Then
+    assert role in space.roles
+    assert role is agent.roles["fake_role"]
 
 
 def test_add_role_creates_account_if_no_account(space_and_agent, role_with_kind):
@@ -250,18 +274,19 @@ def test_add_role_doesnt_create_account_if_account(space_and_agent, role_with_ki
 
 
 @pytest.fixture
-def space_with_role(space):
+def space_with_role(space_and_agent):
     # Given
-    agent, role = Mock(), Mock()
-    space.graph.add_node(role)
-    space.roles = {"fake_role": [role]}
-    agent.roles = {"fake_role": role}
-    role.name = "fake_role"
+    space, agent = space_and_agent
+    role = Mock()
     role.agent = agent
+    role.name = "fake_role"
+    agent.roles["fake_role"] = role
+    space.graph.add_node(role)
+    space.roles.append(role)
     return space, role
 
 
-def test_remove_role_remove_graph_node(space_with_role):
+def test_remove_role_removes_graph_node(space_with_role):
     # Given
     space, role = space_with_role
     graph = space.graph
@@ -273,7 +298,7 @@ def test_remove_role_remove_graph_node(space_with_role):
     assert not graph.has_node(role)
 
 
-def test_remove_role_un_registers_role(space_with_role):
+def test_remove_role_unregisters_role(space_with_role):
     # Given
     space, role = space_with_role
     agent = role.agent
@@ -283,7 +308,7 @@ def test_remove_role_un_registers_role(space_with_role):
 
     # Then
     assert len(agent.roles) == 0
-    assert len(space.roles[role.name]) == 0
+    assert len(space.roles) == 0
 
 
 @pytest.fixture
@@ -291,49 +316,75 @@ def space_with_roles(space, monkeypatch, make_dlist):
     # Given
     roles = [Mock() for _ in range(2)]
     roles = make_dlist(roles)
-    space.roles = {"fake_role": roles}
+    space.roles = roles
     monkeypatch.setattr(space.model, "nprandom", Mock())
     return space, roles
 
 
-def test_find_all_roles(space_with_roles):
+def test_find_all_roles_filter_by_group(space_with_roles):
     # Given
     space, roles = space_with_roles
+    roles[0].group = "other_role"
+    roles[1].group = "fake_role"
 
     # When
     result = space.find_all_roles("fake_role")
 
     # Then
-    assert list(result) == list(roles)
-    assert isinstance(result, AgentDList)
-    assert result is not roles
+    assert list(result) == [roles[1]]
 
 
-def test_find_one_role(space_with_roles):
+def test_find_all_roles_returns_agent_list(space_with_roles):
     # Given
     space, roles = space_with_roles
+    roles[0].group = "other_role"
+    roles[1].group = "fake_role"
 
     # When
-    result = space.find_one_role("fake_role")
+    result = space.find_all_roles("fake_role")
 
     # Then
-    assert result == roles[0]
+    assert isinstance(result, AgentList)
 
 
-@pytest.mark.parametrize("i, j", [(1, 1), (2, 2), (3, 2)])
-def test_find_random_roles(space_with_roles, i, j):
+def test_find_random_roles_filter_by_group(space_with_roles):
     # Given
     space, roles = space_with_roles
+    roles[0].group = "other_role"
+    roles[1].group = "fake_role"
 
     # When
-    result = space.find_random_roles("fake_role", i)
-    print(list(result))
-    print(list(roles))
+    result = space.find_random_roles("fake_role", 2)
 
     # Then
-    assert len(result) == j
-    assert isinstance(result, AgentDList)
-    assert all(role in roles for role in result)
+    assert list(result) == [roles[1]]
+
+
+@pytest.mark.parametrize("size, expected", [(1, 1), (2, 2), (3, 2)])
+def test_find_random_roles_with_various_size(space_with_roles, size, expected):
+    # Given
+    space, roles = space_with_roles
+    roles[0].group = "fake_role"
+    roles[1].group = "fake_role"
+
+    # When
+    result = space.find_random_roles("fake_role", size)
+
+    # Then
+    assert len(result) == expected
+
+
+def test_find_random_roles_returns_agent_list(space_with_roles):
+    # Given
+    space, roles = space_with_roles
+    roles[0].group = "fake_role"
+    roles[1].group = "fake_role"
+
+    # When
+    result = space.find_random_roles("fake_role", 2)
+
+    # Then
+    assert isinstance(result, AgentList)
 
 
 # ---------------------------------------------------

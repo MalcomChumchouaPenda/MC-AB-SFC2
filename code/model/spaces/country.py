@@ -64,19 +64,19 @@ class Country(EcoSpace):
         return sum(bank_sector.equity) / sum(firm_sector.equity)
 
     def _split_bank_firm_sectors(self):
-        firm_sector = AgentDList(self.model)
-        bank_sector = AgentDList(self.model)
-        for company in self.roles["company"]:
-            if company.sector == "B":
-                bank_sector.append(company)
-            else:
-                firm_sector.append(company)
+        roles = self.roles
+        companies = roles.select(roles.group == "company")
+        firm_sector = companies.select(companies.sector != "B")
+        bank_sector = companies.select(companies.sector == "B")
         return bank_sector, firm_sector
 
     def calc_sector_equity_range(self, sector):
-        equities = [c.equity for c in self.roles["company"] if c.sector == sector]
-        if len(equities) == 0:
+        roles = self.roles
+        companies = roles.select(roles.group == "company")
+        selected = companies.select(companies.sector == sector)
+        if len(selected) == 0:
             return None
+        equities = selected.equity
         return min(equities), max(equities)
 
     #
@@ -117,6 +117,7 @@ class Country(EcoSpace):
         sector = "FT" if tradable else "FNT"
         company = self.add_company(firm, sector=sector)
         self._place_firm(firm, tradable)
+        self.model.firms.append(firm)
         for share in shares:
             founder = share["founder"]
             amount = share["amount"]
@@ -138,6 +139,7 @@ class Country(EcoSpace):
             founder = share["founder"]
             amount = share["amount"]
             self.fund_company(company, founder, amount)
+        self.model.banks.append(bank)
         self.env.place_bank(bank)
         self.spaces["deposit_market"].add_demander(bank)
 
@@ -168,7 +170,8 @@ class Country(EcoSpace):
     # Evolution
     #
     def update_state(self):
-        companies = AgentList(self.model, self.roles["company"])
+        roles = self.roles
+        companies = roles.select(roles.group == "company")
         defaults = companies.select(companies.defaulted == True)
         self.prob_failure = len(defaults) / max(1, len(companies))
         self.inflation = self.spaces["good_market"].calc_inflation()

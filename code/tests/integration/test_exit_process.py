@@ -8,10 +8,12 @@ from model.agents.bank import Bank
 
 
 @pytest.fixture
-def model():
+def model(fake_model, make_dlist):
     # Given
-    model = Model()
+    model = fake_model
     model.p.K = 1
+    model.firms = make_dlist()
+    model.banks = make_dlist()
     return model
 
 

@@ -31,6 +31,7 @@ class EcoRole(AgentNode):
         self.agent = agent
         self.env = env
         self.name = ""
+        self.group = ""
 
     @property
     def country_id(self):
@@ -77,18 +78,20 @@ class EcoSpace(Network):
         self.env = None
         self.spaces = {}
         self.accounts = {}
-        self.roles = defaultdict(lambda: AgentDList(self.model))
+        self.roles = AgentDList(self.model)
 
     #
     # Role management
     #
-    def add_role(self, kind, agent, name):
+    def add_role(self, kind, agent, group):
+        name = group
         role = kind(agent, self)
         role.name = name
+        role.group = group
         agent.roles[name] = role
         if agent.account is None:
             self.add_account(agent)
-        self.roles[name].append(role)
+        self.roles.append(role)
         self.positions[agent] = role
         self.graph.add_node(role)
         return role
@@ -97,19 +100,18 @@ class EcoSpace(Network):
         name = role.name
         agent = role.agent
         agent.roles.pop(name)
-        self.roles[name].remove(role)
+        self.roles.remove(role)
         self.graph.remove_node(role)
 
-    def find_all_roles(self, name):
-        return AgentDList(self.model, self.roles[name])
+    def find_all_roles(self, group):
+        roles = self.roles
+        return roles.select(roles.group == group)
 
-    def find_one_role(self, name):
-        return self.roles[name][0]
-
-    def find_random_roles(self, name, size):
-        roles = self.roles[name]
-        min_size = min(size, len(roles))
-        return roles.random(n=min_size).to_dlist()
+    def find_random_roles(self, group, size):
+        roles = self.roles
+        found = roles.select(roles.group == group)
+        selected = found.random(n=min(size, len(found)))
+        return selected.to_list()
 
     #
     # Links/neighbors management

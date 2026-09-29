@@ -349,20 +349,21 @@ def test_add_company_returns_created_role(country_without_roles):
 
 
 @pytest.fixture
-def country_with_companies(country_without_roles, make_dlist):
+def country_with_roles(country_without_roles, make_dlist):
     # Given
-    companies = make_dlist()
+    roles = make_dlist()
     country = country_without_roles
-    country.roles = {"company": companies}
-    return country, companies
+    country.roles = roles
+    return country, roles
 
 
-def test_calc_bank_number_ratio(country_with_companies):
+def test_calc_bank_number_ratio(country_with_roles):
     # Given
-    country, companies = country_with_companies
+    country, roles = country_with_roles
     bank_sector = [Mock(sector="B") for _ in range(2)]
     firm_sector = [Mock(sector="F") for _ in range(10)]
-    companies.extend(bank_sector + firm_sector)
+    roles.extend(bank_sector + firm_sector)
+    roles.group = "company"
 
     # When
     ratio = country.calc_bank_number_ratio()
@@ -371,11 +372,12 @@ def test_calc_bank_number_ratio(country_with_companies):
     assert ratio == 0.2
 
 
-def test_calc_bank_number_ratio_if_no_firms(country_with_companies):
+def test_calc_bank_number_ratio_if_no_firms(country_with_roles):
     # Given
-    country, companies = country_with_companies
+    country, roles = country_with_roles
     bank_sector = [Mock(sector="B") for _ in range(2)]
-    companies.extend(bank_sector)
+    roles.extend(bank_sector)
+    roles.group = "company"
 
     # When
     ratio = country.calc_bank_number_ratio()
@@ -384,12 +386,13 @@ def test_calc_bank_number_ratio_if_no_firms(country_with_companies):
     assert ratio == 1.0
 
 
-def test_calc_bank_equity_ratio(country_with_companies):
+def test_calc_bank_equity_ratio(country_with_roles):
     # Given
-    country, companies = country_with_companies
+    country, roles = country_with_roles
     bank_sector = [Mock(sector="B", equity=100) for _ in range(2)]
     firm_sector = [Mock(sector="F", equity=50) for _ in range(10)]
-    companies.extend(bank_sector + firm_sector)
+    roles.extend(bank_sector + firm_sector)
+    roles.group = "company"
 
     # When
     ratio = country.calc_bank_equity_ratio()
@@ -398,11 +401,12 @@ def test_calc_bank_equity_ratio(country_with_companies):
     assert ratio == 0.4
 
 
-def test_calc_bank_equity_ratio_if_no_firms(country_with_companies):
+def test_calc_bank_equity_ratio_if_no_firms(country_with_roles):
     # Given
-    country, companies = country_with_companies
+    country, roles = country_with_roles
     bank_sector = [Mock(sector="B", equity=100) for _ in range(2)]
-    companies.extend(bank_sector)
+    roles.extend(bank_sector)
+    roles.group = "company"
 
     # When
     ratio = country.calc_bank_equity_ratio()
@@ -411,12 +415,13 @@ def test_calc_bank_equity_ratio_if_no_firms(country_with_companies):
     assert ratio == 1.0
 
 
-def test_calc_sector_equity_range_for_any_sector(country_with_companies):
+def test_calc_sector_equity_range_for_any_sector(country_with_roles):
     # Given
-    country, companies = country_with_companies
-    target_companies = [Mock(sector="X", equity=100 * i) for i in range(2, 5)]
-    other_companies = [Mock(sector="Y", equity=100 * i) for i in range(1, 6)]
-    companies.extend(target_companies + other_companies)
+    country, roles = country_with_roles
+    target = [Mock(sector="X", equity=100 * i) for i in range(2, 5)]
+    others = [Mock(sector="Y", equity=100 * i) for i in range(1, 6)]
+    roles.extend(target + others)
+    roles.group = "company"
 
     # When
     range_ = country.calc_sector_equity_range("X")
@@ -425,10 +430,11 @@ def test_calc_sector_equity_range_for_any_sector(country_with_companies):
     assert range_ == (200, 400)
 
 
-def test_calc_sector_equity_range_if_empty_sector(country_with_companies):
+def test_calc_sector_equity_range_if_empty_sector(country_with_roles):
     # Given
-    country, companies = country_with_companies
-    companies.extend([Mock(sector="Y", equity=100)])
+    country, roles = country_with_roles
+    roles.extend([Mock(sector="Y", equity=100)])
+    roles.group = "company"
 
     # When
     range_ = country.calc_sector_equity_range("X")
@@ -454,8 +460,8 @@ def country_before_transaction(country_without_roles):
 def test_pay_public_transfers_updates_accounts(country_before_transaction):
     # Given
     country = country_before_transaction
-    citizen = Mock()
-    auth = Mock()
+    citizen = Mock(id=1)
+    auth = Mock(id=2)
 
     # When
     country.pay_public_transfers(auth, citizen, 10)
@@ -588,9 +594,11 @@ def test_update_equity_share_updates_graph_edge(country_with_company_and_founder
 
 
 @pytest.fixture
-def country_before_creation(country_without_roles):
+def country_before_creation(country_without_roles, make_dlist):
     # Given
     country = country_without_roles
+    country.model.firms = make_dlist()
+    country.model.banks = make_dlist()
     country.add_company = Mock()
     country.fund_company = Mock()
     country.env = Mock()
@@ -688,6 +696,20 @@ def test_create_firm_place_firm_in_env(country_before_creation, share, tradable)
     country.env.place_firm.assert_called_with(firm, tradable=tradable)
 
 
+@pytest.mark.parametrize("tradable", [True, False])
+def test_create_firm_registers_firm(country_before_creation, share, tradable):
+    # Given
+    firm = Mock()
+    country = country_before_creation
+    firms = country.model.firms
+
+    # When
+    country.create_firm(firm, [share], tradable=tradable)
+
+    # Then
+    assert firms[0] is firm
+
+
 # ---------------------------------------------------
 # BANK CREATION
 # ----------------------------------------------------
@@ -733,6 +755,19 @@ def test_create_bank_place_bank_in_env(country_before_creation, share):
     country.env.place_bank.assert_called_with(bank)
 
 
+def test_create_bank_place_bank_in_env(country_before_creation, share):
+    # Given
+    country = country_before_creation
+    banks = country.model.banks
+    bank = Mock()
+
+    # When
+    country.create_bank(bank, [share])
+
+    # Then
+    assert bank is banks[0]
+
+
 # ---------------------------------------------------
 # TRANSFERS
 # ----------------------------------------------------
@@ -740,19 +775,16 @@ def test_create_bank_place_bank_in_env(country_before_creation, share):
 
 def test_transfer_profits_to_government(country_before_transaction):
     # Given
-    auth1, auth2 = Mock(), Mock()
     country = country_before_transaction
-    country.fiscal_authority = auth1
-    country.monetary_authority = auth2
+    country.fiscal_authority = Mock(id=1)
+    country.monetary_authority = Mock(id=2)
 
     # When
     country.transfer_central_bank_profits(100)
 
     # Then
-    country.transfer_stock.assert_any_call("cash", auth2.id, auth1.id, 100)
-    country.make_transaction.assert_any_call(
-        "profit_transfers", auth2.id, auth1.id, 100
-    )
+    country.transfer_stock.assert_any_call("cash", 2, 1, 100)
+    country.make_transaction.assert_any_call("profit_transfers", 2, 1, 100)
 
 
 def test_transfer_residual_cash_of_company(country_before_transaction):
@@ -778,7 +810,7 @@ def country_before_update(country_without_roles, make_dlist):
     # Given
     country = country_without_roles
     country.spaces["good_market"] = Mock()
-    country.roles = {"company": make_dlist()}
+    country.roles = make_dlist()
     country.gdp = 0
     return country
 
@@ -812,7 +844,8 @@ def test_update_state_updates_prob_failure(country_before_update):
     defaults = [Mock(defaulted=True) for _ in range(5)]
     others = [Mock(defaulted=False) for _ in range(5)]
     country = country_before_update
-    country.roles["company"].extend(defaults + others)
+    country.roles.extend(defaults + others)
+    country.roles.group = "company"
 
     # When
     country.update_state()

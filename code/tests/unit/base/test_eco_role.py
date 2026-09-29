@@ -74,6 +74,17 @@ def test_initializes_name():
     assert role.name == ""
 
 
+def test_initializes_group():
+    # Given
+    agent, env = Mock(), Mock()
+
+    # When
+    role = EcoRole(agent, env)
+
+    # Then
+    assert role.group == ""
+
+
 def test_expose_agent_id():
     # Given
     agent, env = Mock(), Mock()
