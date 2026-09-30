@@ -92,10 +92,6 @@ class Household(EcoAgent):
         p = self.p
         roles = self.roles
         desired_cons = self.desired_consumption
-        # steps = [
-        #     (roles["trad_consumer"], p.cT * desired_cons),
-        #     (roles["non_trad_consumer"], (1 - p.cT) * desired_cons),
-        # ]
         steps = [("trad_consumer", p.cT), ("non_trad_consumer", (1 - p.cT))]
         random = self.model.random
         random.shuffle(steps)
