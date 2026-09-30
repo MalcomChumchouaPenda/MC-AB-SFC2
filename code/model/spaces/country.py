@@ -64,15 +64,13 @@ class Country(EcoSpace):
         return sum(bank_sector.equity) / sum(firm_sector.equity)
 
     def _split_bank_firm_sectors(self):
-        roles = self.roles
-        companies = roles.select(roles.group == "company")
+        companies = self.find_all_roles("company")
         firm_sector = companies.select(companies.sector != "B")
         bank_sector = companies.select(companies.sector == "B")
         return bank_sector, firm_sector
 
     def calc_sector_equity_range(self, sector):
-        roles = self.roles
-        companies = roles.select(roles.group == "company")
+        companies = self.find_all_roles("company")
         selected = companies.select(companies.sector == sector)
         if len(selected) == 0:
             return None
@@ -170,8 +168,7 @@ class Country(EcoSpace):
     # Evolution
     #
     def update_state(self):
-        roles = self.roles
-        companies = roles.select(roles.group == "company")
+        companies = self.find_all_roles("company")
         defaults = companies.select(companies.defaulted == True)
         self.prob_failure = len(defaults) / max(1, len(companies))
         self.inflation = self.spaces["good_market"].calc_inflation()

@@ -53,7 +53,7 @@ def test_initializes_accounts_dict(fake_model):
     assert space.accounts == {}
 
 
-def test_initializes_roles_agent_dlist(fake_model):
+def test_initializes_roles_dict(fake_model):
     # Given
     model = fake_model
 
@@ -61,7 +61,7 @@ def test_initializes_roles_agent_dlist(fake_model):
     space = EcoSpace(model)
 
     # Then
-    assert isinstance(space.roles, AgentDList)
+    assert space.roles == {}
 
 
 # ---------------------------------------------------
@@ -152,11 +152,11 @@ def role_with_kind():
 
 
 @pytest.fixture
-def space_and_agent(space, make_dlist):
+def space_and_agent(space):
     # Given
-    agent = Mock(roles={})
-    space.roles = make_dlist()
+    space.roles = {}
     space.add_account = Mock()
+    agent = Mock(roles={})
     return space, agent
 
 
@@ -256,7 +256,7 @@ def test_add_role_registers_role(space_and_agent, role_with_kind):
     space.add_role(role_kind, agent, "fake_role")
 
     # Then
-    assert role in space.roles
+    assert role is space.roles[agent.id]
     assert role is agent.roles["fake_role"]
 
 
@@ -294,8 +294,8 @@ def space_with_role(space_and_agent):
     role.agent = agent
     role.name = "fake_role"
     agent.roles["fake_role"] = role
+    space.roles = {agent.id: role}
     space.graph.add_node(role)
-    space.roles.append(role)
     return space, role
 
 
@@ -325,12 +325,10 @@ def test_remove_role_unregisters_role(space_with_role):
 
 
 @pytest.fixture
-def space_with_roles(space, monkeypatch, make_dlist):
+def space_with_roles(space):
     # Given
-    roles = [Mock() for _ in range(2)]
-    roles = make_dlist(roles)
-    space.roles = roles
-    monkeypatch.setattr(space.model, "nprandom", Mock())
+    roles = [Mock(id=i) for i in range(2)]
+    space.roles = {role.id: role for role in roles}
     return space, roles
 
 

@@ -126,7 +126,7 @@ def test_household_creates_new_bank(country, founders, model):
     positions = country.positions
     banks = model.banks
     roles = country.roles
-    roles.extend([Mock(equity=100, sector="F", group="company") for _ in range(5)])
+    roles.update({i: Mock(equity=100, sector="F", group="company") for i in range(5)})
 
     # # When
     household1.invest_equity()

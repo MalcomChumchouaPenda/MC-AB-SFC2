@@ -349,21 +349,29 @@ def test_add_company_returns_created_role(country_without_roles):
 
 
 @pytest.fixture
-def country_with_roles(country_without_roles, make_dlist):
+def country_with_roles(country_without_roles):
     # Given
-    roles = make_dlist()
+    roles = {}
     country = country_without_roles
     country.roles = roles
     return country, roles
 
 
-def test_calc_bank_number_ratio(country_with_roles):
+@pytest.fixture
+def country_with_two_groups(country_with_roles, make_dlist):
     # Given
     country, roles = country_with_roles
-    bank_sector = [Mock(sector="B") for _ in range(2)]
-    firm_sector = [Mock(sector="F") for _ in range(10)]
-    roles.extend(bank_sector + firm_sector)
-    roles.group = "company"
+    group1 = make_dlist([Mock(id=i, group="company") for i in range(10)])
+    group2 = make_dlist([Mock(id=i, group="company") for i in range(10, 12)])
+    roles.update({role.id: role for role in group1 + group2})
+    return country, group1, group2
+
+
+def test_calc_bank_number_ratio(country_with_two_groups):
+    # Given
+    country, group1, group2 = country_with_two_groups
+    group1.sector = "F"
+    group2.sector = "B"
 
     # When
     ratio = country.calc_bank_number_ratio()
@@ -372,12 +380,11 @@ def test_calc_bank_number_ratio(country_with_roles):
     assert ratio == 0.2
 
 
-def test_calc_bank_number_ratio_if_no_firms(country_with_roles):
+def test_calc_bank_number_ratio_if_no_firms(country_with_two_groups):
     # Given
-    country, roles = country_with_roles
-    bank_sector = [Mock(sector="B") for _ in range(2)]
-    roles.extend(bank_sector)
-    roles.group = "company"
+    country, group1, group2 = country_with_two_groups
+    group1.sector = "B"
+    group2.sector = "B"
 
     # When
     ratio = country.calc_bank_number_ratio()
@@ -386,13 +393,11 @@ def test_calc_bank_number_ratio_if_no_firms(country_with_roles):
     assert ratio == 1.0
 
 
-def test_calc_bank_equity_ratio(country_with_roles):
+def test_calc_bank_equity_ratio(country_with_two_groups):
     # Given
-    country, roles = country_with_roles
-    bank_sector = [Mock(sector="B", equity=100) for _ in range(2)]
-    firm_sector = [Mock(sector="F", equity=50) for _ in range(10)]
-    roles.extend(bank_sector + firm_sector)
-    roles.group = "company"
+    country, group1, group2 = country_with_two_groups
+    group1.sector, group1.equity = "F", 50
+    group2.sector, group2.equity = "B", 100
 
     # When
     ratio = country.calc_bank_equity_ratio()
@@ -401,12 +406,11 @@ def test_calc_bank_equity_ratio(country_with_roles):
     assert ratio == 0.4
 
 
-def test_calc_bank_equity_ratio_if_no_firms(country_with_roles):
+def test_calc_bank_equity_ratio_if_no_firms(country_with_two_groups):
     # Given
-    country, roles = country_with_roles
-    bank_sector = [Mock(sector="B", equity=100) for _ in range(2)]
-    roles.extend(bank_sector)
-    roles.group = "company"
+    country, group1, group2 = country_with_two_groups
+    group1.sector, group1.equity = "B", 100
+    group2.sector, group2.equity = "B", 100
 
     # When
     ratio = country.calc_bank_equity_ratio()
@@ -415,29 +419,28 @@ def test_calc_bank_equity_ratio_if_no_firms(country_with_roles):
     assert ratio == 1.0
 
 
-def test_calc_sector_equity_range_for_any_sector(country_with_roles):
+def test_calc_sector_equity_range_for_any_sector(country_with_two_groups):
     # Given
-    country, roles = country_with_roles
-    target = [Mock(sector="X", equity=100 * i) for i in range(2, 5)]
-    others = [Mock(sector="Y", equity=100 * i) for i in range(1, 6)]
-    roles.extend(target + others)
-    roles.group = "company"
+    country, group1, group2 = country_with_two_groups
+    group1.sector, group1.equity = "X", 100
+    group2.sector, group2.equity = "Y", 100
+    group2[-1].equity = 200
 
     # When
-    range_ = country.calc_sector_equity_range("X")
+    range_ = country.calc_sector_equity_range("Y")
 
     # Then
-    assert range_ == (200, 400)
+    assert range_ == (100, 200)
 
 
-def test_calc_sector_equity_range_if_empty_sector(country_with_roles):
+def test_calc_sector_equity_range_if_empty_sector(country_with_two_groups):
     # Given
-    country, roles = country_with_roles
-    roles.extend([Mock(sector="Y", equity=100)])
-    roles.group = "company"
+    country, group1, group2 = country_with_two_groups
+    group1.sector, group1.equity = "X", 100
+    group2.sector, group2.equity = "Y", 100
 
     # When
-    range_ = country.calc_sector_equity_range("X")
+    range_ = country.calc_sector_equity_range("Z")
 
     # Then
     assert range_ is None
@@ -467,10 +470,8 @@ def test_pay_public_transfers_updates_accounts(country_before_transaction):
     country.pay_public_transfers(auth, citizen, 10)
 
     # Then
-    country.transfer_stock.assert_any_call("cash", auth.id, citizen.id, 10)
-    country.make_transaction.assert_any_call(
-        "public_transfers", auth.id, citizen.id, 10
-    )
+    country.transfer_stock.assert_any_call("cash", 2, 1, 10)
+    country.make_transaction.assert_any_call("public_transfers", 2, 1, 10)
 
 
 @pytest.fixture
@@ -806,11 +807,11 @@ def test_transfer_residual_cash_of_company(country_before_transaction):
 
 
 @pytest.fixture
-def country_before_update(country_without_roles, make_dlist):
+def country_before_update(country_without_roles):
     # Given
     country = country_without_roles
     country.spaces["good_market"] = Mock()
-    country.roles = make_dlist()
+    country.roles = {}
     country.gdp = 0
     return country
 
@@ -841,11 +842,11 @@ def test_update_state_updates_inflation(country_before_update):
 
 def test_update_state_updates_prob_failure(country_before_update):
     # Given
-    defaults = [Mock(defaulted=True) for _ in range(5)]
-    others = [Mock(defaulted=False) for _ in range(5)]
+    default = Mock(group="company", defaulted=True)
+    other = Mock(group="company", defaulted=False)
     country = country_before_update
-    country.roles.extend(defaults + others)
-    country.roles.group = "company"
+    country.roles[0] = default
+    country.roles[1] = other
 
     # When
     country.update_state()

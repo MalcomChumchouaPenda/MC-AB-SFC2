@@ -1,4 +1,5 @@
-from agentpy import Agent, Network, AgentNode, AgentDList, AttrDict
+from agentpy import Agent, Network, AgentNode
+from agentpy import AgentList, AgentDList, AttrDict
 from model.accounts import FINANCIAL_ASSETS, REAL_ASSETS, TRANSACTIONS
 
 
@@ -75,9 +76,9 @@ class EcoSpace(Network):
 
     def setup(self):
         self.env = None
+        self.roles = {}
         self.spaces = {}
         self.accounts = {}
-        self.roles = AgentDList(self.model)
 
     #
     # Role management
@@ -99,7 +100,7 @@ class EcoSpace(Network):
 
     def _register_role(self, agent, role, name):
         agent.roles[name] = role
-        self.roles.append(role)
+        self.roles[agent.id] = role
 
     def _add_node(self, agent, role):
         self.positions[agent] = role
@@ -109,16 +110,15 @@ class EcoSpace(Network):
         name = role.name
         agent = role.agent
         agent.roles.pop(name)
-        self.roles.remove(role)
+        self.roles.pop(agent.id)
         self.graph.remove_node(role)
 
     def find_all_roles(self, group):
-        roles = self.roles
-        return roles.select(roles.group == group)
+        selected = [role for role in self.roles.values() if role.group == group]
+        return AgentList(self.model, selected)
 
     def find_random_roles(self, group, size):
-        roles = self.roles
-        found = roles.select(roles.group == group)
+        found = self.find_all_roles(group)
         selected = found.random(n=min(size, len(found)))
         return selected.to_list()
 
