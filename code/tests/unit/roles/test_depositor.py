@@ -62,23 +62,25 @@ def test_get_deposit_rate_from_deposit_bank(role):
 def test_make_deposits_into_env(role):
     # Given
     env = role.env
+    deposit_bank = Mock()
 
     # When
-    role.make_deposits(200)
+    role.make_deposits(deposit_bank, 200)
 
     # Then
-    env.make_deposits.assert_called_with(role, 200)
+    env.make_deposits.assert_called_with(role, deposit_bank, 200)
 
 
 def test_withdraw_deposits_into_env(role):
     # Given
     env = role.env
+    deposit_bank = Mock()
 
     # When
-    role.withdraw_deposits(200)
+    role.withdraw_deposits(deposit_bank, 200)
 
     # Then
-    env.withdraw_deposits.assert_called_with(role, 200)
+    env.withdraw_deposits.assert_called_with(role, deposit_bank, 200)
 
 
 def test_choose_bank_into_env(role):

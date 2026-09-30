@@ -37,9 +37,10 @@ def test_decreases_firm_cash(firm, bank):
     # Given
     firm.account["cash"] = 1000
     depositor = firm.roles["depositor"]
+    deposit_bank = bank.roles["deposit_bank"]
 
     # When
-    depositor.make_deposits(200)
+    depositor.make_deposits(deposit_bank, 200)
 
     # Then
     assert firm.account["cash"] == 800
@@ -50,9 +51,10 @@ def test_increases_firm_deposits(firm, bank):
     # Given
     firm.account["cash"] = 1000
     depositor = firm.roles["depositor"]
+    deposit_bank = bank.roles["deposit_bank"]
 
     # When
-    depositor.make_deposits(200)
+    depositor.make_deposits(deposit_bank, 200)
 
     # Then
     assert firm.account["deposits"] == 200
@@ -74,9 +76,10 @@ def test_decreases_household_cash(household, bank):
     # Given
     household.account["cash"] = 1000
     depositor = household.roles["depositor"]
+    deposit_bank = bank.roles["deposit_bank"]
 
     # When
-    depositor.make_deposits(400)
+    depositor.make_deposits(deposit_bank, 400)
 
     # Then
     assert household.account["cash"] == 600
@@ -87,9 +90,10 @@ def test_increases_household_deposits(household, bank):
     # Given
     household.account["cash"] = 1000
     depositor = household.roles["depositor"]
+    deposit_bank = bank.roles["deposit_bank"]
 
     # When
-    depositor.make_deposits(400)
+    depositor.make_deposits(deposit_bank, 400)
 
     # Then
     assert household.account["deposits"] == 400

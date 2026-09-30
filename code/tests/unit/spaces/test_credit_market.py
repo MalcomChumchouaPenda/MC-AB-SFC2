@@ -137,10 +137,7 @@ def test_grant_loan_updates_accounts(market_with_participants):
 
     # Then
     market.transfer_stock.assert_any_call("loans", borrower.id, lender.id, 500)
-    market.transfer_stock.assert_any_call(
-        "deposits", borrower.bank_id, borrower.id, 500
-    )
-    market.transfer_stock.assert_any_call("cash", lender.id, borrower.bank_id, 500)
+    market.transfer_stock.assert_any_call("cash", lender.id, borrower.id, 500)
 
 
 def test_grant_loan_reduces_loan_demand(market_with_participants):
@@ -184,18 +181,15 @@ def test_repay_loans_updates_graph_edge(market_with_loan):
 def test_repay_loans_updates_accounts(market_with_loan):
     # Given
     market, borrower, lender = market_with_loan
-    bank_id = borrower.bank_id
+    bank_id = lender.id
 
     # When
     market.repay_loans(borrower, lender, 100, 10)
 
     # Then
-    market.transfer_stock.assert_any_call("loans", lender.id, borrower.id, 100)
-    market.transfer_stock.assert_any_call("cash", bank_id, lender.id, 110)
-    market.transfer_stock.assert_any_call("deposits", borrower.id, bank_id, 110)
-    market.make_transaction.assert_any_call(
-        "loan_interests", borrower.id, lender.id, 10
-    )
+    market.transfer_stock.assert_any_call("loans", bank_id, borrower.id, 100)
+    market.transfer_stock.assert_any_call("cash", borrower.id, bank_id, 110)
+    market.make_transaction.assert_any_call("loan_interests", borrower.id, bank_id, 10)
 
 
 def test_make_defaults_updates_graph_edge(market_with_loan):
@@ -214,15 +208,14 @@ def test_make_defaults_updates_graph_edge(market_with_loan):
 def test_make_defaults_updates_accounts(market_with_loan):
     # Given
     market, borrower, lender = market_with_loan
+    bank_id = lender.id
 
     # When
     market.make_defaults(borrower, lender, 100)
 
     # Then
-    market.transfer_stock.assert_any_call("loans", lender.id, borrower.id, 100)
-    market.make_transaction.assert_any_call(
-        "loan_defaults", lender.id, borrower.id, 100
-    )
+    market.transfer_stock.assert_any_call("loans", bank_id, borrower.id, 100)
+    market.make_transaction.assert_any_call("loan_defaults", bank_id, borrower.id, 100)
 
 
 # ---------------------------------------------------

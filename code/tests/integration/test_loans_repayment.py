@@ -110,33 +110,17 @@ def test_decreases_loan_as_link(markets, firm_with_deposit_bank, bank_with_loan)
     assert markets[0].graph[firm_role][bank_role]["amount"] == 0
 
 
-def test_decreases_firm_deposits_as_stock(firm_with_deposit_bank, bank_with_loan):
+def test_decreases_firm_cash(firm_with_deposit_bank, bank_with_loan):
     # Given
-    _, amount, rate = bank_with_loan
+    bank, amount, rate = bank_with_loan
     repayment = amount * (1 + rate)
-    firm, bank = firm_with_deposit_bank
-    firm_deposits = firm.account["deposits"]
-    bank_deposits = bank.account["deposits"]
+    firm, _ = firm_with_deposit_bank
+    firm_cash = firm.account["cash"]
+    bank_cash = bank.account["cash"]
 
     # When
     firm.repay_loans()
 
     # Then
-    assert firm.account["deposits"] == firm_deposits - repayment
-    assert bank.account["deposits"] == bank_deposits + repayment
-
-
-def test_transfer_cash_between_banks(firm_with_deposit_bank, bank_with_loan):
-    # Given
-    bank1, amount, rate = bank_with_loan
-    firm, bank2 = firm_with_deposit_bank
-    cash1 = bank1.account["cash"]
-    cash2 = bank2.account["cash"]
-    repayment = amount * (1 + rate)
-
-    # When
-    firm.repay_loans()
-
-    # Then
-    assert bank2.account["cash"] == pytest.approx(cash2 - repayment)
-    assert bank1.account["cash"] == pytest.approx(cash1 + repayment)
+    assert firm.account["cash"] == pytest.approx(firm_cash - repayment)
+    assert bank.account["cash"] == pytest.approx(bank_cash + repayment)

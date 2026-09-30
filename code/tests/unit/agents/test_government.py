@@ -570,7 +570,7 @@ def test_issue_deposit_guarantee_bonds_registers_defaults(govt_as_deposit_guaran
     assert govt._defaults == [default]
 
 
-def test_reimburse_deposits(govt_as_deposit_guarantee):
+def test_reimburse_deposits_uses_env(govt_as_deposit_guarantee):
     # Given
     bank, client = Mock(), Mock()
     default = {"bank": bank, "amount": -100}
@@ -584,7 +584,7 @@ def test_reimburse_deposits(govt_as_deposit_guarantee):
 
     # Then
     role.find_deposits.assert_called_with(bank)
-    role.reimburse_deposits.assert_called_with(client, 100)
+    role.reimburse_deposits.assert_called_with(client, bank, 100)
 
 
 def test_update_public_spending_history(govt):

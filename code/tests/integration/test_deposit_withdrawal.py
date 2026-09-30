@@ -39,7 +39,7 @@ def test_increases_firm_cash(firm, bank, market):
     market.join_deposit_bank(depositor, deposit_bank, 500)
 
     # When
-    depositor.withdraw_deposits(100)
+    depositor.withdraw_deposits(deposit_bank, 100)
 
     # Then
     assert firm.account["cash"] == 600
@@ -54,7 +54,7 @@ def test_decreases_firm_deposits(firm, bank, market):
     market.join_deposit_bank(depositor, deposit_bank, 500)
 
     # When
-    depositor.withdraw_deposits(100)
+    depositor.withdraw_deposits(deposit_bank, 100)
 
     # Then
     assert firm.account["deposits"] == 400
@@ -78,7 +78,7 @@ def test_increases_household_cash(household, bank, market):
     market.join_deposit_bank(depositor, deposit_bank, 500)
 
     # When
-    depositor.withdraw_deposits(400)
+    depositor.withdraw_deposits(deposit_bank, 400)
 
     # Then
     assert household.account["cash"] == 900
@@ -93,7 +93,7 @@ def test_decreases_household_deposits(household, bank, market):
     market.join_deposit_bank(depositor, deposit_bank, 500)
 
     # When
-    depositor.withdraw_deposits(400)
+    depositor.withdraw_deposits(deposit_bank, 400)
 
     # Then
     assert household.account["deposits"] == 100

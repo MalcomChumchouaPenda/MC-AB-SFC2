@@ -158,10 +158,11 @@ class Government(EcoAgent):
     def reimburse_deposits(self):
         role = self.roles["deposit_guarantee"]
         for default in self._defaults:
-            for deposit in role.find_deposits(default["bank"]):
+            deposit_bank = default["bank"]
+            for deposit in role.find_deposits(deposit_bank):
                 amount = deposit["amount"]
                 client = deposit["depositor"]
-                role.reimburse_deposits(client, amount)
+                role.reimburse_deposits(client, deposit_bank, amount)
 
     #
     # History

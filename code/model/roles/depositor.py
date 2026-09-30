@@ -15,11 +15,11 @@ class Depositor(EcoRole):
     #
     # Actions
     #
-    def make_deposits(self, amount):
-        self.env.make_deposits(self, amount)
+    def make_deposits(self, deposit_bank, amount):
+        self.env.make_deposits(self, deposit_bank, amount)
 
-    def withdraw_deposits(self, amount):
-        self.env.withdraw_deposits(self, amount)
+    def withdraw_deposits(self, deposit_bank, amount):
+        self.env.withdraw_deposits(self, deposit_bank, amount)
 
     def choose_bank(self, deposit_bank, amount=0):
         if self.deposit_bank is not None:

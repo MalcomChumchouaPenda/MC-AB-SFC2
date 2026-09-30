@@ -121,27 +121,14 @@ def test_join_deposit_bank_with_initial_amount(market_with_participants):
 def test_join_deposit_bank_updates_accounts(market_with_participants):
     # Given
     market, depositor, deposit_bank = market_with_participants
+    bank_id = deposit_bank.id
 
     # When
     market.join_deposit_bank(depositor, deposit_bank, amount=500)
 
     # Then
-    market.transfer_stock.assert_any_call("cash", depositor.id, deposit_bank.id, 500)
-    market.transfer_stock.assert_any_call(
-        "deposits", deposit_bank.id, depositor.id, 500
-    )
-
-
-def test_join_deposit_bank_registers_deposit_bank_refs(market_with_participants):
-    # Given
-    market, depositor, deposit_bank = market_with_participants
-
-    # When
-    market.join_deposit_bank(depositor, deposit_bank)
-
-    # Then
-    assert depositor.deposit_bank == deposit_bank
-    assert depositor.bank_id == deposit_bank.id
+    market.transfer_stock.assert_any_call("cash", depositor.id, bank_id, 500)
+    market.transfer_stock.assert_any_call("deposits", bank_id, depositor.id, 500)
 
 
 @pytest.fixture
@@ -149,19 +136,16 @@ def market_with_depositor_amount(market_with_participants):
     # Given
     market, depositor, deposit_bank = market_with_participants
     market.graph.add_edge(depositor, deposit_bank, amount=100)
-    depositor.deposit_bank = deposit_bank
-    depositor.bank_id = deposit_bank.id
-    return market, depositor, 100
+    return market, depositor, deposit_bank, 100
 
 
 def test_leave_deposit_bank_remove_graph_edge(market_with_depositor_amount):
     # Given
-    market, depositor, _ = market_with_depositor_amount
-    deposit_bank = depositor.deposit_bank
+    market, depositor, deposit_bank, _ = market_with_depositor_amount
     graph = market.graph
 
     # When
-    market.leave_deposit_bank(depositor)
+    market.leave_deposit_bank(depositor, deposit_bank)
 
     # Then
     assert not graph.has_edge(depositor, deposit_bank)
@@ -169,27 +153,15 @@ def test_leave_deposit_bank_remove_graph_edge(market_with_depositor_amount):
 
 def test_leave_deposit_bank_updates_accounts(market_with_depositor_amount):
     # Given
-    market, depositor, amount = market_with_depositor_amount
-    bank_id = depositor.bank_id
+    market, depositor, deposit_bank, amount = market_with_depositor_amount
+    bank_id = deposit_bank.id
 
     # When
-    market.leave_deposit_bank(depositor)
+    market.leave_deposit_bank(depositor, deposit_bank)
 
     # Then
     market.transfer_stock.assert_any_call("cash", bank_id, depositor.id, amount)
     market.transfer_stock.assert_any_call("deposits", depositor.id, bank_id, amount)
-
-
-def test_leave_deposit_bank_change_bank_id(market_with_depositor_amount):
-    # Given
-    market, depositor, _ = market_with_depositor_amount
-
-    # When
-    market.leave_deposit_bank(depositor)
-
-    # Then
-    assert depositor.bank_id is None
-    assert depositor.deposit_bank is None
 
 
 # ---------------------------------------------------
@@ -199,27 +171,24 @@ def test_leave_deposit_bank_change_bank_id(market_with_depositor_amount):
 
 def test_make_deposits_updates_accounts(market_with_depositor_amount):
     # Given
-    market, depositor, _ = market_with_depositor_amount
-    deposit_bank = depositor.deposit_bank
+    market, depositor, deposit_bank, _ = market_with_depositor_amount
+    bank_id = deposit_bank.id
 
     # When
-    market.make_deposits(depositor, 500)
+    market.make_deposits(depositor, deposit_bank, 500)
 
     # Then
-    market.transfer_stock.assert_any_call("cash", depositor.id, deposit_bank.id, 500)
-    market.transfer_stock.assert_any_call(
-        "deposits", deposit_bank.id, depositor.id, 500
-    )
+    market.transfer_stock.assert_any_call("cash", depositor.id, bank_id, 500)
+    market.transfer_stock.assert_any_call("deposits", bank_id, depositor.id, 500)
 
 
 def test_make_deposits_transfers_cash(market_with_depositor_amount):
     # Given
-    market, depositor, amount = market_with_depositor_amount
-    deposit_bank = depositor.deposit_bank
+    market, depositor, deposit_bank, amount = market_with_depositor_amount
     graph = market.graph
 
     # When
-    market.make_deposits(depositor, 500)
+    market.make_deposits(depositor, deposit_bank, 500)
 
     # Then
     assert graph[depositor][deposit_bank]["amount"] == amount + 500
@@ -227,27 +196,24 @@ def test_make_deposits_transfers_cash(market_with_depositor_amount):
 
 def test_withdraw_deposits_updates_accounts(market_with_depositor_amount):
     # Given
-    market, depositor, _ = market_with_depositor_amount
-    deposit_bank = depositor.deposit_bank
+    market, depositor, deposit_bank, _ = market_with_depositor_amount
+    bank_id = deposit_bank.id
 
     # When
-    market.withdraw_deposits(depositor, 500)
+    market.withdraw_deposits(depositor, deposit_bank, 500)
 
     # Then
-    market.transfer_stock.assert_any_call("cash", deposit_bank.id, depositor.id, 500)
-    market.transfer_stock.assert_any_call(
-        "deposits", depositor.id, deposit_bank.id, 500
-    )
+    market.transfer_stock.assert_any_call("cash", bank_id, depositor.id, 500)
+    market.transfer_stock.assert_any_call("deposits", depositor.id, bank_id, 500)
 
 
 def test_withdraw_deposits_transfers_cash(market_with_depositor_amount):
     # Given
-    market, depositor, amount = market_with_depositor_amount
-    deposit_bank = depositor.deposit_bank
+    market, depositor, deposit_bank, amount = market_with_depositor_amount
     graph = market.graph
 
     # When
-    market.withdraw_deposits(depositor, 500)
+    market.withdraw_deposits(depositor, deposit_bank, 500)
 
     # Then
     assert graph[depositor][deposit_bank]["amount"] == amount - 500
@@ -260,25 +226,21 @@ def test_withdraw_deposits_transfers_cash(market_with_depositor_amount):
 
 def test_pay_interests_updates_accounts(market_with_depositor_amount):
     # Given
-    market, depositor, _ = market_with_depositor_amount
-    deposit_bank = depositor.deposit_bank
+    market, depositor, deposit_bank, _ = market_with_depositor_amount
+    source = deposit_bank.id
+    target = depositor.id
 
     # When
     market.pay_interests(deposit_bank, depositor, 10.0)
 
     # Then
-    market.transfer_stock.assert_any_call(
-        "deposits", deposit_bank.id, depositor.id, 10.0
-    )
-    market.make_transaction.assert_any_call(
-        "dep_interests", deposit_bank.id, depositor.id, 10.0
-    )
+    market.transfer_stock.assert_any_call("deposits", source, target, 10.0)
+    market.make_transaction.assert_any_call("dep_interests", source, target, 10.0)
 
 
 def test_pay_interests_updates_graph_edge(market_with_depositor_amount):
     # Given
-    market, depositor, amount = market_with_depositor_amount
-    deposit_bank = depositor.deposit_bank
+    market, depositor, deposit_bank, amount = market_with_depositor_amount
     graph = market.graph
 
     # When
@@ -290,13 +252,27 @@ def test_pay_interests_updates_graph_edge(market_with_depositor_amount):
 
 def test_reimburse_deposits_updates_accounts(market_with_depositor_amount):
     # Given
+    market, depositor, deposit_bank, _ = market_with_depositor_amount
+    bank_id = deposit_bank.id
     guarantee = Mock()
-    market, depositor, _ = market_with_depositor_amount
-    deposit_bank = depositor.deposit_bank
 
     # When
-    market.reimburse_deposits(guarantee, depositor, 50)
+    market.reimburse_deposits(guarantee, depositor, deposit_bank, 50)
 
     # Then
     market.transfer_stock.assert_any_call("cash", guarantee.id, depositor.id, 50)
-    market.transfer_stock.assert_any_call("deposits", depositor.id, deposit_bank.id, 50)
+    market.transfer_stock.assert_any_call("deposits", depositor.id, bank_id, 50)
+    market.make_transaction.assert_any_call("loan_defaults", guarantee.id, bank_id, 50)
+
+
+def test_reimburse_deposits_remove_graph_edge(market_with_depositor_amount):
+    # Given
+    market, depositor, deposit_bank, _ = market_with_depositor_amount
+    graph = market.graph
+    guarantee = Mock()
+
+    # When
+    market.reimburse_deposits(guarantee, depositor, deposit_bank, 50)
+
+    # Then
+    assert not graph.has_edge(depositor, deposit_bank)

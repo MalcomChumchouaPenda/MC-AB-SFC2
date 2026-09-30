@@ -23,5 +23,5 @@ class DepositGuarantee(EcoRole):
     #
     # Actions
     #
-    def reimburse_deposits(self, depositor, amount):
-        self.env.reimburse_deposits(self, depositor, amount)
+    def reimburse_deposits(self, depositor, deposit_bank, amount):
+        self.env.reimburse_deposits(self, depositor, deposit_bank, amount)

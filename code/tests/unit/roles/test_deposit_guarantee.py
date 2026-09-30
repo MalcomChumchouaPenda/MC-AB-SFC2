@@ -68,9 +68,10 @@ def test_reimburse_deposits_into_env(role):
     # Given
     env = role.env
     depositor = Mock()
+    deposit_bank = Mock()
 
     # When
-    role.reimburse_deposits(depositor, 200)
+    role.reimburse_deposits(depositor, deposit_bank, 200)
 
     # Then
-    env.reimburse_deposits.assert_called_with(role, depositor, 200)
+    env.reimburse_deposits.assert_called_with(role, depositor, deposit_bank, 200)
