@@ -92,14 +92,17 @@ class Household(EcoAgent):
         p = self.p
         roles = self.roles
         desired_cons = self.desired_consumption
-        steps = [
-            (roles["trad_consumer"], p.cT * desired_cons),
-            (roles["non_trad_consumer"], (1 - p.cT) * desired_cons),
-        ]
+        # steps = [
+        #     (roles["trad_consumer"], p.cT * desired_cons),
+        #     (roles["non_trad_consumer"], (1 - p.cT) * desired_cons),
+        # ]
+        steps = [("trad_consumer", p.cT), ("non_trad_consumer", (1 - p.cT))]
         random = self.model.random
         random.shuffle(steps)
         self._fund_consumption(desired_cons)
-        for role, target_cons in steps:
+        for name, share in steps:
+            role = roles[name]
+            target_cons = share * desired_cons
             self.consume_good(role, target_cons)
 
     def _fund_consumption(self, desired_cons):
@@ -112,15 +115,17 @@ class Household(EcoAgent):
 
     def consume_good(self, role, target_cons):
         cash = self.account["cash"]
-        average_price = role.get_average_price()
-        suppliers = role.find_suppliers(self.p.psi)
-        ranked = self.rank_suppliers(suppliers, average_price=average_price)
-        for supplier in ranked:
+        for supplier in self._list_suppliers(role):
             if target_cons <= 0 or cash <= 0:
                 break
             amount = self._buy_supplier_goods(role, supplier, target_cons, cash)
             target_cons -= amount
             cash -= amount
+
+    def _list_suppliers(self, role):
+        average_price = role.get_average_price()
+        suppliers = role.find_suppliers(self.p.psi)
+        return self.rank_suppliers(suppliers, average_price=average_price)
 
     def _buy_supplier_goods(self, role, supplier, target_cons, cash):
         price = supplier.price

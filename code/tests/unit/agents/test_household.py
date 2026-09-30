@@ -612,14 +612,11 @@ def test_consume_each_good_type(hh_as_general_consumer):
 
 def test_consume_randomizes_entry_order(hh_as_general_consumer):
     # Given
-    household, roles, _ = hh_as_general_consumer
+    entry_order = [("trad_consumer", 0.6), ("non_trad_consumer", 0.4)]
+    household, *_ = hh_as_general_consumer
     household.p.cT = 0.6
     household.desired_consumption = 100
     random = household.model.random
-    entry_order = [
-        (roles["trad_consumer"], 60.0),
-        (roles["non_trad_consumer"], 40.0),
-    ]
 
     # When
     household.consume()
