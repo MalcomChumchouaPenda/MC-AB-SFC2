@@ -53,6 +53,19 @@ def test_find_deposits_from_env(role):
     assert found == env.find_links.return_value
 
 
+def test_find_depositor_returns_roles_from_env(role):
+    # Given
+    roles = {i: Mock() for i in range(5)}
+    env = role.env
+    env.roles = roles
+
+    # When
+    found = role.find_depositor(1)
+
+    # Then
+    assert found == roles[1]
+
+
 # ---------------------------------------------------
 # ACTION TESTS
 # ----------------------------------------------------
@@ -68,3 +81,15 @@ def test_pay_interests_into_env(role):
 
     # Then
     env.pay_interests.assert_called_with(role, depositor, 200)
+
+
+def test_make_deposits_call_join_deposit_bank_from_env(role):
+    # Given
+    env = role.env
+    depositor = Mock()
+
+    # When
+    role.make_deposits(depositor, 200)
+
+    # Then
+    env.join_deposit_bank.assert_called_with(depositor, role, 200)

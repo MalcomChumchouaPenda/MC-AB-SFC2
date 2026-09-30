@@ -186,7 +186,7 @@ def test_calc_loan_rate(bank):
 @pytest.fixture
 def bank_as_lender(bank_with_roles_and_account):
     # Given
-    borrowers = [Mock(loan_demand=100) for _ in range(5)]
+    borrowers = [Mock(id=i, loan_demand=100) for i in range(5)]
     lender = Mock(loan_applicants=borrowers)
     bank, roles, _ = bank_with_roles_and_account
     bank.calc_loan_rate = Mock(return_value=0.02)
@@ -194,6 +194,7 @@ def bank_as_lender(bank_with_roles_and_account):
     bank.calc_credit_capacity = Mock(return_value=500)
     random = bank.model.nprandom
     random.choice.return_value = 0
+    roles["deposit_bank"] = Mock()
     roles["lender"] = lender
     return bank
 
@@ -265,6 +266,25 @@ def test_grant_loans_cleans_loan_applicants_list(bank_as_lender):
 
     # Then
     assert len(lender.loan_applicants) == 0
+
+
+def test_grant_loans_and_make_deposits(bank_as_lender):
+    # Given
+    bank = bank_as_lender
+    applicants = bank.roles["lender"].loan_applicants
+    depositors = {a.id: Mock() for a in applicants}
+    deposit_bank = bank.roles["deposit_bank"]
+    deposit_bank.find_depositor.side_effect = lambda i: depositors[i]
+    random = bank.model.nprandom
+    random.choice.return_value = 1
+
+    # When
+    bank.grant_loans()
+
+    # Then
+    for id, depositor in depositors.items():
+        deposit_bank.find_depositor.assert_any_call(id)
+        deposit_bank.make_deposits.assert_any_call(depositor, 100)
 
 
 # ---------------------------------------------------

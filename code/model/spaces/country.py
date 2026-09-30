@@ -1,4 +1,3 @@
-from agentpy import AgentDList, AgentList
 from model.base import EcoSpace
 from model.roles.citizen import Citizen
 from model.roles.company import Company

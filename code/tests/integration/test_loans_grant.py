@@ -6,10 +6,19 @@ from model.spaces.monetary_union import MonetaryUnion
 
 
 @pytest.fixture
-def union(fake_model):
+def model(fake_model):
     # Given
     model = fake_model
     model.p.K = 1
+    model.p.iota_l = 0
+    model.p.chi = 0.0
+    model.p.mu1 = 1.0
+    return model
+
+
+@pytest.fixture
+def union(model):
+    # Given
     union = MonetaryUnion(model)
     return union
 
@@ -31,62 +40,40 @@ def markets(union, country):
 
 
 @pytest.fixture
-def banks(fake_model, country):
+def bank(model, country, markets):
     # Given
-    model = fake_model
-    model.p.iota_l = 0
-    model.p.chi = 0.0
-    model.p.mu1 = 1.0
-    banks = []
-    for _ in range(2):
-        bank = Bank(model)
-        banks.append(bank)
-        country.add_company(bank, "B")
-        bank.account["equities"] = 100
-    return banks
+    bank = Bank(model)
+    country.add_company(bank, "B")
+    markets[0].add_lender(bank)
+    markets[1].add_deposit_bank(bank)
+    bank.account["equities"] = 100
+    return bank
 
 
 @pytest.fixture
-def firm(fake_model):
+def firm(model, markets):
     # Given
-    model = fake_model
     firm = Firm(model)
+    markets[0].add_borrower(firm)
+    markets[1].add_depositor(firm)
     return firm
 
 
 @pytest.fixture
-def firm_with_deposit_bank(firm, banks, markets):
-    # Given
-    depositor = markets[1].add_depositor(firm)
-    deposit_bank = markets[1].add_deposit_bank(banks[1])
-    markets[1].join_deposit_bank(depositor, deposit_bank)
-    return firm, banks[1]
-
-
-@pytest.fixture
-def firm_with_loan_demand(firm_with_deposit_bank, markets):
+def firm_with_loan_demand(firm, bank):
     # Given
     amount = 50
-    firm, _ = firm_with_deposit_bank
-    borrower = markets[0].add_borrower(firm)
+    borrower = firm.roles["borrower"]
     borrower.loan_demand = amount
     borrower.net_worth = 100
+    lender = bank.roles["lender"]
+    lender.loan_applicants = [borrower]
     return firm, amount
 
 
-@pytest.fixture
-def bank_with_loan_demand(firm_with_loan_demand, banks, markets):
+def test_increases_firm_loans(firm_with_loan_demand, bank):
     # Given
     firm, amount = firm_with_loan_demand
-    borrower = firm.roles["borrower"]
-    lender = markets[0].add_lender(banks[0])
-    lender.loan_applicants = [borrower]
-    return banks[0], amount
-
-
-def test_increases_firm_loans(firm, bank_with_loan_demand):
-    # Given
-    bank, amount = bank_with_loan_demand
 
     # When
     bank.grant_loans()
@@ -96,23 +83,21 @@ def test_increases_firm_loans(firm, bank_with_loan_demand):
     assert firm.account["loans"] == -amount
 
 
-def test_increases_firm_cash(firm_with_deposit_bank, bank_with_loan_demand):
+def test_increases_firm_deposits(firm_with_loan_demand, bank):
     # Given
-    firm, deposit_bank = firm_with_deposit_bank
-    credit_bank, amount = bank_with_loan_demand
+    firm, amount = firm_with_loan_demand
 
     # When
-    credit_bank.grant_loans()
+    bank.grant_loans()
 
     # Then
-    assert firm.account["cash"] == amount
-    assert credit_bank.account["cash"] == -amount
+    assert firm.account["deposits"] == amount
+    assert bank.account["deposits"] == -amount
 
 
-def test_creates_loan_as_link(firm_with_deposit_bank, bank_with_loan_demand, markets):
+def test_creates_loan_as_link(firm_with_loan_demand, bank, markets):
     # Given
-    bank, amount = bank_with_loan_demand
-    firm, _ = firm_with_deposit_bank
+    firm, amount = firm_with_loan_demand
     firm_role = firm.roles["borrower"]
     bank_role = bank.roles["lender"]
 
@@ -122,3 +107,16 @@ def test_creates_loan_as_link(firm_with_deposit_bank, bank_with_loan_demand, mar
     # Then
     assert markets[0].graph[bank_role][firm_role]["amount"] == amount
     assert markets[0].graph[bank_role][firm_role]["rate"] == 0.05
+
+
+def test_creates_deposit_as_link(firm_with_loan_demand, bank, markets):
+    # Given
+    firm, amount = firm_with_loan_demand
+    firm_role = firm.roles["depositor"]
+    bank_role = bank.roles["deposit_bank"]
+
+    # When
+    bank.grant_loans()
+
+    # Then
+    assert markets[1].graph[bank_role][firm_role]["amount"] == amount

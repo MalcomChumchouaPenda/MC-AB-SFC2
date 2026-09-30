@@ -32,21 +32,31 @@ class Bank(EcoAgent):
 
     def grant_loans(self):
         role = self.roles["lender"]
-        applicants = role.loan_applicants
-        random = self.model.random
-        random.shuffle(applicants)
+        applicants = self._list_applicants()
         capacity = self.calc_credit_capacity()
         choice = self.model.nprandom.choice
         for borrower in applicants:
             if capacity <= 0:
                 break
+            amount = min(capacity, borrower.loan_demand)
             prob = self.calc_loan_probability(borrower)
             rate = self.calc_loan_rate(borrower)
-            amount = min(capacity, borrower.loan_demand)
             if choice([0, 1], p=[1 - prob, prob]):
-                role.grant_loan(borrower, amount, rate)
+                self._fund_applicant(borrower, amount, rate)
                 capacity -= amount
         role.loan_applicants = []
+
+    def _list_applicants(self):
+        applicants = self.roles["lender"].loan_applicants
+        self.model.random.shuffle(applicants)
+        return applicants
+
+    def _fund_applicant(self, borrower, amount, rate):
+        deposit_bank = self.roles["deposit_bank"]
+        lender = self.roles["lender"]
+        lender.grant_loan(borrower, amount, rate)
+        depositor = deposit_bank.find_depositor(borrower.id)
+        deposit_bank.make_deposits(depositor, amount)
 
     def calc_credit_capacity(self):
         equity = self.account["equities"]
