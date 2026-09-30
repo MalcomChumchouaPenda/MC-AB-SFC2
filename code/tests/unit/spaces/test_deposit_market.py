@@ -24,17 +24,15 @@ def test_inherits_from_eco_space():
 
 
 FakeBank = Mock()
-FakeDepositSupplier = Mock()
+FakeDepositor = Mock()
 FakeGuarantee = Mock()
 
 
 @pytest.fixture
 def market_without_roles(monkeypatch, fake_model):
     # Given
-    monkeypatch.setattr("model.spaces.deposit_market.DepositDemander", FakeBank)
-    monkeypatch.setattr(
-        "model.spaces.deposit_market.DepositSupplier", FakeDepositSupplier
-    )
+    monkeypatch.setattr("model.spaces.deposit_market.DepositBank", FakeBank)
+    monkeypatch.setattr("model.spaces.deposit_market.Depositor", FakeDepositor)
     monkeypatch.setattr("model.spaces.deposit_market.DepositGuarantee", FakeGuarantee)
     market = DepositMarket(fake_model)
     market.add_role = Mock()
@@ -63,7 +61,7 @@ def test_add_depositor_creates_proper_role(market_without_roles):
     role = market.add_depositor(agent)
 
     # Then
-    market.add_role.assert_called_with(FakeDepositSupplier, agent, "depositor")
+    market.add_role.assert_called_with(FakeDepositor, agent, "depositor")
     assert role == market.add_role.return_value
 
 
@@ -128,9 +126,7 @@ def test_join_deposit_bank_updates_accounts(market_with_participants):
     market.join_deposit_bank(depositor, deposit_bank, amount=500)
 
     # Then
-    market.transfer_stock.assert_any_call(
-        "cash", depositor.id, deposit_bank.id, 500
-    )
+    market.transfer_stock.assert_any_call("cash", depositor.id, deposit_bank.id, 500)
     market.transfer_stock.assert_any_call(
         "deposits", deposit_bank.id, depositor.id, 500
     )
@@ -181,9 +177,7 @@ def test_leave_deposit_bank_updates_accounts(market_with_depositor_amount):
 
     # Then
     market.transfer_stock.assert_any_call("cash", bank_id, depositor.id, amount)
-    market.transfer_stock.assert_any_call(
-        "deposits", depositor.id, bank_id, amount
-    )
+    market.transfer_stock.assert_any_call("deposits", depositor.id, bank_id, amount)
 
 
 def test_leave_deposit_bank_change_bank_id(market_with_depositor_amount):
@@ -212,9 +206,7 @@ def test_make_deposits_updates_accounts(market_with_depositor_amount):
     market.make_deposits(depositor, 500)
 
     # Then
-    market.transfer_stock.assert_any_call(
-        "cash", depositor.id, deposit_bank.id, 500
-    )
+    market.transfer_stock.assert_any_call("cash", depositor.id, deposit_bank.id, 500)
     market.transfer_stock.assert_any_call(
         "deposits", deposit_bank.id, depositor.id, 500
     )
@@ -242,9 +234,7 @@ def test_withdraw_deposits_updates_accounts(market_with_depositor_amount):
     market.withdraw_deposits(depositor, 500)
 
     # Then
-    market.transfer_stock.assert_any_call(
-        "cash", deposit_bank.id, depositor.id, 500
-    )
+    market.transfer_stock.assert_any_call("cash", deposit_bank.id, depositor.id, 500)
     market.transfer_stock.assert_any_call(
         "deposits", depositor.id, deposit_bank.id, 500
     )
@@ -309,6 +299,4 @@ def test_reimburse_deposits_updates_accounts(market_with_depositor_amount):
 
     # Then
     market.transfer_stock.assert_any_call("cash", guarantee.id, depositor.id, 50)
-    market.transfer_stock.assert_any_call(
-        "deposits", depositor.id, deposit_bank.id, 50
-    )
+    market.transfer_stock.assert_any_call("deposits", depositor.id, deposit_bank.id, 50)

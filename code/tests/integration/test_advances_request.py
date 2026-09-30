@@ -1,4 +1,3 @@
-from unittest.mock import Mock
 import pytest
 from model.agents.bank import Bank
 from model.agents.central_bank import CentralBank

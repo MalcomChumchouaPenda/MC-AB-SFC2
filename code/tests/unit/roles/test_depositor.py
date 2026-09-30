@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import Mock
 from model.base import EcoRole
-from model.roles.depositor import DepositSupplier
+from model.roles.depositor import Depositor
 
 # ---------------------------------------------------
 # ARCHITECTURE
@@ -13,7 +13,7 @@ def test_inherits_from_eco_role():
     from model.base import EcoRole
 
     # When
-    is_derived = issubclass(DepositSupplier, EcoRole)
+    is_derived = issubclass(Depositor, EcoRole)
 
     # Then
     assert is_derived
@@ -23,7 +23,7 @@ def test_inherits_from_eco_role():
 def role():
     # Given
     agent, env = Mock(), Mock()
-    return DepositSupplier(agent, env)
+    return Depositor(agent, env)
 
 
 # ---------------------------------------------------

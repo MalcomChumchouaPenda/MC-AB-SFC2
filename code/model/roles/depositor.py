@@ -1,7 +1,7 @@
 from model.base import EcoRole
 
 
-class DepositSupplier(EcoRole):
+class Depositor(EcoRole):
 
     #
     # Perceptions

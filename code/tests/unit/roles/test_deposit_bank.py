@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import Mock
-from model.roles.deposit_bank import DepositDemander
+from model.roles.deposit_bank import DepositBank
 
 # ---------------------------------------------------
 # ARCHITECTURE
@@ -12,7 +12,7 @@ def test_inherits_from_eco_role():
     from model.base import EcoRole
 
     # When
-    is_derived = issubclass(DepositDemander, EcoRole)
+    is_derived = issubclass(DepositBank, EcoRole)
 
     # Then
     assert is_derived
@@ -23,7 +23,7 @@ def test_initializes_defaulted():
     agent, env = Mock(), Mock()
 
     # When
-    role = DepositDemander(agent, env)
+    role = DepositBank(agent, env)
 
     # Then
     assert role.defaulted is False
@@ -38,7 +38,7 @@ def test_initializes_defaulted():
 def role():
     # Given
     agent, env = Mock(), Mock()
-    return DepositDemander(agent, env)
+    return DepositBank(agent, env)
 
 
 def test_find_deposits_from_env(role):

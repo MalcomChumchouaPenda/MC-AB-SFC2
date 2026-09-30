@@ -146,7 +146,7 @@ These objects have been grouped into three spheres:
 The financial sphere comprises:
 - `BondMarket`, where the roles `BondBuyer` and `BondIssuer` trade in `Bond` holdings.
 - `CreditMarket`, where the `CreditLender` role grants `Loans` to the `CreditBorrower` role;
-- `DepositMarket`, where `Deposit` holdings are exchanged between agents playing the roles of `DepositGuarantee`, `DepositDemander` or `DepositSupplier`
+- `DepositMarket`, where `Deposit` holdings are exchanged between agents playing the roles of `DepositGuarantee`, `DepositBank` or `Depositor`
 
 
 ![financial-sphere](diagrams\hierarchy_financial_objects.drawio.svg)

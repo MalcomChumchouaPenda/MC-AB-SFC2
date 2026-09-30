@@ -109,9 +109,7 @@ def test_increases_firm_deposits(firm_with_deposit_bank, bank_with_loan_demand):
     assert deposit_bank.account["deposits"] == -amount
 
 
-def test_transfers_cash_between_banks(
-    firm_with_deposit_bank, bank_with_loan_demand
-):
+def test_transfers_cash_between_banks(firm_with_deposit_bank, bank_with_loan_demand):
     # Given
     _, deposit_bank = firm_with_deposit_bank
     credit_bank, amount = bank_with_loan_demand
@@ -124,9 +122,7 @@ def test_transfers_cash_between_banks(
     assert deposit_bank.account["cash"] == amount
 
 
-def test_creates_loan_as_link(
-    firm_with_deposit_bank, bank_with_loan_demand, markets
-):
+def test_creates_loan_as_link(firm_with_deposit_bank, bank_with_loan_demand, markets):
     # Given
     bank, amount = bank_with_loan_demand
     firm, _ = firm_with_deposit_bank
