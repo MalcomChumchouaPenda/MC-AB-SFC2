@@ -25,17 +25,11 @@ class MonetaryUnion(EcoSpace):
     def add_policy_maker(self, agent):
         return self.add_role(PolicyMaker, agent, "policy_maker")
 
-    #
-    # Firm creation
-    #
     def place_firm(self, firm, tradable):
         self.spaces["credit_market"].add_borrower(firm)
         if tradable:
             self.spaces["good_market"].add_producer(firm)
 
-    #
-    # Bank creation
-    #
     def place_bank(self, bank):
         self.spaces["credit_market"].add_lender(bank)
         self.spaces["bond_market"].add_buyer(bank)

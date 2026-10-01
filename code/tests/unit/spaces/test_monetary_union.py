@@ -119,6 +119,9 @@ def union_without_roles(monkeypatch, model_before_union_creation):
     model = model_before_union_creation
     union = MonetaryUnion(model)
     union.add_role = Mock()
+    union.spaces["good_market"] = Mock()
+    union.spaces["bond_market"] = Mock()
+    union.spaces["credit_market"] = Mock()
     return union
 
 
@@ -146,27 +149,10 @@ def test_add_policy_maker_returns_created_role(union_without_roles):
     assert role == union.add_role.return_value
 
 
-# ---------------------------------------------------
-# FIRM CREATION TESTS
-# ----------------------------------------------------
-
-
-@pytest.fixture
-def union_before_firm_creation(model_before_union_creation):
-    # Given
-    model = model_before_union_creation
-    union = MonetaryUnion(model)
-    union.add_company = Mock()
-    union.fund_company = Mock()
-    union.spaces["good_market"] = Mock()
-    union.spaces["credit_market"] = Mock()
-    return union
-
-
-def test_place_trad_firm_in_goods_market(union_before_firm_creation):
+def test_place_trad_firm_in_goods_market(union_without_roles):
     # Given
     firm = Mock()
-    union = union_before_firm_creation
+    union = union_without_roles
     market = union.spaces["good_market"]
 
     # When
@@ -176,11 +162,11 @@ def test_place_trad_firm_in_goods_market(union_before_firm_creation):
     market.add_producer.assert_called_with(firm)
 
 
-def test_dont_place_non_trad_firm_in_goods_market(union_before_firm_creation):
+def test_dont_place_non_trad_firm_in_goods_market(union_without_roles):
     # Given
     firm = Mock()
-    union = union_before_firm_creation
-    market = union.spaces["good_market"]
+    union = union_without_roles
+    market = union.spaces["good_market"] 
 
     # When
     union.place_firm(firm, tradable=False)
@@ -190,11 +176,11 @@ def test_dont_place_non_trad_firm_in_goods_market(union_before_firm_creation):
 
 
 @pytest.mark.parametrize("tradable", [True, False])
-def test_place_firm_add_borrower_role(union_before_firm_creation, tradable):
+def test_place_firm_add_borrower_role(union_without_roles, tradable):
     # Given
     firm = Mock()
-    union = union_before_firm_creation
-    market = union.spaces["credit_market"]
+    union = union_without_roles
+    market = union.spaces["credit_market"] 
 
     # When
     union.place_firm(firm, tradable=tradable)
@@ -203,28 +189,11 @@ def test_place_firm_add_borrower_role(union_before_firm_creation, tradable):
     market.add_borrower.assert_called_with(firm)
 
 
-# ---------------------------------------------------
-# BANK CREATION TESTS
-# ----------------------------------------------------
-
-
-@pytest.fixture
-def union_before_bank_creation(model_before_union_creation):
-    # Given
-    model = model_before_union_creation
-    union = MonetaryUnion(model)
-    union.add_company = Mock()
-    union.fund_company = Mock()
-    union.spaces["bond_market"] = Mock()
-    union.spaces["credit_market"] = Mock()
-    return union
-
-
-def test_place_bank_add_bond_buyer(union_before_bank_creation):
+def test_place_bank_add_bond_buyer(union_without_roles):
     # Given
     bank = Mock()
-    union = union_before_bank_creation
-    market = union.spaces["bond_market"]
+    union = union_without_roles
+    market = union.spaces["bond_market"] 
 
     # When
     union.place_bank(bank)
@@ -233,11 +202,11 @@ def test_place_bank_add_bond_buyer(union_before_bank_creation):
     market.add_buyer.assert_called_with(bank)
 
 
-def test_place_bank_add_lender_role(union_before_bank_creation):
+def test_place_bank_add_lender_role(union_without_roles):
     # Given
     bank = Mock()
-    union = union_before_bank_creation
-    market = union.spaces["credit_market"]
+    union = union_without_roles
+    market = union.spaces["credit_market"] 
 
     # When
     union.place_bank(bank)
