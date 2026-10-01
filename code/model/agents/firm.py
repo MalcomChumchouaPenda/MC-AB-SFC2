@@ -82,11 +82,9 @@ class Firm(EcoAgent):
             self.price *= 1 + random.uniform(0, delta)
 
         elif self.prev_output + self.prev_inventories > self.prev_sales:
-            role = self.roles["producer"]
-            wage_bill = self.account["wages"]
             self.expected_sales *= 1 - random.uniform(0, delta)
             self.price *= 1 - random.uniform(0, delta)
-            self.price = max(wage_bill / role.productivity, self.price)
+            self.price = max(self.wages / self.productivity, self.price)
 
     #
     # Wage revision

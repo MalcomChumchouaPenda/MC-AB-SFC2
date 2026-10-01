@@ -478,14 +478,12 @@ def test_calc_desired_output_cannot_be_negative(firm):
 
 
 @pytest.fixture
-def pricing_firm(firm_with_roles_and_account):
-    role = Mock(productivity=2)
-    firm, roles, account = firm_with_roles_and_account
+def pricing_firm(firm):
     firm.p.delta = 0.1
-    firm.price = 10
     firm.expected_sales = 100
-    account["wages"] = 10
-    roles["producer"] = role
+    firm.productivity=2
+    firm.price = 10
+    firm.wages = 10
     return firm
 
 
