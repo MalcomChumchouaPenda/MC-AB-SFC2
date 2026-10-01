@@ -110,30 +110,38 @@ class Firm(EcoAgent):
     #
     # Innovation and imitation process
     #
+
+    @property
+    def goods_market(self):
+        model = self.model
+        if self.tradable:
+            return model.common_goods_market
+        pos = self.country_id
+        return model.national_goods_markets[pos]
+
     def update_productivity(self):
-        role = self.roles["producer"]
         self.calc_desired_rd()
         self.execute_rd()
         if self.rd == 0:
-            return role.productivity
+            return self.productivity
 
         prob = self.calc_rd_success_probability()
         random = self.model.nprandom
         success = random.choice([0, 1], p=[1 - prob, prob])
-        print(success)
         if success:
-            self._innovation(role, random)
-            self._imitation(role, random)
+            self._innovation(random)
+            self._imitation(random)
 
-    def _innovation(self, role, random):
+    def _innovation(self, random):
         delta = self.p.delta
-        role.productivity *= 1 + random.uniform(0, delta)
+        self.productivity *= 1 + random.uniform(0, delta)
 
-    def _imitation(self, role, random):
-        avg_productivity = role.get_average_productivity()
-        prod_diff = avg_productivity - role.productivity
+    def _imitation(self, random):
+        market = self.goods_market
+        avg_productivity = market.average_productivity
+        prod_diff = avg_productivity - self.productivity
         if prod_diff > 0:
-            role.productivity += random.uniform(0, prod_diff)
+            self.productivity += random.uniform(0, prod_diff)
 
     def calc_desired_rd(self):
         self.desired_wage_bill = self.wage_offer * self.desired_labor
@@ -141,16 +149,15 @@ class Firm(EcoAgent):
         return self.desired_rd
 
     def calc_rd_success_probability(self):
-        producer_role = self.roles["producer"]
-        avg_price = producer_role.get_average_price()
-        avg_productivity = producer_role.get_average_productivity()
+        market = self.goods_market
+        avg_price = market.average_price
+        avg_productivity = market.average_productivity
         prob = 1 - math.exp(-self.p.nu * self.rd / (avg_price * avg_productivity))
         return prob
 
     def execute_rd(self):
-        stocks = self.account
         labor_constraint = self.labor < self.desired_labor
-        financial_constraint = stocks["loans"] < self.desired_loans
+        financial_constraint = self.loans < self.desired_loans
         if labor_constraint or financial_constraint:
             self.rd = 0
         else:
