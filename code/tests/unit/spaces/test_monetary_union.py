@@ -56,6 +56,7 @@ def union_without_spaces(fake_model, monkeypatch):
 
 FakeCountry = Mock()
 
+
 @pytest.fixture
 def union_without_countries(union_without_spaces, monkeypatch):
     # Given
@@ -90,10 +91,10 @@ def test_create_countries_creates_national_markets(union_without_countries):
     country.create_markets.assert_called_once_with()
 
 
-
 FakeGoodMarket = Mock()
 FakeCreditMarket = Mock()
 FakeBondMarket = Mock()
+
 
 @pytest.fixture
 def union_without_markets(union_without_spaces, monkeypatch):
@@ -103,6 +104,7 @@ def union_without_markets(union_without_spaces, monkeypatch):
     monkeypatch.setattr("model.spaces.monetary_union.BondMarket", FakeBondMarket)
     union = union_without_spaces
     return union
+
 
 def test_create_markets_adds_tradable_goods_market(union_without_markets):
     # Given
@@ -135,8 +137,6 @@ def test_create_markets_adds_bond_market(union_without_markets):
 
     # Then
     union.add_space.assert_any_call(FakeBondMarket, "bond_market")
-
-
 
 
 # ---------------------------------------------------

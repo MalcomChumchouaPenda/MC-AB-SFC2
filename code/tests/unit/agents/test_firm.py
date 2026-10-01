@@ -240,6 +240,148 @@ def test_initializes_prev_desired_labor(fake_model):
 
 
 # ---------------------------------------------------
+# DEFAULT STOCKS AMOUNT
+# ----------------------------------------------------
+
+
+def test_initializes_inventories(fake_model):
+    # Given
+    model = fake_model
+
+    # When
+    firm = Firm(model)
+
+    # Then
+    assert firm.inventories == 0.0
+
+
+def test_initializes_deposits(fake_model):
+    # Given
+    model = fake_model
+
+    # When
+    firm = Firm(model)
+
+    # Then
+    assert firm.deposits == 0.0
+
+
+def test_initializes_loans(fake_model):
+    # Given
+    model = fake_model
+
+    # When
+    firm = Firm(model)
+
+    # Then
+    assert firm.loans == 0.0
+
+
+def test_initializes_cash(fake_model):
+    # Given
+    model = fake_model
+
+    # When
+    firm = Firm(model)
+
+    # Then
+    assert firm.cash == 0.0
+
+
+def test_initializes_equities(fake_model):
+    # Given
+    model = fake_model
+
+    # When
+    firm = Firm(model)
+
+    # Then
+    assert firm.equities == 0.0
+
+
+# ---------------------------------------------------
+# DEFAULT TRANSACTIONS STATE
+# ----------------------------------------------------
+
+
+def test_initializes_consumption(fake_model):
+    # Given
+    model = fake_model
+
+    # When
+    firm = Firm(model)
+
+    # Then
+    assert firm.consumption == 0.0
+
+
+def test_initializes_wages(fake_model):
+    # Given
+    model = fake_model
+
+    # When
+    firm = Firm(model)
+
+    # Then
+    assert firm.wages == 0.0
+
+
+def test_initializes_taxes(fake_model):
+    # Given
+    model = fake_model
+
+    # When
+    firm = Firm(model)
+
+    # Then
+    assert firm.taxes == 0.0
+
+
+def test_initializes_dep_interests(fake_model):
+    # Given
+    model = fake_model
+
+    # When
+    firm = Firm(model)
+
+    # Then
+    assert firm.dep_interests == 0.0
+
+
+def test_initializes_loan_interests(fake_model):
+    # Given
+    model = fake_model
+
+    # When
+    firm = Firm(model)
+
+    # Then
+    assert firm.loan_interests == 0.0
+
+
+def test_initializes_loan_defaults(fake_model):
+    # Given
+    model = fake_model
+
+    # When
+    firm = Firm(model)
+
+    # Then
+    assert firm.loan_defaults == 0.0
+
+
+def test_initializes_dividends(fake_model):
+    # Given
+    model = fake_model
+
+    # When
+    firm = Firm(model)
+
+    # Then
+    assert firm.dividends == 0.0
+
+
+# ---------------------------------------------------
 # PRODUCTION PLANNING
 # ----------------------------------------------------
 

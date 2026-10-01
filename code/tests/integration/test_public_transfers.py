@@ -27,6 +27,7 @@ def cb(model):
     cb = CentralBank(model)
     return cb
 
+
 @pytest.fixture
 def union(fake_model):
     # Given

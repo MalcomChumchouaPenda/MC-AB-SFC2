@@ -14,6 +14,7 @@ def model(fake_model):
     model.p.mu1 = 1.0
     return model
 
+
 @pytest.fixture
 def union(fake_model):
     # Given

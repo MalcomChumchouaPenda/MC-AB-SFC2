@@ -38,6 +38,22 @@ class Firm(EcoAgent):
         self.variety = 0.0
         self.defaulted = False
 
+        # stocks
+        self.inventories = 0.0
+        self.deposits = 0.0
+        self.loans = 0.0
+        self.cash = 0.0
+        self.equities = 0.0
+
+        # transactions
+        self.consumption = 0.0
+        self.wages = 0.0
+        self.taxes = 0.0
+        self.dep_interests = 0.0
+        self.loan_interests = 0.0
+        self.loan_defaults = 0.0
+        self.dividends = 0.0
+
     #
     # Production planning
     #

@@ -9,6 +9,18 @@ class CentralBank(EcoAgent):
         super().setup()
         self.prev_discount_rate = 0
 
+        # stocks
+        self.bonds = 0.0
+        self.cash = 0.0
+        self.advances = 0.0
+
+        # transactions
+        self.loan_defaults = 0.0
+        self.bond_interests = 0.0
+        self.cash_interests = 0.0
+        self.adv_interests = 0.0
+        self.profit_transfers = 0.0
+
     #
     # Bond purchases
     #

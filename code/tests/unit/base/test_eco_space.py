@@ -84,7 +84,6 @@ def space_without_subspaces(space):
     return space, subspaces
 
 
-
 def test_add_space_creates_space(space_without_subspaces):
     # Given
     fake_space = Mock()

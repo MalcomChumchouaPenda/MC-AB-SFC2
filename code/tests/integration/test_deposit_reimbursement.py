@@ -14,6 +14,7 @@ def union(fake_model):
     union.create_countries(1)
     return union
 
+
 @pytest.fixture
 def deposit_market(union):
     # Given

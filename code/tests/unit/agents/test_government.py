@@ -118,6 +118,82 @@ def test_initializes_prev_budget_surplus(fake_model):
 
 
 # ---------------------------------------------------
+# DEFAULT STOCKS AMOUNT
+# ----------------------------------------------------
+
+
+def test_initializes_bonds(fake_model):
+    # Given
+    model = fake_model
+
+    # When
+    govt = Government(model)
+
+    # Then
+    assert govt.bonds == 0.0
+
+
+def test_initializes_cash(fake_model):
+    # Given
+    model = fake_model
+
+    # When
+    govt = Government(model)
+
+    # Then
+    assert govt.cash == 0.0
+
+
+# ---------------------------------------------------
+# DEFAULT TRANSACTIONS STATE
+# ----------------------------------------------------
+
+
+def test_initializes_public_transfers(fake_model):
+    # Given
+    model = fake_model
+
+    # When
+    govt = Government(model)
+
+    # Then
+    assert govt.public_transfers == 0.0
+
+
+def test_initializes_taxes(fake_model):
+    # Given
+    model = fake_model
+
+    # When
+    govt = Government(model)
+
+    # Then
+    assert govt.taxes == 0.0
+
+
+def test_initializes_bond_interests(fake_model):
+    # Given
+    model = fake_model
+
+    # When
+    govt = Government(model)
+
+    # Then
+    assert govt.bond_interests == 0.0
+
+
+def test_initializes_profit_transfers(fake_model):
+    # Given
+    model = fake_model
+
+    # When
+    govt = Government(model)
+
+    # Then
+    assert govt.profit_transfers == 0.0
+
+
+# ---------------------------------------------------
 # PUBLIC TRANSFERS
 # ----------------------------------------------------
 

@@ -30,6 +30,16 @@ class Government(EcoAgent):
         self.budget_deficit = 0
         self.budget_surplus = 0
 
+        # stocks
+        self.bonds = 0.0
+        self.cash = 0.0
+
+        # transactions
+        self.public_transfers = 0.0
+        self.taxes = 0.0
+        self.bond_interests = 0.0
+        self.profit_transfers = 0.0
+
         # accointances
         self.central_bank = None
 

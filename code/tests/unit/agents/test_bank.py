@@ -86,6 +86,170 @@ def test_initializes_defaulted(fake_model):
 
 
 # ---------------------------------------------------
+# DEFAULT STOCKS AMOUNT
+# ----------------------------------------------------
+
+
+def test_initializes_deposits(fake_model):
+    # Given
+    model = fake_model
+
+    # When
+    bank = Bank(model)
+
+    # Then
+    assert bank.deposits == 0.0
+
+
+def test_initializes_loans(fake_model):
+    # Given
+    model = fake_model
+
+    # When
+    bank = Bank(model)
+
+    # Then
+    assert bank.loans == 0.0
+
+
+def test_initializes_bonds(fake_model):
+    # Given
+    model = fake_model
+
+    # When
+    bank = Bank(model)
+
+    # Then
+    assert bank.bonds == 0.0
+
+
+def test_initializes_cash(fake_model):
+    # Given
+    model = fake_model
+
+    # When
+    bank = Bank(model)
+
+    # Then
+    assert bank.cash == 0.0
+
+
+def test_initializes_advances(fake_model):
+    # Given
+    model = fake_model
+
+    # When
+    bank = Bank(model)
+
+    # Then
+    assert bank.advances == 0.0
+
+
+def test_initializes_equities(fake_model):
+    # Given
+    model = fake_model
+
+    # When
+    bank = Bank(model)
+
+    # Then
+    assert bank.equities == 0.0
+
+
+# ---------------------------------------------------
+# DEFAULT TRANSACTIONS STATE
+# ----------------------------------------------------
+
+
+def test_initializes_taxes(fake_model):
+    # Given
+    model = fake_model
+
+    # When
+    bank = Bank(model)
+
+    # Then
+    assert bank.taxes == 0.0
+
+
+def test_initializes_dep_interests(fake_model):
+    # Given
+    model = fake_model
+
+    # When
+    bank = Bank(model)
+
+    # Then
+    assert bank.dep_interests == 0.0
+
+
+def test_initializes_loan_interests(fake_model):
+    # Given
+    model = fake_model
+
+    # When
+    bank = Bank(model)
+
+    # Then
+    assert bank.loan_interests == 0.0
+
+
+def test_initializes_loan_defaults(fake_model):
+    # Given
+    model = fake_model
+
+    # When
+    bank = Bank(model)
+
+    # Then
+    assert bank.loan_defaults == 0.0
+
+
+def test_initializes_bond_interests(fake_model):
+    # Given
+    model = fake_model
+
+    # When
+    bank = Bank(model)
+
+    # Then
+    assert bank.bond_interests == 0.0
+
+
+def test_initializes_cash_interests(fake_model):
+    # Given
+    model = fake_model
+
+    # When
+    bank = Bank(model)
+
+    # Then
+    assert bank.cash_interests == 0.0
+
+
+def test_initializes_adv_interests(fake_model):
+    # Given
+    model = fake_model
+
+    # When
+    bank = Bank(model)
+
+    # Then
+    assert bank.adv_interests == 0.0
+
+
+def test_initializes_dividends(fake_model):
+    # Given
+    model = fake_model
+
+    # When
+    bank = Bank(model)
+
+    # Then
+    assert bank.dividends == 0.0
+
+
+# ---------------------------------------------------
 # DEPOSIT INTERESTS PAYMENT
 # ----------------------------------------------------
 

@@ -15,7 +15,6 @@ def model(fake_model, make_dlist):
     return model
 
 
-
 @pytest.fixture
 def union(fake_model):
     # Given

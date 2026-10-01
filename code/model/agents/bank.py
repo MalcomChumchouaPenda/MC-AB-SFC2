@@ -20,6 +20,24 @@ class Bank(EcoAgent):
         # accointances
         self.central_bank = None
 
+        # stocks
+        self.deposits = 0.0
+        self.loans = 0.0
+        self.bonds = 0.0
+        self.cash = 0.0
+        self.advances = 0.0
+        self.equities = 0.0
+
+        # transactions
+        self.taxes = 0.0
+        self.dep_interests = 0.0
+        self.loan_interests = 0.0
+        self.loan_defaults = 0.0
+        self.bond_interests = 0.0
+        self.cash_interests = 0.0
+        self.adv_interests = 0.0
+        self.dividends = 0.0
+
     def update_deposit_rate(self):
         discount_rate = self.roles["company"].get_discount_rate()
         self.deposit_rate = self.p.zeta * discount_rate

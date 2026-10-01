@@ -3,6 +3,7 @@ from model.agents.bank import Bank
 from model.agents.central_bank import CentralBank
 from model.spaces.monetary_union import MonetaryUnion
 
+
 @pytest.fixture
 def union(fake_model):
     # Given

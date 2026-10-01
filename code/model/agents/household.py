@@ -30,6 +30,19 @@ class Household(EcoAgent):
         self.labor_supply = 1.0
         self.preference = 0
 
+        # stocks
+        self.deposits = 0.0
+        self.cash = 0.0
+        self.equities = 0.0
+
+        # transactions
+        self.consumption = 0.0
+        self.wages = 0.0
+        self.public_transfers = 0.0
+        self.taxes = 0.0
+        self.dep_interests = 0.0
+        self.dividends = 0.0
+
     def revise_reservation_wage(self):
         p = self.p
         random = self.model.nprandom
