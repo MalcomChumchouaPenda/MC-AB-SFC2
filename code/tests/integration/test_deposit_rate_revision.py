@@ -9,6 +9,7 @@ def country(fake_model):
     # Given
     model = fake_model
     country = Country(model)
+    country.build_space()
     country.monetary_authority = Mock()
     return country
 

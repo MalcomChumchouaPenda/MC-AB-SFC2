@@ -31,7 +31,7 @@ def test_initializes_env(fake_model):
     assert space.env is None
 
 
-def test_initializes_sub_spaces_dict(fake_model):
+def test_initializes_subspaces_dict(fake_model):
     # Given
     model = fake_model
 
@@ -77,18 +77,42 @@ def space(fake_model):
 
 
 @pytest.fixture
-def space_with_sub_spaces(space):
+def space_without_subspaces(space, monkeypatch):
     # Given
-    sub_spaces = {}
-    space.spaces = sub_spaces
-    return space, sub_spaces
+    subspaces = {}
+    space.spaces = subspaces
+    monkeypatch.setattr(space, "create_spaces", Mock())
+    return space, subspaces
 
 
-def test_add_space_creates_space(space_with_sub_spaces):
+def test_build_space_creates_subspaces(space_without_subspaces):
+    # Given
+    space, _ = space_without_subspaces
+
+    # When
+    space.build_space()
+
+    # Then
+    space.create_spaces.assert_called_once()
+
+
+def test_build_space_builds_subspaces(space_without_subspaces):
+    # Given
+    space, subspaces = space_without_subspaces
+    subspaces["x"] = Mock()
+
+    # When
+    space.build_space()
+
+    # Then
+    subspaces["x"].build_space.assert_called_once()
+
+
+def test_add_space_creates_space(space_without_subspaces):
     # Given
     fake_space = Mock()
     fake_kind = Mock(return_value=fake_space)
-    space, _ = space_with_sub_spaces
+    space, _ = space_without_subspaces
 
     # When
     space.add_space(fake_kind, "fake_space")
@@ -98,11 +122,11 @@ def test_add_space_creates_space(space_with_sub_spaces):
     assert fake_space.env is space
 
 
-def test_add_space_creates_with_kwargs(space_with_sub_spaces):
+def test_add_space_creates_with_kwargs(space_without_subspaces):
     # Given
     fake_space = Mock()
     fake_kind = Mock(return_value=fake_space)
-    space, _ = space_with_sub_spaces
+    space, _ = space_without_subspaces
 
     # When
     space.add_space(fake_kind, "fake_space", x=1, y=2)
@@ -112,11 +136,11 @@ def test_add_space_creates_with_kwargs(space_with_sub_spaces):
     assert fake_space.env is space
 
 
-def test_add_space_returns_new_space(space_with_sub_spaces):
+def test_add_space_returns_new_space(space_without_subspaces):
     # Given
     fake_space = Mock()
     fake_kind = Mock(return_value=fake_space)
-    space, _ = space_with_sub_spaces
+    space, _ = space_without_subspaces
 
     # When
     result = space.add_space(fake_kind, "fake_space")
@@ -125,17 +149,17 @@ def test_add_space_returns_new_space(space_with_sub_spaces):
     assert result is fake_space
 
 
-def test_add_space_registers_sub_space(space_with_sub_spaces):
+def test_add_space_registers_subspace(space_without_subspaces):
     # Given
     fake_space = Mock()
     fake_kind = Mock(return_value=fake_space)
-    space, sub_spaces = space_with_sub_spaces
+    space, subspaces = space_without_subspaces
 
     # When
     space.add_space(fake_kind, "fake_space")
 
     # Then
-    assert sub_spaces["fake_space"] == fake_space
+    assert subspaces["fake_space"] == fake_space
 
 
 # ---------------------------------------------------
@@ -624,9 +648,9 @@ def test_make_transaction_uses_available_env_method(space_with_accounts):
 
 
 @pytest.fixture
-def space_before_evolution(space_with_sub_spaces):
+def space_before_evolution(space_without_subspaces):
     # Given
-    space, _ = space_with_sub_spaces
+    space, _ = space_without_subspaces
     space.update_state = Mock()
     space.clear_defaults = Mock()
     return space
@@ -634,30 +658,30 @@ def space_before_evolution(space_with_sub_spaces):
 
 def test_evolve_update_all_state(space_before_evolution):
     # Given
-    sub_space = Mock()
+    subspace = Mock()
     space = space_before_evolution
-    space.spaces["fake_market"] = sub_space
+    space.spaces["fake_market"] = subspace
 
     # When
     space.evolve()
 
     # Then
     space.update_state.assert_called_once()
-    sub_space.update_state.assert_called_once()
+    subspace.update_state.assert_called_once()
 
 
 def test_evolve_clear_all_defaults(space_before_evolution):
     # Given
-    sub_space = Mock()
+    subspace = Mock()
     space = space_before_evolution
-    space.spaces["fake_market"] = sub_space
+    space.spaces["fake_market"] = subspace
 
     # When
     space.evolve()
 
     # Then
     space.clear_defaults.assert_called_once()
-    sub_space.clear_defaults.assert_called_once()
+    subspace.clear_defaults.assert_called_once()
 
 
 def test_update_state_is_not_implemented(fake_model):

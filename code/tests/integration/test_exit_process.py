@@ -20,6 +20,7 @@ def model(fake_model, make_dlist):
 def union(model):
     # Given
     union = MonetaryUnion(model)
+    union.build_space()
     union.monetary_authority = Mock()
     union.spaces["country_0"].monetary_authority = Mock()
     return union

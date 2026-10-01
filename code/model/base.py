@@ -173,16 +173,25 @@ class EcoSpace(Network):
     #
     # Space management
     #
+
+    def build_space(self):
+        self.create_spaces()
+        for subspace in self.spaces.values():
+            subspace.build_space()
+
+    def create_spaces(self):
+        pass
+
     def add_space(self, kind, name, **kwargs):
-        sub_space = kind(self.model, **kwargs)
-        sub_space.env = self
-        self.spaces[name] = sub_space
-        return sub_space
+        subspace = kind(self.model, **kwargs)
+        subspace.env = self
+        self.spaces[name] = subspace
+        return subspace
 
     def evolve(self):
-        for sub_space in self.spaces.values():
-            sub_space.update_state()
-            sub_space.clear_defaults()
+        for subspace in self.spaces.values():
+            subspace.update_state()
+            subspace.clear_defaults()
         self.update_state()
         self.clear_defaults()
 

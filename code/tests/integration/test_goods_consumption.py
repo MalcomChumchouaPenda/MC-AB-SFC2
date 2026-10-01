@@ -10,6 +10,7 @@ def markets(fake_model, make_dlist):
     model = fake_model
     model.p.K = 1
     union = MonetaryUnion(model)
+    union.build_space()
     country = union.spaces["country_0"]
     trad_market = union.spaces["goods_market"]
     non_trad_market = country.spaces["goods_market"]

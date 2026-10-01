@@ -21,6 +21,7 @@ def model(fake_model, make_dlist):
 def union(model):
     # Given
     union = MonetaryUnion(model)
+    union.build_space()
     return union
 
 

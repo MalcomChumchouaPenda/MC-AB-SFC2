@@ -10,6 +10,7 @@ def country_with_market(fake_model):
     model = fake_model
     model.p.K = 1
     union = MonetaryUnion(model)
+    union.build_space()
     country = union.spaces["country_0"]
     market = union.spaces["credit_market"]
     return country, market

@@ -18,25 +18,9 @@ def test_inherits_from_eco_space():
     assert is_derived
 
 
-FakeGoodMarket = Mock()
-FakeLaborMarket = Mock()
-FakeDepositMarket = Mock()
-
-
-@pytest.fixture
-def model_before_space_creation(monkeypatch, fake_model):
+def test_initializes_inflation(fake_model):
     # Given
-    monkeypatch.setattr("model.spaces.country.GoodsMarket", FakeGoodMarket)
-    monkeypatch.setattr("model.spaces.country.LaborMarket", FakeLaborMarket)
-    monkeypatch.setattr("model.spaces.country.DepositMarket", FakeDepositMarket)
-    monkeypatch.setattr(Country, "add_space", Mock())
     model = fake_model
-    return model
-
-
-def test_initializes_inflation(model_before_space_creation):
-    # Given
-    model = model_before_space_creation
 
     # When
     country = Country(model)
@@ -45,9 +29,9 @@ def test_initializes_inflation(model_before_space_creation):
     assert country.inflation == 0
 
 
-def test_initializes_gdp(model_before_space_creation):
+def test_initializes_gdp(fake_model):
     # Given
-    model = model_before_space_creation
+    model = fake_model
 
     # When
     country = Country(model)
@@ -56,9 +40,9 @@ def test_initializes_gdp(model_before_space_creation):
     assert country.gdp == 0
 
 
-def test_initializes_prob_failure(model_before_space_creation):
+def test_initializes_prob_failure(fake_model):
     # Given
-    model = model_before_space_creation
+    model = fake_model
 
     # When
     country = Country(model)
@@ -67,9 +51,9 @@ def test_initializes_prob_failure(model_before_space_creation):
     assert country.prob_failure == 0
 
 
-def test_initializes_tax_rate(model_before_space_creation):
+def test_initializes_tax_rate(fake_model):
     # Given
-    model = model_before_space_creation
+    model = fake_model
 
     # When
     country = Country(model)
@@ -78,9 +62,9 @@ def test_initializes_tax_rate(model_before_space_creation):
     assert country.tax_rate == 0
 
 
-def test_initializes_fiscal_authority(model_before_space_creation):
+def test_initializes_fiscal_authority(fake_model):
     # Given
-    model = model_before_space_creation
+    model = fake_model
 
     # When
     country = Country(model)
@@ -89,9 +73,9 @@ def test_initializes_fiscal_authority(model_before_space_creation):
     assert country.fiscal_authority is None
 
 
-def test_initializes_monetary_authority(model_before_space_creation):
+def test_initializes_monetary_authority(fake_model):
     # Given
-    model = model_before_space_creation
+    model = fake_model
 
     # When
     country = Country(model)
@@ -101,38 +85,54 @@ def test_initializes_monetary_authority(model_before_space_creation):
 
 
 # ---------------------------------------------------
-# SPACES CREATION
+# SUB SPACES CREATION
 # ----------------------------------------------------
 
 
-def test_creates_goods_market(model_before_space_creation):
+FakeGoodMarket = Mock()
+FakeLaborMarket = Mock()
+FakeDepositMarket = Mock()
+
+
+@pytest.fixture
+def country_without_spaces(monkeypatch, fake_model):
     # Given
-    model = model_before_space_creation
+    monkeypatch.setattr("model.spaces.country.GoodsMarket", FakeGoodMarket)
+    monkeypatch.setattr("model.spaces.country.LaborMarket", FakeLaborMarket)
+    monkeypatch.setattr("model.spaces.country.DepositMarket", FakeDepositMarket)
+    monkeypatch.setattr(Country, "add_space", Mock())
+    country = Country(fake_model)
+    return country
+
+
+def test_create_spaces_adds_goods_market(country_without_spaces):
+    # Given
+    country = country_without_spaces
 
     # When
-    country = Country(model)
+    country.create_spaces()
 
     # Then
     country.add_space.assert_any_call(FakeGoodMarket, "goods_market", tradable=False)
 
 
-def test_creates_labor_market(model_before_space_creation):
+def test_create_spaces_adds_labor_market(country_without_spaces):
     # Given
-    model = model_before_space_creation
+    country = country_without_spaces
 
     # When
-    country = Country(model)
+    country.create_spaces()
 
     # Then
     country.add_space.assert_any_call(FakeLaborMarket, "labor_market")
 
 
-def test_creates_deposit_market(model_before_space_creation):
+def test_create_spaces_adds_deposit_market(country_without_spaces):
     # Given
-    model = model_before_space_creation
+    country = country_without_spaces
 
     # When
-    country = Country(model)
+    country.create_spaces()
 
     # Then
     country.add_space.assert_any_call(FakeDepositMarket, "deposit_market")
@@ -150,14 +150,13 @@ FakeCompany = Mock()
 
 
 @pytest.fixture
-def country_without_roles(model_before_space_creation, monkeypatch):
+def country_without_roles(fake_model, monkeypatch):
     # Given
     monkeypatch.setattr("model.spaces.country.MonetaryAuthority", FakeMonetaryAuth)
     monkeypatch.setattr("model.spaces.country.FiscalAuthority", FakeFiscalAuth)
     monkeypatch.setattr("model.spaces.country.Citizen", FakeCitizen)
     monkeypatch.setattr("model.spaces.country.Company", FakeCompany)
-    model = model_before_space_creation
-    country = Country(model)
+    country = Country(fake_model)
     country.add_role = Mock()
     country.env = Mock()
     return country

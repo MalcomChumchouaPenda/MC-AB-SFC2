@@ -13,6 +13,8 @@ class MonetaryUnion(EcoSpace):
         self.gdp = 0
         self.average_inflation = 0
         self.discount_rate = 0.0
+
+    def create_spaces(self):
         self.add_space(GoodsMarket, "goods_market", tradable=True)
         self.add_space(CreditMarket, "credit_market")
         self.add_space(BondMarket, "bond_market")

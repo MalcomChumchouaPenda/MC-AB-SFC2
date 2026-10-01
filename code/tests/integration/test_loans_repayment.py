@@ -11,6 +11,7 @@ def union(fake_model):
     model = fake_model
     model.p.K = 1
     union = MonetaryUnion(model)
+    union.build_space()
     return union
 
 

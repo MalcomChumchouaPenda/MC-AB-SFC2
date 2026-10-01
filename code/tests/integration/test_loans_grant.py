@@ -20,6 +20,7 @@ def model(fake_model):
 def union(model):
     # Given
     union = MonetaryUnion(model)
+    union.build_space()
     return union
 
 
