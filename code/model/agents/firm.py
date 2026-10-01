@@ -63,13 +63,12 @@ class Firm(EcoAgent):
 
     def calc_desired_output(self):
         theta = self.p.theta
-        inv = self.roles["producer"].inventories
+        inv = self.inventories
         self.desired_output = max(0, self.expected_sales * (1 + theta) - inv)
         return self.desired_output
 
     def calc_labor_demand(self):
-        role = self.roles["producer"]
-        self.desired_labor = self.desired_output / role.productivity
+        self.desired_labor = self.desired_output / self.productivity
         return self.desired_labor
 
     #

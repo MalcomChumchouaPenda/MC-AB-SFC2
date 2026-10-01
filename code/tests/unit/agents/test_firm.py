@@ -419,22 +419,11 @@ def firm_with_roles_and_account(firm):
     return firm, roles, account
 
 
-@pytest.fixture
-def firm_before_production(firm_with_roles_and_account):
+def test_calc_desired_output(firm):
     # Given
-    role = Mock(inventories=0)
-    firm, roles, account = firm_with_roles_and_account
-    account["inventories"] = 0
-    roles["producer"] = role
-    return firm
-
-
-def test_calc_desired_output(firm_before_production):
-    # Given
-    firm = firm_before_production
     firm.expected_sales = 100
     firm.p.theta = 0.20
-    firm.roles["producer"].inventories = 20
+    firm.inventories = 20
 
     # When
     desired_output = firm.calc_desired_output()
@@ -444,12 +433,11 @@ def test_calc_desired_output(firm_before_production):
     assert firm.desired_output == 100
 
 
-def test_calc_desired_output_decreases_with_inventories(firm_before_production):
+def test_calc_desired_output_decreases_with_inventories(firm):
     # Given
-    firm = firm_before_production
-    firm.expected_sales = 100
     firm.p.theta = 0.20
-    firm.roles["producer"].inventories = 50
+    firm.inventories = 50
+    firm.expected_sales = 100
 
     # When
     firm.calc_desired_output()
@@ -458,11 +446,10 @@ def test_calc_desired_output_decreases_with_inventories(firm_before_production):
     assert firm.desired_output == 70
 
 
-def test_calc_labor_demand(firm_before_production):
+def test_calc_labor_demand(firm):
     # Given
-    firm = firm_before_production
     firm.desired_output = 100
-    firm.roles["producer"].productivity = 2
+    firm.productivity = 2
 
     # When
     labor = firm.calc_labor_demand()
@@ -472,12 +459,11 @@ def test_calc_labor_demand(firm_before_production):
     assert firm.desired_labor == 50
 
 
-def test_calc_desired_output_cannot_be_negative(firm_before_production):
+def test_calc_desired_output_cannot_be_negative(firm):
     # Given
-    firm = firm_before_production
     firm.expected_sales = 50
     firm.p.theta = 0.10
-    firm.roles["producer"].inventories = 100
+    firm.inventories = 100
 
     # When
     firm.calc_desired_output()
