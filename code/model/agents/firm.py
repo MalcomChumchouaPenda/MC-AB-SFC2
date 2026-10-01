@@ -102,8 +102,9 @@ class Firm(EcoAgent):
 
     def calc_revision_probability(self):
         p = self.p
-        role = self.roles["employer"]
-        unemployment = role.get_unemployment_rate()
+        pos = self.country_id
+        labor_market = self.model.labor_markets[pos]
+        unemployment = labor_market.unemployment_rate
         return p.upsilon_f * math.exp(-p.upsilon * unemployment)
 
     #

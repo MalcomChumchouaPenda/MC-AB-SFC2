@@ -566,15 +566,18 @@ def test_price_cannot_be_below_unit_cost(pricing_firm):
 # WAGE REVISION
 # ----------------------------------------------------
 
+@pytest.fixture
+def labor_markets(fake_model):
+    markets = [Mock() for _ in range(5)]
+    fake_model.labor_markets = markets
+    return markets
 
-def test_calc_revision_probability(firm_with_roles_and_account):
+def test_calc_revision_probability(firm, labor_markets):
     # Given
-    role = Mock()
-    role.get_unemployment_rate.return_value = 0.1
-    firm, roles, _ = firm_with_roles_and_account
+    firm.country_id = 1
     firm.p.upsilon = 1.0
     firm.p.upsilon_f = 0.9
-    roles["employer"] = role
+    labor_markets[1].unemployment_rate = 0.1
 
     # When
     result = firm.calc_revision_probability()
