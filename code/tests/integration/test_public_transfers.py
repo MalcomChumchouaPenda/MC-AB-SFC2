@@ -11,7 +11,6 @@ from model.agents.household import Household
 def model():
     # Given
     model = Model()
-    model.p.K = 1
     return model
 
 
@@ -28,12 +27,12 @@ def cb(model):
     cb = CentralBank(model)
     return cb
 
-
 @pytest.fixture
-def union(model):
+def union(fake_model):
     # Given
-    union = MonetaryUnion(model)
-    union.build_space()
+    union = MonetaryUnion(fake_model)
+    union.create_markets()
+    union.create_countries(1)
     return union
 
 

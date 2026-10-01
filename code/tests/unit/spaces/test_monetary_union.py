@@ -45,69 +45,98 @@ def test_initializes_discount_rate(fake_model):
 # ----------------------------------------------------
 
 
+@pytest.fixture
+def union_without_spaces(fake_model, monkeypatch):
+    # Given
+    monkeypatch.setattr(MonetaryUnion, "add_space", Mock())
+    union = MonetaryUnion(fake_model)
+    union.spaces = {}
+    return union
+
+
+FakeCountry = Mock()
+
+@pytest.fixture
+def union_without_countries(union_without_spaces, monkeypatch):
+    # Given
+    monkeypatch.setattr("model.spaces.monetary_union.Country", FakeCountry)
+    union = union_without_spaces
+    return union
+
+
+def test_create_countries_adds_countries(union_without_countries):
+    # Given
+    union = union_without_countries
+
+    # When
+    union.create_countries(2)
+
+    # Then
+    union.add_space.assert_any_call(FakeCountry, "country_0")
+    union.add_space.assert_any_call(FakeCountry, "country_1")
+    assert union.add_space.call_count == 2
+
+
+def test_create_countries_creates_national_markets(union_without_countries):
+    # Given
+    country = Mock()
+    union = union_without_countries
+    union.add_space.return_value = country
+
+    # When
+    union.create_countries(1)
+
+    # Then
+    country.create_markets.assert_called_once_with()
+
+
+
 FakeGoodMarket = Mock()
 FakeCreditMarket = Mock()
 FakeBondMarket = Mock()
-FakeCountry = Mock()
-
 
 @pytest.fixture
-def union_without_spaces(fake_model, monkeypatch):
+def union_without_markets(union_without_spaces, monkeypatch):
     # Given
     monkeypatch.setattr("model.spaces.monetary_union.GoodsMarket", FakeGoodMarket)
     monkeypatch.setattr("model.spaces.monetary_union.CreditMarket", FakeCreditMarket)
     monkeypatch.setattr("model.spaces.monetary_union.BondMarket", FakeBondMarket)
-    monkeypatch.setattr("model.spaces.monetary_union.Country", FakeCountry)
-    monkeypatch.setattr(MonetaryUnion, "add_space", Mock())
-    union = MonetaryUnion(fake_model)
-    union.p.K = 0
+    union = union_without_spaces
     return union
 
-
-def test_create_spaces_adds_tradable_goods_market(union_without_spaces):
+def test_create_markets_adds_tradable_goods_market(union_without_markets):
     # Given
-    union = union_without_spaces
+    union = union_without_markets
 
     # When
-    union.create_spaces()
+    union.create_markets()
 
     # Then
     union.add_space.assert_any_call(FakeGoodMarket, "goods_market", tradable=True)
 
 
-def test_create_spaces_adds_credit_market(union_without_spaces):
+def test_create_markets_adds_credit_market(union_without_markets):
     # Given
-    union = union_without_spaces
+    union = union_without_markets
 
     # When
-    union.create_spaces()
+    union.create_markets()
 
     # Then
     union.add_space.assert_any_call(FakeCreditMarket, "credit_market")
 
 
-def test_create_spaces_adds_bond_market(union_without_spaces):
+def test_create_markets_adds_bond_market(union_without_markets):
     # Given
-    union = union_without_spaces
+    union = union_without_markets
 
     # When
-    union.create_spaces()
+    union.create_markets()
 
     # Then
     union.add_space.assert_any_call(FakeBondMarket, "bond_market")
 
 
-def test_create_spaces_adds_countries(union_without_spaces):
-    # Given
-    union = union_without_spaces
-    union.p.K = 2
-
-    # When
-    union.create_spaces()
-
-    # Then
-    union.add_space.assert_any_call(FakeCountry, "country_0")
-    union.add_space.assert_any_call(FakeCountry, "country_1")
 
 
 # ---------------------------------------------------

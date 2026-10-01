@@ -5,35 +5,31 @@ from model.spaces.monetary_union import MonetaryUnion
 
 
 @pytest.fixture
-def country_with_market(fake_model):
+def union(fake_model):
     # Given
-    model = fake_model
-    model.p.K = 1
-    union = MonetaryUnion(model)
-    union.build_space()
-    country = union.spaces["country_0"]
-    market = union.spaces["credit_market"]
-    return country, market
+    union = MonetaryUnion(fake_model)
+    union.create_markets()
+    union.create_countries(1)
+    return union
 
 
 @pytest.fixture
-def cb(fake_model, country_with_market):
+def cb(fake_model, union):
     # Given
-    model = fake_model
-    cb = CentralBank(model)
-    country, _ = country_with_market
+    cb = CentralBank(fake_model)
+    country = union.spaces["country_0"]
     country.add_monetary_authority(cb)
     return cb
 
 
 @pytest.fixture
-def bank(fake_model, country_with_market, cb):
+def bank(fake_model, union, cb):
     # Given
-    model = fake_model
-    bank = Bank(model)
+    bank = Bank(fake_model)
     bank.cb_id = cb.id
-    country, market = country_with_market
+    country = union.spaces["country_0"]
     country.add_company(bank, "B")
+    market = union.spaces["credit_market"]
     market.add_lender(bank)
     return bank
 

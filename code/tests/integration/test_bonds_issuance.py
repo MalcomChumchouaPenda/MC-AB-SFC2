@@ -7,34 +7,32 @@ from model.spaces.monetary_union import MonetaryUnion
 @pytest.fixture
 def union(fake_model):
     # Given
-    model = fake_model
-    model.p.K = 1
-    union = MonetaryUnion(model)
-    union.build_space()
+    union = MonetaryUnion(fake_model)
+    union.create_markets()
+    union.create_countries(1)
     return union
 
 
 @pytest.fixture
-def govt(fake_model):
-    # Given
-    model = fake_model
-    govt = Government(model)
-    return govt
-
-
-@pytest.fixture
-def govt_with_country(govt, union):
+def country(union):
     # Given
     country = union.spaces["country_0"]
     country.monetary_authority = Mock()
-    country.add_fiscal_authority(govt)
-    union.spaces["bond_market"].add_issuer(govt)
-    return govt, country
+    return country
 
 
-def test_sets_govt_debt_ratio(govt_with_country):
+@pytest.fixture
+def govt(fake_model, union, country):
     # Given
-    govt, country = govt_with_country
+    govt = Government(fake_model)
+    country.add_fiscal_authority(govt)
+    market = union.spaces["bond_market"]
+    market.add_issuer(govt)
+    return govt
+
+
+def test_sets_govt_debt_ratio(govt, country):
+    # Given
     govt.prev_budget_surplus = 50
     govt.budget_deficit = 200
     country.gdp = 1000
@@ -46,9 +44,8 @@ def test_sets_govt_debt_ratio(govt_with_country):
     assert govt.roles["bond_issuer"].debt_ratio == 0.15
 
 
-def test_sets_govt_bonds_number_and_value(govt_with_country):
+def test_sets_govt_bonds_number_and_value(govt, country):
     # Given
-    govt, country = govt_with_country
     govt.prev_budget_surplus = 50
     govt.budget_deficit = 200
     country.gdp = 1000

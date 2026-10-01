@@ -14,12 +14,15 @@ class MonetaryUnion(EcoSpace):
         self.average_inflation = 0
         self.discount_rate = 0.0
 
-    def create_spaces(self):
+    def create_markets(self):
         self.add_space(GoodsMarket, "goods_market", tradable=True)
         self.add_space(CreditMarket, "credit_market")
         self.add_space(BondMarket, "bond_market")
-        for k in range(self.model.p.K):
-            self.add_space(Country, f"country_{k}")
+
+    def create_countries(self, number):
+        for k in range(number):
+            country = self.add_space(Country, f"country_{k}")
+            country.create_markets()
 
     #
     # Role management

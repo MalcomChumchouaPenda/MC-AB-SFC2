@@ -5,12 +5,16 @@ from model.spaces.monetary_union import MonetaryUnion
 
 
 @pytest.fixture
-def markets(fake_model, make_dlist):
+def union(fake_model):
     # Given
-    model = fake_model
-    model.p.K = 1
-    union = MonetaryUnion(model)
-    union.build_space()
+    union = MonetaryUnion(fake_model)
+    union.create_markets()
+    union.create_countries(1)
+    return union
+
+@pytest.fixture
+def markets(union, make_dlist):
+    # Given
     country = union.spaces["country_0"]
     trad_market = union.spaces["goods_market"]
     non_trad_market = country.spaces["goods_market"]

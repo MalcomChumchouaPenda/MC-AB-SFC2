@@ -10,19 +10,18 @@ from model.agents.bank import Bank
 def model(fake_model, make_dlist):
     # Given
     model = fake_model
-    model.p.K = 1
     model.firms = make_dlist()
     model.banks = make_dlist()
     return model
 
 
+
 @pytest.fixture
-def union(model):
+def union(fake_model):
     # Given
-    union = MonetaryUnion(model)
-    union.build_space()
-    union.monetary_authority = Mock()
-    union.spaces["country_0"].monetary_authority = Mock()
+    union = MonetaryUnion(fake_model)
+    union.create_markets()
+    union.create_countries(1)
     return union
 
 
@@ -48,6 +47,7 @@ def households(model):
 def country_with_firm_and_founders(union, firm, households):
     # Given
     country = union.spaces["country_0"]
+    country.monetary_authority = Mock()
     founders = []
     shares = []
     for household in households:

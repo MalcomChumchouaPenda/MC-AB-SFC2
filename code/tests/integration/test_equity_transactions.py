@@ -18,10 +18,11 @@ def model(fake_model, make_dlist):
 
 
 @pytest.fixture
-def union(model):
+def union(fake_model):
     # Given
-    union = MonetaryUnion(model)
-    union.build_space()
+    union = MonetaryUnion(fake_model)
+    union.create_markets()
+    union.create_countries(1)
     return union
 
 

@@ -9,7 +9,7 @@ def country(fake_model):
     # Given
     model = fake_model
     country = Country(model)
-    country.build_space()
+    country.create_markets()
     country.monetary_authority = Mock()
     return country
 
@@ -17,8 +17,7 @@ def country(fake_model):
 @pytest.fixture
 def bank(fake_model, country):
     # Given
-    model = fake_model
-    bank = Bank(model)
+    bank = Bank(fake_model)
     country.add_company(bank, sector="B")
     market = country.spaces["deposit_market"]
     market.add_deposit_bank(bank)

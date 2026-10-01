@@ -95,7 +95,7 @@ FakeDepositMarket = Mock()
 
 
 @pytest.fixture
-def country_without_spaces(monkeypatch, fake_model):
+def country_without_markets(monkeypatch, fake_model):
     # Given
     monkeypatch.setattr("model.spaces.country.GoodsMarket", FakeGoodMarket)
     monkeypatch.setattr("model.spaces.country.LaborMarket", FakeLaborMarket)
@@ -105,34 +105,34 @@ def country_without_spaces(monkeypatch, fake_model):
     return country
 
 
-def test_create_spaces_adds_goods_market(country_without_spaces):
+def test_create_markets_adds_goods_market(country_without_markets):
     # Given
-    country = country_without_spaces
+    country = country_without_markets
 
     # When
-    country.create_spaces()
+    country.create_markets()
 
     # Then
     country.add_space.assert_any_call(FakeGoodMarket, "goods_market", tradable=False)
 
 
-def test_create_spaces_adds_labor_market(country_without_spaces):
+def test_create_markets_adds_labor_market(country_without_markets):
     # Given
-    country = country_without_spaces
+    country = country_without_markets
 
     # When
-    country.create_spaces()
+    country.create_markets()
 
     # Then
     country.add_space.assert_any_call(FakeLaborMarket, "labor_market")
 
 
-def test_create_spaces_adds_deposit_market(country_without_spaces):
+def test_create_markets_adds_deposit_market(country_without_markets):
     # Given
-    country = country_without_spaces
+    country = country_without_markets
 
     # When
-    country.create_spaces()
+    country.create_markets()
 
     # Then
     country.add_space.assert_any_call(FakeDepositMarket, "deposit_market")

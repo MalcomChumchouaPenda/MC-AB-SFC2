@@ -7,33 +7,30 @@ from model.spaces.monetary_union import MonetaryUnion
 @pytest.fixture
 def union(fake_model):
     # Given
-    model = fake_model
-    model.p.K = 1
-    union = MonetaryUnion(model)
-    union.build_space()
+    union = MonetaryUnion(fake_model)
+    union.create_markets()
+    union.create_countries(1)
     return union
 
 
 @pytest.fixture
-def govt(fake_model):
-    # Given
-    model = fake_model
-    govt = Government(model)
-    return govt
-
-
-@pytest.fixture
-def govt_with_country(govt, union):
+def country(union):
     # Given
     country = union.spaces["country_0"]
     country.monetary_authority = Mock()
-    country.add_fiscal_authority(govt)
-    return govt, country
+    return country
 
 
-def test_sets_govt_bond_rate(govt_with_country):
+@pytest.fixture
+def govt(fake_model, country):
     # Given
-    govt, country = govt_with_country
+    govt = Government(fake_model)
+    country.add_fiscal_authority(govt)
+    return govt
+
+
+def test_sets_govt_bond_rate(govt, country):
+    # Given
     govt.account["bonds"] = 100
     govt.p.chi = 0.02
     country.gdp = 1000

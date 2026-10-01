@@ -174,14 +174,6 @@ class EcoSpace(Network):
     # Space management
     #
 
-    def build_space(self):
-        self.create_spaces()
-        for subspace in self.spaces.values():
-            subspace.build_space()
-
-    def create_spaces(self):
-        pass
-
     def add_space(self, kind, name, **kwargs):
         subspace = kind(self.model, **kwargs)
         subspace.env = self

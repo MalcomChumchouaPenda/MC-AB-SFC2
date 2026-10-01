@@ -77,35 +77,12 @@ def space(fake_model):
 
 
 @pytest.fixture
-def space_without_subspaces(space, monkeypatch):
+def space_without_subspaces(space):
     # Given
     subspaces = {}
     space.spaces = subspaces
-    monkeypatch.setattr(space, "create_spaces", Mock())
     return space, subspaces
 
-
-def test_build_space_creates_subspaces(space_without_subspaces):
-    # Given
-    space, _ = space_without_subspaces
-
-    # When
-    space.build_space()
-
-    # Then
-    space.create_spaces.assert_called_once()
-
-
-def test_build_space_builds_subspaces(space_without_subspaces):
-    # Given
-    space, subspaces = space_without_subspaces
-    subspaces["x"] = Mock()
-
-    # When
-    space.build_space()
-
-    # Then
-    subspaces["x"].build_space.assert_called_once()
 
 
 def test_add_space_creates_space(space_without_subspaces):

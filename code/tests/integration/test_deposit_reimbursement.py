@@ -9,18 +9,10 @@ from model.spaces.monetary_union import MonetaryUnion
 @pytest.fixture
 def union(fake_model):
     # Given
-    model = fake_model
-    model.p.K = 1
-    union = MonetaryUnion(model)
-    union.build_space()
+    union = MonetaryUnion(fake_model)
+    union.create_markets()
+    union.create_countries(1)
     return union
-
-
-@pytest.fixture
-def bond_market(union):
-    # Given
-    return union.spaces["bond_market"]
-
 
 @pytest.fixture
 def deposit_market(union):
@@ -30,10 +22,10 @@ def deposit_market(union):
 
 
 @pytest.fixture
-def govt(fake_model, bond_market, deposit_market):
+def govt(fake_model, union, deposit_market):
     # Given
-    model = fake_model
-    govt = Government(model)
+    govt = Government(fake_model)
+    bond_market = union.spaces["bond_market"]
     bond_market.add_issuer(govt)
     deposit_market.add_guarantee(govt)
     return govt
@@ -42,8 +34,7 @@ def govt(fake_model, bond_market, deposit_market):
 @pytest.fixture
 def bank(fake_model, deposit_market):
     # Given
-    model = fake_model
-    bank = Bank(model)
+    bank = Bank(fake_model)
     deposit_bank = deposit_market.add_deposit_bank(bank)
     deposit_bank.defaulted = True
     return bank
@@ -52,8 +43,7 @@ def bank(fake_model, deposit_market):
 @pytest.fixture
 def firm(fake_model, deposit_market):
     # Given
-    model = fake_model
-    firm = Firm(model)
+    firm = Firm(fake_model)
     deposit_market.add_depositor(firm)
     return firm
 

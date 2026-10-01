@@ -20,7 +20,7 @@ class Country(EcoSpace):
         self.fiscal_authority = None
 
     # Spaces management
-    def create_spaces(self):
+    def create_markets(self):
         self.add_space(GoodsMarket, "goods_market", tradable=False)
         self.add_space(LaborMarket, "labor_market")
         self.add_space(DepositMarket, "deposit_market")
