@@ -105,7 +105,7 @@ def test_initializes_monetary_authority(model_before_space_creation):
 # ----------------------------------------------------
 
 
-def test_creates_good_market(model_before_space_creation):
+def test_creates_goods_market(model_before_space_creation):
     # Given
     model = model_before_space_creation
 
@@ -113,7 +113,7 @@ def test_creates_good_market(model_before_space_creation):
     country = Country(model)
 
     # Then
-    country.add_space.assert_any_call(FakeGoodMarket, "good_market", tradable=False)
+    country.add_space.assert_any_call(FakeGoodMarket, "goods_market", tradable=False)
 
 
 def test_creates_labor_market(model_before_space_creation):
@@ -603,7 +603,7 @@ def country_before_creation(country_without_roles, make_dlist):
     country.add_company = Mock()
     country.fund_company = Mock()
     country.env = Mock()
-    country.spaces["good_market"] = Mock()
+    country.spaces["goods_market"] = Mock()
     country.spaces["labor_market"] = Mock()
     country.spaces["deposit_market"] = Mock()
     return country
@@ -640,14 +640,14 @@ def test_dont_create_trad_firm_in_goods_market(country_before_creation, share):
     country.create_firm(firm, [share], tradable=True)
 
     # Then
-    country.spaces["good_market"].add_producer.assert_not_called()
+    country.spaces["goods_market"].add_producer.assert_not_called()
 
 
 def test_create_non_trad_firm_in_goods_market(country_before_creation, share):
     # Given
     firm = Mock()
     country = country_before_creation
-    market = country.spaces["good_market"]
+    market = country.spaces["goods_market"]
 
     # When
     country.create_firm(firm, [share], tradable=False)
@@ -810,7 +810,7 @@ def test_transfer_residual_cash_of_company(country_before_transaction):
 def country_before_update(country_without_roles):
     # Given
     country = country_without_roles
-    country.spaces["good_market"] = Mock()
+    country.spaces["goods_market"] = Mock()
     country.roles = {}
     country.gdp = 0
     return country
@@ -819,7 +819,7 @@ def country_before_update(country_without_roles):
 def test_update_state_updates_gdp(country_before_update):
     # Given
     country = country_before_update
-    country.spaces["good_market"].calc_gdp.return_value = 100
+    country.spaces["goods_market"].calc_gdp.return_value = 100
 
     # When
     country.update_state()
@@ -831,7 +831,7 @@ def test_update_state_updates_gdp(country_before_update):
 def test_update_state_updates_inflation(country_before_update):
     # Given
     country = country_before_update
-    country.spaces["good_market"].calc_inflation.return_value = 0.2
+    country.spaces["goods_market"].calc_inflation.return_value = 0.2
 
     # When
     country.update_state()

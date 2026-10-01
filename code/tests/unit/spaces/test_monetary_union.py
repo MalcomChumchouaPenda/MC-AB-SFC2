@@ -59,7 +59,7 @@ def test_initializes_discount_rate(model_before_union_creation):
     assert union.discount_rate == 0.0
 
 
-def test_creates_tradable_good_market(model_before_union_creation):
+def test_creates_tradable_goods_market(model_before_union_creation):
     # Given
     model = model_before_union_creation
 
@@ -67,7 +67,7 @@ def test_creates_tradable_good_market(model_before_union_creation):
     union = MonetaryUnion(model)
 
     # Then
-    union.add_space.assert_any_call(FakeGoodMarket, "good_market", tradable=True)
+    union.add_space.assert_any_call(FakeGoodMarket, "goods_market", tradable=True)
 
 
 def test_creates_credit_market(model_before_union_creation):
@@ -119,7 +119,7 @@ def union_without_roles(monkeypatch, model_before_union_creation):
     model = model_before_union_creation
     union = MonetaryUnion(model)
     union.add_role = Mock()
-    union.spaces["good_market"] = Mock()
+    union.spaces["goods_market"] = Mock()
     union.spaces["bond_market"] = Mock()
     union.spaces["credit_market"] = Mock()
     return union
@@ -153,7 +153,7 @@ def test_place_trad_firm_in_goods_market(union_without_roles):
     # Given
     firm = Mock()
     union = union_without_roles
-    market = union.spaces["good_market"]
+    market = union.spaces["goods_market"]
 
     # When
     union.place_firm(firm, tradable=True)
@@ -166,7 +166,7 @@ def test_dont_place_non_trad_firm_in_goods_market(union_without_roles):
     # Given
     firm = Mock()
     union = union_without_roles
-    market = union.spaces["good_market"] 
+    market = union.spaces["goods_market"]
 
     # When
     union.place_firm(firm, tradable=False)
@@ -180,7 +180,7 @@ def test_place_firm_add_borrower_role(union_without_roles, tradable):
     # Given
     firm = Mock()
     union = union_without_roles
-    market = union.spaces["credit_market"] 
+    market = union.spaces["credit_market"]
 
     # When
     union.place_firm(firm, tradable=tradable)
@@ -193,7 +193,7 @@ def test_place_bank_add_bond_buyer(union_without_roles):
     # Given
     bank = Mock()
     union = union_without_roles
-    market = union.spaces["bond_market"] 
+    market = union.spaces["bond_market"]
 
     # When
     union.place_bank(bank)
@@ -206,7 +206,7 @@ def test_place_bank_add_lender_role(union_without_roles):
     # Given
     bank = Mock()
     union = union_without_roles
-    market = union.spaces["credit_market"] 
+    market = union.spaces["credit_market"]
 
     # When
     union.place_bank(bank)

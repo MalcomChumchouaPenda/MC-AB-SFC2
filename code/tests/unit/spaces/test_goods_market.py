@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import Mock
-from model.spaces.good_market import GoodsMarket
+from model.spaces.goods_market import GoodsMarket
 
 # ---------------------------------------------------
 # ARCHITECTURE
@@ -75,8 +75,8 @@ FakeProducer = Mock()
 @pytest.fixture
 def market_without_roles(monkeypatch, fake_model):
     # Given
-    monkeypatch.setattr("model.spaces.good_market.Consumer", FakeConsumer)
-    monkeypatch.setattr("model.spaces.good_market.Producer", FakeProducer)
+    monkeypatch.setattr("model.spaces.goods_market.Consumer", FakeConsumer)
+    monkeypatch.setattr("model.spaces.goods_market.Producer", FakeProducer)
     market = GoodsMarket(fake_model)
     market.add_role = Mock()
     return market

@@ -1,7 +1,7 @@
 from model.base import EcoSpace
 from model.roles.policy_maker import PolicyMaker
 from model.spaces.country import Country
-from model.spaces.good_market import GoodsMarket
+from model.spaces.goods_market import GoodsMarket
 from model.spaces.credit_market import CreditMarket
 from model.spaces.bond_market import BondMarket
 
@@ -13,7 +13,7 @@ class MonetaryUnion(EcoSpace):
         self.gdp = 0
         self.average_inflation = 0
         self.discount_rate = 0.0
-        self.add_space(GoodsMarket, "good_market", tradable=True)
+        self.add_space(GoodsMarket, "goods_market", tradable=True)
         self.add_space(CreditMarket, "credit_market")
         self.add_space(BondMarket, "bond_market")
         for k in range(self.model.p.K):
@@ -28,7 +28,7 @@ class MonetaryUnion(EcoSpace):
     def place_firm(self, firm, tradable):
         self.spaces["credit_market"].add_borrower(firm)
         if tradable:
-            self.spaces["good_market"].add_producer(firm)
+            self.spaces["goods_market"].add_producer(firm)
 
     def place_bank(self, bank):
         self.spaces["credit_market"].add_lender(bank)

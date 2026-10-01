@@ -3,7 +3,7 @@ from model.roles.citizen import Citizen
 from model.roles.company import Company
 from model.roles.monetary_authority import MonetaryAuthority
 from model.roles.fiscal_authority import FiscalAuthority
-from model.spaces.good_market import GoodsMarket
+from model.spaces.goods_market import GoodsMarket
 from model.spaces.labor_market import LaborMarket
 from model.spaces.deposit_market import DepositMarket
 
@@ -18,7 +18,7 @@ class Country(EcoSpace):
         self.tax_rate = 0
         self.monetary_authority = None
         self.fiscal_authority = None
-        self.add_space(GoodsMarket, "good_market", tradable=False)
+        self.add_space(GoodsMarket, "goods_market", tradable=False)
         self.add_space(LaborMarket, "labor_market")
         self.add_space(DepositMarket, "deposit_market")
 
@@ -125,7 +125,7 @@ class Country(EcoSpace):
         self.spaces["deposit_market"].add_depositor(firm)
         self.spaces["labor_market"].add_employer(firm)
         if not tradable:
-            self.spaces["good_market"].add_producer(firm)
+            self.spaces["goods_market"].add_producer(firm)
 
     #
     # Bank creation
@@ -170,5 +170,5 @@ class Country(EcoSpace):
         companies = self.find_all_roles("company")
         defaults = companies.select(companies.defaulted == True)
         self.prob_failure = len(defaults) / max(1, len(companies))
-        self.inflation = self.spaces["good_market"].calc_inflation()
-        self.gdp = self.spaces["good_market"].calc_gdp()
+        self.inflation = self.spaces["goods_market"].calc_inflation()
+        self.gdp = self.spaces["goods_market"].calc_gdp()

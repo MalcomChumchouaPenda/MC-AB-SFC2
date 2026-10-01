@@ -11,8 +11,8 @@ def markets(fake_model, make_dlist):
     model.p.K = 1
     union = MonetaryUnion(model)
     country = union.spaces["country_0"]
-    trad_market = union.spaces["good_market"]
-    non_trad_market = country.spaces["good_market"]
+    trad_market = union.spaces["goods_market"]
+    non_trad_market = country.spaces["goods_market"]
     return make_dlist([trad_market, non_trad_market])
 
 

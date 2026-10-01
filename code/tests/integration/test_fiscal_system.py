@@ -43,7 +43,7 @@ def country(union):
     # Given
     country = union.spaces["country_0"]
     country.monetary_authority = Mock()
-    country.spaces["good_market"] = Mock()
+    country.spaces["goods_market"] = Mock()
     return country
 
 
@@ -57,8 +57,8 @@ def country_before_fiscal_policy(country, govt):
 def test_government_updates_fiscal_policy(govt, country_before_fiscal_policy):
     # Given
     country = country_before_fiscal_policy
-    country.spaces["good_market"].average_price = 2
-    country.spaces["good_market"].average_prod = 3
+    country.spaces["goods_market"].average_price = 2
+    country.spaces["goods_market"].average_prod = 3
     country.gdp = 1000
     govt.prev_public_spending = 10
     govt.public_spending = 100

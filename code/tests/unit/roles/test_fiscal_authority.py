@@ -66,17 +66,17 @@ def test_get_discount_rate_within_env(role):
 
 
 @pytest.fixture
-def role_with_good_market(role):
+def role_with_goods_market(role):
     # Given
     market = Mock()
     env = role.env
-    env.spaces = {"good_market": market}
+    env.spaces = {"goods_market": market}
     return role, market
 
 
-def test_get_average_price_from_env(role_with_good_market):
+def test_get_average_price_from_env(role_with_goods_market):
     # Given
-    role, market = role_with_good_market
+    role, market = role_with_goods_market
     market.average_price = 1.5
 
     # When
@@ -86,9 +86,9 @@ def test_get_average_price_from_env(role_with_good_market):
     assert perceived == 1.5
 
 
-def test_get_average_productivity_from_env(role_with_good_market):
+def test_get_average_productivity_from_env(role_with_goods_market):
     # Given
-    role, market = role_with_good_market
+    role, market = role_with_goods_market
     market.average_prod = 1.0
 
     # When

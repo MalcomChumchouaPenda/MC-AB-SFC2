@@ -14,10 +14,10 @@ class FiscalAuthority(EcoRole):
         return self.env.monetary_authority.discount_rate
 
     def get_average_price(self):
-        return self.env.spaces["good_market"].average_price
+        return self.env.spaces["goods_market"].average_price
 
     def get_average_productivity(self):
-        return self.env.spaces["good_market"].average_prod
+        return self.env.spaces["goods_market"].average_prod
 
     def find_citizens(self):
         return self.env.find_all_roles("citizen")
