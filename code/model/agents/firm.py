@@ -171,17 +171,14 @@ class Firm(EcoAgent):
         self.desired_loans = self.calc_desired_loans()
         if self.desired_loans <= 0:
             return
-        role = self.roles["borrower"]
-        role.loan_demand = self.desired_loans
-        role.net_worth = self.account["equities"]
-        lenders = role.find_lenders()
-        for lender in lenders:
-            role.request_loans(lender)
+        self.loan_demand = self.desired_loans
+        self.net_worth = self.equities
+        for bank in self.model.banks:
+            bank.loan_applicants.append(self)
 
     def calc_desired_loans(self):
-        deposits = self.account["deposits"]
         wage_bill = self.wage_offer * self.desired_labor
-        return max(0, wage_bill + self.desired_rd - deposits)
+        return max(0, wage_bill + self.desired_rd - self.deposits)
 
     def repay_loans(self):
         role = self.roles["borrower"]

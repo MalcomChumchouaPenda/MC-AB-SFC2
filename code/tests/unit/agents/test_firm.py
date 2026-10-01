@@ -907,20 +907,19 @@ def test_update_productivity_by_imitation(innovating_firm, goods_markets):
 
 
 @pytest.fixture
-def firm_before_borrowing(firm_with_roles_and_account):
+def firm_before_borrowing(firm):
     # Given
-    firm, _, account = firm_with_roles_and_account
     firm.wage_offer = 10
     firm.desired_labor = 10
     firm.desired_rd = 50
-    account["deposits"] = 0
+    firm.deposits = 0
     return firm
 
 
 def test_calc_desired_loans_when_external_finance_needed(firm_before_borrowing):
     # Given
     firm = firm_before_borrowing
-    firm.account["deposits"] = 20
+    firm.deposits = 20
 
     # When
     result = firm.calc_desired_loans()
@@ -932,7 +931,7 @@ def test_calc_desired_loans_when_external_finance_needed(firm_before_borrowing):
 def test_calc_desired_loans_when_internal_funds_are_sufficient(firm_before_borrowing):
     # Given
     firm = firm_before_borrowing
-    firm.account["deposits"] = 150
+    firm.deposits = 150
 
     # When
     result = firm.calc_desired_loans()
@@ -942,59 +941,57 @@ def test_calc_desired_loans_when_internal_funds_are_sufficient(firm_before_borro
 
 
 @pytest.fixture
-def firm_as_borrower(firm_with_roles_and_account):
+def firm_as_borrower(firm):
     # Given
-    role = Mock()
-    role.find_lenders.return_value = []
-    firm, roles, account = firm_with_roles_and_account
     firm.calc_desired_loans = Mock(return_value=10)
-    account["equities"] = 100
-    roles["borrower"] = role
-    return firm, role
+    firm.equities = 100
+    return firm
 
 
-def test_request_loans_to_all_lenders(firm_as_borrower):
+def test_request_loans_to_all_lenders(firm_as_borrower, fake_model):
     # Given
-    lender = Mock()
-    firm, role = firm_as_borrower
-    role.find_lenders.return_value = [lender]
+    bank = Mock(loan_applicants=[])
+    fake_model.banks = [bank]
+    firm = firm_as_borrower
 
     # When
     firm.request_loans()
 
     # Then
-    role.request_loans.assert_any_call(lender)
+    assert bank.loan_applicants == [firm]
 
 
-def test_request_loans_and_set_loan_demand(firm_as_borrower):
+def test_request_loans_and_set_loan_demand(firm_as_borrower, fake_model):
     # Given
-    firm, role = firm_as_borrower
-    firm.calc_desired_loans.return_value = 100
-    role.find_lenders.return_value = [Mock()]
-
-    # When
-    firm.request_loans()
-
-    # Then
-    assert role.loan_demand == 100
-
-
-def test_request_loans_and_registers_networth(firm_as_borrower):
-    # Given
-    firm, role = firm_as_borrower
-    firm.account["equities"] = 200
+    fake_model.banks = []
+    firm = firm_as_borrower
     firm.calc_desired_loans.return_value = 100
 
     # When
     firm.request_loans()
 
     # Then
-    assert role.net_worth == 200
+    assert firm.loan_demand == 100
 
 
-def test_request_loans_and_registers_desired_loans(firm_as_borrower):
+def test_request_loans_and_registers_networth(firm_as_borrower, fake_model):
     # Given
-    firm, _ = firm_as_borrower
+    fake_model.banks = []
+    firm = firm_as_borrower
+    firm.equities = 200
+    firm.calc_desired_loans.return_value = 100
+
+    # When
+    firm.request_loans()
+
+    # Then
+    assert firm.net_worth == 200
+
+
+def test_request_loans_and_registers_desired_loans(firm_as_borrower, fake_model):
+    # Given
+    fake_model.banks = []
+    firm = firm_as_borrower
     firm.calc_desired_loans.return_value = 100
 
     # When
@@ -1005,16 +1002,19 @@ def test_request_loans_and_registers_desired_loans(firm_as_borrower):
 
 
 @pytest.mark.parametrize("desired", [0, -100])
-def test_dont_request_unneccessary_loans(firm_as_borrower, desired):
+def test_dont_request_unneccessary_loans(firm_as_borrower, fake_model, desired):
     # Given
-    firm, role = firm_as_borrower
+    bank = Mock(loan_applicants=[])
+    fake_model.banks = [bank]
+    firm = firm_as_borrower
     firm.calc_desired_loans.return_value = desired
 
     # When
     firm.request_loans()
 
     # Then
-    role.request_loans.assert_not_called()
+    assert bank.loan_applicants == []
+    
 
 
 # ---------------------------------------------------
