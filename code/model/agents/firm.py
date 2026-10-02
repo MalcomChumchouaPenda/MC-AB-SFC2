@@ -38,21 +38,6 @@ class Firm(EcoAgent):
         self.variety = 0.0
         self.defaulted = False
 
-        # stocks
-        self.inventories = 0.0
-        self.deposits = 0.0
-        self.loans = 0.0
-        self.cash = 0.0
-        self.equities = 0.0
-
-        # transactions
-        self.consumption = 0.0
-        self.wages = 0.0
-        self.taxes = 0.0
-        self.dep_interests = 0.0
-        self.loan_interests = 0.0
-        self.loan_defaults = 0.0
-        self.dividends = 0.0
 
     #
     # Production planning
@@ -63,12 +48,13 @@ class Firm(EcoAgent):
 
     def calc_desired_output(self):
         theta = self.p.theta
-        inv = self.inventories
+        inv = self.roles["producer"].inventories
         self.desired_output = max(0, self.expected_sales * (1 + theta) - inv)
         return self.desired_output
 
     def calc_labor_demand(self):
-        self.desired_labor = self.desired_output / self.productivity
+        role = self.roles["producer"]
+        self.desired_labor = self.desired_output / role.productivity
         return self.desired_labor
 
     #
@@ -82,9 +68,11 @@ class Firm(EcoAgent):
             self.price *= 1 + random.uniform(0, delta)
 
         elif self.prev_output + self.prev_inventories > self.prev_sales:
+            role = self.roles["producer"]
+            wage_bill = self.account["wages"]
             self.expected_sales *= 1 - random.uniform(0, delta)
             self.price *= 1 - random.uniform(0, delta)
-            self.price = max(self.wages / self.productivity, self.price)
+            self.price = max(wage_bill / role.productivity, self.price)
 
     #
     # Wage revision
@@ -102,46 +90,37 @@ class Firm(EcoAgent):
 
     def calc_revision_probability(self):
         p = self.p
-        pos = self.country_id
-        labor_market = self.model.labor_markets[pos]
-        unemployment = labor_market.unemployment_rate
+        role = self.roles["employer"]
+        unemployment = role.get_unemployment_rate()
         return p.upsilon_f * math.exp(-p.upsilon * unemployment)
 
     #
     # Innovation and imitation process
     #
-
-    @property
-    def goods_market(self):
-        model = self.model
-        if self.tradable:
-            return model.common_goods_market
-        pos = self.country_id
-        return model.national_goods_markets[pos]
-
     def update_productivity(self):
+        role = self.roles["producer"]
         self.calc_desired_rd()
         self.execute_rd()
         if self.rd == 0:
-            return self.productivity
+            return role.productivity
 
         prob = self.calc_rd_success_probability()
         random = self.model.nprandom
         success = random.choice([0, 1], p=[1 - prob, prob])
+        print(success)
         if success:
-            self._innovation(random)
-            self._imitation(random)
+            self._innovation(role, random)
+            self._imitation(role, random)
 
-    def _innovation(self, random):
+    def _innovation(self, role, random):
         delta = self.p.delta
-        self.productivity *= 1 + random.uniform(0, delta)
+        role.productivity *= 1 + random.uniform(0, delta)
 
-    def _imitation(self, random):
-        market = self.goods_market
-        avg_productivity = market.average_productivity
-        prod_diff = avg_productivity - self.productivity
+    def _imitation(self, role, random):
+        avg_productivity = role.get_average_productivity()
+        prod_diff = avg_productivity - role.productivity
         if prod_diff > 0:
-            self.productivity += random.uniform(0, prod_diff)
+            role.productivity += random.uniform(0, prod_diff)
 
     def calc_desired_rd(self):
         self.desired_wage_bill = self.wage_offer * self.desired_labor
@@ -149,15 +128,16 @@ class Firm(EcoAgent):
         return self.desired_rd
 
     def calc_rd_success_probability(self):
-        market = self.goods_market
-        avg_price = market.average_price
-        avg_productivity = market.average_productivity
+        producer_role = self.roles["producer"]
+        avg_price = producer_role.get_average_price()
+        avg_productivity = producer_role.get_average_productivity()
         prob = 1 - math.exp(-self.p.nu * self.rd / (avg_price * avg_productivity))
         return prob
 
     def execute_rd(self):
+        stocks = self.account
         labor_constraint = self.labor < self.desired_labor
-        financial_constraint = self.loans < self.desired_loans
+        financial_constraint = stocks["loans"] < self.desired_loans
         if labor_constraint or financial_constraint:
             self.rd = 0
         else:
@@ -171,14 +151,17 @@ class Firm(EcoAgent):
         self.desired_loans = self.calc_desired_loans()
         if self.desired_loans <= 0:
             return
-        self.loan_demand = self.desired_loans
-        self.net_worth = self.equities
-        for bank in self.model.banks:
-            bank.loan_applicants.append(self)
+        role = self.roles["borrower"]
+        role.loan_demand = self.desired_loans
+        role.net_worth = self.account["equities"]
+        lenders = role.find_lenders()
+        for lender in lenders:
+            role.request_loans(lender)
 
     def calc_desired_loans(self):
+        deposits = self.account["deposits"]
         wage_bill = self.wage_offer * self.desired_labor
-        return max(0, wage_bill + self.desired_rd - self.deposits)
+        return max(0, wage_bill + self.desired_rd - deposits)
 
     def repay_loans(self):
         role = self.roles["borrower"]

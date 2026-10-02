@@ -239,147 +239,6 @@ def test_initializes_prev_desired_labor(fake_model):
     assert firm.prev_desired_labor == 0
 
 
-# ---------------------------------------------------
-# DEFAULT STOCKS AMOUNT
-# ----------------------------------------------------
-
-
-def test_initializes_inventories(fake_model):
-    # Given
-    model = fake_model
-
-    # When
-    firm = Firm(model)
-
-    # Then
-    assert firm.inventories == 0.0
-
-
-def test_initializes_deposits(fake_model):
-    # Given
-    model = fake_model
-
-    # When
-    firm = Firm(model)
-
-    # Then
-    assert firm.deposits == 0.0
-
-
-def test_initializes_loans(fake_model):
-    # Given
-    model = fake_model
-
-    # When
-    firm = Firm(model)
-
-    # Then
-    assert firm.loans == 0.0
-
-
-def test_initializes_cash(fake_model):
-    # Given
-    model = fake_model
-
-    # When
-    firm = Firm(model)
-
-    # Then
-    assert firm.cash == 0.0
-
-
-def test_initializes_equities(fake_model):
-    # Given
-    model = fake_model
-
-    # When
-    firm = Firm(model)
-
-    # Then
-    assert firm.equities == 0.0
-
-
-# ---------------------------------------------------
-# DEFAULT TRANSACTIONS STATE
-# ----------------------------------------------------
-
-
-def test_initializes_consumption(fake_model):
-    # Given
-    model = fake_model
-
-    # When
-    firm = Firm(model)
-
-    # Then
-    assert firm.consumption == 0.0
-
-
-def test_initializes_wages(fake_model):
-    # Given
-    model = fake_model
-
-    # When
-    firm = Firm(model)
-
-    # Then
-    assert firm.wages == 0.0
-
-
-def test_initializes_taxes(fake_model):
-    # Given
-    model = fake_model
-
-    # When
-    firm = Firm(model)
-
-    # Then
-    assert firm.taxes == 0.0
-
-
-def test_initializes_dep_interests(fake_model):
-    # Given
-    model = fake_model
-
-    # When
-    firm = Firm(model)
-
-    # Then
-    assert firm.dep_interests == 0.0
-
-
-def test_initializes_loan_interests(fake_model):
-    # Given
-    model = fake_model
-
-    # When
-    firm = Firm(model)
-
-    # Then
-    assert firm.loan_interests == 0.0
-
-
-def test_initializes_loan_defaults(fake_model):
-    # Given
-    model = fake_model
-
-    # When
-    firm = Firm(model)
-
-    # Then
-    assert firm.loan_defaults == 0.0
-
-
-def test_initializes_dividends(fake_model):
-    # Given
-    model = fake_model
-
-    # When
-    firm = Firm(model)
-
-    # Then
-    assert firm.dividends == 0.0
-
 
 # ---------------------------------------------------
 # PRODUCTION PLANNING
@@ -419,11 +278,22 @@ def firm_with_roles_and_account(firm):
     return firm, roles, account
 
 
-def test_calc_desired_output(firm):
+@pytest.fixture
+def firm_before_production(firm_with_roles_and_account):
     # Given
+    role = Mock(inventories=0)
+    firm, roles, account = firm_with_roles_and_account
+    account["inventories"] = 0
+    roles["producer"] = role
+    return firm
+
+
+def test_calc_desired_output(firm_before_production):
+    # Given
+    firm = firm_before_production
     firm.expected_sales = 100
     firm.p.theta = 0.20
-    firm.inventories = 20
+    firm.roles["producer"].inventories = 20
 
     # When
     desired_output = firm.calc_desired_output()
@@ -433,11 +303,12 @@ def test_calc_desired_output(firm):
     assert firm.desired_output == 100
 
 
-def test_calc_desired_output_decreases_with_inventories(firm):
+def test_calc_desired_output_decreases_with_inventories(firm_before_production):
     # Given
-    firm.p.theta = 0.20
-    firm.inventories = 50
+    firm = firm_before_production
     firm.expected_sales = 100
+    firm.p.theta = 0.20
+    firm.roles["producer"].inventories = 50
 
     # When
     firm.calc_desired_output()
@@ -446,10 +317,11 @@ def test_calc_desired_output_decreases_with_inventories(firm):
     assert firm.desired_output == 70
 
 
-def test_calc_labor_demand(firm):
+def test_calc_labor_demand(firm_before_production):
     # Given
+    firm = firm_before_production
     firm.desired_output = 100
-    firm.productivity = 2
+    firm.roles["producer"].productivity = 2
 
     # When
     labor = firm.calc_labor_demand()
@@ -459,11 +331,12 @@ def test_calc_labor_demand(firm):
     assert firm.desired_labor == 50
 
 
-def test_calc_desired_output_cannot_be_negative(firm):
+def test_calc_desired_output_cannot_be_negative(firm_before_production):
     # Given
+    firm = firm_before_production
     firm.expected_sales = 50
     firm.p.theta = 0.10
-    firm.inventories = 100
+    firm.roles["producer"].inventories = 100
 
     # When
     firm.calc_desired_output()
@@ -478,12 +351,14 @@ def test_calc_desired_output_cannot_be_negative(firm):
 
 
 @pytest.fixture
-def pricing_firm(firm):
+def pricing_firm(firm_with_roles_and_account):
+    role = Mock(productivity=2)
+    firm, roles, account = firm_with_roles_and_account
     firm.p.delta = 0.1
-    firm.expected_sales = 100
-    firm.productivity=2
     firm.price = 10
-    firm.wages = 10
+    firm.expected_sales = 100
+    account["wages"] = 10
+    roles["producer"] = role
     return firm
 
 
@@ -566,18 +441,15 @@ def test_price_cannot_be_below_unit_cost(pricing_firm):
 # WAGE REVISION
 # ----------------------------------------------------
 
-@pytest.fixture
-def labor_markets(fake_model):
-    markets = [Mock() for _ in range(5)]
-    fake_model.labor_markets = markets
-    return markets
 
-def test_calc_revision_probability(firm, labor_markets):
+def test_calc_revision_probability(firm_with_roles_and_account):
     # Given
-    firm.country_id = 1
+    role = Mock()
+    role.get_unemployment_rate.return_value = 0.1
+    firm, roles, _ = firm_with_roles_and_account
     firm.p.upsilon = 1.0
     firm.p.upsilon_f = 0.9
-    labor_markets[1].unemployment_rate = 0.1
+    roles["employer"] = role
 
     # When
     result = firm.calc_revision_probability()
@@ -717,13 +589,14 @@ def test_calc_desired_rd(firm):
     assert firm.desired_rd == 50
 
 
-def test_execute_rd_without_constraints(firm):
+def test_execute_rd_without_constraints(firm_with_roles_and_account):
     # Given
+    firm, _, account = firm_with_roles_and_account
     firm.desired_rd = 100
     firm.desired_labor = 50
-    firm.desired_loans = 200
     firm.labor = 50
-    firm.loans = 200
+    firm.desired_loans = 200
+    account["loans"] = 200
 
     # When
     firm.execute_rd()
@@ -732,13 +605,14 @@ def test_execute_rd_without_constraints(firm):
     assert firm.rd == 100
 
 
-def test_execute_rd_with_labor_constraint(firm):
+def test_execute_rd_with_labor_constraint(firm_with_roles_and_account):
     # Given
+    firm, _, account = firm_with_roles_and_account
     firm.desired_rd = 100
     firm.desired_labor = 100
-    firm.desired_loans = 200
     firm.labor = 80
-    firm.loans = 200
+    firm.desired_loans = 200
+    account["loans"] = 200
 
     # When
     firm.execute_rd()
@@ -747,13 +621,14 @@ def test_execute_rd_with_labor_constraint(firm):
     assert firm.rd == 0
 
 
-def test_execute_rd_with_financial_constraint(firm):
+def test_execute_rd_with_financial_constraint(firm_with_roles_and_account):
     # Given
+    firm, _, account = firm_with_roles_and_account
     firm.desired_rd = 100
     firm.desired_labor = 50
-    firm.desired_loans = 200
     firm.labor = 50
-    firm.loans = 100
+    firm.desired_loans = 200
+    account["loans"] = 100
 
     # When
     firm.execute_rd()
@@ -763,29 +638,22 @@ def test_execute_rd_with_financial_constraint(firm):
 
 
 @pytest.fixture
-def firm_with_rd(firm):
+def firm_with_rd_project(firm_with_roles_and_account):
     # Given
+    firm, roles, _ = firm_with_roles_and_account
     firm.p.nu = 0.5
     firm.rd = 100
+    roles["producer"] = Mock()
     return firm
 
-@pytest.fixture
-def goods_markets(fake_model):
-    # Given
-    common_market = Mock()
-    national_markets = [Mock() for _ in range(5)]
-    fake_model.common_goods_market = common_market
-    fake_model.national_goods_markets = national_markets
-    return common_market, national_markets
-    
 
-def test_calc_rd_success_probability_for_tradable(firm_with_rd, goods_markets):
+def test_calc_rd_success_probability_tradable(firm_with_rd_project):
     # Given
-    firm = firm_with_rd
+    firm = firm_with_rd_project
     firm.tradable = True
-    common_market, _ = goods_markets
-    common_market.average_price = 20
-    common_market.average_productivity = 10
+    role = firm.roles["producer"]
+    role.get_average_price.return_value = 20
+    role.get_average_productivity.return_value = 10
 
     # When
     probability = firm.calc_rd_success_probability()
@@ -795,14 +663,13 @@ def test_calc_rd_success_probability_for_tradable(firm_with_rd, goods_markets):
     assert probability == pytest.approx(expected)
 
 
-def test_calc_rd_success_probability_non_tradable(firm_with_rd, goods_markets):
+def test_calc_rd_success_probability_non_tradable(firm_with_rd_project):
     # Given
-    firm = firm_with_rd
-    firm.country_id = 2
+    firm = firm_with_rd_project
     firm.tradable = False
-    _, national_markets = goods_markets
-    national_markets[2].average_price = 15
-    national_markets[2].average_productivity = 20
+    role = firm.roles["producer"]
+    role.get_average_price.return_value = 15
+    role.get_average_productivity.return_value = 20
 
     # When
     probability = firm.calc_rd_success_probability()
@@ -813,24 +680,25 @@ def test_calc_rd_success_probability_non_tradable(firm_with_rd, goods_markets):
 
 
 @pytest.fixture
-def innovating_firm(firm):
-    firm.tradable = True
+def innovating_firm(firm_with_roles_and_account):
+    firm, roles, _ = firm_with_roles_and_account
     firm.p.delta = 0.2
-    firm.productivity = 10
     firm.calc_desired_rd = Mock(side_effect=setattr(firm, "desired_rd", 100))
     firm.execute_rd = Mock(side_effect=setattr(firm, "rd", 100))
     firm.calc_rd_success_probability = Mock(return_value=0.6)
+    roles["producer"] = Mock()
     return firm
 
 
-def test_update_productivity_with_multi_steps(innovating_firm, goods_markets):
+def test_update_productivity_with_multi_steps(innovating_firm):
     # Given
     firm = innovating_firm
     random = firm.model.nprandom
     random.choice.return_value = 1
     random.uniform.return_value = 0.05
-    common_market, _ = goods_markets
-    common_market.average_productivity = 10
+    role = firm.roles["producer"]
+    role.productivity = 10
+    role.get_average_productivity.return_value = 10
 
     # When
     firm.update_productivity()
@@ -842,63 +710,68 @@ def test_update_productivity_with_multi_steps(innovating_firm, goods_markets):
     random.choice.assert_called_with([0, 1], p=[1 - 0.6, 0.6])
 
 
-def test_update_productivity_without_success(innovating_firm, goods_markets):
+def test_update_productivity_without_success(innovating_firm):
     # Given
     firm = innovating_firm
     random = firm.model.nprandom
     random.choice.return_value = 0
-    common_market, _ = goods_markets
-    common_market.average_productivity = 10
+    role = firm.roles["producer"]
+    role.get_average_productivity.return_value = 10
+    role.productivity = 10
 
     # When
     firm.update_productivity()
 
     # Then
-    assert firm.productivity == 10
+    assert role.productivity == 10
 
 
 def test_update_productivity_without_rd(innovating_firm):
     # Given
     firm = innovating_firm
     firm.execute_rd.side_effect = setattr(firm, "rd", 0)
+    role = firm.roles["producer"]
+    role.productivity = 10
 
     # When
     firm.update_productivity()
 
     # Then
-    assert firm.productivity == 10
+    assert role.productivity == 10
 
 
-def test_update_productivity_by_innovation(innovating_firm, goods_markets):
+def test_update_productivity_by_innovation(innovating_firm):
     # Given
     firm = innovating_firm
     random = firm.model.nprandom
     random.choice.return_value = 1
     random.uniform = lambda a, b: b
-    common_market, _ = goods_markets
-    common_market.average_productivity = 10
+    role = firm.roles["producer"]
+    role.get_average_productivity.return_value = 10
+    role.productivity = 10
 
     # When
     firm.update_productivity()
 
     # Then
-    assert firm.productivity == 12
+    assert role.productivity == 12
 
 
-def test_update_productivity_by_imitation(innovating_firm, goods_markets):
+def test_update_productivity_by_imitation(innovating_firm):
     # Given
     firm = innovating_firm
     random = firm.model.nprandom
     random.choice.return_value = 1
     random.uniform = lambda a, b: b
-    common_market, _ = goods_markets
-    common_market.average_productivity = 20
+    role = firm.roles["producer"]
+    role.get_average_productivity.return_value = 20
+    role.productivity = 10
 
     # When
     firm.update_productivity()
 
     # Then
-    assert firm.productivity == 20
+    assert role.productivity == 20
 
 
 # ---------------------------------------------------
@@ -907,19 +780,20 @@ def test_update_productivity_by_imitation(innovating_firm, goods_markets):
 
 
 @pytest.fixture
-def firm_before_borrowing(firm):
+def firm_before_borrowing(firm_with_roles_and_account):
     # Given
+    firm, _, account = firm_with_roles_and_account
     firm.wage_offer = 10
     firm.desired_labor = 10
     firm.desired_rd = 50
-    firm.deposits = 0
+    account["deposits"] = 0
     return firm
 
 
 def test_calc_desired_loans_when_external_finance_needed(firm_before_borrowing):
     # Given
     firm = firm_before_borrowing
-    firm.deposits = 20
+    firm.account["deposits"] = 20
 
     # When
     result = firm.calc_desired_loans()
@@ -931,7 +805,7 @@ def test_calc_desired_loans_when_external_finance_needed(firm_before_borrowing):
 def test_calc_desired_loans_when_internal_funds_are_sufficient(firm_before_borrowing):
     # Given
     firm = firm_before_borrowing
-    firm.deposits = 150
+    firm.account["deposits"] = 150
 
     # When
     result = firm.calc_desired_loans()
@@ -941,57 +815,59 @@ def test_calc_desired_loans_when_internal_funds_are_sufficient(firm_before_borro
 
 
 @pytest.fixture
-def firm_as_borrower(firm):
+def firm_as_borrower(firm_with_roles_and_account):
     # Given
+    role = Mock()
+    role.find_lenders.return_value = []
+    firm, roles, account = firm_with_roles_and_account
     firm.calc_desired_loans = Mock(return_value=10)
-    firm.equities = 100
-    return firm
+    account["equities"] = 100
+    roles["borrower"] = role
+    return firm, role
 
 
-def test_request_loans_to_all_lenders(firm_as_borrower, fake_model):
+def test_request_loans_to_all_lenders(firm_as_borrower):
     # Given
-    bank = Mock(loan_applicants=[])
-    fake_model.banks = [bank]
-    firm = firm_as_borrower
+    lender = Mock()
+    firm, role = firm_as_borrower
+    role.find_lenders.return_value = [lender]
 
     # When
     firm.request_loans()
 
     # Then
-    assert bank.loan_applicants == [firm]
+    role.request_loans.assert_any_call(lender)
 
 
-def test_request_loans_and_set_loan_demand(firm_as_borrower, fake_model):
+def test_request_loans_and_set_loan_demand(firm_as_borrower):
     # Given
-    fake_model.banks = []
-    firm = firm_as_borrower
+    firm, role = firm_as_borrower
+    firm.calc_desired_loans.return_value = 100
+    role.find_lenders.return_value = [Mock()]
+
+    # When
+    firm.request_loans()
+
+    # Then
+    assert role.loan_demand == 100
+
+
+def test_request_loans_and_registers_networth(firm_as_borrower):
+    # Given
+    firm, role = firm_as_borrower
+    firm.account["equities"] = 200
     firm.calc_desired_loans.return_value = 100
 
     # When
     firm.request_loans()
 
     # Then
-    assert firm.loan_demand == 100
+    assert role.net_worth == 200
 
 
-def test_request_loans_and_registers_networth(firm_as_borrower, fake_model):
+def test_request_loans_and_registers_desired_loans(firm_as_borrower):
     # Given
-    fake_model.banks = []
-    firm = firm_as_borrower
-    firm.equities = 200
-    firm.calc_desired_loans.return_value = 100
-
-    # When
-    firm.request_loans()
-
-    # Then
-    assert firm.net_worth == 200
-
-
-def test_request_loans_and_registers_desired_loans(firm_as_borrower, fake_model):
-    # Given
-    fake_model.banks = []
-    firm = firm_as_borrower
+    firm, _ = firm_as_borrower
     firm.calc_desired_loans.return_value = 100
 
     # When
@@ -1002,19 +878,16 @@ def test_request_loans_and_registers_desired_loans(firm_as_borrower, fake_model)
 
 
 @pytest.mark.parametrize("desired", [0, -100])
-def test_dont_request_unneccessary_loans(firm_as_borrower, fake_model, desired):
+def test_dont_request_unneccessary_loans(firm_as_borrower, desired):
     # Given
-    bank = Mock(loan_applicants=[])
-    fake_model.banks = [bank]
-    firm = firm_as_borrower
+    firm, role = firm_as_borrower
     firm.calc_desired_loans.return_value = desired
 
     # When
     firm.request_loans()
 
     # Then
-    assert bank.loan_applicants == []
-    
+    role.request_loans.assert_not_called()
 
 
 # ---------------------------------------------------

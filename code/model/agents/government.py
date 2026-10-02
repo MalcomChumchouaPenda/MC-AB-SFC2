@@ -7,14 +7,6 @@ class Government(EcoAgent):
         super().setup()
         self._defaults = []
 
-        # stocks
-        self.reserves = 0
-
-        # flows
-        self.taxes = 0
-        self.profits = 0
-        self.public_transfers = 0
-
         # choices
         self.tax_rate = 0.0
         self.bond_rate = 0.0
@@ -30,15 +22,6 @@ class Government(EcoAgent):
         self.budget_deficit = 0
         self.budget_surplus = 0
 
-        # stocks
-        self.bonds = 0.0
-        self.cash = 0.0
-
-        # transactions
-        self.public_transfers = 0.0
-        self.taxes = 0.0
-        self.bond_interests = 0.0
-        self.profit_transfers = 0.0
 
         # accointances
         self.central_bank = None
