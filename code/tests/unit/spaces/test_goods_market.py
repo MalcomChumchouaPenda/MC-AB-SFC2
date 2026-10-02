@@ -82,70 +82,30 @@ def market_without_roles(monkeypatch, fake_model):
     return market
 
 
-def test_add_consumer_creates_tradable_consumer_role(market_without_roles):
-    # Given
-    market = market_without_roles
-    market.tradable = True
-    agent = Mock()
-
-    # When
-    market.add_consumer(agent)
-
-    # Then
-    market.add_role.assert_called_with(FakeConsumer, agent, "consumer", prefix="trad")
-
-
-def test_add_consumer_creates_non_tradable_consumer_role(market_without_roles):
-    # Given
-    market = market_without_roles
-    market.tradable = False
-    agent = Mock()
-
-    # When
-    market.add_consumer(agent)
-
-    # Then
-    market.add_role.assert_called_with(
-        FakeConsumer, agent, "consumer", prefix="non_trad"
-    )
-
-
-@pytest.mark.parametrize("tradable", [True, False])
-def test_add_consumer_returns_created_role(market_without_roles, tradable):
+@pytest.mark.parametrize("tradable, prefix", [(True, "trad"), (False, "non_trad")])
+def test_place_household_add_consumer_role(market_without_roles, tradable, prefix):
     # Given
     market = market_without_roles
     market.tradable = tradable
-    agent = Mock()
+    household = Mock()
 
     # When
-    role = market.add_consumer(agent)
+    market.place_household(household)
 
     # Then
-    assert role is market.add_role.return_value
+    market.add_role.assert_called_with(FakeConsumer, household, f"{prefix}_consumer")
 
 
-def test_add_producer_creates_producer_role(market_without_roles):
+def test_place_firm_add_producer_role(market_without_roles):
     # Given
-    agent = Mock()
+    firm = Mock()
     market = market_without_roles
 
     # When
-    market.add_producer(agent)
+    market.place_firm(firm)
 
     # Then
-    market.add_role.assert_called_with(FakeProducer, agent, "producer")
-
-
-def test_add_producer_returns_created_role(market_without_roles):
-    # Given
-    agent = Mock()
-    market = market_without_roles
-
-    # When
-    role = market.add_producer(agent)
-
-    # Then
-    assert role is market.add_role.return_value
+    market.add_role.assert_called_with(FakeProducer, firm, "producer")
 
 
 # ---------------------------------------------------

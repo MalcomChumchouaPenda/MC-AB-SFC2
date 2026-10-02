@@ -239,7 +239,6 @@ def test_initializes_prev_desired_labor(fake_model):
     assert firm.prev_desired_labor == 0
 
 
-
 # ---------------------------------------------------
 # PRODUCTION PLANNING
 # ----------------------------------------------------

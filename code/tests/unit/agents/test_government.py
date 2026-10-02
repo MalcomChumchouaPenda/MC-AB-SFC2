@@ -117,7 +117,6 @@ def test_initializes_prev_budget_surplus(fake_model):
     assert govt.prev_budget_surplus == 0
 
 
-
 # ---------------------------------------------------
 # PUBLIC TRANSFERS
 # ----------------------------------------------------

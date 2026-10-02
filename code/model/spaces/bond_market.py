@@ -8,11 +8,14 @@ class BondMarket(EcoSpace):
     #
     # roles
     #
-    def add_issuer(self, agent):
-        return self.add_role(BondIssuer, agent, "bond_issuer")
+    def place_bank(self, bank):
+        self.add_role(BondBuyer, bank, "bond_buyer")
 
-    def add_buyer(self, agent):
-        return self.add_role(BondBuyer, agent, "bond_buyer")
+    def place_central_bank(self, cb):
+        self.add_role(BondBuyer, cb, "bond_buyer")
+
+    def place_government(self, govt):
+        self.add_role(BondIssuer, govt, "bond_issuer")
 
     #
     # Bonds transactions

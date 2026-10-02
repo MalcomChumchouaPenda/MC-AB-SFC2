@@ -153,78 +153,98 @@ def union_without_roles(monkeypatch, fake_model):
     union = MonetaryUnion(fake_model)
     union.add_role = Mock()
     union.spaces["goods_market"] = Mock()
-    union.spaces["bond_market"] = Mock()
     union.spaces["credit_market"] = Mock()
+    union.spaces["bond_market"] = Mock()
+    union.spaces["country_0"] = Mock()
+    union.spaces["country_1"] = Mock()
     return union
 
 
-def test_add_policy_maker_creates_proper_role(union_without_roles):
+def test_place_household_places_agent_into_goods_market(union_without_roles):
     # Given
-    cb = Mock()
-    union = union_without_roles
-
-    # When
-    union.add_policy_maker(cb)
-
-    # Then
-    union.add_role.assert_called_with(FakeMaker, cb, "policy_maker")
-
-
-def test_add_policy_maker_returns_created_role(union_without_roles):
-    # Given
-    cb = Mock()
-    union = union_without_roles
-
-    # When
-    role = union.add_policy_maker(cb)
-
-    # Then
-    assert role == union.add_role.return_value
-
-
-def test_place_trad_firm_in_goods_market(union_without_roles):
-    # Given
-    firm = Mock()
+    household = Mock(country_id=1)
     union = union_without_roles
     market = union.spaces["goods_market"]
 
     # When
-    union.place_firm(firm, tradable=True)
+    union.place_household(household)
 
     # Then
-    market.add_producer.assert_called_with(firm)
+    market.place_household.assert_called_with(household)
 
 
-def test_dont_place_non_trad_firm_in_goods_market(union_without_roles):
+def test_place_household_places_agent_into_its_country(union_without_roles):
     # Given
-    firm = Mock()
+    household = Mock(country_id=1)
+    union = union_without_roles
+    country = union.spaces["country_1"]
+
+    # When
+    union.place_household(household)
+
+    # Then
+    country.place_household.assert_called_with(household)
+
+
+def test_place_firm_in_goods_market_if_tradable(union_without_roles):
+    # Given
+    firm = Mock(tradable=True)
     union = union_without_roles
     market = union.spaces["goods_market"]
 
     # When
-    union.place_firm(firm, tradable=False)
+    union.place_firm(firm)
 
     # Then
-    market.add_producer.assert_not_called()
+    market.place_firm.assert_called_with(firm)
+
+
+def test_dont_place_firm_in_goods_market_if_not_tradable(union_without_roles):
+    # Given
+    firm = Mock(tradable=False)
+    union = union_without_roles
+    market = union.spaces["goods_market"]
+
+    # When
+    union.place_firm(firm)
+
+    # Then
+    market.place_firm.assert_not_called()
 
 
 @pytest.mark.parametrize("tradable", [True, False])
-def test_place_firm_add_borrower_role(union_without_roles, tradable):
+def test_place_firm_into_credit_market(union_without_roles, tradable):
     # Given
-    firm = Mock()
+    firm = Mock(tradable=tradable)
     union = union_without_roles
     market = union.spaces["credit_market"]
 
     # When
-    union.place_firm(firm, tradable=tradable)
+    union.place_firm(firm)
 
     # Then
-    market.add_borrower.assert_called_with(firm)
+    market.place_firm.assert_called_with(firm)
 
 
-def test_place_bank_add_bond_buyer(union_without_roles):
+@pytest.mark.parametrize("tradable", [True, False])
+def test_place_firm_into_all_countries(union_without_roles, tradable):
     # Given
-    bank = Mock()
+    firm = Mock(tradable=tradable)
+    union = union_without_roles
+    country0 = union.spaces["country_0"]
+    country1 = union.spaces["country_1"]
+
+    # When
+    union.place_firm(firm)
+
+    # Then
+    country0.place_firm.assert_called_with(firm)
+    country1.place_firm.assert_called_with(firm)
+
+
+def test_place_bank_into_bond_market(union_without_roles):
+    # Given
+    bank = Mock(country_id=1)
     union = union_without_roles
     market = union.spaces["bond_market"]
 
@@ -232,12 +252,12 @@ def test_place_bank_add_bond_buyer(union_without_roles):
     union.place_bank(bank)
 
     # Then
-    market.add_buyer.assert_called_with(bank)
+    market.place_bank.assert_called_with(bank)
 
 
-def test_place_bank_add_lender_role(union_without_roles):
+def test_place_bank_into_credit_market(union_without_roles):
     # Given
-    bank = Mock()
+    bank = Mock(country_id=1)
     union = union_without_roles
     market = union.spaces["credit_market"]
 
@@ -245,7 +265,102 @@ def test_place_bank_add_lender_role(union_without_roles):
     union.place_bank(bank)
 
     # Then
-    market.add_lender.assert_called_with(bank)
+    market.place_bank.assert_called_with(bank)
+
+
+def test_place_bank_into_one_country(union_without_roles):
+    # Given
+    bank = Mock(country_id=1)
+    union = union_without_roles
+    country = union.spaces["country_1"]
+
+    # When
+    union.place_bank(bank)
+
+    # Then
+    country.place_bank.assert_called_with(bank)
+
+
+def test_place_government_into_bond_market(union_without_roles):
+    # Given
+    govt = Mock(country_id=1)
+    union = union_without_roles
+    market = union.spaces["bond_market"]
+
+    # When
+    union.place_government(govt)
+
+    # Then
+    market.place_government.assert_called_with(govt)
+
+
+def test_place_government_into_one_country(union_without_roles):
+    # Given
+    govt = Mock(country_id=1)
+    union = union_without_roles
+    country = union.spaces["country_1"]
+
+    # When
+    union.place_government(govt)
+
+    # Then
+    country.place_government.assert_called_with(govt)
+
+
+@pytest.mark.parametrize("national", [True, False])
+def test_place_central_bank_add_policy_maker_role(union_without_roles, national):
+    # Given
+    cb = Mock(national=national, country_id=0)
+    union = union_without_roles
+
+    # When
+    union.place_central_bank(cb)
+
+    # Then
+    union.add_role.assert_called_with(FakeMaker, cb, "policy_maker")
+
+
+def test_place_central_bank_into_country_if_national(union_without_roles):
+    # Given
+    cb = Mock(national=True, country_id=1)
+    union = union_without_roles
+    country0 = union.spaces["country_0"]
+    country1 = union.spaces["country_1"]
+
+    # When
+    union.place_central_bank(cb)
+
+    # Then
+    country0.place_central_bank.assert_not_called()
+    country1.place_central_bank.assert_called_with(cb)
+
+
+def test_dont_place_central_bank_into_country_if_not_national(union_without_roles):
+    # Given
+    cb = Mock(national=False, country_id=0)
+    union = union_without_roles
+    country0 = union.spaces["country_0"]
+    country1 = union.spaces["country_1"]
+
+    # When
+    union.place_central_bank(cb)
+
+    # Then
+    country0.place_central_bank.assert_not_called()
+    country1.place_central_bank.assert_not_called()
+
+
+def test_place_central_bank_into_bond_market_if_national(union_without_roles):
+    # Given
+    cb = Mock(national=True, country_id=1)
+    union = union_without_roles
+    market = union.spaces["bond_market"]
+
+    # When
+    union.place_central_bank(cb)
+
+    # Then
+    market.place_central_bank.assert_called_with(cb)
 
 
 # ---------------------------------------------------

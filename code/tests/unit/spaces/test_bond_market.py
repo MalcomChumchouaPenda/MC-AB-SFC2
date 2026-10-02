@@ -37,52 +37,40 @@ def market_without_roles(monkeypatch, fake_model):
     return market
 
 
-def test_add_buyer_creates_proper_role(market_without_roles):
+def test_place_bank_add_buyer_role(market_without_roles):
     # Given
-    agent = Mock()
+    bank = Mock()
     market = market_without_roles
 
     # When
-    market.add_buyer(agent)
+    market.place_bank(bank)
 
     # Then
-    market.add_role.assert_called_with(FakeBuyer, agent, "bond_buyer")
+    market.add_role.assert_called_with(FakeBuyer, bank, "bond_buyer")
 
 
-def test_add_buyer_returns_created_role(market_without_roles):
+def test_place_central_bank_add_buyer_role(market_without_roles):
     # Given
-    agent = Mock()
+    cb = Mock()
     market = market_without_roles
 
     # When
-    role = market.add_buyer(agent)
+    market.place_central_bank(cb)
 
     # Then
-    assert role == market.add_role.return_value
+    market.add_role.assert_called_with(FakeBuyer, cb, "bond_buyer")
 
 
-def test_add_issuer_creates_proper_role(market_without_roles):
+def test_place_government_add_issuer_role(market_without_roles):
     # Given
-    agent = Mock()
+    govt = Mock()
     market = market_without_roles
 
     # When
-    market.add_issuer(agent)
+    market.place_government(govt)
 
     # Then
-    market.add_role.assert_called_with(FakeIssuer, agent, "bond_issuer")
-
-
-def test_add_issuer_returns_created_role(market_without_roles):
-    # Given
-    agent = Mock()
-    market = market_without_roles
-
-    # When
-    role = market.add_issuer(agent)
-
-    # Then
-    assert role == market.add_role.return_value
+    market.add_role.assert_called_with(FakeIssuer, govt, "bond_issuer")
 
 
 # ---------------------------------------------------

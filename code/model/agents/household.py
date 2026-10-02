@@ -30,7 +30,6 @@ class Household(EcoAgent):
         self.labor_supply = 1.0
         self.preference = 0
 
-
     def revise_reservation_wage(self):
         p = self.p
         random = self.model.nprandom

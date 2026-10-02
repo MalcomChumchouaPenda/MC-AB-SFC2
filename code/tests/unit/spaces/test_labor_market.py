@@ -59,52 +59,28 @@ def market_without_roles(monkeypatch, fake_model):
     return market
 
 
-def test_add_worker_creates_proper_role(market_without_roles):
+def test_place_household_add_worker_role(market_without_roles):
     # Given
-    agent = Mock()
+    household = Mock()
     market = market_without_roles
 
     # When
-    market.add_worker(agent)
+    market.place_household(household)
 
     # Then
-    market.add_role.assert_called_with(FakeWorker, agent, "worker")
+    market.add_role.assert_called_with(FakeWorker, household, "worker")
 
 
-def test_add_worker_returns_created_role(market_without_roles):
+def test_place_firm_add_employer_role(market_without_roles):
     # Given
-    agent = Mock()
+    firm = Mock()
     market = market_without_roles
 
     # When
-    role = market.add_worker(agent)
+    market.place_firm(firm)
 
     # Then
-    assert role == market.add_role.return_value
-
-
-def test_add_employer_creates_proper_role(market_without_roles):
-    # Given
-    agent = Mock()
-    market = market_without_roles
-
-    # When
-    market.add_employer(agent)
-
-    # Then
-    market.add_role.assert_called_with(FakeEmployer, agent, "employer")
-
-
-def test_add_employer_returns_created_role(market_without_roles):
-    # Given
-    agent = Mock()
-    market = market_without_roles
-
-    # When
-    role = market.add_employer(agent)
-
-    # Then
-    assert role == market.add_role.return_value
+    market.add_role.assert_called_with(FakeEmployer, firm, "employer")
 
 
 # ---------------------------------------------------

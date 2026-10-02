@@ -11,11 +11,14 @@ class LaborMarket(EcoSpace):
         self.average_wage = 0
         self.unemployment = 0
 
-    def add_employer(self, firm):
-        return self.add_role(Employer, firm, "employer")
+    #
+    # roles management
+    #
+    def place_household(self, household):
+        self.add_role(Worker, household, "worker")
 
-    def add_worker(self, household):
-        return self.add_role(Worker, household, "worker")
+    def place_firm(self, firm):
+        self.add_role(Employer, firm, "employer")
 
     #
     # labor matching

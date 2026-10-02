@@ -28,27 +28,38 @@ class Country(EcoSpace):
     #
     # Role management
     #
-    def add_monetary_authority(self, agent):
-        role = self.add_role(MonetaryAuthority, agent, "monetary_authority")
-        self.monetary_authority = role
-        return role
+    def place_household(self, household):
+        self.add_role(Citizen, household, "citizen")
+        self.spaces["goods_market"].place_household(household)
+        self.spaces["labor_market"].place_household(household)
+        self.spaces["deposit_market"].place_household(household)
 
-    def add_fiscal_authority(self, agent):
-        role = self.add_role(FiscalAuthority, agent, "fiscal_authority")
-        agent.cb_id = self.monetary_authority.id
-        self.fiscal_authority = role
-        return role
+    def place_firm(self, firm):
+        if firm.country_id == self.id:
+            self.spaces["labor_market"].place_firm(firm)
+        if firm.tradable:
+            self._add_company(firm, "FT")
+        else:
+            self._add_company(firm, "FNT")
+            self.spaces["goods_market"].place_firm(firm)
+        self.spaces["deposit_market"].place_firm(firm)
 
-    def add_citizen(self, agent):
-        role = self.add_role(Citizen, agent, "citizen")
-        agent.cb_id = self.monetary_authority.id
-        return role
+    def place_bank(self, bank):
+        self._add_company(bank, "B")
+        self.spaces["deposit_market"].place_bank(bank)
 
-    def add_company(self, agent, sector):
-        agent.cb_id = self.monetary_authority.id
+    def _add_company(self, agent, sector):
         role = self.add_role(Company, agent, "company")
         role.sector = sector
-        return role
+
+    def place_government(self, govt):
+        role = self.add_role(FiscalAuthority, govt, "fiscal_authority")
+        self.fiscal_authority = role
+        self.spaces["deposit_market"].place_government(govt)
+
+    def place_central_bank(self, cb):
+        role = self.add_role(MonetaryAuthority, cb, "monetary_authority")
+        self.monetary_authority = role
 
     #
     # Current indicators

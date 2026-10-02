@@ -15,14 +15,13 @@ class GoodsMarket(EcoSpace):
     #
     # Roles management
     #
-    def add_producer(self, firm):
-        return self.add_role(Producer, firm, "producer")
 
-    def add_consumer(self, household):
-        group = "consumer"
-        prefix = "trad" if self.tradable else "non_trad"
-        role = self.add_role(Consumer, household, group, prefix=prefix)
-        return role
+    def place_household(self, household):
+        group = "trad_consumer" if self.tradable else "non_trad_consumer"
+        self.add_role(Consumer, household, group)
+
+    def place_firm(self, firm):
+        self.add_role(Producer, firm, "producer")
 
     #
     # Reactions

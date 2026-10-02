@@ -22,7 +22,6 @@ class Government(EcoAgent):
         self.budget_deficit = 0
         self.budget_surplus = 0
 
-
         # accointances
         self.central_bank = None
 
@@ -42,7 +41,9 @@ class Government(EcoAgent):
     #
     def calc_budget_balance(self):
         account = self.account
-        balance = account["taxes"] - account["public_transfers"] - account["bond_interests"]
+        balance = (
+            account["taxes"] - account["public_transfers"] - account["bond_interests"]
+        )
         self.budget_deficit = max(0, -balance)
         self.budget_surplus = max(0, balance)
         return balance

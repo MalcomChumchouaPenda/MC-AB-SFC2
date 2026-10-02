@@ -85,8 +85,6 @@ def test_initializes_defaulted(fake_model):
     assert bank.defaulted == False
 
 
-
-
 # ---------------------------------------------------
 # DEPOSIT INTERESTS PAYMENT
 # ----------------------------------------------------

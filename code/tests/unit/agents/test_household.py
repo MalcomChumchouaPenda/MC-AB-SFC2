@@ -130,8 +130,6 @@ def test_initializes_incomes(fake_model):
     assert household.disposable_income == 0
 
 
-
-
 # ----------------------------------------------------
 # JOB SEARCH
 # ----------------------------------------------------

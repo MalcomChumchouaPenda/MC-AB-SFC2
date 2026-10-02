@@ -7,14 +7,25 @@ from model.roles.deposit_guarantee import DepositGuarantee
 
 class DepositMarket(EcoSpace):
 
-    def add_depositor(self, agent):
-        return self.add_role(Depositor, agent, "depositor")
+    #
+    # Roles management
+    #
+    def place_household(self, household):
+        self.add_role(Depositor, household, "depositor")
 
-    def add_deposit_bank(self, bank):
-        return self.add_role(DepositBank, bank, "deposit_bank")
+    def place_firm(self, firm):
+        c = self.country_id
+        self.add_role(Depositor, firm, f"depositor_{c}")
 
-    def add_guarantee(self, agent):
-        return self.add_role(DepositGuarantee, agent, "deposit_guarantee")
+    def place_bank(self, bank):
+        self.add_role(DepositBank, bank, "deposit_bank")
+
+    def place_government(self, govt):
+        self.add_role(DepositGuarantee, govt, "deposit_guarantee")
+
+    #
+    # Transactions
+    #
 
     def join_deposit_bank(self, depositor, deposit_bank, amount=0):
         self.transfer_stock("cash", depositor.id, deposit_bank.id, amount)

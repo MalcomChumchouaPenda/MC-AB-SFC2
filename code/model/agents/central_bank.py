@@ -29,7 +29,9 @@ class CentralBank(EcoAgent):
     def calc_profit(self):
         account = self.account
         return (
-            account["bond_interests"] + account["adv_interests"] - account["cash_interests"]
+            account["bond_interests"]
+            + account["adv_interests"]
+            - account["cash_interests"]
         )
 
     #

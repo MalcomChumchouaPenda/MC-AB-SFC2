@@ -38,7 +38,6 @@ class Firm(EcoAgent):
         self.variety = 0.0
         self.defaulted = False
 
-
     #
     # Production planning
     #

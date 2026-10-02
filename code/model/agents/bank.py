@@ -19,7 +19,6 @@ class Bank(EcoAgent):
 
         # accointances
         self.central_bank = None
-        
 
     def update_deposit_rate(self):
         discount_rate = self.roles["company"].get_discount_rate()

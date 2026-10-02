@@ -49,52 +49,28 @@ def market_without_roles(monkeypatch, fake_model):
     return market
 
 
-def test_add_lender_creates_proper_role(market_without_roles):
+def test_place_bank_add_lender_role(market_without_roles):
     # Given
-    agent = Mock()
+    bank = Mock()
     market = market_without_roles
 
     # When
-    market.add_lender(agent)
+    market.place_bank(bank)
 
     # Then
-    market.add_role.assert_called_with(FakeLender, agent, "lender")
+    market.add_role.assert_called_with(FakeLender, bank, "lender")
 
 
-def test_add_lender_returns_created_role(market_without_roles):
+def test_place_firm_add_borrower_role(market_without_roles):
     # Given
-    agent = Mock()
+    firm = Mock()
     market = market_without_roles
 
     # When
-    role = market.add_lender(agent)
+    market.place_firm(firm)
 
     # Then
-    assert role == market.add_role.return_value
-
-
-def test_add_borrower_creates_proper_role(market_without_roles):
-    # Given
-    agent = Mock()
-    market = market_without_roles
-
-    # When
-    market.add_borrower(agent)
-
-    # Then
-    market.add_role.assert_called_with(FakeBorrower, agent, "borrower")
-
-
-def test_add_borrower_returns_created_role(market_without_roles):
-    # Given
-    agent = Mock()
-    market = market_without_roles
-
-    # When
-    role = market.add_borrower(agent)
-
-    # Then
-    assert role == market.add_role.return_value
+    market.add_role.assert_called_with(FakeBorrower, firm, "borrower")
 
 
 # ---------------------------------------------------

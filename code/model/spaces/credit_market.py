@@ -13,11 +13,11 @@ class CreditMarket(EcoSpace):
     #
     # Roles management
     #
-    def add_borrower(self, agent):
-        return self.add_role(Borrower, agent, "borrower")
+    def place_firm(self, firm):
+        self.add_role(Borrower, firm, "borrower")
 
-    def add_lender(self, agent):
-        return self.add_role(Lender, agent, "lender")
+    def place_bank(self, bank):
+        self.add_role(Lender, bank, "lender")
 
     #
     # Loan matching

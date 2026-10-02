@@ -29,7 +29,6 @@ def test_initializes_previous_discount_rate(fake_model):
     assert cb.prev_discount_rate == 0
 
 
-
 # ---------------------------------------------------
 # BONDS PURCHASES
 # ----------------------------------------------------

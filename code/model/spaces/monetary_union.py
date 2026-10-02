@@ -27,17 +27,37 @@ class MonetaryUnion(EcoSpace):
     #
     # Role management
     #
-    def add_policy_maker(self, agent):
-        return self.add_role(PolicyMaker, agent, "policy_maker")
+    def place_household(self, household):
+        c = household.country_id
+        self.spaces[f"country_{c}"].place_household(household)
+        self.spaces["goods_market"].place_household(household)
 
-    def place_firm(self, firm, tradable):
-        self.spaces["credit_market"].add_borrower(firm)
-        if tradable:
-            self.spaces["goods_market"].add_producer(firm)
+    def place_firm(self, firm):
+        for name, space in self.spaces.items():
+            if name.startswith("country_"):
+                space.place_firm(firm)
+            elif name == "credit_market":
+                space.place_firm(firm)
+            elif name == "goods_market" and firm.tradable:
+                space.place_firm(firm)
 
     def place_bank(self, bank):
-        self.spaces["credit_market"].add_lender(bank)
-        self.spaces["bond_market"].add_buyer(bank)
+        c = bank.country_id
+        self.spaces[f"country_{c}"].place_bank(bank)
+        self.spaces["credit_market"].place_bank(bank)
+        self.spaces["bond_market"].place_bank(bank)
+
+    def place_government(self, govt):
+        c = govt.country_id
+        self.spaces[f"country_{c}"].place_government(govt)
+        self.spaces["bond_market"].place_government(govt)
+
+    def place_central_bank(self, cb):
+        self.add_role(PolicyMaker, cb, "policy_maker")
+        self.spaces["bond_market"].place_central_bank(cb)
+        if cb.national:
+            c = cb.country_id
+            self.spaces[f"country_{c}"].place_central_bank(cb)
 
     #
     # Evolution
