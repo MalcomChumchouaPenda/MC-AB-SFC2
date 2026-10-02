@@ -72,8 +72,8 @@ class Household(EcoAgent):
         role.pay_taxes(taxes)
 
     def calc_income(self):
-        flows = self.account
-        return flows["wages"] + flows["dep_interests"] + flows["dividends"]
+        account = self.account
+        return account["wages"] + account["dep_interests"] + account["dividends"]
 
     def calc_disposable_income(self):
         tax_rate = self.roles["citizen"].get_tax_rate()
@@ -103,10 +103,10 @@ class Household(EcoAgent):
             self.consume_good(role, target_cons)
 
     def _fund_consumption(self, desired_cons):
-        stocks = self.account
-        if desired_cons > stocks["cash"]:
-            needs = desired_cons - stocks["cash"]
-            feasible = min(needs, stocks["deposits"])
+        account = self.account
+        if desired_cons > account["cash"]:
+            needs = desired_cons - account["cash"]
+            feasible = min(needs, account["deposits"])
             role = self.roles["depositor"]
             role.withdraw_deposits(feasible)
 
@@ -173,8 +173,8 @@ class Household(EcoAgent):
         return p.lambda_ * math.exp(profit_ratio * (1 - default_prob) - deposit_rate)
 
     def calc_net_worth(self):
-        stocks = self.account
-        self.net_worth = stocks["deposits"] + stocks["equities"] + stocks["cash"]
+        account = self.account
+        self.net_worth = account["deposits"] + account["equities"] + account["cash"]
 
     def calc_expected_net_worth(self):
         return self.net_worth + self.disposable_income - self.expected_consumption

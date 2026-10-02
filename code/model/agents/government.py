@@ -41,8 +41,8 @@ class Government(EcoAgent):
     # Fiscal policy
     #
     def calc_budget_balance(self):
-        flows = self.account
-        balance = flows["taxes"] - flows["public_transfers"] - flows["bond_interests"]
+        account = self.account
+        balance = account["taxes"] - account["public_transfers"] - account["bond_interests"]
         self.budget_deficit = max(0, -balance)
         self.budget_surplus = max(0, balance)
         return balance

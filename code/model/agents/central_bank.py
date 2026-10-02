@@ -27,9 +27,9 @@ class CentralBank(EcoAgent):
         role.transfer_profit(profit)
 
     def calc_profit(self):
-        flows = self.account
+        account = self.account
         return (
-            flows["bond_interests"] + flows["adv_interests"] - flows["cash_interests"]
+            account["bond_interests"] + account["adv_interests"] - account["cash_interests"]
         )
 
     #

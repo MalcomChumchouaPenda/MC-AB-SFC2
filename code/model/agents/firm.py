@@ -135,9 +135,9 @@ class Firm(EcoAgent):
         return prob
 
     def execute_rd(self):
-        stocks = self.account
+        account = self.account
         labor_constraint = self.labor < self.desired_labor
-        financial_constraint = stocks["loans"] < self.desired_loans
+        financial_constraint = account["loans"] < self.desired_loans
         if labor_constraint or financial_constraint:
             self.rd = 0
         else:
@@ -165,16 +165,17 @@ class Firm(EcoAgent):
 
     def repay_loans(self):
         role = self.roles["borrower"]
-        stocks = self.account
-        self._fund_repayments(stocks)
+        account = self.account
+        self._fund_repayments()
         for loan in role.find_loans():
-            deposits = stocks["deposits"]
+            deposits = account["deposits"]
             self._pay_lender(role, loan, deposits)
 
-    def _fund_repayments(self, stocks):
-        needs = max(0, stocks["loans"] - stocks["deposits"])
+    def _fund_repayments(self):
+        account = self.account
+        needs = max(0, account["loans"] - account["deposits"])
         if needs > 0:
-            feasible = min(stocks["cash"], needs)
+            feasible = min(account["cash"], needs)
             role = self.roles["depositor"]
             role.make_deposits(feasible)
 
@@ -201,12 +202,12 @@ class Firm(EcoAgent):
         self.dividends_payable = self.calc_dividends()
 
     def calc_net_cash_flow(self):
-        flows = self.account
+        account = self.account
         return (
-            flows["consumption"]
-            + flows["dep_interests"]
-            - flows["wages"]
-            - flows["loan_interests"]
+            account["consumption"]
+            + account["dep_interests"]
+            - account["wages"]
+            - account["loan_interests"]
         )
 
     def calc_profit(self):
@@ -227,10 +228,10 @@ class Firm(EcoAgent):
         return self.p.rho * (self.net_cash_flow - self.taxes_payable)
 
     def update_net_worth(self):
-        stocks = self.account
+        account = self.account
         payable = self.taxes_payable + self.dividends_payable
         self.net_worth += self.net_cash_flow - payable
-        self.update_equity_shares(self.net_worth + stocks["equities"])
+        self.update_equity_shares(self.net_worth + account["equities"])
         return self.net_worth
 
     def update_equity_shares(self, total_variation):

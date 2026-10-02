@@ -76,9 +76,9 @@ class Bank(EcoAgent):
     # Cash advances
     #
     def request_cash_advances(self):
-        stocks = self.account
-        required = self.p.mu2 * stocks["deposits"]
-        shortage = max(required - stocks["cash"], 0)
+        account = self.account
+        required = self.p.mu2 * account["deposits"]
+        shortage = max(required - account["cash"], 0)
         if shortage > 0:
             role = self.roles["lender"]
             role.request_advances(shortage)
@@ -115,9 +115,9 @@ class Bank(EcoAgent):
         return bond_issuers
 
     def calc_excess_reserves(self):
-        stocks = self.account
-        required = self.p.mu2 * stocks["deposits"]
-        return max(stocks["cash"] - required, 0)
+        account = self.account
+        required = self.p.mu2 * account["deposits"]
+        return max(account["cash"] - required, 0)
 
     def calc_bond_purchases_probability(self, issuer):
         return math.exp(-self.p.iota_b * issuer.debt_ratio)
@@ -132,14 +132,14 @@ class Bank(EcoAgent):
         self.dividends_payable = self.calc_dividends()
 
     def calc_profit(self):
-        flows = self.account
+        account = self.account
         return (
-            flows["loan_interests"]
-            + flows["bond_interests"]
-            + flows["cash_interests"]
-            - flows["loan_defaults"]
-            - flows["dep_interests"]
-            - flows["adv_interests"]
+            account["loan_interests"]
+            + account["bond_interests"]
+            + account["cash_interests"]
+            - account["loan_defaults"]
+            - account["dep_interests"]
+            - account["adv_interests"]
         )
 
     def calc_taxes(self):
@@ -154,9 +154,9 @@ class Bank(EcoAgent):
         return self.p.rho * (self.profit - self.taxes_payable)
 
     def update_net_worth(self):
-        stocks = self.account
+        account = self.account
         self.net_worth += self.profit - self.taxes_payable - self.dividends_payable
-        self.update_equity_shares(self.net_worth + stocks["equities"])
+        self.update_equity_shares(self.net_worth + account["equities"])
         return self.net_worth
 
     def update_equity_shares(self, total_variation):
