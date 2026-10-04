@@ -11,7 +11,6 @@ def market(fake_model):
     return market
 
 
-
 @pytest.fixture
 def firm(fake_model, market):
     # Given
@@ -36,7 +35,6 @@ def households(fake_model, market, firm):
     return households
 
 
-
 def test_increases_wages_from_firm(firm, households):
     # When
     firm.pay_wages()
@@ -55,4 +53,3 @@ def test_transfers_cash_from_firm_to_household(firm, households):
     assert firm.account["cash"] == -20.0
     assert households[0].account["cash"] == 10.0
     assert households[1].account["cash"] == 10.0
-

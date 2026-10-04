@@ -998,11 +998,9 @@ def test_repay_loans_with_available_deposits(firm_after_borrowing, fund, default
     role.make_defaults.assert_called_once_with(lender, default)
 
 
-
 # ---------------------------------------------------
 # WAGES PAYMENT
 # ----------------------------------------------------
-
 
 
 @pytest.fixture
@@ -1016,7 +1014,7 @@ def firm_before_wages_payment(firm_with_roles_and_account):
 def test_pay_wages_by_job(firm_before_wages_payment):
     # Given
     worker = Mock()
-    job = {"worker":worker, "quantity": 0.5}
+    job = {"worker": worker, "quantity": 0.5}
     firm = firm_before_wages_payment
     role = firm.roles["employer"]
     role.get_jobs.return_value = [job]

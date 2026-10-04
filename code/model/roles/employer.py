@@ -22,4 +22,3 @@ class Employer(EcoRole):
     #
     def pay_wages(self, worker, amount):
         self.env.pay_wages(self, worker, amount)
-

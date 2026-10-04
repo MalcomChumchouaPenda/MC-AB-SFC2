@@ -145,7 +145,6 @@ def test_hire_worker_reduces_labor_supply(market_with_participants):
 # ----------------------------------------------------
 
 
-
 @pytest.fixture
 def market_with_jobs(market_without_roles):
     # Given

@@ -36,7 +36,6 @@ class LaborMarket(EcoSpace):
         self.make_transaction("wages", employer.id, worker.id, amount)
         self.graph[employer][worker]["wages"] += amount
 
-
     #
     # evolution
     #

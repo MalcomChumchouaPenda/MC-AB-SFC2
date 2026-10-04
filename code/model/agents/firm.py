@@ -213,7 +213,6 @@ class Firm(EcoAgent):
             wages = labor * role.wage
             role.pay_wages(worker, wages)
 
-
     #
     # Profit, taxes and dividend computation
     #
