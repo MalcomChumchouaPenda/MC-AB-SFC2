@@ -307,14 +307,14 @@ def space_with_roles(space):
     return space, roles
 
 
-def test_find_all_roles_filter_by_group(space_with_roles):
+def test_find_all_roles_filter_by_pattern(space_with_roles):
     # Given
     space, roles = space_with_roles
     roles[0].name = "other_role"
     roles[1].name = "fake_role"
 
     # When
-    result = space.find_all_roles("fake_role")
+    result = space.find_all_roles("fake")
 
     # Then
     assert list(result) == [roles[1]]
@@ -333,14 +333,14 @@ def test_find_all_roles_returns_agent_list(space_with_roles):
     assert isinstance(result, AgentList)
 
 
-def test_find_random_roles_filter_by_group(space_with_roles):
+def test_find_random_roles_filter_by_pattern(space_with_roles):
     # Given
     space, roles = space_with_roles
     roles[0].name = "other_role"
     roles[1].name = "fake_role"
 
     # When
-    result = space.find_random_roles("fake_role", 2)
+    result = space.find_random_roles("fake", 2)
 
     # Then
     assert list(result) == [roles[1]]

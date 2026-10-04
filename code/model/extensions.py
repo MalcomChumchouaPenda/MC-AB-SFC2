@@ -92,12 +92,12 @@ class EcoSpace(Network):
         self.roles.pop(agent.id)
         self.graph.remove_node(role)
 
-    def find_all_roles(self, name):
-        selected = [role for role in self.roles.values() if role.name == name]
+    def find_all_roles(self, pattern):
+        selected = [role for role in self.roles.values() if pattern in role.name]
         return AgentList(self.model, selected)
 
-    def find_random_roles(self, name, size):
-        found = self.find_all_roles(name)
+    def find_random_roles(self, pattern, size):
+        found = self.find_all_roles(pattern)
         selected = found.random(n=min(size, len(found)))
         return selected.to_list()
 
