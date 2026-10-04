@@ -194,6 +194,15 @@ class Firm(EcoAgent):
             role.repay_loans(lender, amount, 0.0)
 
     #
+    # Production
+    #
+    def produce_goods(self):
+        employer_role = self.roles["employer"]
+        labor = sum([j["quantity"] for j in employer_role.get_jobs()])
+        producer_role = self.roles["producer"]
+        producer_role.produce_goods(labor)
+
+    #
     # Profit, taxes and dividend computation
     #
     def compute_profit_distribution(self):

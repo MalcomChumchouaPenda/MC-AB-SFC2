@@ -103,7 +103,7 @@ def test_get_average_productivity(role):
 # ----------------------------------------------------
 
 
-def test_get_produce_goods_increases_inventories(role):
+def test_produce_goods_increases_inventories(role):
     # Given
     role.productivity = 2.0
     role.inventories = 5.0

@@ -63,7 +63,6 @@ def test_initializes_label_with_agent_id():
     assert role.label == agent.id
 
 
-
 def test_initializes_name():
     # Given
     agent, env = Mock(), Mock()

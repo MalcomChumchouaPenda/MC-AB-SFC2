@@ -38,7 +38,7 @@ class Country(EcoSpace):
         self.spaces["deposit_market"].place_household(household)
 
     def place_firm(self, firm):
-        if firm.country_pos == self.id:
+        if firm.country_pos == self.pos:
             self.spaces["labor_market"].place_firm(firm)
         if firm.tradable:
             self._add_company(firm, "FT")

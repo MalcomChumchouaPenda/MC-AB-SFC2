@@ -785,6 +785,35 @@ def test_update_productivity_by_imitation(innovating_firm):
 
 
 # ---------------------------------------------------
+# PRODUCTION
+# ----------------------------------------------------
+
+
+@pytest.fixture
+def firm_before_production(firm_with_roles_and_account):
+    # Given
+    firm, roles, _ = firm_with_roles_and_account
+    roles["producer"] = Mock()
+    roles["employer"] = Mock()
+    return firm
+
+
+def test_produce_goods_with_job_quantity(firm_before_production):
+    # Given
+    job = {"wage": 0, "quantity": 0.9}
+    firm = firm_before_production
+    producer_role = firm.roles["producer"]
+    employer_role = firm.roles["employer"]
+    employer_role.get_jobs.return_value = [job]
+
+    # When
+    firm.produce_goods()
+
+    # Then
+    producer_role.produce_goods.assert_called_with(0.9)
+
+
+# ---------------------------------------------------
 # CREDIT DEMAND
 # ----------------------------------------------------
 

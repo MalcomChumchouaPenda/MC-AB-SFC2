@@ -325,7 +325,7 @@ def test_place_firm_into_labor_market_if_domestic(country_without_roles, tradabl
     # Given
     country = country_without_roles
     market = country.spaces["labor_market"]
-    firm = Mock(tradable=tradable, country_pos=country.id)
+    firm = Mock(tradable=tradable, country_pos=country.pos)
 
     # When
     country.place_firm(firm)
