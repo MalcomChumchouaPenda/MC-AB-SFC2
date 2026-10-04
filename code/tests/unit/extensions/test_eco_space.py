@@ -137,10 +137,10 @@ def test_add_space_registers_subspace(space_without_subspaces):
     assert subspaces["fake_space"] == fake_space
 
 
-
 # ---------------------------------------------------
 # AGENT MANAGEMENT TESTS
 # ----------------------------------------------------
+
 
 class FakeAgent:
     pass
@@ -157,7 +157,6 @@ def test_add_agents_uses_appropriate_method(space):
     # Then
     for agent in agents:
         space.add_fake_agent.assert_any_call(agent)
-
 
 
 # ---------------------------------------------------
@@ -180,7 +179,6 @@ def space_and_agent(space):
     space.add_account = Mock()
     agent = Mock(roles={})
     return space, agent
-
 
 
 def test_add_role_creates_role(space_and_agent, role_with_kind):

@@ -62,23 +62,21 @@ class EcoSpace(Network):
         self.spaces = {}
         self.accounts = {}
 
-
     #
     # Agent management
     #
     def add_agents(self, agents):
-        kind_name =  self._calc_kind_name(agents[0])
+        kind_name = self._calc_kind_name(agents[0])
         method_name = "add_" + kind_name
         if hasattr(self, method_name):
             method = getattr(self, method_name)
             for agent in agents:
                 method(agent)
 
-    
     def _calc_kind_name(self, agent):
         name = agent.__class__.__qualname__
-        s1 = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', name)
-        return re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
+        s1 = re.sub("(.)([A-Z][a-z]+)", r"\1_\2", name)
+        return re.sub("([a-z0-9])([A-Z])", r"\1_\2", s1).lower()
 
     #
     # Role management
