@@ -35,7 +35,7 @@ def govt(model, country):
     govt.prev_public_spending = 10
     govt.public_spending = 100
     govt.budget_deficit = 100
-    govt.tax_rate = 0.20
+    govt.next_tax_rate = 0.20
     country.place_government(govt)
     return govt
 
@@ -78,4 +78,4 @@ def test_updates_next_tax_rate(govt, random):
     govt.update_fiscal_policy()
 
     # Then
-    assert govt.tax_rate == pytest.approx(0.21)
+    assert govt.next_tax_rate == pytest.approx(0.21)

@@ -8,7 +8,7 @@ class Government(EcoAgent):
         self._defaults = []
 
         # choices
-        self.tax_rate = 0.0
+        self.next_tax_rate = 0.0
         self.bond_rate = 0.0
         self.bond_supply = 0
         self.desired_public_spending = 0
@@ -63,13 +63,13 @@ class Government(EcoAgent):
         if ratio >= self.p.dmax:
             if target <= self.public_spending:
                 self.public_spending *= 1 - variation
-                self.tax_rate *= 1 + variation
+                self.next_tax_rate *= 1 + variation
             else:
-                self.tax_rate *= 1 + variation
+                self.next_tax_rate *= 1 + variation
         else:
             if target <= self.public_spending:
                 self.public_spending *= 1 - variation
-                self.tax_rate *= 1 - variation
+                self.next_tax_rate *= 1 - variation
             else:
                 self.public_spending *= 1 + variation
 
@@ -83,8 +83,8 @@ class Government(EcoAgent):
         return desired_spending
 
     def apply_tax_rate_bounds(self):
-        self.tax_rate = max(self.p.tax_min, self.tax_rate)
-        self.tax_rate = min(self.p.tax_max, self.tax_rate)
+        self.next_tax_rate = max(self.p.tax_min, self.next_tax_rate)
+        self.next_tax_rate = min(self.p.tax_max, self.next_tax_rate)
 
     def apply_public_spending_bounds(self):
         gdp = self.roles["fiscal_authority"].get_gdp()
@@ -95,7 +95,7 @@ class Government(EcoAgent):
 
     def implement_fiscal_policy(self):
         role = self.roles["fiscal_authority"]
-        role.set_discount_rate(self.tax_rate)
+        role.set_discount_rate(self.next_tax_rate)
 
     #
     # Bond Supply
