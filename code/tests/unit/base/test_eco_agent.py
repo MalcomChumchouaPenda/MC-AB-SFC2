@@ -48,28 +48,6 @@ def test_initializes_account(fake_model):
     assert agent.account is None
 
 
-def test_initializes_central_bank_id(fake_model):
-    # Given
-    model = fake_model
-
-    # When
-    agent = EcoAgent(model)
-
-    # Then
-    assert agent.cb_id is None
-
-
-def test_initializes_deposit_bank_id(fake_model):
-    # Given
-    model = fake_model
-
-    # When
-    agent = EcoAgent(model)
-
-    # Then
-    assert agent.bank_id is None
-
-
 def test_initializes_country_pos(fake_model):
     # Given
     model = fake_model

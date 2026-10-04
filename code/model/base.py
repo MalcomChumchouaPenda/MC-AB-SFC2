@@ -14,8 +14,6 @@ class EcoAgent(Agent):
         self.roles = {}
         self.country_pos = 0
         self.account = None
-        self.cb_id = None
-        self.bank_id = None
 
 
 class EcoRole(AgentNode):
@@ -40,18 +38,6 @@ class EcoRole(AgentNode):
     @property
     def id(self):
         return self.agent.id
-
-    @property
-    def cb_id(self):
-        return self.agent.cb_id
-
-    @property
-    def bank_id(self):
-        return self.agent.bank_id
-
-    @bank_id.setter
-    def bank_id(self, account):
-        self.agent.bank_id = account
 
 
 class EcoAccount(AttrDict):
