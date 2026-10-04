@@ -201,72 +201,72 @@ def country_without_roles(fake_model, monkeypatch):
     return country
 
 
-def test_place_household_add_citizen_role(country_without_roles):
+def test_add_household_add_citizen_role(country_without_roles):
     # Given
     household = Mock()
     country = country_without_roles
 
     # When
-    country.place_household(household)
+    country.add_household(household)
 
     # Then
     country.add_role.assert_called_with(FakeCitizen, household, "citizen")
 
 
-def test_place_household_places_agent_into_goods_market(country_without_roles):
+def test_add_household_places_agent_into_goods_market(country_without_roles):
     # Given
     household = Mock(country_pos=1)
     country = country_without_roles
     market = country.spaces["goods_market"]
 
     # When
-    country.place_household(household)
+    country.add_household(household)
 
     # Then
-    market.place_household.assert_called_with(household)
+    market.add_household.assert_called_with(household)
 
 
-def test_place_household_places_agent_into_labor_market(country_without_roles):
+def test_add_household_places_agent_into_labor_market(country_without_roles):
     # Given
     household = Mock(country_pos=1)
     country = country_without_roles
     market = country.spaces["labor_market"]
 
     # When
-    country.place_household(household)
+    country.add_household(household)
 
     # Then
-    market.place_household.assert_called_with(household)
+    market.add_household.assert_called_with(household)
 
 
-def test_place_household_places_agent_into_deposit_market(country_without_roles):
+def test_add_household_places_agent_into_deposit_market(country_without_roles):
     # Given
     household = Mock(country_pos=1)
     country = country_without_roles
     market = country.spaces["deposit_market"]
 
     # When
-    country.place_household(household)
+    country.add_household(household)
 
     # Then
-    market.place_household.assert_called_with(household)
+    market.add_household.assert_called_with(household)
 
 
 @pytest.mark.parametrize("tradable", [True, False])
-def test_place_firm_add_company_role(country_without_roles, tradable):
+def test_add_firm_add_company_role(country_without_roles, tradable):
     # Given
     firm = Mock(tradable=tradable)
     country = country_without_roles
 
     # When
-    country.place_firm(firm)
+    country.add_firm(firm)
 
     # Then
     country.add_role.assert_called_with(FakeCompany, firm, "company")
 
 
 @pytest.mark.parametrize("tradable, sector", [(True, "FT"), (False, "FNT")])
-def test_place_firm_sets_company_sector(country_without_roles, tradable, sector):
+def test_add_firm_sets_company_sector(country_without_roles, tradable, sector):
     # Given
     role = Mock()
     firm = Mock(tradable=tradable)
@@ -274,79 +274,79 @@ def test_place_firm_sets_company_sector(country_without_roles, tradable, sector)
     country.add_role.return_value = role
 
     # When
-    country.place_firm(firm)
+    country.add_firm(firm)
 
     # Then
     assert role.sector == sector
 
 
-def test_place_firm_in_goods_market_if_not_tradable(country_without_roles):
+def test_add_firm_in_goods_market_if_not_tradable(country_without_roles):
     # Given
     firm = Mock(tradable=False)
     country = country_without_roles
     market = country.spaces["goods_market"]
 
     # When
-    country.place_firm(firm)
+    country.add_firm(firm)
 
     # Then
-    market.place_firm.assert_called_with(firm)
+    market.add_firm.assert_called_with(firm)
 
 
-def test_dont_place_firm_into_goods_market_if_tradable(country_without_roles):
+def test_dont_add_firm_into_goods_market_if_tradable(country_without_roles):
     # Given
     firm = Mock(tradable=True)
     country = country_without_roles
     market = country.spaces["goods_market"]
 
     # When
-    country.place_firm(firm)
+    country.add_firm(firm)
 
     # Then
-    market.place_firm.assert_not_called()
+    market.add_firm.assert_not_called()
 
 
 @pytest.mark.parametrize("tradable", [True, False])
-def test_place_firm_into_deposit_market(country_without_roles, tradable):
+def test_add_firm_into_deposit_market(country_without_roles, tradable):
     # Given
     firm = Mock(tradable=tradable)
     country = country_without_roles
     market = country.spaces["deposit_market"]
 
     # When
-    country.place_firm(firm)
+    country.add_firm(firm)
 
     # Then
-    market.place_firm.assert_called_with(firm)
+    market.add_firm.assert_called_with(firm)
 
 
 @pytest.mark.parametrize("tradable", [True, False])
-def test_place_firm_into_labor_market_if_domestic(country_without_roles, tradable):
+def test_add_firm_into_labor_market_if_domestic(country_without_roles, tradable):
     # Given
     country = country_without_roles
     market = country.spaces["labor_market"]
     firm = Mock(tradable=tradable, country_pos=country.pos)
 
     # When
-    country.place_firm(firm)
+    country.add_firm(firm)
 
     # Then
-    market.place_firm.assert_called_with(firm)
+    market.add_firm.assert_called_with(firm)
 
 
-def test_place_bank_add_company_role(country_without_roles):
+def test_add_bank_add_company_role(country_without_roles):
     # Given
     bank = Mock()
     country = country_without_roles
 
     # When
-    country.place_bank(bank)
+    country.add_bank(bank)
 
     # Then
     country.add_role.assert_called_with(FakeCompany, bank, "company")
 
 
-def test_place_bank_sets_company_sector(country_without_roles):
+def test_add_bank_sets_company_sector(country_without_roles):
     # Given
     role = Mock()
     bank = Mock()
@@ -354,38 +354,38 @@ def test_place_bank_sets_company_sector(country_without_roles):
     country.add_role.return_value = role
 
     # When
-    country.place_bank(bank)
+    country.add_bank(bank)
 
     # Then
     assert role.sector == "B"
 
 
-def test_place_bank_in_deposit_market_if_not_tradable(country_without_roles):
+def test_add_bank_in_deposit_market_if_not_tradable(country_without_roles):
     # Given
     bank = Mock()
     country = country_without_roles
     market = country.spaces["deposit_market"]
 
     # When
-    country.place_bank(bank)
+    country.add_bank(bank)
 
     # Then
-    market.place_bank.assert_called_with(bank)
+    market.add_bank.assert_called_with(bank)
 
 
-def test_place_government_add_fiscal_authority_role(country_without_roles):
+def test_add_government_add_fiscal_authority_role(country_without_roles):
     # Given
     govt = Mock()
     country = country_without_roles
 
     # When
-    country.place_government(govt)
+    country.add_government(govt)
 
     # Then
     country.add_role.assert_called_with(FakeFiscalAuth, govt, "fiscal_authority")
 
 
-def test_place_government_sets_fiscal_authority(country_without_roles):
+def test_add_government_sets_fiscal_authority(country_without_roles):
     # Given
     role = Mock()
     govt = Mock()
@@ -393,38 +393,38 @@ def test_place_government_sets_fiscal_authority(country_without_roles):
     country.add_role.return_value = role
 
     # When
-    country.place_government(govt)
+    country.add_government(govt)
 
     # Then
     assert country.fiscal_authority == role
 
 
-def test_place_government_into_deposit_market(country_without_roles):
+def test_add_government_into_deposit_market(country_without_roles):
     # Given
     govt = Mock(country_pos=1)
     country = country_without_roles
     market = country.spaces["deposit_market"]
 
     # When
-    country.place_government(govt)
+    country.add_government(govt)
 
     # Then
-    market.place_government.assert_called_with(govt)
+    market.add_government.assert_called_with(govt)
 
 
-def test_place_central_bank_add_monetary_authority_role(country_without_roles):
+def test_add_central_bank_add_monetary_authority_role(country_without_roles):
     # Given
     cb = Mock()
     country = country_without_roles
 
     # When
-    country.place_central_bank(cb)
+    country.add_central_bank(cb)
 
     # Then
     country.add_role.assert_called_with(FakeMonetaryAuth, cb, "monetary_authority")
 
 
-def test_place_central_bank_sets_monetary_authority(country_without_roles):
+def test_add_central_bank_sets_monetary_authority(country_without_roles):
     # Given
     cb = Mock()
     role = Mock()
@@ -432,7 +432,7 @@ def test_place_central_bank_sets_monetary_authority(country_without_roles):
     country.add_role.return_value = role
 
     # When
-    country.place_central_bank(cb)
+    country.add_central_bank(cb)
 
     # Then
     assert country.monetary_authority is role

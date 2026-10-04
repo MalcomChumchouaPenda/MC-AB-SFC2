@@ -36,7 +36,7 @@ def govt(model, country):
     govt.public_spending = 100
     govt.budget_deficit = 100
     govt.next_tax_rate = 0.20
-    country.place_government(govt)
+    country.add_government(govt)
     return govt
 
 

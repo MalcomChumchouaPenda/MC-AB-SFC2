@@ -28,7 +28,7 @@ def union(fake_model):
 def union_cb(model, union):
     cb = CentralBank(model)
     cb.national = False
-    union.place_central_bank(cb)
+    union.add_central_bank(cb)
     return cb
 
 
@@ -48,7 +48,7 @@ def test_updates_discount_rate_via_union_central_bank_action(union, union_cb):
 def national_cb(model, union):
     cb = CentralBank(model)
     cb.national = True
-    union.place_central_bank(cb)
+    union.add_central_bank(cb)
     return cb
 
 

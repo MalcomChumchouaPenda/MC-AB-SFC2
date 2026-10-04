@@ -39,7 +39,7 @@ def markets(union):
 def bank(model, union):
     # Given
     bank = Bank(model)
-    union.place_bank(bank)
+    union.add_bank(bank)
     return bank
 
 
@@ -47,7 +47,7 @@ def bank(model, union):
 def firm(model, union):
     # Given
     firm = Firm(model)
-    union.place_firm(firm)
+    union.add_firm(firm)
     return firm
 
 

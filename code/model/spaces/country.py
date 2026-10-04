@@ -31,36 +31,36 @@ class Country(EcoSpace):
     #
     # Role management
     #
-    def place_household(self, household):
+    def add_household(self, household):
         self.add_role(Citizen, household, "citizen")
-        self.spaces["goods_market"].place_household(household)
-        self.spaces["labor_market"].place_household(household)
-        self.spaces["deposit_market"].place_household(household)
+        self.spaces["goods_market"].add_household(household)
+        self.spaces["labor_market"].add_household(household)
+        self.spaces["deposit_market"].add_household(household)
 
-    def place_firm(self, firm):
+    def add_firm(self, firm):
         if firm.country_pos == self.pos:
-            self.spaces["labor_market"].place_firm(firm)
+            self.spaces["labor_market"].add_firm(firm)
         if firm.tradable:
             self._add_company(firm, "FT")
         else:
             self._add_company(firm, "FNT")
-            self.spaces["goods_market"].place_firm(firm)
-        self.spaces["deposit_market"].place_firm(firm)
+            self.spaces["goods_market"].add_firm(firm)
+        self.spaces["deposit_market"].add_firm(firm)
 
-    def place_bank(self, bank):
+    def add_bank(self, bank):
         self._add_company(bank, "B")
-        self.spaces["deposit_market"].place_bank(bank)
+        self.spaces["deposit_market"].add_bank(bank)
 
     def _add_company(self, agent, sector):
         role = self.add_role(Company, agent, "company")
         role.sector = sector
 
-    def place_government(self, govt):
+    def add_government(self, govt):
         role = self.add_role(FiscalAuthority, govt, "fiscal_authority")
         self.fiscal_authority = role
-        self.spaces["deposit_market"].place_government(govt)
+        self.spaces["deposit_market"].add_government(govt)
 
-    def place_central_bank(self, cb):
+    def add_central_bank(self, cb):
         role = self.add_role(MonetaryAuthority, cb, "monetary_authority")
         self.monetary_authority = role
 

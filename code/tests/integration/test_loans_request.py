@@ -17,7 +17,7 @@ def bank(fake_model, market):
     # Given
     model = fake_model
     bank = Bank(model)
-    market.place_bank(bank)
+    market.add_bank(bank)
     return bank
 
 
@@ -26,7 +26,7 @@ def firm(fake_model, market):
     # Given
     model = fake_model
     firm = Firm(model)
-    market.place_firm(firm)
+    market.add_firm(firm)
     return firm
 
 

@@ -17,7 +17,7 @@ def country(fake_model):
 def bank(fake_model, country):
     # Given
     bank = Bank(fake_model)
-    country.place_bank(bank)
+    country.add_bank(bank)
     return bank
 
 

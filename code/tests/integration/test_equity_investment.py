@@ -38,7 +38,7 @@ def country(union):
 def bank(model, union):
     # Given
     bank = Bank(model)
-    union.place_bank(bank)
+    union.add_bank(bank)
     return bank
 
 
@@ -50,7 +50,7 @@ def founders(model, union, bank):
         household = Household(model)
         household.deposit_bank_id = bank.id
         household.desired_equity = 300 - i * 100
-        union.place_household(household)
+        union.add_household(household)
         founders.append(household)
     return founders
 

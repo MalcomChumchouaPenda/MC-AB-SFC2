@@ -24,7 +24,7 @@ def country(union):
 def govt(fake_model, union):
     # Given
     govt = Government(fake_model)
-    union.place_government(govt)
+    union.add_government(govt)
     return govt
 
 

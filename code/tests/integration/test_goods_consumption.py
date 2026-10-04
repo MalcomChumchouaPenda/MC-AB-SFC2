@@ -30,7 +30,7 @@ def household(fake_model, union):
     model.p.beta = 1
     model.p.cT = 0.6
     household = Household(model)
-    union.place_household(household)
+    union.add_household(household)
     return household
 
 
@@ -44,7 +44,7 @@ def firms(fake_model, union, make_dlist):
         firm.tradable = tradable
         firm.variety = 0.5
         firms.append(firm)
-        union.place_firm(firm)
+        union.add_firm(firm)
     return firms
 
 

@@ -22,7 +22,7 @@ def banks(fake_model, union):
     for _ in range(2):
         bank = Bank(model)
         banks.append(bank)
-        union.place_bank(bank)
+        union.add_bank(bank)
     return banks
 
 
@@ -31,7 +31,7 @@ def firm(fake_model, union):
     # Given
     model = fake_model
     firm = Firm(model)
-    union.place_firm(firm)
+    union.add_firm(firm)
     return firm
 
 

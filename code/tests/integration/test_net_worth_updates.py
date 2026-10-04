@@ -18,7 +18,7 @@ def country(fake_model):
 def household(fake_model, country):
     # Given
     household = Household(fake_model)
-    country.place_household(household)
+    country.add_household(household)
     return household
 
 
@@ -26,7 +26,7 @@ def household(fake_model, country):
 def firm(fake_model, country, household):
     # Given
     firm = Firm(fake_model)
-    country.place_firm(firm)
+    country.add_firm(firm)
     citizen = household.roles["citizen"]
     citizen.fund_company(firm.id, 500)
     return firm
@@ -54,7 +54,7 @@ def test_firm_update_net_worth(firm, household):
 def bank(fake_model, country, household):
     # Given
     bank = Bank(fake_model)
-    country.place_bank(bank)
+    country.add_bank(bank)
     citizen = household.roles["citizen"]
     citizen.fund_company(bank.id, 500)
     return bank

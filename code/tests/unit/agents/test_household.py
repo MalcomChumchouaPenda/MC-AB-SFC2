@@ -994,7 +994,7 @@ def test_create_company_places_firm_into_union(hh_before_investment, sector):
     household.create_company(shares, sector=sector)
 
     # Then
-    union.place_firm.assert_called_once_with(firm)
+    union.add_firm.assert_called_once_with(firm)
 
 
 @pytest.mark.parametrize("sector", ["FT", "FNT"])
@@ -1058,7 +1058,7 @@ def test_create_company_places_bank_into_union(hh_before_investment):
     household.create_company(shares, sector="B")
 
     # Then
-    union.place_bank.assert_called_once_with(bank)
+    union.add_bank.assert_called_once_with(bank)
 
 
 def test_create_company_append_to_model_banks(hh_before_investment):

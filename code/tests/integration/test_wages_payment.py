@@ -15,7 +15,7 @@ def market(fake_model):
 def firm(fake_model, market):
     # Given
     firm = Firm(fake_model)
-    market.place_firm(firm)
+    market.add_firm(firm)
     employer = firm.roles["employer"]
     employer.wage = 10.0
     return firm
@@ -28,7 +28,7 @@ def households(fake_model, market, firm):
     employer = firm.roles["employer"]
     for _ in range(2):
         household = Household(fake_model)
-        market.place_household(household)
+        market.add_household(household)
         worker = household.roles["worker"]
         market.hire_worker(worker, employer, 1.0)
         households.append(household)

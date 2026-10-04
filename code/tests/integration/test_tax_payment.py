@@ -19,7 +19,7 @@ def country(fake_model):
 def govt(fake_model, country):
     # Given
     govt = Government(fake_model)
-    country.place_government(govt)
+    country.add_government(govt)
     return govt
 
 
@@ -27,7 +27,7 @@ def govt(fake_model, country):
 def household(fake_model, country):
     # Given
     household = Household(fake_model)
-    country.place_household(household)
+    country.add_household(household)
     household.account["cash"] = 1000
     household.account["wages"] = 550
     household.account["dividends"] = 50
@@ -57,7 +57,7 @@ def test_transfers_cash_from_household_to_govt(household, govt):
 def firm(fake_model, country):
     # Given
     firm = Firm(fake_model)
-    country.place_firm(firm)
+    country.add_firm(firm)
     firm.taxes_payable = 100
     firm.account["cash"] = 1000
     return firm
@@ -86,7 +86,7 @@ def test_tansfers_cash_from_firm_to_govt(firm, govt):
 def bank(fake_model, country):
     # Given
     bank = Bank(fake_model)
-    country.place_bank(bank)
+    country.add_bank(bank)
     bank.taxes_payable = 100
     bank.account["cash"] = 1000
     return bank

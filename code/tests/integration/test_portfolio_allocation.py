@@ -17,7 +17,7 @@ def country(fake_model):
 def bank(fake_model, country):
     # Given
     bank = Bank(fake_model)
-    country.place_bank(bank)
+    country.add_bank(bank)
     return bank
 
 
@@ -26,7 +26,7 @@ def household(fake_model, country, bank):
     # Given
     household = Household(fake_model)
     household.deposit_bank_id = bank.id
-    country.place_household(household)
+    country.add_household(household)
     role = household.roles["depositor"]
     role.join_deposit_bank(bank.id)
     return household

@@ -59,25 +59,25 @@ def market_without_roles(monkeypatch, fake_model):
     return market
 
 
-def test_place_household_add_worker_role(market_without_roles):
+def test_add_household_add_worker_role(market_without_roles):
     # Given
     household = Mock()
     market = market_without_roles
 
     # When
-    market.place_household(household)
+    market.add_household(household)
 
     # Then
     market.add_role.assert_called_with(FakeWorker, household, "worker")
 
 
-def test_place_firm_add_employer_role(market_without_roles):
+def test_add_firm_add_employer_role(market_without_roles):
     # Given
     firm = Mock()
     market = market_without_roles
 
     # When
-    market.place_firm(firm)
+    market.add_firm(firm)
 
     # Then
     market.add_role.assert_called_with(FakeEmployer, firm, "employer")

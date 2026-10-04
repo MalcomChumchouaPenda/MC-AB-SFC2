@@ -50,50 +50,50 @@ def market_without_roles(monkeypatch, fake_model):
     return market
 
 
-def test_place_bank_add_deposit_bank_role(market_without_roles):
+def test_add_bank_add_deposit_bank_role(market_without_roles):
     # Given
     bank = Mock()
     market = market_without_roles
 
     # When
-    market.place_bank(bank)
+    market.add_bank(bank)
 
     # Then
     market.add_role.assert_called_with(FakeBank, bank, "deposit_bank")
 
 
-def test_place_firm_add_depositor_role(market_without_roles):
+def test_add_firm_add_depositor_role(market_without_roles):
     # Given
     firm = Mock()
     market = market_without_roles
     market.country_pos = 2
 
     # When
-    market.place_firm(firm)
+    market.add_firm(firm)
 
     # Then
     market.add_role.assert_called_with(FakeDepositor, firm, "depositor_2")
 
 
-def test_place_household_add_depositor_role(market_without_roles):
+def test_add_household_add_depositor_role(market_without_roles):
     # Given
     household = Mock()
     market = market_without_roles
 
     # When
-    market.place_household(household)
+    market.add_household(household)
 
     # Then
     market.add_role.assert_called_with(FakeDepositor, household, "depositor")
 
 
-def test_place_government_add_guarantee_role(market_without_roles):
+def test_add_government_add_guarantee_role(market_without_roles):
     # Given
     govt = Mock()
     market = market_without_roles
 
     # When
-    market.place_government(govt)
+    market.add_government(govt)
 
     # Then
     market.add_role.assert_called_with(FakeGuarantee, govt, "deposit_guarantee")

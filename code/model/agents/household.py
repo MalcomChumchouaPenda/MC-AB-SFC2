@@ -230,7 +230,7 @@ class Household(EcoAgent):
     def _create_bank(self, shares):
         model = self.model
         bank = Bank(model)
-        model.union.place_bank(bank)
+        model.union.add_bank(bank)
         model.banks.append(bank)
         for share in shares:
             share["founder"].fund_company(bank.id, share["amount"])
@@ -239,7 +239,7 @@ class Household(EcoAgent):
         model = self.model
         firm = Firm(model)
         firm.tradable = sector == "FT"
-        model.union.place_firm(firm)
+        model.union.add_firm(firm)
         model.firms.append(firm)
         for share in shares:
             share["founder"].fund_company(firm.id, share["amount"])

@@ -26,7 +26,7 @@ def deposit_market(union):
 def govt(fake_model, union):
     # Given
     govt = Government(fake_model)
-    union.place_government(govt)
+    union.add_government(govt)
     return govt
 
 
@@ -34,7 +34,7 @@ def govt(fake_model, union):
 def bank(fake_model, union):
     # Given
     bank = Bank(fake_model)
-    union.place_bank(bank)
+    union.add_bank(bank)
     deposit_bank = bank.roles["deposit_bank"]
     deposit_bank.defaulted = True
     return bank
@@ -44,7 +44,7 @@ def bank(fake_model, union):
 def firm(fake_model, union):
     # Given
     firm = Firm(fake_model)
-    union.place_firm(firm)
+    union.add_firm(firm)
     return firm
 
 
@@ -101,7 +101,7 @@ def household(fake_model, union):
     # Given
     model = fake_model
     household = Household(model)
-    union.place_household(household)
+    union.add_household(household)
     return household
 
 

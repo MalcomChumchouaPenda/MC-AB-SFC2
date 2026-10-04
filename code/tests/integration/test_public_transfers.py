@@ -26,7 +26,7 @@ def country(fake_model):
 def govt(model, country):
     # Given
     govt = Government(model)
-    country.place_government(govt)
+    country.add_government(govt)
     return govt
 
 
@@ -35,7 +35,7 @@ def cb(model, country):
     # Given
     cb = CentralBank(model)
     cb.national = True
-    country.place_central_bank(cb)
+    country.add_central_bank(cb)
     return cb
 
 
@@ -62,7 +62,7 @@ def households(model, country):
     for _ in range(4):
         household = Household(model)
         households.append(household)
-        country.place_household(household)
+        country.add_household(household)
     return households
 
 

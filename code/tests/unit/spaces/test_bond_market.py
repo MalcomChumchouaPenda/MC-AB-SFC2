@@ -37,43 +37,43 @@ def market_without_roles(monkeypatch, fake_model):
     return market
 
 
-def test_place_bank_add_buyer_role(market_without_roles):
+def test_add_bank_add_buyer_role(market_without_roles):
     # Given
     bank = Mock()
     market = market_without_roles
 
     # When
-    market.place_bank(bank)
+    market.add_bank(bank)
 
     # Then
     market.add_role.assert_called_with(FakeBuyer, bank, "bond_buyer")
 
 
-def test_place_central_bank_add_buyer_role(market_without_roles):
+def test_add_central_bank_add_buyer_role(market_without_roles):
     # Given
     cb = Mock()
     market = market_without_roles
 
     # When
-    market.place_central_bank(cb)
+    market.add_central_bank(cb)
 
     # Then
     market.add_role.assert_called_with(FakeBuyer, cb, "bond_buyer")
 
 
-def test_place_government_add_issuer_role(market_without_roles):
+def test_add_government_add_issuer_role(market_without_roles):
     # Given
     govt = Mock()
     market = market_without_roles
 
     # When
-    market.place_government(govt)
+    market.add_government(govt)
 
     # Then
     market.add_role.assert_called_with(FakeIssuer, govt, "bond_issuer")
 
 
-def test_place_government_sets_role_country_pos(market_without_roles):
+def test_add_government_sets_role_country_pos(market_without_roles):
     # Given
     role = Mock()
     market = market_without_roles
@@ -81,7 +81,7 @@ def test_place_government_sets_role_country_pos(market_without_roles):
     govt = Mock()
 
     # When
-    market.place_government(govt)
+    market.add_government(govt)
 
     # Then
     assert role.country_pos == govt.country_pos

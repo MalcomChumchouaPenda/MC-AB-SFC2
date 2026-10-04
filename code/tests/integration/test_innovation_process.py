@@ -25,7 +25,7 @@ def market(model):
 def firm(model, market):
     # Given
     firm = Firm(model)
-    market.place_firm(firm)
+    market.add_firm(firm)
     return firm
 
 

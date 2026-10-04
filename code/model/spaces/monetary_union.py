@@ -27,37 +27,37 @@ class MonetaryUnion(EcoSpace):
     #
     # Role management
     #
-    def place_household(self, household):
+    def add_household(self, household):
         c = household.country_pos
-        self.spaces[f"country_{c}"].place_household(household)
-        self.spaces["goods_market"].place_household(household)
+        self.spaces[f"country_{c}"].add_household(household)
+        self.spaces["goods_market"].add_household(household)
 
-    def place_firm(self, firm):
+    def add_firm(self, firm):
         for name, space in self.spaces.items():
             if name.startswith("country_"):
-                space.place_firm(firm)
+                space.add_firm(firm)
             elif name == "credit_market":
-                space.place_firm(firm)
+                space.add_firm(firm)
             elif name == "goods_market" and firm.tradable:
-                space.place_firm(firm)
+                space.add_firm(firm)
 
-    def place_bank(self, bank):
+    def add_bank(self, bank):
         c = bank.country_pos
-        self.spaces[f"country_{c}"].place_bank(bank)
-        self.spaces["credit_market"].place_bank(bank)
-        self.spaces["bond_market"].place_bank(bank)
+        self.spaces[f"country_{c}"].add_bank(bank)
+        self.spaces["credit_market"].add_bank(bank)
+        self.spaces["bond_market"].add_bank(bank)
 
-    def place_government(self, govt):
+    def add_government(self, govt):
         c = govt.country_pos
-        self.spaces[f"country_{c}"].place_government(govt)
-        self.spaces["bond_market"].place_government(govt)
+        self.spaces[f"country_{c}"].add_government(govt)
+        self.spaces["bond_market"].add_government(govt)
 
-    def place_central_bank(self, cb):
+    def add_central_bank(self, cb):
         self.add_role(PolicyMaker, cb, "policy_maker")
-        self.spaces["bond_market"].place_central_bank(cb)
+        self.spaces["bond_market"].add_central_bank(cb)
         if cb.national:
             c = cb.country_pos
-            self.spaces[f"country_{c}"].place_central_bank(cb)
+            self.spaces[f"country_{c}"].add_central_bank(cb)
 
     #
     # Evolution

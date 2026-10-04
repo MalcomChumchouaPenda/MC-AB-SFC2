@@ -25,7 +25,7 @@ def firm(model, country):
     # Given
     firm = Firm(model)
     firm.country_pos = country.pos
-    country.place_firm(firm)
+    country.add_firm(firm)
     return firm
 
 
@@ -51,7 +51,7 @@ def workers(model, country, firm):
     market = country.spaces["labor_market"]
     for _ in range(5):
         household = Household(model)
-        country.place_household(household)
+        country.add_household(household)
         worker = household.roles["worker"]
         workers.append(worker)
         market.hire_worker(worker, employer, 1.0)

@@ -25,7 +25,7 @@ def country(model):
 def firm(model, country):
     # Given
     firm = Firm(model)
-    country.place_firm(firm)
+    country.add_firm(firm)
     return firm
 
 
@@ -83,7 +83,7 @@ def test_sets_firm_payable_dividends(firm):
 def bank(model, country):
     # Given
     bank = Bank(model)
-    country.place_bank(bank)
+    country.add_bank(bank)
     return bank
 
 

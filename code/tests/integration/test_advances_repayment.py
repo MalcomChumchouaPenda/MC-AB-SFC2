@@ -25,7 +25,7 @@ def cb(fake_model, union):
     # Given
     cb = CentralBank(fake_model)
     cb.national = True
-    union.place_central_bank(cb)
+    union.add_central_bank(cb)
     return cb
 
 
@@ -33,7 +33,7 @@ def cb(fake_model, union):
 def bank(fake_model, union):
     # Given
     bank = Bank(fake_model)
-    union.place_bank(bank)
+    union.add_bank(bank)
     return bank
 
 
