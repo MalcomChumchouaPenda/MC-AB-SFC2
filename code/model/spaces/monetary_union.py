@@ -28,7 +28,7 @@ class MonetaryUnion(EcoSpace):
     # Role management
     #
     def place_household(self, household):
-        c = household.country_id
+        c = household.country_pos
         self.spaces[f"country_{c}"].place_household(household)
         self.spaces["goods_market"].place_household(household)
 
@@ -42,13 +42,13 @@ class MonetaryUnion(EcoSpace):
                 space.place_firm(firm)
 
     def place_bank(self, bank):
-        c = bank.country_id
+        c = bank.country_pos
         self.spaces[f"country_{c}"].place_bank(bank)
         self.spaces["credit_market"].place_bank(bank)
         self.spaces["bond_market"].place_bank(bank)
 
     def place_government(self, govt):
-        c = govt.country_id
+        c = govt.country_pos
         self.spaces[f"country_{c}"].place_government(govt)
         self.spaces["bond_market"].place_government(govt)
 
@@ -56,7 +56,7 @@ class MonetaryUnion(EcoSpace):
         self.add_role(PolicyMaker, cb, "policy_maker")
         self.spaces["bond_market"].place_central_bank(cb)
         if cb.national:
-            c = cb.country_id
+            c = cb.country_pos
             self.spaces[f"country_{c}"].place_central_bank(cb)
 
     #

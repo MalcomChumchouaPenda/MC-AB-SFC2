@@ -63,25 +63,3 @@ def test_grant_loan(role):
 
     # Then
     env.grant_loan.assert_called_with(role, borrower, 100, 0.04)
-
-
-def test_request_advances(role):
-    # Given
-    env = role.env
-
-    # When
-    role.request_advances(100)
-
-    # Then
-    env.request_advances.assert_called_with(role, 100)
-
-
-def test_repay_advances(role):
-    # Given
-    env = role.env
-
-    # When
-    role.repay_advances(100, 10)
-
-    # Then
-    env.repay_advances.assert_called_with(role, 100, 10)

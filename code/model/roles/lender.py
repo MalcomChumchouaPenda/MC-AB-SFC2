@@ -15,9 +15,3 @@ class Lender(EcoRole):
 
     def grant_loan(self, borrower, amount, rate):
         self.env.grant_loan(self, borrower, amount, rate)
-
-    def request_advances(self, amount):
-        self.env.request_advances(self, amount)
-
-    def repay_advances(self, principal, interests):
-        self.env.repay_advances(self, principal, interests)

@@ -162,7 +162,7 @@ def union_without_roles(monkeypatch, fake_model):
 
 def test_place_household_places_agent_into_goods_market(union_without_roles):
     # Given
-    household = Mock(country_id=1)
+    household = Mock(country_pos=1)
     union = union_without_roles
     market = union.spaces["goods_market"]
 
@@ -175,7 +175,7 @@ def test_place_household_places_agent_into_goods_market(union_without_roles):
 
 def test_place_household_places_agent_into_its_country(union_without_roles):
     # Given
-    household = Mock(country_id=1)
+    household = Mock(country_pos=1)
     union = union_without_roles
     country = union.spaces["country_1"]
 
@@ -244,7 +244,7 @@ def test_place_firm_into_all_countries(union_without_roles, tradable):
 
 def test_place_bank_into_bond_market(union_without_roles):
     # Given
-    bank = Mock(country_id=1)
+    bank = Mock(country_pos=1)
     union = union_without_roles
     market = union.spaces["bond_market"]
 
@@ -257,7 +257,7 @@ def test_place_bank_into_bond_market(union_without_roles):
 
 def test_place_bank_into_credit_market(union_without_roles):
     # Given
-    bank = Mock(country_id=1)
+    bank = Mock(country_pos=1)
     union = union_without_roles
     market = union.spaces["credit_market"]
 
@@ -270,7 +270,7 @@ def test_place_bank_into_credit_market(union_without_roles):
 
 def test_place_bank_into_one_country(union_without_roles):
     # Given
-    bank = Mock(country_id=1)
+    bank = Mock(country_pos=1)
     union = union_without_roles
     country = union.spaces["country_1"]
 
@@ -283,7 +283,7 @@ def test_place_bank_into_one_country(union_without_roles):
 
 def test_place_government_into_bond_market(union_without_roles):
     # Given
-    govt = Mock(country_id=1)
+    govt = Mock(country_pos=1)
     union = union_without_roles
     market = union.spaces["bond_market"]
 
@@ -296,7 +296,7 @@ def test_place_government_into_bond_market(union_without_roles):
 
 def test_place_government_into_one_country(union_without_roles):
     # Given
-    govt = Mock(country_id=1)
+    govt = Mock(country_pos=1)
     union = union_without_roles
     country = union.spaces["country_1"]
 
@@ -310,7 +310,7 @@ def test_place_government_into_one_country(union_without_roles):
 @pytest.mark.parametrize("national", [True, False])
 def test_place_central_bank_add_policy_maker_role(union_without_roles, national):
     # Given
-    cb = Mock(national=national, country_id=0)
+    cb = Mock(national=national, country_pos=0)
     union = union_without_roles
 
     # When
@@ -322,7 +322,7 @@ def test_place_central_bank_add_policy_maker_role(union_without_roles, national)
 
 def test_place_central_bank_into_country_if_national(union_without_roles):
     # Given
-    cb = Mock(national=True, country_id=1)
+    cb = Mock(national=True, country_pos=1)
     union = union_without_roles
     country0 = union.spaces["country_0"]
     country1 = union.spaces["country_1"]
@@ -337,7 +337,7 @@ def test_place_central_bank_into_country_if_national(union_without_roles):
 
 def test_dont_place_central_bank_into_country_if_not_national(union_without_roles):
     # Given
-    cb = Mock(national=False, country_id=0)
+    cb = Mock(national=False, country_pos=0)
     union = union_without_roles
     country0 = union.spaces["country_0"]
     country1 = union.spaces["country_1"]
@@ -352,7 +352,7 @@ def test_dont_place_central_bank_into_country_if_not_national(union_without_role
 
 def test_place_central_bank_into_bond_market_if_national(union_without_roles):
     # Given
-    cb = Mock(national=True, country_id=1)
+    cb = Mock(national=True, country_pos=1)
     union = union_without_roles
     market = union.spaces["bond_market"]
 

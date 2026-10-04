@@ -21,42 +21,33 @@ def union(fake_model):
     union = MonetaryUnion(fake_model)
     union.create_markets()
     union.create_countries(1)
+    country = union.spaces["country_0"]
+    country.monetary_authority = Mock(discount_rate=0.05)
     return union
 
 
 @pytest.fixture
-def country(union):
+def markets(union):
     # Given
     country = union.spaces["country_0"]
-    country.monetary_authority = Mock(discount_rate=0.05)
-    return country
-
-
-@pytest.fixture
-def markets(union, country):
-    # Given
     credit_market = union.spaces["credit_market"]
     deposit_market = country.spaces["deposit_market"]
     return [credit_market, deposit_market]
 
 
 @pytest.fixture
-def bank(model, country, markets):
+def bank(model, union):
     # Given
     bank = Bank(model)
-    country.add_company(bank, "B")
-    markets[0].add_lender(bank)
-    markets[1].add_deposit_bank(bank)
-    bank.account["equities"] = 100
+    union.place_bank(bank)
     return bank
 
 
 @pytest.fixture
-def firm(model, markets):
+def firm(model, union):
     # Given
     firm = Firm(model)
-    markets[0].add_borrower(firm)
-    markets[1].add_depositor(firm)
+    union.place_firm(firm)
     return firm
 
 
@@ -75,6 +66,7 @@ def firm_with_loan_demand(firm, bank):
 def test_increases_firm_loans(firm_with_loan_demand, bank):
     # Given
     firm, amount = firm_with_loan_demand
+    bank.account["equities"] = 100
 
     # When
     bank.grant_loans()
@@ -87,6 +79,7 @@ def test_increases_firm_loans(firm_with_loan_demand, bank):
 def test_increases_firm_deposits(firm_with_loan_demand, bank):
     # Given
     firm, amount = firm_with_loan_demand
+    bank.account["equities"] = 100
 
     # When
     bank.grant_loans()
@@ -101,6 +94,7 @@ def test_creates_loan_as_link(firm_with_loan_demand, bank, markets):
     firm, amount = firm_with_loan_demand
     firm_role = firm.roles["borrower"]
     bank_role = bank.roles["lender"]
+    bank.account["equities"] = 100
 
     # When
     bank.grant_loans()
@@ -113,8 +107,9 @@ def test_creates_loan_as_link(firm_with_loan_demand, bank, markets):
 def test_creates_deposit_as_link(firm_with_loan_demand, bank, markets):
     # Given
     firm, amount = firm_with_loan_demand
-    firm_role = firm.roles["depositor"]
+    firm_role = firm.roles["depositor_0"]
     bank_role = bank.roles["deposit_bank"]
+    bank.account["equities"] = 100
 
     # When
     bank.grant_loans()

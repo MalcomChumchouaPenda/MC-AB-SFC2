@@ -5,36 +5,29 @@ from model.spaces.monetary_union import MonetaryUnion
 
 
 @pytest.fixture
-def union(fake_model):
+def country(fake_model):
     # Given
     union = MonetaryUnion(fake_model)
     union.create_markets()
     union.create_countries(1)
-    return union
-
-
-@pytest.fixture
-def country(union):
-    # Given
-    country = union.spaces["country_0"]
-    country.monetary_authority = Mock()
-    return country
+    return union.spaces["country_0"]
 
 
 @pytest.fixture
 def govt(fake_model, country):
     # Given
     govt = Government(fake_model)
-    country.add_fiscal_authority(govt)
+    country.place_government(govt)
     return govt
 
 
 def test_sets_govt_bond_rate(govt, country):
     # Given
-    govt.account["bonds"] = 100
-    govt.p.chi = 0.02
+    authority = Mock(discount_rate=0.04)
+    country.monetary_authority = authority
     country.gdp = 1000
-    country.monetary_authority.discount_rate = 0.04
+    govt.p.chi = 0.02
+    govt.account["bonds"] = 100
 
     # When
     govt.update_bond_rate()

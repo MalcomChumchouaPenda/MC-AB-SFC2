@@ -19,6 +19,17 @@ def test_inherits_from_eco_agent():
     assert is_derived
 
 
+def test_initializes_tradable(fake_model):
+    # Given
+    model = fake_model
+
+    # When
+    firm = Firm(model)
+
+    # Then
+    assert firm.tradable is False
+
+
 def test_initializes_defaulted(fake_model):
     # Given
     model = fake_model

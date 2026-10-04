@@ -18,7 +18,7 @@ def firm(fake_model, market):
     model = fake_model
     model.p.theta = 0.20
     firm = Firm(model)
-    market.add_producer(firm)
+    market.place_firm(firm)
     return firm
 
 

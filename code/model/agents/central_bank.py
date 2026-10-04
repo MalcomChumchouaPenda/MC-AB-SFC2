@@ -8,6 +8,7 @@ class CentralBank(EcoAgent):
     def setup(self):
         super().setup()
         self.prev_discount_rate = 0
+        self.national = False
 
     #
     # Bond purchases
@@ -15,7 +16,7 @@ class CentralBank(EcoAgent):
     def buy_remaining_bonds(self):
         role = self.roles["bond_buyer"]
         for issuer in role.find_issuers():
-            if issuer.country_id == self.country_id:
+            if issuer.country_pos == self.country_pos:
                 role.buy_bonds(issuer, issuer.bond_number)
 
     #

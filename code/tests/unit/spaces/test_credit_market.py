@@ -192,35 +192,3 @@ def test_make_defaults_updates_accounts(market_with_loan):
     # Then
     market.transfer_stock.assert_any_call("loans", bank_id, borrower.id, 100)
     market.make_transaction.assert_any_call("loan_defaults", bank_id, borrower.id, 100)
-
-
-# ---------------------------------------------------
-# CASH ADVANCE REQUEST / REPAYMENT
-# ----------------------------------------------------
-
-
-def test_request_advances_updates_accounts(market_with_participants):
-    # Given
-    market, _, lender = market_with_participants
-
-    # When
-    market.request_advances(lender, 100)
-
-    # Then
-    market.transfer_stock.assert_any_call("cash", lender.cb_id, lender.id, 100)
-    market.transfer_stock.assert_any_call("advances", lender.id, lender.cb_id, 100)
-
-
-def test_repay_advances_updates_accounts(market_with_participants):
-    # Given
-    market, _, lender = market_with_participants
-
-    # When
-    market.repay_advances(lender, 100, 10)
-
-    # Then
-    market.transfer_stock.assert_any_call("cash", lender.id, lender.cb_id, 110)
-    market.transfer_stock.assert_any_call("advances", lender.cb_id, lender.id, 100)
-    market.make_transaction.assert_any_call(
-        "adv_interests", lender.id, lender.cb_id, 10
-    )

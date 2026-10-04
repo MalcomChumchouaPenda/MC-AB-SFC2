@@ -12,7 +12,7 @@ class EcoAgent(Agent):
 
     def setup(self):
         self.roles = {}
-        self.country_id = 0
+        self.country_pos = 0
         self.account = None
         self.cb_id = None
         self.bank_id = None
@@ -34,8 +34,8 @@ class EcoRole(AgentNode):
         self.group = ""
 
     @property
-    def country_id(self):
-        return self.agent.country_id
+    def country_pos(self):
+        return self.agent.country_pos
 
     @property
     def id(self):

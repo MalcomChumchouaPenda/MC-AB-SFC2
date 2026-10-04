@@ -28,7 +28,8 @@ def union(fake_model):
 @pytest.fixture
 def union_cb(model, union):
     cb = CentralBank(model)
-    union.add_policy_maker(cb)
+    cb.national = False
+    union.place_central_bank(cb)
     return cb
 
 
@@ -47,9 +48,8 @@ def test_union_central_bank_determines_discount_rate(union, union_cb):
 @pytest.fixture
 def national_cb(model, union):
     cb = CentralBank(model)
-    union.add_policy_maker(cb)
-    country = union.spaces["country_0"]
-    country.add_monetary_authority(cb)
+    cb.national = True
+    union.place_central_bank(cb)
     return cb
 
 

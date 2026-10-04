@@ -31,7 +31,7 @@ def household(model):
 def test_household_revises_reservation_wage_when_fully_employed(household, market):
     # Given
     market.unemployment_rate = 0.05
-    market.add_worker(household)
+    market.place_household(household)
     household.prev_labor_sold = 1.0
     household.model.nprandom.choice.return_value = 1
     household.model.nprandom.uniform.return_value = 0.05
@@ -46,7 +46,7 @@ def test_household_revises_reservation_wage_when_fully_employed(household, marke
 def test_household_revises_reservation_wage_when_not_fully_employed(household, market):
     # Given
     market.unemployment_rate = 0.30
-    market.add_worker(household)
+    market.place_household(household)
     household.prev_labor_sold = 0.0
     household.model.nprandom.choice.return_value = 1
     household.model.nprandom.uniform.return_value = 0.05
@@ -61,7 +61,7 @@ def test_household_revises_reservation_wage_when_not_fully_employed(household, m
 def test_household_dont_revises_reservation_wage(household, market):
     # Given
     market.unemployment_rate = 0.30
-    market.add_worker(household)
+    market.place_household(household)
     household.prev_labor_sold = 0.0
     household.model.nprandom.choice.return_value = 0
     household.model.nprandom.uniform.return_value = 0.05

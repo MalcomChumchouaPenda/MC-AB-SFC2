@@ -23,28 +23,28 @@ def markets(union, make_dlist):
 
 
 @pytest.fixture
-def household(fake_model, markets):
+def household(fake_model, union):
     # Given
     model = fake_model
     model.p.psi = 2
     model.p.beta = 1
     model.p.cT = 0.6
     household = Household(model)
-    for market in markets:
-        market.add_consumer(household)
+    union.place_household(household)
     return household
 
 
 @pytest.fixture
-def firms(fake_model, markets, make_dlist):
+def firms(fake_model, union, make_dlist):
     # Given
     model = fake_model
     firms = make_dlist()
-    for market in markets:
+    for tradable in [True, False]:
         firm = Firm(model)
+        firm.tradable = tradable
         firm.variety = 0.5
         firms.append(firm)
-        market.add_producer(firm)
+        union.place_firm(firm)
     return firms
 
 

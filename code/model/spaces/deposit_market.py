@@ -1,4 +1,3 @@
-from agentpy import AgentDList
 from model.base import EcoSpace
 from model.roles.depositor import Depositor
 from model.roles.deposit_bank import DepositBank
@@ -7,6 +6,10 @@ from model.roles.deposit_guarantee import DepositGuarantee
 
 class DepositMarket(EcoSpace):
 
+    def setup(self):
+        super().setup()
+        self.country_pos = 0
+
     #
     # Roles management
     #
@@ -14,7 +17,7 @@ class DepositMarket(EcoSpace):
         self.add_role(Depositor, household, "depositor")
 
     def place_firm(self, firm):
-        c = self.country_id
+        c = self.country_pos
         self.add_role(Depositor, firm, f"depositor_{c}")
 
     def place_bank(self, bank):

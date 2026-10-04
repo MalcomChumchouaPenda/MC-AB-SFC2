@@ -26,7 +26,7 @@ def firm(model):
 def market(monkeypatch, model, firm):
     # Given
     market = GoodsMarket(model)
-    market.add_producer(firm)
+    market.place_firm(firm)
     monkeypatch.setattr(market.model, "nprandom", Mock())
     return market
 

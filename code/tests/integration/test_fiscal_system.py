@@ -1,7 +1,7 @@
 from unittest.mock import Mock
 import pytest
 from agentpy import Model
-from model.spaces.monetary_union import MonetaryUnion
+from model.spaces.country import Country
 from model.agents.firm import Firm
 from model.agents.bank import Bank
 from model.agents.household import Household
@@ -25,40 +25,24 @@ def model(monkeypatch):
 
 
 @pytest.fixture
-def govt(model):
+def country(fake_model):
+    # Given
+    country = Country(fake_model)
+    country.monetary_authority = Mock()
+    country.create_markets()
+    return country
+
+
+@pytest.fixture
+def govt(model, country):
     # Given
     govt = Government(model)
+    country.place_government(govt)
     return govt
 
 
-@pytest.fixture
-def union(fake_model):
+def test_government_updates_fiscal_policy(govt, country):
     # Given
-    union = MonetaryUnion(fake_model)
-    union.create_markets()
-    union.create_countries(1)
-    return union
-
-
-@pytest.fixture
-def country(union):
-    # Given
-    country = union.spaces["country_0"]
-    country.monetary_authority = Mock()
-    country.spaces["goods_market"] = Mock()
-    return country
-
-
-@pytest.fixture
-def country_before_fiscal_policy(country, govt):
-    # Given
-    country.add_fiscal_authority(govt)
-    return country
-
-
-def test_government_updates_fiscal_policy(govt, country_before_fiscal_policy):
-    # Given
-    country = country_before_fiscal_policy
     country.spaces["goods_market"].average_price = 2
     country.spaces["goods_market"].average_prod = 3
     country.gdp = 1000
@@ -77,37 +61,29 @@ def test_government_updates_fiscal_policy(govt, country_before_fiscal_policy):
 
 
 @pytest.fixture
-def household(model):
+def household(model, country):
     # Given
     household = Household(model)
+    country.place_household(household)
     return household
 
 
 @pytest.fixture
-def firm(model):
+def firm(model, country):
     # Given
     firm = Firm(model)
+    country.place_firm(firm)
     return firm
 
 
 @pytest.fixture
-def bank(model):
+def bank(model, country):
     # Given
     bank = Bank(model)
+    country.place_bank(bank)
     return bank
 
 
-@pytest.fixture
-def country_before_tax_payment(country, govt, household, firm, bank):
-    # Given
-    country.add_fiscal_authority(govt)
-    country.add_citizen(household)
-    country.add_company(firm, "FT")
-    country.add_company(bank, "B")
-    return country
-
-
-@pytest.mark.usefixtures("country_before_tax_payment")
 def test_household_pay_taxes(household, govt):
     # Given
     govt.tax_rate = 0.10
@@ -126,7 +102,6 @@ def test_household_pay_taxes(household, govt):
     assert govt.account["cash"] == 60
 
 
-@pytest.mark.usefixtures("country_before_tax_payment")
 def test_firm_pay_taxes(firm, govt):
     # Given
     govt.tax_rate = 0.10
@@ -144,7 +119,6 @@ def test_firm_pay_taxes(firm, govt):
     assert govt.account["cash"] == 100
 
 
-@pytest.mark.usefixtures("country_before_tax_payment")
 def test_bank_pay_taxes(bank, govt):
     # Given
     govt.tax_rate = 0.10

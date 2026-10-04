@@ -6,6 +6,8 @@ class Firm(EcoAgent):
 
     def setup(self):
         super().setup()
+        self.tradable = False
+
         # prices
         self.price = 0.0
         self.wage_offer = 0

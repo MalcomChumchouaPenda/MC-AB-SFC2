@@ -136,29 +136,17 @@ def test_get_tax_rate(role):
 # ----------------------------------------------------
 
 
-@pytest.mark.parametrize("tradable", [True, False])
-def test_create_firm_uses_env_method(role, tradable):
+def test_fund_company_uses_env_method(role):
     # Given
+    company = Mock(id=2)
     env = role.env
-    firm, share = Mock(), Mock()
+    env.roles = {2: company}
 
     # When
-    role.create_firm(firm, [share], tradable=tradable)
+    role.fund_company(2, 200)
 
     # Then
-    env.create_firm.assert_called_with(firm, [share], tradable)
-
-
-def test_create_bank_uses_env_method(role):
-    # Given
-    env = role.env
-    bank, share = Mock(), Mock()
-
-    # When
-    role.create_bank(bank, [share])
-
-    # Then
-    env.create_bank.assert_called_with(bank, [share])
+    env.fund_company.assert_called_with(company, role, 200)
 
 
 def test_pay_taxes_uses_env_method(role):

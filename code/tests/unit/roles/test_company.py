@@ -161,3 +161,25 @@ def test_transfer_residual_cash_uses_env_method(role):
 
     # Then
     env.transfer_residual_cash.assert_called_with(role, founder, 50)
+
+
+def test_request_advances_uses_env_method(role):
+    # Given
+    env = role.env
+
+    # When
+    role.request_advances(100)
+
+    # Then
+    env.request_advances.assert_called_with(role, 100)
+
+
+def test_repay_advances_uses_env_method(role):
+    # Given
+    env = role.env
+
+    # When
+    role.repay_advances(100, 10)
+
+    # Then
+    env.repay_advances.assert_called_with(role, 100, 10)

@@ -18,7 +18,7 @@ def bank(fake_model, market):
     # Given
     model = fake_model
     bank = Bank(model)
-    market.add_deposit_bank(bank)
+    market.place_bank(bank)
     return bank
 
 
@@ -27,14 +27,14 @@ def firm(fake_model, market):
     # Given
     model = fake_model
     firm = Firm(model)
-    market.add_depositor(firm)
+    market.place_firm(firm)
     return firm
 
 
 def test_increases_firm_deposits(firm, bank, market):
     # Given
     bank.deposit_rate = 0.02
-    depositor = firm.roles["depositor"]
+    depositor = firm.roles["depositor_0"]
     deposit_bank = bank.roles["deposit_bank"]
     market.join_deposit_bank(depositor, deposit_bank, 2000)
 
@@ -49,7 +49,7 @@ def test_increases_firm_deposits(firm, bank, market):
 def test_increases_firm_deposit_interests(firm, bank, market):
     # Given
     bank.deposit_rate = 0.02
-    depositor = firm.roles["depositor"]
+    depositor = firm.roles["depositor_0"]
     deposit_bank = bank.roles["deposit_bank"]
     market.join_deposit_bank(depositor, deposit_bank, 2000)
 
@@ -66,7 +66,7 @@ def household(fake_model, market):
     # Given
     model = fake_model
     household = Household(model)
-    market.add_depositor(household)
+    market.place_household(household)
     return household
 
 

@@ -17,20 +17,16 @@ def union(fake_model):
 def cb(fake_model, union):
     # Given
     cb = CentralBank(fake_model)
-    country = union.spaces["country_0"]
-    country.add_monetary_authority(cb)
+    cb.national = True
+    union.place_central_bank(cb)
     return cb
 
 
 @pytest.fixture
-def bank(fake_model, union, cb):
+def bank(fake_model, union):
     # Given
     bank = Bank(fake_model)
-    bank.cb_id = cb.id
-    country = union.spaces["country_0"]
-    country.add_company(bank, "B")
-    market = union.spaces["credit_market"]
-    market.add_lender(bank)
+    union.place_bank(bank)
     return bank
 
 

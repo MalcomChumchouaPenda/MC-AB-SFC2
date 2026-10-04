@@ -70,7 +70,7 @@ def test_initializes_deposit_bank_id(fake_model):
     assert agent.bank_id is None
 
 
-def test_initializes_country_id(fake_model):
+def test_initializes_country_pos(fake_model):
     # Given
     model = fake_model
 
@@ -78,4 +78,4 @@ def test_initializes_country_id(fake_model):
     agent = EcoAgent(model)
 
     # Then
-    assert agent.country_id == 0
+    assert agent.country_pos == 0

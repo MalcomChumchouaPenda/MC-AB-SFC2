@@ -19,8 +19,8 @@ def cb(fake_model, market):
     # Given
     model = fake_model
     cb = CentralBank(model)
-    cb.country_id = 0
-    market.add_buyer(cb)
+    cb.national = True
+    market.place_central_bank(cb)
     return cb
 
 
@@ -29,8 +29,7 @@ def govt(fake_model, market):
     # Given
     model = fake_model
     govt = Government(model)
-    govt.country_id = 0
-    market.add_issuer(govt)
+    market.place_government(govt)
     return govt
 
 
@@ -39,8 +38,7 @@ def bank(fake_model, market):
     # Given
     model = fake_model
     bank = Bank(model)
-    bank.country_id = 0
-    market.add_buyer(bank)
+    market.place_central_bank(bank)
     return bank
 
 

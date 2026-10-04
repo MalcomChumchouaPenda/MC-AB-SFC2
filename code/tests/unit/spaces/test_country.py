@@ -18,6 +18,17 @@ def test_inherits_from_eco_space():
     assert is_derived
 
 
+def test_initializes_pos(fake_model):
+    # Given
+    model = fake_model
+
+    # When
+    country = Country(model)
+
+    # Then
+    assert country.pos == 0
+
+
 def test_initializes_inflation(fake_model):
     # Given
     model = fake_model
@@ -102,6 +113,7 @@ def country_without_markets(monkeypatch, fake_model):
     monkeypatch.setattr("model.spaces.country.DepositMarket", FakeDepositMarket)
     monkeypatch.setattr(Country, "add_space", Mock())
     country = Country(fake_model)
+    country.pos = 2
     return country
 
 
@@ -136,6 +148,19 @@ def test_create_markets_adds_deposit_market(country_without_markets):
 
     # Then
     country.add_space.assert_any_call(FakeDepositMarket, "deposit_market")
+
+
+def test_create_markets_sets_deposit_market_country_pos(country_without_markets):
+    # Given
+    market = Mock()
+    country = country_without_markets
+    country.add_space = lambda a, *b, **c: market if a is FakeDepositMarket else Mock()
+
+    # When
+    country.create_markets()
+
+    # Then
+    assert market.country_pos == country.pos
 
 
 # ---------------------------------------------------
@@ -179,7 +204,7 @@ def test_place_household_add_citizen_role(country_without_roles):
 
 def test_place_household_places_agent_into_goods_market(country_without_roles):
     # Given
-    household = Mock(country_id=1)
+    household = Mock(country_pos=1)
     country = country_without_roles
     market = country.spaces["goods_market"]
 
@@ -192,7 +217,7 @@ def test_place_household_places_agent_into_goods_market(country_without_roles):
 
 def test_place_household_places_agent_into_labor_market(country_without_roles):
     # Given
-    household = Mock(country_id=1)
+    household = Mock(country_pos=1)
     country = country_without_roles
     market = country.spaces["labor_market"]
 
@@ -205,7 +230,7 @@ def test_place_household_places_agent_into_labor_market(country_without_roles):
 
 def test_place_household_places_agent_into_deposit_market(country_without_roles):
     # Given
-    household = Mock(country_id=1)
+    household = Mock(country_pos=1)
     country = country_without_roles
     market = country.spaces["deposit_market"]
 
@@ -289,7 +314,7 @@ def test_place_firm_into_labor_market_if_domestic(country_without_roles, tradabl
     # Given
     country = country_without_roles
     market = country.spaces["labor_market"]
-    firm = Mock(tradable=tradable, country_id=country.id)
+    firm = Mock(tradable=tradable, country_pos=country.id)
 
     # When
     country.place_firm(firm)
@@ -365,7 +390,7 @@ def test_place_government_sets_fiscal_authority(country_without_roles):
 
 def test_place_government_into_deposit_market(country_without_roles):
     # Given
-    govt = Mock(country_id=1)
+    govt = Mock(country_pos=1)
     country = country_without_roles
     market = country.spaces["deposit_market"]
 
@@ -649,186 +674,6 @@ def test_update_equity_share_updates_graph_edge(country_with_company_and_founder
 
 
 # ---------------------------------------------------
-# FIRM CREATION
-# ----------------------------------------------------
-
-
-@pytest.fixture
-def country_before_creation(country_without_roles, make_dlist):
-    # Given
-    country = country_without_roles
-    country.model.firms = make_dlist()
-    country.model.banks = make_dlist()
-    country.add_company = Mock()
-    country.fund_company = Mock()
-    country.env = Mock()
-    country.spaces["goods_market"] = Mock()
-    country.spaces["labor_market"] = Mock()
-    country.spaces["deposit_market"] = Mock()
-    return country
-
-
-@pytest.fixture
-def share():
-    founder = Mock(resid_equity=10)
-    return {"founder": founder, "amount": 5}
-
-
-@pytest.mark.parametrize("trad, sector", [(True, "FT"), (False, "FNT")])
-def test_create_firm_add_and_fund_company(country_before_creation, share, trad, sector):
-    # Given
-    firm = Mock()
-    company = Mock()
-    country = country_before_creation
-    country.add_company.return_value = company
-
-    # When
-    country.create_firm(firm, [share], tradable=trad)
-
-    # Then
-    country.add_company.assert_called_with(firm, sector=sector)
-    country.fund_company.assert_called_with(company, share["founder"], 5)
-
-
-def test_dont_create_trad_firm_in_goods_market(country_before_creation, share):
-    # Given
-    firm = Mock()
-    country = country_before_creation
-
-    # When
-    country.create_firm(firm, [share], tradable=True)
-
-    # Then
-    country.spaces["goods_market"].add_producer.assert_not_called()
-
-
-def test_create_non_trad_firm_in_goods_market(country_before_creation, share):
-    # Given
-    firm = Mock()
-    country = country_before_creation
-    market = country.spaces["goods_market"]
-
-    # When
-    country.create_firm(firm, [share], tradable=False)
-
-    # Then
-    market.add_producer.assert_called_with(firm)
-
-
-@pytest.mark.parametrize("tradable", [True, False])
-def test_create_firm_add_employer_role(country_before_creation, share, tradable):
-    # Given
-    firm = Mock()
-    country = country_before_creation
-    market = country.spaces["labor_market"]
-
-    # When
-    country.create_firm(firm, [share], tradable=tradable)
-
-    # Then
-    market.add_employer.assert_called_with(firm)
-
-
-@pytest.mark.parametrize("tradable", [True, False])
-def test_create_firm_add_depositor_role(country_before_creation, share, tradable):
-    # Given
-    firm = Mock()
-    country = country_before_creation
-    market = country.spaces["deposit_market"]
-
-    # When
-    country.create_firm(firm, [share], tradable=tradable)
-
-    # Then
-    market.add_depositor.assert_called_with(firm)
-
-
-@pytest.mark.parametrize("tradable", [True, False])
-def test_create_firm_place_firm_in_env(country_before_creation, share, tradable):
-    # Given
-    firm = Mock()
-    country = country_before_creation
-
-    # When
-    country.create_firm(firm, [share], tradable=tradable)
-
-    # Then
-    country.env.place_firm.assert_called_with(firm, tradable=tradable)
-
-
-@pytest.mark.parametrize("tradable", [True, False])
-def test_create_firm_registers_firm(country_before_creation, share, tradable):
-    # Given
-    firm = Mock()
-    country = country_before_creation
-    firms = country.model.firms
-
-    # When
-    country.create_firm(firm, [share], tradable=tradable)
-
-    # Then
-    assert firms[0] is firm
-
-
-# ---------------------------------------------------
-# BANK CREATION
-# ----------------------------------------------------
-
-
-def test_create_bank_add_and_fund_company(country_before_creation, share):
-    # Given
-    bank = Mock()
-    company = Mock()
-    country = country_before_creation
-    country.add_company.return_value = company
-
-    # When
-    country.create_bank(bank, [share])
-
-    # Then
-    country.add_company.assert_called_with(bank, sector="B")
-    country.fund_company.assert_called_with(company, share["founder"], 5)
-
-
-def test_create_bank_add_deposit_bank_role(country_before_creation, share):
-    # Given
-    bank = Mock()
-    country = country_before_creation
-    market = country.spaces["deposit_market"]
-
-    # When
-    country.create_bank(bank, [share])
-
-    # Then
-    market.add_deposit_bank.assert_called_with(bank)
-
-
-def test_create_bank_place_bank_in_env(country_before_creation, share):
-    # Given
-    bank = Mock()
-    country = country_before_creation
-
-    # When
-    country.create_bank(bank, [share])
-
-    # Then
-    country.env.place_bank.assert_called_with(bank)
-
-
-def test_create_bank_place_bank_in_env(country_before_creation, share):
-    # Given
-    country = country_before_creation
-    banks = country.model.banks
-    bank = Mock()
-
-    # When
-    country.create_bank(bank, [share])
-
-    # Then
-    assert bank is banks[0]
-
-
-# ---------------------------------------------------
 # TRANSFERS
 # ----------------------------------------------------
 
@@ -858,6 +703,40 @@ def test_transfer_residual_cash_of_company(country_before_transaction):
     # Then
     country.transfer_stock.assert_any_call("cash", company.id, founder.id, 100)
     country.transfer_stock.assert_any_call("equities", founder.id, company.id, 100)
+
+
+# ---------------------------------------------------
+# CASH ADVANCE REQUEST / REPAYMENT
+# ----------------------------------------------------
+
+
+def test_request_advances_updates_accounts(country_before_transaction):
+    # Given
+    country = country_before_transaction
+    country.monetary_authority = Mock(id=1)
+    company = Mock(id=2)
+
+    # When
+    country.request_advances(company, 100)
+
+    # Then
+    country.transfer_stock.assert_any_call("cash", 1, 2, 100)
+    country.transfer_stock.assert_any_call("advances", 2, 1, 100)
+
+
+def test_repay_advances_updates_accounts(country_before_transaction):
+    # Given
+    country = country_before_transaction
+    country.monetary_authority = Mock(id=1)
+    company = Mock(id=2)
+
+    # When
+    country.repay_advances(company, 100, 10)
+
+    # Then
+    country.transfer_stock.assert_any_call("cash", 2, 1, 110)
+    country.transfer_stock.assert_any_call("advances", 1, 2, 100)
+    country.make_transaction.assert_any_call("adv_interests", 2, 1, 10)
 
 
 # ---------------------------------------------------

@@ -18,6 +18,17 @@ def test_inherits_from_eco_space():
     assert is_derived
 
 
+def test_initializes_country_pos(fake_model):
+    # Given
+    model = fake_model
+
+    # When
+    market = DepositMarket(model)
+
+    # Then
+    assert market.country_pos == 0
+
+
 # ---------------------------------------------------
 # ROLES MANAGEMENT
 # ----------------------------------------------------
@@ -55,7 +66,7 @@ def test_place_firm_add_depositor_role(market_without_roles):
     # Given
     firm = Mock()
     market = market_without_roles
-    market.country_id = 2
+    market.country_pos = 2
 
     # When
     market.place_firm(firm)

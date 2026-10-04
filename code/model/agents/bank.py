@@ -79,17 +79,20 @@ class Bank(EcoAgent):
         required = self.p.mu2 * account["deposits"]
         shortage = max(required - account["cash"], 0)
         if shortage > 0:
-            role = self.roles["lender"]
+            role = self.roles["company"]
             role.request_advances(shortage)
 
     def repay_cash_advances(self):
-        discount_rate = self.roles["company"].get_discount_rate()
+        role = self.roles["company"]
+        discount_rate = role.get_discount_rate()
         principal = abs(self.account["advances"])
         if principal > 0:
             interests = discount_rate * principal
-            role = self.roles["lender"]
             role.repay_advances(principal, interests)
 
+    #
+    # Bonds transactions
+    #
     def buy_bonds(self):
         role = self.roles["bond_buyer"]
         bond_issuers = self.find_bond_issuers()

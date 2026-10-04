@@ -35,11 +35,9 @@ class Citizen(EcoRole):
     #
     # Creation actions
     #
-    def create_firm(self, firm, shares, tradable):
-        self.env.create_firm(firm, shares, tradable)
-
-    def create_bank(self, bank, shares):
-        self.env.create_bank(bank, shares)
+    def fund_company(self, agent_id, amount):
+        company = self.env.roles[agent_id]
+        self.env.fund_company(company, self, amount)
 
     def pay_taxes(self, amount):
         self.env.pay_taxes(self, amount)

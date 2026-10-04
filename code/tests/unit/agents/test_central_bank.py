@@ -29,6 +29,17 @@ def test_initializes_previous_discount_rate(fake_model):
     assert cb.prev_discount_rate == 0
 
 
+def test_initializes_national(fake_model):
+    # Given
+    model = fake_model
+
+    # When
+    cb = CentralBank(model)
+
+    # Then
+    assert cb.national is False
+
+
 # ---------------------------------------------------
 # BONDS PURCHASES
 # ----------------------------------------------------
@@ -40,13 +51,13 @@ def cb_as_bond_buyer(fake_model):
     role = Mock()
     cb = CentralBank(fake_model)
     cb.roles = {"bond_buyer": role}
-    cb.country_id = 1
+    cb.country_pos = 1
     return cb, role
 
 
 def test_buy_all_domestic_remaining_bonds(cb_as_bond_buyer):
     # Given
-    issuer = Mock(country_id=1, bond_number=5)
+    issuer = Mock(country_pos=1, bond_number=5)
     cb, role = cb_as_bond_buyer
     role.find_issuers.return_value = [issuer]
 
@@ -59,7 +70,7 @@ def test_buy_all_domestic_remaining_bonds(cb_as_bond_buyer):
 
 def test_dont_buy_foreign_bonds(cb_as_bond_buyer):
     # Given
-    issuer = Mock(country_id=2, bond_number=5)
+    issuer = Mock(country_pos=2, bond_number=5)
     cb, role = cb_as_bond_buyer
     role.find_issuers.return_value = [issuer]
 

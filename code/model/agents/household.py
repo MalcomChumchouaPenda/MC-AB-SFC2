@@ -25,6 +25,7 @@ class Household(EcoAgent):
         self.employed_labor = 0
         self.income = 0
         self.disposable_income = 0
+        self.deposit_bank_id = None
 
         # others props
         self.labor_supply = 1.0
@@ -165,7 +166,7 @@ class Household(EcoAgent):
         equity = self.account["equities"]
         dividends = self.account["dividends"]
         default_prob = roles["citizen"].get_prob_failure()
-        deposit_rate = roles["depositor"].get_deposit_rate()
+        deposit_rate = roles["depositor"].get_deposit_rate(self.deposit_bank_id)
         profit_ratio = dividends / equity if equity else 0
         if profit_ratio < deposit_rate or equity <= 0:
             return p.lambda_
@@ -222,24 +223,45 @@ class Household(EcoAgent):
         return random.uniform(minimum, maximum)
 
     def create_company(self, shares, sector):
-        role = self.roles["citizen"]
         if sector == "B":
-            bank = Bank(self.model)
-            role.create_bank(bank, shares)
+            self._create_bank(shares)
         else:
-            firm = Firm(self.model)
-            tradable = sector == "FT"
-            role.create_firm(firm, shares, tradable=tradable)
+            self._create_firm(shares, sector)
 
+    def _create_bank(self, shares):
+        model = self.model
+        bank = Bank(model)
+        model.union.place_bank(bank)
+        model.banks.append(bank)
+        for share in shares:
+            share["founder"].fund_company(bank.id, share["amount"])
+
+    def _create_firm(self, shares, sector):
+        model = self.model
+        firm = Firm(model)
+        firm.tradable = sector == "FT"
+        model.union.place_firm(firm)
+        model.firms.append(firm)
+        for share in shares:
+            share["founder"].fund_company(firm.id, share["amount"])
+
+    #
+    # Deposits management
+    #
     def make_deposits(self):
         account = self.account
+        bank_id = self.deposit_bank_id
         role = self.roles["depositor"]
-        role.make_deposits(account["cash"])
+        role.make_deposits(bank_id, account["cash"])
 
     def choose_deposit_bank(self):
         role = self.roles["depositor"]
         banks = role.find_deposit_banks()
         if len(banks) > 0:
+            bank_id = self.deposit_bank_id
+            if bank_id is not None:
+                role.leave_deposit_bank(bank_id)
             random = self.model.random
             new_bank = random.choice(banks)
-            role.choose_bank(new_bank)
+            role.join_deposit_bank(new_bank.id)
+            self.deposit_bank_id = new_bank.id

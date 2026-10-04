@@ -45,10 +45,11 @@ def test_find_deposit_banks_from_env(role):
 
 def test_get_deposit_rate_from_deposit_bank(role):
     # Given
-    role.deposit_bank = Mock(deposit_rate=0.01)
+    deposit_bank = Mock(deposit_rate=0.01)
+    role.env.roles = {1: deposit_bank, 0: Mock()}
 
     # When
-    perceived = role.get_deposit_rate()
+    perceived = role.get_deposit_rate(1)
 
     # Then
     assert perceived == 0.01
@@ -59,66 +60,53 @@ def test_get_deposit_rate_from_deposit_bank(role):
 # ----------------------------------------------------
 
 
-def test_make_deposits_into_env(role):
+@pytest.fixture
+def banks(role):
     # Given
-    env = role.env
-    deposit_bank = Mock()
-
-    # When
-    role.make_deposits(deposit_bank, 200)
-
-    # Then
-    env.make_deposits.assert_called_with(role, deposit_bank, 200)
+    banks = {i: Mock() for i in range(4)}
+    role.env.roles = banks
+    return banks
 
 
-def test_withdraw_deposits_into_env(role):
+def test_make_deposits_uses_env_method(role, banks):
     # Given
-    env = role.env
-    deposit_bank = Mock()
-
-    # When
-    role.withdraw_deposits(deposit_bank, 200)
-
-    # Then
-    env.withdraw_deposits.assert_called_with(role, deposit_bank, 200)
-
-
-def test_choose_bank_into_env(role):
-    # Given
-    env = role.env
-    role.deposit_bank = None
-    deposit_bank = Mock()
-
-    # When
-    role.choose_bank(deposit_bank)
-
-    # Then
-    env.join_deposit_bank.assert_called_with(role, deposit_bank, 0)
-
-
-def test_choose_bank_with_initial_amount(role):
-    # Given
-    env = role.env
-    role.deposit_bank = None
-    deposit_bank = Mock()
-
-    # When
-    role.choose_bank(deposit_bank, amount=100)
-
-    # Then
-    env.join_deposit_bank.assert_called_with(role, deposit_bank, 100)
-
-
-def test_choose_bank_to_switch_bank(role):
-    # Given
-    old_deposit_bank = Mock()
-    new_deposit_bank = Mock()
-    role.deposit_bank = old_deposit_bank
     env = role.env
 
     # When
-    role.choose_bank(new_deposit_bank)
+    role.make_deposits(2, 200)
 
     # Then
-    env.leave_deposit_bank.assert_called_with(role)
-    env.join_deposit_bank.assert_called_with(role, new_deposit_bank, 0)
+    env.make_deposits.assert_called_with(role, banks[2], 200)
+
+
+def test_withdraw_deposits_uses_env_method(role, banks):
+    # Given
+    env = role.env
+
+    # When
+    role.withdraw_deposits(2, 200)
+
+    # Then
+    env.withdraw_deposits.assert_called_with(role, banks[2], 200)
+
+
+def test_join_deposit_bank_uses_env_method(role, banks):
+    # Given
+    env = role.env
+
+    # When
+    role.join_deposit_bank(1)
+
+    # Then
+    env.join_deposit_bank.assert_called_with(role, banks[1], 0)
+
+
+def test_leave_deposit_bank_uses_env_method(role, banks):
+    # Given
+    env = role.env
+
+    # When
+    role.leave_deposit_bank(1)
+
+    # Then
+    env.leave_deposit_bank.assert_called_with(role, banks[1])

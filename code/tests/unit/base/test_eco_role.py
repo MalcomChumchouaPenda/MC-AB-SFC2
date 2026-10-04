@@ -133,13 +133,13 @@ def test_change_agent_deposit_bank_id():
     assert agent.bank_id == 2
 
 
-def test_expose_agent_country_id():
+def test_expose_agent_country_pos():
     # Given
     agent, env = Mock(), Mock()
     role = EcoRole(agent, env)
 
     # When
-    agent.country_id = 2
+    agent.country_pos = 2
 
     # Then
-    assert role.country_id == 2
+    assert role.country_pos == 2

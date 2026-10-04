@@ -11,51 +11,47 @@ def union(fake_model):
     union = MonetaryUnion(fake_model)
     union.create_markets()
     union.create_countries(1)
+    country = union.spaces["country_0"]
+    country.monetary_authority = Mock()
     return union
 
 
 @pytest.fixture
-def country(union):
-    # Given
-    country = union.spaces["country_0"]
-    country.monetary_authority = Mock()
-    return country
-
-
-@pytest.fixture
-def markets(union, country):
-    # Given
-    credit_market = union.spaces["credit_market"]
-    deposit_market = country.spaces["deposit_market"]
-    return [credit_market, deposit_market]
-
-
-@pytest.fixture
-def banks(fake_model, country):
+def banks(fake_model, union):
     # Given
     banks = []
     model = fake_model
     for _ in range(2):
         bank = Bank(model)
         banks.append(bank)
-        country.add_company(bank, "B")
+        union.place_bank(bank)
     return banks
 
 
 @pytest.fixture
-def firm(fake_model):
+def firm(fake_model, union):
     # Given
     model = fake_model
     firm = Firm(model)
+    union.place_firm(firm)
     return firm
+
+
+@pytest.fixture
+def markets(union):
+    # Given
+    country = union.spaces["country_0"]
+    credit_market = union.spaces["credit_market"]
+    deposit_market = country.spaces["deposit_market"]
+    return [credit_market, deposit_market]
 
 
 @pytest.fixture
 def firm_with_deposit_bank(firm, banks, markets):
     # Given
-    supplier = markets[1].add_depositor(firm)
-    deposit_bank = markets[1].add_deposit_bank(banks[1])
-    markets[1].join_deposit_bank(supplier, deposit_bank, amount=100)
+    depositor = firm.roles["depositor_0"]
+    deposit_bank = banks[1].roles["deposit_bank"]
+    markets[1].join_deposit_bank(depositor, deposit_bank, amount=100)
     return firm, banks[1]
 
 
@@ -63,8 +59,8 @@ def firm_with_deposit_bank(firm, banks, markets):
 def bank_with_loan(firm, banks, markets):
     # Given
     amount, rate = 50, 0.1
-    borrower = markets[0].add_borrower(firm)
-    lender = markets[0].add_lender(banks[0])
+    borrower = firm.roles["borrower"]
+    lender = banks[0].roles["lender"]
     markets[0].grant_loan(lender, borrower, amount, rate)
     return banks[0], amount, rate
 

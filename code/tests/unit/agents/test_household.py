@@ -130,6 +130,17 @@ def test_initializes_incomes(fake_model):
     assert household.disposable_income == 0
 
 
+def test_initializes_deposit_bank_id(fake_model):
+    # Given
+    model = fake_model
+
+    # When
+    household = Household(model)
+
+    # Then
+    assert household.deposit_bank_id is None
+
+
 # ----------------------------------------------------
 # JOB SEARCH
 # ----------------------------------------------------
@@ -668,6 +679,7 @@ def test_consume_with_insufficient_deposits(hh_as_general_consumer):
 def hh_before_allocation(hh_with_roles_and_account):
     # Given
     household, roles, _ = hh_with_roles_and_account
+    household.deposit_bank_id = 1
     roles["citizen"] = Mock()
     roles["depositor"] = Mock()
     return household
@@ -699,6 +711,24 @@ def test_calc_expected_net_worth(hh_before_allocation):
 
     # Then
     assert expected_worth == 1100
+
+
+def test_calc_liquidity_pref_with_deposit_bank_rate(hh_before_allocation):
+    # Given
+    household = hh_before_allocation
+    household.account["dividends"] = 10
+    household.account["equities"] = 100
+    household.p.lambda_ = 0.6
+    roles = household.roles
+    roles["citizen"].get_prob_failure.return_value = 0.10
+    roles["depositor"].get_deposit_rate.return_value = 0.05
+    bank_id = household.deposit_bank_id
+
+    # When
+    household.calc_liquidity_preference()
+
+    # Then
+    roles["depositor"].get_deposit_rate.assert_called_with(bank_id)
 
 
 def test_calc_liquidity_pref_when_equity_is_more_profitable(hh_before_allocation):
@@ -918,52 +948,149 @@ def test_calc_initial_equity_uses_exogenous_equity(hh_before_investment, sector)
     assert equity == 1000
 
 
-def test_create_company_can_create_non_tradable_firms(hh_before_investment):
+@pytest.mark.parametrize("sector", ["FT", "FNT"])
+def test_create_company_creates_firm(hh_before_investment, sector):
     # Given
-    firm = Mock()
-    FakeFirm.return_value = firm
+    shares = [{"founder": Mock(), "amount": 100}]
     household = hh_before_investment
-    role = household.roles["citizen"]
-    shares = [Mock() for _ in range(5)]
+    household.model.union = Mock()
+    household.model.firms = []
 
     # When
-    household.create_company(shares, sector="FNT")
+    household.create_company(shares, sector=sector)
 
     # Then
     FakeFirm.assert_called_with(household.model)
-    role.create_firm.assert_called_once_with(firm, shares, tradable=False)
 
 
-def test_create_company_can_create_tradable_firms(hh_before_investment):
+@pytest.mark.parametrize("sector, tradable", [("FT", True), ("FNT", False)])
+def test_create_company_sets_firm_tradable(hh_before_investment, sector, tradable):
     # Given
     firm = Mock()
     FakeFirm.return_value = firm
+    shares = [{"founder": Mock(), "amount": 100}]
     household = hh_before_investment
-    role = household.roles["citizen"]
-    shares = [Mock() for _ in range(5)]
+    household.model.union = Mock()
+    household.model.firms = []
 
     # When
-    household.create_company(shares, sector="FT")
+    household.create_company(shares, sector=sector)
 
     # Then
-    FakeFirm.assert_called_with(household.model)
-    role.create_firm.assert_called_once_with(firm, shares, tradable=True)
+    assert firm.tradable == tradable
 
 
-def test_create_company_can_create_bank(hh_before_investment):
+@pytest.mark.parametrize("sector", ["FT", "FNT"])
+def test_create_company_places_firm_into_union(hh_before_investment, sector):
     # Given
-    bank = Mock()
-    FakeBank.return_value = bank
+    firm, union = Mock(), Mock()
+    FakeFirm.return_value = firm
+    shares = [{"founder": Mock(), "amount": 100}]
     household = hh_before_investment
-    role = household.roles["citizen"]
-    shares = [Mock() for _ in range(5)]
+    household.model.union = union
+    household.model.firms = []
+
+    # When
+    household.create_company(shares, sector=sector)
+
+    # Then
+    union.place_firm.assert_called_once_with(firm)
+
+
+@pytest.mark.parametrize("sector", ["FT", "FNT"])
+def test_create_company_append_to_model_firms(hh_before_investment, sector):
+    # Given
+    firm = Mock()
+    FakeFirm.return_value = firm
+    shares = [{"founder": Mock(), "amount": 100}]
+    household = hh_before_investment
+    household.model.union = Mock()
+    household.model.firms = []
+
+    # When
+    household.create_company(shares, sector=sector)
+
+    # Then
+    assert firm in household.model.firms
+
+
+@pytest.mark.parametrize("sector", ["FT", "FNT"])
+def test_create_company_fund_firm_with_shares(hh_before_investment, sector):
+    # Given
+    founder, firm = Mock(), Mock()
+    FakeFirm.return_value = firm
+    shares = [{"founder": founder, "amount": 100}]
+    household = hh_before_investment
+    household.model.union = Mock()
+    household.model.firms = []
+
+    # When
+    household.create_company(shares, sector=sector)
+
+    # Then
+    founder.fund_company.assert_called_with(firm.id, 100)
+
+
+def test_create_company_creates_bank(hh_before_investment):
+    # Given
+    shares = [{"founder": Mock(), "amount": 100}]
+    household = hh_before_investment
+    household.model.union = Mock()
+    household.model.banks = []
 
     # When
     household.create_company(shares, sector="B")
 
     # Then
     FakeBank.assert_called_with(household.model)
-    role.create_bank.assert_called_once_with(bank, shares)
+
+
+def test_create_company_places_bank_into_union(hh_before_investment):
+    # Given
+    bank, union = Mock(), Mock()
+    FakeBank.return_value = bank
+    shares = [{"founder": Mock(), "amount": 100}]
+    household = hh_before_investment
+    household.model.union = union
+    household.model.banks = []
+
+    # When
+    household.create_company(shares, sector="B")
+
+    # Then
+    union.place_bank.assert_called_once_with(bank)
+
+
+def test_create_company_append_to_model_banks(hh_before_investment):
+    # Given
+    bank = Mock()
+    FakeBank.return_value = bank
+    shares = [{"founder": Mock(), "amount": 100}]
+    household = hh_before_investment
+    household.model.union = Mock()
+    household.model.banks = []
+
+    # When
+    household.create_company(shares, sector="B")
+
+    # Then
+    assert bank in household.model.banks
+
+
+def test_create_company_fund_bank_with_shares(hh_before_investment):
+    # Given
+    founder, bank = Mock(), Mock()
+    FakeBank.return_value = bank
+    shares = [{"founder": founder, "amount": 100}]
+    household = hh_before_investment
+    household.model.union = Mock()
+    household.model.banks = []
+
+    # When
+    household.create_company(shares, sector="B")
+
+    # Then
+    founder.fund_company.assert_called_with(bank.id, 100)
 
 
 @pytest.fixture
@@ -979,12 +1106,13 @@ def test_make_deposits_with_residual_cash(hh_as_depositor):
     # Given
     household, role = hh_as_depositor
     household.account["cash"] = 500
+    household.deposit_bank_id = 2
 
     # When
     household.make_deposits()
 
     # Then
-    role.make_deposits.assert_called_with(500)
+    role.make_deposits.assert_called_with(2, 500)
 
 
 @pytest.fixture
@@ -1078,9 +1206,44 @@ def test_invest_equity_does_nothing_when_insufficient_equity(hh_as_investor):
     household.make_deposits.assert_called_with()
 
 
-def test_choose_deposit_bank_opens_account_randomly(hh_as_depositor):
+# ---------------------------------------------------
+# DEPOSIT BANK CHOICE
+# ----------------------------------------------------
+
+
+def test_choose_deposit_bank_leave_old_deposit_bank(hh_as_depositor):
     # Given
-    banks = [Mock() for _ in range(3)]
+    banks = [Mock(id=i) for i in range(3)]
+    household, role = hh_as_depositor
+    household.deposit_bank_id = 4
+    household.model.random.choice.side_effect = lambda x: x[-1]
+    role.find_deposit_banks.return_value = banks
+
+    # When
+    household.choose_deposit_bank()
+
+    # Then
+    role.leave_deposit_bank.assert_called_once_with(4)
+
+
+def test_choose_deposit_bank_doesnt_leave_null_deposit_bank(hh_as_depositor):
+    # Given
+    banks = [Mock(id=i) for i in range(3)]
+    household, role = hh_as_depositor
+    household.deposit_bank_id = None
+    household.model.random.choice.side_effect = lambda x: x[-1]
+    role.find_deposit_banks.return_value = banks
+
+    # When
+    household.choose_deposit_bank()
+
+    # Then
+    role.leave_deposit_bank.assert_not_called()
+
+
+def test_choose_deposit_bank_join_new_deposit_bank(hh_as_depositor):
+    # Given
+    banks = [Mock(id=i) for i in range(3)]
     household, role = hh_as_depositor
     household.model.random.choice.side_effect = lambda x: x[-1]
     role.find_deposit_banks.return_value = banks
@@ -1089,4 +1252,18 @@ def test_choose_deposit_bank_opens_account_randomly(hh_as_depositor):
     household.choose_deposit_bank()
 
     # Then
-    role.choose_bank.assert_called_once_with(banks[-1])
+    role.join_deposit_bank.assert_called_once_with(banks[-1].id)
+
+
+def test_choose_deposit_bank_sets_deposit_bank_id(hh_as_depositor):
+    # Given
+    banks = [Mock(id=i) for i in range(3)]
+    household, role = hh_as_depositor
+    household.model.random.choice.side_effect = lambda x: x[-1]
+    role.find_deposit_banks.return_value = banks
+
+    # When
+    household.choose_deposit_bank()
+
+    # Then
+    assert household.deposit_bank_id == banks[-1].id

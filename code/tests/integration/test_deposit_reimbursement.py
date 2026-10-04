@@ -23,36 +23,35 @@ def deposit_market(union):
 
 
 @pytest.fixture
-def govt(fake_model, union, deposit_market):
+def govt(fake_model, union):
     # Given
     govt = Government(fake_model)
-    bond_market = union.spaces["bond_market"]
-    bond_market.add_issuer(govt)
-    deposit_market.add_guarantee(govt)
+    union.place_government(govt)
     return govt
 
 
 @pytest.fixture
-def bank(fake_model, deposit_market):
+def bank(fake_model, union):
     # Given
     bank = Bank(fake_model)
-    deposit_bank = deposit_market.add_deposit_bank(bank)
+    union.place_bank(bank)
+    deposit_bank = bank.roles["deposit_bank"]
     deposit_bank.defaulted = True
     return bank
 
 
 @pytest.fixture
-def firm(fake_model, deposit_market):
+def firm(fake_model, union):
     # Given
     firm = Firm(fake_model)
-    deposit_market.add_depositor(firm)
+    union.place_firm(firm)
     return firm
 
 
 def test_issues_bonds_for_reimbursement(firm, bank, govt, deposit_market):
     # Given
     firm.account["cash"] = 1000
-    depositor = firm.roles["depositor"]
+    depositor = firm.roles["depositor_0"]
     deposit_bank = bank.roles["deposit_bank"]
     deposit_market.join_deposit_bank(depositor, deposit_bank, 500)
 
@@ -68,7 +67,7 @@ def test_issues_bonds_for_reimbursement(firm, bank, govt, deposit_market):
 def test_increases_firm_cash(firm, bank, govt, deposit_market):
     # Given
     firm.account["cash"] = 1000
-    depositor = firm.roles["depositor"]
+    depositor = firm.roles["depositor_0"]
     deposit_bank = bank.roles["deposit_bank"]
     deposit_market.join_deposit_bank(depositor, deposit_bank, 500)
 
@@ -84,7 +83,7 @@ def test_increases_firm_cash(firm, bank, govt, deposit_market):
 def test_clears_firm_deposits(firm, bank, govt, deposit_market):
     # Given
     firm.account["cash"] = 1000
-    depositor = firm.roles["depositor"]
+    depositor = firm.roles["depositor_0"]
     deposit_bank = bank.roles["deposit_bank"]
     deposit_market.join_deposit_bank(depositor, deposit_bank, 500)
 
@@ -98,11 +97,11 @@ def test_clears_firm_deposits(firm, bank, govt, deposit_market):
 
 
 @pytest.fixture
-def household(fake_model, deposit_market):
+def household(fake_model, union):
     # Given
     model = fake_model
     household = Household(model)
-    deposit_market.add_depositor(household)
+    union.place_household(household)
     return household
 
 

@@ -308,7 +308,7 @@ def test_doesnot_request_advance_when_sufficient_reserves(bank_before_advance):
     # Given
     bank = bank_before_advance
     bank.account["cash"] = 200
-    role = bank.roles["lender"]
+    role = bank.roles["company"]
 
     # When
     bank.request_cash_advances()
@@ -321,7 +321,7 @@ def test_request_advance_when_insufficient_reserves(bank_before_advance):
     # Given
     bank = bank_before_advance
     bank.account["cash"] = 50
-    role = bank.roles["lender"]
+    role = bank.roles["company"]
 
     # When
     bank.request_cash_advances()
@@ -334,15 +334,14 @@ def test_repay_advance_when_insufficient_reserves(bank_before_advance):
     # Given
     bank = bank_before_advance
     bank.account["advances"] = -100
-    lender_role = bank.roles["lender"]
-    company_role = bank.roles["company"]
-    company_role.get_discount_rate.return_value = 0.02
+    role = bank.roles["company"]
+    role.get_discount_rate.return_value = 0.02
 
     # When
     bank.repay_cash_advances()
 
     # Then
-    lender_role.repay_advances.assert_called_with(100, 2)
+    role.repay_advances.assert_called_with(100, 2)
 
 
 # ---------------------------------------------------

@@ -18,9 +18,7 @@ def country(fake_model):
 def bank(fake_model, country):
     # Given
     bank = Bank(fake_model)
-    country.add_company(bank, sector="B")
-    market = country.spaces["deposit_market"]
-    market.add_deposit_bank(bank)
+    country.place_bank(bank)
     return bank
 
 

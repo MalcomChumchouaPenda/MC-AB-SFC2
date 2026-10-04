@@ -40,3 +40,9 @@ class Company(EcoRole):
 
     def transfer_residual_cash(self, founder, amount):
         self.env.transfer_residual_cash(self, founder, amount)
+
+    def request_advances(self, amount):
+        self.env.request_advances(self, amount)
+
+    def repay_advances(self, principal, interests):
+        self.env.repay_advances(self, principal, interests)

@@ -1,10 +1,12 @@
-from agentpy import AgentDList
 from model.base import EcoSpace
 from model.roles.lender import Lender
 from model.roles.borrower import Borrower
 
 
 class CreditMarket(EcoSpace):
+
+    def setup(self):
+        super().setup()
 
     @property
     def discount_rate(self):
@@ -43,16 +45,3 @@ class CreditMarket(EcoSpace):
         self.transfer_stock("loans", lender.id, borrower.id, amount)
         self.make_transaction("loan_defaults", lender.id, borrower.id, amount)
         self.graph[borrower][lender]["amount"] -= amount
-
-    #
-    # Cash advances
-    #
-    def request_advances(self, lender, amount):
-        self.transfer_stock("cash", lender.cb_id, lender.id, amount)
-        self.transfer_stock("advances", lender.id, lender.cb_id, amount)
-
-    def repay_advances(self, lender, principal, interests):
-        total = principal + interests
-        self.transfer_stock("cash", lender.id, lender.cb_id, total)
-        self.transfer_stock("advances", lender.cb_id, lender.id, principal)
-        self.make_transaction("adv_interests", lender.id, lender.cb_id, interests)

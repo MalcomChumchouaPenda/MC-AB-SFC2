@@ -12,6 +12,7 @@ class Country(EcoSpace):
 
     def setup(self):
         super().setup()
+        self.pos = 0
         self.gdp = 0
         self.inflation = 0
         self.prob_failure = 0
@@ -23,7 +24,8 @@ class Country(EcoSpace):
     def create_markets(self):
         self.add_space(GoodsMarket, "goods_market", tradable=False)
         self.add_space(LaborMarket, "labor_market")
-        self.add_space(DepositMarket, "deposit_market")
+        market = self.add_space(DepositMarket, "deposit_market")
+        market.country_pos = self.pos
 
     #
     # Role management
@@ -35,7 +37,7 @@ class Country(EcoSpace):
         self.spaces["deposit_market"].place_household(household)
 
     def place_firm(self, firm):
-        if firm.country_id == self.id:
+        if firm.country_pos == self.id:
             self.spaces["labor_market"].place_firm(firm)
         if firm.tradable:
             self._add_company(firm, "FT")
@@ -100,6 +102,7 @@ class Country(EcoSpace):
             self.graph[company][founder]["value"] += amount
         else:
             self.graph.add_edge(company, founder, value=amount)
+
         self.transfer_stock("cash", founder.id, company.id, amount)
         self.transfer_stock("equities", company.id, founder.id, amount)
 
@@ -120,39 +123,6 @@ class Country(EcoSpace):
         auth_id = self.fiscal_authority.id
         self.transfer_stock("cash", payer.id, auth_id, amount)
         self.make_transaction("taxes", payer.id, auth_id, amount)
-
-    #
-    # Firm creation
-    #
-    def create_firm(self, firm, shares, tradable):
-        sector = "FT" if tradable else "FNT"
-        company = self.add_company(firm, sector=sector)
-        self._place_firm(firm, tradable)
-        self.model.firms.append(firm)
-        for share in shares:
-            founder = share["founder"]
-            amount = share["amount"]
-            self.fund_company(company, founder, amount)
-
-    def _place_firm(self, firm, tradable):
-        self.env.place_firm(firm, tradable=tradable)
-        self.spaces["deposit_market"].add_depositor(firm)
-        self.spaces["labor_market"].add_employer(firm)
-        if not tradable:
-            self.spaces["goods_market"].add_producer(firm)
-
-    #
-    # Bank creation
-    #
-    def create_bank(self, bank, shares):
-        company = self.add_company(bank, sector="B")
-        for share in shares:
-            founder = share["founder"]
-            amount = share["amount"]
-            self.fund_company(company, founder, amount)
-        self.model.banks.append(bank)
-        self.env.place_bank(bank)
-        self.spaces["deposit_market"].add_deposit_bank(bank)
 
     #
     # Profit transfers
@@ -176,6 +146,21 @@ class Country(EcoSpace):
     def transfer_residual_cash(self, company, founder, amount):
         self.transfer_stock("cash", company.id, founder.id, amount)
         self.transfer_stock("equities", founder.id, company.id, amount)
+
+    #
+    # Cash advances
+    #
+    def request_advances(self, lender, amount):
+        cb_id = self.monetary_authority.id
+        self.transfer_stock("cash", cb_id, lender.id, amount)
+        self.transfer_stock("advances", lender.id, cb_id, amount)
+
+    def repay_advances(self, lender, principal, interests):
+        cb_id = self.monetary_authority.id
+        total = principal + interests
+        self.transfer_stock("cash", lender.id, cb_id, total)
+        self.transfer_stock("advances", cb_id, lender.id, principal)
+        self.make_transaction("adv_interests", lender.id, cb_id, interests)
 
     #
     # Evolution

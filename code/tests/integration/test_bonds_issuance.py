@@ -22,12 +22,10 @@ def country(union):
 
 
 @pytest.fixture
-def govt(fake_model, union, country):
+def govt(fake_model, union):
     # Given
     govt = Government(fake_model)
-    country.add_fiscal_authority(govt)
-    market = union.spaces["bond_market"]
-    market.add_issuer(govt)
+    union.place_government(govt)
     return govt
 
 
