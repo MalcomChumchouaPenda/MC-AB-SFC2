@@ -1,15 +1,15 @@
 from unittest.mock import Mock
 import pytest
-from agentpy import Model
+from agentpy import AttrIter
 from model.spaces.labor_market import LaborMarket
 from model.agents.household import Household
 from model.agents.firm import Firm
 
 
 @pytest.fixture
-def model():
+def model(fake_model):
     # Given
-    model = Model()
+    model = fake_model
     model.p.psi = 2
     random = model.random
     random.sample = Mock(side_effect=lambda pop, k: pop[:k])
@@ -32,9 +32,9 @@ def household(model, market):
 
 
 @pytest.fixture
-def employers(model, market):
+def employers(model, market, make_dlist):
     # Given
-    employers = []
+    employers = make_dlist()
     wages = [20, 15, 16]
     demands = [0.4, 0.8, 0.8]
     for wage, demand in zip(wages, demands):
@@ -47,30 +47,44 @@ def employers(model, market):
     return employers
 
 
-def test_household_search_jobs_on_labor_market(household, employers, market):
+def test_creates_link_with_firms_with_higher_wages(household, employers, market):
     # Given
-    graph = market.graph
+    household.p.psi = 3
+    household.reservation_wage = 10
     worker = household.roles["worker"]
-    household.reservation_wage = 10
 
     # When
     household.search_jobs()
 
     # Then
-    assert len(graph.edges) == 2
-    for employer in employers[:2]:
-        assert graph.has_edge(worker, employer)
+    assert len(market.graph.edges) == 2
+    assert market.graph.has_edge(worker, employers[0])
+    assert market.graph.has_edge(worker, employers[2])
 
 
-def test_household_sells_total_labor_supply(household, employers, market):
+@pytest.mark.usefixtures("employers")
+def test_created_limited_number_of_links(household, market):
     # Given
+    household.p.psi = 1
     household.reservation_wage = 10
 
     # When
     household.search_jobs()
 
     # Then
-    edges = market.graph.edges(data=True)
-    labor_sold = [data["quantity"] for u, v, data in edges]
-    assert sum(labor_sold) == pytest.approx(1.0)
-    assert len(labor_sold) < len(employers)
+    assert len(market.graph.edges) == 1
+
+
+@pytest.mark.usefixtures("employers")
+def test_increases_labor_sold_by_household(household, market):
+    # Given
+    household.p.psi = 3
+    household.reservation_wage = 10
+    worker = household.roles["worker"]
+    links = lambda: market.find_links(worker, "employer")
+
+    # When
+    household.search_jobs()
+
+    # Then
+    assert sum([link["quantity"] for link in links()]) == pytest.approx(1.0)
