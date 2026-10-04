@@ -1,5 +1,5 @@
 import pytest
-from model.base import EcoAccount
+from model.extensions import EcoAccount
 
 # ---------------------------------------------------
 # ARCHITECTURE
@@ -19,9 +19,9 @@ def test_inherit_from_agentpy_attrdict():
 
 def test_creates_default_value_for_financial_assets(monkeypatch):
     # Given
-    monkeypatch.setattr("model.base.FINANCIAL_ASSETS", ["x", "y"])
-    monkeypatch.setattr("model.base.REAL_ASSETS", [])
-    monkeypatch.setattr("model.base.TRANSACTIONS", [])
+    monkeypatch.setattr("model.extensions.FINANCIAL_ASSETS", ["x", "y"])
+    monkeypatch.setattr("model.extensions.REAL_ASSETS", [])
+    monkeypatch.setattr("model.extensions.TRANSACTIONS", [])
 
     # When
     account = EcoAccount()
@@ -32,9 +32,9 @@ def test_creates_default_value_for_financial_assets(monkeypatch):
 
 def test_creates_default_value_for_real_assets(monkeypatch):
     # Given
-    monkeypatch.setattr("model.base.FINANCIAL_ASSETS", [])
-    monkeypatch.setattr("model.base.REAL_ASSETS", ["z"])
-    monkeypatch.setattr("model.base.TRANSACTIONS", [])
+    monkeypatch.setattr("model.extensions.FINANCIAL_ASSETS", [])
+    monkeypatch.setattr("model.extensions.REAL_ASSETS", ["z"])
+    monkeypatch.setattr("model.extensions.TRANSACTIONS", [])
 
     # When
     account = EcoAccount()
@@ -45,9 +45,9 @@ def test_creates_default_value_for_real_assets(monkeypatch):
 
 def test_creates_default_value_for_transactions(monkeypatch):
     # Given
-    monkeypatch.setattr("model.base.FINANCIAL_ASSETS", [])
-    monkeypatch.setattr("model.base.REAL_ASSETS", [])
-    monkeypatch.setattr("model.base.TRANSACTIONS", ["a", "b"])
+    monkeypatch.setattr("model.extensions.FINANCIAL_ASSETS", [])
+    monkeypatch.setattr("model.extensions.REAL_ASSETS", [])
+    monkeypatch.setattr("model.extensions.TRANSACTIONS", ["a", "b"])
 
     # When
     account = EcoAccount()
@@ -63,9 +63,9 @@ def test_creates_default_value_for_transactions(monkeypatch):
 
 def test_clear_flows_reset_amount(monkeypatch):
     # Given
-    monkeypatch.setattr("model.base.FINANCIAL_ASSETS", [])
-    monkeypatch.setattr("model.base.REAL_ASSETS", [])
-    monkeypatch.setattr("model.base.TRANSACTIONS", ["a"])
+    monkeypatch.setattr("model.extensions.FINANCIAL_ASSETS", [])
+    monkeypatch.setattr("model.extensions.REAL_ASSETS", [])
+    monkeypatch.setattr("model.extensions.TRANSACTIONS", ["a"])
     account = EcoAccount()
     account["a"] = 500
 

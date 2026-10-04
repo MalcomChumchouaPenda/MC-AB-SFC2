@@ -1,4 +1,4 @@
-from model.base import EcoSpace
+from model.extensions import EcoSpace
 from model.roles.bond_buyer import BondBuyer
 from model.roles.bond_issuer import BondIssuer
 

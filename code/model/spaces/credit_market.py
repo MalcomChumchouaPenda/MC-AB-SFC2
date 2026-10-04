@@ -1,4 +1,4 @@
-from model.base import EcoSpace
+from model.extensions import EcoSpace
 from model.roles.lender import Lender
 from model.roles.borrower import Borrower
 

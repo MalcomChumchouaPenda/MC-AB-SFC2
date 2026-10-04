@@ -1,4 +1,4 @@
-from model.base import EcoSpace
+from model.extensions import EcoSpace
 from model.roles.depositor import Depositor
 from model.roles.deposit_bank import DepositBank
 from model.roles.deposit_guarantee import DepositGuarantee

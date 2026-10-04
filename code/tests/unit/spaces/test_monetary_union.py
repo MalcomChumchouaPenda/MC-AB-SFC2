@@ -9,7 +9,7 @@ from model.spaces.monetary_union import MonetaryUnion
 
 def test_inherits_from_eco_space():
     # Given
-    from model.base import EcoSpace
+    from model.extensions import EcoSpace
 
     # When
     is_derived = issubclass(MonetaryUnion, EcoSpace)

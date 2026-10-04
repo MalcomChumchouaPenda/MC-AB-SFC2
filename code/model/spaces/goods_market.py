@@ -1,4 +1,4 @@
-from model.base import EcoSpace
+from model.extensions import EcoSpace
 from model.roles.consumer import Consumer
 from model.roles.producer import Producer
 

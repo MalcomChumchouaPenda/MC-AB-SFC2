@@ -1,4 +1,4 @@
-from model.base import EcoSpace
+from model.extensions import EcoSpace
 from model.roles.policy_maker import PolicyMaker
 from model.spaces.country import Country
 from model.spaces.goods_market import GoodsMarket

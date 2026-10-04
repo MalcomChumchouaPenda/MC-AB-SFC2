@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import Mock
-from model.base import EcoRole
+from model.extensions import EcoRole
 from model.roles.depositor import Depositor
 
 # ---------------------------------------------------
@@ -10,7 +10,7 @@ from model.roles.depositor import Depositor
 
 def test_inherits_from_eco_role():
     # Given
-    from model.base import EcoRole
+    from model.extensions import EcoRole
 
     # When
     is_derived = issubclass(Depositor, EcoRole)

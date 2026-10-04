@@ -1,5 +1,5 @@
 from agentpy import AgentDList
-from model.base import EcoSpace
+from model.extensions import EcoSpace
 from model.roles.employer import Employer
 from model.roles.worker import Worker
 

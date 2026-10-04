@@ -1,4 +1,4 @@
-from model.base import EcoAgent
+from model.extensions import EcoAgent
 
 
 class Government(EcoAgent):

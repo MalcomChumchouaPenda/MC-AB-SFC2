@@ -2,7 +2,7 @@ from unittest.mock import Mock
 from collections import defaultdict
 import pytest
 from agentpy import AgentDList, AgentList
-from model.base import EcoSpace
+from model.extensions import EcoSpace
 
 # ---------------------------------------------------
 # ARCHITECTURE
@@ -446,7 +446,7 @@ FakeAccount = Mock()
 @pytest.fixture
 def space_without_accounts(monkeypatch, space):
     # Given
-    monkeypatch.setattr("model.base.EcoAccount", FakeAccount)
+    monkeypatch.setattr("model.extensions.EcoAccount", FakeAccount)
     space.accounts = {}
     return space
 

@@ -1,4 +1,4 @@
-from model.base import EcoRole
+from model.extensions import EcoRole
 
 
 class BondBuyer(EcoRole):

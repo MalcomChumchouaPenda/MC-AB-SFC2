@@ -1,5 +1,5 @@
 import math
-from model.base import EcoAgent
+from model.extensions import EcoAgent
 
 
 class Bank(EcoAgent):

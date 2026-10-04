@@ -10,7 +10,7 @@ from model.agents.firm import Firm
 
 def test_inherits_from_eco_agent():
     # Given
-    from model.base import EcoAgent
+    from model.extensions import EcoAgent
 
     # When
     is_derived = issubclass(Firm, EcoAgent)

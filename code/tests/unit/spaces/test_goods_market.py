@@ -9,7 +9,7 @@ from model.spaces.goods_market import GoodsMarket
 
 def test_inherits_from_eco_space():
     # Given
-    from model.base import EcoSpace
+    from model.extensions import EcoSpace
 
     # When
     is_derived = issubclass(GoodsMarket, EcoSpace)

@@ -1,5 +1,5 @@
 import pytest
-from model.base import EcoAgent
+from model.extensions import EcoAgent
 from unittest.mock import Mock
 
 # ---------------------------------------------------

@@ -9,7 +9,7 @@ from model.roles.worker import Worker
 
 def test_inherits_from_eco_role():
     # Given
-    from model.base import EcoRole
+    from model.extensions import EcoRole
 
     # When
     is_derived = issubclass(Worker, EcoRole)

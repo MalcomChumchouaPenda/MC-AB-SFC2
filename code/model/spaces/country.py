@@ -1,4 +1,4 @@
-from model.base import EcoSpace
+from model.extensions import EcoSpace
 from model.roles.citizen import Citizen
 from model.roles.company import Company
 from model.roles.monetary_authority import MonetaryAuthority

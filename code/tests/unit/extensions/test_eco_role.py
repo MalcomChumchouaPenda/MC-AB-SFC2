@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import Mock
-from model.base import EcoRole
+from model.extensions import EcoRole
 
 # ---------------------------------------------------
 # ARCHITECTURE
