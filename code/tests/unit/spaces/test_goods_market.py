@@ -191,7 +191,7 @@ def producers(make_dlist):
     # Given
     producers = [Mock(id=i) for i in range(5)]
     producers = make_dlist(producers)
-    producers.group = "producer"
+    producers.name = "producer"
     producers.price = 0
     producers.productivity = 0
     return producers
@@ -200,7 +200,8 @@ def producers(make_dlist):
 @pytest.fixture
 def market_before_update(market_without_roles, producers, make_dlist):
     # Given
-    others = make_dlist([Mock(group="other") for _ in range(5)])
+    others = make_dlist([Mock(id=i) for i in range(5)])
+    others.name = "other"
     market = market_without_roles
     market.roles = others + producers
     return market

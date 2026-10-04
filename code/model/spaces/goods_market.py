@@ -39,7 +39,7 @@ class GoodsMarket(EcoSpace):
     #
     def update_state(self):
         roles = self.roles
-        producers = roles.select(roles.group == "producer")
+        producers = roles.select(roles.name == "producer")
         self.average_price_prev = self.average_price
         self.average_price = sum(producers.price) / max(1, len(producers))
         self.average_prod = sum(producers.productivity) / max(1, len(producers))
@@ -51,5 +51,5 @@ class GoodsMarket(EcoSpace):
 
     def calc_gdp(self):
         roles = self.roles
-        producers = roles.select(roles.group == "producer")
+        producers = roles.select(roles.name == "producer")
         return sum(self.get_stock("consumption", i) for i in producers.id)

@@ -222,31 +222,6 @@ def test_add_role_initializes_name(space_and_agent, role_with_kind):
     assert role.name == "fake_role"
 
 
-def test_add_role_initializes_group(space_and_agent, role_with_kind):
-    # Given
-    role, role_kind = role_with_kind
-    space, agent = space_and_agent
-
-    # When
-    space.add_role(role_kind, agent, "fake_role")
-
-    # Then
-    assert role.group == "fake_role"
-
-
-def test_add_role_initializes_name_with_prefix(space_and_agent, role_with_kind):
-    # Given
-    role, role_kind = role_with_kind
-    space, agent = space_and_agent
-
-    # When
-    space.add_role(role_kind, agent, "fake_role", prefix="any")
-
-    # Then
-    assert role.name == "any_fake_role"
-    assert role.group == "fake_role"
-
-
 def test_add_role_registers_role(space_and_agent, role_with_kind):
     # Given
     role, role_kind = role_with_kind
@@ -335,8 +310,8 @@ def space_with_roles(space):
 def test_find_all_roles_filter_by_group(space_with_roles):
     # Given
     space, roles = space_with_roles
-    roles[0].group = "other_role"
-    roles[1].group = "fake_role"
+    roles[0].name = "other_role"
+    roles[1].name = "fake_role"
 
     # When
     result = space.find_all_roles("fake_role")
@@ -348,8 +323,8 @@ def test_find_all_roles_filter_by_group(space_with_roles):
 def test_find_all_roles_returns_agent_list(space_with_roles):
     # Given
     space, roles = space_with_roles
-    roles[0].group = "other_role"
-    roles[1].group = "fake_role"
+    roles[0].name = "other_role"
+    roles[1].name = "fake_role"
 
     # When
     result = space.find_all_roles("fake_role")
@@ -361,8 +336,8 @@ def test_find_all_roles_returns_agent_list(space_with_roles):
 def test_find_random_roles_filter_by_group(space_with_roles):
     # Given
     space, roles = space_with_roles
-    roles[0].group = "other_role"
-    roles[1].group = "fake_role"
+    roles[0].name = "other_role"
+    roles[1].name = "fake_role"
 
     # When
     result = space.find_random_roles("fake_role", 2)
@@ -375,8 +350,8 @@ def test_find_random_roles_filter_by_group(space_with_roles):
 def test_find_random_roles_with_various_size(space_with_roles, size, expected):
     # Given
     space, roles = space_with_roles
-    roles[0].group = "fake_role"
-    roles[1].group = "fake_role"
+    roles[0].name = "fake_role"
+    roles[1].name = "fake_role"
 
     # When
     result = space.find_random_roles("fake_role", size)
@@ -388,8 +363,8 @@ def test_find_random_roles_with_various_size(space_with_roles, size, expected):
 def test_find_random_roles_returns_agent_list(space_with_roles):
     # Given
     space, roles = space_with_roles
-    roles[0].group = "fake_role"
-    roles[1].group = "fake_role"
+    roles[0].name = "fake_role"
+    roles[1].name = "fake_role"
 
     # When
     result = space.find_random_roles("fake_role", 2)

@@ -29,7 +29,6 @@ class EcoRole(AgentNode):
         self.agent = agent
         self.env = env
         self.name = ""
-        self.group = ""
 
     @property
     def id(self):
@@ -65,19 +64,17 @@ class EcoSpace(Network):
     #
     # Role management
     #
-    def add_role(self, kind, agent, group, prefix=None):
-        name = prefix + "_" + group if prefix else group
-        role = self._create_role(kind, agent, group, name)
+    def add_role(self, kind, agent, name):
+        role = self._create_role(kind, agent, name)
         if agent.account is None:
             self.add_account(agent)
         self._register_role(agent, role, name)
         self._add_node(agent, role)
         return role
 
-    def _create_role(self, kind, agent, group, name):
+    def _create_role(self, kind, agent, name):
         role = kind(agent, self)
         role.name = name
-        role.group = group
         return role
 
     def _register_role(self, agent, role, name):
@@ -95,12 +92,12 @@ class EcoSpace(Network):
         self.roles.pop(agent.id)
         self.graph.remove_node(role)
 
-    def find_all_roles(self, group):
-        selected = [role for role in self.roles.values() if role.group == group]
+    def find_all_roles(self, name):
+        selected = [role for role in self.roles.values() if role.name == name]
         return AgentList(self.model, selected)
 
-    def find_random_roles(self, group, size):
-        found = self.find_all_roles(group)
+    def find_random_roles(self, name, size):
+        found = self.find_all_roles(name)
         selected = found.random(n=min(size, len(found)))
         return selected.to_list()
 

@@ -456,9 +456,11 @@ def country_with_roles(country_without_roles):
 def country_with_two_groups(country_with_roles, make_dlist):
     # Given
     country, roles = country_with_roles
-    group1 = make_dlist([Mock(id=i, group="company") for i in range(10)])
-    group2 = make_dlist([Mock(id=i, group="company") for i in range(10, 12)])
-    roles.update({role.id: role for role in group1 + group2})
+    companies = make_dlist([Mock(id=i) for i in range(12)])
+    companies.name = "company"
+    roles.update({role.id: role for role in companies})
+    group1 = make_dlist(companies[:10])
+    group2 = make_dlist(companies[10:])
     return country, group1, group2
 
 
@@ -791,8 +793,9 @@ def test_update_state_updates_inflation(country_before_update):
 
 def test_update_state_updates_prob_failure(country_before_update):
     # Given
-    default = Mock(group="company", defaulted=True)
-    other = Mock(group="company", defaulted=False)
+    default = Mock(defaulted=True)
+    other = Mock(defaulted=False)
+    other.name = default.name = "company"
     country = country_before_update
     country.roles[0] = default
     country.roles[1] = other

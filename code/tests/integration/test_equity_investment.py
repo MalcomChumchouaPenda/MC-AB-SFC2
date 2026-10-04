@@ -133,7 +133,8 @@ def before_bank_creation(before_firm_creation, country):
     _ = before_firm_creation
     roles = country.roles
     for i in range(5):
-        company_role = Mock(equity=100, sector="F", group="company")
+        company_role = Mock(equity=100, sector="F")
+        company_role.name = "company"
         roles[i] = company_role
 
 
