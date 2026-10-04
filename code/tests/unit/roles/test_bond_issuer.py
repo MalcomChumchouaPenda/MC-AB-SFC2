@@ -20,11 +20,10 @@ def test_inherits_from_eco_role():
 
 def test_initializes_country_pos():
     # Given
-    env = Mock()
-    agent_id = 1
+    agent, env = Mock(), Mock()
 
     # When
-    role = BondIssuer(agent_id, env)
+    role = BondIssuer(agent, env)
 
     # Then
     assert role.country_pos is None
@@ -32,11 +31,10 @@ def test_initializes_country_pos():
 
 def test_initializes_debt_ratio():
     # Given
-    env = Mock()
-    agent_id = 1
+    agent, env = Mock(), Mock()
 
     # When
-    role = BondIssuer(agent_id, env)
+    role = BondIssuer(agent, env)
 
     # Then
     assert role.debt_ratio == 0.0
@@ -44,11 +42,10 @@ def test_initializes_debt_ratio():
 
 def test_initializes_bond_number():
     # Given
-    env = Mock()
-    agent_id = 1
+    agent, env = Mock(), Mock()
 
     # When
-    role = BondIssuer(agent_id, env)
+    role = BondIssuer(agent, env)
 
     # Then
     assert role.bond_number == 0.0
@@ -56,11 +53,10 @@ def test_initializes_bond_number():
 
 def test_initializes_bond_value():
     # Given
-    env = Mock()
-    agent_id = 1
+    agent, env = Mock(), Mock()
 
     # When
-    role = BondIssuer(agent_id, env)
+    role = BondIssuer(agent, env)
 
     # Then
     assert role.bond_value == 0.0
@@ -74,9 +70,8 @@ def test_initializes_bond_value():
 @pytest.fixture
 def role():
     # Given
-    env = Mock()
-    agent_id = 1
-    return BondIssuer(agent_id, env)
+    agent, env = Mock(), Mock()
+    return BondIssuer(agent, env)
 
 
 def test_get_discount_rate(role):

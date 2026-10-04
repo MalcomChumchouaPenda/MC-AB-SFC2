@@ -20,11 +20,10 @@ def test_inherits_from_eco_role():
 
 def test_initializes_defaulted():
     # Given
-    env = Mock()
-    agent_id = 1
+    agent, env = Mock(), Mock()
 
     # When
-    role = DepositBank(agent_id, env)
+    role = DepositBank(agent, env)
 
     # Then
     assert role.defaulted is False
@@ -38,9 +37,8 @@ def test_initializes_defaulted():
 @pytest.fixture
 def role():
     # Given
-    env = Mock()
-    agent_id = 1
-    return DepositBank(agent_id, env)
+    agent, env = Mock(), Mock()
+    return DepositBank(agent, env)
 
 
 def test_find_deposits_from_env(role):

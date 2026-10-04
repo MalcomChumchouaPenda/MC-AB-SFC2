@@ -20,11 +20,10 @@ def test_inherits_from_eco_role():
 
 def test_initializes_price():
     # Given
-    env = Mock()
-    agent_id = 1
+    agent, env = Mock(), Mock()
 
     # When
-    role = Producer(agent_id, env)
+    role = Producer(agent, env)
 
     # Then
     assert role.price == 0
@@ -32,11 +31,10 @@ def test_initializes_price():
 
 def test_initializes_productivity():
     # Given
-    env = Mock()
-    agent_id = 1
+    agent, env = Mock(), Mock()
 
     # When
-    role = Producer(agent_id, env)
+    role = Producer(agent, env)
 
     # Then
     assert role.productivity == 0
@@ -44,11 +42,10 @@ def test_initializes_productivity():
 
 def test_initializes_inventories():
     # Given
-    env = Mock()
-    agent_id = 1
+    agent, env = Mock(), Mock()
 
     # When
-    role = Producer(agent_id, env)
+    role = Producer(agent, env)
 
     # Then
     assert role.inventories == 0
@@ -56,11 +53,10 @@ def test_initializes_inventories():
 
 def test_initializes_variety():
     # Given
-    env = Mock()
-    agent_id = 1
+    agent, env = Mock(), Mock()
 
     # When
-    role = Producer(agent_id, env)
+    role = Producer(agent, env)
 
     # Then
     assert role.variety is None
@@ -74,9 +70,8 @@ def test_initializes_variety():
 @pytest.fixture
 def role():
     # Given
-    env = Mock()
-    agent_id = 1
-    return Producer(agent_id, env)
+    agent, env = Mock(), Mock()
+    return Producer(agent, env)
 
 
 def test_get_average_price(role):

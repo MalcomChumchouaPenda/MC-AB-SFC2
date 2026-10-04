@@ -3,8 +3,8 @@ from model.extensions import EcoRole
 
 class DepositBank(EcoRole):
 
-    def __init__(self, agent_id, env):
-        super().__init__(agent_id, env)
+    def __init__(self, agent, env):
+        super().__init__(agent, env)
         self.defaulted = False
 
     #

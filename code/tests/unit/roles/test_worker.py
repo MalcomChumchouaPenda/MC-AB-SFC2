@@ -20,11 +20,10 @@ def test_inherits_from_eco_role():
 
 def test_initializes_unit_labor_supply():
     # Given
-    env = Mock()
-    agent_id = 1
+    agent, env = Mock(), Mock()
 
     # When
-    role = Worker(agent_id, env)
+    role = Worker(agent, env)
 
     # Then
     assert role.labor_supply == 1.0
@@ -38,9 +37,8 @@ def test_initializes_unit_labor_supply():
 @pytest.fixture
 def role():
     # Given
-    env = Mock()
-    agent_id = 1
-    return Worker(agent_id, env)
+    agent, env = Mock(), Mock()
+    return Worker(agent, env)
 
 
 def test_get_labor_sold(role):

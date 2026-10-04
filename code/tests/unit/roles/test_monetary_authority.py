@@ -26,9 +26,8 @@ def test_inherits_from_eco_role():
 @pytest.fixture
 def role():
     # Given
-    env = Mock()
-    agent_id = 1
-    return MonetaryAuthority(agent_id, env)
+    agent, env = Mock(), Mock()
+    return MonetaryAuthority(agent, env)
 
 
 def test_transfer_profits_with_env(role):

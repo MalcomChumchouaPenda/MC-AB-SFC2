@@ -181,7 +181,7 @@ def test_add_role_creates_role(space_and_agent, role_with_kind):
     space.add_role(role_kind, agent, "fake_role")
 
     # Then
-    role_kind.assert_called_with(agent.id, space)
+    role_kind.assert_called_with(agent, space)
 
 
 def test_add_role_returns_role(space_and_agent, role_with_kind):

@@ -22,9 +22,8 @@ def test_inherits_from_eco_role():
 @pytest.fixture
 def role():
     # Given
-    env = Mock()
-    agent_id = 1
-    return Depositor(agent_id, env)
+    agent, env = Mock(), Mock()
+    return Depositor(agent, env)
 
 
 # ---------------------------------------------------

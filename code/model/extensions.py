@@ -24,13 +24,16 @@ class EcoRole(AgentNode):
     et un adaptateur vers un espace d'interaction.
     """
 
-    def __init__(self, agent_id, env):
-        super().__init__(label=agent_id)
-        self.agent_id = agent_id
-        self.id = agent_id
+    def __init__(self, agent, env):
+        super().__init__(label=agent.id)
+        self.agent = agent
         self.env = env
         self.name = ""
         self.group = ""
+
+    @property
+    def id(self):
+        return self.agent.id
 
 
 class EcoAccount(AttrDict):
@@ -72,7 +75,7 @@ class EcoSpace(Network):
         return role
 
     def _create_role(self, kind, agent, group, name):
-        role = kind(agent.id, self)
+        role = kind(agent, self)
         role.name = name
         role.group = group
         return role

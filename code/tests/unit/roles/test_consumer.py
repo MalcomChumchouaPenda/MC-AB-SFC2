@@ -20,11 +20,10 @@ def test_inherits_from_eco_role():
 
 def test_initializes_preference(role):
     # Given
-    env = Mock()
-    agent_id = 1
+    agent, env = Mock(), Mock()
 
     # When
-    role = Consumer(agent_id, env)
+    role = Consumer(agent, env)
 
     # Then
     assert role.preference is None
@@ -38,9 +37,8 @@ def test_initializes_preference(role):
 @pytest.fixture
 def role():
     # Given
-    env = Mock()
-    agent_id = 1
-    return Consumer(agent_id, env)
+    agent, env = Mock(), Mock()
+    return Consumer(agent, env)
 
 
 def test_get_average_price(role):

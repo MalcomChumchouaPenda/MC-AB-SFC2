@@ -20,7 +20,7 @@ def test_inherits_from_agentpy_agentnode():
 
 def test_requires_agent_and_env():
     # Given
-    required = "'agent_id' and 'env'"
+    required = "'agent' and 'env'"
 
     #  When
     with pytest.raises(TypeError) as error:
@@ -32,23 +32,21 @@ def test_requires_agent_and_env():
 
 def test_initializes_agent():
     # Given
-    env = Mock()
-    agent_id = 1
+    agent, env = Mock(), Mock()
 
     # When
-    role = EcoRole(agent_id, env)
+    role = EcoRole(agent, env)
 
     # Then
-    assert role.agent_id == agent_id
+    assert role.agent == agent
 
 
 def test_initializes_env():
     # Given
-    env = Mock()
-    agent_id = 1
+    agent, env = Mock(), Mock()
 
     # When
-    role = EcoRole(agent_id, env)
+    role = EcoRole(agent, env)
 
     # Then
     assert role.env is env
@@ -56,35 +54,22 @@ def test_initializes_env():
 
 def test_initializes_label_with_agent_id():
     # Given
-    env = Mock()
-    agent_id = 1
+    agent, env = Mock(), Mock()
 
     # When
-    role = EcoRole(agent_id, env)
+    role = EcoRole(agent, env)
 
     # Then
-    assert role.label == agent_id
+    assert role.label == agent.id
 
-
-def test_initializes_id_with_agent_id():
-    # Given
-    env = Mock()
-    agent_id = 1
-
-    # When
-    role = EcoRole(agent_id, env)
-
-    # Then
-    assert role.id is agent_id
 
 
 def test_initializes_name():
     # Given
-    env = Mock()
-    agent_id = 1
+    agent, env = Mock(), Mock()
 
     # When
-    role = EcoRole(agent_id, env)
+    role = EcoRole(agent, env)
 
     # Then
     assert role.name == ""
@@ -92,11 +77,10 @@ def test_initializes_name():
 
 def test_initializes_group():
     # Given
-    env = Mock()
-    agent_id = 1
+    agent, env = Mock(), Mock()
 
     # When
-    role = EcoRole(agent_id, env)
+    role = EcoRole(agent, env)
 
     # Then
     assert role.group == ""
@@ -104,12 +88,11 @@ def test_initializes_group():
 
 def test_expose_agent_id():
     # Given
-    env = Mock()
-    agent_id = 1
-    role = EcoRole(agent_id, env)
+    agent, env = Mock(), Mock()
+    role = EcoRole(agent, env)
 
     # When
     exposed = role.id
 
     # Then
-    assert exposed is agent_id
+    assert exposed is agent.id

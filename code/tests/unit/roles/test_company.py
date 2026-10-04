@@ -20,11 +20,10 @@ def test_inherits_from_eco_role():
 
 def test_initializes_sector():
     # Given
-    env = Mock()
-    agent_id = 1
+    agent, env = Mock(), Mock()
 
     # When
-    role = Company(agent_id, env)
+    role = Company(agent, env)
 
     # Then
     assert role.sector == ""
@@ -32,11 +31,10 @@ def test_initializes_sector():
 
 def test_initializes_net_worth():
     # Given
-    env = Mock()
-    agent_id = 1
+    agent, env = Mock(), Mock()
 
     # When
-    role = Company(agent_id, env)
+    role = Company(agent, env)
 
     # Then
     assert role.net_worth == 0
@@ -44,11 +42,10 @@ def test_initializes_net_worth():
 
 def test_initializes_defaulted():
     # Given
-    env = Mock()
-    agent_id = 1
+    agent, env = Mock(), Mock()
 
     # When
-    role = Company(agent_id, env)
+    role = Company(agent, env)
 
     # Then
     assert role.defaulted is False
@@ -62,9 +59,8 @@ def test_initializes_defaulted():
 @pytest.fixture
 def role():
     # Given
-    env = Mock()
-    agent_id = 1
-    return Company(agent_id, env)
+    agent, env = Mock(), Mock()
+    return Company(agent, env)
 
 
 def test_get_average_wage(role):

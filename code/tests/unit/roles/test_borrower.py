@@ -20,11 +20,10 @@ def test_inherits_from_eco_role():
 
 def test_initializes_loan_demand():
     # Given
-    env = Mock()
-    agent_id = 1
+    agent, env = Mock(), Mock()
 
     # When
-    role = Borrower(agent_id, env)
+    role = Borrower(agent, env)
 
     # Then
     assert role.loan_demand == 0.0
@@ -32,11 +31,10 @@ def test_initializes_loan_demand():
 
 def test_initializes_net_worth():
     # Given
-    env = Mock()
-    agent_id = 1
+    agent, env = Mock(), Mock()
 
     # When
-    role = Borrower(agent_id, env)
+    role = Borrower(agent, env)
 
     # Then
     assert role.net_worth == 0.0
@@ -50,9 +48,8 @@ def test_initializes_net_worth():
 @pytest.fixture
 def role():
     # Given
-    env = Mock()
-    agent_id = 1
-    return Borrower(agent_id, env)
+    agent, env = Mock(), Mock()
+    return Borrower(agent, env)
 
 
 def test_find_lenders(role, make_dlist):
