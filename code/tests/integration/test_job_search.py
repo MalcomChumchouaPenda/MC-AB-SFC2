@@ -81,7 +81,7 @@ def test_increases_labor_sold_by_household(household, market):
     household.p.psi = 3
     household.reservation_wage = 10
     worker = household.roles["worker"]
-    links = lambda: market.find_links(worker, "employer")
+    links = lambda: market.links(worker, "employer")
 
     # When
     household.search_jobs()

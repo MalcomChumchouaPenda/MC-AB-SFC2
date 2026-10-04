@@ -83,8 +83,8 @@ def test_get_equity_shares_from_env(role):
     found = role.get_equity_shares()
 
     # Then
-    env.find_links.assert_called_with(role, "founder")
-    assert found == env.find_links.return_value
+    env.links.assert_called_with(role, "founder")
+    assert found == env.links.return_value
 
 
 def test_get_tax_rate(role):

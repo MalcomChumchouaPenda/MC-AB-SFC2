@@ -15,7 +15,7 @@ class Employer(EcoRole):
         return self.env.unemployment
 
     def get_jobs(self):
-        return self.env.find_links(self, "worker")
+        return self.env.links(self, "worker")
 
     #
     # actions method
@@ -23,4 +23,3 @@ class Employer(EcoRole):
     def pay_wages(self, worker, amount):
         self.env.pay_wages(self, worker, amount)
 
-        

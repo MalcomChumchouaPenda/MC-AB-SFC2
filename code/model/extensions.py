@@ -1,5 +1,5 @@
 from agentpy import Agent, Network, AgentNode
-from agentpy import AgentList, AgentDList, AttrDict
+from agentpy import AgentList, AgentDList, AttrDict, AgentIter
 from model.accounts import FINANCIAL_ASSETS, REAL_ASSETS, TRANSACTIONS
 
 
@@ -105,12 +105,12 @@ class EcoSpace(Network):
     # Links/neighbors management
     #
 
-    def find_neighbors(self, role):
+    def neighbors(self, role):
         edges = self.graph.edges(role)
         neighbors = [neighbor for _, neighbor in edges]
-        return AgentDList(self.model, neighbors)
+        return AgentIter(self.model, neighbors)
 
-    def find_links(self, role, neighbor_name):
+    def links(self, role, neighbor_name):
         links = []
         edges = self.graph.edges(role, data=True)
         for _, neighbor, data in edges:

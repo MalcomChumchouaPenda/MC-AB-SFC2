@@ -90,13 +90,13 @@ def test_find_bonds_returns_buyer_and_amount(role):
     # Given
     bond = Mock()
     env = role.env
-    env.find_links.return_value = [bond]
+    env.links.return_value = [bond]
 
     # When
     result = role.find_bonds()
 
     # Then
-    env.find_links.assert_called_with(role, "buyer")
+    env.links.assert_called_with(role, "buyer")
     assert result == [bond]
 
 

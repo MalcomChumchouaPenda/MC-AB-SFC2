@@ -72,8 +72,8 @@ def test_get_jobs(role):
     found = role.get_jobs()
 
     # Then
-    env.find_links.assert_called_with(role, "worker")
-    assert found == env.find_links.return_value
+    env.links.assert_called_with(role, "worker")
+    assert found == env.links.return_value
 
 
 # ---------------------------------------------------
@@ -91,4 +91,3 @@ def test_pay_wages_uses_env_method(role):
 
     # Then
     env.pay_wages.assert_called_with(role, worker, 1.5)
-    

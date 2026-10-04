@@ -1,7 +1,6 @@
 from unittest.mock import Mock
-from collections import defaultdict
 import pytest
-from agentpy import AgentDList, AgentList
+from agentpy import AgentIter, AgentList
 from model.extensions import EcoSpace
 
 # ---------------------------------------------------
@@ -388,24 +387,24 @@ def space_with_edges(space):
     return space, roles
 
 
-def test_find_neighbors_returns_role_agent_list(space_with_edges):
+def test_neighbors_returns_role_agent_iter(space_with_edges):
     # Given
     space, roles = space_with_edges
 
     # When
-    result = space.find_neighbors(roles[1])
+    result = space.neighbors(roles[1])
 
     # Then
-    assert isinstance(result, AgentDList)
+    assert isinstance(result, AgentIter)
     assert list(result) == [roles[0]]
 
 
-def test_find_links_returns_edge_data_list(space_with_edges):
+def test_links_returns_edge_list(space_with_edges):
     # Given
     space, roles = space_with_edges
 
     # When
-    result = space.find_links(roles[1], "supplier")
+    result = space.links(roles[1], "supplier")
 
     # Then
     assert result == [{"supplier": roles[0], "variable": 10}]

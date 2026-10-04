@@ -18,7 +18,7 @@ class DepositGuarantee(EcoRole):
         return defaults
 
     def find_deposits(self, deposit_bank):
-        return self.env.find_links(deposit_bank, "depositor")
+        return self.env.links(deposit_bank, "depositor")
 
     #
     # Actions

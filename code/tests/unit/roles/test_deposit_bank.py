@@ -49,8 +49,8 @@ def test_find_deposits_from_env(role):
     found = role.find_deposits()
 
     # Then
-    env.find_links.assert_called_with(role, "depositor")
-    assert found == env.find_links.return_value
+    env.links.assert_called_with(role, "depositor")
+    assert found == env.links.return_value
 
 
 def test_find_depositor_returns_roles_from_env(role):

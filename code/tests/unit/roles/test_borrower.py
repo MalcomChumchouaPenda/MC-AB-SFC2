@@ -70,13 +70,13 @@ def test_find_loans(role):
     # Given
     loan = Mock()
     env = role.env
-    env.find_links.return_value = [loan]
+    env.links.return_value = [loan]
 
     # When
     result = role.find_loans()
 
     # Then
-    env.find_links.assert_called_with(role, "lender")
+    env.links.assert_called_with(role, "lender")
     assert result == [loan]
 
 

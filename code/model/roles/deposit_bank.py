@@ -12,7 +12,7 @@ class DepositBank(EcoRole):
     #
 
     def find_deposits(self):
-        return self.env.find_links(self, "depositor")
+        return self.env.links(self, "depositor")
 
     def find_depositor(self, id):
         return self.env.roles[id]
