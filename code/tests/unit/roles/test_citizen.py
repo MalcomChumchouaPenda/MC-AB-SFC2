@@ -122,7 +122,7 @@ def test_get_sector_equity_range_from_env(role):
 def test_get_tax_rate(role):
     # Given
     env = role.env
-    env.fiscal_authority.tax_rate = 0.2
+    env.tax_rate = 0.2
 
     # When
     perceived = role.get_tax_rate()

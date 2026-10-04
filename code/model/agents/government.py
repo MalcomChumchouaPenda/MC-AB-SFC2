@@ -93,6 +93,10 @@ class Government(EcoAgent):
         self.public_spending = max(minimum, self.public_spending)
         self.public_spending = min(maximum, self.public_spending)
 
+    def implement_fiscal_policy(self):
+        role = self.roles["fiscal_authority"]
+        role.set_discount_rate(self.tax_rate)
+
     #
     # Bond Supply
     #

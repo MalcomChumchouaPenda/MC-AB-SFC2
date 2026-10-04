@@ -49,7 +49,7 @@ class CentralBank(EcoAgent):
             + (1 - p.xi) * p.xi_deltap * inflation_gap
         )
 
-    def determine_discount_rate(self):
+    def update_discount_rate(self):
         role = self.roles["policy_maker"]
         old_discount_rate = role.get_discount_rate()
         new_discount_rate = self.calc_discount_rate()
@@ -60,5 +60,5 @@ class CentralBank(EcoAgent):
         maker_role = self.roles["policy_maker"]
         discount_rate = maker_role.get_discount_rate()
         auth_role = self.roles["monetary_authority"]
-        auth_role.discount_rate = discount_rate
+        auth_role.set_discount_rate(discount_rate)
         self.prev_discount_rate = discount_rate

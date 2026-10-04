@@ -28,7 +28,6 @@ def model(monkeypatch):
 def country(fake_model):
     # Given
     country = Country(fake_model)
-    country.monetary_authority = Mock()
     country.create_markets()
     return country
 
@@ -84,9 +83,9 @@ def bank(model, country):
     return bank
 
 
-def test_household_pay_taxes(household, govt):
+def test_household_pay_taxes(household, govt, country):
     # Given
-    govt.tax_rate = 0.10
+    country.tax_rate = 0.10
     household.account["cash"] = 1000
     household.account["wages"] = 550
     household.account["dividends"] = 50
@@ -102,9 +101,9 @@ def test_household_pay_taxes(household, govt):
     assert govt.account["cash"] == 60
 
 
-def test_firm_pay_taxes(firm, govt):
+def test_firm_pay_taxes(firm, govt, country):
     # Given
-    govt.tax_rate = 0.10
+    country.tax_rate = 0.10
     firm.taxes_payable = 100
     firm.account["cash"] = 1000
 
@@ -119,9 +118,9 @@ def test_firm_pay_taxes(firm, govt):
     assert govt.account["cash"] == 100
 
 
-def test_bank_pay_taxes(bank, govt):
+def test_bank_pay_taxes(bank, govt, country):
     # Given
-    govt.tax_rate = 0.10
+    country.tax_rate = 0.10
     bank.taxes_payable = 100
     bank.account["cash"] = 1000
 

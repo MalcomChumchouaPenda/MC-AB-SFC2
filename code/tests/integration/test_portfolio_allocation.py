@@ -10,7 +10,6 @@ def country(fake_model):
     # Given
     country = Country(fake_model)
     country.create_markets()
-    country.monetary_authority = Mock()
     return country
 
 

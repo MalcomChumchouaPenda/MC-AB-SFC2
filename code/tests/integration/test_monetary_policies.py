@@ -33,13 +33,13 @@ def union_cb(model, union):
     return cb
 
 
-def test_union_central_bank_determines_discount_rate(union, union_cb):
+def test_union_central_bank_updates_discount_rate(union, union_cb):
     # Given
     union_cb.prev_discount_rate = 0.03
     union.average_inflation = 0.04
 
     # When
-    union_cb.determine_discount_rate()
+    union_cb.update_discount_rate()
 
     # Then
     assert union.discount_rate == pytest.approx(0.04)
@@ -56,10 +56,10 @@ def national_cb(model, union):
 def test_national_central_banks_implements_discount_rate(union, national_cb):
     # Given
     union.discount_rate = 0.05
-    role = national_cb.roles["monetary_authority"]
+    country = union.spaces["country_0"]
 
     # When
     national_cb.implement_discount_rate()
 
     # Then
-    assert role.discount_rate == pytest.approx(0.05)
+    assert country.discount_rate == pytest.approx(0.05)

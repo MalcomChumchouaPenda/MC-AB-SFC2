@@ -17,6 +17,7 @@ class Country(EcoSpace):
         self.inflation = 0
         self.prob_failure = 0
         self.tax_rate = 0
+        self.discount_rate = 0
         self.monetary_authority = None
         self.fiscal_authority = None
 

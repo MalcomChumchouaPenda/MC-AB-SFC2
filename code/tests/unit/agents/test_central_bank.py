@@ -124,7 +124,7 @@ def test_calc_discount_rate(cb_as_policy_maker):
     assert discount_rate == pytest.approx(0.04)
 
 
-def test_determine_discount_rate(cb_as_policy_maker):
+def test_update_discount_rate_sets_discount_rate(cb_as_policy_maker):
     # Given
     cb, role = cb_as_policy_maker
     cb.prev_discount_rate = 0.0
@@ -132,13 +132,13 @@ def test_determine_discount_rate(cb_as_policy_maker):
     role.get_discount_rate.return_value = 0.0
 
     # When
-    cb.determine_discount_rate()
+    cb.update_discount_rate()
 
     # Then
     role.set_discount_rate.assert_called_with(0.02)
 
 
-def test_determine_discount_rate_changes_lag_values(cb_as_policy_maker):
+def test_update_discount_rate_changes_lag_values(cb_as_policy_maker):
     # Given
     cb, role = cb_as_policy_maker
     cb.prev_discount_rate = 0.01
@@ -146,13 +146,13 @@ def test_determine_discount_rate_changes_lag_values(cb_as_policy_maker):
     role.get_discount_rate.return_value = 0.02
 
     # When
-    cb.determine_discount_rate()
+    cb.update_discount_rate()
 
     # Then
     assert cb.prev_discount_rate == 0.02
 
 
-def test_implement_discount_rate(cb_as_policy_maker):
+def test_implement_discount_rate_sets_discount_rate(cb_as_policy_maker):
     # Given
     cb, maker_role = cb_as_policy_maker
     cb.prev_discount_rate = 0.0
@@ -163,7 +163,7 @@ def test_implement_discount_rate(cb_as_policy_maker):
     cb.implement_discount_rate()
 
     # Then
-    assert auth_role.discount_rate == 0.05
+    auth_role.set_discount_rate.assert_called_with(0.05)
 
 
 def test_implement_discount_rate_changes_lag_values(cb_as_policy_maker):

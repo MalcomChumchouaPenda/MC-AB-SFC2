@@ -31,7 +31,6 @@ def union(model):
 @pytest.fixture
 def country(union):
     country = union.spaces["country_0"]
-    country.monetary_authority = Mock()
     return country
 
 

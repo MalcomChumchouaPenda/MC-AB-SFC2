@@ -22,7 +22,7 @@ def union(fake_model):
     union.create_markets()
     union.create_countries(1)
     country = union.spaces["country_0"]
-    country.monetary_authority = Mock(discount_rate=0.05)
+    country.discount_rate = 0.05
     return union
 
 

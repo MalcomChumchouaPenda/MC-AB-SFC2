@@ -19,8 +19,6 @@ def union(fake_model):
     union = MonetaryUnion(fake_model)
     union.create_markets()
     union.create_countries(1)
-    country = union.spaces["country_0"]
-    country.monetary_authority = Mock()
     return union
 
 

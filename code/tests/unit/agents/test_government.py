@@ -325,7 +325,7 @@ def test_update_fiscal_policy_with_multi_steps(govt_for_policy):
     govt.apply_tax_rate_bounds.assert_called_with()
 
 
-def test_reduce_spending_and_increase_tax_when_deficit_high(govt_for_policy):
+def test_update_fiscal_policy_when_deficit_high_and_spending_high(govt_for_policy):
     # Given
     govt = govt_for_policy
     govt.budget_deficit = 100
@@ -339,7 +339,7 @@ def test_reduce_spending_and_increase_tax_when_deficit_high(govt_for_policy):
     assert govt.tax_rate == pytest.approx(0.21)
 
 
-def test_keep_spending_and_increase_tax_when_deficit_high(govt_for_policy):
+def test_update_fiscal_policy_when_deficit_high_and_spending_low(govt_for_policy):
     # Given
     govt = govt_for_policy
     govt.budget_deficit = 100
@@ -353,7 +353,7 @@ def test_keep_spending_and_increase_tax_when_deficit_high(govt_for_policy):
     assert govt.tax_rate == pytest.approx(0.21)
 
 
-def test_reduce_spending_and_tax_when_deficit_low(govt_for_policy):
+def test_update_fiscal_policy_when_deficit_low_and_spending_high(govt_for_policy):
     # Given
     govt = govt_for_policy
     govt.budget_deficit = 20
@@ -367,7 +367,7 @@ def test_reduce_spending_and_tax_when_deficit_low(govt_for_policy):
     assert govt.tax_rate == pytest.approx(0.19)
 
 
-def test_increase_spending_and_keep_tax_when_deficit_low(govt_for_policy):
+def test_update_fiscal_policy_when_deficit_low_and_spending_low(govt_for_policy):
     # Given
     govt = govt_for_policy
     govt.budget_deficit = 20
@@ -379,6 +379,18 @@ def test_increase_spending_and_keep_tax_when_deficit_low(govt_for_policy):
     # Then
     assert govt.public_spending == pytest.approx(105)
     assert govt.tax_rate == pytest.approx(0.20)
+
+
+def test_implement_fiscal_policy(govt_as_authority):
+    # Given
+    govt, role = govt_as_authority
+    govt.tax_rate = 0.15
+
+    # When
+    govt.implement_fiscal_policy()
+
+    # Then
+    role.set_discount_rate.assert_called_with(0.15)
 
 
 # ---------------------------------------------------

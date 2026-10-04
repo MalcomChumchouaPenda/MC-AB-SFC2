@@ -17,7 +17,6 @@ def union(fake_model):
 def country(union):
     # Given
     country = union.spaces["country_0"]
-    country.monetary_authority = Mock()
     return country
 
 

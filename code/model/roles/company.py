@@ -21,10 +21,10 @@ class Company(EcoRole):
         return self.env.average_wage
 
     def get_tax_rate(self):
-        return self.env.fiscal_authority.tax_rate
+        return self.env.tax_rate
 
     def get_discount_rate(self):
-        return self.env.monetary_authority.discount_rate
+        return self.env.discount_rate
 
     #
     #  Actions methods

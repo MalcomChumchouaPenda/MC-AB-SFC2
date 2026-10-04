@@ -14,6 +14,13 @@ def union(fake_model):
 
 
 @pytest.fixture
+def country(union):
+    # Given
+    country = union.spaces["country_0"]
+    return country
+
+
+@pytest.fixture
 def cb(fake_model, union):
     # Given
     cb = CentralBank(fake_model)
@@ -30,11 +37,11 @@ def bank(fake_model, union):
     return bank
 
 
-def test_decreases_advances(bank, cb):
+def test_decreases_advances(bank, cb, country):
     # Given
     bank.account["advances"] = -100
     cb.account["advances"] = 100
-    cb.roles["monetary_authority"].discount_rate = 0.05
+    country.discount_rate = 0.05
 
     # When
     bank.repay_cash_advances()
@@ -44,11 +51,11 @@ def test_decreases_advances(bank, cb):
     assert cb.account["advances"] == 0
 
 
-def test_increases_advance_interests(bank, cb):
+def test_increases_advance_interests(bank, cb, country):
     # Given
     bank.account["advances"] = -100
     cb.account["advances"] = 100
-    cb.roles["monetary_authority"].discount_rate = 0.05
+    country.discount_rate = 0.05
 
     # When
     bank.repay_cash_advances()
@@ -58,11 +65,11 @@ def test_increases_advance_interests(bank, cb):
     assert cb.account["adv_interests"] == 5
 
 
-def test_transfers_cash(bank, cb):
+def test_transfers_cash(bank, cb, country):
     # Given
     bank.account["advances"] = -100
     cb.account["advances"] = 100
-    cb.roles["monetary_authority"].discount_rate = 0.05
+    country.discount_rate = 0.05
 
     # When
     bank.repay_cash_advances()

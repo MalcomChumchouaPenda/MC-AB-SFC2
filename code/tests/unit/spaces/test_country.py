@@ -73,6 +73,17 @@ def test_initializes_tax_rate(fake_model):
     assert country.tax_rate == 0
 
 
+def test_initializes_discount_rate(fake_model):
+    # Given
+    model = fake_model
+
+    # When
+    country = Country(model)
+
+    # Then
+    assert country.discount_rate == 0
+
+
 def test_initializes_fiscal_authority(fake_model):
     # Given
     model = fake_model

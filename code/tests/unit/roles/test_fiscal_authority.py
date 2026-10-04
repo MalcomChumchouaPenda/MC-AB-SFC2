@@ -18,27 +18,16 @@ def test_inherits_from_eco_role():
     assert is_derived
 
 
+# ---------------------------------------------------
+# PERCEPTION TESTS
+# ----------------------------------------------------
+
+
 @pytest.fixture
 def role():
     # Given
     agent, env = Mock(), Mock()
     return FiscalAuthority(agent, env)
-
-
-def test_expose_tax_rate_from_agent(role):
-    # Given
-    role.agent.tax_rate = 0.02
-
-    # When
-    exposed = role.tax_rate
-
-    # Then
-    assert exposed == 0.02
-
-
-# ---------------------------------------------------
-# PERCEPTION TESTS
-# ----------------------------------------------------
 
 
 def test_get_gdp_from_env(role):
@@ -56,7 +45,7 @@ def test_get_gdp_from_env(role):
 def test_get_discount_rate_within_env(role):
     # Given
     env = role.env
-    env.monetary_authority.discount_rate = 0.02
+    env.discount_rate = 0.02
 
     # When
     perceived = role.get_discount_rate()
@@ -125,3 +114,15 @@ def test_pay_public_transfers_from_env(role):
 
     # Then
     env.pay_public_transfers(role, citizen, 100)
+
+
+def test_set_tax_rate_into_env(role):
+    # Given
+    env = role.env
+    env.tax_rate = 0.0
+
+    # When
+    role.set_tax_rate(0.05)
+
+    # Then
+    assert env.tax_rate == 0.05

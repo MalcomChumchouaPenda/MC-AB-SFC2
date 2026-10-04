@@ -4,7 +4,6 @@ from model.agents.firm import Firm
 from model.spaces.goods_market import GoodsMarket
 
 
-
 @pytest.fixture
 def model(fake_model):
     # Given
@@ -13,7 +12,6 @@ def model(fake_model):
     model.p.gamma = 0.1
     model.p.nu = 1
     return model
-
 
 
 @pytest.fixture
@@ -49,7 +47,6 @@ def before_innovation(firm):
     firm.desired_rd = 100
     firm.desired_loans = 100
     firm.account["loans"] = 100
-
 
 
 @pytest.mark.usefixtures("before_innovation")

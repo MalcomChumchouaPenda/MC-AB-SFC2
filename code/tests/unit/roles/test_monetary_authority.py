@@ -18,22 +18,6 @@ def test_inherits_from_eco_role():
     assert is_derived
 
 
-def test_initializes_discount_rate():
-    # Given
-    agent, env = Mock(), Mock()
-
-    # When
-    role = MonetaryAuthority(agent, env)
-
-    # Then
-    assert role.discount_rate == 0.0
-
-
-# ---------------------------------------------------
-# PERCEPTION TESTS
-# ----------------------------------------------------
-
-
 # ---------------------------------------------------
 # ACTIONS TESTS
 # ----------------------------------------------------
@@ -55,3 +39,15 @@ def test_transfer_profits_with_env(role):
 
     # Then
     env.transfer_central_bank_profits.assert_called_with(200)
+
+
+def test_set_discount_rate_into_env(role):
+    # Given
+    env = role.env
+    env.discount_rate = 0.0
+
+    # When
+    role.set_discount_rate(0.05)
+
+    # Then
+    assert env.discount_rate == 0.05

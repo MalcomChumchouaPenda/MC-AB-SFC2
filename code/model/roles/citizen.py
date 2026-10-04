@@ -30,7 +30,7 @@ class Citizen(EcoRole):
         return self.env.calc_sector_equity_range(sector)
 
     def get_tax_rate(self):
-        return self.env.fiscal_authority.tax_rate
+        return self.env.tax_rate
 
     #
     # Creation actions

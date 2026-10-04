@@ -90,7 +90,7 @@ def test_get_equity_shares_from_env(role):
 def test_get_tax_rate(role):
     # Given
     env = role.env
-    env.fiscal_authority.tax_rate = 0.2
+    env.tax_rate = 0.2
 
     # When
     perceived = role.get_tax_rate()
@@ -102,7 +102,7 @@ def test_get_tax_rate(role):
 def test_get_discount_rate(role):
     # Given
     env = role.env
-    env.monetary_authority.discount_rate = 0.05
+    env.discount_rate = 0.05
 
     # When
     perceived = role.get_discount_rate()

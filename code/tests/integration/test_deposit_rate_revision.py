@@ -10,7 +10,6 @@ def country(fake_model):
     model = fake_model
     country = Country(model)
     country.create_markets()
-    country.monetary_authority = Mock()
     return country
 
 
@@ -25,7 +24,7 @@ def bank(fake_model, country):
 def test_sets_bank_deposit_rate(bank, country):
     # Given
     bank.p.zeta = 0.8
-    country.monetary_authority.discount_rate = 0.04
+    country.discount_rate = 0.04
 
     # When
     bank.update_deposit_rate()
