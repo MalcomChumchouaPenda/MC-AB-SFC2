@@ -1,4 +1,3 @@
-from unittest.mock import Mock
 import pytest
 from agentpy import Model
 from model.agents.central_bank import CentralBank
@@ -33,7 +32,7 @@ def union_cb(model, union):
     return cb
 
 
-def test_union_central_bank_updates_discount_rate(union, union_cb):
+def test_updates_discount_rate_via_union_central_bank_action(union, union_cb):
     # Given
     union_cb.prev_discount_rate = 0.03
     union.average_inflation = 0.04
@@ -53,7 +52,7 @@ def national_cb(model, union):
     return cb
 
 
-def test_national_central_banks_implements_discount_rate(union, national_cb):
+def test_implements_discount_rate_via_national_central_banks_action(union, national_cb):
     # Given
     union.discount_rate = 0.05
     country = union.spaces["country_0"]
