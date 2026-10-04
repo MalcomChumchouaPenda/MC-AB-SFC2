@@ -18,27 +18,29 @@ def test_inherits_from_eco_role():
     assert is_derived
 
 
-@pytest.fixture
-def role():
+def test_initializes_preference(role):
     # Given
-    agent, env = Mock(), Mock()
-    return Consumer(agent, env)
-
-
-def test_expose_preference(role):
-    # Given
-    role.agent.preference = 0.1
+    env = Mock()
+    agent_id = 1
 
     # When
-    exposed = role.preference
+    role = Consumer(agent_id, env)
 
     # Then
-    assert exposed == 0.1
+    assert role.preference is None
 
 
 # ---------------------------------------------------
 # PERCEPTION TESTS
 # ----------------------------------------------------
+
+
+@pytest.fixture
+def role():
+    # Given
+    env = Mock()
+    agent_id = 1
+    return Consumer(agent_id, env)
 
 
 def test_get_average_price(role):

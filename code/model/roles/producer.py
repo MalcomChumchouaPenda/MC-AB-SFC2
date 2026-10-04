@@ -3,15 +3,12 @@ from model.extensions import EcoRole
 
 class Producer(EcoRole):
 
-    def __init__(self, agent, env):
-        super().__init__(agent, env)
+    def __init__(self, agent_id, env):
+        super().__init__(agent_id, env)
         self.price = 0
         self.productivity = 0
         self.inventories = 0
-
-    @property
-    def variety(self):
-        return self.agent.variety
+        self.variety = None
 
     #
     # Perceptions

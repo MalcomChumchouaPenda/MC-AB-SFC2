@@ -21,8 +21,9 @@ def test_inherits_from_eco_role():
 @pytest.fixture
 def role():
     # Given
-    agent, env = Mock(), Mock()
-    return PolicyMaker(agent, env)
+    env = Mock()
+    agent_id = 1
+    return PolicyMaker(agent_id, env)
 
 
 # ---------------------------------------------------

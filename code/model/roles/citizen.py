@@ -3,8 +3,8 @@ from model.extensions import EcoRole
 
 class Citizen(EcoRole):
 
-    def __init__(self, agent, env):
-        super().__init__(agent, env)
+    def __init__(self, agent_id, env):
+        super().__init__(agent_id, env)
         self.resid_equity = 0
 
     #

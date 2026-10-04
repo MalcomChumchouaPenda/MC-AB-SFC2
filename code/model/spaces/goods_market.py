@@ -18,10 +18,12 @@ class GoodsMarket(EcoSpace):
 
     def place_household(self, household):
         group = "trad_consumer" if self.tradable else "non_trad_consumer"
-        self.add_role(Consumer, household, group)
+        role = self.add_role(Consumer, household, group)
+        role.preference = household.preference
 
     def place_firm(self, firm):
-        self.add_role(Producer, firm, "producer")
+        role = self.add_role(Producer, firm, "producer")
+        role.variety = firm.variety
 
     #
     # Reactions

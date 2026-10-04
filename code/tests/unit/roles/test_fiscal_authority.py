@@ -26,8 +26,9 @@ def test_inherits_from_eco_role():
 @pytest.fixture
 def role():
     # Given
-    agent, env = Mock(), Mock()
-    return FiscalAuthority(agent, env)
+    env = Mock()
+    agent_id = 1
+    return FiscalAuthority(agent_id, env)
 
 
 def test_get_gdp_from_env(role):

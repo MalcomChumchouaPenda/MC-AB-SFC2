@@ -20,10 +20,11 @@ def test_inherits_from_eco_role():
 
 def test_initializes_loan_applicants_list():
     # Given
-    agent, env = Mock(), Mock()
+    env = Mock()
+    agent_id = 1
 
     # When
-    role = Lender(agent, env)
+    role = Lender(agent_id, env)
 
     # Then
     assert role.loan_applicants == []
@@ -37,8 +38,9 @@ def test_initializes_loan_applicants_list():
 @pytest.fixture
 def role():
     # Given
-    agent, env = Mock(), Mock()
-    return Lender(agent, env)
+    env = Mock()
+    agent_id = 1
+    return Lender(agent_id, env)
 
 
 def test_receive_request(role):

@@ -20,10 +20,11 @@ def test_inherits_from_eco_role():
 
 def test_initializes_residual_equity():
     # Given
-    agent, env = Mock(), Mock()
+    env = Mock()
+    agent_id = 1
 
     # When
-    role = Citizen(agent, env)
+    role = Citizen(agent_id, env)
 
     # Then
     assert role.resid_equity == 0
@@ -37,8 +38,9 @@ def test_initializes_residual_equity():
 @pytest.fixture
 def role():
     # Given
-    agent, env = Mock(), Mock()
-    return Citizen(agent, env)
+    env = Mock()
+    agent_id = 1
+    return Citizen(agent_id, env)
 
 
 def test_get_prob_failure(role):

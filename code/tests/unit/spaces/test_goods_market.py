@@ -96,6 +96,22 @@ def test_place_household_add_consumer_role(market_without_roles, tradable, prefi
     market.add_role.assert_called_with(FakeConsumer, household, f"{prefix}_consumer")
 
 
+@pytest.mark.parametrize("tradable", [True, False])
+def test_place_household_sets_role_preference(market_without_roles, tradable):
+    # Given
+    role = Mock()
+    market = market_without_roles
+    market.add_role.return_value = role
+    market.tradable = tradable
+    household = Mock()
+
+    # When
+    market.place_household(household)
+
+    # Then
+    assert role.preference == household.preference
+
+
 def test_place_firm_add_producer_role(market_without_roles):
     # Given
     firm = Mock()
@@ -106,6 +122,20 @@ def test_place_firm_add_producer_role(market_without_roles):
 
     # Then
     market.add_role.assert_called_with(FakeProducer, firm, "producer")
+
+
+def test_place_firm_sets_role_variety(market_without_roles):
+    # Given
+    role = Mock()
+    firm = Mock()
+    market = market_without_roles
+    market.add_role.return_value = role
+
+    # When
+    market.place_firm(firm)
+
+    # Then
+    assert role.variety == firm.variety
 
 
 # ---------------------------------------------------

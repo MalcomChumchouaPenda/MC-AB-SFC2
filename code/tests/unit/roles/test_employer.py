@@ -20,10 +20,11 @@ def test_inherits_from_eco_role():
 
 def test_initializes_wage():
     # Given
-    agent, env = Mock(), Mock()
+    env = Mock()
+    agent_id = 1
 
     # When
-    role = Employer(agent, env)
+    role = Employer(agent_id, env)
 
     # Then
     assert role.wage == 0
@@ -31,10 +32,11 @@ def test_initializes_wage():
 
 def test_initializes_labor_demand():
     # Given
-    agent, env = Mock(), Mock()
+    env = Mock()
+    agent_id = 1
 
     # When
-    role = Employer(agent, env)
+    role = Employer(agent_id, env)
 
     # Then
     assert role.labor_demand == 0
@@ -48,8 +50,9 @@ def test_initializes_labor_demand():
 @pytest.fixture
 def role():
     # Given
-    agent, env = Mock(), Mock()
-    return Employer(agent, env)
+    env = Mock()
+    agent_id = 1
+    return Employer(agent_id, env)
 
 
 def test_get_unemployment(role):

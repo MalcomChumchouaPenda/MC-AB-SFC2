@@ -3,9 +3,9 @@ from model.extensions import EcoRole
 
 class Consumer(EcoRole):
 
-    @property
-    def preference(self):
-        return self.agent.preference
+    def __init__(self, agent_id, env):
+        super().__init__(agent_id, env)
+        self.preference = None
 
     #
     # perception
