@@ -102,7 +102,6 @@ def test_hire_worker_add_edge(market_with_participants):
     # Given
     market, employer, worker = market_with_participants
     employer.labor_demand = 10
-    employer.wage = 20
     worker.labor_supply = 1.0
     graph = market.graph
 
@@ -111,7 +110,7 @@ def test_hire_worker_add_edge(market_with_participants):
 
     # Then
     assert graph.has_edge(worker, employer)
-    assert graph[worker][employer]["wage"] == 20
+    assert graph[worker][employer]["wages"] == 0.0
     assert graph[worker][employer]["quantity"] == 0.9
 
 
@@ -119,7 +118,6 @@ def test_hire_worker_reduces_labor_demand(market_with_participants):
     # Given
     market, employer, worker = market_with_participants
     employer.labor_demand = 10
-    employer.wage = 20
     worker.labor_supply = 1.0
 
     # When
@@ -133,7 +131,6 @@ def test_hire_worker_reduces_labor_supply(market_with_participants):
     # Given
     market, employer, worker = market_with_participants
     employer.labor_demand = 10
-    employer.wage = 20
     worker.labor_supply = 1.0
 
     # When
@@ -146,6 +143,43 @@ def test_hire_worker_reduces_labor_supply(market_with_participants):
 # ---------------------------------------------------
 # WAGES PAYMENT
 # ----------------------------------------------------
+
+
+
+@pytest.fixture
+def market_with_jobs(market_without_roles):
+    # Given
+    worker = Mock()
+    employer = Mock()
+    market = market_without_roles
+    market.transfer_stock = Mock()
+    market.make_transaction = Mock()
+    market.graph.add_edge(employer, worker, wages=0.0)
+    return market, employer, worker
+
+
+def test_pay_wages_update_edge(market_with_jobs):
+    # Given
+    market, employer, worker = market_with_jobs
+    graph = market.graph
+
+    # When
+    market.pay_wages(employer, worker, 3.0)
+
+    # Then
+    assert graph[worker][employer]["wages"] == 3.0
+
+
+def test_pay_wages_updates_accounts(market_with_jobs):
+    # Given
+    market, employer, worker = market_with_jobs
+
+    # When
+    market.pay_wages(employer, worker, 3.0)
+
+    # Then
+    market.transfer_stock.assert_any_call("cash", employer.id, worker.id, 3.0)
+    market.make_transaction.assert_any_call("wages", employer.id, worker.id, 3.0)
 
 
 # ---------------------------------------------------

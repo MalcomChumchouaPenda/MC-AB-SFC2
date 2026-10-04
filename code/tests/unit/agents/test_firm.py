@@ -800,7 +800,7 @@ def firm_before_production(firm_with_roles_and_account):
 
 def test_produce_goods_with_job_quantity(firm_before_production):
     # Given
-    job = {"wage": 0, "quantity": 0.9}
+    job = {"wages": 0, "quantity": 0.9}
     firm = firm_before_production
     producer_role = firm.roles["producer"]
     employer_role = firm.roles["employer"]
@@ -996,6 +996,36 @@ def test_repay_loans_with_available_deposits(firm_after_borrowing, fund, default
     # Then
     role.repay_loans.assert_called_once_with(lender, fund, 0.0)
     role.make_defaults.assert_called_once_with(lender, default)
+
+
+
+# ---------------------------------------------------
+# WAGES PAYMENT
+# ----------------------------------------------------
+
+
+
+@pytest.fixture
+def firm_before_wages_payment(firm_with_roles_and_account):
+    # Given
+    firm, roles, _ = firm_with_roles_and_account
+    roles["employer"] = Mock(wage=2.0)
+    return firm
+
+
+def test_pay_wages_by_job(firm_before_wages_payment):
+    # Given
+    worker = Mock()
+    job = {"worker":worker, "quantity": 0.5}
+    firm = firm_before_wages_payment
+    role = firm.roles["employer"]
+    role.get_jobs.return_value = [job]
+
+    # When
+    firm.pay_wages()
+
+    # Then
+    role.pay_wages.assert_called_with(worker, 1.0)
 
 
 # ---------------------------------------------------

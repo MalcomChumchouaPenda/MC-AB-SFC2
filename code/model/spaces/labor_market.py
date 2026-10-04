@@ -24,14 +24,18 @@ class LaborMarket(EcoSpace):
     # labor matching
     #
     def hire_worker(self, worker, employer, quantity):
-        wage = employer.wage
         worker.labor_supply -= quantity
         employer.labor_demand -= quantity
-        self.graph.add_edge(worker, employer, wage=wage, quantity=quantity)
+        self.graph.add_edge(worker, employer, wages=0, quantity=quantity)
 
     #
     # wages payment
     #
+    def pay_wages(self, employer, worker, amount):
+        self.transfer_stock("cash", employer.id, worker.id, amount)
+        self.make_transaction("wages", employer.id, worker.id, amount)
+        self.graph[employer][worker]["wages"] += amount
+
 
     #
     # evolution

@@ -203,6 +203,18 @@ class Firm(EcoAgent):
         producer_role.produce_goods(labor)
 
     #
+    # Wages
+    #
+    def pay_wages(self):
+        role = self.roles["employer"]
+        for job in role.get_jobs():
+            worker = job["worker"]
+            labor = job["quantity"]
+            wages = labor * role.wage
+            role.pay_wages(worker, wages)
+
+
+    #
     # Profit, taxes and dividend computation
     #
     def compute_profit_distribution(self):
