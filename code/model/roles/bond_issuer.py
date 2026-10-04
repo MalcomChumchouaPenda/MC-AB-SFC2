@@ -5,6 +5,7 @@ class BondIssuer(EcoRole):
 
     def __init__(self, agent, env):
         super().__init__(agent, env)
+        self.country_pos = None
         self.debt_ratio = 0
         self.bond_value = 0
         self.bond_number = 0

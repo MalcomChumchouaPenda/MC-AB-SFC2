@@ -32,10 +32,6 @@ class EcoRole(AgentNode):
         self.group = ""
 
     @property
-    def country_pos(self):
-        return self.agent.country_pos
-
-    @property
     def id(self):
         return self.agent.id
 

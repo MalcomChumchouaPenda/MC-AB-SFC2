@@ -18,6 +18,17 @@ def test_inherits_from_eco_role():
     assert is_derived
 
 
+def test_initializes_country_pos():
+    # Given
+    agent, env = Mock(), Mock()
+
+    # When
+    role = BondIssuer(agent, env)
+
+    # Then
+    assert role.country_pos is None
+
+
 def test_initializes_debt_ratio():
     # Given
     agent, env = Mock(), Mock()
