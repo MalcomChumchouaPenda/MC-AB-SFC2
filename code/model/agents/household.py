@@ -193,7 +193,6 @@ class Household(EcoAgent):
                 if collected_equity >= required_equity:
                     self.create_company(shares, sector)
                     break
-        self.make_deposits()
 
     def choose_investment_sector(self):
         p = self.p

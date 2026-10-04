@@ -1126,8 +1126,6 @@ def hh_as_investor(hh_before_allocation):
     household.find_potential_investors = Mock(return_value=[])
     household.calc_initial_equity = Mock(return_value=100)
     household.create_company = Mock()
-    household.make_deposits = Mock()
-    household.withdraw_deposits = Mock()
     return household
 
 
@@ -1144,7 +1142,6 @@ def test_invest_equity_does_nothing_without_desire(hh_as_investor):
     household.find_potential_investors.assert_not_called()
     household.calc_initial_equity.assert_not_called()
     household.create_company.assert_not_called()
-    household.make_deposits.assert_called_with()
 
 
 def test_invest_equity_when_sufficient_equity(hh_as_investor):
@@ -1164,7 +1161,6 @@ def test_invest_equity_when_sufficient_equity(hh_as_investor):
     household.find_potential_investors.assert_called_with()
     household.calc_initial_equity.assert_called_with("any")
     household.create_company.assert_called_with(shares, "any")
-    household.make_deposits.assert_called_with()
 
 
 def test_invest_equity_with_only_sufficient_equity(hh_as_investor):
@@ -1186,7 +1182,6 @@ def test_invest_equity_with_only_sufficient_equity(hh_as_investor):
     household.find_potential_investors.assert_called_with()
     household.calc_initial_equity.assert_called_with("any")
     household.create_company.assert_called_with(shares, "any")
-    household.make_deposits.assert_called_with()
 
 
 def test_invest_equity_does_nothing_when_insufficient_equity(hh_as_investor):
@@ -1203,7 +1198,6 @@ def test_invest_equity_does_nothing_when_insufficient_equity(hh_as_investor):
     household.find_potential_investors.assert_called_with()
     household.calc_initial_equity.assert_called_with("any")
     household.create_company.assert_not_called()
-    household.make_deposits.assert_called_with()
 
 
 # ---------------------------------------------------
