@@ -64,12 +64,22 @@ def params():
     }
 
 
-def test_setup_by_calling_four_steps(monkeypatch, params):
+FakeDList = Mock()
+
+
+@pytest.fixture
+def before_setup_call(monkeypatch):
     # Given
+    monkeypatch.setattr("model.model.AgentDList", FakeDList)
     monkeypatch.setattr(EcoModel, "_create_union", Mock())
     monkeypatch.setattr(EcoModel, "_create_households", Mock())
     monkeypatch.setattr(EcoModel, "_create_governments", Mock())
     monkeypatch.setattr(EcoModel, "_create_central_banks", Mock())
+
+
+@pytest.mark.usefixtures("before_setup_call")
+def test_setup_by_calling_four_sub_procedures(params):
+    # Given
     model = EcoModel(params)
 
     # When
@@ -82,7 +92,31 @@ def test_setup_by_calling_four_steps(monkeypatch, params):
     model._create_central_banks.assert_called_once_with()
 
 
-def test_setup_create_union(monkeypatch, params):
+@pytest.mark.usefixtures("before_setup_call")
+def test_setup_creates_firms_as_empty_agent_dlist(params):
+    # Given
+    model = EcoModel(params)
+
+    # When
+    model.setup()
+
+    # Then
+    assert model.firms == FakeDList.return_value
+
+
+@pytest.mark.usefixtures("before_setup_call")
+def test_setup_creates_banks_as_empty_agent_dlist(params):
+    # Given
+    model = EcoModel(params)
+
+    # When
+    model.setup()
+
+    # Then
+    assert model.banks == FakeDList.return_value
+
+
+def test_create_union_creates_monetary_union(monkeypatch, params):
     # Given
     FakeUnion = Mock()
     monkeypatch.setattr("model.model.MonetaryUnion", FakeUnion)
@@ -96,7 +130,7 @@ def test_setup_create_union(monkeypatch, params):
     assert model.union is FakeUnion.return_value
 
 
-def test_setup_create_union_markets(monkeypatch, params):
+def test_create_union_creates_markets(monkeypatch, params):
     # Given
     union = Mock()
     FakeUnion = Mock(return_value=union)
@@ -110,7 +144,7 @@ def test_setup_create_union_markets(monkeypatch, params):
     union.create_markets.assert_called_with()
 
 
-def test_setup_create_union_countries(monkeypatch, params):
+def test_create_union_creates_countries(monkeypatch, params):
     # Given
     union = Mock()
     FakeUnion = Mock(return_value=union)
@@ -138,7 +172,7 @@ def before_household_creation(monkeypatch):
 
 
 @pytest.mark.usefixtures("before_household_creation")
-def test_setup_create_households_as_agent_list(params):
+def test_create_households_creates_households_agent_list(params):
     # Given
     num1 = params["household_number"]
     num2 = params["country_number"]
@@ -154,7 +188,7 @@ def test_setup_create_households_as_agent_list(params):
 
 
 @pytest.mark.usefixtures("before_household_creation")
-def test_setup_create_households_with_country_pos(params):
+def test_create_households_sets_households_country_pos(params):
     # Given
     num1 = params["household_number"]
     num2 = params["country_number"]
@@ -170,7 +204,7 @@ def test_setup_create_households_with_country_pos(params):
 
 
 @pytest.mark.usefixtures("before_household_creation")
-def test_setup_add_households_to_union(params):
+def test_create_households_adds_households_to_union(params):
     # Given
     union = Mock()
     agent_list = Mock()
@@ -197,7 +231,7 @@ def before_govt_creation(monkeypatch):
 
 
 @pytest.mark.usefixtures("before_govt_creation")
-def test_setup_create_governments_as_agent_list(params):
+def test_create_governments_creates_govt_agent_list(params):
     # Given
     num = params["country_number"]
     model = EcoModel(params)
@@ -212,7 +246,7 @@ def test_setup_create_governments_as_agent_list(params):
 
 
 @pytest.mark.usefixtures("before_govt_creation")
-def test_setup_create_governments_with_country_pos(params):
+def test_create_governments_sets_govts_with_country_pos(params):
     # Given
     num = params["country_number"]
     model = EcoModel(params)
@@ -227,7 +261,7 @@ def test_setup_create_governments_with_country_pos(params):
 
 
 @pytest.mark.usefixtures("before_govt_creation")
-def test_setup_add_governments_to_union(params):
+def test_create_governments_adds_governments_to_union(params):
     # Given
     union = Mock()
     agent_list = Mock()
@@ -254,7 +288,7 @@ def before_cbank_creation(monkeypatch):
 
 
 @pytest.mark.usefixtures("before_cbank_creation")
-def test_setup_create_national_central_banks_as_agent_list(params):
+def test_create_central_banks_creates_national_cbs_as_agent_list(params):
     # Given
     num = params["country_number"]
     model = EcoModel(params)
@@ -269,7 +303,7 @@ def test_setup_create_national_central_banks_as_agent_list(params):
 
 
 @pytest.mark.usefixtures("before_cbank_creation")
-def test_setup_create_union_central_bank(params):
+def test_create_central_banks_creates_union_cb(params):
     # Given
     model = EcoModel(params)
     model.union = Mock()
@@ -283,7 +317,7 @@ def test_setup_create_union_central_bank(params):
 
 
 @pytest.mark.usefixtures("before_cbank_creation")
-def test_setup_create_national_central_banks_with_country_pos(params):
+def test_create_central_banks_sets_national_cbs_country_pos(params):
     # Given
     num = params["country_number"]
     model = EcoModel(params)
@@ -298,7 +332,7 @@ def test_setup_create_national_central_banks_with_country_pos(params):
 
 
 @pytest.mark.usefixtures("before_cbank_creation")
-def test_setup_create_central_banks_with_national_property(params):
+def test_create_central_banks_sets_cbs_national_property(params):
     # Given
     model = EcoModel(params)
     model.union = Mock()
@@ -312,7 +346,7 @@ def test_setup_create_central_banks_with_national_property(params):
 
 
 @pytest.mark.usefixtures("before_cbank_creation")
-def test_setup_add_national_central_banks_to_union(params):
+def test_create_central_banks_adds_national_cbs_to_union(params):
     # Given
     union = Mock()
     agent_list = Mock()
@@ -328,7 +362,7 @@ def test_setup_add_national_central_banks_to_union(params):
 
 
 @pytest.mark.usefixtures("before_cbank_creation")
-def test_setup_add_union_central_bank_to_union(params):
+def test_create_central_banks_adds_union_cb_to_union(params):
     # Given
     union = Mock()
     cb = Mock()
@@ -341,3 +375,202 @@ def test_setup_add_union_central_bank_to_union(params):
 
     # Then
     union.add_agents.assert_any_call([cb])
+
+
+# ---------------------------------------------------
+# STEP PROCESS
+# ----------------------------------------------------
+
+
+@pytest.fixture
+def before_step_call(monkeypatch):
+    # Given
+    monkeypatch.setattr(EcoModel, "_production_and_rd_planning", Mock())
+    monkeypatch.setattr(EcoModel, "_credit_markets_matching", Mock())
+    monkeypatch.setattr(EcoModel, "_labor_markets_matching", Mock())
+    monkeypatch.setattr(EcoModel, "_production_and_incomes_distribution", Mock())
+    monkeypatch.setattr(EcoModel, "_tax_collection_and_public_expenditures", Mock())
+    monkeypatch.setattr(EcoModel, "_bond_markets_matching", Mock())
+    monkeypatch.setattr(EcoModel, "_goods_consumption", Mock())
+    monkeypatch.setattr(EcoModel, "_profit_distribution_planning", Mock())
+    monkeypatch.setattr(EcoModel, "_enter_exit", Mock())
+
+
+@pytest.mark.usefixtures("before_step_call")
+def test_step_by_calling_nine_sub_procedures(params):
+    # Given
+    model = EcoModel(params)
+
+    # When
+    model.step()
+
+    # Then
+    model._production_and_rd_planning.assert_called_with()
+    model._credit_markets_matching.assert_called_with()
+    model._labor_markets_matching.assert_called_with()
+    model._production_and_incomes_distribution.assert_called_with()
+    model._tax_collection_and_public_expenditures.assert_called_with()
+    model._bond_markets_matching.assert_called_with()
+    model._goods_consumption.assert_called_with()
+    model._profit_distribution_planning.assert_called_with()
+    model._enter_exit.assert_called_with()
+
+
+def test_production_and_rd_planning(params):
+    # Given
+    model = EcoModel(params)
+    model.firms = Mock()
+
+    # When
+    model._production_and_rd_planning()
+
+    # Then
+    model.firms.plan_production.assert_called_with()
+    model.firms.adapt_expectations.assert_called_with()
+    model.firms.revise_wage_offer.assert_called_with()
+
+
+def test_credit_markets_matching(params):
+    # Given
+    model = EcoModel(params)
+    model.firms = Mock()
+    model.banks = Mock()
+
+    # When
+    model._credit_markets_matching()
+
+    # Then
+    model.firms.request_loans.assert_called_with()
+    model.banks.grant_loans.assert_called_with()
+    model.banks.request_cash_advances.assert_called_with()
+
+
+def test_labor_markets_matching(params):
+    # Given
+    model = EcoModel(params)
+    model.households = Mock()
+
+    # When
+    model._labor_markets_matching()
+
+    # Then
+    model.households.revise_reservation_wage.assert_called_with()
+    model.households.search_jobs.assert_called_with()
+
+
+def test_production_and_incomes_distribution(params):
+    # Given
+    model = EcoModel(params)
+    model.firms = Mock()
+    model.banks = Mock()
+
+    # When
+    model._production_and_incomes_distribution()
+
+    # Then
+    model.firms.pay_wages.assert_called_with()
+    model.firms.produce_goods.assert_called_with()
+    model.firms.update_productivity.assert_called_with()
+    model.firms.pay_dividends.assert_called_with()
+    model.banks.update_deposit_rate.assert_called_with()
+    model.banks.pay_deposit_interests.assert_called_with()
+    model.banks.pay_dividends.assert_called_with()
+
+
+def test_tax_collection_and_public_expenditures(params):
+    # Given
+    model = EcoModel(params)
+    model.households = Mock()
+    model.firms = Mock()
+    model.banks = Mock()
+    model.governments = Mock()
+
+    # When
+    model._tax_collection_and_public_expenditures()
+
+    # Then
+    model.households.pay_taxes.assert_called_with()
+    model.firms.pay_taxes.assert_called_with()
+    model.banks.pay_taxes.assert_called_with()
+    model.governments.calc_budget_balance.assert_called_with()
+    model.governments.update_fiscal_policy.assert_called_with()
+    model.governments.repay_bonds.assert_called_with()
+    model.governments.issue_bonds.assert_called_with()
+    model.governments.update_bond_rate.assert_called_with()
+    model.governments.update_history.assert_called_with()
+
+
+def test_bond_markets_matching(params):
+    # Given
+    model = EcoModel(params)
+    model.banks = Mock()
+    model.national_central_banks = Mock()
+
+    # When
+    model._bond_markets_matching()
+
+    # Then
+    model.banks.buy_bonds.assert_called_with()
+    model.national_central_banks.buy_bonds.assert_called_with()
+
+
+def test_goods_consumption(params):
+    # Given
+    model = EcoModel(params)
+    model.households = Mock()
+    model.governments = Mock()
+
+    # When
+    model._goods_consumption()
+
+    # Then
+    model.governments.pay_public_transfers.assert_called_with()
+    model.households.calc_consumption.assert_called_with()
+    model.households.consume.assert_called_with()
+
+
+def test_profit_distribution_planning(params):
+    # Given
+    model = EcoModel(params)
+    model.firms = Mock()
+    model.banks = Mock()
+    model.union_central_bank = Mock()
+    model.national_central_banks = Mock()
+
+    # When
+    model._profit_distribution_planning()
+
+    # Then
+    model.firms.repay_loans.assert_called_with()
+    model.firms.compute_profit_distribution.assert_called_with()
+    model.firms.update_net_worth.assert_called_with()
+    model.firms.update_production_history.assert_called_with()
+    model.banks.repay_cash_advances.assert_called_with()
+    model.banks.compute_profit_distribution.assert_called_with()
+    model.banks.update_net_worth.assert_called_with()
+    model.national_central_banks.transfer_profit.assert_called_with()
+    model.union_central_bank.update_discount_rate.assert_called_with()
+    model.national_central_banks.implement_discount_rate.assert_called_with()
+
+
+def test_enter_exit(params):
+    # Given
+    model = EcoModel(params)
+    model.households = Mock()
+    model.firms = Mock()
+    model.banks = Mock()
+    model.governments = Mock()
+    model.national_central_banks = Mock()
+
+    # When
+    model._enter_exit()
+
+    # Then
+    model.households.choose_portfolio_allocation.assert_called_with()
+    model.households.invest_equity.assert_called_with()
+    model.households.make_deposits.assert_called_with()
+    model.firms.exit.assert_called_with()
+    model.banks.exit.assert_called_with()
+    model.governments.issue_deposit_guarantee_bonds.assert_called_with()
+    model.national_central_banks.buy_remaining_bonds.assert_called_with()
+    model.governments.reimburse_deposits.assert_called_with()
