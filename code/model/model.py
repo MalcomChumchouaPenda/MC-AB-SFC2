@@ -1,12 +1,62 @@
-import agentpy as ap
+from agentpy import Model
+from agentpy import AgentList, AttrIter
+from model.spaces.monetary_union import MonetaryUnion
+from model.agents.household import Household
+from model.agents.government import Government
+from model.agents.central_bank import CentralBank
 
 
-class EcoModel(ap.Model):
+class EcoModel(Model):
     """
     Classe de base du modèle économique.
 
     Responsable de l'orchestration de la simulation.
     """
+
+    def setup(self):
+        self._create_union()
+        self._create_households()
+        self._create_governments()
+        self._create_central_banks()
+
+    def _create_union(self):
+        union = MonetaryUnion(self)
+        union.create_countries(self.p.country_number)
+        union.create_markets()
+        self.union = union
+
+    def _create_households(self):
+        p = self.p
+        num1 = p.country_number
+        num2 = p.household_number
+        pos = list(range(num1)) * num2
+        households = AgentList(self, num1 * num2, Household)
+        households.country_pos = AttrIter(pos)
+        self.union.add_agents(households)
+        self.households = households
+
+    def _create_governments(self):
+        p = self.p
+        num = p.country_number
+        pos = list(range(num))
+        govts = AgentList(self, num, Government)
+        govts.country_pos = AttrIter(pos)
+        self.union.add_agents(govts)
+        self.governments = govts
+
+    def _create_central_banks(self):
+        p = self.p
+        num = p.country_number
+        pos = list(range(num))
+        national_cbs = AgentList(self, num, CentralBank)
+        national_cbs.country_pos = AttrIter(pos)
+        national_cbs.national = True
+        union_cb  = CentralBank(self)
+        union_cb.national = False
+        self.union.add_agents(national_cbs)
+        self.union.add_agents([union_cb])
+        self.union_central_bank = union_cb
+        self.national_central_banks = national_cbs
 
 
 """
