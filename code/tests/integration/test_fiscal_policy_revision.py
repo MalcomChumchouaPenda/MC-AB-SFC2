@@ -8,6 +8,9 @@ from model.agents.government import Government
 def model(fake_model):
     # Given
     model = fake_model
+    model.p.initial_tax_rate = 0.0
+    model.p.initial_discount_rate = 0.0
+    model.p.initial_bond_rate = 0.0
     model.p.dmax = 0.05
     model.p.tax_min = 0.10
     model.p.tax_max = 0.50
@@ -18,9 +21,9 @@ def model(fake_model):
 
 
 @pytest.fixture
-def country(fake_model):
+def country(model):
     # Given
-    country = Country(fake_model)
+    country = Country(model)
     country.create_markets()
     country.spaces["goods_market"].average_price = 2
     country.spaces["goods_market"].average_prod = 3

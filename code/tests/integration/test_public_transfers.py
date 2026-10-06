@@ -1,6 +1,5 @@
 from unittest.mock import Mock
 import pytest
-from agentpy import Model
 from model.spaces.country import Country
 from model.agents.government import Government
 from model.agents.central_bank import CentralBank
@@ -8,16 +7,20 @@ from model.agents.household import Household
 
 
 @pytest.fixture
-def model():
+def model(fake_model):
     # Given
-    model = Model()
+    model = fake_model
+    model.p.initial_tax_rate = 0.0
+    model.p.initial_discount_rate = 0.0
+    model.p.initial_bond_rate = 0.0
+    model.p.initial_wage = 0.0
     return model
 
 
 @pytest.fixture
-def country(fake_model):
+def country(model):
     # Given
-    country = Country(fake_model)
+    country = Country(model)
     country.create_markets()
     return country
 

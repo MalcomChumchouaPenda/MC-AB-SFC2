@@ -8,6 +8,8 @@ from model.spaces.goods_market import GoodsMarket
 def model(fake_model):
     # Given
     model = fake_model
+    model.p.initial_tax_rate = 0.0
+    model.p.initial_discount_rate = 0.0
     model.p.delta = 0.2
     model.p.gamma = 0.1
     model.p.nu = 1

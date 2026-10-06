@@ -28,6 +28,7 @@ def params():
         "iota_l": 1.0,
         "chi": 0.003,
         "iota_b": 0.1,
+        "initial_discount_rate": 0.0,
         "initial_bond_rate": 0.001,
         "long_run_rate": 0.0075,
         "xi": 0.8,

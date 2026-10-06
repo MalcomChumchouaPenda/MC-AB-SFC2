@@ -8,8 +8,9 @@ class Government(EcoAgent):
         self._defaults = []
 
         # choices
+        p = self.p
         self.next_tax_rate = 0.0
-        self.bond_rate = 0.0
+        self.bond_rate = p.initial_bond_rate
         self.bond_supply = 0
         self.desired_public_spending = 0
         self.prev_public_spending = 0

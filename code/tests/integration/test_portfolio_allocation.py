@@ -6,25 +6,35 @@ from model.agents.bank import Bank
 
 
 @pytest.fixture
-def country(fake_model):
+def model(fake_model):
     # Given
-    country = Country(fake_model)
+    model = fake_model
+    model.p.initial_tax_rate = 0.0
+    model.p.initial_discount_rate = 0.0
+    model.p.initial_wage = 0.0
+    return model
+
+
+@pytest.fixture
+def country(model):
+    # Given
+    country = Country(model)
     country.create_markets()
     return country
 
 
 @pytest.fixture
-def bank(fake_model, country):
+def bank(model, country):
     # Given
-    bank = Bank(fake_model)
+    bank = Bank(model)
     country.add_bank(bank)
     return bank
 
 
 @pytest.fixture
-def household(fake_model, country, bank):
+def household(model, country, bank):
     # Given
-    household = Household(fake_model)
+    household = Household(model)
     household.deposit_bank_id = bank.id
     country.add_household(household)
     role = household.roles["depositor"]

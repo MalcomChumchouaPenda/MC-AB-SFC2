@@ -7,25 +7,35 @@ from model.agents.bank import Bank
 
 
 @pytest.fixture
-def country(fake_model):
+def model(fake_model):
     # Given
-    country = Country(fake_model)
+    model = fake_model
+    model.p.initial_tax_rate = 0.0
+    model.p.initial_discount_rate = 0.0
+    model.p.initial_wage = 0.0
+    return model
+
+
+@pytest.fixture
+def country(model):
+    # Given
+    country = Country(model)
     country.create_markets()
     return country
 
 
 @pytest.fixture
-def household(fake_model, country):
+def household(model, country):
     # Given
-    household = Household(fake_model)
+    household = Household(model)
     country.add_household(household)
     return household
 
 
 @pytest.fixture
-def firm(fake_model, country, household):
+def firm(model, country, household):
     # Given
-    firm = Firm(fake_model)
+    firm = Firm(model)
     country.add_firm(firm)
     citizen = household.roles["citizen"]
     citizen.fund_company(firm.id, 500)
@@ -62,9 +72,9 @@ def test_decreases_firm_cash(firm, household):
 
 
 @pytest.fixture
-def bank(fake_model, country, household):
+def bank(model, country, household):
     # Given
-    bank = Bank(fake_model)
+    bank = Bank(model)
     country.add_bank(bank)
     citizen = household.roles["citizen"]
     citizen.fund_company(bank.id, 500)

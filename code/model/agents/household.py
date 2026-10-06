@@ -13,7 +13,8 @@ class Household(EcoAgent):
         self.desired_consumption = 0
 
         # decisions
-        self.reservation_wage = 0
+        p = self.p
+        self.reservation_wage = p.initial_wage
         self.expected_consumption = 0
         self.desired_trad_cons = 0
         self.desired_non_trad_cons = 0

@@ -19,10 +19,15 @@ def test_inherits_from_eco_agent():
     assert is_derived
 
 
-def test_initializes_labor_supply(fake_model):
+@pytest.fixture
+def model(fake_model):
     # Given
     model = fake_model
+    model.p.initial_wage = 0.0
+    return model
 
+
+def test_initializes_labor_supply(model):
     # When
     household = Household(model)
 
@@ -30,10 +35,7 @@ def test_initializes_labor_supply(fake_model):
     assert household.labor_supply == 1.0
 
 
-def test_initializes_prev_labor_sold(fake_model):
-    # Given
-    model = fake_model
-
+def test_initializes_prev_labor_sold(model):
     # When
     household = Household(model)
 
@@ -41,10 +43,7 @@ def test_initializes_prev_labor_sold(fake_model):
     assert household.prev_labor_sold == 0.0
 
 
-def test_initializes_preference(fake_model):
-    # Given
-    model = fake_model
-
+def test_initializes_preference(model):
     # When
     household = Household(model)
 
@@ -52,21 +51,18 @@ def test_initializes_preference(fake_model):
     assert household.preference == 0
 
 
-def test_initializes_reservation_wage(fake_model):
+def test_initializes_reservation_wage(model):
     # Given
-    model = fake_model
+    model.p.initial_wage = 10
 
     # When
     household = Household(model)
 
     # Then
-    assert household.reservation_wage == 0
+    assert household.reservation_wage == 10
 
 
-def test_initializes_expected_consumption(fake_model):
-    # Given
-    model = fake_model
-
+def test_initializes_expected_consumption(model):
     # When
     household = Household(model)
 
@@ -74,10 +70,7 @@ def test_initializes_expected_consumption(fake_model):
     assert household.expected_consumption == 0
 
 
-def test_initializes_desired_consumption(fake_model):
-    # Given
-    model = fake_model
-
+def test_initializes_desired_consumption(model):
     # When
     household = Household(model)
 
@@ -85,10 +78,7 @@ def test_initializes_desired_consumption(fake_model):
     assert household.desired_consumption == 0
 
 
-def test_initializes_desired_equity(fake_model):
-    # Given
-    model = fake_model
-
+def test_initializes_desired_equity(model):
     # When
     household = Household(model)
 
@@ -96,10 +86,7 @@ def test_initializes_desired_equity(fake_model):
     assert household.desired_equity == 0
 
 
-def test_initializes_desired_deposits(fake_model):
-    # Given
-    model = fake_model
-
+def test_initializes_desired_deposits(model):
     # When
     household = Household(model)
 
@@ -107,10 +94,7 @@ def test_initializes_desired_deposits(fake_model):
     assert household.desired_deposits == 0
 
 
-def test_initializes_desired_investment_sector(fake_model):
-    # Given
-    model = fake_model
-
+def test_initializes_desired_investment_sector(model):
     # When
     household = Household(model)
 
@@ -118,10 +102,7 @@ def test_initializes_desired_investment_sector(fake_model):
     assert household.desired_investment_sector is None
 
 
-def test_initializes_net_worth(fake_model):
-    # Given
-    model = fake_model
-
+def test_initializes_net_worth(model):
     # When
     household = Household(model)
 
@@ -129,10 +110,7 @@ def test_initializes_net_worth(fake_model):
     assert household.net_worth == 0
 
 
-def test_initializes_incomes(fake_model):
-    # Given
-    model = fake_model
-
+def test_initializes_incomes(model):
     # When
     household = Household(model)
 
@@ -141,10 +119,7 @@ def test_initializes_incomes(fake_model):
     assert household.disposable_income == 0
 
 
-def test_initializes_deposit_bank_id(fake_model):
-    # Given
-    model = fake_model
-
+def test_initializes_deposit_bank_id(model):
     # When
     household = Household(model)
 
@@ -158,9 +133,8 @@ def test_initializes_deposit_bank_id(fake_model):
 
 
 @pytest.fixture
-def household(fake_model):
+def household(model):
     # Given
-    model = fake_model
     model.random = Mock()
     model.nprandom = Mock()
     return Household(model)

@@ -6,13 +6,21 @@ from model.spaces.country import Country
 
 
 @pytest.fixture
-def country(fake_model):
+def model(fake_model):
     # Given
     model = fake_model
+    model.p.zeta = 1.0
+    model.p.initial_tax_rate = 0.0
+    model.p.initial_discount_rate = 0.02
+    model.p.initial_wage = 0.0
+    return model
+
+
+@pytest.fixture
+def country(model):
+    # Given
     country = Country(model)
     country.create_markets()
-    country.p.zeta = 1.0
-    country.discount_rate = 0.02
     return country
 
 
@@ -24,18 +32,16 @@ def market(country):
 
 
 @pytest.fixture
-def bank(fake_model, country):
+def bank(model, country):
     # Given
-    model = fake_model
     bank = Bank(model)
     country.add_bank(bank)
     return bank
 
 
 @pytest.fixture
-def firm(fake_model, country):
+def firm(model, country):
     # Given
-    model = fake_model
     firm = Firm(model)
     country.add_firm(firm)
     return firm
@@ -70,9 +76,8 @@ def test_increases_firm_deposit_interests(firm, bank, market):
 
 
 @pytest.fixture
-def household(fake_model, market):
+def household(model, market):
     # Given
-    model = fake_model
     household = Household(model)
     market.add_household(household)
     return household

@@ -7,6 +7,14 @@ from model.agents.government import Government
 # ----------------------------------------------------
 
 
+@pytest.fixture
+def model(fake_model):
+    # Given
+    model = fake_model
+    model.p.initial_bond_rate = 0.0
+    return model
+
+
 def test_inherits_from_eco_agent():
     # Given
     from model.extensions import EcoAgent
@@ -18,32 +26,26 @@ def test_inherits_from_eco_agent():
     assert is_derived
 
 
-def test_initializes_next_tax_rate(fake_model):
+def test_initializes_next_tax_rate(model):
+    # When
+    govt = Government(model)
+
+    # Then
+    assert govt.next_tax_rate == 0.0
+
+
+def test_initializes_bond_rate(model):
     # Given
-    model = fake_model
+    model.p.initial_bond_rate = 0.01
 
     # When
     govt = Government(model)
 
     # Then
-    assert govt.next_tax_rate == 0
+    assert govt.bond_rate == 0.01
 
 
-def test_initializes_bond_rate(fake_model):
-    # Given
-    model = fake_model
-
-    # When
-    govt = Government(model)
-
-    # Then
-    assert govt.bond_rate == 0
-
-
-def test_initializes_public_spending(fake_model):
-    # Given
-    model = fake_model
-
+def test_initializes_public_spending(model):
     # When
     govt = Government(model)
 
@@ -51,10 +53,7 @@ def test_initializes_public_spending(fake_model):
     assert govt.public_spending == 0
 
 
-def test_initializes_desired_public_spending(fake_model):
-    # Given
-    model = fake_model
-
+def test_initializes_desired_public_spending(model):
     # When
     govt = Government(model)
 
@@ -62,10 +61,7 @@ def test_initializes_desired_public_spending(fake_model):
     assert govt.desired_public_spending == 0
 
 
-def test_initializes_new_public_debt(fake_model):
-    # Given
-    model = fake_model
-
+def test_initializes_new_public_debt(model):
     # When
     govt = Government(model)
 
@@ -73,10 +69,7 @@ def test_initializes_new_public_debt(fake_model):
     assert govt.new_public_debt == 0
 
 
-def test_initializes_budget_deficit(fake_model):
-    # Given
-    model = fake_model
-
+def test_initializes_budget_deficit(model):
     # When
     govt = Government(model)
 
@@ -84,10 +77,7 @@ def test_initializes_budget_deficit(fake_model):
     assert govt.budget_deficit == 0
 
 
-def test_initializes_budget_surplus(fake_model):
-    # Given
-    model = fake_model
-
+def test_initializes_budget_surplus(model):
     # When
     govt = Government(model)
 
@@ -95,10 +85,7 @@ def test_initializes_budget_surplus(fake_model):
     assert govt.budget_surplus == 0
 
 
-def test_initializes_prev_public_spending(fake_model):
-    # Given
-    model = fake_model
-
+def test_initializes_prev_public_spending(model):
     # When
     govt = Government(model)
 
@@ -106,10 +93,7 @@ def test_initializes_prev_public_spending(fake_model):
     assert govt.prev_public_spending == 0
 
 
-def test_initializes_prev_budget_surplus(fake_model):
-    # Given
-    model = fake_model
-
+def test_initializes_prev_budget_surplus(model):
     # When
     govt = Government(model)
 
@@ -123,9 +107,8 @@ def test_initializes_prev_budget_surplus(fake_model):
 
 
 @pytest.fixture
-def govt(fake_model):
+def govt(model):
     # Given
-    model = fake_model
     model.random = Mock()
     model.nprandom = Mock()
     return Government(model)

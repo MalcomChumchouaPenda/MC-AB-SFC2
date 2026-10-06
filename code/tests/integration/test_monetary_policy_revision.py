@@ -1,13 +1,14 @@
 import pytest
-from agentpy import Model
 from model.agents.central_bank import CentralBank
 from model.spaces.monetary_union import MonetaryUnion
 
 
 @pytest.fixture
-def model():
+def model(fake_model):
     # Given
-    model = Model()
+    model = fake_model
+    model.p.initial_tax_rate = 0.0
+    model.p.initial_discount_rate = 0.0
     model.p.xi = 0.5
     model.p.xi_deltap = 1.5
     model.p.long_run_rate = 0.02
@@ -16,9 +17,9 @@ def model():
 
 
 @pytest.fixture
-def union(fake_model):
+def union(model):
     # Given
-    union = MonetaryUnion(fake_model)
+    union = MonetaryUnion(model)
     union.create_markets()
     union.create_countries(1)
     return union

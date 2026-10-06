@@ -5,26 +5,30 @@ from model.spaces.credit_market import CreditMarket
 
 
 @pytest.fixture
-def market(fake_model):
+def model(fake_model):
     # Given
     model = fake_model
+    return model
+
+
+@pytest.fixture
+def market(model):
+    # Given
     market = CreditMarket(model)
     return market
 
 
 @pytest.fixture
-def bank(fake_model, market):
+def bank(model, market):
     # Given
-    model = fake_model
     bank = Bank(model)
     market.add_bank(bank)
     return bank
 
 
 @pytest.fixture
-def firm(fake_model, market):
+def firm(model, market):
     # Given
-    model = fake_model
     firm = Firm(model)
     market.add_firm(firm)
     return firm

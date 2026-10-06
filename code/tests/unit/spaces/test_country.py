@@ -18,10 +18,16 @@ def test_inherits_from_eco_space():
     assert is_derived
 
 
-def test_initializes_pos(fake_model):
+@pytest.fixture
+def model(fake_model):
     # Given
     model = fake_model
+    model.p.initial_tax_rate = 0.0
+    model.p.initial_discount_rate = 0.0
+    return model
 
+
+def test_initializes_pos(model):
     # When
     country = Country(model)
 
@@ -29,10 +35,7 @@ def test_initializes_pos(fake_model):
     assert country.pos == 0
 
 
-def test_initializes_inflation(fake_model):
-    # Given
-    model = fake_model
-
+def test_initializes_inflation(model):
     # When
     country = Country(model)
 
@@ -40,10 +43,7 @@ def test_initializes_inflation(fake_model):
     assert country.inflation == 0
 
 
-def test_initializes_gdp(fake_model):
-    # Given
-    model = fake_model
-
+def test_initializes_gdp(model):
     # When
     country = Country(model)
 
@@ -51,10 +51,7 @@ def test_initializes_gdp(fake_model):
     assert country.gdp == 0
 
 
-def test_initializes_prob_failure(fake_model):
-    # Given
-    model = fake_model
-
+def test_initializes_prob_failure(model):
     # When
     country = Country(model)
 
@@ -62,32 +59,29 @@ def test_initializes_prob_failure(fake_model):
     assert country.prob_failure == 0
 
 
-def test_initializes_tax_rate(fake_model):
+def test_initializes_tax_rate(model):
     # Given
-    model = fake_model
+    model.p.initial_tax_rate = 0.21
 
     # When
     country = Country(model)
 
     # Then
-    assert country.tax_rate == 0
+    assert country.tax_rate == 0.21
 
 
-def test_initializes_discount_rate(fake_model):
+def test_initializes_discount_rate(model):
     # Given
-    model = fake_model
+    model.p.initial_discount_rate = 0.01
 
     # When
     country = Country(model)
 
     # Then
-    assert country.discount_rate == 0
+    assert country.discount_rate == 0.01
 
 
-def test_initializes_fiscal_authority(fake_model):
-    # Given
-    model = fake_model
-
+def test_initializes_fiscal_authority(model):
     # When
     country = Country(model)
 
@@ -95,10 +89,7 @@ def test_initializes_fiscal_authority(fake_model):
     assert country.fiscal_authority is None
 
 
-def test_initializes_monetary_authority(fake_model):
-    # Given
-    model = fake_model
-
+def test_initializes_monetary_authority(model):
     # When
     country = Country(model)
 
@@ -117,13 +108,13 @@ FakeDepositMarket = Mock()
 
 
 @pytest.fixture
-def country_without_markets(monkeypatch, fake_model):
+def country_without_markets(monkeypatch, model):
     # Given
     monkeypatch.setattr("model.spaces.country.GoodsMarket", FakeGoodMarket)
     monkeypatch.setattr("model.spaces.country.LaborMarket", FakeLaborMarket)
     monkeypatch.setattr("model.spaces.country.DepositMarket", FakeDepositMarket)
     monkeypatch.setattr(Country, "add_space", Mock())
-    country = Country(fake_model)
+    country = Country(model)
     country.pos = 2
     return country
 
@@ -186,13 +177,13 @@ FakeCompany = Mock()
 
 
 @pytest.fixture
-def country_without_roles(fake_model, monkeypatch):
+def country_without_roles(model, monkeypatch):
     # Given
     monkeypatch.setattr("model.spaces.country.MonetaryAuthority", FakeMonetaryAuth)
     monkeypatch.setattr("model.spaces.country.FiscalAuthority", FakeFiscalAuth)
     monkeypatch.setattr("model.spaces.country.Citizen", FakeCitizen)
     monkeypatch.setattr("model.spaces.country.Company", FakeCompany)
-    country = Country(fake_model)
+    country = Country(model)
     country.add_role = Mock()
     country.env = Mock()
     country.spaces["goods_market"] = Mock()

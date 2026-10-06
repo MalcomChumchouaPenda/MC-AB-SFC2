@@ -5,16 +5,26 @@ from model.agents.firm import Firm
 
 
 @pytest.fixture
-def market(fake_model):
+def model(fake_model):
     # Given
-    market = LaborMarket(fake_model)
+    model = fake_model
+    model.p.initial_tax_rate = 0.0
+    model.p.initial_discount_rate = 0.0
+    model.p.initial_wage = 0.0
+    return model
+
+
+@pytest.fixture
+def market(model):
+    # Given
+    market = LaborMarket(model)
     return market
 
 
 @pytest.fixture
-def firm(fake_model, market):
+def firm(model, market):
     # Given
-    firm = Firm(fake_model)
+    firm = Firm(model)
     market.add_firm(firm)
     employer = firm.roles["employer"]
     employer.wage = 10.0
@@ -22,12 +32,12 @@ def firm(fake_model, market):
 
 
 @pytest.fixture
-def households(fake_model, market, firm):
+def households(model, market, firm):
     # Given
     households = []
     employer = firm.roles["employer"]
     for _ in range(2):
-        household = Household(fake_model)
+        household = Household(model)
         market.add_household(household)
         worker = household.roles["worker"]
         market.hire_worker(worker, employer, 1.0)

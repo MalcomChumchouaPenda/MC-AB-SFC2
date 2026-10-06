@@ -5,9 +5,19 @@ from model.spaces.monetary_union import MonetaryUnion
 
 
 @pytest.fixture
-def union(fake_model):
+def model(fake_model):
     # Given
-    union = MonetaryUnion(fake_model)
+    model = fake_model
+    model.p.initial_tax_rate = 0.0
+    model.p.initial_discount_rate = 0.0
+    model.p.initial_wage = 0.0
+    return model
+
+
+@pytest.fixture
+def union(model):
+    # Given
+    union = MonetaryUnion(model)
     union.create_markets()
     union.create_countries(1)
     return union
@@ -23,9 +33,8 @@ def markets(union, make_dlist):
 
 
 @pytest.fixture
-def household(fake_model, union):
+def household(model, union):
     # Given
-    model = fake_model
     model.p.psi = 2
     model.p.beta = 1
     model.p.cT = 0.6
@@ -35,9 +44,8 @@ def household(fake_model, union):
 
 
 @pytest.fixture
-def firms(fake_model, union, make_dlist):
+def firms(model, union, make_dlist):
     # Given
-    model = fake_model
     firms = make_dlist()
     for tradable in [True, False]:
         firm = Firm(model)

@@ -9,6 +9,8 @@ from model.spaces.monetary_union import MonetaryUnion
 def model(fake_model):
     # Given
     model = fake_model
+    model.p.initial_tax_rate = 0.0
+    model.p.initial_discount_rate = 0.0
     model.p.iota_l = 0
     model.p.chi = 0.0
     model.p.mu1 = 1.0
@@ -16,9 +18,9 @@ def model(fake_model):
 
 
 @pytest.fixture
-def union(fake_model):
+def union(model):
     # Given
-    union = MonetaryUnion(fake_model)
+    union = MonetaryUnion(model)
     union.create_markets()
     union.create_countries(1)
     country = union.spaces["country_0"]

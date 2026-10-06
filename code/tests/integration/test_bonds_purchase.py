@@ -6,18 +6,24 @@ from model.spaces.bond_market import BondMarket
 
 
 @pytest.fixture
-def market(fake_model):
+def model(fake_model):
     # Given
     model = fake_model
     model.p.mu2 = 0.1
     model.p.iota_b = 0
+    model.p.initial_bond_rate = 0.0
+    return model
+
+
+@pytest.fixture
+def market(model):
+    # Given
     return BondMarket(model)
 
 
 @pytest.fixture
-def cb(fake_model, market):
+def cb(model, market):
     # Given
-    model = fake_model
     cb = CentralBank(model)
     cb.national = True
     market.add_central_bank(cb)
@@ -25,18 +31,16 @@ def cb(fake_model, market):
 
 
 @pytest.fixture
-def govt(fake_model, market):
+def govt(model, market):
     # Given
-    model = fake_model
     govt = Government(model)
     market.add_government(govt)
     return govt
 
 
 @pytest.fixture
-def bank(fake_model, market):
+def bank(model, market):
     # Given
-    model = fake_model
     bank = Bank(model)
     market.add_central_bank(bank)
     return bank

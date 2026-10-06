@@ -7,9 +7,20 @@ from model.spaces.monetary_union import MonetaryUnion
 
 
 @pytest.fixture
-def union(fake_model):
+def model(fake_model):
     # Given
-    union = MonetaryUnion(fake_model)
+    model = fake_model
+    model.p.initial_tax_rate = 0.0
+    model.p.initial_discount_rate = 0.0
+    model.p.initial_bond_rate = 0.0
+    model.p.initial_wage = 0.0
+    return model
+
+
+@pytest.fixture
+def union(model):
+    # Given
+    union = MonetaryUnion(model)
     union.create_markets()
     union.create_countries(1)
     return union
@@ -23,17 +34,17 @@ def deposit_market(union):
 
 
 @pytest.fixture
-def govt(fake_model, union):
+def govt(model, union):
     # Given
-    govt = Government(fake_model)
+    govt = Government(model)
     union.add_government(govt)
     return govt
 
 
 @pytest.fixture
-def bank(fake_model, union):
+def bank(model, union):
     # Given
-    bank = Bank(fake_model)
+    bank = Bank(model)
     union.add_bank(bank)
     deposit_bank = bank.roles["deposit_bank"]
     deposit_bank.defaulted = True
@@ -41,9 +52,9 @@ def bank(fake_model, union):
 
 
 @pytest.fixture
-def firm(fake_model, union):
+def firm(model, union):
     # Given
-    firm = Firm(fake_model)
+    firm = Firm(model)
     union.add_firm(firm)
     return firm
 
@@ -97,9 +108,8 @@ def test_clears_firm_deposits(firm, bank, govt, deposit_market):
 
 
 @pytest.fixture
-def household(fake_model, union):
+def household(model, union):
     # Given
-    model = fake_model
     household = Household(model)
     union.add_household(household)
     return household

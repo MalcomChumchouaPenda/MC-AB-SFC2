@@ -1,13 +1,15 @@
 from unittest.mock import Mock
 import pytest
-from agentpy import Model
 from model.agents.household import Household
 from model.spaces.labor_market import LaborMarket
 
 
 @pytest.fixture
-def model(monkeypatch):
-    model = Model()
+def model(fake_model, monkeypatch):
+    model = fake_model
+    model.p.initial_tax_rate = 0.0
+    model.p.initial_discount_rate = 0.0
+    model.p.initial_wage = 0.0
     model.p.delta = 0.1
     model.p.upsilon = 1.0
     monkeypatch.setattr(model, "nprandom", Mock())

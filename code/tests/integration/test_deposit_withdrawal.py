@@ -6,26 +6,31 @@ from model.spaces.deposit_market import DepositMarket
 
 
 @pytest.fixture
-def market(fake_model):
+def model(fake_model):
     # Given
     model = fake_model
+    model.p.initial_wage = 0.0
+    return model
+
+
+@pytest.fixture
+def market(model):
+    # Given
     market = DepositMarket(model)
     return market
 
 
 @pytest.fixture
-def bank(fake_model, market):
+def bank(model, market):
     # Given
-    model = fake_model
     bank = Bank(model)
     market.add_bank(bank)
     return bank
 
 
 @pytest.fixture
-def firm(fake_model, market):
+def firm(model, market):
     # Given
-    model = fake_model
     firm = Firm(model)
     market.add_firm(firm)
     return firm
@@ -62,9 +67,8 @@ def test_decreases_firm_deposits(firm, bank, market):
 
 
 @pytest.fixture
-def household(fake_model, market):
+def household(model, market):
     # Given
-    model = fake_model
     household = Household(model)
     market.add_household(household)
     return household

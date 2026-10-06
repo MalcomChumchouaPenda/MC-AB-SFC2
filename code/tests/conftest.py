@@ -1,8 +1,6 @@
 import os
 import sys
 import pytest
-import itertools
-from unittest.mock import Mock
 from agentpy import AgentDList, Model
 
 root_dir = os.path.abspath(__file__)

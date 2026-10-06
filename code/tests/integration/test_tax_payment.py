@@ -7,26 +7,36 @@ from model.agents.government import Government
 
 
 @pytest.fixture
-def country(fake_model):
+def model(fake_model):
     # Given
-    country = Country(fake_model)
+    model = fake_model
+    model.p.initial_tax_rate = 0.10
+    model.p.initial_discount_rate = 0.0
+    model.p.initial_bond_rate = 0.0
+    model.p.initial_wage = 0.0
+    return model
+
+
+@pytest.fixture
+def country(model):
+    # Given
+    country = Country(model)
     country.create_markets()
-    country.tax_rate = 0.10
     return country
 
 
 @pytest.fixture
-def govt(fake_model, country):
+def govt(model, country):
     # Given
-    govt = Government(fake_model)
+    govt = Government(model)
     country.add_government(govt)
     return govt
 
 
 @pytest.fixture
-def household(fake_model, country):
+def household(model, country):
     # Given
-    household = Household(fake_model)
+    household = Household(model)
     country.add_household(household)
     household.account["cash"] = 1000
     household.account["wages"] = 550
@@ -54,9 +64,9 @@ def test_transfers_cash_from_household_to_govt(household, govt):
 
 
 @pytest.fixture
-def firm(fake_model, country):
+def firm(model, country):
     # Given
-    firm = Firm(fake_model)
+    firm = Firm(model)
     country.add_firm(firm)
     firm.taxes_payable = 100
     firm.account["cash"] = 1000
@@ -83,9 +93,9 @@ def test_tansfers_cash_from_firm_to_govt(firm, govt):
 
 
 @pytest.fixture
-def bank(fake_model, country):
+def bank(model, country):
     # Given
-    bank = Bank(fake_model)
+    bank = Bank(model)
     country.add_bank(bank)
     bank.taxes_payable = 100
     bank.account["cash"] = 1000

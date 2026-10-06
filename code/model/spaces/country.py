@@ -12,12 +12,13 @@ class Country(EcoSpace):
 
     def setup(self):
         super().setup()
+        p = self.p
         self.pos = 0
         self.gdp = 0
         self.inflation = 0
         self.prob_failure = 0
-        self.tax_rate = 0
-        self.discount_rate = 0
+        self.tax_rate = p.initial_tax_rate
+        self.discount_rate = p.initial_discount_rate
         self.monetary_authority = None
         self.fiscal_authority = None
 
