@@ -29,6 +29,20 @@ def test_initializes_country_pos(fake_model):
     assert market.country_pos == 0
 
 
+def test_exposes_deposit_rate_as_fraction_of_discount_rate(fake_model):
+    # Given
+    model = fake_model
+    model.p.zeta = 0.6
+    market = DepositMarket(model)
+    market.env = Mock(discount_rate=0.05)
+
+    # When
+    exposed = market.deposit_rate
+
+    # Then
+    assert exposed == pytest.approx(0.6 * 0.05)
+
+
 # ---------------------------------------------------
 # ROLES MANAGEMENT
 # ----------------------------------------------------

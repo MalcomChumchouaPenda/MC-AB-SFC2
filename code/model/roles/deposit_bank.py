@@ -10,6 +10,8 @@ class DepositBank(EcoRole):
     #
     # Perceptions
     #
+    def get_deposit_rate(self):
+        return self.env.deposit_rate
 
     def find_deposits(self):
         return self.env.links(self, "depositor")

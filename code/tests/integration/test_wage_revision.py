@@ -10,7 +10,6 @@ def model(monkeypatch):
     model = Model()
     model.p.delta = 0.1
     model.p.upsilon = 1.0
-    model.p.upsilon_h = 1.0
     monkeypatch.setattr(model, "nprandom", Mock())
     return model
 

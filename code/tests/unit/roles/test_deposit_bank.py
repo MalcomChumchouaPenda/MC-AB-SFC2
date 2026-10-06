@@ -29,6 +29,18 @@ def test_initializes_defaulted():
     assert role.defaulted is False
 
 
+def test_get_deposit_rate_from_env(role):
+    # Given
+    env = role.env
+    env.deposit_rate = 0.01
+
+    # When
+    perceived = role.get_deposit_rate()
+
+    # Then
+    assert perceived == 0.01
+
+
 # ---------------------------------------------------
 # PERCEPTION TESTS
 # ----------------------------------------------------

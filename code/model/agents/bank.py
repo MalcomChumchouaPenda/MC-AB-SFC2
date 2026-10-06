@@ -7,7 +7,6 @@ class Bank(EcoAgent):
     def setup(self):
         super().setup()
         # choices
-        self.deposit_rate = 0
         self.taxes_payable = 0
         self.dividends_payable = 0
 
@@ -20,14 +19,11 @@ class Bank(EcoAgent):
         # accointances
         self.central_bank = None
 
-    def update_deposit_rate(self):
-        discount_rate = self.roles["company"].get_discount_rate()
-        self.deposit_rate = self.p.zeta * discount_rate
-
     def pay_deposit_interests(self):
         role = self.roles["deposit_bank"]
+        deposit_rate = role.get_deposit_rate()
         for deposit in role.find_deposits():
-            amount = self.deposit_rate * deposit["amount"]
+            amount = deposit_rate * deposit["amount"]
             role.pay_interests(deposit["depositor"], amount)
 
     def grant_loans(self):

@@ -62,7 +62,7 @@ def test_buy_all_domestic_remaining_bonds(cb_as_bond_buyer):
     role.find_issuers.return_value = [issuer]
 
     # When
-    cb.buy_remaining_bonds()
+    cb.buy_bonds()
 
     # Then
     role.buy_bonds.assert_called_with(issuer, 5)
@@ -75,7 +75,7 @@ def test_dont_buy_foreign_bonds(cb_as_bond_buyer):
     role.find_issuers.return_value = [issuer]
 
     # When
-    cb.buy_remaining_bonds()
+    cb.buy_bonds()
 
     # Then
     role.buy_bonds.assert_not_called()

@@ -381,6 +381,23 @@ def test_update_fiscal_policy_when_deficit_low_and_spending_low(govt_for_policy)
     assert govt.next_tax_rate == pytest.approx(0.20)
 
 
+def test_doesnt_update_fiscal_policy_without_positive_gdp(govt_for_policy):
+    # Given
+    govt = govt_for_policy
+    govt.budget_deficit = 100
+    govt.desired_public_spending = 80
+    role = govt.roles["fiscal_authority"]
+    role.get_gdp.return_value = 0
+
+    # When
+    govt.update_fiscal_policy()
+
+    # Then
+    govt.calc_desired_public_spending.assert_not_called()
+    govt.apply_public_spending_bounds.assert_not_called()
+    govt.apply_tax_rate_bounds.assert_not_called()
+
+
 def test_implement_fiscal_policy(govt_as_authority):
     # Given
     govt, role = govt_as_authority
@@ -490,6 +507,24 @@ def test_issues_bonds_with_multi_step(govt_before_bond_supply):
     govt.calc_new_bonds.assert_called_with()
 
 
+def test_issues_bonds_set_debt_ratio_with_no_gdp(govt_before_bond_supply):
+    # Given
+    govt = govt_before_bond_supply
+    govt.bond_supply = 100
+    govt.calc_new_bonds.return_value = 500
+    govt.roles["fiscal_authority"].get_gdp.return_value = 0
+    role = govt.roles["bond_issuer"]
+
+    # When
+    govt.issue_bonds()
+
+    # Then
+    assert govt.bond_supply == 600
+    assert role.debt_ratio == float("inf")
+    assert role.bond_value == 6.0
+    assert role.bond_number == 100
+
+
 # ---------------------------------------------------
 #  BOND REPAYMENT
 # ----------------------------------------------------
@@ -509,8 +544,9 @@ def test_update_bond_rate(govt_before_repayment):
     govt = govt_before_repayment
     govt.p.chi = 0.02
     govt.account["bonds"] = 500
-    govt.roles["fiscal_authority"].get_gdp.return_value = 1000
-    govt.roles["fiscal_authority"].get_discount_rate.return_value = 0.03
+    role = govt.roles["fiscal_authority"]
+    role.get_gdp.return_value = 1000
+    role.get_discount_rate.return_value = 0.03
 
     # when
     rate = govt.update_bond_rate()
@@ -518,6 +554,24 @@ def test_update_bond_rate(govt_before_repayment):
     # Then
     assert rate == 0.04
     assert govt.bond_rate == 0.04
+
+
+def test_dont_update_bond_rate_with_no_gdp(govt_before_repayment):
+    # Given
+    govt = govt_before_repayment
+    govt.p.chi = 0.02
+    govt.bond_rate = 0.02
+    govt.account["bonds"] = 500
+    role = govt.roles["fiscal_authority"]
+    role.get_gdp.return_value = 0
+    role.get_discount_rate.return_value = 0.03
+
+    # when
+    rate = govt.update_bond_rate()
+
+    # Then
+    assert rate == 0.02
+    assert govt.bond_rate == 0.02
 
 
 def test_repay_bonds(govt_before_repayment):

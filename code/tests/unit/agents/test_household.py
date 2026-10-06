@@ -30,6 +30,17 @@ def test_initializes_labor_supply(fake_model):
     assert household.labor_supply == 1.0
 
 
+def test_initializes_prev_labor_sold(fake_model):
+    # Given
+    model = fake_model
+
+    # When
+    household = Household(model)
+
+    # Then
+    assert household.prev_labor_sold == 0.0
+
+
 def test_initializes_preference(fake_model):
     # Given
     model = fake_model
@@ -263,14 +274,13 @@ def test_calc_revision_probability(hh_with_roles_and_account):
     role.get_unemployment.return_value = 0.1
     household, roles, _ = hh_with_roles_and_account
     household.p.upsilon = 1.0
-    household.p.upsilon_h = 0.9
     roles["worker"] = role
 
     # When
     result = household.calc_revision_probability()
 
     # Then
-    assert result == 0.9 * math.exp(-1.0 * 0.1)
+    assert result == math.exp(-1.0 * 0.1)
 
 
 @pytest.fixture
@@ -722,13 +732,12 @@ def test_calc_liquidity_pref_with_deposit_bank_rate(hh_before_allocation):
     roles = household.roles
     roles["citizen"].get_prob_failure.return_value = 0.10
     roles["depositor"].get_deposit_rate.return_value = 0.05
-    bank_id = household.deposit_bank_id
 
     # When
     household.calc_liquidity_preference()
 
     # Then
-    roles["depositor"].get_deposit_rate.assert_called_with(bank_id)
+    roles["depositor"].get_deposit_rate.assert_called_with()
 
 
 def test_calc_liquidity_pref_when_equity_is_more_profitable(hh_before_allocation):
@@ -1115,6 +1124,19 @@ def test_make_deposits_with_residual_cash(hh_as_depositor):
     role.make_deposits.assert_called_with(2, 500)
 
 
+def test_dont_make_deposits_without_deposit_bank_id(hh_as_depositor):
+    # Given
+    household, role = hh_as_depositor
+    household.account["cash"] = 500
+    household.deposit_bank_id = None
+
+    # When
+    household.make_deposits()
+
+    # Then
+    role.make_deposits.assert_not_called()
+
+
 @pytest.fixture
 def hh_as_investor(hh_before_allocation):
     # Given
@@ -1261,3 +1283,21 @@ def test_choose_deposit_bank_sets_deposit_bank_id(hh_as_depositor):
 
     # Then
     assert household.deposit_bank_id == banks[-1].id
+
+
+# ---------------------------------------------------
+# HISTORY
+# ----------------------------------------------------
+
+
+def test_update_history_sets_prev_labor_sold(hh_with_roles_and_account):
+    # Given
+    role = Mock(labor_sold=0.9)
+    household, roles, _ = hh_with_roles_and_account
+    roles["worker"] = role
+
+    # When
+    household.update_history()
+
+    # Then
+    assert household.prev_labor_sold == role.labor_sold

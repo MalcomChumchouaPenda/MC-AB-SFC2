@@ -2,38 +2,47 @@ import pytest
 from model.agents.bank import Bank
 from model.agents.firm import Firm
 from model.agents.household import Household
-from model.spaces.deposit_market import DepositMarket
+from model.spaces.country import Country
 
 
 @pytest.fixture
-def market(fake_model):
+def country(fake_model):
     # Given
     model = fake_model
-    market = DepositMarket(model)
+    country = Country(model)
+    country.create_markets()
+    country.p.zeta = 1.0
+    country.discount_rate = 0.02
+    return country
+
+
+@pytest.fixture
+def market(country):
+    # Given
+    market = country.spaces["deposit_market"]
     return market
 
 
 @pytest.fixture
-def bank(fake_model, market):
+def bank(fake_model, country):
     # Given
     model = fake_model
     bank = Bank(model)
-    market.add_bank(bank)
+    country.add_bank(bank)
     return bank
 
 
 @pytest.fixture
-def firm(fake_model, market):
+def firm(fake_model, country):
     # Given
     model = fake_model
     firm = Firm(model)
-    market.add_firm(firm)
+    country.add_firm(firm)
     return firm
 
 
 def test_increases_firm_deposits(firm, bank, market):
     # Given
-    bank.deposit_rate = 0.02
     depositor = firm.roles["depositor_0"]
     deposit_bank = bank.roles["deposit_bank"]
     market.join_deposit_bank(depositor, deposit_bank, 2000)
@@ -48,7 +57,6 @@ def test_increases_firm_deposits(firm, bank, market):
 
 def test_increases_firm_deposit_interests(firm, bank, market):
     # Given
-    bank.deposit_rate = 0.02
     depositor = firm.roles["depositor_0"]
     deposit_bank = bank.roles["deposit_bank"]
     market.join_deposit_bank(depositor, deposit_bank, 2000)
@@ -72,7 +80,6 @@ def household(fake_model, market):
 
 def test_increases_household_deposits(household, bank, market):
     # Given
-    bank.deposit_rate = 0.02
     depositor = household.roles["depositor"]
     deposit_bank = bank.roles["deposit_bank"]
     market.join_deposit_bank(depositor, deposit_bank, 1000)
@@ -87,7 +94,6 @@ def test_increases_household_deposits(household, bank, market):
 
 def test_increases_household_deposit_interests(household, bank, market):
     # Given
-    bank.deposit_rate = 0.02
     depositor = household.roles["depositor"]
     deposit_bank = bank.roles["deposit_bank"]
     market.join_deposit_bank(depositor, deposit_bank, 1000)

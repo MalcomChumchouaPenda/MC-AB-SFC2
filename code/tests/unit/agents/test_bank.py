@@ -19,17 +19,6 @@ def test_inherits_from_eco_agent():
     assert is_derived
 
 
-def test_initializes_deposit_rate(fake_model):
-    # Given
-    model = fake_model
-
-    # When
-    bank = Bank(model)
-
-    # Then
-    assert bank.deposit_rate == 0
-
-
 def test_initializes_taxes_payable(fake_model):
     # Given
     model = fake_model
@@ -99,25 +88,11 @@ def bank(fake_model):
     return Bank(model)
 
 
-def test_update_deposit_rate_as_fraction_of_discount_rate(bank):
-    # Given
-    company = Mock()
-    company.get_discount_rate.return_value = 0.05
-    bank.roles["company"] = company
-    bank.p.zeta = 0.8
-
-    # When
-    bank.update_deposit_rate()
-
-    # Then
-    assert bank.deposit_rate == pytest.approx(0.04)
-
-
 def test_pay_deposit_interests_to_all_clients(bank):
     # Given
     role, client = Mock(), Mock()
     role.find_deposits.return_value = [{"depositor": client, "amount": 100}]
-    bank.deposit_rate = 0.05
+    role.get_deposit_rate.return_value = 0.05
     bank.roles["deposit_bank"] = role
 
     # When

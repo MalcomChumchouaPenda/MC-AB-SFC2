@@ -458,14 +458,13 @@ def test_calc_revision_probability(firm_with_roles_and_account):
     role.get_unemployment_rate.return_value = 0.1
     firm, roles, _ = firm_with_roles_and_account
     firm.p.upsilon = 1.0
-    firm.p.upsilon_f = 0.9
     roles["employer"] = role
 
     # When
     result = firm.calc_revision_probability()
 
     # Then
-    assert result == 0.9 * math.exp(-1.0 * 0.1)
+    assert result == math.exp(-1.0 * 0.1)
 
 
 @pytest.fixture

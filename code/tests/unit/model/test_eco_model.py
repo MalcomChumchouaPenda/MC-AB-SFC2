@@ -49,6 +49,7 @@ def params():
         "iota_l": 1.0,
         "chi": 0.003,
         "iota_b": 0.1,
+        "initial_discount_rate": 0.0,
         "initial_bond_rate": 0.001,
         "long_run_rate": 0.0075,
         "xi": 0.8,
@@ -472,7 +473,6 @@ def test_production_and_incomes_distribution(params):
     model.firms.produce_goods.assert_called_with()
     model.firms.update_productivity.assert_called_with()
     model.firms.pay_dividends.assert_called_with()
-    model.banks.update_deposit_rate.assert_called_with()
     model.banks.pay_deposit_interests.assert_called_with()
     model.banks.pay_dividends.assert_called_with()
 
@@ -568,9 +568,10 @@ def test_enter_exit(params):
     # Then
     model.households.choose_portfolio_allocation.assert_called_with()
     model.households.invest_equity.assert_called_with()
+    model.households.choose_deposit_bank.assert_called_with()
     model.households.make_deposits.assert_called_with()
     model.firms.exit.assert_called_with()
     model.banks.exit.assert_called_with()
     model.governments.issue_deposit_guarantee_bonds.assert_called_with()
-    model.national_central_banks.buy_remaining_bonds.assert_called_with()
+    model.national_central_banks.buy_bonds.assert_called_with()
     model.governments.reimburse_deposits.assert_called_with()

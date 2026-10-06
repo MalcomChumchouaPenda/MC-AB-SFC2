@@ -13,7 +13,7 @@ class CentralBank(EcoAgent):
     #
     # Bond purchases
     #
-    def buy_remaining_bonds(self):
+    def buy_bonds(self):
         role = self.roles["bond_buyer"]
         for issuer in role.find_issuers():
             if issuer.country_pos == self.country_pos:

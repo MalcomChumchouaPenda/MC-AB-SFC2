@@ -22,7 +22,7 @@ class Household(EcoAgent):
         self.desired_investment_sector = None
 
         # memory
-        self.employed_labor = 0
+        self.prev_labor_sold = 0
         self.income = 0
         self.disposable_income = 0
         self.deposit_bank_id = None
@@ -46,7 +46,7 @@ class Household(EcoAgent):
         p = self.p
         role = self.roles["worker"]
         unemployment = role.get_unemployment()
-        return p.upsilon_h * math.exp(-p.upsilon * unemployment)
+        return math.exp(-p.upsilon * unemployment)
 
     def search_jobs(self):
         p = self.p
@@ -148,7 +148,6 @@ class Household(EcoAgent):
     def choose_portfolio_allocation(self):
         self.calc_net_worth()
         lp = self.calc_liquidity_preference()
-        print(lp, self.net_worth)
         equity = self.account["equities"]
         expected_worth = self.calc_expected_net_worth()
         self.desired_equity = max(equity, (1 - lp) * expected_worth)
@@ -161,7 +160,7 @@ class Household(EcoAgent):
         equity = self.account["equities"]
         dividends = self.account["dividends"]
         default_prob = roles["citizen"].get_prob_failure()
-        deposit_rate = roles["depositor"].get_deposit_rate(self.deposit_bank_id)
+        deposit_rate = roles["depositor"].get_deposit_rate()
         profit_ratio = dividends / equity if equity else 0
         if profit_ratio < deposit_rate or equity <= 0:
             return p.lambda_
@@ -243,10 +242,11 @@ class Household(EcoAgent):
     # Deposits management
     #
     def make_deposits(self):
-        account = self.account
         bank_id = self.deposit_bank_id
-        role = self.roles["depositor"]
-        role.make_deposits(bank_id, account["cash"])
+        if bank_id is not None:
+            account = self.account
+            role = self.roles["depositor"]
+            role.make_deposits(bank_id, account["cash"])
 
     def choose_deposit_bank(self):
         role = self.roles["depositor"]
@@ -259,3 +259,9 @@ class Household(EcoAgent):
             new_bank = random.choice(banks)
             role.join_deposit_bank(new_bank.id)
             self.deposit_bank_id = new_bank.id
+
+    #
+    # History
+    #
+    def update_history(self):
+        self.prev_labor_sold = self.roles["worker"].labor_sold

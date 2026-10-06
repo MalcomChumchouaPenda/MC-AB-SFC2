@@ -43,13 +43,13 @@ def test_find_deposit_banks_from_env(role):
     assert found == env.find_all_roles.return_value
 
 
-def test_get_deposit_rate_from_deposit_bank(role):
+def test_get_deposit_rate_from_env(role):
     # Given
-    deposit_bank = Mock(deposit_rate=0.01)
-    role.env.roles = {1: deposit_bank, 0: Mock()}
+    env = role.env
+    env.deposit_rate = 0.01
 
     # When
-    perceived = role.get_deposit_rate(1)
+    perceived = role.get_deposit_rate()
 
     # Then
     assert perceived == 0.01

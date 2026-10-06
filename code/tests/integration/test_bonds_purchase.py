@@ -112,7 +112,7 @@ def test_clears_bond_number_with_central_bank_purchase(govt, cb):
     issuer_role.bond_number = 100
 
     # When
-    cb.buy_remaining_bonds()
+    cb.buy_bonds()
 
     # Then
     assert issuer_role.bond_number == 0
@@ -126,7 +126,7 @@ def test_creates_link_with_central_bank_purchase(market, govt, cb):
     issuer_role.bond_number = 100
 
     # When
-    cb.buy_remaining_bonds()
+    cb.buy_bonds()
 
     # Then
     assert market.graph[issuer_role][buyer_role]["amount"] == 500
@@ -139,7 +139,7 @@ def test_increases_bonds_with_central_bank_purchase(govt, cb):
     issuer_role.bond_number = 100
 
     # When
-    cb.buy_remaining_bonds()
+    cb.buy_bonds()
 
     # Then
     assert cb.account["bonds"] == 500
@@ -153,7 +153,7 @@ def test_transfers_cash_from_central_bank(govt, cb):
     issuer_role.bond_number = 100
 
     # When
-    cb.buy_remaining_bonds()
+    cb.buy_bonds()
 
     # Then
     assert cb.account["cash"] == -500

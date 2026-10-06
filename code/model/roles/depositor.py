@@ -9,8 +9,8 @@ class Depositor(EcoRole):
     def find_deposit_banks(self):
         return self.env.find_all_roles("deposit_bank")
 
-    def get_deposit_rate(self, bank_id):
-        return self.env.roles[bank_id].deposit_rate
+    def get_deposit_rate(self):
+        return self.env.deposit_rate
 
     #
     # Actions

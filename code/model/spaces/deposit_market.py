@@ -10,6 +10,10 @@ class DepositMarket(EcoSpace):
         super().setup()
         self.country_pos = 0
 
+    @property
+    def deposit_rate(self):
+        return self.p.zeta * self.env.discount_rate
+
     #
     # Roles management
     #

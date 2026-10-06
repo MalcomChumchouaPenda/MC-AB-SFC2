@@ -49,15 +49,16 @@ class Government(EcoAgent):
         return balance
 
     def update_fiscal_policy(self):
-        p = self.p
-        random = self.model.random
-        variation = random.uniform(0, p.delta)
         gdp = self.roles["fiscal_authority"].get_gdp()
-        ratio = self.budget_deficit / gdp
-        target = self.calc_desired_public_spending()
-        self._update_policy_randomly(ratio, target, variation)
-        self.apply_tax_rate_bounds()
-        self.apply_public_spending_bounds()
+        if gdp > 0:
+            p = self.p
+            random = self.model.random
+            variation = random.uniform(0, p.delta)
+            ratio = self.budget_deficit / gdp
+            target = self.calc_desired_public_spending()
+            self._update_policy_randomly(ratio, target, variation)
+            self.apply_tax_rate_bounds()
+            self.apply_public_spending_bounds()
 
     def _update_policy_randomly(self, ratio, target, variation):
         if ratio >= self.p.dmax:
@@ -106,9 +107,9 @@ class Government(EcoAgent):
         self.bond_supply += new_bonds
         gdp = self.roles["fiscal_authority"].get_gdp()
         role = self.roles["bond_issuer"]
-        role.debt_ratio = self.bond_supply / gdp
-        role.bond_value = self.bond_supply / 100
         role.bond_number = 100
+        role.bond_value = self.bond_supply / 100
+        role.debt_ratio = self.bond_supply / gdp if gdp > 0 else float("inf")
 
     def calc_new_debt(self):
         bonds = self.account["bonds"]
@@ -135,10 +136,10 @@ class Government(EcoAgent):
         bonds = self.account["bonds"]
         role = self.roles["fiscal_authority"]
         gdp = role.get_gdp()
-        discount_rate = role.get_discount_rate()
-        bond_rate = self.p.chi * (bonds / gdp) + discount_rate
-        self.bond_rate = bond_rate
-        return bond_rate
+        if gdp > 0:
+            discount_rate = role.get_discount_rate()
+            self.bond_rate = self.p.chi * (bonds / gdp) + discount_rate
+        return self.bond_rate
 
     #
     # Deposit guarantee

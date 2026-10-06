@@ -93,7 +93,7 @@ class Firm(EcoAgent):
         p = self.p
         role = self.roles["employer"]
         unemployment = role.get_unemployment_rate()
-        return p.upsilon_f * math.exp(-p.upsilon * unemployment)
+        return math.exp(-p.upsilon * unemployment)
 
     #
     # Innovation and imitation process

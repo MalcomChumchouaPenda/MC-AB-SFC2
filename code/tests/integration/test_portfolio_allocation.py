@@ -34,6 +34,8 @@ def household(fake_model, country, bank):
 
 def test_household_portfolio_allocation(country, household, bank):
     # Given
+    country.p.zeta = 1.0  # for deposit rate computaion
+    country.discount_rate = 0.05
     country.prob_failure = 0.0
     household.p.lambda_ = 0.4
     household.disposable_income = 100
@@ -42,7 +44,6 @@ def test_household_portfolio_allocation(country, household, bank):
     household.account["equities"] = 50
     household.account["deposits"] = 0
     household.account["cash"] = 0
-    bank.roles["deposit_bank"].deposit_rate = 0.05
 
     # When
     household.choose_portfolio_allocation()
