@@ -22,6 +22,10 @@ class Country(EcoSpace):
         self.monetary_authority = None
         self.fiscal_authority = None
 
+    @property
+    def average_wage(self):
+        return self.spaces["labor_market"].average_wage
+
     # Spaces management
     def create_markets(self):
         self.add_space(GoodsMarket, "goods_market", tradable=False)

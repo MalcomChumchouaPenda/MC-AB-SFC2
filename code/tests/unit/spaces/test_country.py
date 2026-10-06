@@ -97,6 +97,18 @@ def test_initializes_monetary_authority(model):
     assert country.monetary_authority is None
 
 
+def test_exposes_average_wage_from_labor_market(model):
+    # Given
+    country = Country(model)
+    country.spaces["labor_market"] = Mock(average_wage=15)
+
+    # When
+    exposed = country.average_wage
+
+    # Then
+    assert exposed == 15
+
+
 # ---------------------------------------------------
 # SUB SPACES CREATION
 # ----------------------------------------------------
