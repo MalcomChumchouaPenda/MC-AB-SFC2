@@ -122,7 +122,7 @@ def test_calc_credit_capacity(bank_with_roles_and_account):
     # Given
     bank, _, account = bank_with_roles_and_account
     bank.p.mu1 = 10
-    account["equities"] = 100
+    account["equities"] = -100
 
     # When
     result = bank.calc_credit_capacity()

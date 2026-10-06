@@ -12,10 +12,10 @@ class Government(EcoAgent):
         self.next_tax_rate = 0.0
         self.bond_rate = p.initial_bond_rate
         self.bond_supply = 0
-        self.desired_public_spending = 0
-        self.prev_public_spending = 0
-        self.public_spending = 0
         self.prev_budget_surplus = 0
+        self.prev_public_spending = 0
+        self.desired_public_spending = 0
+        self.public_spending = p.household_number * p.initial_public_transfer
         self.new_public_debt = 0
 
         # indicators

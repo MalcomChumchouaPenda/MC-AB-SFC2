@@ -54,6 +54,7 @@ def params():
         "long_run_rate": 0.0075,
         "xi": 0.8,
         "xi_deltap": 2,
+        "initial_public_transfer": 0.4,
         "inflation_target": 0.005,
         "dmax": 0.03,
         "tax_min": 0.35,

@@ -29,17 +29,6 @@ def test_initializes_sector():
     assert role.sector == ""
 
 
-def test_initializes_net_worth():
-    # Given
-    agent, env = Mock(), Mock()
-
-    # When
-    role = Company(agent, env)
-
-    # Then
-    assert role.net_worth == 0
-
-
 def test_initializes_defaulted():
     # Given
     agent, env = Mock(), Mock()
@@ -49,6 +38,34 @@ def test_initializes_defaulted():
 
     # Then
     assert role.defaulted is False
+
+
+def test_exposes_equity_from_env():
+    # Given
+    agent, env = Mock(), Mock()
+    role = Company(agent, env)
+    env.get_stock.return_value = -100
+
+    # When
+    exposed = role.equity
+
+    # Then
+    env.get_stock.assert_called_with("equities", agent.id)
+    assert exposed == 100
+
+
+def test_exposes_net_worth_from_env():
+    # Given
+    agent, env = Mock(), Mock()
+    role = Company(agent, env)
+    env.get_stock.return_value = -100
+
+    # When
+    exposed = role.net_worth
+
+    # Then
+    env.get_stock.assert_called_with("equities", agent.id)
+    assert exposed == 100
 
 
 # ---------------------------------------------------

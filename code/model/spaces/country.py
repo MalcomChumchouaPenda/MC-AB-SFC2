@@ -104,7 +104,6 @@ class Country(EcoSpace):
             self.graph[company][founder]["value"] += amount
         else:
             self.graph.add_edge(company, founder, value=amount)
-
         self.transfer_stock("cash", founder.id, company.id, amount)
         self.transfer_stock("equities", company.id, founder.id, amount)
 

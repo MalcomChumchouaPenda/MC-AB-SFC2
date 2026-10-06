@@ -9,6 +9,8 @@ from model.spaces.bond_market import BondMarket
 def model(fake_model):
     # Given
     model = fake_model
+    model.p.household_number = 0
+    model.p.initial_public_transfer = 0.0
     model.p.initial_bond_rate = 0.0
     return model
 

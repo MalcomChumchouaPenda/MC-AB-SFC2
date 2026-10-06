@@ -154,7 +154,6 @@ class Firm(EcoAgent):
             return
         role = self.roles["borrower"]
         role.loan_demand = self.desired_loans
-        role.net_worth = self.account["equities"]
         lenders = role.find_lenders()
         for lender in lenders:
             role.request_loans(lender)

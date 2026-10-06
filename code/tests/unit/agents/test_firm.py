@@ -890,19 +890,6 @@ def test_request_loans_and_set_loan_demand(firm_as_borrower):
     assert role.loan_demand == 100
 
 
-def test_request_loans_and_registers_networth(firm_as_borrower):
-    # Given
-    firm, role = firm_as_borrower
-    firm.account["equities"] = 200
-    firm.calc_desired_loans.return_value = 100
-
-    # When
-    firm.request_loans()
-
-    # Then
-    assert role.net_worth == 200
-
-
 def test_request_loans_and_registers_desired_loans(firm_as_borrower):
     # Given
     firm, _ = firm_as_borrower

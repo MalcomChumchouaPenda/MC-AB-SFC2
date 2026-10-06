@@ -11,6 +11,8 @@ def model(fake_model):
     model = fake_model
     model.p.mu2 = 0.1
     model.p.iota_b = 0
+    model.p.household_number = 0
+    model.p.initial_public_transfer = 0.0
     model.p.initial_bond_rate = 0.0
     return model
 

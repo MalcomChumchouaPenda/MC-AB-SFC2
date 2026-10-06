@@ -11,6 +11,8 @@ from model.agents.government import Government
 def model(fake_model):
     # Given
     model = fake_model
+    model.p.household_number = 0
+    model.p.initial_public_transfer = 0.0
     model.p.initial_bond_rate = 0.0
     return model
 
@@ -47,10 +49,12 @@ def test_initializes_bond_rate(model):
 
 def test_initializes_public_spending(model):
     # When
+    model.p.household_number = 10
+    model.p.initial_public_transfer = 0.5
     govt = Government(model)
 
     # Then
-    assert govt.public_spending == 0
+    assert govt.public_spending == 5.0
 
 
 def test_initializes_desired_public_spending(model):

@@ -6,7 +6,11 @@ class Borrower(EcoRole):
     def __init__(self, agent, env):
         super().__init__(agent, env)
         self.loan_demand = 0
-        self.net_worth = 0
+
+    @property
+    def net_worth(self):
+        amount = self.env.get_stock("equities", self.agent.id)
+        return -1 * amount
 
     #
     # Perceptions

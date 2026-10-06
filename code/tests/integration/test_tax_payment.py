@@ -10,6 +10,8 @@ from model.agents.government import Government
 def model(fake_model):
     # Given
     model = fake_model
+    model.p.household_number = 0
+    model.p.initial_public_transfer = 0.0
     model.p.initial_tax_rate = 0.10
     model.p.initial_discount_rate = 0.0
     model.p.initial_bond_rate = 0.0

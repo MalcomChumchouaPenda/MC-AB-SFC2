@@ -55,7 +55,7 @@ class Bank(EcoAgent):
         deposit_bank.make_deposits(depositor, amount)
 
     def calc_credit_capacity(self):
-        equity = self.account["equities"]
+        equity = -1 * self.account["equities"]
         return equity * self.p.mu1
 
     def calc_loan_probability(self, borrower):
@@ -93,7 +93,6 @@ class Bank(EcoAgent):
         role = self.roles["bond_buyer"]
         bond_issuers = self.find_bond_issuers()
         excess = self.calc_excess_reserves()
-        print(excess, bond_issuers)
         choice = self.model.nprandom.choice
         for issuer in bond_issuers:
             prob = self.calc_bond_purchases_probability(issuer)

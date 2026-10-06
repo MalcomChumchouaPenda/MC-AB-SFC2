@@ -34,6 +34,7 @@ def params():
         "xi": 0.8,
         "xi_deltap": 2,
         "inflation_target": 0.005,
+        "initial_public_transfer": 0.4,
         "dmax": 0.03,
         "tax_min": 0.35,
         "tax_max": 0.45,

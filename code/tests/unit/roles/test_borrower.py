@@ -29,15 +29,18 @@ def test_initializes_loan_demand():
     assert role.loan_demand == 0.0
 
 
-def test_initializes_net_worth():
+def test_exposes_net_worth_from_env():
     # Given
     agent, env = Mock(), Mock()
+    role = Borrower(agent, env)
+    env.get_stock.return_value = -100
 
     # When
-    role = Borrower(agent, env)
+    exposed = role.net_worth
 
     # Then
-    assert role.net_worth == 0.0
+    env.get_stock.assert_called_with("equities", agent.id)
+    assert exposed == 100
 
 
 # ---------------------------------------------------
