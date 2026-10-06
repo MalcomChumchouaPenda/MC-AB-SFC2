@@ -225,6 +225,7 @@ class Household(EcoAgent):
     def _create_bank(self, shares):
         model = self.model
         bank = Bank(model)
+        bank.country_pos = self.country_pos
         model.union.add_bank(bank)
         model.banks.append(bank)
         for share in shares:
@@ -233,6 +234,7 @@ class Household(EcoAgent):
     def _create_firm(self, shares, sector):
         model = self.model
         firm = Firm(model)
+        firm.country_pos = self.country_pos
         firm.tradable = sector == "FT"
         model.union.add_firm(firm)
         model.firms.append(firm)

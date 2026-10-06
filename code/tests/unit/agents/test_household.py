@@ -946,6 +946,24 @@ def test_create_company_creates_firm(hh_before_investment, sector):
     FakeFirm.assert_called_with(household.model)
 
 
+@pytest.mark.parametrize("sector", ["FT","FNT"])
+def test_create_company_sets_firm_country_pos(hh_before_investment, sector):
+    # Given
+    firm = Mock()
+    FakeFirm.return_value = firm
+    shares = [{"founder": Mock(), "amount": 100}]
+    household = hh_before_investment
+    household.country_pos = 5
+    household.model.union = Mock()
+    household.model.firms = []
+
+    # When
+    household.create_company(shares, sector=sector)
+
+    # Then
+    assert firm.country_pos == 5
+
+
 @pytest.mark.parametrize("sector, tradable", [("FT", True), ("FNT", False)])
 def test_create_company_sets_firm_tradable(hh_before_investment, sector, tradable):
     # Given
@@ -1026,6 +1044,23 @@ def test_create_company_creates_bank(hh_before_investment):
 
     # Then
     FakeBank.assert_called_with(household.model)
+
+
+def test_create_company_sets_bank_country_pos(hh_before_investment):
+    # Given
+    bank = Mock()
+    FakeBank.return_value = bank
+    shares = [{"founder": Mock(), "amount": 100}]
+    household = hh_before_investment
+    household.country_pos = 6
+    household.model.union = Mock()
+    household.model.banks = []
+
+    # When
+    household.create_company(shares, sector="B")
+
+    # Then
+    assert bank.country_pos == 6
 
 
 def test_create_company_places_bank_into_union(hh_before_investment):
