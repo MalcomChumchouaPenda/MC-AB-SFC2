@@ -9,7 +9,6 @@ def camel_to_snake(name):
     return re.sub("([a-z0-9])([A-Z])", r"\1_\2", s1).lower()
 
 
-
 class EcoAgent(Agent):
     """
     Classe de base des agents économiques.
@@ -190,7 +189,7 @@ class EcoSpace(Network):
         self.clear_defaults()
 
     def update_state(self):
-        raise NotImplementedError
+        pass
 
     def clear_defaults(self):
-        raise NotImplementedError
+        pass

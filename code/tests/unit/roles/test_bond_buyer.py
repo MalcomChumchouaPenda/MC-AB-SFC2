@@ -18,16 +18,27 @@ def test_inherits_from_eco_role():
     assert is_derived
 
 
-@pytest.fixture
-def role():
+def test_initializes_defaulted():
     # Given
     agent, env = Mock(), Mock()
-    return BondBuyer(agent, env)
+
+    # When
+    role = BondBuyer(agent, env)
+
+    # Then
+    assert role.defaulted is False
 
 
 # ---------------------------------------------------
 #  PERCEPTIONS
 # ----------------------------------------------------
+
+
+@pytest.fixture
+def role():
+    # Given
+    agent, env = Mock(), Mock()
+    return BondBuyer(agent, env)
 
 
 def test_find_issuers_with_positive_bond_number(role, make_dlist):

@@ -232,7 +232,6 @@ def test_add_role_add_graph_node(space_and_agent, role_with_kind):
     assert space.positions[agent] is role
 
 
-
 def test_add_role_registers_role(space_and_agent, role_with_kind):
     # Given
     role, role_kind = role_with_kind
@@ -244,7 +243,6 @@ def test_add_role_registers_role(space_and_agent, role_with_kind):
     # Then
     assert role is space.roles[agent.id]
     assert role is agent.roles["fake_role"]
-
 
 
 def test_add_role_with_prefix(space_and_agent, role_with_kind):
@@ -717,27 +715,3 @@ def test_evolve_clear_all_defaults(space_before_evolution):
     # Then
     space.clear_defaults.assert_called_once()
     subspace.clear_defaults.assert_called_once()
-
-
-def test_update_state_is_not_implemented(fake_model):
-    # Given
-    model = fake_model
-
-    # When
-    space = EcoSpace(model)
-
-    # Then
-    with pytest.raises(NotImplementedError):
-        space.update_state()
-
-
-def test_clear_defaults_is_not_implemented(fake_model):
-    # Given
-    model = fake_model
-
-    # When
-    space = EcoSpace(model)
-
-    # Then
-    with pytest.raises(NotImplementedError):
-        space.clear_defaults()

@@ -825,7 +825,7 @@ def test_update_state_updates_prob_failure(country_before_update):
 @pytest.fixture
 def country_with_defaults(country_without_roles):
     companies = [Mock(defaulted=val) for val in [True, False]]
-    citizens = [Mock(company_number=i) for i in range(1,3)]
+    citizens = [Mock(company_number=i) for i in range(1, 3)]
     country = country_without_roles
     for company, citizen in zip(companies, citizens):
         company.name = "company"

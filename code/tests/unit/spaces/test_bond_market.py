@@ -1,5 +1,5 @@
 import pytest
-from unittest.mock import Mock
+from unittest.mock import Mock, call
 from model.spaces.bond_market import BondMarket
 
 # ---------------------------------------------------
@@ -180,3 +180,32 @@ def test_repay_bond_updates_accounts(market_with_purchase):
     market.transfer_stock.assert_any_call("bonds", buyer.id, issuer.id, 100)
     market.transfer_stock.assert_any_call("cash", issuer.id, buyer.id, 110)
     market.make_transaction.assert_any_call("bond_interests", issuer.id, buyer.id, 10)
+
+
+# ---------------------------------------------------
+# EVOLUTION
+# ----------------------------------------------------
+
+
+@pytest.fixture
+def market_with_defaults(market_without_roles):
+    buyers = [Mock(defaulted=val) for val in [True, False]]
+    market = market_without_roles
+    for role in buyers:
+        role.name = "bond_buyer"
+        market.roles[role.agent.id] = role
+    market.remove_role = Mock()
+    return market, buyers
+
+
+def test_clear_defaults_removes_defaulted_buyers(market_with_defaults):
+    # Given
+    market, buyers = market_with_defaults
+
+    # When
+    market.clear_defaults()
+
+    # Then
+    assert call(buyers[0]) in market.remove_role.call_args_list
+    assert call(buyers[1]) not in market.remove_role.call_args_list
+    assert market.remove_role.call_count == 1

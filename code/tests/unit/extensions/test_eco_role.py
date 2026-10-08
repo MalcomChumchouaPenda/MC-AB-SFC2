@@ -74,7 +74,6 @@ def test_initializes_name_with_classname():
     assert role.name == "eco_role"
 
 
-
 def test_initializes_prefix():
     # Given
     agent, env = Mock(), Mock()

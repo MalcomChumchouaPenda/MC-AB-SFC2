@@ -35,3 +35,11 @@ class BondMarket(EcoSpace):
         self.transfer_stock("cash", issuer.id, buyer.id, repayment)
         self.make_transaction("bond_interests", issuer.id, buyer.id, interests)
         self.graph[issuer][buyer]["amount"] -= principal
+
+    #
+    # Evolution
+    #
+    def clear_defaults(self):
+        roles = self.find_all_roles("bond_buyer")
+        for role in roles.select(roles.defaulted == True):
+            self.remove_role(role)
