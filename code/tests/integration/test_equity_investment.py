@@ -16,6 +16,8 @@ def model(fake_model, make_dlist):
     model.p.initial_tax_rate = 0.0
     model.p.initial_discount_rate = 0.0
     model.p.initial_wage = 0.0
+    model.p.omega = 0.1
+    model.p.psi = 5
     model.firms = make_dlist()
     model.banks = make_dlist()
     return model

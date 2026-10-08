@@ -844,23 +844,63 @@ def hh_before_investment(monkeypatch):
     model = Mock()
     model.p.cT = 0.6
     model.p.eta = 0.3
+    model.p.psi = 5
+    model.p.omega = 0.1
     household = Household(model)
     household.roles = {"citizen": Mock()}
     return household
 
 
-def test_find_potential_equity_investors(hh_before_investment):
+@pytest.fixture
+def investors():
     # Given
-    investors = [Mock(), Mock()]
+    return [Mock(resid_equity=10, company_number=i) for i in range(2)]
+
+
+def test_find_investors_with_citizen_role(hh_before_investment, investors):
+    # Given
     household = hh_before_investment
     role = household.roles["citizen"]
     role.find_investors.return_value = investors
+    role.get_average_wage.return_value = 15.0
 
     # When
     result = household.find_potential_investors()
 
     # Then
     assert result == investors
+
+
+def test_find_investors_with_minimum_level_of_equity(hh_before_investment, investors):
+    # Given
+    ineligible, eligible = investors
+    ineligible.resid_equity = 0.5
+    household = hh_before_investment
+    role = household.roles["citizen"]
+    role.find_investors.return_value = investors
+    role.get_average_wage.return_value = 15.0
+
+    # When
+    result = household.find_potential_investors()
+
+    # Then
+    assert result == [eligible]
+
+
+def test_find_investors_with_maximum_company_number(hh_before_investment, investors):
+    # Given
+    ineligible, eligible = investors
+    ineligible.company_number = 6
+    household = hh_before_investment
+    role = household.roles["citizen"]
+    role.find_investors.return_value = investors
+    role.get_average_wage.return_value = 15.0
+
+    # When
+    result = household.find_potential_investors()
+
+    # Then
+    assert result == [eligible]
 
 
 @pytest.mark.parametrize("ratio1, ratio2", [(0.2, 0.5), (0.5, 0.2)])
@@ -946,7 +986,7 @@ def test_create_company_creates_firm(hh_before_investment, sector):
     FakeFirm.assert_called_with(household.model)
 
 
-@pytest.mark.parametrize("sector", ["FT","FNT"])
+@pytest.mark.parametrize("sector", ["FT", "FNT"])
 def test_create_company_sets_firm_country_pos(hh_before_investment, sector):
     # Given
     firm = Mock()

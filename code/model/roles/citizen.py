@@ -6,6 +6,7 @@ class Citizen(EcoRole):
     def __init__(self, agent, env):
         super().__init__(agent, env)
         self.resid_equity = 0
+        self.company_number = 0
 
     #
     # Perception methods
@@ -31,6 +32,9 @@ class Citizen(EcoRole):
 
     def get_tax_rate(self):
         return self.env.tax_rate
+
+    def get_average_wage(self):
+        return self.env.average_wage
 
     #
     # Creation actions

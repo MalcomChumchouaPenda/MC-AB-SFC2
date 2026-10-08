@@ -29,6 +29,18 @@ def test_initializes_residual_equity():
     assert role.resid_equity == 0
 
 
+
+def test_initializes_company_number():
+    # Given
+    agent, env = Mock(), Mock()
+
+    # When
+    role = Citizen(agent, env)
+
+    # Then
+    assert role.company_number == 0
+
+
 # ---------------------------------------------------
 # PERCEPTION TESTS
 # ----------------------------------------------------
@@ -129,6 +141,18 @@ def test_get_tax_rate(role):
 
     # Then
     assert perceived == 0.2
+
+
+def test_get_average_wage(role):
+    # Given
+    env = role.env
+    env.average_wage = 15.0
+
+    # When
+    perceived = role.get_average_wage()
+
+    # Then
+    assert perceived == 15.0
 
 
 # ---------------------------------------------------

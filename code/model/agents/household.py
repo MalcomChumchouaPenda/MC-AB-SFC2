@@ -204,8 +204,14 @@ class Household(EcoAgent):
         return sector
 
     def find_potential_investors(self):
+        p = self.p
         role = self.roles["citizen"]
-        return role.find_investors()
+        min_equity = p.omega * role.get_average_wage()
+        return [
+            investor
+            for investor in role.find_investors()
+            if investor.resid_equity >= min_equity and investor.company_number < p.psi
+        ]
 
     def calc_initial_equity(self, sector):
         role = self.roles["citizen"]
