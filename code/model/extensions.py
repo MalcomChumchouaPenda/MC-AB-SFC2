@@ -149,6 +149,10 @@ class EcoSpace(Network):
         self.accounts[agent.id] = account
         return account
 
+    def remove_account(self, agent):
+        agent.account = None
+        self.accounts.pop(agent.id)
+
     def get_stock(self, category, account_id):
         if self.env is not None:
             return self.env.get_stock(category, account_id)

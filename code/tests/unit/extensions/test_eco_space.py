@@ -560,6 +560,20 @@ def space_with_accounts(space):
     return space, accounts
 
 
+def test_remove_account_unregisters_agent_account(space_with_accounts):
+    # Given
+    agent = Mock(id=1)
+    space, accounts = space_with_accounts
+    agent = Mock(id=1, account=accounts[1])
+
+    # When
+    space.remove_account(agent)
+
+    # Then
+    assert agent.id not in accounts
+    assert agent.account is None
+
+
 def test_transfer_stock_decr_source_account_stock(space_with_accounts):
     # Given
     source, target = 0, 1
