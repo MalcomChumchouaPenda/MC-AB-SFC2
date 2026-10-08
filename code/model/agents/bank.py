@@ -187,3 +187,5 @@ class Bank(EcoAgent):
         average_wage = role.get_average_wage()
         if self.net_worth < average_wage:
             role.close_bank(self)
+            for role in self.roles.values():
+                role.defaulted = True

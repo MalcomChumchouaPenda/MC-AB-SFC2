@@ -1342,3 +1342,18 @@ def test_exit_transfer_residual_cash_to_founders(firm_before_exit):
 
     # Then
     role.transfer_residual_cash.assert_called_with(founder, 200)
+
+
+def test_exit_sets_all_roles_defaulted(firm_before_exit):
+    # Given
+    firm, roles, _ = firm_before_exit
+    firm.net_worth = 90
+    firm.wage_offer = 100
+    roles["any"] = Mock()
+
+    # When
+    firm.exit()
+
+    # Then
+    for role in roles.values():
+        assert role.defaulted is True

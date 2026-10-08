@@ -643,3 +643,18 @@ def test_does_not_exit_when_not_bankrupt(bank_before_exit):
 
     # Then
     role.close_bank.assert_not_called()
+
+
+def test_exit_sets_all_roles_defaulted(bank_before_exit):
+    # Given
+    bank = bank_before_exit
+    bank.net_worth = 90
+    roles = bank.roles
+    roles["any"] = Mock()
+
+    # When
+    bank.exit()
+
+    # Then
+    for role in roles.values():
+        assert role.defaulted is True

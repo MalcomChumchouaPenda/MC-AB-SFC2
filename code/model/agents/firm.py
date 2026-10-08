@@ -286,6 +286,8 @@ class Firm(EcoAgent):
     def exit(self):
         if self.net_worth < self.wage_offer:
             self.defaulted = True
+            for role in self.roles.values():
+                role.defaulted = True
             self._make_loan_defaults()
             self._withdraw_residual_deposits()
             self._transfer_residual_cash()
