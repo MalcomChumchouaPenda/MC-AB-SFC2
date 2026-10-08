@@ -87,23 +87,29 @@ class EcoSpace(Network):
     def add_role(self, kind, agent, prefix=""):
         role = kind(agent, self)
         role.prefix = prefix
-        role_name = role.name
+        key = role.name
         if prefix:
-            role_name = prefix + "_" + role_name
-        agent.roles[role_name] = role
-        if agent.account is None:
-            self.add_account(agent)
+            key = prefix + "_" + key
+        agent.roles[key] = role
         self.roles[agent.id] = role
         self.positions[agent] = role
         self.graph.add_node(role)
+        if agent.account is None:
+            self.add_account(agent)
         return role
 
     def remove_role(self, role):
-        name = role.name
+        key = role.name
+        prefix = role.prefix
+        if prefix:
+            key = prefix + "_" + key
         agent = role.agent
-        agent.roles.pop(name)
+        agent.roles.pop(key)
         self.roles.pop(agent.id)
+        self.positions.pop(agent)
         self.graph.remove_node(role)
+        if self.env is None:
+            self.remove_account(agent)
 
     def find_all_roles(self, pattern):
         selected = [role for role in self.roles.values() if pattern in role.name]

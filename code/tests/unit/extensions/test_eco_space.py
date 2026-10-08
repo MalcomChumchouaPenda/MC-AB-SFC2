@@ -292,10 +292,13 @@ def space_with_role(space_and_agent):
     space, agent = space_and_agent
     role = Mock()
     role.agent = agent
+    role.prefix = ""
     role.name = "fake_role"
     agent.roles["fake_role"] = role
     space.roles = {agent.id: role}
+    space.positions[agent] = role
     space.graph.add_node(role)
+    space.remove_account = Mock()
     return space, role
 
 
@@ -303,12 +306,14 @@ def test_remove_role_removes_graph_node(space_with_role):
     # Given
     space, role = space_with_role
     graph = space.graph
+    agent = role.agent
 
     # When
     space.remove_role(role)
 
     # Then
     assert not graph.has_node(role)
+    assert not agent in space.positions
 
 
 def test_remove_role_unregisters_role(space_with_role):
@@ -322,6 +327,46 @@ def test_remove_role_unregisters_role(space_with_role):
     # Then
     assert len(agent.roles) == 0
     assert len(space.roles) == 0
+
+
+def test_remove_role_with_prefix(space_with_role):
+    # Given
+    space, role = space_with_role
+    role.prefix = "any"
+    agent = role.agent
+    agent.roles["any_fake_role"] = role
+
+    # When
+    space.remove_role(role)
+
+    # Then
+    assert "any_fake_role" not in agent.roles
+
+
+def test_remove_role_removes_account_if_no_env(space_with_role):
+    # Given
+    space, role = space_with_role
+    space.env = None
+    agent = role.agent
+
+    # When
+    space.remove_role(role)
+
+    # Then
+    space.remove_account.assert_called_with(agent)
+
+
+def test_remove_role_doesnt_remove_account_if_env(space_with_role):
+    # Given
+    env = Mock()
+    space, role = space_with_role
+    space.env = env
+
+    # When
+    space.remove_role(role)
+
+    # Then
+    space.remove_account.assert_not_called()
 
 
 @pytest.fixture
