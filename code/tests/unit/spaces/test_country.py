@@ -1,5 +1,5 @@
 import pytest
-from unittest.mock import Mock
+from unittest.mock import Mock, call
 from model.spaces.country import Country
 
 # ---------------------------------------------------
@@ -820,3 +820,41 @@ def test_update_state_updates_prob_failure(country_before_update):
 
     # Then
     assert country.prob_failure == 0.5
+
+
+@pytest.fixture
+def country_with_defaults(country_without_roles):
+    companies = [Mock(defaulted=val) for val in [True, False]]
+    citizens = [Mock(company_number=i) for i in range(1,3)]
+    country = country_without_roles
+    for company, citizen in zip(companies, citizens):
+        company.name = "company"
+        country.roles[company.agent.id] = company
+        country.graph.add_edge(company, citizen)
+    country.remove_role = Mock()
+    return country, companies, citizens
+
+
+def test_clear_defaults_remove_defaulted_company(country_with_defaults):
+    # Given
+    country, companies, _ = country_with_defaults
+
+    # When
+    country.clear_defaults()
+
+    # Then
+    assert call(companies[0]) in country.remove_role.call_args_list
+    assert call(companies[1]) not in country.remove_role.call_args_list
+    assert country.remove_role.call_count == 1
+
+
+def test_clear_defaults_reduces_company_number(country_with_defaults):
+    # Given
+    country, _, citizens = country_with_defaults
+
+    # When
+    country.clear_defaults()
+
+    # Then
+    assert citizens[0].company_number == 0
+    assert citizens[1].company_number == 2

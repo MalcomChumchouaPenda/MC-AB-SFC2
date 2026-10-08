@@ -177,3 +177,10 @@ class Country(EcoSpace):
         self.prob_failure = len(defaults) / max(1, len(companies))
         self.inflation = self.spaces["goods_market"].calc_inflation()
         self.gdp = self.spaces["goods_market"].calc_gdp()
+
+    def clear_defaults(self):
+        companies = self.find_all_roles("company")
+        for company in companies.select(companies.defaulted == True):
+            for founder in self.neighbors(company):
+                founder.company_number -= 1
+            self.remove_role(company)
