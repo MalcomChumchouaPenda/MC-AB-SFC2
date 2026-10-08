@@ -9,6 +9,7 @@ class Producer(EcoRole):
         self.productivity = 0
         self.inventories = 0
         self.variety = None
+        self.defaulted = False
 
     #
     # Perceptions

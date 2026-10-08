@@ -51,3 +51,11 @@ class LaborMarket(EcoSpace):
         workers = self.roles["worker"]
         unemployed = workers.select(workers.labor_supply == 1.0)
         self.unemployment = len(unemployed) / max(1, len(workers))
+
+    #
+    # Evolution
+    #
+    def clear_defaults(self):
+        roles = self.find_all_roles("employer")
+        for role in roles.select(roles.defaulted == True):
+            self.remove_role(role)

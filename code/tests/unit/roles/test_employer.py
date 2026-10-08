@@ -40,6 +40,17 @@ def test_initializes_labor_demand():
     assert role.labor_demand == 0
 
 
+def test_initializes_defaulted():
+    # Given
+    agent, env = Mock(), Mock()
+
+    # When
+    role = Employer(agent, env)
+
+    # Then
+    assert role.defaulted is False
+
+
 # ---------------------------------------------------
 # PERCEPTION TESTS
 # ----------------------------------------------------

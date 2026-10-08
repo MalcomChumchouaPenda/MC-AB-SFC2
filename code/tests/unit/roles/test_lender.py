@@ -18,6 +18,17 @@ def test_inherits_from_eco_role():
     assert is_derived
 
 
+def test_initializes_defaulted():
+    # Given
+    agent, env = Mock(), Mock()
+
+    # When
+    role = Lender(agent, env)
+
+    # Then
+    assert role.defaulted is False
+
+
 def test_initializes_loan_applicants_list():
     # Given
     agent, env = Mock(), Mock()

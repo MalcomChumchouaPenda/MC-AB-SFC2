@@ -62,6 +62,17 @@ def test_initializes_variety():
     assert role.variety is None
 
 
+def test_initializes_defaulted():
+    # Given
+    agent, env = Mock(), Mock()
+
+    # When
+    role = Producer(agent, env)
+
+    # Then
+    assert role.defaulted is False
+
+
 # ---------------------------------------------------
 # PERCEPTIONS TESTS
 # ----------------------------------------------------

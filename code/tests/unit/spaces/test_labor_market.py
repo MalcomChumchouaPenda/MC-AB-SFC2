@@ -1,5 +1,5 @@
 import pytest
-from unittest.mock import Mock
+from unittest.mock import Mock, call
 from model.spaces.labor_market import LaborMarket
 
 # ---------------------------------------------------
@@ -224,3 +224,27 @@ def test_update_state_updates_unemployment_rate(market_before_update):
 
     # Then
     assert market.unemployment == pytest.approx(0.5)
+
+
+@pytest.fixture
+def market_with_defaults(market_without_roles):
+    employers = [Mock(defaulted=val) for val in [True, False]]
+    market = market_without_roles
+    for role in employers:
+        role.name = "employer"
+        market.roles[role.agent.id] = role
+    market.remove_role = Mock()
+    return market, employers
+
+
+def test_clear_defaults_removes_defaulted_employers(market_with_defaults):
+    # Given
+    market, employers = market_with_defaults
+
+    # When
+    market.clear_defaults()
+
+    # Then
+    assert call(employers[0]) in market.remove_role.call_args_list
+    assert call(employers[1]) not in market.remove_role.call_args_list
+    assert market.remove_role.call_count == 1

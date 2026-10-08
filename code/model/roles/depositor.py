@@ -3,6 +3,10 @@ from model.extensions import EcoRole
 
 class Depositor(EcoRole):
 
+    def __init__(self, agent, env):
+        super().__init__(agent, env)
+        self.defaulted = False
+
     #
     # Perceptions
     #

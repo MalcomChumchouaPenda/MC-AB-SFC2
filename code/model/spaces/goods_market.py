@@ -35,14 +35,8 @@ class GoodsMarket(EcoSpace):
         self.make_transaction("consumption", consumer.id, producer.id, amount)
 
     #
-    #   Evolution
+    # statistics
     #
-    def update_state(self):
-        roles = self.roles
-        producers = roles.select(roles.name == "producer")
-        self.average_price_prev = self.average_price
-        self.average_price = sum(producers.price) / max(1, len(producers))
-        self.average_prod = sum(producers.productivity) / max(1, len(producers))
 
     def calc_inflation(self):
         prev_price = self.average_price_prev
@@ -53,3 +47,21 @@ class GoodsMarket(EcoSpace):
         roles = self.roles
         producers = roles.select(roles.name == "producer")
         return sum(self.get_stock("consumption", i) for i in producers.id)
+
+    #
+    #   Evolution
+    #
+    def update_state(self):
+        roles = self.roles
+        producers = roles.select(roles.name == "producer")
+        self.average_price_prev = self.average_price
+        self.average_price = sum(producers.price) / max(1, len(producers))
+        self.average_prod = sum(producers.productivity) / max(1, len(producers))
+
+    #
+    # Evolution
+    #
+    def clear_defaults(self):
+        roles = self.find_all_roles("producer")
+        for role in roles.select(roles.defaulted == True):
+            self.remove_role(role)

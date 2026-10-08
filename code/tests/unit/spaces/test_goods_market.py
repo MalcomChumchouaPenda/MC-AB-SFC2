@@ -1,5 +1,5 @@
 import pytest
-from unittest.mock import Mock
+from unittest.mock import Mock, call
 from model.spaces.goods_market import GoodsMarket
 
 # ---------------------------------------------------
@@ -182,7 +182,37 @@ def test_buy_goods_decrease_inventories(market_before_transaction):
 
 
 # ---------------------------------------------------
-# EVOLUTION TESTS
+#  STATISTICS TESTS
+# ----------------------------------------------------
+
+
+def test_calc_inflation(market_before_update):
+    # Given
+    market = market_before_update
+    market.average_price_prev = 10
+    market.average_price = 12
+
+    # When
+    inflation = market.calc_inflation()
+
+    # Then
+    assert inflation == pytest.approx(0.2)
+
+
+def test_calc_gdp(market_before_update, producers):
+    # Given
+    market = market_before_update
+    market.get_stock = lambda x, y: 100 if x == "consumption" else 0
+
+    # When
+    gdp = market.calc_gdp()
+
+    # Then
+    assert gdp == 100 * len(producers)
+
+
+# ---------------------------------------------------
+# EVOLUTION
 # ----------------------------------------------------
 
 
@@ -252,31 +282,25 @@ def test_update_state_recalc_average_productivity(market_before_update, producer
     assert market.average_prod == pytest.approx(10.0)
 
 
-# ---------------------------------------------------
-#  STATISTICS TESTS
-# ----------------------------------------------------
+@pytest.fixture
+def market_with_defaults(market_without_roles):
+    producers = [Mock(defaulted=val) for val in [True, False]]
+    market = market_without_roles
+    for role in producers:
+        role.name = "producer"
+        market.roles[role.agent.id] = role
+    market.remove_role = Mock()
+    return market, producers
 
 
-def test_calc_inflation(market_before_update):
+def test_clear_defaults_removes_defaulted_producers(market_with_defaults):
     # Given
-    market = market_before_update
-    market.average_price_prev = 10
-    market.average_price = 12
+    market, producers = market_with_defaults
 
     # When
-    inflation = market.calc_inflation()
+    market.clear_defaults()
 
     # Then
-    assert inflation == pytest.approx(0.2)
-
-
-def test_calc_gdp(market_before_update, producers):
-    # Given
-    market = market_before_update
-    market.get_stock = lambda x, y: 100 if x == "consumption" else 0
-
-    # When
-    gdp = market.calc_gdp()
-
-    # Then
-    assert gdp == 100 * len(producers)
+    assert call(producers[0]) in market.remove_role.call_args_list
+    assert call(producers[1]) not in market.remove_role.call_args_list
+    assert market.remove_role.call_count == 1

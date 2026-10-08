@@ -6,6 +6,7 @@ class Lender(EcoRole):
     def __init__(self, agent, env):
         super().__init__(agent, env)
         self.loan_applicants = []
+        self.defaulted = False
 
     #
     #   Actions

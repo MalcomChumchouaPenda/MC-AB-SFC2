@@ -29,6 +29,17 @@ def test_initializes_loan_demand():
     assert role.loan_demand == 0.0
 
 
+def test_initializes_defaulted():
+    # Given
+    agent, env = Mock(), Mock()
+
+    # When
+    role = Borrower(agent, env)
+
+    # Then
+    assert role.defaulted is False
+
+
 def test_exposes_net_worth_from_env():
     # Given
     agent, env = Mock(), Mock()

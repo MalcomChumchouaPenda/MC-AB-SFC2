@@ -6,6 +6,7 @@ class Borrower(EcoRole):
     def __init__(self, agent, env):
         super().__init__(agent, env)
         self.loan_demand = 0
+        self.defaulted = False
 
     @property
     def net_worth(self):

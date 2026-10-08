@@ -7,6 +7,7 @@ class Employer(EcoRole):
         super().__init__(agent, env)
         self.wage = 0
         self.labor_demand = 0
+        self.defaulted = False
 
     #
     # perceptions method

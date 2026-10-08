@@ -45,3 +45,12 @@ class CreditMarket(EcoSpace):
         self.transfer_stock("loans", lender.id, borrower.id, amount)
         self.make_transaction("loan_defaults", lender.id, borrower.id, amount)
         self.graph[borrower][lender]["amount"] -= amount
+
+    #
+    # Evolution
+    #
+    def clear_defaults(self):
+        for group in ["lender", "borrower"]:
+            roles = self.find_all_roles(group)
+            for role in roles.select(roles.defaulted == True):
+                self.remove_role(role)

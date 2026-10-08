@@ -1,5 +1,5 @@
 import pytest
-from unittest.mock import Mock
+from unittest.mock import Mock, call
 from model.spaces.deposit_market import DepositMarket
 
 # ---------------------------------------------------
@@ -311,3 +311,46 @@ def test_reimburse_deposits_remove_graph_edge(market_with_depositor_amount):
 
     # Then
     assert not graph.has_edge(depositor, deposit_bank)
+
+
+# ---------------------------------------------------
+# EVOLUTION
+# ----------------------------------------------------
+
+
+@pytest.fixture
+def market_with_defaults(market_without_roles):
+    deposit_banks = [Mock(defaulted=val) for val in [True, False]]
+    depositors = [Mock(defaulted=val) for val in [True, False]]
+    market = market_without_roles
+    for role1, role2 in zip(deposit_banks, depositors):
+        role1.name = "deposit_bank"
+        role2.name = "depositor"
+        market.roles[role1.agent.id] = role1
+        market.roles[role2.agent.id] = role2
+    market.remove_role = Mock()
+    return market, deposit_banks, depositors
+
+
+def test_clear_defaults_removes_defaulted_deposit_banks(market_with_defaults):
+    # Given
+    market, deposit_banks, _ = market_with_defaults
+
+    # When
+    market.clear_defaults()
+
+    # Then
+    assert call(deposit_banks[0]) in market.remove_role.call_args_list
+    assert call(deposit_banks[1]) not in market.remove_role.call_args_list
+
+
+def test_clear_defaults_removes_defaulted_depositors(market_with_defaults):
+    # Given
+    market, _, depositors = market_with_defaults
+
+    # When
+    market.clear_defaults()
+
+    # Then
+    assert call(depositors[0]) in market.remove_role.call_args_list
+    assert call(depositors[1]) not in market.remove_role.call_args_list

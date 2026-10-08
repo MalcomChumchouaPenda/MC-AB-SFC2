@@ -1,5 +1,5 @@
 import pytest
-from unittest.mock import Mock
+from unittest.mock import Mock, call
 from model.spaces.credit_market import CreditMarket
 
 # ---------------------------------------------------
@@ -192,3 +192,46 @@ def test_make_defaults_updates_accounts(market_with_loan):
     # Then
     market.transfer_stock.assert_any_call("loans", bank_id, borrower.id, 100)
     market.make_transaction.assert_any_call("loan_defaults", bank_id, borrower.id, 100)
+
+
+# ---------------------------------------------------
+# EVOLUTION
+# ----------------------------------------------------
+
+
+@pytest.fixture
+def market_with_defaults(market_without_roles):
+    lenders = [Mock(defaulted=val) for val in [True, False]]
+    borrowers = [Mock(defaulted=val) for val in [True, False]]
+    market = market_without_roles
+    for role1, role2 in zip(lenders, borrowers):
+        role1.name = "lender"
+        role2.name = "borrower"
+        market.roles[role1.agent.id] = role1
+        market.roles[role2.agent.id] = role2
+    market.remove_role = Mock()
+    return market, lenders, borrowers
+
+
+def test_clear_defaults_removes_defaulted_lenders(market_with_defaults):
+    # Given
+    market, lenders, _ = market_with_defaults
+
+    # When
+    market.clear_defaults()
+
+    # Then
+    assert call(lenders[0]) in market.remove_role.call_args_list
+    assert call(lenders[1]) not in market.remove_role.call_args_list
+
+
+def test_clear_defaults_removes_defaulted_borrowers(market_with_defaults):
+    # Given
+    market, _, borrowers = market_with_defaults
+
+    # When
+    market.clear_defaults()
+
+    # Then
+    assert call(borrowers[0]) in market.remove_role.call_args_list
+    assert call(borrowers[1]) not in market.remove_role.call_args_list

@@ -65,3 +65,12 @@ class DepositMarket(EcoSpace):
         self.transfer_stock("cash", deposit_bank.id, depositor.id, amount)
         self.transfer_stock("deposits", depositor.id, deposit_bank.id, amount)
         self.graph[depositor][deposit_bank]["amount"] -= amount
+
+    #
+    # Evolution
+    #
+    def clear_defaults(self):
+        for group in ["deposit_bank", "depositor"]:
+            roles = self.find_all_roles(group)
+            for role in roles.select(roles.defaulted == True):
+                self.remove_role(role)
