@@ -63,7 +63,7 @@ def test_initializes_label_with_agent_id():
     assert role.label == agent.id
 
 
-def test_initializes_name():
+def test_initializes_name_with_classname():
     # Given
     agent, env = Mock(), Mock()
 
@@ -71,7 +71,19 @@ def test_initializes_name():
     role = EcoRole(agent, env)
 
     # Then
-    assert role.name == ""
+    assert role.name == "eco_role"
+
+
+
+def test_initializes_prefix():
+    # Given
+    agent, env = Mock(), Mock()
+
+    # When
+    role = EcoRole(agent, env)
+
+    # Then
+    assert role.prefix == ""
 
 
 def test_expose_agent_id():

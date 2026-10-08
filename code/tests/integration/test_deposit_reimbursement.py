@@ -64,7 +64,7 @@ def firm(model, union):
 def test_issues_bonds_for_reimbursement(firm, bank, govt, deposit_market):
     # Given
     firm.account["cash"] = 1000
-    depositor = firm.roles["depositor_0"]
+    depositor = firm.roles["country_0_depositor"]
     deposit_bank = bank.roles["deposit_bank"]
     deposit_market.join_deposit_bank(depositor, deposit_bank, 500)
 
@@ -80,7 +80,7 @@ def test_issues_bonds_for_reimbursement(firm, bank, govt, deposit_market):
 def test_increases_firm_cash(firm, bank, govt, deposit_market):
     # Given
     firm.account["cash"] = 1000
-    depositor = firm.roles["depositor_0"]
+    depositor = firm.roles["country_0_depositor"]
     deposit_bank = bank.roles["deposit_bank"]
     deposit_market.join_deposit_bank(depositor, deposit_bank, 500)
 
@@ -96,7 +96,7 @@ def test_increases_firm_cash(firm, bank, govt, deposit_market):
 def test_clears_firm_deposits(firm, bank, govt, deposit_market):
     # Given
     firm.account["cash"] = 1000
-    depositor = firm.roles["depositor_0"]
+    depositor = firm.roles["country_0_depositor"]
     deposit_bank = bank.roles["deposit_bank"]
     deposit_market.join_deposit_bank(depositor, deposit_bank, 500)
 

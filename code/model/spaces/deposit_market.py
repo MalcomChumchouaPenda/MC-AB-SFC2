@@ -18,17 +18,17 @@ class DepositMarket(EcoSpace):
     # Roles management
     #
     def add_household(self, household):
-        self.add_role(Depositor, household, "depositor")
+        self.add_role(Depositor, household)
 
     def add_firm(self, firm):
         c = self.country_pos
-        self.add_role(Depositor, firm, f"depositor_{c}")
+        self.add_role(Depositor, firm, prefix=f"country_{c}")
 
     def add_bank(self, bank):
-        self.add_role(DepositBank, bank, "deposit_bank")
+        self.add_role(DepositBank, bank)
 
     def add_government(self, govt):
-        self.add_role(DepositGuarantee, govt, "deposit_guarantee")
+        self.add_role(DepositGuarantee, govt)
 
     #
     # Transactions

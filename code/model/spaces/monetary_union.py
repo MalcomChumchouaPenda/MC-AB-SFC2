@@ -53,7 +53,7 @@ class MonetaryUnion(EcoSpace):
         self.spaces["bond_market"].add_government(govt)
 
     def add_central_bank(self, cb):
-        self.add_role(PolicyMaker, cb, "policy_maker")
+        self.add_role(PolicyMaker, cb)
         self.spaces["bond_market"].add_central_bank(cb)
         if cb.national:
             c = cb.country_pos

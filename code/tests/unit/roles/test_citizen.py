@@ -29,7 +29,6 @@ def test_initializes_residual_equity():
     assert role.resid_equity == 0
 
 
-
 def test_initializes_company_number():
     # Given
     agent, env = Mock(), Mock()

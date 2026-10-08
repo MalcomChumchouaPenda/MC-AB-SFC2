@@ -93,7 +93,7 @@ def test_add_household_add_consumer_role(market_without_roles, tradable, prefix)
     market.add_household(household)
 
     # Then
-    market.add_role.assert_called_with(FakeConsumer, household, f"{prefix}_consumer")
+    market.add_role.assert_called_with(FakeConsumer, household, prefix=prefix)
 
 
 @pytest.mark.parametrize("tradable", [True, False])
@@ -121,7 +121,7 @@ def test_add_firm_add_producer_role(market_without_roles):
     market.add_firm(firm)
 
     # Then
-    market.add_role.assert_called_with(FakeProducer, firm, "producer")
+    market.add_role.assert_called_with(FakeProducer, firm)
 
 
 def test_add_firm_sets_role_variety(market_without_roles):

@@ -54,7 +54,7 @@ def markets(union):
 @pytest.fixture
 def firm_with_deposit_bank(firm, banks, markets):
     # Given
-    depositor = firm.roles["depositor_0"]
+    depositor = firm.roles["country_0_depositor"]
     deposit_bank = banks[1].roles["deposit_bank"]
     markets[1].join_deposit_bank(depositor, deposit_bank, amount=100)
     return firm, banks[1]

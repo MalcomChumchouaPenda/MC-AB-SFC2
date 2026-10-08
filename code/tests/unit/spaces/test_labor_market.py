@@ -68,7 +68,7 @@ def test_add_household_add_worker_role(market_without_roles):
     market.add_household(household)
 
     # Then
-    market.add_role.assert_called_with(FakeWorker, household, "worker")
+    market.add_role.assert_called_with(FakeWorker, household)
 
 
 def test_add_firm_add_employer_role(market_without_roles):
@@ -80,7 +80,7 @@ def test_add_firm_add_employer_role(market_without_roles):
     market.add_firm(firm)
 
     # Then
-    market.add_role.assert_called_with(FakeEmployer, firm, "employer")
+    market.add_role.assert_called_with(FakeEmployer, firm)
 
 
 # ---------------------------------------------------

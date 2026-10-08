@@ -317,7 +317,7 @@ def test_add_central_bank_add_policy_maker_role(union_without_roles, national):
     union.add_central_bank(cb)
 
     # Then
-    union.add_role.assert_called_with(FakeMaker, cb, "policy_maker")
+    union.add_role.assert_called_with(FakeMaker, cb)
 
 
 def test_add_central_bank_into_country_if_national(union_without_roles):

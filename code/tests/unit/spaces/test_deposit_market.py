@@ -73,7 +73,7 @@ def test_add_bank_add_deposit_bank_role(market_without_roles):
     market.add_bank(bank)
 
     # Then
-    market.add_role.assert_called_with(FakeBank, bank, "deposit_bank")
+    market.add_role.assert_called_with(FakeBank, bank)
 
 
 def test_add_firm_add_depositor_role(market_without_roles):
@@ -86,7 +86,7 @@ def test_add_firm_add_depositor_role(market_without_roles):
     market.add_firm(firm)
 
     # Then
-    market.add_role.assert_called_with(FakeDepositor, firm, "depositor_2")
+    market.add_role.assert_called_with(FakeDepositor, firm, prefix="country_2")
 
 
 def test_add_household_add_depositor_role(market_without_roles):
@@ -98,7 +98,7 @@ def test_add_household_add_depositor_role(market_without_roles):
     market.add_household(household)
 
     # Then
-    market.add_role.assert_called_with(FakeDepositor, household, "depositor")
+    market.add_role.assert_called_with(FakeDepositor, household)
 
 
 def test_add_government_add_guarantee_role(market_without_roles):
@@ -110,7 +110,7 @@ def test_add_government_add_guarantee_role(market_without_roles):
     market.add_government(govt)
 
     # Then
-    market.add_role.assert_called_with(FakeGuarantee, govt, "deposit_guarantee")
+    market.add_role.assert_called_with(FakeGuarantee, govt)
 
 
 # ---------------------------------------------------

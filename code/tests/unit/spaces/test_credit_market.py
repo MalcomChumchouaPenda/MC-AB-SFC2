@@ -58,7 +58,7 @@ def test_add_bank_add_lender_role(market_without_roles):
     market.add_bank(bank)
 
     # Then
-    market.add_role.assert_called_with(FakeLender, bank, "lender")
+    market.add_role.assert_called_with(FakeLender, bank)
 
 
 def test_add_firm_add_borrower_role(market_without_roles):
@@ -70,7 +70,7 @@ def test_add_firm_add_borrower_role(market_without_roles):
     market.add_firm(firm)
 
     # Then
-    market.add_role.assert_called_with(FakeBorrower, firm, "borrower")
+    market.add_role.assert_called_with(FakeBorrower, firm)
 
 
 # ---------------------------------------------------

@@ -46,7 +46,7 @@ def test_add_bank_add_buyer_role(market_without_roles):
     market.add_bank(bank)
 
     # Then
-    market.add_role.assert_called_with(FakeBuyer, bank, "bond_buyer")
+    market.add_role.assert_called_with(FakeBuyer, bank)
 
 
 def test_add_central_bank_add_buyer_role(market_without_roles):
@@ -58,7 +58,7 @@ def test_add_central_bank_add_buyer_role(market_without_roles):
     market.add_central_bank(cb)
 
     # Then
-    market.add_role.assert_called_with(FakeBuyer, cb, "bond_buyer")
+    market.add_role.assert_called_with(FakeBuyer, cb)
 
 
 def test_add_government_add_issuer_role(market_without_roles):
@@ -70,7 +70,7 @@ def test_add_government_add_issuer_role(market_without_roles):
     market.add_government(govt)
 
     # Then
-    market.add_role.assert_called_with(FakeIssuer, govt, "bond_issuer")
+    market.add_role.assert_called_with(FakeIssuer, govt)
 
 
 def test_add_government_sets_role_country_pos(market_without_roles):

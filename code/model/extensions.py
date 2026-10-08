@@ -1,7 +1,13 @@
 import re
 from agentpy import Agent, Network, AgentNode
-from agentpy import AgentList, AgentDList, AttrDict, AgentIter
+from agentpy import AgentList, AgentIter, AttrDict
 from model.accounts import FINANCIAL_ASSETS, REAL_ASSETS, TRANSACTIONS
+
+
+def camel_to_snake(name):
+    s1 = re.sub("(.)([A-Z][a-z]+)", r"\1_\2", name)
+    return re.sub("([a-z0-9])([A-Z])", r"\1_\2", s1).lower()
+
 
 
 class EcoAgent(Agent):
@@ -29,7 +35,8 @@ class EcoRole(AgentNode):
         super().__init__(label=agent.id)
         self.agent = agent
         self.env = env
-        self.name = ""
+        self.prefix = ""
+        self.name = camel_to_snake(self.__class__.__name__)
 
     @property
     def id(self):
@@ -66,41 +73,30 @@ class EcoSpace(Network):
     # Agent management
     #
     def add_agents(self, agents):
-        kind_name = self._calc_kind_name(agents[0])
+        cls_name = agents[0].__class__.__qualname__
+        kind_name = camel_to_snake(cls_name)
         method_name = "add_" + kind_name
         if hasattr(self, method_name):
             method = getattr(self, method_name)
             for agent in agents:
                 method(agent)
 
-    def _calc_kind_name(self, agent):
-        name = agent.__class__.__qualname__
-        s1 = re.sub("(.)([A-Z][a-z]+)", r"\1_\2", name)
-        return re.sub("([a-z0-9])([A-Z])", r"\1_\2", s1).lower()
-
     #
     # Role management
     #
-    def add_role(self, kind, agent, name):
-        role = self._create_role(kind, agent, name)
+    def add_role(self, kind, agent, prefix=""):
+        role = kind(agent, self)
+        role.prefix = prefix
+        role_name = role.name
+        if prefix:
+            role_name = prefix + "_" + role_name
+        agent.roles[role_name] = role
         if agent.account is None:
             self.add_account(agent)
-        self._register_role(agent, role, name)
-        self._add_node(agent, role)
-        return role
-
-    def _create_role(self, kind, agent, name):
-        role = kind(agent, self)
-        role.name = name
-        return role
-
-    def _register_role(self, agent, role, name):
-        agent.roles[name] = role
         self.roles[agent.id] = role
-
-    def _add_node(self, agent, role):
         self.positions[agent] = role
         self.graph.add_node(role)
+        return role
 
     def remove_role(self, role):
         name = role.name

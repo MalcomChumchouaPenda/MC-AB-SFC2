@@ -9,13 +9,13 @@ class BondMarket(EcoSpace):
     # roles
     #
     def add_bank(self, bank):
-        self.add_role(BondBuyer, bank, "bond_buyer")
+        self.add_role(BondBuyer, bank)
 
     def add_central_bank(self, cb):
-        self.add_role(BondBuyer, cb, "bond_buyer")
+        self.add_role(BondBuyer, cb)
 
     def add_government(self, govt):
-        role = self.add_role(BondIssuer, govt, "bond_issuer")
+        role = self.add_role(BondIssuer, govt)
         role.country_pos = govt.country_pos
 
     #

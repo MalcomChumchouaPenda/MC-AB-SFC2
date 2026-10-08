@@ -168,6 +168,7 @@ def test_add_agents_uses_appropriate_method(space):
 def role_with_kind():
     # Given
     role = Mock()
+    role.name = "fake_role"
     role_kind = Mock(return_value=role)
     return role, role_kind
 
@@ -187,7 +188,7 @@ def test_add_role_creates_role(space_and_agent, role_with_kind):
     space, agent = space_and_agent
 
     # When
-    space.add_role(role_kind, agent, "fake_role")
+    space.add_role(role_kind, agent)
 
     # Then
     role_kind.assert_called_with(agent, space)
@@ -199,7 +200,7 @@ def test_add_role_creates_role(space_and_agent, role_with_kind):
     space, agent = space_and_agent
 
     # When
-    space.add_role(role_kind, agent, "fake_role")
+    space.add_role(role_kind, agent)
 
     # Then
     role_kind.assert_called_with(agent, space)
@@ -211,7 +212,7 @@ def test_add_role_returns_role(space_and_agent, role_with_kind):
     space, agent = space_and_agent
 
     # When
-    result = space.add_role(role_kind, agent, "fake_role")
+    result = space.add_role(role_kind, agent)
 
     # Then
     assert result is role
@@ -224,23 +225,12 @@ def test_add_role_add_graph_node(space_and_agent, role_with_kind):
     graph = space.graph
 
     # When
-    space.add_role(role_kind, agent, "fake_role")
+    space.add_role(role_kind, agent)
 
     # Then
     assert graph.has_node(role)
     assert space.positions[agent] is role
 
-
-def test_add_role_initializes_name(space_and_agent, role_with_kind):
-    # Given
-    role, role_kind = role_with_kind
-    space, agent = space_and_agent
-
-    # When
-    space.add_role(role_kind, agent, "fake_role")
-
-    # Then
-    assert role.name == "fake_role"
 
 
 def test_add_role_registers_role(space_and_agent, role_with_kind):
@@ -249,11 +239,25 @@ def test_add_role_registers_role(space_and_agent, role_with_kind):
     space, agent = space_and_agent
 
     # When
-    space.add_role(role_kind, agent, "fake_role")
+    space.add_role(role_kind, agent)
 
     # Then
     assert role is space.roles[agent.id]
     assert role is agent.roles["fake_role"]
+
+
+
+def test_add_role_with_prefix(space_and_agent, role_with_kind):
+    # Given
+    role, role_kind = role_with_kind
+    space, agent = space_and_agent
+
+    # When
+    space.add_role(role_kind, agent, prefix="any")
+
+    # Then
+    assert role.prefix == "any"
+    assert role is agent.roles["any_fake_role"]
 
 
 def test_add_role_creates_account_if_no_account(space_and_agent, role_with_kind):
@@ -263,7 +267,7 @@ def test_add_role_creates_account_if_no_account(space_and_agent, role_with_kind)
     agent.account = None
 
     # When
-    space.add_role(role_kind, agent, "fake_role")
+    space.add_role(role_kind, agent)
 
     # Then
     space.add_account.assert_called_with(agent)
@@ -276,7 +280,7 @@ def test_add_role_doesnt_create_account_if_account(space_and_agent, role_with_ki
     agent.account = Mock()
 
     # When
-    space.add_role(role_kind, agent, "fake_role")
+    space.add_role(role_kind, agent)
 
     # Then
     space.add_account.assert_not_called()

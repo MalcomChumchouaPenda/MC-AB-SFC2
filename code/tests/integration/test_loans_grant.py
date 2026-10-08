@@ -107,7 +107,7 @@ def test_creates_loan_as_link(firm_with_loan_demand, bank, markets):
 def test_creates_deposit_as_link(firm_with_loan_demand, bank, markets):
     # Given
     firm, amount = firm_with_loan_demand
-    borrower_role = firm.roles["depositor_0"]
+    borrower_role = firm.roles["country_0_depositor"]
     lender_role = bank.roles["deposit_bank"]
 
     # When

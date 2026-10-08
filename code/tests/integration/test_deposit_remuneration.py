@@ -49,7 +49,7 @@ def firm(model, country):
 
 def test_increases_firm_deposits(firm, bank, market):
     # Given
-    depositor = firm.roles["depositor_0"]
+    depositor = firm.roles["country_0_depositor"]
     deposit_bank = bank.roles["deposit_bank"]
     market.join_deposit_bank(depositor, deposit_bank, 2000)
 
@@ -63,7 +63,7 @@ def test_increases_firm_deposits(firm, bank, market):
 
 def test_increases_firm_deposit_interests(firm, bank, market):
     # Given
-    depositor = firm.roles["depositor_0"]
+    depositor = firm.roles["country_0_depositor"]
     deposit_bank = bank.roles["deposit_bank"]
     market.join_deposit_bank(depositor, deposit_bank, 2000)
 

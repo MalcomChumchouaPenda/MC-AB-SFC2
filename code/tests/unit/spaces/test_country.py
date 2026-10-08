@@ -213,7 +213,7 @@ def test_add_household_add_citizen_role(country_without_roles):
     country.add_household(household)
 
     # Then
-    country.add_role.assert_called_with(FakeCitizen, household, "citizen")
+    country.add_role.assert_called_with(FakeCitizen, household)
 
 
 def test_add_household_places_agent_into_goods_market(country_without_roles):
@@ -265,7 +265,7 @@ def test_add_firm_add_company_role(country_without_roles, tradable):
     country.add_firm(firm)
 
     # Then
-    country.add_role.assert_called_with(FakeCompany, firm, "company")
+    country.add_role.assert_called_with(FakeCompany, firm)
 
 
 @pytest.mark.parametrize("tradable, sector", [(True, "FT"), (False, "FNT")])
@@ -346,7 +346,7 @@ def test_add_bank_add_company_role(country_without_roles):
     country.add_bank(bank)
 
     # Then
-    country.add_role.assert_called_with(FakeCompany, bank, "company")
+    country.add_role.assert_called_with(FakeCompany, bank)
 
 
 def test_add_bank_sets_company_sector(country_without_roles):
@@ -385,7 +385,7 @@ def test_add_government_add_fiscal_authority_role(country_without_roles):
     country.add_government(govt)
 
     # Then
-    country.add_role.assert_called_with(FakeFiscalAuth, govt, "fiscal_authority")
+    country.add_role.assert_called_with(FakeFiscalAuth, govt)
 
 
 def test_add_government_sets_fiscal_authority(country_without_roles):
@@ -424,7 +424,7 @@ def test_add_central_bank_add_monetary_authority_role(country_without_roles):
     country.add_central_bank(cb)
 
     # Then
-    country.add_role.assert_called_with(FakeMonetaryAuth, cb, "monetary_authority")
+    country.add_role.assert_called_with(FakeMonetaryAuth, cb)
 
 
 def test_add_central_bank_sets_monetary_authority(country_without_roles):
@@ -631,7 +631,6 @@ def test_fund_company_reduces_resid_equity(country_with_company_and_founder):
 
     # Then
     assert founder.resid_equity == 50
-
 
 
 def test_fund_company_increases_company_number(country_with_company_and_founder):

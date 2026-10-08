@@ -37,7 +37,7 @@ class Country(EcoSpace):
     # Role management
     #
     def add_household(self, household):
-        self.add_role(Citizen, household, "citizen")
+        self.add_role(Citizen, household)
         self.spaces["goods_market"].add_household(household)
         self.spaces["labor_market"].add_household(household)
         self.spaces["deposit_market"].add_household(household)
@@ -57,16 +57,16 @@ class Country(EcoSpace):
         self.spaces["deposit_market"].add_bank(bank)
 
     def _add_company(self, agent, sector):
-        role = self.add_role(Company, agent, "company")
+        role = self.add_role(Company, agent)
         role.sector = sector
 
     def add_government(self, govt):
-        role = self.add_role(FiscalAuthority, govt, "fiscal_authority")
+        role = self.add_role(FiscalAuthority, govt)
         self.fiscal_authority = role
         self.spaces["deposit_market"].add_government(govt)
 
     def add_central_bank(self, cb):
-        role = self.add_role(MonetaryAuthority, cb, "monetary_authority")
+        role = self.add_role(MonetaryAuthority, cb)
         self.monetary_authority = role
 
     #

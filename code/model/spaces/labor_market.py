@@ -15,10 +15,10 @@ class LaborMarket(EcoSpace):
     # roles management
     #
     def add_household(self, household):
-        self.add_role(Worker, household, "worker")
+        self.add_role(Worker, household)
 
     def add_firm(self, firm):
-        self.add_role(Employer, firm, "employer")
+        self.add_role(Employer, firm)
 
     #
     # labor matching
