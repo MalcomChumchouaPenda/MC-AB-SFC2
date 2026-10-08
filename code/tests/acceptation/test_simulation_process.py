@@ -9,6 +9,7 @@ def params():
         "household_number": 10,
         "psi": 10,
         "upsilon": 1.0,
+        "omega":0.1,
         "initial_wage": 1.0,
         "initial_productivity": 1.0,
         "initial_tax_rate": 0.4,
