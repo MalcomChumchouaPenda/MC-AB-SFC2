@@ -37,8 +37,20 @@ class LaborMarket(EcoSpace):
         self.graph[employer][worker]["wages"] += amount
 
     #
+    # Statitics
+    #
+
+    def calc_wage_range(self):
+        employers = self.find_all_roles("employer")
+        if len(employers) == 0:
+            return None
+        values = employers.wage
+        return min(values), max(values)
+
+    #
     # evolution
     #
+
     def update_state(self):
         self._update_average_wage()
         self._update_unemployment()
@@ -52,9 +64,6 @@ class LaborMarket(EcoSpace):
         unemployed = workers.select(workers.labor_supply == 1.0)
         self.unemployment = len(unemployed) / max(1, len(workers))
 
-    #
-    # Evolution
-    #
     def clear_defaults(self):
         roles = self.find_all_roles("employer")
         for role in roles.select(roles.defaulted == True):

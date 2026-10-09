@@ -846,6 +846,9 @@ def hh_before_investment(monkeypatch):
     model.p.eta = 0.3
     model.p.psi = 5
     model.p.omega = 0.1
+    model.union = Mock()
+    model.firms = []
+    model.banks = []
     household = Household(model)
     household.roles = {"citizen": Mock()}
     return household
@@ -944,7 +947,7 @@ def test_calc_initial_equity_by_investment_sector(hh_before_investment, sector):
     household = hh_before_investment
     household.desired_investment_sector = sector
     role = household.roles["citizen"]
-    role.get_sector_equity_range.return_value = (100, 500)
+    role.get_equity_range.return_value = (100, 500)
     random = household.model.nprandom
     random.uniform.return_value = 300
 
@@ -952,7 +955,7 @@ def test_calc_initial_equity_by_investment_sector(hh_before_investment, sector):
     equity = household.calc_initial_equity(sector)
 
     # Then
-    role.get_sector_equity_range.assert_called_with(sector)
+    role.get_equity_range.assert_called_with(sector)
     assert equity == 300
 
 
@@ -962,7 +965,7 @@ def test_calc_initial_equity_uses_exogenous_equity(hh_before_investment, sector)
     household = hh_before_investment
     household.p.initial_equity = 1000
     role = household.roles["citizen"]
-    role.get_sector_equity_range.return_value = None
+    role.get_equity_range.return_value = None
 
     # When
     equity = household.calc_initial_equity(sector=sector)
@@ -971,13 +974,25 @@ def test_calc_initial_equity_uses_exogenous_equity(hh_before_investment, sector)
     assert equity == 1000
 
 
+@pytest.fixture
+def hh_before_firm_creation(hh_before_investment):
+    # Given
+    household = hh_before_investment
+    household.p.initial_wage = 1.0
+    household.p.initial_productivity = 1.0
+    role = household.roles["citizen"]
+    role.get_productivity_range.return_value = []
+    role.get_price_range.return_value = []
+    role.get_sales_range.return_value = []
+    role.get_wage_range.return_value = []
+    return household
+
+
 @pytest.mark.parametrize("sector", ["FT", "FNT"])
-def test_create_company_creates_firm(hh_before_investment, sector):
+def test_create_company_creates_firm(hh_before_firm_creation, sector):
     # Given
     shares = [{"founder": Mock(), "amount": 100}]
-    household = hh_before_investment
-    household.model.union = Mock()
-    household.model.firms = []
+    household = hh_before_firm_creation
 
     # When
     household.create_company(shares, sector=sector)
@@ -987,15 +1002,13 @@ def test_create_company_creates_firm(hh_before_investment, sector):
 
 
 @pytest.mark.parametrize("sector", ["FT", "FNT"])
-def test_create_company_sets_firm_country_pos(hh_before_investment, sector):
+def test_create_company_sets_firm_country_pos(hh_before_firm_creation, sector):
     # Given
     firm = Mock()
     FakeFirm.return_value = firm
     shares = [{"founder": Mock(), "amount": 100}]
-    household = hh_before_investment
+    household = hh_before_firm_creation
     household.country_pos = 5
-    household.model.union = Mock()
-    household.model.firms = []
 
     # When
     household.create_company(shares, sector=sector)
@@ -1005,14 +1018,12 @@ def test_create_company_sets_firm_country_pos(hh_before_investment, sector):
 
 
 @pytest.mark.parametrize("sector, tradable", [("FT", True), ("FNT", False)])
-def test_create_company_sets_firm_tradable(hh_before_investment, sector, tradable):
+def test_create_company_sets_firm_tradable(hh_before_firm_creation, sector, tradable):
     # Given
     firm = Mock()
     FakeFirm.return_value = firm
     shares = [{"founder": Mock(), "amount": 100}]
-    household = hh_before_investment
-    household.model.union = Mock()
-    household.model.firms = []
+    household = hh_before_firm_creation
 
     # When
     household.create_company(shares, sector=sector)
@@ -1022,14 +1033,175 @@ def test_create_company_sets_firm_tradable(hh_before_investment, sector, tradabl
 
 
 @pytest.mark.parametrize("sector", ["FT", "FNT"])
-def test_create_company_places_firm_into_union(hh_before_investment, sector):
+def test_create_company_sets_firm_productivity_from_range(
+    hh_before_firm_creation, sector
+):
     # Given
-    firm, union = Mock(), Mock()
+    firm = Mock()
     FakeFirm.return_value = firm
     shares = [{"founder": Mock(), "amount": 100}]
-    household = hh_before_investment
-    household.model.union = union
-    household.model.firms = []
+    household = hh_before_firm_creation
+    random = household.model.nprandom
+    random.uniform.return_value = 10.0
+    role = household.roles["citizen"]
+    role.get_productivity_range.return_value = (5.0, 15.0)
+
+    # When
+    household.create_company(shares, sector=sector)
+
+    # Then
+    role.get_productivity_range.assert_called_with(sector)
+    random.uniform.assert_any_call(5.0, 15.0)
+    assert firm.initial_productivity == 10.0
+
+
+@pytest.mark.parametrize("sector", ["FT", "FNT"])
+def test_create_company_sets_firm_productivity_from_params(
+    hh_before_firm_creation, sector
+):
+    # Given
+    firm = Mock()
+    FakeFirm.return_value = firm
+    shares = [{"founder": Mock(), "amount": 100}]
+    household = hh_before_firm_creation
+    household.p.initial_productivity = 0.5
+    role = household.roles["citizen"]
+    role.get_productivity_range.return_value = None
+
+    # When
+    household.create_company(shares, sector=sector)
+
+    # Then
+    assert firm.initial_productivity == pytest.approx(0.5)
+
+
+@pytest.mark.parametrize("sector", ["FT", "FNT"])
+def test_create_company_sets_firm_price_from_range(hh_before_firm_creation, sector):
+    # Given
+    firm = Mock()
+    FakeFirm.return_value = firm
+    shares = [{"founder": Mock(), "amount": 100}]
+    household = hh_before_firm_creation
+    random = household.model.nprandom
+    random.uniform.return_value = 10.0
+    role = household.roles["citizen"]
+    role.get_price_range.return_value = (5.0, 15.0)
+
+    # When
+    household.create_company(shares, sector=sector)
+
+    # Then
+    role.get_price_range.assert_called_with(sector)
+    random.uniform.assert_any_call(5.0, 15.0)
+    assert firm.price == 10.0
+
+
+@pytest.mark.parametrize("sector", ["FT", "FNT"])
+def test_create_company_sets_firm_price_from_params(hh_before_firm_creation, sector):
+    # Given
+    firm = Mock()
+    FakeFirm.return_value = firm
+    shares = [{"founder": Mock(), "amount": 100}]
+    household = hh_before_firm_creation
+    household.p.initial_wage = 2.0
+    household.p.initial_productivity = 0.5
+    role = household.roles["citizen"]
+    role.get_productivity_range.return_value = None
+
+    # When
+    household.create_company(shares, sector=sector)
+
+    # Then
+    assert firm.price == pytest.approx(2.0 / 0.5)
+
+
+@pytest.mark.parametrize("sector", ["FT", "FNT"])
+def test_create_company_sets_firm_sales_from_range(hh_before_firm_creation, sector):
+    # Given
+    firm = Mock()
+    FakeFirm.return_value = firm
+    shares = [{"founder": Mock(), "amount": 100}]
+    household = hh_before_firm_creation
+    random = household.model.nprandom
+    random.uniform.return_value = 10.0
+    role = household.roles["citizen"]
+    role.get_sales_range.return_value = (5.0, 15.0)
+
+    # When
+    household.create_company(shares, sector=sector)
+
+    # Then
+    role.get_sales_range.assert_called_with(sector)
+    random.uniform.assert_any_call(5.0, 15.0)
+    assert firm.expected_sales == 10.0
+
+
+@pytest.mark.parametrize("sector", ["FT", "FNT"])
+def test_create_company_sets_firm_sales_from_params(hh_before_firm_creation, sector):
+    # Given
+    firm = Mock()
+    FakeFirm.return_value = firm
+    shares = [{"founder": Mock(), "amount": 100}]
+    household = hh_before_firm_creation
+    household.p.initial_wage = 2.0
+    household.p.initial_productivity = 0.5
+    role = household.roles["citizen"]
+    role.get_productivity_range.return_value = None
+
+    # When
+    household.create_company(shares, sector=sector)
+
+    # Then
+    assert firm.expected_sales == pytest.approx(0.5 * 100 / 2.0)
+
+
+@pytest.mark.parametrize("sector", ["FT", "FNT"])
+def test_create_company_sets_firm_wage_from_range(hh_before_firm_creation, sector):
+    # Given
+    firm = Mock()
+    FakeFirm.return_value = firm
+    shares = [{"founder": Mock(), "amount": 100}]
+    household = hh_before_firm_creation
+    random = household.model.nprandom
+    random.uniform.return_value = 10.0
+    role = household.roles["citizen"]
+    role.get_wage_range.return_value = (5.0, 15.0)
+
+    # When
+    household.create_company(shares, sector=sector)
+
+    # Then
+    role.get_wage_range.assert_called_with(sector)
+    random.uniform.assert_any_call(5.0, 15.0)
+    assert firm.wage_offer == 10.0
+
+
+@pytest.mark.parametrize("sector", ["FT", "FNT"])
+def test_create_company_sets_firm_wage_from_params(hh_before_firm_creation, sector):
+    # Given
+    firm = Mock()
+    FakeFirm.return_value = firm
+    shares = [{"founder": Mock(), "amount": 100}]
+    household = hh_before_firm_creation
+    household.p.initial_wage = 2.0
+    role = household.roles["citizen"]
+    role.get_productivity_range.return_value = None
+
+    # When
+    household.create_company(shares, sector=sector)
+
+    # Then
+    assert firm.wage_offer == pytest.approx(2.0)
+
+
+@pytest.mark.parametrize("sector", ["FT", "FNT"])
+def test_create_company_places_firm_into_union(hh_before_firm_creation, sector):
+    # Given
+    firm = Mock()
+    FakeFirm.return_value = firm
+    shares = [{"founder": Mock(), "amount": 100}]
+    household = hh_before_firm_creation
+    union = household.model.union
 
     # When
     household.create_company(shares, sector=sector)
@@ -1039,14 +1211,12 @@ def test_create_company_places_firm_into_union(hh_before_investment, sector):
 
 
 @pytest.mark.parametrize("sector", ["FT", "FNT"])
-def test_create_company_append_to_model_firms(hh_before_investment, sector):
+def test_create_company_append_to_model_firms(hh_before_firm_creation, sector):
     # Given
     firm = Mock()
     FakeFirm.return_value = firm
     shares = [{"founder": Mock(), "amount": 100}]
-    household = hh_before_investment
-    household.model.union = Mock()
-    household.model.firms = []
+    household = hh_before_firm_creation
 
     # When
     household.create_company(shares, sector=sector)
@@ -1056,14 +1226,12 @@ def test_create_company_append_to_model_firms(hh_before_investment, sector):
 
 
 @pytest.mark.parametrize("sector", ["FT", "FNT"])
-def test_create_company_fund_firm_with_shares(hh_before_investment, sector):
+def test_create_company_fund_firm_with_shares(hh_before_firm_creation, sector):
     # Given
     founder, firm = Mock(), Mock()
     FakeFirm.return_value = firm
     shares = [{"founder": founder, "amount": 100}]
-    household = hh_before_investment
-    household.model.union = Mock()
-    household.model.firms = []
+    household = hh_before_firm_creation
 
     # When
     household.create_company(shares, sector=sector)
@@ -1076,8 +1244,6 @@ def test_create_company_creates_bank(hh_before_investment):
     # Given
     shares = [{"founder": Mock(), "amount": 100}]
     household = hh_before_investment
-    household.model.union = Mock()
-    household.model.banks = []
 
     # When
     household.create_company(shares, sector="B")
@@ -1093,8 +1259,6 @@ def test_create_company_sets_bank_country_pos(hh_before_investment):
     shares = [{"founder": Mock(), "amount": 100}]
     household = hh_before_investment
     household.country_pos = 6
-    household.model.union = Mock()
-    household.model.banks = []
 
     # When
     household.create_company(shares, sector="B")
@@ -1105,12 +1269,11 @@ def test_create_company_sets_bank_country_pos(hh_before_investment):
 
 def test_create_company_places_bank_into_union(hh_before_investment):
     # Given
-    bank, union = Mock(), Mock()
+    bank = Mock()
     FakeBank.return_value = bank
     shares = [{"founder": Mock(), "amount": 100}]
     household = hh_before_investment
-    household.model.union = union
-    household.model.banks = []
+    union = household.model.union
 
     # When
     household.create_company(shares, sector="B")
@@ -1125,8 +1288,6 @@ def test_create_company_append_to_model_banks(hh_before_investment):
     FakeBank.return_value = bank
     shares = [{"founder": Mock(), "amount": 100}]
     household = hh_before_investment
-    household.model.union = Mock()
-    household.model.banks = []
 
     # When
     household.create_company(shares, sector="B")
@@ -1141,8 +1302,6 @@ def test_create_company_fund_bank_with_shares(hh_before_investment):
     FakeBank.return_value = bank
     shares = [{"founder": founder, "amount": 100}]
     household = hh_before_investment
-    household.model.union = Mock()
-    household.model.banks = []
 
     # When
     household.create_company(shares, sector="B")

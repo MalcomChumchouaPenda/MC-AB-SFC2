@@ -90,13 +90,31 @@ class Country(EcoSpace):
         bank_sector = companies.select(companies.sector == "B")
         return bank_sector, firm_sector
 
-    def calc_sector_equity_range(self, sector):
+    def calc_equity_range(self, sector):
         companies = self.find_all_roles("company")
         selected = companies.select(companies.sector == sector)
         if len(selected) == 0:
             return None
         equities = selected.equity
         return min(equities), max(equities)
+
+    def calc_productivity_range(self, sector):
+        if sector == "FNT":
+            return self.spaces["goods_market"].calc_productivity_range()
+        return self.env.calc_productivity_range()
+
+    def calc_price_range(self, sector):
+        if sector == "FNT":
+            return self.spaces["goods_market"].calc_price_range()
+        return self.env.calc_price_range()
+
+    def calc_sales_range(self, sector):
+        if sector == "FNT":
+            return self.spaces["goods_market"].calc_sales_range()
+        return self.env.calc_sales_range()
+
+    def calc_wage_range(self, sector):
+        return self.spaces["labor_market"].calc_wage_range()
 
     #
     # Equity investment

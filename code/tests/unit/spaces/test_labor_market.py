@@ -182,6 +182,39 @@ def test_pay_wages_updates_accounts(market_with_jobs):
 
 
 # ---------------------------------------------------
+#  STATISTICS TESTS
+# ----------------------------------------------------
+
+
+def test_calc_wage_range_for_all_employers(market_without_roles, make_dlist):
+    # Given
+    employers = [Mock(id=i, wage=10.0) for i in range(4)]
+    employers = make_dlist(employers)
+    employers.name = "employer"
+    employers[1].wage = 15.0
+    market = market_without_roles
+    market.roles = {role.id: role for role in employers}
+
+    # When
+    range_ = market.calc_wage_range()
+
+    # Then
+    assert range_ == (10.0, 15.0)
+
+
+def test_calc_wage_range_if_no_employers(market_without_roles):
+    # Given
+    market = market_without_roles
+    market.roles = {}
+
+    # When
+    range_ = market.calc_wage_range()
+
+    # Then
+    assert range_ is None
+
+
+# ---------------------------------------------------
 # EVOLUTION
 # ----------------------------------------------------
 

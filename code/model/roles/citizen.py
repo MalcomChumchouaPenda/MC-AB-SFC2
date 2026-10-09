@@ -27,8 +27,20 @@ class Citizen(EcoRole):
     def get_bank_equity_ratio(self):
         return self.env.calc_bank_equity_ratio()
 
-    def get_sector_equity_range(self, sector):
-        return self.env.calc_sector_equity_range(sector)
+    def get_equity_range(self, sector):
+        return self.env.calc_equity_range(sector)
+
+    def get_productivity_range(self, sector):
+        return self.env.calc_productivity_range(sector)
+
+    def get_price_range(self, sector):
+        return self.env.calc_price_range(sector)
+
+    def get_sales_range(self, sector):
+        return self.env.calc_sales_range(sector)
+
+    def get_wage_range(self, sector):
+        return self.env.calc_wage_range(sector)
 
     def get_tax_rate(self):
         return self.env.tax_rate

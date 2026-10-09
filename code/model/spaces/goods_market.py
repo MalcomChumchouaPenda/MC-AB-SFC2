@@ -23,14 +23,16 @@ class GoodsMarket(EcoSpace):
 
     def add_firm(self, firm):
         role = self.add_role(Producer, firm)
+        role.productivity = firm.initial_productivity
         role.variety = firm.variety
 
     #
     # Reactions
     #
     def buy_goods(self, consumer, producer, quantity):
-        producer.inventories -= quantity
         amount = quantity * producer.price
+        producer.inventories -= quantity
+        producer.sales += amount
         self.transfer_stock("cash", consumer.id, producer.id, amount)
         self.make_transaction("consumption", consumer.id, producer.id, amount)
 
@@ -44,16 +46,35 @@ class GoodsMarket(EcoSpace):
         return (current_price - prev_price) / prev_price
 
     def calc_gdp(self):
-        roles = self.roles
-        producers = roles.select(roles.name == "producer")
+        producers = self.find_all_roles("producer")
         return sum(self.get_stock("consumption", i) for i in producers.id)
+
+    def calc_productivity_range(self):
+        producers = self.find_all_roles("producer")
+        if len(producers) == 0:
+            return None
+        values = producers.productivity
+        return min(values), max(values)
+
+    def calc_price_range(self):
+        producers = self.find_all_roles("producer")
+        if len(producers) == 0:
+            return None
+        values = producers.price
+        return min(values), max(values)
+
+    def calc_sales_range(self):
+        producers = self.find_all_roles("producer")
+        if len(producers) == 0:
+            return None
+        values = producers.sales
+        return min(values), max(values)
 
     #
     #   Evolution
     #
     def update_state(self):
-        roles = self.roles
-        producers = roles.select(roles.name == "producer")
+        producers = self.find_all_roles("producer")
         self.average_price_prev = self.average_price
         self.average_price = sum(producers.price) / max(1, len(producers))
         self.average_prod = sum(producers.productivity) / max(1, len(producers))

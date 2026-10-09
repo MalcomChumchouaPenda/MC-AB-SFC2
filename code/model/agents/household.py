@@ -215,7 +215,7 @@ class Household(EcoAgent):
 
     def calc_initial_equity(self, sector):
         role = self.roles["citizen"]
-        range_ = role.get_sector_equity_range(sector)
+        range_ = role.get_equity_range(sector)
         if range_ is None:
             return self.p.initial_equity
         minimum, maximum = range_
@@ -238,10 +238,25 @@ class Household(EcoAgent):
             share["founder"].fund_company(bank.id, share["amount"])
 
     def _create_firm(self, shares, sector):
+        p = self.p
         model = self.model
         firm = Firm(model)
         firm.country_pos = self.country_pos
         firm.tradable = sector == "FT"
+        role = self.roles["citizen"]
+        phi_range = role.get_productivity_range(sector)
+        if phi_range is None:
+            equity = sum([s["amount"] for s in shares])
+            firm.wage_offer = p.initial_wage
+            firm.initial_productivity = p.initial_productivity
+            firm.price = p.initial_wage / p.initial_productivity
+            firm.expected_sales = p.initial_productivity * equity / p.initial_wage
+        else:
+            uniform = self.model.nprandom.uniform
+            firm.wage_offer = uniform(*role.get_wage_range(sector))
+            firm.initial_productivity = uniform(*role.get_productivity_range(sector))
+            firm.price = uniform(*role.get_price_range(sector))
+            firm.expected_sales = uniform(*role.get_sales_range(sector))
         model.union.add_firm(firm)
         model.firms.append(firm)
         for share in shares:

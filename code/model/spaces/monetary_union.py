@@ -60,6 +60,19 @@ class MonetaryUnion(EcoSpace):
             self.spaces[f"country_{c}"].add_central_bank(cb)
 
     #
+    # Statitics
+    #
+
+    def calc_productivity_range(self):
+        return self.spaces["goods_market"].calc_productivity_range()
+
+    def calc_price_range(self):
+        return self.spaces["goods_market"].calc_price_range()
+
+    def calc_sales_range(self):
+        return self.spaces["goods_market"].calc_sales_range()
+
+    #
     # Evolution
     #
     def update_average_inflation(self):

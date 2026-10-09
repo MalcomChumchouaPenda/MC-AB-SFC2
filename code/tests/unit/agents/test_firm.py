@@ -250,6 +250,17 @@ def test_initializes_prev_desired_labor(fake_model):
     assert firm.prev_desired_labor == 0
 
 
+def test_initializes_initial_productivity(fake_model):
+    # Given
+    model = fake_model
+
+    # When
+    firm = Firm(model)
+
+    # Then
+    assert firm.initial_productivity == 0
+
+
 # ---------------------------------------------------
 # PRODUCTION PLANNING
 # ----------------------------------------------------

@@ -379,3 +379,47 @@ def test_update_average_inflation(fake_model):
 
     # Then
     assert union.average_inflation == pytest.approx(0.05)
+
+
+# ---------------------------------------------------
+# CURRENT INDICATORS
+# ----------------------------------------------------
+
+
+def test_calc_productivity_range_from_goods_market(union_without_roles):
+    # Given
+    market = Mock()
+    union = union_without_roles
+    union.spaces = {"goods_market": market}
+
+    # When
+    range_ = union.calc_productivity_range()
+
+    # Then
+    assert range_ == market.calc_productivity_range.return_value
+
+
+def test_calc_price_range_from_goods_market(union_without_roles):
+    # Given
+    market = Mock()
+    union = union_without_roles
+    union.spaces = {"goods_market": market}
+
+    # When
+    range_ = union.calc_price_range()
+
+    # Then
+    assert range_ == market.calc_price_range.return_value
+
+
+def test_calc_sales_range_from_goods_market(union_without_roles):
+    # Given
+    market = Mock()
+    union = union_without_roles
+    union.spaces = {"goods_market": market}
+
+    # When
+    range_ = union.calc_sales_range()
+
+    # Then
+    assert range_ == market.calc_sales_range.return_value

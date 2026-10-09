@@ -8,6 +8,7 @@ class Producer(EcoRole):
         self.price = 0
         self.productivity = 0
         self.inventories = 0
+        self.sales = 0
         self.variety = None
         self.defaulted = False
 

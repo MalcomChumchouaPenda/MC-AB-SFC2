@@ -138,6 +138,20 @@ def test_add_firm_sets_role_variety(market_without_roles):
     assert role.variety == firm.variety
 
 
+def test_add_firm_sets_productivity(market_without_roles):
+    # Given
+    role = Mock()
+    firm = Mock()
+    market = market_without_roles
+    market.add_role.return_value = role
+
+    # When
+    market.add_firm(firm)
+
+    # Then
+    assert role.productivity == firm.initial_productivity
+
+
 # ---------------------------------------------------
 # MATCHING / TRANSACTIONS TESTS
 # ----------------------------------------------------
@@ -157,7 +171,7 @@ def market_before_transaction(market_without_roles):
 def test_buy_goods_updates_accounts(market_before_transaction):
     # Given
     consumer = Mock()
-    producer = Mock(price=10, inventories=100)
+    producer = Mock(price=10, inventories=100, sales=0)
     market = market_before_transaction
 
     # When
@@ -171,7 +185,7 @@ def test_buy_goods_updates_accounts(market_before_transaction):
 def test_buy_goods_decrease_inventories(market_before_transaction):
     # Given
     consumer = Mock()
-    producer = Mock(price=10, inventories=100)
+    producer = Mock(price=10, inventories=100, sales=0)
     market = market_before_transaction
 
     # When
@@ -181,38 +195,21 @@ def test_buy_goods_decrease_inventories(market_before_transaction):
     assert producer.inventories == 95.0
 
 
-# ---------------------------------------------------
-#  STATISTICS TESTS
-# ----------------------------------------------------
-
-
-def test_calc_inflation(market_before_update):
+def test_buy_goods_increases_sales(market_before_transaction):
     # Given
-    market = market_before_update
-    market.average_price_prev = 10
-    market.average_price = 12
+    consumer = Mock()
+    producer = Mock(price=10, inventories=100, sales=0)
+    market = market_before_transaction
 
     # When
-    inflation = market.calc_inflation()
+    market.buy_goods(consumer, producer, 5)
 
     # Then
-    assert inflation == pytest.approx(0.2)
-
-
-def test_calc_gdp(market_before_update, producers):
-    # Given
-    market = market_before_update
-    market.get_stock = lambda x, y: 100 if x == "consumption" else 0
-
-    # When
-    gdp = market.calc_gdp()
-
-    # Then
-    assert gdp == 100 * len(producers)
+    assert producer.sales == 50.0
 
 
 # ---------------------------------------------------
-# EVOLUTION
+#  STATISTICS TESTS
 # ----------------------------------------------------
 
 
@@ -228,12 +225,129 @@ def producers(make_dlist):
 
 
 @pytest.fixture
-def market_before_update(market_without_roles, producers, make_dlist):
+def market_without_producers(market_without_roles, make_dlist):
     # Given
     others = make_dlist([Mock(id=i) for i in range(5)])
     others.name = "other"
     market = market_without_roles
-    market.roles = others + producers
+    market.roles = {r.id: r for r in others}
+    return market
+
+
+@pytest.fixture
+def market_with_producers(market_without_producers, producers):
+    # Given
+    market = market_without_producers
+    market.roles.update({r.id: r for r in producers})
+    return market, producers
+
+
+def test_calc_inflation(market_without_producers):
+    # Given
+    market = market_without_producers
+    market.average_price_prev = 10
+    market.average_price = 12
+
+    # When
+    inflation = market.calc_inflation()
+
+    # Then
+    assert inflation == pytest.approx(0.2)
+
+
+def test_calc_gdp(market_with_producers):
+    # Given
+    market, producers = market_with_producers
+    market.get_stock = lambda x, y: 100 if x == "consumption" else 0
+
+    # When
+    gdp = market.calc_gdp()
+
+    # Then
+    assert gdp == 100 * len(producers)
+
+
+def test_calc_productivity_range_for_all_producers(market_with_producers):
+    # Given
+    market, producers = market_with_producers
+    producers.productivity = 1.0
+    producers[2].productivity = 2.0
+
+    # When
+    range_ = market.calc_productivity_range()
+
+    # Then
+    assert range_ == (1.0, 2.0)
+
+
+def test_calc_productivity_range_if_no_producers(market_without_producers):
+    # Given
+    market = market_without_producers
+
+    # When
+    range_ = market.calc_productivity_range()
+
+    # Then
+    assert range_ is None
+
+
+def test_calc_price_range_for_all_producers(market_with_producers):
+    # Given
+    market, producers = market_with_producers
+    producers.price = 10.0
+    producers[1].price = 15.0
+
+    # When
+    range_ = market.calc_price_range()
+
+    # Then
+    assert range_ == (10.0, 15.0)
+
+
+def test_calc_price_range_if_no_producers(market_without_producers):
+    # Given
+    market = market_without_producers
+
+    # When
+    range_ = market.calc_price_range()
+
+    # Then
+    assert range_ is None
+
+
+def test_calc_sales_range_for_all_producers(market_with_producers):
+    # Given
+    market, producers = market_with_producers
+    producers.sales = 100.0
+    producers[1].sales = 150.0
+
+    # When
+    range_ = market.calc_sales_range()
+
+    # Then
+    assert range_ == (100.0, 150.0)
+
+
+def test_calc_sales_range_if_no_producers(market_without_producers):
+    # Given
+    market = market_without_producers
+
+    # When
+    range_ = market.calc_sales_range()
+
+    # Then
+    assert range_ is None
+
+
+# ---------------------------------------------------
+# EVOLUTION
+# ----------------------------------------------------
+
+
+@pytest.fixture
+def market_before_update(market_with_producers):
+    # Given
+    market, _ = market_with_producers
     return market
 
 

@@ -51,6 +51,17 @@ def test_initializes_inventories():
     assert role.inventories == 0
 
 
+def test_initializes_sales():
+    # Given
+    agent, env = Mock(), Mock()
+
+    # When
+    role = Producer(agent, env)
+
+    # Then
+    assert role.sales == 0
+
+
 def test_initializes_variety():
     # Given
     agent, env = Mock(), Mock()

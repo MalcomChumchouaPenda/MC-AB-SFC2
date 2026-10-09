@@ -118,13 +118,61 @@ def test_get_bank_equity_ratio_from_env(role):
     assert ratio == 0.6
 
 
-def test_get_sector_equity_range_from_env(role):
+def test_get_equity_range_from_env(role):
     # Given
     env = role.env
-    env.calc_sector_equity_range.return_value = (100, 200)
+    env.calc_equity_range.return_value = (100, 200)
 
     # When
-    range_ = role.get_sector_equity_range("X")
+    range_ = role.get_equity_range("X")
+
+    # Then
+    assert range_ == (100, 200)
+
+
+def test_get_productivity_range_from_env(role):
+    # Given
+    env = role.env
+    env.calc_productivity_range.return_value = (100, 200)
+
+    # When
+    range_ = role.get_productivity_range("X")
+
+    # Then
+    assert range_ == (100, 200)
+
+
+def test_get_price_range_from_env(role):
+    # Given
+    env = role.env
+    env.calc_price_range.return_value = (100, 200)
+
+    # When
+    range_ = role.get_price_range("X")
+
+    # Then
+    assert range_ == (100, 200)
+
+
+def test_get_sales_range_from_env(role):
+    # Given
+    env = role.env
+    env.calc_sales_range.return_value = (100, 200)
+
+    # When
+    range_ = role.get_sales_range("X")
+
+    # Then
+    assert range_ == (100, 200)
+
+
+def test_get_wage_range_from_env(role):
+    # Given
+    env = role.env
+    env.calc_wage_range.return_value = (100, 200)
+
+    # When
+    range_ = role.get_wage_range("X")
 
     # Then
     assert range_ == (100, 200)

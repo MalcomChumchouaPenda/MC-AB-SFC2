@@ -11,6 +11,7 @@ class Firm(EcoAgent):
         # prices
         self.price = 0.0
         self.wage_offer = 0
+        self.initial_productivity = 0
 
         # flows
         self.rd = 0

@@ -519,7 +519,7 @@ def test_calc_bank_equity_ratio_if_no_firms(country_with_two_groups):
     assert ratio == 1.0
 
 
-def test_calc_sector_equity_range_for_any_sector(country_with_two_groups):
+def test_calc_equity_range_for_any_sector(country_with_two_groups):
     # Given
     country, group1, group2 = country_with_two_groups
     group1.sector, group1.equity = "X", 100
@@ -527,23 +527,114 @@ def test_calc_sector_equity_range_for_any_sector(country_with_two_groups):
     group2[-1].equity = 200
 
     # When
-    range_ = country.calc_sector_equity_range("Y")
+    range_ = country.calc_equity_range("Y")
 
     # Then
     assert range_ == (100, 200)
 
 
-def test_calc_sector_equity_range_if_empty_sector(country_with_two_groups):
+def test_calc_equity_range_if_empty_sector(country_with_two_groups):
     # Given
     country, group1, group2 = country_with_two_groups
     group1.sector, group1.equity = "X", 100
     group2.sector, group2.equity = "Y", 100
 
     # When
-    range_ = country.calc_sector_equity_range("Z")
+    range_ = country.calc_equity_range("Z")
 
     # Then
     assert range_ is None
+
+
+def test_calc_productivity_range_from_goods_market(country_without_roles):
+    # Given
+    market = Mock()
+    country = country_without_roles
+    country.spaces = {"goods_market": market}
+
+    # When
+    range_ = country.calc_productivity_range("FNT")
+
+    # Then
+    assert range_ == market.calc_productivity_range.return_value
+
+
+def test_calc_productivity_range_from_union(country_without_roles):
+    # Given
+    union = Mock()
+    country = country_without_roles
+    country.env = union
+
+    # When
+    range_ = country.calc_productivity_range("FT")
+
+    # Then
+    assert range_ == union.calc_productivity_range.return_value
+
+
+def test_calc_price_range_from_goods_market(country_without_roles):
+    # Given
+    market = Mock()
+    country = country_without_roles
+    country.spaces = {"goods_market": market}
+
+    # When
+    range_ = country.calc_price_range("FNT")
+
+    # Then
+    assert range_ == market.calc_price_range.return_value
+
+
+def test_calc_price_range_from_union(country_without_roles):
+    # Given
+    union = Mock()
+    country = country_without_roles
+    country.env = union
+
+    # When
+    range_ = country.calc_price_range("FT")
+
+    # Then
+    assert range_ == union.calc_price_range.return_value
+
+
+def test_calc_sales_range_from_goods_market(country_without_roles):
+    # Given
+    market = Mock()
+    country = country_without_roles
+    country.spaces = {"goods_market": market}
+
+    # When
+    range_ = country.calc_sales_range("FNT")
+
+    # Then
+    assert range_ == market.calc_sales_range.return_value
+
+
+def test_calc_sales_range_from_union(country_without_roles):
+    # Given
+    union = Mock()
+    country = country_without_roles
+    country.env = union
+
+    # When
+    range_ = country.calc_sales_range("FT")
+
+    # Then
+    assert range_ == union.calc_sales_range.return_value
+
+
+def test_calc_wage_range_from_labor_market(country_without_roles):
+    # Given
+    market = Mock()
+    country = country_without_roles
+    country.spaces = {"labor_market": market}
+
+    # When
+    range_ = country.calc_wage_range("X")
+
+    # Then
+    assert range_ == market.calc_wage_range.return_value
 
 
 # ---------------------------------------------------
