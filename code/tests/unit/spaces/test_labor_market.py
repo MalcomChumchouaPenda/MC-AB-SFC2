@@ -220,23 +220,57 @@ def test_calc_wage_range_if_no_employers(market_without_roles):
 
 
 @pytest.fixture
-def market_before_update(market_without_roles, make_dlist):
+def employers(make_dlist):
+    # Given
+    roles = make_dlist()
+    for _ in range(5):
+        role = Mock(wage=5.0)
+        role.name = "employer"
+        roles.append(role)
+    return roles
+
+
+@pytest.fixture
+def employed(make_dlist):
+    # Given
+    roles = make_dlist()
+    for _ in range(5):
+        role = Mock(labor_supply=0.5)
+        role.name = "worker"
+        roles.append(role)
+    return roles
+
+
+@pytest.fixture
+def unemployed(make_dlist):
+    # Given
+    roles = make_dlist()
+    for _ in range(5):
+        role = Mock(labor_supply=1.0)
+        role.name = "worker"
+        roles.append(role)
+    return roles
+
+
+@pytest.fixture
+def workers(employed, unemployed):
+    # Given
+    return employed + unemployed
+
+
+@pytest.fixture
+def market_before_update(market_without_roles, employers, workers):
     # Given
     market = market_without_roles
+    market.roles = {role.id: role for role in employers + workers}
     market.average_wage = 0
     market.unemployment = 0
-    market.roles = {
-        "employer": make_dlist(),
-        "worker": make_dlist(),
-    }
     return market
 
 
 def test_update_state_updates_average_wage(market_before_update):
     # Given
     market = market_before_update
-    roles = market.roles["employer"]
-    roles.extend([Mock(wage=5) for _ in range(5)])
 
     # When
     market.update_state()
@@ -248,9 +282,6 @@ def test_update_state_updates_average_wage(market_before_update):
 def test_update_state_updates_unemployment_rate(market_before_update):
     # Given
     market = market_before_update
-    roles = market.roles["worker"]
-    roles.extend([Mock(labor_supply=1.0) for _ in range(5)])
-    roles.extend([Mock(labor_supply=0.5) for _ in range(5)])
 
     # When
     market.update_state()

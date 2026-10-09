@@ -244,8 +244,8 @@ class Household(EcoAgent):
         firm.country_pos = self.country_pos
         firm.tradable = sector == "FT"
         role = self.roles["citizen"]
-        phi_range = role.get_productivity_range(sector)
-        if phi_range is None:
+        productivity_range = role.get_productivity_range(sector)
+        if productivity_range is None:
             equity = sum([s["amount"] for s in shares])
             firm.wage_offer = p.initial_wage
             firm.initial_productivity = p.initial_productivity

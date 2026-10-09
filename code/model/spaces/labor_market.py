@@ -56,11 +56,11 @@ class LaborMarket(EcoSpace):
         self._update_unemployment()
 
     def _update_average_wage(self):
-        employers = self.roles["employer"]
+        employers = self.find_all_roles("employer")
         self.average_wage = sum(employers.wage) / max(1, len(employers))
 
     def _update_unemployment(self):
-        workers = self.roles["worker"]
+        workers = self.find_all_roles("worker")
         unemployed = workers.select(workers.labor_supply == 1.0)
         self.unemployment = len(unemployed) / max(1, len(workers))
 
