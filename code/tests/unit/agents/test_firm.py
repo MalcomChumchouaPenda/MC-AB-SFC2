@@ -466,7 +466,7 @@ def test_price_cannot_be_below_unit_cost(pricing_firm):
 def test_calc_revision_probability(firm_with_roles_and_account):
     # Given
     role = Mock()
-    role.get_unemployment_rate.return_value = 0.1
+    role.get_unemployment.return_value = 0.1
     firm, roles, _ = firm_with_roles_and_account
     firm.p.upsilon = 1.0
     roles["employer"] = role

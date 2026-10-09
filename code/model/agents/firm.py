@@ -93,7 +93,7 @@ class Firm(EcoAgent):
     def calc_revision_probability(self):
         p = self.p
         role = self.roles["employer"]
-        unemployment = role.get_unemployment_rate()
+        unemployment = role.get_unemployment()
         return math.exp(-p.upsilon * unemployment)
 
     #
