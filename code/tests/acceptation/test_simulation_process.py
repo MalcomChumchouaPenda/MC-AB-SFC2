@@ -43,6 +43,7 @@ def params():
         "g_max": 0.6,
         "eta": 0.03,
         "initial_equity": 10.0,
+        "sigma":4,
     }
 
 
