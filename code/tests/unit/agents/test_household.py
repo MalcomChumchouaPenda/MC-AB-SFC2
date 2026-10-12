@@ -832,482 +832,617 @@ def test_choose_portfolio_allocation_updates_citizen_role(hh_before_allocation):
 # FIRM AND BANK CREATION
 # ----------------------------------------------------
 
-FakeFirm = Mock()
-FakeBank = Mock()
-
 
 @pytest.fixture
-def hh_before_investment(monkeypatch):
+def hh_with_investment_steps(hh_before_allocation):
     # Given
-    monkeypatch.setattr("model.agents.household.Firm", FakeFirm)
-    monkeypatch.setattr("model.agents.household.Bank", FakeBank)
-    model = Mock()
-    model.p.cT = 0.6
-    model.p.eta = 0.3
-    model.p.psi = 5
-    model.p.omega = 0.1
-    model.union = Mock()
-    model.firms = []
-    model.banks = []
-    household = Household(model)
-    household.roles = {"citizen": Mock()}
+    household = hh_before_allocation
+    household._choose_investment_sector = Mock()
+    household._calc_initial_equity = Mock()
+    household._collect_equity_shares = Mock()
+    household._create_company = Mock()
     return household
 
 
+def test_invest_equity_does_nothing_if_no_desired_equity(hh_with_investment_steps):
+    # Given
+    household = hh_with_investment_steps
+    household.desired_equity = 0
+
+    # When
+    household.invest_equity()
+
+    # Then
+    household._choose_investment_sector.assert_not_called()
+    household._calc_initial_equity.assert_not_called()
+    household._collect_equity_shares.assert_not_called()
+    household._create_company.assert_not_called()
+
+
+def test_invest_equity_chooses_investment_sector(hh_with_investment_steps):
+    # Given
+    household = hh_with_investment_steps
+    household.desired_equity = 100
+
+    # When
+    household.invest_equity()
+
+    # Then
+    household._choose_investment_sector.assert_called_once_with()
+
+
+def test_invest_equity_calcs_initial_equity_with_sector(hh_with_investment_steps):
+    # Given
+    household = hh_with_investment_steps
+    household.desired_equity = 100
+    household._choose_investment_sector.return_value = "ANY"
+
+    # When
+    household.invest_equity()
+
+    # Then
+    household._calc_initial_equity.assert_called_once_with("ANY")
+
+
+def test_invest_equity_collects_equity_shares_with_target(hh_with_investment_steps):
+    # Given
+    household = hh_with_investment_steps
+    household.desired_equity = 100
+    household._calc_initial_equity.return_value = 250
+
+    # When
+    household.invest_equity()
+
+    # Then
+    household._collect_equity_shares.assert_called_once_with(250)
+
+
+def test_invest_equity_creates_company_with_sector_and_shares(hh_with_investment_steps):
+    # Given
+    shares = [Mock()]
+    household = hh_with_investment_steps
+    household.desired_equity = 100
+    household._collect_equity_shares.return_value = shares
+    household._choose_investment_sector.return_value = "ANY"
+
+    # When
+    household.invest_equity()
+
+    # Then
+    household._create_company.assert_called_once_with("ANY", shares)
+
+
+def test_invest_equity_doesnt_create_company_if_no_shares(hh_with_investment_steps):
+    # Given
+    household = hh_with_investment_steps
+    household.desired_equity = 100
+    household._collect_equity_shares.return_value = None
+    household._choose_investment_sector.return_value = "ANY"
+
+    # When
+    household.invest_equity()
+
+    # Then
+    household._create_company.assert_not_called()
+
+
 @pytest.fixture
-def investors():
+def hh_as_investor(hh_before_allocation):
     # Given
-    return [Mock(resid_equity=10, company_number=i) for i in range(2)]
-
-
-def test_find_investors_with_citizen_role(hh_before_investment, investors):
-    # Given
-    household = hh_before_investment
-    role = household.roles["citizen"]
-    role.find_investors.return_value = investors
-    role.get_average_wage.return_value = 15.0
-
-    # When
-    result = household.find_potential_investors()
-
-    # Then
-    assert result == investors
-
-
-def test_find_investors_with_minimum_level_of_equity(hh_before_investment, investors):
-    # Given
-    ineligible, eligible = investors
-    ineligible.resid_equity = 0.5
-    household = hh_before_investment
-    role = household.roles["citizen"]
-    role.find_investors.return_value = investors
-    role.get_average_wage.return_value = 15.0
-
-    # When
-    result = household.find_potential_investors()
-
-    # Then
-    assert result == [eligible]
-
-
-def test_find_investors_with_maximum_company_number(hh_before_investment, investors):
-    # Given
-    ineligible, eligible = investors
-    ineligible.company_number = 6
-    household = hh_before_investment
-    role = household.roles["citizen"]
-    role.find_investors.return_value = investors
-    role.get_average_wage.return_value = 15.0
-
-    # When
-    result = household.find_potential_investors()
-
-    # Then
-    assert result == [eligible]
+    role = Mock()
+    household = hh_before_allocation
+    household.roles = {"citizen": role}
+    return household, role
 
 
 @pytest.mark.parametrize("ratio1, ratio2", [(0.2, 0.5), (0.5, 0.2)])
-def test_choose_bank_as_investment_sector(hh_before_investment, ratio1, ratio2):
+def test_choose_investment_sector_returns_bank_sector(hh_as_investor, ratio1, ratio2):
     # Given
-    household = hh_before_investment
-    role = household.roles["citizen"]
+    household, role = hh_as_investor
+    household.p.cT = 0.6
+    household.p.eta = 0.3
     role.get_bank_number_ratio.return_value = ratio1
     role.get_bank_equity_ratio.return_value = ratio2
 
     # When
-    sector = household.choose_investment_sector()
+    sector = household._choose_investment_sector()
 
     # Then
     assert sector == "B"
-    assert household.desired_investment_sector == sector
 
 
-def test_choose_firm_as_investment_sector(hh_before_investment):
+def test_choose_investment_sector_returns_random_firm_sector(hh_as_investor):
     # Given
-    household = hh_before_investment
-    role = household.roles["citizen"]
+    household, role = hh_as_investor
+    household.p.cT = 0.6
+    household.p.eta = 0.3
     role.get_bank_number_ratio.return_value = 0.6
     role.get_bank_equity_ratio.return_value = 0.6
     random = household.model.nprandom
-    random.choice.return_value = "FT"
-    sectors = ["FNT", "FT"]
 
     # When
-    sector = household.choose_investment_sector()
+    sector = household._choose_investment_sector()
 
     # Then
-    random.choice.assert_called_with(sectors, p=[0.4, 0.6])
-    assert sector == "FT"
+    random.choice.assert_called_with(["FNT", "FT"], p=[0.4, 0.6])
+    assert sector == random.choice.return_value
+
+
+@pytest.mark.parametrize("ratio", [0.2, 0.5, 0.6])
+def test_choose_investment_sector_registers_desired_sector(hh_as_investor, ratio):
+    # Given
+    household, role = hh_as_investor
+    household.p.cT = 0.6
+    household.p.eta = 0.3
+    role.get_bank_number_ratio.return_value = ratio
+    role.get_bank_equity_ratio.return_value = ratio
+
+    # When
+    sector = household._choose_investment_sector()
+
+    # Then
     assert household.desired_investment_sector == sector
 
 
-@pytest.mark.parametrize("sector", ["FNT", "FT", "B"])
-def test_calc_initial_equity_by_investment_sector(hh_before_investment, sector):
+def test_calc_initial_equity_chooses_equity_between_current_range(hh_as_investor):
     # Given
-    household = hh_before_investment
-    household.desired_investment_sector = sector
-    role = household.roles["citizen"]
-    role.get_equity_range.return_value = (100, 500)
+    household, role = hh_as_investor
+    household.p.sigma = 1.0
     random = household.model.nprandom
-    random.uniform.return_value = 300
+    role.get_equity_range.return_value = (100, 500)
 
     # When
-    equity = household.calc_initial_equity(sector)
+    equity = household._calc_initial_equity("ANY")
 
     # Then
-    role.get_equity_range.assert_called_with(sector)
-    assert equity == 300
+    role.get_equity_range.assert_called_with("ANY")
+    random.uniform.assert_called_once_with(100, 500)
+    assert equity == random.uniform.return_value
 
 
-@pytest.mark.parametrize("sector", ["FNT", "FT", "B"])
-def test_calc_initial_equity_uses_exogenous_equity(hh_before_investment, sector):
+def test_calc_initial_equity_returns_initial_equity_if_no_current_range(hh_as_investor):
     # Given
-    household = hh_before_investment
+    household, role = hh_as_investor
+    household.p.sigma = 1.0
     household.p.initial_equity = 1000
-    role = household.roles["citizen"]
+    random = household.model.nprandom
     role.get_equity_range.return_value = None
 
     # When
-    equity = household.calc_initial_equity(sector=sector)
+    equity = household._calc_initial_equity("ANY")
 
     # Then
-    assert equity == 1000
+    random.uniform.assert_not_called()
+    assert equity == household.p.initial_equity
+
+
+def test_calc_initial_equity_includes_median_firm_size_for_bank_sector(hh_as_investor):
+    # Given
+    household, role = hh_as_investor
+    household.p.sigma = 0.5
+    random = household.model.nprandom
+    role.get_median_firm_size.return_value = 500
+    role.get_equity_range.return_value = (100, 500)
+
+    # When
+    equity = household._calc_initial_equity("B")
+
+    # Then
+    role.get_median_firm_size.assert_called_once_with()
+    random.uniform.assert_called_once_with(250, 500)
+    assert equity == random.uniform.return_value
+
+
+def test_calc_initial_equity_uses_median_firm_size_if_no_bank_sector(hh_as_investor):
+    # Given
+    household, role = hh_as_investor
+    household.p.sigma = 0.5
+    household.p.initial_equity = 1000
+    random = household.model.nprandom
+    role.get_median_firm_size.return_value = 500
+    role.get_equity_range.return_value = None
+
+    # When
+    equity = household._calc_initial_equity("B")
+
+    # Then
+    role.get_median_firm_size.assert_called_once_with()
+    random.uniform.assert_called_once_with(250, 1000)
+    assert equity == random.uniform.return_value
 
 
 @pytest.fixture
-def hh_before_firm_creation(hh_before_investment):
+def investors(hh_as_investor):
     # Given
-    household = hh_before_investment
-    household.p.initial_wage = 1.0
-    household.p.initial_productivity = 1.0
-    role = household.roles["citizen"]
-    role.get_productivity_range.return_value = []
-    role.get_price_range.return_value = []
-    role.get_sales_range.return_value = []
-    role.get_wage_range.return_value = []
-    return household
+    investors = [Mock(resid_equity=10, company_number=i) for i in range(2)]
+    _, role = hh_as_investor
+    role.resid_equity = 10
+    role.find_investors.return_value = investors
+    return investors
 
 
-@pytest.mark.parametrize("sector", ["FT", "FNT"])
-def test_create_company_creates_firm(hh_before_firm_creation, sector):
+@pytest.fixture
+def before_equity_collection(hh_as_investor, investors):
     # Given
-    shares = [{"founder": Mock(), "amount": 100}]
-    household = hh_before_firm_creation
+    household, role = hh_as_investor
+    household.p.omega = 0.1
+    household.p.psi = 5
+    role.get_average_wage.return_value = 15.0
+    return household, role, investors
+
+
+def test_collect_equity_shares_builds_and_returns_shares(before_equity_collection):
+    # Given
+    household, role, investors = before_equity_collection
+    founders = [role] + investors
 
     # When
-    household.create_company(shares, sector=sector)
+    result = household._collect_equity_shares(30)
+
+    # Then
+    assert result == [{"founder": founder, "amount": 10} for founder in founders]
+
+
+def test_collect_equity_shares_with_an_minimum_equity_target(before_equity_collection):
+    # Given
+    household, role, investors = before_equity_collection
+    founders = [role, investors[0]]
+
+    # When
+    result = household._collect_equity_shares(15.0)
+
+    # Then
+    assert result == [{"founder": founder, "amount": 10} for founder in founders]
+
+
+def test_collect_equity_shares_returns_none_if_low_funds(before_equity_collection):
+    # Given
+    household, *_ = before_equity_collection
+
+    # When
+    result = household._collect_equity_shares(100.0)
+
+    # Then
+    assert result is None
+
+
+def test_collect_equity_shares_with_minimum_level_of_equity(before_equity_collection):
+    # Given
+    household, role, investors = before_equity_collection
+    ineligible, eligible = investors
+    ineligible.resid_equity = 0.5
+    founders = [role, eligible]
+
+    # When
+    result = household._collect_equity_shares(20)
+
+    # Then
+    assert result == [{"founder": founder, "amount": 10} for founder in founders]
+
+
+def test_collect_equity_shares_with_maximum_company_number(before_equity_collection):
+    # Given
+    household, role, investors = before_equity_collection
+    ineligible, eligible = investors
+    ineligible.company_number = 6
+    founders = [role, eligible]
+
+    # When
+    result = household._collect_equity_shares(20)
+
+    # Then
+    assert result == [{"founder": founder, "amount": 10} for founder in founders]
+
+
+FakeFirm = Mock()
+
+
+@pytest.fixture
+def before_firm_creation(monkeypatch, hh_as_investor):
+    # Given
+    monkeypatch.setattr("model.agents.household.Firm", FakeFirm)
+    household, role = hh_as_investor
+    household.p.initial_wage = 1.0
+    household.p.initial_productivity = 1.0
+    household.model.union = Mock()
+    household.model.firms = []
+    role.get_productivity_range.return_value = [0, 0]
+    role.get_price_range.return_value = [0, 0]
+    role.get_sales_range.return_value = [0, 0]
+    role.get_wage_range.return_value = [0, 0]
+    shares = [{"founder": role, "amount": 100}]
+    return household, role, shares
+
+
+def test_create_company_creates_firm_with_model(before_firm_creation):
+    # Given
+    household, _, shares = before_firm_creation
+
+    # When
+    household._create_company("ANY", shares)
 
     # Then
     FakeFirm.assert_called_with(household.model)
 
 
-@pytest.mark.parametrize("sector", ["FT", "FNT"])
-def test_create_company_sets_firm_country_pos(hh_before_firm_creation, sector):
+def test_create_company_sets_new_firm_country_pos(before_firm_creation):
     # Given
     firm = Mock()
     FakeFirm.return_value = firm
-    shares = [{"founder": Mock(), "amount": 100}]
-    household = hh_before_firm_creation
+    household, _, shares = before_firm_creation
     household.country_pos = 5
 
     # When
-    household.create_company(shares, sector=sector)
+    household._create_company("ANY", shares)
 
     # Then
     assert firm.country_pos == 5
 
 
 @pytest.mark.parametrize("sector, tradable", [("FT", True), ("FNT", False)])
-def test_create_company_sets_firm_tradable(hh_before_firm_creation, sector, tradable):
+def test_create_company_sets_new_firm_tradable(before_firm_creation, sector, tradable):
     # Given
     firm = Mock()
     FakeFirm.return_value = firm
-    shares = [{"founder": Mock(), "amount": 100}]
-    household = hh_before_firm_creation
+    household, _, shares = before_firm_creation
 
     # When
-    household.create_company(shares, sector=sector)
+    household._create_company(sector, shares)
 
     # Then
     assert firm.tradable == tradable
 
 
-@pytest.mark.parametrize("sector", ["FT", "FNT"])
-def test_create_company_sets_firm_productivity_from_range(
-    hh_before_firm_creation, sector
-):
+def test_create_company_sets_new_firm_productivity_from_range(before_firm_creation):
     # Given
     firm = Mock()
     FakeFirm.return_value = firm
-    shares = [{"founder": Mock(), "amount": 100}]
-    household = hh_before_firm_creation
+    household, role, shares = before_firm_creation
     random = household.model.nprandom
-    random.uniform.return_value = 10.0
-    role = household.roles["citizen"]
-    role.get_productivity_range.return_value = (5.0, 15.0)
+    random.uniform = lambda a, b: (a + b) / 2
+    role.get_productivity_range.return_value = (1.0, 2.0)
 
     # When
-    household.create_company(shares, sector=sector)
+    household._create_company("ANY", shares)
 
     # Then
-    role.get_productivity_range.assert_called_with(sector)
-    random.uniform.assert_any_call(5.0, 15.0)
-    assert firm.initial_productivity == 10.0
+    assert firm.initial_productivity == pytest.approx(1.5)
 
 
-@pytest.mark.parametrize("sector", ["FT", "FNT"])
-def test_create_company_sets_firm_productivity_from_params(
-    hh_before_firm_creation, sector
-):
+def test_create_company_sets_new_firm_productivity_from_params(before_firm_creation):
     # Given
     firm = Mock()
     FakeFirm.return_value = firm
-    shares = [{"founder": Mock(), "amount": 100}]
-    household = hh_before_firm_creation
+    household, role, shares = before_firm_creation
     household.p.initial_productivity = 0.5
-    role = household.roles["citizen"]
     role.get_productivity_range.return_value = None
 
     # When
-    household.create_company(shares, sector=sector)
+    household._create_company("ANY", shares)
 
     # Then
     assert firm.initial_productivity == pytest.approx(0.5)
 
 
-@pytest.mark.parametrize("sector", ["FT", "FNT"])
-def test_create_company_sets_firm_price_from_range(hh_before_firm_creation, sector):
+def test_create_company_sets_new_firm_price_from_range(before_firm_creation):
     # Given
     firm = Mock()
     FakeFirm.return_value = firm
-    shares = [{"founder": Mock(), "amount": 100}]
-    household = hh_before_firm_creation
+    household, role, shares = before_firm_creation
     random = household.model.nprandom
-    random.uniform.return_value = 10.0
-    role = household.roles["citizen"]
+    random.uniform = lambda a, b: (a + b) / 2
     role.get_price_range.return_value = (5.0, 15.0)
 
     # When
-    household.create_company(shares, sector=sector)
+    household._create_company("ANY", shares)
 
     # Then
-    role.get_price_range.assert_called_with(sector)
-    random.uniform.assert_any_call(5.0, 15.0)
-    assert firm.price == 10.0
+    assert firm.price == pytest.approx(10.0)
 
 
-@pytest.mark.parametrize("sector", ["FT", "FNT"])
-def test_create_company_sets_firm_price_from_params(hh_before_firm_creation, sector):
+def test_create_company_sets_new_firm_price_from_params(before_firm_creation):
     # Given
     firm = Mock()
     FakeFirm.return_value = firm
-    shares = [{"founder": Mock(), "amount": 100}]
-    household = hh_before_firm_creation
+    household, role, shares = before_firm_creation
     household.p.initial_wage = 2.0
     household.p.initial_productivity = 0.5
-    role = household.roles["citizen"]
     role.get_productivity_range.return_value = None
 
     # When
-    household.create_company(shares, sector=sector)
+    household._create_company("ANY", shares)
 
     # Then
     assert firm.price == pytest.approx(2.0 / 0.5)
 
 
-@pytest.mark.parametrize("sector", ["FT", "FNT"])
-def test_create_company_sets_firm_sales_from_range(hh_before_firm_creation, sector):
+def test_create_company_sets_new_firm_sales_from_range(before_firm_creation):
     # Given
     firm = Mock()
     FakeFirm.return_value = firm
-    shares = [{"founder": Mock(), "amount": 100}]
-    household = hh_before_firm_creation
+    household, role, shares = before_firm_creation
     random = household.model.nprandom
-    random.uniform.return_value = 10.0
-    role = household.roles["citizen"]
-    role.get_sales_range.return_value = (5.0, 15.0)
+    random.uniform = lambda a, b: (a + b) / 2
+    role.get_sales_range.return_value = (50.0, 100.0)
 
     # When
-    household.create_company(shares, sector=sector)
+    household._create_company("ANY", shares)
 
     # Then
-    role.get_sales_range.assert_called_with(sector)
-    random.uniform.assert_any_call(5.0, 15.0)
-    assert firm.expected_sales == 10.0
+    assert firm.expected_sales == pytest.approx(75.0)
 
 
-@pytest.mark.parametrize("sector", ["FT", "FNT"])
-def test_create_company_sets_firm_sales_from_params(hh_before_firm_creation, sector):
+def test_create_company_sets_new_firm_sales_from_params(before_firm_creation):
     # Given
     firm = Mock()
     FakeFirm.return_value = firm
-    shares = [{"founder": Mock(), "amount": 100}]
-    household = hh_before_firm_creation
+    household, role, shares = before_firm_creation
     household.p.initial_wage = 2.0
     household.p.initial_productivity = 0.5
-    role = household.roles["citizen"]
     role.get_productivity_range.return_value = None
 
     # When
-    household.create_company(shares, sector=sector)
+    household._create_company("ANY", shares)
 
     # Then
     assert firm.expected_sales == pytest.approx(0.5 * 100 / 2.0)
 
 
-@pytest.mark.parametrize("sector", ["FT", "FNT"])
-def test_create_company_sets_firm_wage_from_range(hh_before_firm_creation, sector):
+def test_create_company_sets_new_firm_wage_from_range(before_firm_creation):
     # Given
     firm = Mock()
     FakeFirm.return_value = firm
-    shares = [{"founder": Mock(), "amount": 100}]
-    household = hh_before_firm_creation
+    household, role, shares = before_firm_creation
     random = household.model.nprandom
-    random.uniform.return_value = 10.0
-    role = household.roles["citizen"]
-    role.get_wage_range.return_value = (5.0, 15.0)
+    random.uniform = lambda a, b: (a + b) / 2
+    role.get_wage_range.return_value = (2.0, 4.0)
 
     # When
-    household.create_company(shares, sector=sector)
+    household._create_company("ANY", shares)
 
     # Then
-    role.get_wage_range.assert_called_with(sector)
-    random.uniform.assert_any_call(5.0, 15.0)
-    assert firm.wage_offer == 10.0
+    assert firm.wage_offer == pytest.approx(3.0)
 
 
-@pytest.mark.parametrize("sector", ["FT", "FNT"])
-def test_create_company_sets_firm_wage_from_params(hh_before_firm_creation, sector):
+def test_create_company_sets_new_firm_wage_from_params(before_firm_creation):
     # Given
     firm = Mock()
     FakeFirm.return_value = firm
-    shares = [{"founder": Mock(), "amount": 100}]
-    household = hh_before_firm_creation
+    household, role, shares = before_firm_creation
     household.p.initial_wage = 2.0
-    role = household.roles["citizen"]
     role.get_productivity_range.return_value = None
 
     # When
-    household.create_company(shares, sector=sector)
+    household._create_company("ANY", shares)
 
     # Then
     assert firm.wage_offer == pytest.approx(2.0)
 
 
-@pytest.mark.parametrize("sector", ["FT", "FNT"])
-def test_create_company_places_firm_into_union(hh_before_firm_creation, sector):
+def test_create_company_adds_firm_into_union(before_firm_creation):
     # Given
     firm = Mock()
     FakeFirm.return_value = firm
-    shares = [{"founder": Mock(), "amount": 100}]
-    household = hh_before_firm_creation
+    household, _, shares = before_firm_creation
     union = household.model.union
 
     # When
-    household.create_company(shares, sector=sector)
+    household._create_company("ANY", shares)
 
     # Then
     union.add_firm.assert_called_once_with(firm)
 
 
-@pytest.mark.parametrize("sector", ["FT", "FNT"])
-def test_create_company_append_to_model_firms(hh_before_firm_creation, sector):
+def test_create_company_appends_to_model_firms(before_firm_creation):
     # Given
     firm = Mock()
     FakeFirm.return_value = firm
-    shares = [{"founder": Mock(), "amount": 100}]
-    household = hh_before_firm_creation
+    household, _, shares = before_firm_creation
 
     # When
-    household.create_company(shares, sector=sector)
+    household._create_company("ANY", shares)
 
     # Then
     assert firm in household.model.firms
 
 
-@pytest.mark.parametrize("sector", ["FT", "FNT"])
-def test_create_company_fund_firm_with_shares(hh_before_firm_creation, sector):
+def test_create_company_funds_new_firm(before_firm_creation):
     # Given
-    founder, firm = Mock(), Mock()
+    firm = Mock()
     FakeFirm.return_value = firm
-    shares = [{"founder": founder, "amount": 100}]
-    household = hh_before_firm_creation
+    household, _, shares = before_firm_creation
 
     # When
-    household.create_company(shares, sector=sector)
+    household._create_company("ANY", shares)
 
     # Then
-    founder.fund_company.assert_called_with(firm.id, 100)
+    for share in shares:
+        share["founder"].fund_company.assert_called_once_with(firm.id, share["amount"])
 
 
-def test_create_company_creates_bank(hh_before_investment):
+FakeBank = Mock()
+
+
+@pytest.fixture
+def before_bank_creation(monkeypatch, hh_as_investor):
     # Given
-    shares = [{"founder": Mock(), "amount": 100}]
-    household = hh_before_investment
+    monkeypatch.setattr("model.agents.household.Bank", FakeBank)
+    household, role = hh_as_investor
+    household.model.union = Mock()
+    household.model.banks = []
+    shares = [{"founder": role, "amount": 100}]
+    return household, shares
+
+
+def test_create_company_creates_bank_with_model(before_bank_creation):
+    # Given
+    household, shares = before_bank_creation
 
     # When
-    household.create_company(shares, sector="B")
+    household._create_company("B", shares)
 
     # Then
     FakeBank.assert_called_with(household.model)
 
 
-def test_create_company_sets_bank_country_pos(hh_before_investment):
+def test_create_company_sets_new_bank_country_pos(before_bank_creation):
     # Given
     bank = Mock()
     FakeBank.return_value = bank
-    shares = [{"founder": Mock(), "amount": 100}]
-    household = hh_before_investment
-    household.country_pos = 6
+    household, shares = before_bank_creation
+    household.country_pos = 4
 
     # When
-    household.create_company(shares, sector="B")
+    household._create_company("B", shares)
 
     # Then
-    assert bank.country_pos == 6
+    assert bank.country_pos == 4
 
 
-def test_create_company_places_bank_into_union(hh_before_investment):
+def test_create_company_adds_bank_into_union(before_bank_creation):
     # Given
     bank = Mock()
     FakeBank.return_value = bank
-    shares = [{"founder": Mock(), "amount": 100}]
-    household = hh_before_investment
+    household, shares = before_bank_creation
     union = household.model.union
 
     # When
-    household.create_company(shares, sector="B")
+    household._create_company("B", shares)
 
     # Then
     union.add_bank.assert_called_once_with(bank)
 
 
-def test_create_company_append_to_model_banks(hh_before_investment):
+def test_create_company_appends_to_model_banks(before_bank_creation):
     # Given
     bank = Mock()
     FakeBank.return_value = bank
-    shares = [{"founder": Mock(), "amount": 100}]
-    household = hh_before_investment
+    household, shares = before_bank_creation
 
     # When
-    household.create_company(shares, sector="B")
+    household._create_company("B", shares)
 
     # Then
     assert bank in household.model.banks
 
 
-def test_create_company_fund_bank_with_shares(hh_before_investment):
+def test_create_company_funds_new_bank(before_bank_creation):
     # Given
-    founder, bank = Mock(), Mock()
+    bank = Mock()
     FakeBank.return_value = bank
-    shares = [{"founder": founder, "amount": 100}]
-    household = hh_before_investment
+    household, shares = before_bank_creation
 
     # When
-    household.create_company(shares, sector="B")
+    household._create_company("B", shares)
 
     # Then
-    founder.fund_company.assert_called_with(bank.id, 100)
+    for share in shares:
+        share["founder"].fund_company.assert_called_once_with(bank.id, share["amount"])
+
+
+# ---------------------------------------------------
+# DEPOSIT BANK CHOICE
+# ----------------------------------------------------
 
 
 @pytest.fixture
@@ -1343,96 +1478,6 @@ def test_dont_make_deposits_without_deposit_bank_id(hh_as_depositor):
 
     # Then
     role.make_deposits.assert_not_called()
-
-
-@pytest.fixture
-def hh_as_investor(hh_before_allocation):
-    # Given
-    household = hh_before_allocation
-    household.account["equities"] = 0
-    household.desired_equity = 100
-    household.roles = {"citizen": Mock(resid_equity=100)}
-    household.choose_investment_sector = Mock(return_value=None)
-    household.find_potential_investors = Mock(return_value=[])
-    household.calc_initial_equity = Mock(return_value=100)
-    household.create_company = Mock()
-    return household
-
-
-def test_invest_equity_does_nothing_without_desire(hh_as_investor):
-    # Given
-    household = hh_as_investor
-    household.desired_equity = 0
-
-    # When
-    household.invest_equity()
-
-    # Then
-    household.choose_investment_sector.assert_not_called()
-    household.find_potential_investors.assert_not_called()
-    household.calc_initial_equity.assert_not_called()
-    household.create_company.assert_not_called()
-
-
-def test_invest_equity_when_sufficient_equity(hh_as_investor):
-    # Given
-    household = hh_as_investor
-    initiator = household.roles["citizen"]
-    founders = [Mock(resid_equity=100) for _ in range(2)]
-    shares = [{"founder": o, "amount": o.resid_equity} for o in [initiator] + founders]
-    household.find_potential_investors.return_value = founders
-    household.choose_investment_sector.return_value = "any"
-    household.calc_initial_equity.return_value = 300
-
-    # When
-    household.invest_equity()
-
-    # Then
-    household.find_potential_investors.assert_called_with()
-    household.calc_initial_equity.assert_called_with("any")
-    household.create_company.assert_called_with(shares, "any")
-
-
-def test_invest_equity_with_only_sufficient_equity(hh_as_investor):
-    # Given
-    household = hh_as_investor
-    initiator = household.roles["citizen"]
-    founders = [Mock(resid_equity=100) for _ in range(5)]
-    shares = [
-        {"founder": o, "amount": o.resid_equity} for o in [initiator] + founders[:2]
-    ]
-    household.find_potential_investors.return_value = founders
-    household.choose_investment_sector.return_value = "any"
-    household.calc_initial_equity.return_value = 300
-
-    # When
-    household.invest_equity()
-
-    # Then
-    household.find_potential_investors.assert_called_with()
-    household.calc_initial_equity.assert_called_with("any")
-    household.create_company.assert_called_with(shares, "any")
-
-
-def test_invest_equity_does_nothing_when_insufficient_equity(hh_as_investor):
-    # Given
-    household = hh_as_investor
-    household.find_potential_investors.return_value = []
-    household.choose_investment_sector.return_value = "any"
-    household.calc_initial_equity.return_value = 300
-
-    # When
-    household.invest_equity()
-
-    # Then
-    household.find_potential_investors.assert_called_with()
-    household.calc_initial_equity.assert_called_with("any")
-    household.create_company.assert_not_called()
-
-
-# ---------------------------------------------------
-# DEPOSIT BANK CHOICE
-# ----------------------------------------------------
 
 
 def test_choose_deposit_bank_leave_old_deposit_bank(hh_as_depositor):

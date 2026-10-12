@@ -118,6 +118,19 @@ def test_get_bank_equity_ratio_from_env(role):
     assert ratio == 0.6
 
 
+def test_get_median_firm_size_from_env(role):
+    # Given
+    env = role.env
+    env.calc_median_firm_size.return_value = 150.0
+
+    # When
+    median_size = role.get_median_firm_size()
+
+    # Then
+    assert median_size == 150.0
+
+
+
 def test_get_equity_range_from_env(role):
     # Given
     env = role.env

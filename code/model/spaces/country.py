@@ -1,3 +1,4 @@
+import numpy as np
 from model.extensions import EcoSpace
 from model.roles.citizen import Citizen
 from model.roles.company import Company
@@ -89,6 +90,12 @@ class Country(EcoSpace):
         firm_sector = companies.select(companies.sector != "B")
         bank_sector = companies.select(companies.sector == "B")
         return bank_sector, firm_sector
+
+    def calc_median_firm_size(self):
+        companies = self.find_all_roles("company")
+        firm_sector = companies.select(companies.sector != "B")
+        return float(np.median(firm_sector.equity))
+
 
     def calc_equity_range(self, sector):
         companies = self.find_all_roles("company")

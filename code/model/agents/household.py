@@ -174,22 +174,20 @@ class Household(EcoAgent):
     def calc_expected_net_worth(self):
         return self.net_worth + self.disposable_income - self.expected_consumption
 
+
+    #
+    # Firm and Bank creation
+    #
     def invest_equity(self):
         if self.desired_equity > 0:
-            sector = self.choose_investment_sector()
-            investors = self.find_potential_investors()
-            required_equity = self.calc_initial_equity(sector)
-            collected_equity = self.desired_equity
-            initiator = self.roles["citizen"]
-            shares = [{"founder": initiator, "amount": initiator.resid_equity}]
-            for investor in investors:
-                shares.append({"founder": investor, "amount": investor.resid_equity})
-                collected_equity += investor.resid_equity
-                if collected_equity >= required_equity:
-                    self.create_company(shares, sector)
-                    break
+            sector = self._choose_investment_sector()
+            target = self._calc_initial_equity(sector)
+            shares = self._collect_equity_shares(target)
+            if shares is not None:
+                self._create_company(sector, shares)
+                
 
-    def choose_investment_sector(self):
+    def _choose_investment_sector(self):
         p = self.p
         role = self.roles["citizen"]
         ratio1 = role.get_bank_number_ratio()
@@ -203,42 +201,60 @@ class Household(EcoAgent):
         self.desired_investment_sector = sector
         return sector
 
-    def find_potential_investors(self):
+    def _calc_initial_equity(self, sector):
         p = self.p
-        role = self.roles["citizen"]
-        min_equity = p.omega * role.get_average_wage()
-        return [
-            investor
-            for investor in role.find_investors()
-            if investor.resid_equity >= min_equity and investor.company_number < p.psi
-        ]
-
-    def calc_initial_equity(self, sector):
+        random = self.model.nprandom
         role = self.roles["citizen"]
         range_ = role.get_equity_range(sector)
-        if range_ is None:
-            return self.p.initial_equity
-        minimum, maximum = range_
-        random = self.model.nprandom
+        if sector == "B":
+            median_size = role.get_median_firm_size()
+            if range_ is None:
+                minimum = p.sigma * median_size
+                maximum = max(minimum, p.initial_equity)
+            else:
+                minimum, maximum = range_
+                minimum = max(p.sigma * median_size, minimum)
+        else:
+            if range_ is None:
+                return p.initial_equity
+            minimum, maximum = range_
         return random.uniform(minimum, maximum)
 
-    def create_company(self, shares, sector):
-        if sector == "B":
-            self._create_bank(shares)
-        else:
-            self._create_firm(shares, sector)
+    def _collect_equity_shares(self, target):
+        p = self.p
+        initiator = self.roles["citizen"]
+        collected_equity = initiator.resid_equity
+        min_equity = p.omega * initiator.get_average_wage()
+        shares = [{"founder": initiator, "amount": initiator.resid_equity}]
+        for investor in initiator.find_investors():
+            if investor.resid_equity < min_equity or investor.company_number >= p.psi:
+                continue
+            shares.append({"founder": investor, "amount": investor.resid_equity})
+            collected_equity += investor.resid_equity
+            if collected_equity > target:
+                break
+        if collected_equity < target:
+            return None
+        return shares
 
-    def _create_bank(self, shares):
+    def _create_company(self, sector, shares):
+        if sector == "B":
+            agent_id = self._create_bank()
+        else:
+            size = sum([s["amount"] for s in shares])
+            agent_id = self._create_firm(size, sector)
+        for share in shares:
+            share["founder"].fund_company(agent_id, share["amount"])
+
+    def _create_bank(self):
         model = self.model
         bank = Bank(model)
         bank.country_pos = self.country_pos
         model.union.add_bank(bank)
         model.banks.append(bank)
-        for share in shares:
-            share["founder"].fund_company(bank.id, share["amount"])
+        return bank.id
 
-    def _create_firm(self, shares, sector):
-        p = self.p
+    def _create_firm(self, size, sector):
         model = self.model
         firm = Firm(model)
         firm.country_pos = self.country_pos
@@ -246,21 +262,31 @@ class Household(EcoAgent):
         role = self.roles["citizen"]
         productivity_range = role.get_productivity_range(sector)
         if productivity_range is None:
-            equity = sum([s["amount"] for s in shares])
-            firm.wage_offer = p.initial_wage
-            firm.initial_productivity = p.initial_productivity
-            firm.price = p.initial_wage / p.initial_productivity
-            firm.expected_sales = p.initial_productivity * equity / p.initial_wage
+            self._create_firm_with_initial_params(firm, size)
         else:
-            uniform = self.model.nprandom.uniform
-            firm.wage_offer = uniform(*role.get_wage_range(sector))
-            firm.initial_productivity = uniform(*role.get_productivity_range(sector))
-            firm.price = uniform(*role.get_price_range(sector))
-            firm.expected_sales = uniform(*role.get_sales_range(sector))
+            self._create_firm_with_sector_ranges(firm, sector, productivity_range)
         model.union.add_firm(firm)
         model.firms.append(firm)
-        for share in shares:
-            share["founder"].fund_company(firm.id, share["amount"])
+        return firm.id
+
+
+    def _create_firm_with_initial_params(self, firm, size):
+        p = self.p
+        firm.wage_offer = p.initial_wage
+        firm.initial_productivity = p.initial_productivity
+        firm.price = p.initial_wage / p.initial_productivity
+        firm.expected_sales = p.initial_productivity * size / p.initial_wage
+
+
+    def _create_firm_with_sector_ranges(self, firm, sector, productivity_range):
+        role = self.roles["citizen"]
+        uniform = self.model.nprandom.uniform
+        firm.initial_productivity = uniform(*productivity_range)
+        firm.wage_offer = uniform(*role.get_wage_range(sector))
+        firm.price = uniform(*role.get_price_range(sector))
+        firm.expected_sales = uniform(*role.get_sales_range(sector))
+
+
 
     #
     # Deposits management

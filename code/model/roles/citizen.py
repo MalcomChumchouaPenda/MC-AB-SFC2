@@ -27,6 +27,9 @@ class Citizen(EcoRole):
     def get_bank_equity_ratio(self):
         return self.env.calc_bank_equity_ratio()
 
+    def get_median_firm_size(self):
+        return self.env.calc_median_firm_size()
+
     def get_equity_range(self, sector):
         return self.env.calc_equity_range(sector)
 
