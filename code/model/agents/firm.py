@@ -13,9 +13,6 @@ class Firm(EcoAgent):
         self.wage_offer = 0
         self.initial_productivity = 0
 
-        # flows
-        self.rd = 0
-
         # indicators
         self.net_cash_flow = 0.0
         self.net_worth = 0.0
@@ -99,52 +96,21 @@ class Firm(EcoAgent):
     #
     # Innovation and imitation process
     #
-    def update_productivity(self):
-        role = self.roles["producer"]
-        self.calc_desired_rd()
-        self.execute_rd()
-        if self.rd == 0:
-            return role.productivity
-
-        prob = self.calc_rd_success_probability()
-        random = self.model.nprandom
-        success = random.choice([0, 1], p=[1 - prob, prob])
-        if success:
-            self._innovation(role, random)
-            self._imitation(role, random)
-
-    def _innovation(self, role, random):
-        delta = self.p.delta
-        role.productivity *= 1 + random.uniform(0, delta)
-
-    def _imitation(self, role, random):
-        avg_productivity = role.get_average_productivity()
-        prod_diff = avg_productivity - role.productivity
-        if prod_diff > 0:
-            role.productivity += random.uniform(0, prod_diff)
-
     def calc_desired_rd(self):
         self.desired_wage_bill = self.wage_offer * self.desired_labor
         self.desired_rd = self.p.gamma * self.desired_wage_bill
         return self.desired_rd
 
-    def calc_rd_success_probability(self):
-        producer_role = self.roles["producer"]
-        avg_price = producer_role.get_average_price()
-        avg_productivity = producer_role.get_average_productivity()
-        prob = 1 - math.exp(-self.p.nu * self.rd / (avg_price * avg_productivity))
-        return prob
-
     def execute_rd(self):
+        if self.desired_rd <= 0:
+            return
         roles = self.roles
         account = self.account
         labor_constraint = roles["employer"].labor < self.desired_labor
         financial_constraint = account["loans"] < self.desired_loans
         if labor_constraint or financial_constraint:
-            self.rd = 0
-        else:
-            self.rd = self.desired_rd
-        return self.rd
+            return
+        roles["producer"].execute_rd(self.desired_rd)
 
     #
     # Credit transaction

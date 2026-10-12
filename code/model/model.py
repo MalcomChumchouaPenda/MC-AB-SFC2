@@ -75,6 +75,7 @@ class EcoModel(Model):
         self.firms.plan_production()
         self.firms.adapt_expectations()
         self.firms.revise_wage_offer()
+        self.firms.calc_desired_rd()
 
     def _credit_markets_matching(self):
         self.firms.request_loans()
@@ -88,7 +89,7 @@ class EcoModel(Model):
     def _production_and_incomes_distribution(self):
         self.firms.pay_wages()
         self.firms.produce_goods()
-        self.firms.update_productivity()
+        self.firms.execute_rd()
         self.firms.pay_dividends()
         self.banks.update_deposit_rate()
         self.banks.pay_deposit_interests()

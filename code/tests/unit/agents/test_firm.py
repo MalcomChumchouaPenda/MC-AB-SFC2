@@ -41,17 +41,6 @@ def test_initializes_defaulted(fake_model):
     assert firm.defaulted is False
 
 
-def test_initializes_rd_expenditure(fake_model):
-    # Given
-    model = fake_model
-
-    # When
-    firm = Firm(model)
-
-    # Then
-    assert firm.rd == 0
-
-
 def test_initializes_price_offered(fake_model):
     # Given
     model = fake_model
@@ -612,14 +601,17 @@ def test_calc_desired_rd(firm):
 @pytest.fixture
 def before_rd_investment(firm_with_roles_and_account):
     # Given
+    producer_role = Mock()
+    employer_role = Mock(labor=50.0)
     firm, roles, account = firm_with_roles_and_account
-    roles["employer"] = Mock(labor=50.0)
-    return firm, account
+    roles["employer"] = employer_role
+    roles["producer"] = producer_role
+    return firm, producer_role, account
 
 
-def test_execute_rd_without_constraints(before_rd_investment):
+def test_execute_rd_launchs_innovation_if_no_constraints(before_rd_investment):
     # Given
-    firm, account = before_rd_investment
+    firm, role, account = before_rd_investment
     firm.desired_rd = 100
     firm.desired_labor = 50
     firm.desired_loans = 200
@@ -629,12 +621,27 @@ def test_execute_rd_without_constraints(before_rd_investment):
     firm.execute_rd()
 
     # Then
-    assert firm.rd == 100
+    role.execute_rd.assert_called_with(100)
 
 
-def test_execute_rd_with_labor_constraint(before_rd_investment):
+def test_execute_rd_does_nothing_if_no_desire(before_rd_investment):
     # Given
-    firm, account = before_rd_investment
+    firm, role, account = before_rd_investment
+    firm.desired_rd = 0
+    firm.desired_labor = 100
+    firm.desired_loans = 200
+    account["loans"] = 200
+
+    # When
+    firm.execute_rd()
+
+    # Then
+    role.execute_rd.assert_not_called()
+
+
+def test_execute_rd_does_nothing_if_labor_constraint(before_rd_investment):
+    # Given
+    firm, role, account = before_rd_investment
     firm.desired_rd = 100
     firm.desired_labor = 100
     firm.desired_loans = 200
@@ -644,12 +651,12 @@ def test_execute_rd_with_labor_constraint(before_rd_investment):
     firm.execute_rd()
 
     # Then
-    assert firm.rd == 0
+    role.execute_rd.assert_not_called()
 
 
-def test_execute_rd_with_financial_constraint(before_rd_investment):
+def test_execute_rd_does_nothing_if_financial_constraint(before_rd_investment):
     # Given
-    firm, account = before_rd_investment
+    firm, role, account = before_rd_investment
     firm.desired_rd = 100
     firm.desired_labor = 50
     firm.desired_loans = 200
@@ -659,144 +666,7 @@ def test_execute_rd_with_financial_constraint(before_rd_investment):
     firm.execute_rd()
 
     # Then
-    assert firm.rd == 0
-
-
-@pytest.fixture
-def firm_with_rd_project(firm_with_roles_and_account):
-    # Given
-    firm, roles, _ = firm_with_roles_and_account
-    firm.p.nu = 0.5
-    firm.rd = 100
-    roles["producer"] = Mock()
-    return firm
-
-
-def test_calc_rd_success_probability_tradable(firm_with_rd_project):
-    # Given
-    firm = firm_with_rd_project
-    firm.tradable = True
-    role = firm.roles["producer"]
-    role.get_average_price.return_value = 20
-    role.get_average_productivity.return_value = 10
-
-    # When
-    probability = firm.calc_rd_success_probability()
-
-    # Then
-    expected = 1 - math.exp(-0.5 * 100 / (20 * 10))
-    assert probability == pytest.approx(expected)
-
-
-def test_calc_rd_success_probability_non_tradable(firm_with_rd_project):
-    # Given
-    firm = firm_with_rd_project
-    firm.tradable = False
-    role = firm.roles["producer"]
-    role.get_average_price.return_value = 15
-    role.get_average_productivity.return_value = 20
-
-    # When
-    probability = firm.calc_rd_success_probability()
-
-    # Then
-    expected = 1 - math.exp(-0.5 * 100 / (15 * 20))
-    assert probability == pytest.approx(expected)
-
-
-@pytest.fixture
-def innovating_firm(firm_with_roles_and_account):
-    firm, roles, _ = firm_with_roles_and_account
-    firm.p.delta = 0.2
-    firm.calc_desired_rd = Mock(side_effect=setattr(firm, "desired_rd", 100))
-    firm.execute_rd = Mock(side_effect=setattr(firm, "rd", 100))
-    firm.calc_rd_success_probability = Mock(return_value=0.6)
-    roles["producer"] = Mock()
-    return firm
-
-
-def test_update_productivity_with_multi_steps(innovating_firm):
-    # Given
-    firm = innovating_firm
-    random = firm.model.nprandom
-    random.choice.return_value = 1
-    random.uniform.return_value = 0.05
-    role = firm.roles["producer"]
-    role.productivity = 10
-    role.get_average_productivity.return_value = 10
-
-    # When
-    firm.update_productivity()
-
-    # Then
-    assert firm.calc_desired_rd.called
-    assert firm.execute_rd.called
-    assert firm.calc_rd_success_probability.called
-    random.choice.assert_called_with([0, 1], p=[1 - 0.6, 0.6])
-
-
-def test_update_productivity_without_success(innovating_firm):
-    # Given
-    firm = innovating_firm
-    random = firm.model.nprandom
-    random.choice.return_value = 0
-    role = firm.roles["producer"]
-    role.get_average_productivity.return_value = 10
-    role.productivity = 10
-
-    # When
-    firm.update_productivity()
-
-    # Then
-    assert role.productivity == 10
-
-
-def test_update_productivity_without_rd(innovating_firm):
-    # Given
-    firm = innovating_firm
-    firm.execute_rd.side_effect = setattr(firm, "rd", 0)
-    role = firm.roles["producer"]
-    role.productivity = 10
-
-    # When
-    firm.update_productivity()
-
-    # Then
-    assert role.productivity == 10
-
-
-def test_update_productivity_by_innovation(innovating_firm):
-    # Given
-    firm = innovating_firm
-    random = firm.model.nprandom
-    random.choice.return_value = 1
-    random.uniform = lambda a, b: b
-    role = firm.roles["producer"]
-    role.get_average_productivity.return_value = 10
-    role.productivity = 10
-
-    # When
-    firm.update_productivity()
-
-    # Then
-    assert role.productivity == 12
-
-
-def test_update_productivity_by_imitation(innovating_firm):
-    # Given
-    firm = innovating_firm
-    random = firm.model.nprandom
-    random.choice.return_value = 1
-    random.uniform = lambda a, b: b
-    role = firm.roles["producer"]
-    role.get_average_productivity.return_value = 20
-    role.productivity = 10
-
-    # When
-    firm.update_productivity()
-
-    # Then
-    assert role.productivity == 20
+    role.execute_rd.assert_not_called()
 
 
 # ---------------------------------------------------

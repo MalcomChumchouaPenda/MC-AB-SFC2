@@ -56,7 +56,7 @@ def test_increases_productivity_with_success(firm, random):
     random.uniform.return_value = 0.2
 
     # When
-    firm.update_productivity()
+    firm.execute_rd()
 
     # Then
     assert firm.roles["producer"].productivity == 12
@@ -68,7 +68,7 @@ def test_dont_increases_productivity_without_success(firm, random):
     random.choice.return_value = 0
 
     # When
-    firm.update_productivity()
+    firm.execute_rd()
 
     # Then
     assert firm.roles["producer"].productivity == 10
@@ -81,7 +81,7 @@ def test_increases_prductivity_by_imitation(firm, country, random):
     random.uniform = lambda a, b: b
 
     # When
-    firm.update_productivity()
+    firm.execute_rd()
 
     # Then
     assert firm.roles["producer"].productivity == 15

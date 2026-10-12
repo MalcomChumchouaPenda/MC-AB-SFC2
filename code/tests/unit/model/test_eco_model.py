@@ -432,6 +432,7 @@ def test_production_and_rd_planning(params):
     model.firms.plan_production.assert_called_with()
     model.firms.adapt_expectations.assert_called_with()
     model.firms.revise_wage_offer.assert_called_with()
+    model.firms.calc_desired_rd.assert_called_with()
 
 
 def test_credit_markets_matching(params):
@@ -474,7 +475,7 @@ def test_production_and_incomes_distribution(params):
     # Then
     model.firms.pay_wages.assert_called_with()
     model.firms.produce_goods.assert_called_with()
-    model.firms.update_productivity.assert_called_with()
+    model.firms.execute_rd.assert_called_with()
     model.firms.pay_dividends.assert_called_with()
     model.banks.pay_deposit_interests.assert_called_with()
     model.banks.pay_dividends.assert_called_with()
