@@ -25,6 +25,7 @@ class LaborMarket(EcoSpace):
     #
     def hire_worker(self, worker, employer, quantity):
         worker.labor_supply -= quantity
+        employer.labor += quantity
         employer.labor_demand -= quantity
         self.graph.add_edge(worker, employer, wages=0, quantity=quantity)
 

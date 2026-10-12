@@ -130,7 +130,6 @@ def test_get_median_firm_size_from_env(role):
     assert median_size == 150.0
 
 
-
 def test_get_equity_range_from_env(role):
     # Given
     env = role.env

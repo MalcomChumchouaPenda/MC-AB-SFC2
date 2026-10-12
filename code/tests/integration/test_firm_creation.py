@@ -22,6 +22,7 @@ def model(fake_model, make_dlist):
     model.banks = make_dlist()
     return model
 
+
 @pytest.fixture
 def union(model):
     # Given

@@ -1,7 +1,7 @@
 from unittest.mock import Mock
 import pytest
 from model.agents.firm import Firm
-from model.spaces.goods_market import GoodsMarket
+from model.spaces.country import Country
 
 
 @pytest.fixture
@@ -17,17 +17,27 @@ def model(fake_model):
 
 
 @pytest.fixture
-def market(model):
+def country(model):
     # Given
-    market = GoodsMarket(model)
-    return market
+    country = Country(model)
+    country.create_markets()
+    market = country.spaces["goods_market"]
+    market.average_prod = 10
+    market.average_price = 10
+    return country
 
 
 @pytest.fixture
-def firm(model, market):
+def firm(model, country):
     # Given
     firm = Firm(model)
-    market.add_firm(firm)
+    firm.wage_offer = 10
+    firm.desired_rd = 100
+    firm.desired_labor = 100
+    firm.desired_loans = 100
+    country.add_firm(firm)
+    firm.account["loans"] = 100
+    firm.roles["employer"].labor = 100
     return firm
 
 
@@ -40,23 +50,9 @@ def random(monkeypatch, model):
     return random
 
 
-@pytest.fixture
-def before_innovation(firm):
-    # Given
-    firm.wage_offer = 10
-    firm.desired_labor = 100
-    firm.labor = 100
-    firm.desired_rd = 100
-    firm.desired_loans = 100
-    firm.account["loans"] = 100
-
-
-@pytest.mark.usefixtures("before_innovation")
-def test_increases_productivity_with_success(firm, market, random):
+def test_increases_productivity_with_success(firm, random):
     # Given
     firm.roles["producer"].productivity = 10
-    market.average_prod = 10
-    market.average_price = 10
     random.uniform.return_value = 0.2
 
     # When
@@ -66,12 +62,9 @@ def test_increases_productivity_with_success(firm, market, random):
     assert firm.roles["producer"].productivity == 12
 
 
-@pytest.mark.usefixtures("before_innovation")
-def test_dont_increases_productivity_without_success(firm, market, random):
+def test_dont_increases_productivity_without_success(firm, random):
     # Given
     firm.roles["producer"].productivity = 10
-    market.average_prod = 10
-    market.average_price = 10
     random.choice.return_value = 0
 
     # When
@@ -81,12 +74,10 @@ def test_dont_increases_productivity_without_success(firm, market, random):
     assert firm.roles["producer"].productivity == 10
 
 
-@pytest.mark.usefixtures("before_innovation")
-def test_increases_prductivity_by_imitation(firm, market, random):
+def test_increases_prductivity_by_imitation(firm, country, random):
     # Given
     firm.roles["producer"].productivity = 10
-    market.average_prod = 15
-    market.average_price = 10
+    country.spaces["goods_market"].average_prod = 15
     random.uniform = lambda a, b: b
 
     # When

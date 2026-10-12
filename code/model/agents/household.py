@@ -174,7 +174,6 @@ class Household(EcoAgent):
     def calc_expected_net_worth(self):
         return self.net_worth + self.disposable_income - self.expected_consumption
 
-
     #
     # Firm and Bank creation
     #
@@ -185,7 +184,6 @@ class Household(EcoAgent):
             shares = self._collect_equity_shares(target)
             if shares is not None:
                 self._create_company(sector, shares)
-                
 
     def _choose_investment_sector(self):
         p = self.p
@@ -269,14 +267,12 @@ class Household(EcoAgent):
         model.firms.append(firm)
         return firm.id
 
-
     def _create_firm_with_initial_params(self, firm, size):
         p = self.p
         firm.wage_offer = p.initial_wage
         firm.initial_productivity = p.initial_productivity
         firm.price = p.initial_wage / p.initial_productivity
         firm.expected_sales = p.initial_productivity * size / p.initial_wage
-
 
     def _create_firm_with_sector_ranges(self, firm, sector, productivity_range):
         role = self.roles["citizen"]
@@ -285,8 +281,6 @@ class Household(EcoAgent):
         firm.wage_offer = uniform(*role.get_wage_range(sector))
         firm.price = uniform(*role.get_price_range(sector))
         firm.expected_sales = uniform(*role.get_sales_range(sector))
-
-
 
     #
     # Deposits management

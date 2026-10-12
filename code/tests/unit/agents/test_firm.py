@@ -609,12 +609,19 @@ def test_calc_desired_rd(firm):
     assert firm.desired_rd == 50
 
 
-def test_execute_rd_without_constraints(firm_with_roles_and_account):
+@pytest.fixture
+def before_rd_investment(firm_with_roles_and_account):
     # Given
-    firm, _, account = firm_with_roles_and_account
+    firm, roles, account = firm_with_roles_and_account
+    roles["employer"] = Mock(labor=50.0)
+    return firm, account
+
+
+def test_execute_rd_without_constraints(before_rd_investment):
+    # Given
+    firm, account = before_rd_investment
     firm.desired_rd = 100
     firm.desired_labor = 50
-    firm.labor = 50
     firm.desired_loans = 200
     account["loans"] = 200
 
@@ -625,12 +632,11 @@ def test_execute_rd_without_constraints(firm_with_roles_and_account):
     assert firm.rd == 100
 
 
-def test_execute_rd_with_labor_constraint(firm_with_roles_and_account):
+def test_execute_rd_with_labor_constraint(before_rd_investment):
     # Given
-    firm, _, account = firm_with_roles_and_account
+    firm, account = before_rd_investment
     firm.desired_rd = 100
     firm.desired_labor = 100
-    firm.labor = 80
     firm.desired_loans = 200
     account["loans"] = 200
 
@@ -641,12 +647,11 @@ def test_execute_rd_with_labor_constraint(firm_with_roles_and_account):
     assert firm.rd == 0
 
 
-def test_execute_rd_with_financial_constraint(firm_with_roles_and_account):
+def test_execute_rd_with_financial_constraint(before_rd_investment):
     # Given
-    firm, _, account = firm_with_roles_and_account
+    firm, account = before_rd_investment
     firm.desired_rd = 100
     firm.desired_labor = 50
-    firm.labor = 50
     firm.desired_loans = 200
     account["loans"] = 100
 
@@ -810,11 +815,10 @@ def firm_before_production(firm_with_roles_and_account):
 
 def test_produce_goods_with_job_quantity(firm_before_production):
     # Given
-    job = {"wages": 0, "quantity": 0.9}
     firm = firm_before_production
     producer_role = firm.roles["producer"]
     employer_role = firm.roles["employer"]
-    employer_role.get_jobs.return_value = [job]
+    employer_role.labor = 0.9
 
     # When
     firm.produce_goods()

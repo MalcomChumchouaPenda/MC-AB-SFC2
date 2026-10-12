@@ -6,6 +6,7 @@ class Employer(EcoRole):
     def __init__(self, agent, env):
         super().__init__(agent, env)
         self.wage = 0
+        self.labor = 0
         self.labor_demand = 0
         self.defaulted = False
 

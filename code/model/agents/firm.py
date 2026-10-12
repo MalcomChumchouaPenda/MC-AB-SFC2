@@ -109,7 +109,6 @@ class Firm(EcoAgent):
         prob = self.calc_rd_success_probability()
         random = self.model.nprandom
         success = random.choice([0, 1], p=[1 - prob, prob])
-        print(success)
         if success:
             self._innovation(role, random)
             self._imitation(role, random)
@@ -137,8 +136,9 @@ class Firm(EcoAgent):
         return prob
 
     def execute_rd(self):
+        roles = self.roles
         account = self.account
-        labor_constraint = self.labor < self.desired_labor
+        labor_constraint = roles["employer"].labor < self.desired_labor
         financial_constraint = account["loans"] < self.desired_loans
         if labor_constraint or financial_constraint:
             self.rd = 0
@@ -198,9 +198,8 @@ class Firm(EcoAgent):
     #
     def produce_goods(self):
         employer_role = self.roles["employer"]
-        labor = sum([j["quantity"] for j in employer_role.get_jobs()])
         producer_role = self.roles["producer"]
-        producer_role.produce_goods(labor)
+        producer_role.produce_goods(employer_role.labor)
 
     #
     # Wages

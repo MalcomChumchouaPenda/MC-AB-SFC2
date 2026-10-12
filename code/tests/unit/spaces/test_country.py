@@ -519,7 +519,6 @@ def test_calc_bank_equity_ratio_if_no_firms(country_with_two_groups):
     assert ratio == 1.0
 
 
-
 def test_calc_median_firm_size(country_with_two_groups):
     # Given
     country, group1, group2 = country_with_two_groups
@@ -531,7 +530,6 @@ def test_calc_median_firm_size(country_with_two_groups):
 
     # Then
     assert median_size == pytest.approx(50.0)
-
 
 
 def test_calc_equity_range_for_any_sector(country_with_two_groups):

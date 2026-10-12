@@ -29,6 +29,17 @@ def test_initializes_wage():
     assert role.wage == 0
 
 
+def test_initializes_labor():
+    # Given
+    agent, env = Mock(), Mock()
+
+    # When
+    role = Employer(agent, env)
+
+    # Then
+    assert role.labor == 0
+
+
 def test_initializes_labor_demand():
     # Given
     agent, env = Mock(), Mock()

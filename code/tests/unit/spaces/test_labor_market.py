@@ -101,8 +101,9 @@ def market_with_participants(market_without_roles):
 def test_hire_worker_add_edge(market_with_participants):
     # Given
     market, employer, worker = market_with_participants
-    employer.labor_demand = 10
     worker.labor_supply = 1.0
+    employer.labor_demand = 10
+    employer.labor = 0.0
     graph = market.graph
 
     # When
@@ -117,8 +118,9 @@ def test_hire_worker_add_edge(market_with_participants):
 def test_hire_worker_reduces_labor_demand(market_with_participants):
     # Given
     market, employer, worker = market_with_participants
-    employer.labor_demand = 10
     worker.labor_supply = 1.0
+    employer.labor_demand = 10
+    employer.labor = 0.0
 
     # When
     market.hire_worker(worker, employer, 0.9)
@@ -130,14 +132,29 @@ def test_hire_worker_reduces_labor_demand(market_with_participants):
 def test_hire_worker_reduces_labor_supply(market_with_participants):
     # Given
     market, employer, worker = market_with_participants
-    employer.labor_demand = 10
     worker.labor_supply = 1.0
+    employer.labor_demand = 10
+    employer.labor = 0.0
 
     # When
     market.hire_worker(worker, employer, 0.9)
 
     # Then
     assert worker.labor_supply == pytest.approx(0.1)
+
+
+def test_hire_worker_increases_labor(market_with_participants):
+    # Given
+    market, employer, worker = market_with_participants
+    worker.labor_supply = 1.0
+    employer.labor_demand = 10
+    employer.labor = 0.0
+
+    # When
+    market.hire_worker(worker, employer, 0.9)
+
+    # Then
+    assert employer.labor == pytest.approx(0.9)
 
 
 # ---------------------------------------------------
