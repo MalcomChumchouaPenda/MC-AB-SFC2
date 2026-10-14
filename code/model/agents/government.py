@@ -56,10 +56,10 @@ class Government(EcoAgent):
             random = self.model.random
             variation = random.uniform(0, p.delta)
             ratio = self.budget_deficit / gdp
-            target = self.calc_desired_public_spending()
+            target = self._calc_desired_public_spending()
             self._update_policy_randomly(ratio, target, variation)
-            self.apply_tax_rate_bounds()
-            self.apply_public_spending_bounds()
+            self._apply_tax_rate_bounds()
+            self._apply_public_spending_bounds()
 
     def _update_policy_randomly(self, ratio, target, variation):
         if ratio >= self.p.dmax:
@@ -75,7 +75,7 @@ class Government(EcoAgent):
             else:
                 self.public_spending *= 1 + variation
 
-    def calc_desired_public_spending(self):
+    def _calc_desired_public_spending(self):
         role = self.roles["fiscal_authority"]
         average_price = role.get_average_price()
         average_prod = role.get_average_productivity()
@@ -84,11 +84,11 @@ class Government(EcoAgent):
         self.desired_public_spending = desired_spending
         return desired_spending
 
-    def apply_tax_rate_bounds(self):
+    def _apply_tax_rate_bounds(self):
         self.next_tax_rate = max(self.p.tax_min, self.next_tax_rate)
         self.next_tax_rate = min(self.p.tax_max, self.next_tax_rate)
 
-    def apply_public_spending_bounds(self):
+    def _apply_public_spending_bounds(self):
         gdp = self.roles["fiscal_authority"].get_gdp()
         minimum = self.p.g_min * gdp
         maximum = self.p.g_max * gdp
@@ -103,8 +103,8 @@ class Government(EcoAgent):
     # Bond Supply
     #
     def issue_bonds(self):
-        self.calc_new_debt()
-        new_bonds = self.calc_new_bonds()
+        self._calc_new_debt()
+        new_bonds = self._calc_new_bonds()
         self.bond_supply += new_bonds
         gdp = self.roles["fiscal_authority"].get_gdp()
         role = self.roles["bond_issuer"]
@@ -112,13 +112,13 @@ class Government(EcoAgent):
         role.bond_value = self.bond_supply / 100
         role.debt_ratio = self.bond_supply / gdp if gdp > 0 else float("inf")
 
-    def calc_new_debt(self):
+    def _calc_new_debt(self):
         bonds = self.account["bonds"]
         new_debt = bonds + self.budget_deficit - self.prev_budget_surplus
         self.new_public_debt = new_debt
         return new_debt
 
-    def calc_new_bonds(self):
+    def _calc_new_bonds(self):
         bonds = self.account["bonds"]
         return max(0, self.new_public_debt - bonds)
 

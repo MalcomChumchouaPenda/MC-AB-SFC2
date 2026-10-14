@@ -1,5 +1,3 @@
-import math
-from functools import partial
 from model.extensions import EcoAgent
 
 
@@ -23,11 +21,11 @@ class CentralBank(EcoAgent):
     # Profit transfer
     #
     def transfer_profit(self):
-        profit = self.calc_profit()
+        profit = self._calc_profit()
         role = self.roles["monetary_authority"]
         role.transfer_profit(profit)
 
-    def calc_profit(self):
+    def _calc_profit(self):
         account = self.account
         return (
             account["bond_interests"]
@@ -38,7 +36,15 @@ class CentralBank(EcoAgent):
     #
     # Monetary policy
     #
-    def calc_discount_rate(self):
+
+    def update_discount_rate(self):
+        role = self.roles["policy_maker"]
+        old_discount_rate = role.get_discount_rate()
+        new_discount_rate = self._calc_discount_rate()
+        role.set_discount_rate(new_discount_rate)
+        self.prev_discount_rate = old_discount_rate
+
+    def _calc_discount_rate(self):
         p = self.model.p
         role = self.roles["policy_maker"]
         average_inflation = role.get_average_inflation()
@@ -48,14 +54,7 @@ class CentralBank(EcoAgent):
             + p.xi * self.prev_discount_rate
             + (1 - p.xi) * p.xi_deltap * inflation_gap
         )
-
-    def update_discount_rate(self):
-        role = self.roles["policy_maker"]
-        old_discount_rate = role.get_discount_rate()
-        new_discount_rate = self.calc_discount_rate()
-        role.set_discount_rate(new_discount_rate)
-        self.prev_discount_rate = old_discount_rate
-
+    
     def implement_discount_rate(self):
         maker_role = self.roles["policy_maker"]
         discount_rate = maker_role.get_discount_rate()

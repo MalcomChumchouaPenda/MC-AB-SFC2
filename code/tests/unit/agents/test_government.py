@@ -224,7 +224,7 @@ def test_calc_and_records_desired_public_spending(govt_as_authority):
     role.get_average_productivity.return_value = 3
 
     # When
-    desired = govt.calc_desired_public_spending()
+    desired = govt._calc_desired_public_spending()
 
     # Then
     assert desired == 60
@@ -244,7 +244,7 @@ def test_next_tax_rate_is_bounded(govt, tax_rate, expected):
     govt.p.tax_max = 0.50
 
     # When
-    govt.apply_tax_rate_bounds()
+    govt._apply_tax_rate_bounds()
 
     # Then
     assert govt.next_tax_rate == expected
@@ -260,7 +260,7 @@ def test_public_spending_is_bounded_by_gdp(govt_as_authority, spending, expected
     role.get_gdp.return_value = 1000
 
     # When
-    govt.apply_public_spending_bounds()
+    govt._apply_public_spending_bounds()
 
     # Then
     assert govt.public_spending == expected
@@ -275,9 +275,9 @@ def govt_for_policy(govt_as_authority):
     govt.next_tax_rate = 0.20
     govt.public_spending = 100
     govt.desired_public_spending = 0
-    govt.apply_tax_rate_bounds = Mock()
-    govt.apply_public_spending_bounds = Mock()
-    govt.calc_desired_public_spending = Mock(return_value=0)
+    govt._apply_tax_rate_bounds = Mock()
+    govt._apply_public_spending_bounds = Mock()
+    govt._calc_desired_public_spending = Mock(return_value=0)
     govt.model.random.uniform.return_value = 0.05
     role.get_gdp.return_value = 1000
     return govt
@@ -307,16 +307,16 @@ def test_update_fiscal_policy_with_multi_steps(govt_for_policy):
     govt.update_fiscal_policy()
 
     # Then
-    govt.calc_desired_public_spending.assert_called_with()
-    govt.apply_public_spending_bounds.assert_called_with()
-    govt.apply_tax_rate_bounds.assert_called_with()
+    govt._calc_desired_public_spending.assert_called_with()
+    govt._apply_public_spending_bounds.assert_called_with()
+    govt._apply_tax_rate_bounds.assert_called_with()
 
 
 def test_update_fiscal_policy_when_deficit_high_and_spending_high(govt_for_policy):
     # Given
     govt = govt_for_policy
     govt.budget_deficit = 100
-    govt.calc_desired_public_spending.return_value = 80
+    govt._calc_desired_public_spending.return_value = 80
 
     # When
     govt.update_fiscal_policy()
@@ -330,7 +330,7 @@ def test_update_fiscal_policy_when_deficit_high_and_spending_low(govt_for_policy
     # Given
     govt = govt_for_policy
     govt.budget_deficit = 100
-    govt.calc_desired_public_spending.return_value = 120
+    govt._calc_desired_public_spending.return_value = 120
 
     # When
     govt.update_fiscal_policy()
@@ -344,7 +344,7 @@ def test_update_fiscal_policy_when_deficit_low_and_spending_high(govt_for_policy
     # Given
     govt = govt_for_policy
     govt.budget_deficit = 20
-    govt.calc_desired_public_spending.return_value = 80
+    govt._calc_desired_public_spending.return_value = 80
 
     # When
     govt.update_fiscal_policy()
@@ -358,7 +358,7 @@ def test_update_fiscal_policy_when_deficit_low_and_spending_low(govt_for_policy)
     # Given
     govt = govt_for_policy
     govt.budget_deficit = 20
-    govt.calc_desired_public_spending.return_value = 120
+    govt._calc_desired_public_spending.return_value = 120
 
     # When
     govt.update_fiscal_policy()
@@ -380,9 +380,9 @@ def test_doesnt_update_fiscal_policy_without_positive_gdp(govt_for_policy):
     govt.update_fiscal_policy()
 
     # Then
-    govt.calc_desired_public_spending.assert_not_called()
-    govt.apply_public_spending_bounds.assert_not_called()
-    govt.apply_tax_rate_bounds.assert_not_called()
+    govt._calc_desired_public_spending.assert_not_called()
+    govt._apply_public_spending_bounds.assert_not_called()
+    govt._apply_tax_rate_bounds.assert_not_called()
 
 
 def test_implement_fiscal_policy(govt_as_authority):
@@ -418,7 +418,7 @@ def test_calc_new_debt(govt_before_bond_calc):
     govt.account["bonds"] = 1000
 
     # When
-    new_debt = govt.calc_new_debt()
+    new_debt = govt._calc_new_debt()
 
     # Then
     assert new_debt == 1150
@@ -432,7 +432,7 @@ def test_calc_new_bonds(govt_before_bond_calc):
     govt.account["bonds"] = 1000
 
     # When
-    issuance = govt.calc_new_bonds()
+    issuance = govt._calc_new_bonds()
 
     # Then
     assert issuance == 150
@@ -445,7 +445,7 @@ def test_calc_not_new_bonds_with_enough_bonds(govt_before_bond_calc):
     govt.account["bonds"] = 1000
 
     # When
-    issuance = govt.calc_new_bonds()
+    issuance = govt._calc_new_bonds()
 
     # Then
     assert issuance == 0
@@ -455,8 +455,8 @@ def test_calc_not_new_bonds_with_enough_bonds(govt_before_bond_calc):
 def govt_before_bond_supply(govt_with_roles_and_account):
     # Given
     govt, roles, _ = govt_with_roles_and_account
-    govt.calc_new_debt = Mock(return_value=0)
-    govt.calc_new_bonds = Mock(return_value=0)
+    govt._calc_new_debt = Mock(return_value=0)
+    govt._calc_new_bonds = Mock(return_value=0)
     govt.bond_supply = 0
     roles["bond_issuer"] = Mock()
     roles["fiscal_authority"] = Mock()
@@ -467,7 +467,7 @@ def test_issues_bonds_with_role(govt_before_bond_supply):
     # Given
     govt = govt_before_bond_supply
     govt.bond_supply = 100
-    govt.calc_new_bonds.return_value = 500
+    govt._calc_new_bonds.return_value = 500
     govt.roles["fiscal_authority"].get_gdp.return_value = 1000
     role = govt.roles["bond_issuer"]
 
@@ -490,15 +490,15 @@ def test_issues_bonds_with_multi_step(govt_before_bond_supply):
     govt.issue_bonds()
 
     # Then
-    govt.calc_new_debt.assert_called_with()
-    govt.calc_new_bonds.assert_called_with()
+    govt._calc_new_debt.assert_called_with()
+    govt._calc_new_bonds.assert_called_with()
 
 
 def test_issues_bonds_set_debt_ratio_with_no_gdp(govt_before_bond_supply):
     # Given
     govt = govt_before_bond_supply
     govt.bond_supply = 100
-    govt.calc_new_bonds.return_value = 500
+    govt._calc_new_bonds.return_value = 500
     govt.roles["fiscal_authority"].get_gdp.return_value = 0
     role = govt.roles["bond_issuer"]
 

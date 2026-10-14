@@ -251,7 +251,7 @@ def test_calc_revision_probability(hh_with_roles_and_account):
     roles["worker"] = role
 
     # When
-    result = household.calc_revision_probability()
+    result = household._calc_revision_probability()
 
     # Then
     assert result == math.exp(-1.0 * 0.1)
@@ -264,8 +264,8 @@ def fully_employed_before(hh_with_roles_and_account):
     household.p.delta = 0.9
     household.prev_labor_sold = 1.0
     household.reservation_wage = 10.0
-    household.calc_revision_probability = Mock()
-    household.calc_revision_probability.return_value = 0
+    household._calc_revision_probability = Mock()
+    household._calc_revision_probability.return_value = 0
     return household
 
 
@@ -287,7 +287,7 @@ def test_increases_reserv_wage_when_fully_employed(fully_employed_before):
 def test_increases_reserv_wage_with_upward_revision_prob(fully_employed_before):
     # Given
     household = fully_employed_before
-    household.calc_revision_probability.return_value = 0.6
+    household._calc_revision_probability.return_value = 0.6
     random = household.model.nprandom
     random.choice.return_value = 1
     random.uniform.return_value = 0.05
@@ -321,8 +321,8 @@ def part_employed_before(hh_with_roles_and_account):
     household.p.delta = 0.9
     household.prev_labor_sold = 0.5
     household.reservation_wage = 10.0
-    household.calc_revision_probability = Mock()
-    household.calc_revision_probability.return_value = 0
+    household._calc_revision_probability = Mock()
+    household._calc_revision_probability.return_value = 0
     return household
 
 
@@ -344,7 +344,7 @@ def test_decreases_reserv_wage_when_not_fully_employed(part_employed_before):
 def test_decreases_reserv_wage_with_downward_revision_prob(part_employed_before):
     # Given
     household = part_employed_before
-    household.calc_revision_probability.return_value = 0.6
+    household._calc_revision_probability.return_value = 0.6
     random = household.model.nprandom
     random.choice.return_value = 1
     random.uniform.return_value = 0.05
@@ -394,7 +394,7 @@ def test_calc_income(hh_as_taxpayer):
     household.account["dividends"] = 30
 
     # When
-    income = household.calc_income()
+    income = household._calc_income()
 
     # Then
     assert income == 160
@@ -407,7 +407,7 @@ def test_calc_disposable_income(hh_as_taxpayer):
     household.account["public_transfers"] = 50
 
     # When
-    disposable_income = household.calc_disposable_income()
+    disposable_income = household._calc_disposable_income()
 
     # Then
     assert disposable_income == 210
@@ -416,8 +416,8 @@ def test_calc_disposable_income(hh_as_taxpayer):
 def test_pay_taxes_transfers_cash(hh_as_taxpayer):
     # Given
     household, role = hh_as_taxpayer
-    household.calc_income = Mock(return_value=100)
-    household.calc_disposable_income = Mock(return_value=110)
+    household._calc_income = Mock(return_value=100)
+    household._calc_disposable_income = Mock(return_value=110)
 
     # When
     household.pay_taxes()
@@ -429,8 +429,8 @@ def test_pay_taxes_transfers_cash(hh_as_taxpayer):
 def test_pay_taxes_updates_indicators(hh_as_taxpayer):
     # Given
     household, _ = hh_as_taxpayer
-    household.calc_income = Mock(return_value=100)
-    household.calc_disposable_income = Mock(return_value=110)
+    household._calc_income = Mock(return_value=100)
+    household._calc_disposable_income = Mock(return_value=110)
 
     # When
     household.pay_taxes()
@@ -481,7 +481,7 @@ def test_calc_supplier_score_with_salop_formula(hh_as_specific_consumer):
     supplier = Mock(variety=0.5, price=10)
 
     # When
-    score = household.calc_supplier_score(supplier, average_price=20)
+    score = household._calc_supplier_score(supplier, average_price=20)
 
     # Then
     expected_distance = math.sin(0.5 / 2)
@@ -492,11 +492,11 @@ def test_rank_suppliers_using_supplier_score(hh_as_specific_consumer):
     # Given
     method = lambda supplier, average_price: average_price / supplier.price
     household, *_ = hh_as_specific_consumer
-    household.calc_supplier_score = method
+    household._calc_supplier_score = method
     suppliers = [Mock(price=i, variety=1) for i in range(1, 3)]
 
     # When
-    ranked = household.rank_suppliers(suppliers, average_price=10)
+    ranked = household._rank_suppliers(suppliers, average_price=10)
 
     # Then
     assert ranked[0].price == 1
@@ -508,26 +508,26 @@ def test_consume_good_with_found_suppliers(hh_as_specific_consumer):
     found = [Mock(price=5, inventories=10) for _ in range(5)]
     household, role, _ = hh_as_specific_consumer
     household.p.psi = 5
-    household.rank_suppliers = Mock(return_value=found)
+    household._rank_suppliers = Mock(return_value=found)
     role.find_suppliers.return_value = found
     role.get_average_price.return_value = 20
 
     # When
-    household.consume_good(role, 100)
+    household._consume_good(role, 100)
 
     # Then
     role.find_suppliers.assert_called_with(5)
-    household.rank_suppliers.assert_any_call(found, average_price=20)
+    household._rank_suppliers.assert_any_call(found, average_price=20)
 
 
 def test_consume_good_with_ranked_suppliers(hh_as_specific_consumer):
     # Given
     ranked = [Mock(price=5, inventories=10) for _ in range(2)]
     household, role, _ = hh_as_specific_consumer
-    household.rank_suppliers = Mock(return_value=ranked)
+    household._rank_suppliers = Mock(return_value=ranked)
 
     # When
-    household.consume_good(role, 100)
+    household._consume_good(role, 100)
 
     # Then
     role.buy_goods.assert_any_call(ranked[0], 10)
@@ -539,10 +539,10 @@ def test_consume_good_with_desired_consumption(hh_as_specific_consumer):
     # Given
     ranked = [Mock(price=5, inventories=10) for _ in range(2)]
     household, role, _ = hh_as_specific_consumer
-    household.rank_suppliers = Mock(return_value=ranked)
+    household._rank_suppliers = Mock(return_value=ranked)
 
     # When
-    household.consume_good(role, 50)
+    household._consume_good(role, 50)
 
     # Then
     role.buy_goods.assert_any_call(ranked[0], 10)
@@ -553,10 +553,10 @@ def test_consume_good_with_supply_constraints(hh_as_specific_consumer):
     # Given
     ranked = [Mock(price=5, inventories=5) for _ in range(2)]
     household, role, _ = hh_as_specific_consumer
-    household.rank_suppliers = Mock(return_value=ranked)
+    household._rank_suppliers = Mock(return_value=ranked)
 
     # When
-    household.consume_good(role, 100)
+    household._consume_good(role, 100)
 
     # Then
     role.buy_goods.assert_any_call(ranked[0], 5)
@@ -568,11 +568,11 @@ def test_consume_good_with_monetary_constraints(hh_as_specific_consumer):
     # Given
     ranked = [Mock(price=5, inventories=10) for _ in range(2)]
     household, role, account = hh_as_specific_consumer
-    household.rank_suppliers = Mock(return_value=ranked)
+    household._rank_suppliers = Mock(return_value=ranked)
     account["cash"] = 50
 
     # When
-    household.consume_good(role, 100)
+    household._consume_good(role, 100)
 
     # Then
     role.buy_goods.assert_any_call(ranked[0], 10)
@@ -583,7 +583,7 @@ def test_consume_good_with_monetary_constraints(hh_as_specific_consumer):
 def hh_as_general_consumer(hh_with_roles_and_account):
     # Given
     household, roles, account = hh_with_roles_and_account
-    household.consume_good = Mock()
+    household._consume_good = Mock()
     roles["depositor"] = Mock()
     roles["trad_consumer"] = Mock()
     roles["non_trad_consumer"] = Mock()
@@ -601,8 +601,8 @@ def test_consume_each_good_type(hh_as_general_consumer):
     household.consume()
 
     # Then
-    household.consume_good.assert_any_call(roles["trad_consumer"], 60.0)
-    household.consume_good.assert_any_call(roles["non_trad_consumer"], 40.0)
+    household._consume_good.assert_any_call(roles["trad_consumer"], 60.0)
+    household._consume_good.assert_any_call(roles["non_trad_consumer"], 40.0)
 
 
 def test_consume_randomizes_entry_order(hh_as_general_consumer):
@@ -634,7 +634,7 @@ def test_consume_with_insufficient_cash(hh_as_general_consumer):
 
     # Then
     role.withdraw_deposits.assert_called_with(50)
-    assert household.consume_good.call_count == 2
+    assert household._consume_good.call_count == 2
 
 
 def test_consume_with_insufficient_deposits(hh_as_general_consumer):
@@ -651,7 +651,7 @@ def test_consume_with_insufficient_deposits(hh_as_general_consumer):
 
     # Then
     role.withdraw_deposits.assert_called_with(25)
-    assert household.consume_good.call_count == 2
+    assert household._consume_good.call_count == 2
 
 
 # ---------------------------------------------------
@@ -677,7 +677,7 @@ def test_calc_net_worth(hh_before_allocation):
     household.account["cash"] = 500
 
     # When
-    household.calc_net_worth()
+    household._calc_net_worth()
 
     # Then
     assert household.net_worth == 1000
@@ -691,7 +691,7 @@ def test_calc_expected_net_worth(hh_before_allocation):
     household.expected_consumption = 200
 
     # When
-    expected_worth = household.calc_expected_net_worth()
+    expected_worth = household._calc_expected_net_worth()
 
     # Then
     assert expected_worth == 1100
@@ -708,7 +708,7 @@ def test_calc_liquidity_pref_with_deposit_bank_rate(hh_before_allocation):
     roles["depositor"].get_deposit_rate.return_value = 0.05
 
     # When
-    household.calc_liquidity_preference()
+    household._calc_liquidity_preference()
 
     # Then
     roles["depositor"].get_deposit_rate.assert_called_with()
@@ -726,7 +726,7 @@ def test_calc_liquidity_pref_when_equity_is_more_profitable(hh_before_allocation
     expected = 0.6 * math.exp(((10 * (1 - 0.10)) / 100) - 0.05)
 
     # When
-    lp = household.calc_liquidity_preference()
+    lp = household._calc_liquidity_preference()
 
     # Then
     assert lp == pytest.approx(expected)
@@ -743,7 +743,7 @@ def test_calc_liquidity_pref_when_equity_is_less_profitable(hh_before_allocation
     roles["depositor"].get_deposit_rate.return_value = 0.05
 
     # When
-    lp = household.calc_liquidity_preference()
+    lp = household._calc_liquidity_preference()
 
     # Then
     assert lp == 0.7
@@ -760,7 +760,7 @@ def test_calc_liquidity_preference_when_no_equity(hh_before_allocation):
     roles["depositor"].get_deposit_rate.return_value = 0.05
 
     # When
-    lp = household.calc_liquidity_preference()
+    lp = household._calc_liquidity_preference()
 
     # Then
     assert lp == 0.8
@@ -770,24 +770,24 @@ def test_choose_portfolio_allocation_calc_net_worth(hh_before_allocation):
     # Given
     household = hh_before_allocation
     household.account["equities"] = 80
-    household.calc_liquidity_preference = Mock(return_value=0.80)
-    household.calc_expected_net_worth = Mock(return_value=100)
-    household.calc_net_worth = Mock()
+    household._calc_liquidity_preference = Mock(return_value=0.80)
+    household._calc_expected_net_worth = Mock(return_value=100)
+    household._calc_net_worth = Mock()
 
     # When
     household.choose_portfolio_allocation()
 
     # Then
-    household.calc_net_worth.assert_called_once_with()
+    household._calc_net_worth.assert_called_once_with()
 
 
 def test_choose_portfolio_allocation_updates_desired_assets(hh_before_allocation):
     # Given
     household = hh_before_allocation
     household.account["equities"] = 20
-    household.calc_liquidity_preference = Mock(return_value=0.40)
-    household.calc_expected_net_worth = Mock(return_value=100)
-    household.calc_net_worth = Mock()
+    household._calc_liquidity_preference = Mock(return_value=0.40)
+    household._calc_expected_net_worth = Mock(return_value=100)
+    household._calc_net_worth = Mock()
 
     # When
     household.choose_portfolio_allocation()
@@ -801,9 +801,9 @@ def test_choose_portfolio_allocation_preserves_existing_equity(hh_before_allocat
     # Given
     household = hh_before_allocation
     household.account["equities"] = 80
-    household.calc_liquidity_preference = Mock(return_value=0.80)
-    household.calc_expected_net_worth = Mock(return_value=100)
-    household.calc_net_worth = Mock()
+    household._calc_liquidity_preference = Mock(return_value=0.80)
+    household._calc_expected_net_worth = Mock(return_value=100)
+    household._calc_net_worth = Mock()
 
     # When
     household.choose_portfolio_allocation()
@@ -816,9 +816,9 @@ def test_choose_portfolio_allocation_updates_citizen_role(hh_before_allocation):
     # Given
     household = hh_before_allocation
     household.account["equities"] = 80
-    household.calc_liquidity_preference = Mock(return_value=0.80)
-    household.calc_expected_net_worth = Mock(return_value=100)
-    household.calc_net_worth = Mock()
+    household._calc_liquidity_preference = Mock(return_value=0.80)
+    household._calc_expected_net_worth = Mock(return_value=100)
+    household._calc_net_worth = Mock()
     role = household.roles["citizen"]
 
     # When

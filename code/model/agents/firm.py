@@ -42,16 +42,16 @@ class Firm(EcoAgent):
     # Production planning
     #
     def plan_production(self):
-        self.calc_desired_output()
-        self.calc_labor_demand()
+        self._calc_desired_output()
+        self._calc_labor_demand()
 
-    def calc_desired_output(self):
+    def _calc_desired_output(self):
         theta = self.p.theta
         inv = self.roles["producer"].inventories
         self.desired_output = max(0, self.expected_sales * (1 + theta) - inv)
         return self.desired_output
 
-    def calc_labor_demand(self):
+    def _calc_labor_demand(self):
         role = self.roles["producer"]
         self.desired_labor = self.desired_output / role.productivity
         return self.desired_labor
@@ -79,7 +79,7 @@ class Firm(EcoAgent):
     def revise_wage_offer(self):
         p = self.p
         random = self.model.nprandom
-        prob = self.calc_revision_probability()
+        prob = self._calc_revision_probability()
         if self.prev_desired_labor > self.prev_labor:
             if random.choice([0, 1], p=[1 - prob, prob]):
                 self.wage_offer *= 1 + random.uniform(0, p.delta)
@@ -87,7 +87,7 @@ class Firm(EcoAgent):
             if random.choice([0, 1], p=[prob, 1 - prob]):
                 self.wage_offer *= 1 - random.uniform(0, p.delta)
 
-    def calc_revision_probability(self):
+    def _calc_revision_probability(self):
         p = self.p
         role = self.roles["employer"]
         unemployment = role.get_unemployment()
@@ -116,7 +116,7 @@ class Firm(EcoAgent):
     # Credit transaction
     #
     def request_loans(self):
-        self.desired_loans = self.calc_desired_loans()
+        self.desired_loans = self._calc_desired_loans()
         if self.desired_loans <= 0:
             return
         role = self.roles["borrower"]
@@ -125,7 +125,7 @@ class Firm(EcoAgent):
         for lender in lenders:
             role.request_loans(lender)
 
-    def calc_desired_loans(self):
+    def _calc_desired_loans(self):
         deposits = self.account["deposits"]
         wage_bill = self.wage_offer * self.desired_labor
         return max(0, wage_bill + self.desired_rd - deposits)
@@ -182,12 +182,12 @@ class Firm(EcoAgent):
     # Profit, taxes and dividend computation
     #
     def compute_profit_distribution(self):
-        self.net_cash_flow = self.calc_net_cash_flow()
-        self.profit = self.calc_profit()
-        self.taxes_payable = self.calc_taxes()
-        self.dividends_payable = self.calc_dividends()
+        self.net_cash_flow = self._calc_net_cash_flow()
+        self.profit = self._calc_profit()
+        self.taxes_payable = self._calc_taxes()
+        self.dividends_payable = self._calc_dividends()
 
-    def calc_net_cash_flow(self):
+    def _calc_net_cash_flow(self):
         account = self.account
         return (
             account["consumption"]
@@ -196,19 +196,19 @@ class Firm(EcoAgent):
             - account["loan_interests"]
         )
 
-    def calc_profit(self):
+    def _calc_profit(self):
         role = self.roles["producer"]
         unit_cost = self.wage_offer / role.productivity
         inv_variation = unit_cost * (role.inventories - self.prev_inventories)
         return self.net_cash_flow + inv_variation
 
-    def calc_taxes(self):
+    def _calc_taxes(self):
         if self.net_cash_flow <= 0:
             return 0
         tax_rate = self.roles["company"].get_tax_rate()
         return tax_rate * self.net_cash_flow
 
-    def calc_dividends(self):
+    def _calc_dividends(self):
         if self.net_cash_flow <= 0:
             return 0
         return self.p.rho * (self.net_cash_flow - self.taxes_payable)
@@ -217,10 +217,10 @@ class Firm(EcoAgent):
         account = self.account
         payable = self.taxes_payable + self.dividends_payable
         self.net_worth += self.net_cash_flow - payable
-        self.update_equity_shares(self.net_worth + account["equities"])
+        self._update_equity_shares(self.net_worth + account["equities"])
         return self.net_worth
 
-    def update_equity_shares(self, total_variation):
+    def _update_equity_shares(self, total_variation):
         role = self.roles["company"]
         shares = role.get_equity_shares()
         total_shares = sum(share["value"] for share in shares)

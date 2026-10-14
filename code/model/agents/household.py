@@ -35,7 +35,7 @@ class Household(EcoAgent):
     def revise_reservation_wage(self):
         p = self.p
         random = self.model.nprandom
-        prob = self.calc_revision_probability()
+        prob = self._calc_revision_probability()
         if self.labor_supply == self.prev_labor_sold:
             if random.choice([0, 1], p=[1 - prob, prob]):
                 self.reservation_wage *= 1 + random.uniform(0, p.delta)
@@ -43,7 +43,7 @@ class Household(EcoAgent):
             if random.choice([0, 1], p=[prob, 1 - prob]):
                 self.reservation_wage *= 1 - random.uniform(0, p.delta)
 
-    def calc_revision_probability(self):
+    def _calc_revision_probability(self):
         p = self.p
         role = self.roles["worker"]
         unemployment = role.get_unemployment()
@@ -65,18 +65,18 @@ class Household(EcoAgent):
                 remaining -= quantity
 
     def pay_taxes(self):
-        self.income = self.calc_income()
-        self.disposable_income = self.calc_disposable_income()
+        self.income = self._calc_income()
+        self.disposable_income = self._calc_disposable_income()
         role = self.roles["citizen"]
         tax_rate = role.get_tax_rate()
         taxes = tax_rate * self.income
         role.pay_taxes(taxes)
 
-    def calc_income(self):
+    def _calc_income(self):
         account = self.account
         return account["wages"] + account["dep_interests"] + account["dividends"]
 
-    def calc_disposable_income(self):
+    def _calc_disposable_income(self):
         tax_rate = self.roles["citizen"].get_tax_rate()
         public_transfers = self.account["public_transfers"]
         return (1 - tax_rate) * self.income + public_transfers
@@ -101,7 +101,7 @@ class Household(EcoAgent):
         for name, share in steps:
             role = roles[name]
             target_cons = share * desired_cons
-            self.consume_good(role, target_cons)
+            self._consume_good(role, target_cons)
 
     def _fund_consumption(self, desired_cons):
         account = self.account
@@ -111,7 +111,7 @@ class Household(EcoAgent):
             role = self.roles["depositor"]
             role.withdraw_deposits(feasible)
 
-    def consume_good(self, role, target_cons):
+    def _consume_good(self, role, target_cons):
         cash = self.account["cash"]
         for supplier in self._list_suppliers(role):
             if target_cons <= 0 or cash <= 0:
@@ -123,7 +123,7 @@ class Household(EcoAgent):
     def _list_suppliers(self, role):
         average_price = role.get_average_price()
         suppliers = role.find_suppliers(self.p.psi)
-        return self.rank_suppliers(suppliers, average_price=average_price)
+        return self._rank_suppliers(suppliers, average_price=average_price)
 
     def _buy_supplier_goods(self, role, supplier, target_cons, cash):
         price = supplier.price
@@ -132,11 +132,11 @@ class Household(EcoAgent):
         role.buy_goods(supplier, quantity)
         return price * quantity
 
-    def rank_suppliers(self, suppliers, average_price):
-        key = partial(self.calc_supplier_score, average_price=average_price)
+    def _rank_suppliers(self, suppliers, average_price):
+        key = partial(self._calc_supplier_score, average_price=average_price)
         return sorted(suppliers, key=key, reverse=True)
 
-    def calc_supplier_score(self, supplier, average_price):
+    def _calc_supplier_score(self, supplier, average_price):
         p = self.p
         diff = abs(self.preference - supplier.variety)
         diff = min(diff, 2 * math.pi - diff)
@@ -147,15 +147,15 @@ class Household(EcoAgent):
     # Equity investment
     #
     def choose_portfolio_allocation(self):
-        self.calc_net_worth()
-        lp = self.calc_liquidity_preference()
+        self._calc_net_worth()
+        lp = self._calc_liquidity_preference()
         equity = self.account["equities"]
-        expected_worth = self.calc_expected_net_worth()
+        expected_worth = self._calc_expected_net_worth()
         self.desired_equity = max(equity, (1 - lp) * expected_worth)
         self.desired_deposits = expected_worth - (self.desired_equity - equity)
         self.roles["citizen"].resid_equity = self.desired_equity
 
-    def calc_liquidity_preference(self):
+    def _calc_liquidity_preference(self):
         p = self.p
         roles = self.roles
         equity = self.account["equities"]
@@ -167,11 +167,11 @@ class Household(EcoAgent):
             return p.lambda_
         return p.lambda_ * math.exp(profit_ratio * (1 - default_prob) - deposit_rate)
 
-    def calc_net_worth(self):
+    def _calc_net_worth(self):
         account = self.account
         self.net_worth = account["deposits"] + account["equities"] + account["cash"]
 
-    def calc_expected_net_worth(self):
+    def _calc_expected_net_worth(self):
         return self.net_worth + self.disposable_income - self.expected_consumption
 
     #

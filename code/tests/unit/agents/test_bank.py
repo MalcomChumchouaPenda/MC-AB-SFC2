@@ -125,7 +125,7 @@ def test_calc_credit_capacity(bank_with_roles_and_account):
     account["equities"] = -100
 
     # When
-    result = bank.calc_credit_capacity()
+    result = bank._calc_credit_capacity()
 
     # Then
     assert result == pytest.approx(1000)
@@ -137,7 +137,7 @@ def test_calc_loan_probability(bank):
     borrower = Mock(loan_demand=100, net_worth=200)
 
     # When
-    probability = bank.calc_loan_probability(borrower)
+    probability = bank._calc_loan_probability(borrower)
 
     # Then
     assert probability == pytest.approx(math.exp(-0.5))
@@ -152,7 +152,7 @@ def test_calc_loan_rate(bank):
     borrower = Mock(loan_demand=100, net_worth=200)
 
     # When
-    rate = bank.calc_loan_rate(borrower)
+    rate = bank._calc_loan_rate(borrower)
 
     # Then
     assert rate == pytest.approx(0.02 * 0.5 + 0.05)
@@ -164,9 +164,9 @@ def bank_as_lender(bank_with_roles_and_account):
     borrowers = [Mock(id=i, loan_demand=100) for i in range(5)]
     lender = Mock(loan_applicants=borrowers)
     bank, roles, _ = bank_with_roles_and_account
-    bank.calc_loan_rate = Mock(return_value=0.02)
-    bank.calc_loan_probability = Mock(return_value=0.4)
-    bank.calc_credit_capacity = Mock(return_value=500)
+    bank._calc_loan_rate = Mock(return_value=0.02)
+    bank._calc_loan_probability = Mock(return_value=0.4)
+    bank._calc_credit_capacity = Mock(return_value=500)
     random = bank.model.nprandom
     random.choice.return_value = 0
     roles["deposit_bank"] = Mock()
@@ -188,8 +188,8 @@ def test_grant_loans_and_processes_all_loan_applicants(bank_as_lender):
     # Then
     random.shuffle.assert_called_with(applicants)
     for borrower in applicants:
-        bank.calc_loan_rate.assert_any_call(borrower)
-        bank.calc_loan_probability.assert_any_call(borrower)
+        bank._calc_loan_rate.assert_any_call(borrower)
+        bank._calc_loan_probability.assert_any_call(borrower)
 
 
 def test_grant_loans_with_computed_probability(bank_as_lender):
@@ -213,7 +213,7 @@ def test_grant_loans_with_computed_probability(bank_as_lender):
 def test_grant_loans_in_regards_of_credit_capacity(bank_as_lender):
     # Given
     bank = bank_as_lender
-    bank.calc_credit_capacity.return_value = 200
+    bank._calc_credit_capacity.return_value = 200
     lender = bank.roles["lender"]
     applicants = lender.loan_applicants
     random = bank.model.nprandom
@@ -231,7 +231,7 @@ def test_grant_loans_in_regards_of_credit_capacity(bank_as_lender):
 def test_grant_loans_cleans_loan_applicants_list(bank_as_lender):
     # Given
     bank = bank_as_lender
-    bank.calc_credit_capacity.return_value = 200
+    bank._calc_credit_capacity.return_value = 200
     lender = bank.roles["lender"]
     random = bank.model.nprandom
     random.choice.return_value = 1
@@ -324,7 +324,7 @@ def test_repay_advance_when_insufficient_reserves(bank_before_advance):
 # ----------------------------------------------------
 
 
-def test_calc_bond_purchases_probability():
+def test_calc_bond_purchases_prob():
     # Given
     model = Mock()
     model.p.iota_b = 2
@@ -332,7 +332,7 @@ def test_calc_bond_purchases_probability():
     issuer = Mock(debt_ratio=0.5)
 
     # When
-    probability = bank.calc_bond_purchases_probability(issuer)
+    probability = bank._calc_bond_purchases_prob(issuer)
 
     # Then
     assert probability == math.exp(-1)
@@ -346,7 +346,7 @@ def test_calc_excess_reserves(bank_before_advance, reserves, expected):
     bank.p.mu2 = 0.1
 
     # When
-    excess_reserves = bank.calc_excess_reserves()
+    excess_reserves = bank._calc_excess_reserves()
 
     # Then
     assert excess_reserves == expected
@@ -358,8 +358,8 @@ def bank_as_bond_buyer(bank_with_roles_and_account):
     role = Mock()
     role.find_issuers = Mock(return_value=[])
     bank, roles, _ = bank_with_roles_and_account
-    bank.calc_bond_purchases_probability = Mock(return_value=0)
-    bank.calc_excess_reserves = Mock(return_value=0)
+    bank._calc_bond_purchases_prob = Mock(return_value=0)
+    bank._calc_excess_reserves = Mock(return_value=0)
     bank.model.nprandom.choice.return_value = 1
     roles["bond_buyer"] = role
     return bank, role
@@ -373,7 +373,7 @@ def test_find_bond_suppliers_gets_and_shuffles_issuers(bank_as_bond_buyer):
     role.find_issuers.return_value = bond_issuers
 
     # When
-    result = bank.find_bond_issuers()
+    result = bank._find_bond_issuers()
 
     # Then
     role.find_issuers.assert_called_with()
@@ -392,8 +392,8 @@ def bond_issuers():
 def test_buy_bonds_with_purchases_probability(bank_as_bond_buyer, bond_issuers):
     # Given
     bank, role = bank_as_bond_buyer
-    bank.calc_excess_reserves.return_value = 1000
-    calc_prob = bank.calc_bond_purchases_probability
+    bank._calc_excess_reserves.return_value = 1000
+    calc_prob = bank._calc_bond_purchases_prob
     calc_prob.return_value = 0.4
     random = bank.model.nprandom
     role.find_issuers.return_value = bond_issuers
@@ -411,7 +411,7 @@ def test_buy_bonds_with_purchases_probability(bank_as_bond_buyer, bond_issuers):
 def test_buy_bonds_with_excess_reserves(bank_as_bond_buyer, bond_issuers):
     # Given
     bank, role = bank_as_bond_buyer
-    bank.calc_excess_reserves.return_value = 50
+    bank._calc_excess_reserves.return_value = 50
     role.find_issuers.return_value = bond_issuers
 
     # When
@@ -424,7 +424,7 @@ def test_buy_bonds_with_excess_reserves(bank_as_bond_buyer, bond_issuers):
 def test_dont_buy_bonds_with_insufficient_reserves(bank_as_bond_buyer, bond_issuers):
     # Given
     bank, role = bank_as_bond_buyer
-    bank.calc_excess_reserves.return_value = 50
+    bank._calc_excess_reserves.return_value = 50
     role.find_issuers.return_value = bond_issuers
 
     # When
@@ -450,7 +450,7 @@ def test_calc_profit(bank_with_roles_and_account):
     account["bond_interests"] = 30
 
     # When
-    profit = bank.calc_profit()
+    profit = bank._calc_profit()
 
     # Then
     assert profit == 70
@@ -475,7 +475,7 @@ def test_calc_taxes(bank_as_taxpayer, profit, expected):
     role.get_tax_rate.return_value = 0.20
 
     # When
-    taxes = bank.calc_taxes()
+    taxes = bank._calc_taxes()
 
     # Then
     assert taxes == expected
@@ -490,7 +490,7 @@ def test_calc_dividends(bank_as_taxpayer, profit, expected):
     bank.taxes_payable = 20
 
     # When
-    dividends = bank.calc_dividends()
+    dividends = bank._calc_dividends()
 
     # Then
     assert dividends == expected
@@ -498,9 +498,9 @@ def test_calc_dividends(bank_as_taxpayer, profit, expected):
 
 def test_compute_profit_distribution(bank):
     # Given
-    bank.calc_profit = Mock(return_value=100)
-    bank.calc_taxes = Mock(return_value=20)
-    bank.calc_dividends = Mock(return_value=30)
+    bank._calc_profit = Mock(return_value=100)
+    bank._calc_taxes = Mock(return_value=20)
+    bank._calc_dividends = Mock(return_value=30)
 
     # When
     bank.compute_profit_distribution()
@@ -514,7 +514,7 @@ def test_compute_profit_distribution(bank):
 def test_update_net_worth(bank_with_roles_and_account):
     # Given
     bank, *_ = bank_with_roles_and_account
-    bank.update_equity_shares = Mock()
+    bank._update_equity_shares = Mock()
     bank.profit = 500
     bank.net_worth = 500
     bank.taxes_payable = 50
@@ -525,7 +525,7 @@ def test_update_net_worth(bank_with_roles_and_account):
     bank.update_net_worth()
 
     # Then
-    bank.update_equity_shares.assert_called_once_with(350)
+    bank._update_equity_shares.assert_called_once_with(350)
     assert bank.net_worth == pytest.approx(850)
 
 
@@ -540,7 +540,7 @@ def test_update_equity_shares(bank_with_roles_and_account):
     roles["company"] = role
 
     # When
-    bank.update_equity_shares(-100)
+    bank._update_equity_shares(-100)
 
     # Then
     role.update_equity_share.assert_any_call(founder1, -25)

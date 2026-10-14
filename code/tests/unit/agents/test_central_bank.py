@@ -118,7 +118,7 @@ def test_calc_discount_rate(cb_as_policy_maker):
     role.get_average_inflation.return_value = 0.04
 
     # When
-    discount_rate = cb.calc_discount_rate()
+    discount_rate = cb._calc_discount_rate()
 
     # Then
     assert discount_rate == pytest.approx(0.04)
@@ -128,7 +128,7 @@ def test_update_discount_rate_sets_discount_rate(cb_as_policy_maker):
     # Given
     cb, role = cb_as_policy_maker
     cb.prev_discount_rate = 0.0
-    cb.calc_discount_rate = Mock(return_value=0.02)
+    cb._calc_discount_rate = Mock(return_value=0.02)
     role.get_discount_rate.return_value = 0.0
 
     # When
@@ -142,7 +142,7 @@ def test_update_discount_rate_changes_lag_values(cb_as_policy_maker):
     # Given
     cb, role = cb_as_policy_maker
     cb.prev_discount_rate = 0.01
-    cb.calc_discount_rate = Mock(return_value=0.03)
+    cb._calc_discount_rate = Mock(return_value=0.03)
     role.get_discount_rate.return_value = 0.02
 
     # When
@@ -201,7 +201,7 @@ def test_calc_profit(cb_as_authority):
     cb.account["cash_interests"] = 20
 
     # When
-    profit = cb.calc_profit()
+    profit = cb._calc_profit()
 
     # Then
     assert profit == 120
@@ -210,7 +210,7 @@ def test_calc_profit(cb_as_authority):
 def test_transfer_profit_to_government(cb_as_authority):
     # Given
     cb, role = cb_as_authority
-    cb.calc_profit = Mock(return_value=100)
+    cb._calc_profit = Mock(return_value=100)
 
     # When
     cb.transfer_profit()

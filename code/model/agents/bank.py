@@ -29,14 +29,14 @@ class Bank(EcoAgent):
     def grant_loans(self):
         role = self.roles["lender"]
         applicants = self._list_applicants()
-        capacity = self.calc_credit_capacity()
+        capacity = self._calc_credit_capacity()
         choice = self.model.nprandom.choice
         for borrower in applicants:
             if capacity <= 0:
                 break
             amount = min(capacity, borrower.loan_demand)
-            prob = self.calc_loan_probability(borrower)
-            rate = self.calc_loan_rate(borrower)
+            prob = self._calc_loan_probability(borrower)
+            rate = self._calc_loan_rate(borrower)
             if choice([0, 1], p=[1 - prob, prob]):
                 self._fund_applicant(borrower, amount, rate)
                 capacity -= amount
@@ -54,15 +54,15 @@ class Bank(EcoAgent):
         depositor = deposit_bank.find_depositor(borrower.id)
         deposit_bank.make_deposits(depositor, amount)
 
-    def calc_credit_capacity(self):
+    def _calc_credit_capacity(self):
         equity = -1 * self.account["equities"]
         return equity * self.p.mu1
 
-    def calc_loan_probability(self, borrower):
+    def _calc_loan_probability(self, borrower):
         leverage = borrower.loan_demand / borrower.net_worth
         return math.exp(-self.p.iota_l * leverage)
 
-    def calc_loan_rate(self, borrower):
+    def _calc_loan_rate(self, borrower):
         discount_rate = self.roles["company"].get_discount_rate()
         leverage = borrower.loan_demand / borrower.net_worth
         return self.p.chi * leverage + discount_rate
@@ -91,11 +91,11 @@ class Bank(EcoAgent):
     #
     def buy_bonds(self):
         role = self.roles["bond_buyer"]
-        bond_issuers = self.find_bond_issuers()
-        excess = self.calc_excess_reserves()
+        bond_issuers = self._find_bond_issuers()
+        excess = self._calc_excess_reserves()
         choice = self.model.nprandom.choice
         for issuer in bond_issuers:
-            prob = self.calc_bond_purchases_probability(issuer)
+            prob = self._calc_bond_purchases_prob(issuer)
             if choice([0, 1], p=[1 - prob, prob]):
                 bond_value = issuer.bond_value
                 purchase = min(excess / bond_value, issuer.bond_number)
@@ -104,19 +104,19 @@ class Bank(EcoAgent):
                 if excess <= 0:
                     break
 
-    def find_bond_issuers(self):
+    def _find_bond_issuers(self):
         role = self.roles["bond_buyer"]
         bond_issuers = role.find_issuers()
         random = self.model.random
         random.shuffle(bond_issuers)
         return bond_issuers
 
-    def calc_excess_reserves(self):
+    def _calc_excess_reserves(self):
         account = self.account
         required = self.p.mu2 * account["deposits"]
         return max(account["cash"] - required, 0)
 
-    def calc_bond_purchases_probability(self, issuer):
+    def _calc_bond_purchases_prob(self, issuer):
         return math.exp(-self.p.iota_b * issuer.debt_ratio)
 
     #
@@ -124,11 +124,11 @@ class Bank(EcoAgent):
     # Taxes and dividends payment
     #
     def compute_profit_distribution(self):
-        self.profit = self.calc_profit()
-        self.taxes_payable = self.calc_taxes()
-        self.dividends_payable = self.calc_dividends()
+        self.profit = self._calc_profit()
+        self.taxes_payable = self._calc_taxes()
+        self.dividends_payable = self._calc_dividends()
 
-    def calc_profit(self):
+    def _calc_profit(self):
         account = self.account
         return (
             account["loan_interests"]
@@ -139,13 +139,13 @@ class Bank(EcoAgent):
             - account["adv_interests"]
         )
 
-    def calc_taxes(self):
+    def _calc_taxes(self):
         if self.profit <= 0:
             return 0
         tax_rate = self.roles["company"].get_tax_rate()
         return tax_rate * self.profit
 
-    def calc_dividends(self):
+    def _calc_dividends(self):
         if self.profit <= 0:
             return 0
         return self.p.rho * (self.profit - self.taxes_payable)
@@ -153,10 +153,10 @@ class Bank(EcoAgent):
     def update_net_worth(self):
         account = self.account
         self.net_worth += self.profit - self.taxes_payable - self.dividends_payable
-        self.update_equity_shares(self.net_worth + account["equities"])
+        self._update_equity_shares(self.net_worth + account["equities"])
         return self.net_worth
 
-    def update_equity_shares(self, total_variation):
+    def _update_equity_shares(self, total_variation):
         role = self.roles["company"]
         shares = role.get_equity_shares()
         total_shares = sum(share["value"] for share in shares)

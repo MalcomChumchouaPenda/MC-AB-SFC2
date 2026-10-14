@@ -266,15 +266,15 @@ def firm(fake_model):
 
 def test_plan_production_by_two_steps(firm):
     # Given
-    firm.calc_desired_output = Mock(side_effect=setattr(firm, "desired_output", 10))
-    firm.calc_labor_demand = Mock(side_effect=setattr(firm, "desired_output", 20))
+    firm._calc_desired_output = Mock(side_effect=setattr(firm, "desired_output", 10))
+    firm._calc_labor_demand = Mock(side_effect=setattr(firm, "desired_output", 20))
 
     # When
     firm.plan_production()
 
     # Then
-    firm.calc_desired_output.assert_called_once_with()
-    firm.calc_labor_demand.assert_called_once_with()
+    firm._calc_desired_output.assert_called_once_with()
+    firm._calc_labor_demand.assert_called_once_with()
     assert firm.desired_output == 20
 
 
@@ -306,7 +306,7 @@ def test_calc_desired_output(firm_before_production):
     firm.roles["producer"].inventories = 20
 
     # When
-    desired_output = firm.calc_desired_output()
+    desired_output = firm._calc_desired_output()
 
     # Then
     assert desired_output == 100
@@ -321,7 +321,7 @@ def test_calc_desired_output_decreases_with_inventories(firm_before_production):
     firm.roles["producer"].inventories = 50
 
     # When
-    firm.calc_desired_output()
+    firm._calc_desired_output()
 
     # Then
     assert firm.desired_output == 70
@@ -334,7 +334,7 @@ def test_calc_labor_demand(firm_before_production):
     firm.roles["producer"].productivity = 2
 
     # When
-    labor = firm.calc_labor_demand()
+    labor = firm._calc_labor_demand()
 
     # Then
     assert labor == 50
@@ -349,7 +349,7 @@ def test_calc_desired_output_cannot_be_negative(firm_before_production):
     firm.roles["producer"].inventories = 100
 
     # When
-    firm.calc_desired_output()
+    firm._calc_desired_output()
 
     # Then
     assert firm.desired_output == 0
@@ -461,7 +461,7 @@ def test_calc_revision_probability(firm_with_roles_and_account):
     roles["employer"] = role
 
     # When
-    result = firm.calc_revision_probability()
+    result = firm._calc_revision_probability()
 
     # Then
     assert result == math.exp(-1.0 * 0.1)
@@ -472,7 +472,7 @@ def hiring_firm(firm):
     # Given
     firm.p.delta = 0.9
     firm.wage_offer = 10.0
-    firm.calc_revision_probability = Mock(return_value=0)
+    firm._calc_revision_probability = Mock(return_value=0)
     return firm
 
 
@@ -498,7 +498,7 @@ def test_increases_wage_with_upward_revision_prob(hiring_firm):
     firm = hiring_firm
     firm.prev_labor = 80
     firm.prev_desired_labor = 100
-    firm.calc_revision_probability.return_value = 0.6
+    firm._calc_revision_probability.return_value = 0.6
     random = firm.model.nprandom
     random.choice.return_value = 1
     random.uniform.return_value = 0.05
@@ -549,7 +549,7 @@ def test_decreases_wage_with_downward_revision_prob(hiring_firm):
     firm = hiring_firm
     firm.prev_labor = 100
     firm.prev_desired_labor = 100
-    firm.calc_revision_probability.return_value = 0.6
+    firm._calc_revision_probability.return_value = 0.6
     random = firm.model.nprandom
     random.choice.return_value = 1
     random.uniform.return_value = 0.05
@@ -719,7 +719,7 @@ def test_calc_desired_loans_when_external_finance_needed(firm_before_borrowing):
     firm.account["deposits"] = 20
 
     # When
-    result = firm.calc_desired_loans()
+    result = firm._calc_desired_loans()
 
     # Then
     assert result == 130
@@ -731,7 +731,7 @@ def test_calc_desired_loans_when_internal_funds_are_sufficient(firm_before_borro
     firm.account["deposits"] = 150
 
     # When
-    result = firm.calc_desired_loans()
+    result = firm._calc_desired_loans()
 
     # Then
     assert result == 0
@@ -743,7 +743,7 @@ def firm_as_borrower(firm_with_roles_and_account):
     role = Mock()
     role.find_lenders.return_value = []
     firm, roles, account = firm_with_roles_and_account
-    firm.calc_desired_loans = Mock(return_value=10)
+    firm._calc_desired_loans = Mock(return_value=10)
     account["equities"] = 100
     roles["borrower"] = role
     return firm, role
@@ -765,7 +765,7 @@ def test_request_loans_to_all_lenders(firm_as_borrower):
 def test_request_loans_and_set_loan_demand(firm_as_borrower):
     # Given
     firm, role = firm_as_borrower
-    firm.calc_desired_loans.return_value = 100
+    firm._calc_desired_loans.return_value = 100
     role.find_lenders.return_value = [Mock()]
 
     # When
@@ -778,7 +778,7 @@ def test_request_loans_and_set_loan_demand(firm_as_borrower):
 def test_request_loans_and_registers_desired_loans(firm_as_borrower):
     # Given
     firm, _ = firm_as_borrower
-    firm.calc_desired_loans.return_value = 100
+    firm._calc_desired_loans.return_value = 100
 
     # When
     firm.request_loans()
@@ -791,7 +791,7 @@ def test_request_loans_and_registers_desired_loans(firm_as_borrower):
 def test_dont_request_unneccessary_loans(firm_as_borrower, desired):
     # Given
     firm, role = firm_as_borrower
-    firm.calc_desired_loans.return_value = desired
+    firm._calc_desired_loans.return_value = desired
 
     # When
     firm.request_loans()
@@ -912,7 +912,7 @@ def test_calc_net_cash_flow(firm_with_roles_and_account, sales, expected):
     account["dep_interests"] = 10
 
     # When
-    net_cash_flow = firm.calc_net_cash_flow()
+    net_cash_flow = firm._calc_net_cash_flow()
 
     # Then
     assert net_cash_flow == expected
@@ -928,7 +928,7 @@ def test_calc_profit(firm_with_roles_and_account):
     roles["producer"] = role
 
     # When
-    profit = firm.calc_profit()
+    profit = firm._calc_profit()
 
     # Then
     assert profit == 300
@@ -961,7 +961,7 @@ def test_calc_taxes(firm_as_tax_payer, taxable, expected):
     role.get_tax_rate.return_value = 0.20
 
     # When
-    taxes = firm.calc_taxes()
+    taxes = firm._calc_taxes()
 
     # Then
     assert taxes == expected
@@ -976,7 +976,7 @@ def test_calc_dividends(firm_as_tax_payer, taxable, taxes, expected):
     firm.p.rho = 0.5
 
     # When
-    dividends = firm.calc_dividends()
+    dividends = firm._calc_dividends()
 
     # Then
     assert dividends == pytest.approx(expected)
@@ -984,10 +984,10 @@ def test_calc_dividends(firm_as_tax_payer, taxable, taxes, expected):
 
 def test_compute_profit_distribution(firm):
     # Given
-    firm.calc_net_cash_flow = Mock(return_value=90)
-    firm.calc_profit = Mock(return_value=100)
-    firm.calc_taxes = Mock(return_value=20)
-    firm.calc_dividends = Mock(return_value=30)
+    firm._calc_net_cash_flow = Mock(return_value=90)
+    firm._calc_profit = Mock(return_value=100)
+    firm._calc_taxes = Mock(return_value=20)
+    firm._calc_dividends = Mock(return_value=30)
     firm.update_production_history = Mock()
 
     # When
@@ -1025,7 +1025,7 @@ def test_update_production_history(firm_with_roles_and_account):
 def test_update_net_worth(firm_with_roles_and_account):
     # Given
     firm, *_ = firm_with_roles_and_account
-    firm.update_equity_shares = Mock()
+    firm._update_equity_shares = Mock()
     firm.net_worth = 1000
     firm.net_cash_flow = 500
     firm.taxes_payable = 100
@@ -1036,7 +1036,7 @@ def test_update_net_worth(firm_with_roles_and_account):
     firm.update_net_worth()
 
     # Then
-    firm.update_equity_shares.assert_called_once_with(200)
+    firm._update_equity_shares.assert_called_once_with(200)
     assert firm.net_worth == pytest.approx(1200)
 
 
@@ -1051,7 +1051,7 @@ def test_update_equity_shares(firm_with_roles_and_account):
     roles["company"] = role
 
     # When
-    firm.update_equity_shares(-100)
+    firm._update_equity_shares(-100)
 
     # Then
     role.update_equity_share.assert_any_call(founder1, -25)
