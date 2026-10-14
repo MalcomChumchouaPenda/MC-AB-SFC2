@@ -105,11 +105,12 @@ class Household(EcoAgent):
 
     def _fund_consumption(self, desired_cons):
         account = self.account
-        if desired_cons > account["cash"]:
+        bank_id = self.deposit_bank_id
+        if desired_cons > account["cash"] and bank_id is not None:
             needs = desired_cons - account["cash"]
             feasible = min(needs, account["deposits"])
             role = self.roles["depositor"]
-            role.withdraw_deposits(feasible)
+            role.withdraw_deposits(bank_id, feasible)
 
     def _consume_good(self, role, target_cons):
         cash = self.account["cash"]

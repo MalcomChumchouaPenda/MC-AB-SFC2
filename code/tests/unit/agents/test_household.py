@@ -620,11 +620,12 @@ def test_consume_randomizes_entry_order(hh_as_general_consumer):
     random.shuffle.assert_called_with(entry_order)
 
 
-def test_consume_with_insufficient_cash(hh_as_general_consumer):
+def test_consume_withdraws_deposits(hh_as_general_consumer):
     # Given
     household, roles, account = hh_as_general_consumer
     household.p.cT = 0.6
     household.desired_consumption = 100
+    household.deposit_bank_id = 5
     account["deposits"] = 100
     account["cash"] = 50
     role = roles["depositor"]
@@ -633,15 +634,16 @@ def test_consume_with_insufficient_cash(hh_as_general_consumer):
     household.consume()
 
     # Then
-    role.withdraw_deposits.assert_called_with(50)
+    role.withdraw_deposits.assert_called_with(5, 50)
     assert household._consume_good.call_count == 2
 
 
-def test_consume_with_insufficient_deposits(hh_as_general_consumer):
+def test_consume_withdraws_sufficient_deposits(hh_as_general_consumer):
     # Given
     household, roles, account = hh_as_general_consumer
     household.p.cT = 0.6
     household.desired_consumption = 100
+    household.deposit_bank_id = 5
     account["deposits"] = 25
     account["cash"] = 50
     role = roles["depositor"]
@@ -650,7 +652,26 @@ def test_consume_with_insufficient_deposits(hh_as_general_consumer):
     household.consume()
 
     # Then
-    role.withdraw_deposits.assert_called_with(25)
+    role.withdraw_deposits.assert_called_with(5, 25)
+    assert household._consume_good.call_count == 2
+
+
+
+def test_consume_withdraws_no_deposits(hh_as_general_consumer):
+    # Given
+    household, roles, account = hh_as_general_consumer
+    household.p.cT = 0.6
+    household.desired_consumption = 100
+    household.deposit_bank_id = None
+    account["deposits"] = 25
+    account["cash"] = 50
+    role = roles["depositor"]
+
+    # When
+    household.consume()
+
+    # Then
+    role.withdraw_deposits.assert_not_called()
     assert household._consume_good.call_count == 2
 
 
