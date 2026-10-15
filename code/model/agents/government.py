@@ -167,6 +167,6 @@ class Government(EcoAgent):
     #
     # History
     #
-    def update_history(self):
+    def update_budget_history(self):
         self.prev_budget_surplus = self.budget_surplus
         self.prev_public_spending = self.public_spending

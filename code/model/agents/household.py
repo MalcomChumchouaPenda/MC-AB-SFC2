@@ -308,5 +308,5 @@ class Household(EcoAgent):
     #
     # History
     #
-    def update_history(self):
+    def update_labor_history(self):
         self.prev_labor_sold = self.roles["worker"].labor_sold

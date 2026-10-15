@@ -1564,14 +1564,14 @@ def test_choose_deposit_bank_sets_deposit_bank_id(hh_as_depositor):
 # ----------------------------------------------------
 
 
-def test_update_history_sets_prev_labor_sold(hh_with_roles_and_account):
+def test_update_labor_history_sets_prev_labor_sold(hh_with_roles_and_account):
     # Given
     role = Mock(labor_sold=0.9)
     household, roles, _ = hh_with_roles_and_account
     roles["worker"] = role
 
     # When
-    household.update_history()
+    household.update_labor_history()
 
     # Then
     assert household.prev_labor_sold == role.labor_sold

@@ -85,6 +85,7 @@ class EcoModel(Model):
     def _labor_markets_matching(self):
         self.households.revise_reservation_wage()
         self.households.search_jobs()
+        self.households.update_labor_history()
 
     def _production_and_incomes_distribution(self):
         self.firms.pay_wages()
@@ -104,7 +105,7 @@ class EcoModel(Model):
         self.governments.repay_bonds()
         self.governments.issue_bonds()
         self.governments.update_bond_rate()
-        self.governments.update_history()
+        self.governments.update_budget_history()
 
     def _bond_markets_matching(self):
         self.banks.buy_bonds()

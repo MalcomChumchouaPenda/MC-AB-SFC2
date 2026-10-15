@@ -646,7 +646,7 @@ def test_update_public_spending_history(govt):
     govt.prev_public_spending = 150
 
     # When
-    govt.update_history()
+    govt.update_budget_history()
 
     # Then
     assert govt.prev_public_spending == 200
@@ -658,7 +658,7 @@ def test_update_budget_history(govt):
     govt.prev_budget_surplus = 0
 
     # When
-    govt.update_history()
+    govt.update_budget_history()
 
     # Then
     assert govt.prev_budget_surplus == 100

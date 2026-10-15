@@ -461,6 +461,7 @@ def test_labor_markets_matching(params):
     # Then
     model.households.revise_reservation_wage.assert_called_with()
     model.households.search_jobs.assert_called_with()
+    model.households.update_labor_history.assert_called_with()
 
 
 def test_production_and_incomes_distribution(params):
@@ -501,7 +502,7 @@ def test_tax_collection_and_public_expenditures(params):
     model.governments.repay_bonds.assert_called_with()
     model.governments.issue_bonds.assert_called_with()
     model.governments.update_bond_rate.assert_called_with()
-    model.governments.update_history.assert_called_with()
+    model.governments.update_budget_history.assert_called_with()
 
 
 def test_bond_markets_matching(params):
