@@ -61,6 +61,8 @@ class EcoModel(Model):
         self.national_central_banks = national_cbs
 
     def step(self):
+        self.union.clear_defaults()
+        self.union.clear_transactions()
         self._production_and_rd_planning()
         self._credit_markets_matching()
         self._labor_markets_matching()

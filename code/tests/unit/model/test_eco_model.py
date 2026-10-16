@@ -387,7 +387,7 @@ def test_create_central_banks_adds_union_cb_to_union(params):
 
 
 @pytest.fixture
-def before_step_call(monkeypatch):
+def model_before_step(monkeypatch, params):
     # Given
     monkeypatch.setattr(EcoModel, "_production_and_rd_planning", Mock())
     monkeypatch.setattr(EcoModel, "_credit_markets_matching", Mock())
@@ -398,12 +398,14 @@ def before_step_call(monkeypatch):
     monkeypatch.setattr(EcoModel, "_goods_consumption", Mock())
     monkeypatch.setattr(EcoModel, "_profit_distribution_planning", Mock())
     monkeypatch.setattr(EcoModel, "_enter_exit", Mock())
-
-
-@pytest.mark.usefixtures("before_step_call")
-def test_step_by_calling_nine_sub_procedures(params):
-    # Given
     model = EcoModel(params)
+    model.union = Mock()
+    return model
+
+
+def test_step_by_calling_nine_sub_procedures(model_before_step):
+    # Given
+    model = model_before_step
 
     # When
     model.step()
@@ -419,6 +421,19 @@ def test_step_by_calling_nine_sub_procedures(params):
     model._profit_distribution_planning.assert_called_with()
     model._enter_exit.assert_called_with()
 
+
+
+def test_step_by_calling_union_evolution(model_before_step):
+    # Given
+    model = model_before_step
+
+    # When
+    model.step()
+
+    # Then
+    model.union.clear_transactions.assert_called_with()
+    model.union.clear_defaults.assert_called_with()
+    
 
 def test_production_and_rd_planning(params):
     # Given
