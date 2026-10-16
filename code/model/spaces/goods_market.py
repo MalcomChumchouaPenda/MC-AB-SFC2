@@ -42,6 +42,8 @@ class GoodsMarket(EcoSpace):
 
     def calc_inflation(self):
         prev_price = self.average_price_prev
+        if prev_price == 0:
+            return 0
         current_price = self.average_price
         return (current_price - prev_price) / prev_price
 

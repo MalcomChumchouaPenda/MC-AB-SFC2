@@ -79,6 +79,8 @@ class MonetaryUnion(EcoSpace):
     def update_state(self):
         super().update_state()
         countries = [s for k, s in self.spaces.items() if k.startswith("country")]
-        weighted_inflations = [c.gdp * c.inflation for c in countries]
         gdps = [c.gdp for c in countries]
-        self.average_inflation = sum(weighted_inflations) / sum(gdps)
+        union_gdp = sum(gdps)
+        if union_gdp > 0:
+            weighted_inflations = [c.gdp * c.inflation for c in countries]
+            self.average_inflation = sum(weighted_inflations) / union_gdp
