@@ -403,7 +403,20 @@ def model_before_step(monkeypatch, params):
     return model
 
 
-def test_step_by_calling_nine_sub_procedures(model_before_step):
+def test_step_by_calling_union_evolution(model_before_step):
+    # Given
+    model = model_before_step
+
+    # When
+    model.step()
+
+    # Then
+    model.union.clear_transactions.assert_called_with()
+    model.union.clear_defaults.assert_called_with()
+    model.union.update_state.assert_called_with()
+
+
+def test_step_by_calling_5_first_events_procedures(model_before_step):
     # Given
     model = model_before_step
 
@@ -416,13 +429,9 @@ def test_step_by_calling_nine_sub_procedures(model_before_step):
     model._labor_markets_matching.assert_called_with()
     model._production_and_incomes_distribution.assert_called_with()
     model._tax_collection_and_public_expenditures.assert_called_with()
-    model._bond_markets_matching.assert_called_with()
-    model._goods_consumption.assert_called_with()
-    model._profit_distribution_planning.assert_called_with()
-    model._enter_exit.assert_called_with()
 
 
-def test_step_by_calling_union_evolution(model_before_step):
+def test_step_by_calling_4_last_events_procedures(model_before_step):
     # Given
     model = model_before_step
 
@@ -430,8 +439,10 @@ def test_step_by_calling_union_evolution(model_before_step):
     model.step()
 
     # Then
-    model.union.clear_transactions.assert_called_with()
-    model.union.clear_defaults.assert_called_with()
+    model._bond_markets_matching.assert_called_with()
+    model._goods_consumption.assert_called_with()
+    model._profit_distribution_planning.assert_called_with()
+    model._enter_exit.assert_called_with()
 
 
 def test_production_and_rd_planning(params):

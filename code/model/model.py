@@ -72,6 +72,7 @@ class EcoModel(Model):
         self._goods_consumption()
         self._profit_distribution_planning()
         self._enter_exit()
+        self.union.update_state()
 
     def _production_and_rd_planning(self):
         self.firms.plan_production()

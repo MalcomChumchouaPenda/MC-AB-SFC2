@@ -193,3 +193,7 @@ class EcoSpace(Network):
     def clear_defaults(self):
         for subspace in self.spaces.values():
             subspace.clear_defaults()
+
+    def update_state(self):
+        for subspace in self.spaces.values():
+            subspace.update_state()

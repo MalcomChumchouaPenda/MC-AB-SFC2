@@ -364,24 +364,6 @@ def test_add_central_bank_into_bond_market_if_national(union_without_roles):
 
 
 # ---------------------------------------------------
-# INFLATION
-# ----------------------------------------------------
-
-
-def test_update_average_inflation(fake_model):
-    # Given
-    countries = {f"country_{i}": Mock(inflation=0.05, gdp=100) for i in range(5)}
-    union = MonetaryUnion(fake_model)
-    union.spaces = countries
-
-    # When
-    union.update_average_inflation()
-
-    # Then
-    assert union.average_inflation == pytest.approx(0.05)
-
-
-# ---------------------------------------------------
 # CURRENT INDICATORS
 # ----------------------------------------------------
 
@@ -423,3 +405,41 @@ def test_calc_sales_range_from_goods_market(union_without_roles):
 
     # Then
     assert range_ == market.calc_sales_range.return_value
+
+
+# ---------------------------------------------------
+# INFLATION
+# ----------------------------------------------------
+
+
+@pytest.fixture
+def union_before_update(fake_model):
+    # Given
+    countries = {f"country_{i}": Mock(inflation=0.05, gdp=100) for i in range(5)}
+    union = MonetaryUnion(fake_model)
+    union.spaces = {"any": Mock()}
+    union.spaces.update(countries)
+    return union
+
+
+def test_update_state_updates_average_inflation(union_before_update):
+    # Given
+    union = union_before_update
+
+    # When
+    union.update_state()
+
+    # Then
+    assert union.average_inflation == pytest.approx(0.05)
+
+
+def test_update_state_updates_each_subspace_state(union_before_update):
+    # Given
+    union = union_before_update
+
+    # When
+    union.update_state()
+
+    # Then
+    for subspace in union.spaces.values():
+        subspace.update_state.assert_called_with()

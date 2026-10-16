@@ -885,6 +885,7 @@ def country_before_update(country_without_roles):
     # Given
     country = country_without_roles
     country.spaces["goods_market"] = Mock()
+    country.spaces["any_space"] = Mock()
     country.roles = {}
     country.gdp = 0
     return country
@@ -930,9 +931,16 @@ def test_update_state_updates_prob_failure(country_before_update):
     assert country.prob_failure == 0.5
 
 
-# ---------------------------------------------------
-#  EVOLUTION
-# ----------------------------------------------------
+def test_update_state_updates_each_subspace(country_before_update):
+    # Given
+    country = country_before_update
+
+    # When
+    country.update_state()
+
+    # Then
+    for subspace in country.spaces.values():
+        subspace.update_state.assert_called_with()
 
 
 @pytest.fixture

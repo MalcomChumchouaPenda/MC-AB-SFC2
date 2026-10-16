@@ -75,8 +75,10 @@ class MonetaryUnion(EcoSpace):
     #
     # Evolution
     #
-    def update_average_inflation(self):
+
+    def update_state(self):
+        super().update_state()
         countries = [s for k, s in self.spaces.items() if k.startswith("country")]
-        gdps = [c.gdp for c in countries]
         weighted_inflations = [c.gdp * c.inflation for c in countries]
+        gdps = [c.gdp for c in countries]
         self.average_inflation = sum(weighted_inflations) / sum(gdps)

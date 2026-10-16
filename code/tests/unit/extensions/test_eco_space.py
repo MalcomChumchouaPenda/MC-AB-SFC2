@@ -681,16 +681,16 @@ def test_make_transaction_uses_available_env_method(space_with_accounts):
 
 
 @pytest.fixture
-def space_with_transactions(space):
+def space_before_evolution(space):
     # Given
     space.accounts = {i: Mock() for i in range(10)}
     space.spaces = {i: Mock() for i in range(5)}
     return space
 
 
-def test_clear_transactions_uses_accounts_method(space_with_transactions):
+def test_clear_transactions_uses_accounts_method(space_before_evolution):
     # Given
-    space = space_with_transactions
+    space = space_before_evolution
 
     # When
     space.clear_transactions()
@@ -700,9 +700,9 @@ def test_clear_transactions_uses_accounts_method(space_with_transactions):
         account.clear_transactions.assert_called_with()
 
 
-def test_clear_transactions_uses_subspaces_method(space_with_transactions):
+def test_clear_transactions_uses_subspaces_method(space_before_evolution):
     # Given
-    space = space_with_transactions
+    space = space_before_evolution
 
     # When
     space.clear_transactions()
@@ -712,14 +712,25 @@ def test_clear_transactions_uses_subspaces_method(space_with_transactions):
         subspace.clear_transactions.assert_called_with()
 
 
-def test_clear_defaults_uses_spaces_method(space):
+def test_clear_defaults_uses_spaces_method(space_before_evolution):
     # Given
-    subspaces = {n: Mock() for n in range(10)}
-    space.spaces = subspaces
+    space = space_before_evolution
 
     # When
     space.clear_defaults()
 
     # Then
-    for subspace in subspaces.values():
+    for subspace in space.spaces.values():
         subspace.clear_defaults.assert_called_with()
+
+
+def test_update_state_uses_spaces_method(space_before_evolution):
+    # Given
+    space = space_before_evolution
+
+    # When
+    space.update_state()
+
+    # Then
+    for subspace in space.spaces.values():
+        subspace.update_state.assert_called_with()

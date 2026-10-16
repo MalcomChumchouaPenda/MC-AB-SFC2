@@ -196,6 +196,7 @@ class Country(EcoSpace):
     # Evolution
     #
     def update_state(self):
+        super().update_state()
         companies = self.find_all_roles("company")
         defaults = companies.select(companies.defaulted == True)
         self.prob_failure = len(defaults) / max(1, len(companies))
