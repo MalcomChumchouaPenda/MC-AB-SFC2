@@ -82,7 +82,7 @@ def before_setup_call(monkeypatch):
 
 
 @pytest.mark.usefixtures("before_setup_call")
-def test_setup_by_calling_four_sub_procedures(params):
+def test_setup_calls_4_sub_procedures(params):
     # Given
     model = EcoModel(params)
 
@@ -387,8 +387,9 @@ def test_create_central_banks_adds_union_cb_to_union(params):
 
 
 @pytest.fixture
-def model_before_step(monkeypatch, params):
+def before_step(monkeypatch):
     # Given
+    monkeypatch.setattr(EcoModel, "_clear_defaults_and_transactions", Mock())
     monkeypatch.setattr(EcoModel, "_production_and_rd_planning", Mock())
     monkeypatch.setattr(EcoModel, "_credit_markets_matching", Mock())
     monkeypatch.setattr(EcoModel, "_labor_markets_matching", Mock())
@@ -398,27 +399,26 @@ def model_before_step(monkeypatch, params):
     monkeypatch.setattr(EcoModel, "_goods_consumption", Mock())
     monkeypatch.setattr(EcoModel, "_profit_distribution_planning", Mock())
     monkeypatch.setattr(EcoModel, "_enter_exit", Mock())
-    model = EcoModel(params)
-    model.union = Mock()
-    return model
+    monkeypatch.setattr(EcoModel, "_update_union_state", Mock())
 
 
-def test_step_by_calling_union_evolution(model_before_step):
+@pytest.mark.usefixtures("before_step")
+def test_step_calls_union_evolution_procedures(params):
     # Given
-    model = model_before_step
+    model = EcoModel(params)
 
     # When
     model.step()
 
     # Then
-    model.union.clear_transactions.assert_called_with()
-    model.union.clear_defaults.assert_called_with()
-    model.union.update_state.assert_called_with()
+    model._clear_defaults_and_transactions.assert_called_with()
+    model._update_union_state.assert_called_with()
 
 
-def test_step_by_calling_5_first_events_procedures(model_before_step):
+@pytest.mark.usefixtures("before_step")
+def test_step_calls_5_first_events_procedures(params):
     # Given
-    model = model_before_step
+    model = EcoModel(params)
 
     # When
     model.step()
@@ -431,9 +431,10 @@ def test_step_by_calling_5_first_events_procedures(model_before_step):
     model._tax_collection_and_public_expenditures.assert_called_with()
 
 
-def test_step_by_calling_4_last_events_procedures(model_before_step):
+@pytest.mark.usefixtures("before_step")
+def test_step_calls_4_last_events_procedures(params):
     # Given
-    model = model_before_step
+    model = EcoModel(params)
 
     # When
     model.step()
@@ -443,6 +444,23 @@ def test_step_by_calling_4_last_events_procedures(model_before_step):
     model._goods_consumption.assert_called_with()
     model._profit_distribution_planning.assert_called_with()
     model._enter_exit.assert_called_with()
+
+
+def test_clear_defaults_and_transactions(params, make_dlist):
+    # Given
+    model = EcoModel(params)
+    model.union = Mock()
+    model.firms = make_dlist([Mock(defaulted=True), Mock(defaulted=False)])
+    model.banks = make_dlist([Mock(defaulted=True), Mock(defaulted=False)])
+
+    # When
+    model._clear_defaults_and_transactions()
+
+    # Then
+    assert model.union.clear_transactions.called
+    assert model.union.clear_defaults.called
+    assert len(model.firms) == 1
+    assert len(model.banks) == 1
 
 
 def test_production_and_rd_planning(params):
@@ -605,3 +623,15 @@ def test_enter_exit(params):
     model.governments.issue_deposit_guarantee_bonds.assert_called_with()
     model.national_central_banks.buy_bonds.assert_called_with()
     model.governments.reimburse_deposits.assert_called_with()
+
+
+def test_update_union_state(params):
+    # Given
+    model = EcoModel(params)
+    model.union = Mock()
+
+    # When
+    model._update_union_state()
+
+    # Then
+    model.union.update_state.assert_called_with()

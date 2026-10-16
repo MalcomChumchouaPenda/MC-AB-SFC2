@@ -61,8 +61,7 @@ class EcoModel(Model):
         self.national_central_banks = national_cbs
 
     def step(self):
-        self.union.clear_defaults()
-        self.union.clear_transactions()
+        self._clear_defaults_and_transactions()
         self._production_and_rd_planning()
         self._credit_markets_matching()
         self._labor_markets_matching()
@@ -72,7 +71,15 @@ class EcoModel(Model):
         self._goods_consumption()
         self._profit_distribution_planning()
         self._enter_exit()
-        self.union.update_state()
+        self._update_union_state()
+
+    def _clear_defaults_and_transactions(self):
+        self.union.clear_defaults()
+        self.union.clear_transactions()
+        for group in (self.firms, self.banks):
+            defaults = group.select(group.defaulted == True)
+            for default in defaults:
+                group.remove(default)
 
     def _production_and_rd_planning(self):
         self.firms.plan_production()
@@ -141,3 +148,6 @@ class EcoModel(Model):
         self.governments.issue_deposit_guarantee_bonds()
         self.national_central_banks.buy_bonds()
         self.governments.reimburse_deposits()
+
+    def _update_union_state(self):
+        self.union.update_state()
