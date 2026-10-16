@@ -712,10 +712,9 @@ def test_clear_transactions_uses_subspaces_method(space_with_transactions):
         subspace.clear_transactions.assert_called_with()
 
 
-
 def test_clear_defaults_uses_spaces_method(space):
     # Given
-    subspaces = {n:Mock() for n in range(10)}
+    subspaces = {n: Mock() for n in range(10)}
     space.spaces = subspaces
 
     # When

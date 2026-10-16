@@ -113,6 +113,7 @@ def test_exposes_average_wage_from_labor_market(model):
 # SUB SPACES CREATION
 # ----------------------------------------------------
 
+
 @pytest.fixture
 def country(model):
     # Given
@@ -933,6 +934,7 @@ def test_update_state_updates_prob_failure(country_before_update):
 #  EVOLUTION
 # ----------------------------------------------------
 
+
 @pytest.fixture
 def country_with_defaults(country_with_roles):
     # Given
@@ -943,7 +945,7 @@ def country_with_defaults(country_with_roles):
         company.name = "company"
         roles[company.agent.id] = company
         country.graph.add_edge(company, citizen)
-    country.spaces = {n:Mock() for n in range(10)}
+    country.spaces = {n: Mock() for n in range(10)}
     country.remove_role = Mock()
     return country, companies, citizens
 

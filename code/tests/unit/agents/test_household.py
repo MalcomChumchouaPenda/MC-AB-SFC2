@@ -656,7 +656,6 @@ def test_consume_withdraws_sufficient_deposits(hh_as_general_consumer):
     assert household._consume_good.call_count == 2
 
 
-
 def test_consume_withdraws_no_deposits(hh_as_general_consumer):
     # Given
     household, roles, account = hh_as_general_consumer

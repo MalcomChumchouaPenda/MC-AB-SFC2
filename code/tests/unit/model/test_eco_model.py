@@ -422,7 +422,6 @@ def test_step_by_calling_nine_sub_procedures(model_before_step):
     model._enter_exit.assert_called_with()
 
 
-
 def test_step_by_calling_union_evolution(model_before_step):
     # Given
     model = model_before_step
@@ -433,7 +432,7 @@ def test_step_by_calling_union_evolution(model_before_step):
     # Then
     model.union.clear_transactions.assert_called_with()
     model.union.clear_defaults.assert_called_with()
-    
+
 
 def test_production_and_rd_planning(params):
     # Given

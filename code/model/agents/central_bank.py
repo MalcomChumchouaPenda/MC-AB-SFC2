@@ -54,7 +54,7 @@ class CentralBank(EcoAgent):
             + p.xi * self.prev_discount_rate
             + (1 - p.xi) * p.xi_deltap * inflation_gap
         )
-    
+
     def implement_discount_rate(self):
         maker_role = self.roles["policy_maker"]
         discount_rate = maker_role.get_discount_rate()

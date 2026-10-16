@@ -78,7 +78,6 @@ class EcoSpace(Network):
         self.spaces[name] = subspace
         return subspace
 
-    
     #
     # Agent management
     #
