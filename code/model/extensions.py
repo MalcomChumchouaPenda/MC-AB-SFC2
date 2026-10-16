@@ -79,18 +79,6 @@ class EcoSpace(Network):
         return subspace
 
     #
-    # Agent management
-    #
-    def add_agents(self, agents):
-        cls_name = agents[0].__class__.__qualname__
-        kind_name = camel_to_snake(cls_name)
-        method_name = "add_" + kind_name
-        if hasattr(self, method_name):
-            method = getattr(self, method_name)
-            for agent in agents:
-                method(agent)
-
-    #
     # Role management
     #
     def add_role(self, kind, agent, prefix=""):

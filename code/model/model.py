@@ -29,36 +29,45 @@ class EcoModel(Model):
 
     def _create_households(self):
         p = self.p
-        num1 = p.country_number
-        num2 = p.household_number
-        pos = list(range(num1)) * num2
-        households = AgentList(self, num1 * num2, Household)
-        households.country_pos = AttrIter(pos)
-        self.union.add_agents(households)
+        c_num = p.country_number
+        h_num = p.household_number
+        country_pos = list(range(c_num)) * h_num
+        households = AgentList(self, c_num * h_num, Household)
+        households.country_pos = AttrIter(country_pos)
+        for household in households:
+            self.union.add_household(household)
         self.households = households
 
     def _create_governments(self):
         p = self.p
-        num = p.country_number
-        pos = list(range(num))
-        govts = AgentList(self, num, Government)
-        govts.country_pos = AttrIter(pos)
-        self.union.add_agents(govts)
+        c_num = p.country_number
+        country_pos = list(range(c_num))
+        govts = AgentList(self, c_num, Government)
+        govts.country_pos = AttrIter(country_pos)
+        for govt in govts:
+            self.union.add_government(govt)
         self.governments = govts
 
     def _create_central_banks(self):
+        self._create_national_cbs()
+        self._create_union_cb()
+
+    def _create_national_cbs(self):
         p = self.p
-        num = p.country_number
-        pos = list(range(num))
-        national_cbs = AgentList(self, num, CentralBank)
-        national_cbs.country_pos = AttrIter(pos)
-        national_cbs.national = True
-        union_cb = CentralBank(self)
-        union_cb.national = False
-        self.union.add_agents(national_cbs)
-        self.union.add_agents([union_cb])
-        self.union_central_bank = union_cb
-        self.national_central_banks = national_cbs
+        c_num = p.country_number
+        country_pos = list(range(c_num))
+        cbs = AgentList(self, c_num, CentralBank)
+        cbs.country_pos = AttrIter(country_pos)
+        cbs.national = True
+        for cb in cbs:
+            self.union.add_central_bank(cb)
+        self.national_cbs = cbs
+
+    def _create_union_cb(self):
+        cb = CentralBank(self)
+        cb.national = False
+        self.union_cb = cb
+        self.union.add_central_bank(cb)
 
     def step(self):
         self._clear_defaults_and_transactions()
@@ -119,7 +128,7 @@ class EcoModel(Model):
 
     def _bond_markets_matching(self):
         self.banks.buy_bonds()
-        self.national_central_banks.buy_bonds()
+        self.national_cbs.buy_bonds()
 
     def _goods_consumption(self):
         self.governments.pay_public_transfers()
@@ -134,9 +143,9 @@ class EcoModel(Model):
         self.banks.repay_cash_advances()
         self.banks.compute_profit_distribution()
         self.banks.update_net_worth()
-        self.national_central_banks.transfer_profit()
-        self.union_central_bank.update_discount_rate()
-        self.national_central_banks.implement_discount_rate()
+        self.national_cbs.transfer_profit()
+        self.union_cb.update_discount_rate()
+        self.national_cbs.implement_discount_rate()
 
     def _enter_exit(self):
         self.households.choose_portfolio_allocation()
@@ -146,7 +155,7 @@ class EcoModel(Model):
         self.firms.exit()
         self.banks.exit()
         self.governments.issue_deposit_guarantee_bonds()
-        self.national_central_banks.buy_bonds()
+        self.national_cbs.buy_bonds()
         self.governments.reimburse_deposits()
 
     def _update_union_state(self):

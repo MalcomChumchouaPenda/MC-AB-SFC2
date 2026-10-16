@@ -62,8 +62,8 @@ def test_create_initial_population(params):
     assert len(model.banks) == 0
     assert len(model.households) == 10
     assert len(model.governments) == 2
-    assert len(model.national_central_banks) == 2
-    assert model.union_central_bank is not None
+    assert len(model.national_cbs) == 2
+    assert model.union_cb is not None
 
 
 def test_run_all_steps(params):

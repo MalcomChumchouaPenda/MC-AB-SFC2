@@ -162,9 +162,9 @@ def union_without_roles(monkeypatch, fake_model):
 
 def test_add_household_places_agent_into_goods_market(union_without_roles):
     # Given
-    household = Mock(country_pos=1)
     union = union_without_roles
     market = union.spaces["goods_market"]
+    household = Mock(country_pos=1)
 
     # When
     union.add_household(household)
@@ -175,9 +175,9 @@ def test_add_household_places_agent_into_goods_market(union_without_roles):
 
 def test_add_household_places_agent_into_its_country(union_without_roles):
     # Given
-    household = Mock(country_pos=1)
     union = union_without_roles
     country = union.spaces["country_1"]
+    household = Mock(country_pos=1)
 
     # When
     union.add_household(household)
