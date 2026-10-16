@@ -113,6 +113,13 @@ def test_exposes_average_wage_from_labor_market(model):
 # SUB SPACES CREATION
 # ----------------------------------------------------
 
+@pytest.fixture
+def country(model):
+    # Given
+    country = Country(model)
+    country.pos = 2
+    return country
+
 
 FakeGoodMarket = Mock()
 FakeLaborMarket = Mock()
@@ -120,14 +127,12 @@ FakeDepositMarket = Mock()
 
 
 @pytest.fixture
-def country_without_markets(monkeypatch, model):
+def country_without_markets(monkeypatch, country):
     # Given
     monkeypatch.setattr("model.spaces.country.GoodsMarket", FakeGoodMarket)
     monkeypatch.setattr("model.spaces.country.LaborMarket", FakeLaborMarket)
     monkeypatch.setattr("model.spaces.country.DepositMarket", FakeDepositMarket)
-    monkeypatch.setattr(Country, "add_space", Mock())
-    country = Country(model)
-    country.pos = 2
+    country.add_space = Mock()
     return country
 
 
@@ -189,13 +194,12 @@ FakeCompany = Mock()
 
 
 @pytest.fixture
-def country_without_roles(model, monkeypatch):
+def country_without_roles(country, monkeypatch):
     # Given
     monkeypatch.setattr("model.spaces.country.MonetaryAuthority", FakeMonetaryAuth)
     monkeypatch.setattr("model.spaces.country.FiscalAuthority", FakeFiscalAuth)
     monkeypatch.setattr("model.spaces.country.Citizen", FakeCitizen)
     monkeypatch.setattr("model.spaces.country.Company", FakeCompany)
-    country = Country(model)
     country.add_role = Mock()
     country.env = Mock()
     country.spaces["goods_market"] = Mock()
@@ -447,10 +451,9 @@ def test_add_central_bank_sets_monetary_authority(country_without_roles):
 
 
 @pytest.fixture
-def country_with_roles(country_without_roles):
+def country_with_roles(country):
     # Given
     roles = {}
-    country = country_without_roles
     country.roles = roles
     return country, roles
 
@@ -926,15 +929,21 @@ def test_update_state_updates_prob_failure(country_before_update):
     assert country.prob_failure == 0.5
 
 
+# ---------------------------------------------------
+#  EVOLUTION
+# ----------------------------------------------------
+
 @pytest.fixture
-def country_with_defaults(country_without_roles):
+def country_with_defaults(country_with_roles):
+    # Given
     companies = [Mock(defaulted=val) for val in [True, False]]
     citizens = [Mock(company_number=i) for i in range(1, 3)]
-    country = country_without_roles
+    country, roles = country_with_roles
     for company, citizen in zip(companies, citizens):
         company.name = "company"
-        country.roles[company.agent.id] = company
+        roles[company.agent.id] = company
         country.graph.add_edge(company, citizen)
+    country.spaces = {n:Mock() for n in range(10)}
     country.remove_role = Mock()
     return country, companies, citizens
 
@@ -962,3 +971,15 @@ def test_clear_defaults_reduces_company_number(country_with_defaults):
     # Then
     assert citizens[0].company_number == 0
     assert citizens[1].company_number == 2
+
+
+def test_clear_defaults_uses_spaces_method(country_with_defaults):
+    # Given
+    country, *_ = country_with_defaults
+
+    # When
+    country.clear_defaults()
+
+    # Then
+    for subspace in country.spaces.values():
+        subspace.clear_defaults.assert_called_with()

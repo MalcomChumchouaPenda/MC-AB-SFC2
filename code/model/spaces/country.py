@@ -202,9 +202,12 @@ class Country(EcoSpace):
         self.inflation = self.spaces["goods_market"].calc_inflation()
         self.gdp = self.spaces["goods_market"].calc_gdp()
 
+
     def clear_defaults(self):
+        super().clear_defaults()
         companies = self.find_all_roles("company")
         for company in companies.select(companies.defaulted == True):
             for founder in self.neighbors(company):
                 founder.company_number -= 1
             self.remove_role(company)
+

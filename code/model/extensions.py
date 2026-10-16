@@ -182,9 +182,15 @@ class EcoSpace(Network):
             self.accounts[source][category] -= amount
             self.accounts[target][category] += amount
 
+    #
+    # Evolution
+    #
     def clear_transactions(self):
         for account in self.accounts.values():
             account.clear_transactions()
         for subspace in self.spaces.values():
             subspace.clear_transactions()
 
+    def clear_defaults(self):
+        for subspace in self.spaces.values():
+            subspace.clear_defaults()

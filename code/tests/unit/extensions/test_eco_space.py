@@ -675,6 +675,11 @@ def test_make_transaction_uses_available_env_method(space_with_accounts):
     env.make_transaction.assert_called_with("x", source, target, 100)
 
 
+# ---------------------------------------------------
+#  EVOLUTION
+# ----------------------------------------------------
+
+
 @pytest.fixture
 def space_with_transactions(space):
     # Given
@@ -706,3 +711,16 @@ def test_clear_transactions_uses_subspaces_method(space_with_transactions):
     for subspace in space.spaces.values():
         subspace.clear_transactions.assert_called_with()
 
+
+
+def test_clear_defaults_uses_spaces_method(space):
+    # Given
+    subspaces = {n:Mock() for n in range(10)}
+    space.spaces = subspaces
+
+    # When
+    space.clear_defaults()
+
+    # Then
+    for subspace in subspaces.values():
+        subspace.clear_defaults.assert_called_with()

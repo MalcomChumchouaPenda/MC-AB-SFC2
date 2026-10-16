@@ -423,3 +423,4 @@ def test_calc_sales_range_from_goods_market(union_without_roles):
 
     # Then
     assert range_ == market.calc_sales_range.return_value
+
