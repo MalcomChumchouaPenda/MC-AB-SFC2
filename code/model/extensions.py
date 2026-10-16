@@ -49,7 +49,7 @@ class EcoAccount(AttrDict):
         for name in FINANCIAL_ASSETS + REAL_ASSETS + TRANSACTIONS:
             self[name] = 0.0
 
-    def clear_flows(self):
+    def clear_transactions(self):
         for name in TRANSACTIONS:
             self[name] = 0
 
@@ -68,6 +68,17 @@ class EcoSpace(Network):
         self.spaces = {}
         self.accounts = {}
 
+    #
+    # Space management
+    #
+
+    def add_space(self, kind, name, **kwargs):
+        subspace = kind(self.model, **kwargs)
+        subspace.env = self
+        self.spaces[name] = subspace
+        return subspace
+
+    
     #
     # Agent management
     #
@@ -171,25 +182,9 @@ class EcoSpace(Network):
             self.accounts[source][category] -= amount
             self.accounts[target][category] += amount
 
-    #
-    # Space management
-    #
-
-    def add_space(self, kind, name, **kwargs):
-        subspace = kind(self.model, **kwargs)
-        subspace.env = self
-        self.spaces[name] = subspace
-        return subspace
-
-    def evolve(self):
+    def clear_transactions(self):
+        for account in self.accounts.values():
+            account.clear_transactions()
         for subspace in self.spaces.values():
-            subspace.update_state()
-            subspace.clear_defaults()
-        self.update_state()
-        self.clear_defaults()
+            subspace.clear_transactions()
 
-    def update_state(self):
-        pass
-
-    def clear_defaults(self):
-        pass

@@ -675,43 +675,34 @@ def test_make_transaction_uses_available_env_method(space_with_accounts):
     env.make_transaction.assert_called_with("x", source, target, 100)
 
 
-# ---------------------------------------------------
-# EVOLUTION TESTS
-# ----------------------------------------------------
-
-
 @pytest.fixture
-def space_before_evolution(space_without_subspaces):
+def space_with_transactions(space):
     # Given
-    space, _ = space_without_subspaces
-    space.update_state = Mock()
-    space.clear_defaults = Mock()
+    space.accounts = {i: Mock() for i in range(10)}
+    space.spaces = {i: Mock() for i in range(5)}
     return space
 
 
-def test_evolve_update_all_state(space_before_evolution):
+def test_clear_transactions_uses_accounts_method(space_with_transactions):
     # Given
-    subspace = Mock()
-    space = space_before_evolution
-    space.spaces["fake_market"] = subspace
+    space = space_with_transactions
 
     # When
-    space.evolve()
+    space.clear_transactions()
 
     # Then
-    space.update_state.assert_called_once()
-    subspace.update_state.assert_called_once()
+    for account in space.accounts.values():
+        account.clear_transactions.assert_called_with()
 
 
-def test_evolve_clear_all_defaults(space_before_evolution):
+def test_clear_transactions_uses_subspaces_method(space_with_transactions):
     # Given
-    subspace = Mock()
-    space = space_before_evolution
-    space.spaces["fake_market"] = subspace
+    space = space_with_transactions
 
     # When
-    space.evolve()
+    space.clear_transactions()
 
     # Then
-    space.clear_defaults.assert_called_once()
-    subspace.clear_defaults.assert_called_once()
+    for subspace in space.spaces.values():
+        subspace.clear_transactions.assert_called_with()
+

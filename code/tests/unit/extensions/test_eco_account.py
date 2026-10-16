@@ -61,7 +61,7 @@ def test_creates_default_value_for_transactions(monkeypatch):
 # ----------------------------------------------------
 
 
-def test_clear_flows_reset_amount(monkeypatch):
+def test_clear_transactions_resets_transactions_amount(monkeypatch):
     # Given
     monkeypatch.setattr("model.extensions.FINANCIAL_ASSETS", [])
     monkeypatch.setattr("model.extensions.REAL_ASSETS", [])
@@ -70,7 +70,7 @@ def test_clear_flows_reset_amount(monkeypatch):
     account["a"] = 500
 
     # When
-    account.clear_flows()
+    account.clear_transactions()
 
     # Then
     assert account["a"] == 0
