@@ -79,10 +79,12 @@ class GoodsMarket(EcoSpace):
         self.average_price = sum(producers.price) / max(1, len(producers))
         self.average_prod = sum(producers.productivity) / max(1, len(producers))
 
-    #
-    # Evolution
-    #
     def clear_defaults(self):
         roles = self.find_all_roles("producer")
         for role in roles.select(roles.defaulted == True):
             self.remove_role(role)
+
+    def clear_transactions(self):
+        super().clear_transactions()
+        for role in self.find_all_roles("producer"):
+            role.sales = 0

@@ -344,6 +344,19 @@ def test_calc_sales_range_if_no_producers(market_without_producers):
 # ----------------------------------------------------
 
 
+def test_clear_transactions_resets_each_producer_sales(market_with_producers):
+    # Given
+    market, producers = market_with_producers
+    producers.sales = 100.0
+
+    # When
+    market.clear_transactions()
+
+    # Then
+    for producer in producers:
+        assert producer.sales == 0
+
+
 @pytest.fixture
 def market_before_update(market_with_producers):
     # Given
