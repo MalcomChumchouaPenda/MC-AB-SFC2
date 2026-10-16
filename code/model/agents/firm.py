@@ -35,7 +35,8 @@ class Firm(EcoAgent):
         self.prev_desired_labor = 0
 
         # other props
-        self.variety = 0.0
+        random = self.model.nprandom
+        self.variety = random.uniform(0, math.radians(360))
         self.defaulted = False
 
     #

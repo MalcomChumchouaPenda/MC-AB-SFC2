@@ -29,8 +29,9 @@ class Household(EcoAgent):
         self.deposit_bank_id = None
 
         # others props
+        random = self.model.nprandom
+        self.preference = random.uniform(0, math.radians(360))
         self.labor_supply = 1.0
-        self.preference = 0
 
     def revise_reservation_wage(self):
         p = self.p

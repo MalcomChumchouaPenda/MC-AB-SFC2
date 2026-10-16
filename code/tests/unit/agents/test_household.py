@@ -24,6 +24,7 @@ def model(fake_model):
     # Given
     model = fake_model
     model.p.initial_wage = 0.0
+    model.nprandom = Mock()
     return model
 
 
@@ -43,12 +44,17 @@ def test_initializes_prev_labor_sold(model):
     assert household.prev_labor_sold == 0.0
 
 
-def test_initializes_preference(model):
+def test_initializes_preference_randomly(model):
+    # Given
+    random = model.nprandom
+    random.uniform.return_value = 0.4
+
     # When
     household = Household(model)
 
     # Then
-    assert household.preference == 0
+    random.uniform.assert_called_with(0, math.radians(360))
+    assert household.preference == 0.4
 
 
 def test_initializes_reservation_wage(model):
@@ -261,6 +267,7 @@ def test_calc_revision_probability(hh_with_roles_and_account):
 def fully_employed_before(hh_with_roles_and_account):
     # Given
     household, *_ = hh_with_roles_and_account
+    household.model.nprandom = Mock()
     household.p.delta = 0.9
     household.prev_labor_sold = 1.0
     household.reservation_wage = 10.0
@@ -318,6 +325,7 @@ def test_can_choose_to_not_increases_reserv_wage(fully_employed_before):
 def part_employed_before(hh_with_roles_and_account):
     # Given
     household, *_ = hh_with_roles_and_account
+    household.model.nprandom = Mock()
     household.p.delta = 0.9
     household.prev_labor_sold = 0.5
     household.reservation_wage = 10.0
@@ -951,6 +959,7 @@ def hh_as_investor(hh_before_allocation):
     # Given
     role = Mock()
     household = hh_before_allocation
+    household.model.nprandom = Mock()
     household.roles = {"citizen": role}
     return household, role
 

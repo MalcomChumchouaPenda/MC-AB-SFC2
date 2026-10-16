@@ -19,10 +19,15 @@ def test_inherits_from_eco_agent():
     assert is_derived
 
 
-def test_initializes_tradable(fake_model):
+@pytest.fixture
+def model(fake_model):
     # Given
     model = fake_model
+    model.nprandom = Mock()
+    return model
 
+
+def test_initializes_tradable(model):
     # When
     firm = Firm(model)
 
@@ -30,10 +35,7 @@ def test_initializes_tradable(fake_model):
     assert firm.tradable is False
 
 
-def test_initializes_defaulted(fake_model):
-    # Given
-    model = fake_model
-
+def test_initializes_defaulted(model):
     # When
     firm = Firm(model)
 
@@ -41,10 +43,7 @@ def test_initializes_defaulted(fake_model):
     assert firm.defaulted is False
 
 
-def test_initializes_price_offered(fake_model):
-    # Given
-    model = fake_model
-
+def test_initializes_price_offered(model):
     # When
     firm = Firm(model)
 
@@ -52,10 +51,7 @@ def test_initializes_price_offered(fake_model):
     assert firm.price == 0
 
 
-def test_initializes_wage_offered(fake_model):
-    # Given
-    model = fake_model
-
+def test_initializes_wage_offered(model):
     # When
     firm = Firm(model)
 
@@ -63,10 +59,7 @@ def test_initializes_wage_offered(fake_model):
     assert firm.wage_offer == 0
 
 
-def test_initializes_expected_sales(fake_model):
-    # Given
-    model = fake_model
-
+def test_initializes_expected_sales(model):
     # When
     firm = Firm(model)
 
@@ -74,10 +67,7 @@ def test_initializes_expected_sales(fake_model):
     assert firm.expected_sales == 0
 
 
-def test_initializes_desired_labor(fake_model):
-    # Given
-    model = fake_model
-
+def test_initializes_desired_labor(model):
     # When
     firm = Firm(model)
 
@@ -85,10 +75,7 @@ def test_initializes_desired_labor(fake_model):
     assert firm.desired_labor == 0
 
 
-def test_initializes_desired_output(fake_model):
-    # Given
-    model = fake_model
-
+def test_initializes_desired_output(model):
     # When
     firm = Firm(model)
 
@@ -96,10 +83,7 @@ def test_initializes_desired_output(fake_model):
     assert firm.desired_output == 0
 
 
-def test_initializes_desired_loans(fake_model):
-    # Given
-    model = fake_model
-
+def test_initializes_desired_loans(model):
     # When
     firm = Firm(model)
 
@@ -107,10 +91,7 @@ def test_initializes_desired_loans(fake_model):
     assert firm.desired_loans == 0
 
 
-def test_initializes_desired_rd_expense(fake_model):
-    # Given
-    model = fake_model
-
+def test_initializes_desired_rd_expense(model):
     # When
     firm = Firm(model)
 
@@ -118,10 +99,7 @@ def test_initializes_desired_rd_expense(fake_model):
     assert firm.desired_rd == 0
 
 
-def test_initializes_taxes_payable(fake_model):
-    # Given
-    model = fake_model
-
+def test_initializes_taxes_payable(model):
     # When
     firm = Firm(model)
 
@@ -129,10 +107,7 @@ def test_initializes_taxes_payable(fake_model):
     assert firm.taxes_payable == 0
 
 
-def test_initializes_dividends_payable(fake_model):
-    # Given
-    model = fake_model
-
+def test_initializes_dividends_payable(model):
     # When
     firm = Firm(model)
 
@@ -140,21 +115,20 @@ def test_initializes_dividends_payable(fake_model):
     assert firm.dividends_payable == 0
 
 
-def test_initializes_variety(fake_model):
+def test_initializes_variety_randomly(model):
     # Given
-    model = fake_model
+    random = model.nprandom
+    random.uniform.return_value = 0.6
 
     # When
     firm = Firm(model)
 
     # Then
-    assert firm.variety == 0.0
+    random.uniform.assert_called_with(0, math.radians(360))
+    assert firm.variety == 0.6
 
 
-def test_initializes_net_worth(fake_model):
-    # Given
-    model = fake_model
-
+def test_initializes_net_worth(model):
     # When
     firm = Firm(model)
 
@@ -162,10 +136,7 @@ def test_initializes_net_worth(fake_model):
     assert firm.net_worth == 0.0
 
 
-def test_initializes_net_cash_flow(fake_model):
-    # Given
-    model = fake_model
-
+def test_initializes_net_cash_flow(model):
     # When
     firm = Firm(model)
 
@@ -173,10 +144,7 @@ def test_initializes_net_cash_flow(fake_model):
     assert firm.net_cash_flow == 0.0
 
 
-def test_initializes_prev_sales(fake_model):
-    # Given
-    model = fake_model
-
+def test_initializes_prev_sales(model):
     # When
     firm = Firm(model)
 
@@ -184,10 +152,7 @@ def test_initializes_prev_sales(fake_model):
     assert firm.prev_sales == 0
 
 
-def test_initializes_prev_output(fake_model):
-    # Given
-    model = fake_model
-
+def test_initializes_prev_output(model):
     # When
     firm = Firm(model)
 
@@ -195,10 +160,7 @@ def test_initializes_prev_output(fake_model):
     assert firm.prev_output == 0
 
 
-def test_initializes_prev_expected_sales(fake_model):
-    # Given
-    model = fake_model
-
+def test_initializes_prev_expected_sales(model):
     # When
     firm = Firm(model)
 
@@ -206,10 +168,7 @@ def test_initializes_prev_expected_sales(fake_model):
     assert firm.prev_expected_sales == 0
 
 
-def test_initializes_prev_inventories(fake_model):
-    # Given
-    model = fake_model
-
+def test_initializes_prev_inventories(model):
     # When
     firm = Firm(model)
 
@@ -217,10 +176,7 @@ def test_initializes_prev_inventories(fake_model):
     assert firm.prev_inventories == 0
 
 
-def test_initializes_prev_labor(fake_model):
-    # Given
-    model = fake_model
-
+def test_initializes_prev_labor(model):
     # When
     firm = Firm(model)
 
@@ -228,10 +184,7 @@ def test_initializes_prev_labor(fake_model):
     assert firm.prev_labor == 0
 
 
-def test_initializes_prev_desired_labor(fake_model):
-    # Given
-    model = fake_model
-
+def test_initializes_prev_desired_labor(model):
     # When
     firm = Firm(model)
 
@@ -239,10 +192,7 @@ def test_initializes_prev_desired_labor(fake_model):
     assert firm.prev_desired_labor == 0
 
 
-def test_initializes_initial_productivity(fake_model):
-    # Given
-    model = fake_model
-
+def test_initializes_initial_productivity(model):
     # When
     firm = Firm(model)
 
@@ -473,6 +423,7 @@ def hiring_firm(firm):
     firm.p.delta = 0.9
     firm.wage_offer = 10.0
     firm._calc_revision_probability = Mock(return_value=0)
+    firm.model.nprandom = Mock()
     return firm
 
 
