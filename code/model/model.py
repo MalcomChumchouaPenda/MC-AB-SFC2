@@ -144,12 +144,12 @@ class EcoModel(Model):
         self.national_cbs.implement_discount_rate()
 
     def _enter_exit(self):
+        self.firms.exit()
+        self.banks.exit()
         self.households.choose_portfolio_allocation()
         self.households.invest_equity()
         self.households.choose_deposit_bank()
         self.households.make_deposits()
-        self.firms.exit()
-        self.banks.exit()
         self.governments.issue_deposit_guarantee_bonds()
         self.national_cbs.buy_bonds()
         self.governments.reimburse_deposits()

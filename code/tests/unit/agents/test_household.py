@@ -1475,7 +1475,7 @@ def test_create_company_funds_new_bank(before_bank_creation):
 
 
 @pytest.fixture
-def hh_as_depositor(hh_with_roles_and_account):
+def before_deposits(hh_with_roles_and_account):
     # Given
     role = Mock()
     household, roles, _ = hh_with_roles_and_account
@@ -1483,9 +1483,9 @@ def hh_as_depositor(hh_with_roles_and_account):
     return household, role
 
 
-def test_make_deposits_with_residual_cash(hh_as_depositor):
+def test_make_deposits_with_residual_cash(before_deposits):
     # Given
-    household, role = hh_as_depositor
+    household, role = before_deposits
     household.account["cash"] = 500
     household.deposit_bank_id = 2
 
@@ -1496,9 +1496,9 @@ def test_make_deposits_with_residual_cash(hh_as_depositor):
     role.make_deposits.assert_called_with(2, 500)
 
 
-def test_dont_make_deposits_without_deposit_bank_id(hh_as_depositor):
+def test_dont_make_deposits_without_deposit_bank_id(before_deposits):
     # Given
-    household, role = hh_as_depositor
+    household, role = before_deposits
     household.account["cash"] = 500
     household.deposit_bank_id = None
 
@@ -1509,13 +1509,27 @@ def test_dont_make_deposits_without_deposit_bank_id(hh_as_depositor):
     role.make_deposits.assert_not_called()
 
 
-def test_choose_deposit_bank_leave_old_deposit_bank(hh_as_depositor):
+@pytest.fixture
+def banks(make_dlist):
     # Given
-    banks = [Mock(id=i) for i in range(3)]
-    household, role = hh_as_depositor
-    household.deposit_bank_id = 4
-    household.model.random.choice.side_effect = lambda x: x[-1]
+    return make_dlist([Mock(id=i, defaulted=False) for i in range(3)])
+
+
+@pytest.fixture
+def before_bank_choice(hh_with_roles_and_account, banks):
+    # Given
+    role = Mock()
     role.find_deposit_banks.return_value = banks
+    household, roles, _ = hh_with_roles_and_account
+    household.model.random.choice.side_effect = lambda x: x[-1]
+    roles["depositor"] = role
+    return household, role, banks
+
+
+def test_choose_deposit_bank_leave_old_deposit_bank(before_bank_choice):
+    # Given
+    household, role, _ = before_bank_choice
+    household.deposit_bank_id = 4
 
     # When
     household.choose_deposit_bank()
@@ -1524,13 +1538,10 @@ def test_choose_deposit_bank_leave_old_deposit_bank(hh_as_depositor):
     role.leave_deposit_bank.assert_called_once_with(4)
 
 
-def test_choose_deposit_bank_doesnt_leave_null_deposit_bank(hh_as_depositor):
+def test_choose_deposit_bank_doesnt_leave_null_deposit_bank(before_bank_choice):
     # Given
-    banks = [Mock(id=i) for i in range(3)]
-    household, role = hh_as_depositor
+    household, role, _ = before_bank_choice
     household.deposit_bank_id = None
-    household.model.random.choice.side_effect = lambda x: x[-1]
-    role.find_deposit_banks.return_value = banks
 
     # When
     household.choose_deposit_bank()
@@ -1539,12 +1550,9 @@ def test_choose_deposit_bank_doesnt_leave_null_deposit_bank(hh_as_depositor):
     role.leave_deposit_bank.assert_not_called()
 
 
-def test_choose_deposit_bank_join_new_deposit_bank(hh_as_depositor):
+def test_choose_deposit_bank_join_new_deposit_bank(before_bank_choice):
     # Given
-    banks = [Mock(id=i) for i in range(3)]
-    household, role = hh_as_depositor
-    household.model.random.choice.side_effect = lambda x: x[-1]
-    role.find_deposit_banks.return_value = banks
+    household, role, banks = before_bank_choice
 
     # When
     household.choose_deposit_bank()
@@ -1553,18 +1561,27 @@ def test_choose_deposit_bank_join_new_deposit_bank(hh_as_depositor):
     role.join_deposit_bank.assert_called_once_with(banks[-1].id)
 
 
-def test_choose_deposit_bank_sets_deposit_bank_id(hh_as_depositor):
+def test_choose_deposit_bank_sets_deposit_bank_id(before_bank_choice):
     # Given
-    banks = [Mock(id=i) for i in range(3)]
-    household, role = hh_as_depositor
-    household.model.random.choice.side_effect = lambda x: x[-1]
-    role.find_deposit_banks.return_value = banks
+    household, _, banks = before_bank_choice
 
     # When
     household.choose_deposit_bank()
 
     # Then
     assert household.deposit_bank_id == banks[-1].id
+
+
+def test_choose_deposit_bank_doesnt_join_defaulted_bank(before_bank_choice):
+    # Given
+    household, role, banks = before_bank_choice
+    banks.defaulted = True
+
+    # When
+    household.choose_deposit_bank()
+
+    # Then
+    role.join_deposit_bank.assert_not_called()
 
 
 # ---------------------------------------------------

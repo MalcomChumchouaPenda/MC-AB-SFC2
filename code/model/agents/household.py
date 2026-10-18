@@ -298,12 +298,13 @@ class Household(EcoAgent):
     def choose_deposit_bank(self):
         role = self.roles["depositor"]
         banks = role.find_deposit_banks()
-        if len(banks) > 0:
+        selected = banks.select(banks.defaulted == False)
+        if len(selected) > 0:
             bank_id = self.deposit_bank_id
             if bank_id is not None:
                 role.leave_deposit_bank(bank_id)
             random = self.model.random
-            new_bank = random.choice(banks)
+            new_bank = random.choice(selected)
             role.join_deposit_bank(new_bank.id)
             self.deposit_bank_id = new_bank.id
 
