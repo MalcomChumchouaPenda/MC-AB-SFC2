@@ -39,20 +39,23 @@ def household(model, union):
     model.p.beta = 1
     model.p.cT = 0.6
     household = Household(model)
-    union.add_household(household)
+    union.add_agents([household])
     return household
 
 
 @pytest.fixture
-def firms(model, union, make_dlist):
+def firms(model, union):
     # Given
-    firms = make_dlist()
+    firms = []
     for tradable in [True, False]:
         firm = Firm(model)
         firm.tradable = tradable
-        firm.variety = 0.5
+        union.add_agents([firm])
+        role = firm.roles["producer"]
+        role.inventories = 10
+        role.price = 10
+        role.variety = 0.5
         firms.append(firm)
-        union.add_firm(firm)
     return firms
 
 
@@ -61,9 +64,6 @@ def test_increases_consumption_of_all_goods(household, firms, markets):
     markets.average_price = 10
     household.desired_consumption = 100
     household.account["cash"] = 100
-    for firm in firms:
-        firm.roles["producer"].inventories = 10
-        firm.roles["producer"].price = 10
 
     # When
     household.consume()
@@ -79,9 +79,6 @@ def test_transfers_cash_for_all_consumptions(household, firms, markets):
     markets.average_price = 10
     household.desired_consumption = 100
     household.account["cash"] = 100
-    for firm in firms:
-        firm.roles["producer"].inventories = 10
-        firm.roles["producer"].price = 10
 
     # When
     household.consume()
@@ -97,9 +94,6 @@ def test_reduces_inventories_of_firms(household, firms, markets):
     markets.average_price = 10
     household.desired_consumption = 100
     household.account["cash"] = 100
-    for firm in firms:
-        firm.roles["producer"].inventories = 10
-        firm.roles["producer"].price = 10
 
     # When
     household.consume()

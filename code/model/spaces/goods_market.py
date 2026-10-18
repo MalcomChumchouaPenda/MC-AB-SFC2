@@ -18,13 +18,11 @@ class GoodsMarket(EcoSpace):
 
     def add_household(self, household):
         prefix = "trad" if self.tradable else "non_trad"
-        role = self.add_role(Consumer, household, prefix=prefix)
-        role.preference = household.preference
+        self.add_role(Consumer, household, prefix=prefix)
 
     def add_firm(self, firm):
-        role = self.add_role(Producer, firm)
-        role.productivity = firm.initial_productivity
-        role.variety = firm.variety
+        if firm.tradable == self.tradable:
+            self.add_role(Producer, firm)
 
     #
     # Reactions

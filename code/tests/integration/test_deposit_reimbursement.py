@@ -57,7 +57,7 @@ def bank(model, union):
 def firm(model, union):
     # Given
     firm = Firm(model)
-    union.add_firm(firm)
+    union.add_agents([firm])
     return firm
 
 
@@ -113,7 +113,7 @@ def test_clears_firm_deposits(firm, bank, govt, deposit_market):
 def household(model, union):
     # Given
     household = Household(model)
-    union.add_household(household)
+    union.add_agents([household])
     return household
 
 

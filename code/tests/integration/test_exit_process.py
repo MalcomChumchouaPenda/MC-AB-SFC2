@@ -31,7 +31,7 @@ def founders(model, union):
     founders = []
     for _ in range(2):
         household = Household(model)
-        union.add_household(household)
+        union.add_agents([household])
         founders.append(household)
     return founders
 
@@ -40,7 +40,7 @@ def founders(model, union):
 def firm(model, union, founders):
     # Given
     firm = Firm(model)
-    union.add_firm(firm)
+    union.add_agents([firm])
     for household in founders:
         household.account["cash"] = 50
         citizen = household.roles["citizen"]

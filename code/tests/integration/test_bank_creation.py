@@ -47,7 +47,7 @@ def founders(model, union):
     for i in range(2):
         household = Household(model)
         household.desired_equity = 300 - i * 100
-        union.add_household(household)
+        union.add_agents([household])
         founders.append(household)
     return founders
 
@@ -70,7 +70,6 @@ def test_appends_new_bank_to_model(founders, model):
     # Given
     initiator = founders[0]
     banks = model.banks
-    print(initiator.roles["citizen"].env.roles)
 
     # # When
     initiator.invest_equity()

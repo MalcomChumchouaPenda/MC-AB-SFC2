@@ -185,7 +185,9 @@ class Household(EcoAgent):
             target = self._calc_initial_equity(sector)
             shares = self._collect_equity_shares(target)
             if shares is not None:
-                self._create_company(sector, shares)
+                equity_size = sum([share["amount"] for share in shares])
+                agent_id = self._create_company(sector, equity_size)
+                self._fund_company(agent_id, shares)
 
     def _choose_investment_sector(self):
         p = self.p
@@ -238,52 +240,44 @@ class Household(EcoAgent):
             return None
         return shares
 
-    def _create_company(self, sector, shares):
+    def _create_company(self, sector, equity_size):
+        model = self.model
         if sector == "B":
-            agent_id = self._create_bank()
+            bank = Bank(model)
+            bank.country_pos = self.country_pos
+            model.union.add_agents([bank])
+            model.banks.append(bank)
+            return bank.id
         else:
-            size = sum([s["amount"] for s in shares])
-            agent_id = self._create_firm(size, sector)
+            firm = Firm(model)
+            firm.tradable = sector == "FT"
+            firm.country_pos = self.country_pos
+            model.union.add_agents([firm])
+            model.firms.append(firm)
+            self._resize_new_firm(firm, sector, equity_size)
+            return firm.id
+
+    def _resize_new_firm(self, firm, sector, equity_size):
+        p = self.p
+        citizen_role = self.roles["citizen"]
+        producer_role = firm.roles["producer"]
+        employer_role = firm.roles["employer"]
+        productivity_range = citizen_role.get_productivity_range(sector)
+        if productivity_range is None:
+            employer_role.wage = p.initial_wage
+            producer_role.productivity = p.initial_productivity
+            producer_role.price = p.initial_wage / p.initial_productivity
+            firm.expected_sales = p.initial_productivity * equity_size / p.initial_wage
+        else:
+            uniform = self.model.nprandom.uniform
+            employer_role.wage = uniform(*citizen_role.get_wage_range(sector))
+            producer_role.productivity = uniform(*productivity_range)
+            producer_role.price = uniform(*citizen_role.get_price_range(sector))
+            firm.expected_sales = uniform(*citizen_role.get_sales_range(sector))
+
+    def _fund_company(self, agent_id, shares):
         for share in shares:
             share["founder"].fund_company(agent_id, share["amount"])
-
-    def _create_bank(self):
-        model = self.model
-        bank = Bank(model)
-        bank.country_pos = self.country_pos
-        model.union.add_bank(bank)
-        model.banks.append(bank)
-        return bank.id
-
-    def _create_firm(self, size, sector):
-        model = self.model
-        firm = Firm(model)
-        firm.country_pos = self.country_pos
-        firm.tradable = sector == "FT"
-        role = self.roles["citizen"]
-        productivity_range = role.get_productivity_range(sector)
-        if productivity_range is None:
-            self._create_firm_with_initial_params(firm, size)
-        else:
-            self._create_firm_with_sector_ranges(firm, sector, productivity_range)
-        model.union.add_firm(firm)
-        model.firms.append(firm)
-        return firm.id
-
-    def _create_firm_with_initial_params(self, firm, size):
-        p = self.p
-        firm.wage_offer = p.initial_wage
-        firm.initial_productivity = p.initial_productivity
-        firm.price = p.initial_wage / p.initial_productivity
-        firm.expected_sales = p.initial_productivity * size / p.initial_wage
-
-    def _create_firm_with_sector_ranges(self, firm, sector, productivity_range):
-        role = self.roles["citizen"]
-        uniform = self.model.nprandom.uniform
-        firm.initial_productivity = uniform(*productivity_range)
-        firm.wage_offer = uniform(*role.get_wage_range(sector))
-        firm.price = uniform(*role.get_price_range(sector))
-        firm.expected_sales = uniform(*role.get_sales_range(sector))
 
     #
     # Deposits management

@@ -40,6 +40,9 @@ class EcoRole(AgentNode):
         self.prefix = ""
         self.name = camel_to_snake(self.__class__.__name__)
 
+    def __repr__(self):
+        return f"{self.__class__.__name__}-{self.label}"
+
     @property
     def id(self):
         return self.agent.id

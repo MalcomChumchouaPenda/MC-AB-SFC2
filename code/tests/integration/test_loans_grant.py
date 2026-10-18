@@ -50,7 +50,7 @@ def bank(model, union):
 def firm(model, union):
     # Given
     firm = Firm(model)
-    union.add_firm(firm)
+    union.add_agents([firm])
     firm.account["equities"] = -100
     return firm
 

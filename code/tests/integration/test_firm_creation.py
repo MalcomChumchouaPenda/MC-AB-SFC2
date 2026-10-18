@@ -46,7 +46,7 @@ def founders(model, union):
     for i in range(2):
         household = Household(model)
         household.desired_equity = 300 - i * 100
-        union.add_household(household)
+        union.add_agents([household])
         founders.append(household)
     return founders
 

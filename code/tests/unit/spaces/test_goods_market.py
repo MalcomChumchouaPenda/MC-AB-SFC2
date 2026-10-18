@@ -83,7 +83,7 @@ def market_without_roles(monkeypatch, fake_model):
 
 
 @pytest.mark.parametrize("tradable, prefix", [(True, "trad"), (False, "non_trad")])
-def test_add_household_add_consumer_role(market_without_roles, tradable, prefix):
+def test_add_household_adds_consumer_role(market_without_roles, tradable, prefix):
     # Given
     market = market_without_roles
     market.tradable = tradable
@@ -97,25 +97,11 @@ def test_add_household_add_consumer_role(market_without_roles, tradable, prefix)
 
 
 @pytest.mark.parametrize("tradable", [True, False])
-def test_add_household_sets_role_preference(market_without_roles, tradable):
+def test_add_firm_adds_producer_role_for_compliers(market_without_roles, tradable):
     # Given
-    role = Mock()
+    firm = Mock(tradable=tradable)
     market = market_without_roles
-    market.add_role.return_value = role
     market.tradable = tradable
-    household = Mock()
-
-    # When
-    market.add_household(household)
-
-    # Then
-    assert role.preference == household.preference
-
-
-def test_add_firm_add_producer_role(market_without_roles):
-    # Given
-    firm = Mock()
-    market = market_without_roles
 
     # When
     market.add_firm(firm)
@@ -124,32 +110,18 @@ def test_add_firm_add_producer_role(market_without_roles):
     market.add_role.assert_called_with(FakeProducer, firm)
 
 
-def test_add_firm_sets_role_variety(market_without_roles):
+@pytest.mark.parametrize("tradable", [True, False])
+def test_add_firm_doesnt_add_role_for_no_compliers(market_without_roles, tradable):
     # Given
-    role = Mock()
-    firm = Mock()
+    firm = Mock(tradable=tradable)
     market = market_without_roles
-    market.add_role.return_value = role
+    market.tradable = not tradable
 
     # When
     market.add_firm(firm)
 
     # Then
-    assert role.variety == firm.variety
-
-
-def test_add_firm_sets_productivity(market_without_roles):
-    # Given
-    role = Mock()
-    firm = Mock()
-    market = market_without_roles
-    market.add_role.return_value = role
-
-    # When
-    market.add_firm(firm)
-
-    # Then
-    assert role.productivity == firm.initial_productivity
+    market.add_role.assert_not_called()
 
 
 # ---------------------------------------------------

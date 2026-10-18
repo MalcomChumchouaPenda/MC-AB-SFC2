@@ -688,7 +688,7 @@ def test_consume_withdraws_no_deposits(hh_as_general_consumer):
 
 
 @pytest.fixture
-def hh_before_allocation(hh_with_roles_and_account):
+def before_allocation(hh_with_roles_and_account):
     # Given
     household, roles, _ = hh_with_roles_and_account
     household.deposit_bank_id = 1
@@ -697,9 +697,9 @@ def hh_before_allocation(hh_with_roles_and_account):
     return household
 
 
-def test_calc_net_worth(hh_before_allocation):
+def test_calc_net_worth(before_allocation):
     # Given
-    household = hh_before_allocation
+    household = before_allocation
     household.account["deposits"] = 200
     household.account["equities"] = 300
     household.account["cash"] = 500
@@ -711,9 +711,9 @@ def test_calc_net_worth(hh_before_allocation):
     assert household.net_worth == 1000
 
 
-def test_calc_expected_net_worth(hh_before_allocation):
+def test_calc_expected_net_worth(before_allocation):
     # Given
-    household = hh_before_allocation
+    household = before_allocation
     household.net_worth = 1000
     household.disposable_income = 300
     household.expected_consumption = 200
@@ -725,9 +725,9 @@ def test_calc_expected_net_worth(hh_before_allocation):
     assert expected_worth == 1100
 
 
-def test_calc_liquidity_pref_with_deposit_bank_rate(hh_before_allocation):
+def test_calc_liquidity_pref_with_deposit_bank_rate(before_allocation):
     # Given
-    household = hh_before_allocation
+    household = before_allocation
     household.account["dividends"] = 10
     household.account["equities"] = 100
     household.p.lambda_ = 0.6
@@ -742,9 +742,9 @@ def test_calc_liquidity_pref_with_deposit_bank_rate(hh_before_allocation):
     roles["depositor"].get_deposit_rate.assert_called_with()
 
 
-def test_calc_liquidity_pref_when_equity_is_more_profitable(hh_before_allocation):
+def test_calc_liquidity_pref_when_equity_is_more_profitable(before_allocation):
     # Given
-    household = hh_before_allocation
+    household = before_allocation
     household.account["dividends"] = 10
     household.account["equities"] = 100
     household.p.lambda_ = 0.6
@@ -760,9 +760,9 @@ def test_calc_liquidity_pref_when_equity_is_more_profitable(hh_before_allocation
     assert lp == pytest.approx(expected)
 
 
-def test_calc_liquidity_pref_when_equity_is_less_profitable(hh_before_allocation):
+def test_calc_liquidity_pref_when_equity_is_less_profitable(before_allocation):
     # Given
-    household = hh_before_allocation
+    household = before_allocation
     household.account["dividends"] = 2
     household.account["equities"] = 100
     household.p.lambda_ = 0.7
@@ -777,9 +777,9 @@ def test_calc_liquidity_pref_when_equity_is_less_profitable(hh_before_allocation
     assert lp == 0.7
 
 
-def test_calc_liquidity_preference_when_no_equity(hh_before_allocation):
+def test_calc_liquidity_preference_when_no_equity(before_allocation):
     # Given
-    household = hh_before_allocation
+    household = before_allocation
     household.account["dividends"] = 0
     household.account["equities"] = 0
     household.p.lambda_ = 0.8
@@ -794,9 +794,9 @@ def test_calc_liquidity_preference_when_no_equity(hh_before_allocation):
     assert lp == 0.8
 
 
-def test_choose_portfolio_allocation_calc_net_worth(hh_before_allocation):
+def test_choose_portfolio_allocation_calc_net_worth(before_allocation):
     # Given
-    household = hh_before_allocation
+    household = before_allocation
     household.account["equities"] = 80
     household._calc_liquidity_preference = Mock(return_value=0.80)
     household._calc_expected_net_worth = Mock(return_value=100)
@@ -809,9 +809,9 @@ def test_choose_portfolio_allocation_calc_net_worth(hh_before_allocation):
     household._calc_net_worth.assert_called_once_with()
 
 
-def test_choose_portfolio_allocation_updates_desired_assets(hh_before_allocation):
+def test_choose_portfolio_allocation_updates_desired_assets(before_allocation):
     # Given
-    household = hh_before_allocation
+    household = before_allocation
     household.account["equities"] = 20
     household._calc_liquidity_preference = Mock(return_value=0.40)
     household._calc_expected_net_worth = Mock(return_value=100)
@@ -825,9 +825,9 @@ def test_choose_portfolio_allocation_updates_desired_assets(hh_before_allocation
     assert household.desired_deposits == 60
 
 
-def test_choose_portfolio_allocation_preserves_existing_equity(hh_before_allocation):
+def test_choose_portfolio_allocation_preserves_existing_equity(before_allocation):
     # Given
-    household = hh_before_allocation
+    household = before_allocation
     household.account["equities"] = 80
     household._calc_liquidity_preference = Mock(return_value=0.80)
     household._calc_expected_net_worth = Mock(return_value=100)
@@ -840,9 +840,9 @@ def test_choose_portfolio_allocation_preserves_existing_equity(hh_before_allocat
     assert household.desired_equity == 80
 
 
-def test_choose_portfolio_allocation_updates_citizen_role(hh_before_allocation):
+def test_choose_portfolio_allocation_updates_citizen_role(before_allocation):
     # Given
-    household = hh_before_allocation
+    household = before_allocation
     household.account["equities"] = 80
     household._calc_liquidity_preference = Mock(return_value=0.80)
     household._calc_expected_net_worth = Mock(return_value=100)
@@ -862,19 +862,20 @@ def test_choose_portfolio_allocation_updates_citizen_role(hh_before_allocation):
 
 
 @pytest.fixture
-def hh_with_investment_steps(hh_before_allocation):
+def before_investment(before_allocation):
     # Given
-    household = hh_before_allocation
+    household = before_allocation
     household._choose_investment_sector = Mock()
     household._calc_initial_equity = Mock()
-    household._collect_equity_shares = Mock()
+    household._collect_equity_shares = Mock(return_value=None)
     household._create_company = Mock()
+    household._fund_company = Mock()
     return household
 
 
-def test_invest_equity_does_nothing_if_no_desired_equity(hh_with_investment_steps):
+def test_invest_equity_does_nothing_if_no_desired_equity(before_investment):
     # Given
-    household = hh_with_investment_steps
+    household = before_investment
     household.desired_equity = 0
 
     # When
@@ -885,11 +886,12 @@ def test_invest_equity_does_nothing_if_no_desired_equity(hh_with_investment_step
     household._calc_initial_equity.assert_not_called()
     household._collect_equity_shares.assert_not_called()
     household._create_company.assert_not_called()
+    household._fund_company.assert_not_called()
 
 
-def test_invest_equity_chooses_investment_sector(hh_with_investment_steps):
+def test_invest_equity_chooses_investment_sector(before_investment):
     # Given
-    household = hh_with_investment_steps
+    household = before_investment
     household.desired_equity = 100
 
     # When
@@ -899,9 +901,9 @@ def test_invest_equity_chooses_investment_sector(hh_with_investment_steps):
     household._choose_investment_sector.assert_called_once_with()
 
 
-def test_invest_equity_calcs_initial_equity_with_sector(hh_with_investment_steps):
+def test_invest_equity_calcs_initial_equity_with_sector(before_investment):
     # Given
-    household = hh_with_investment_steps
+    household = before_investment
     household.desired_equity = 100
     household._choose_investment_sector.return_value = "ANY"
 
@@ -912,9 +914,9 @@ def test_invest_equity_calcs_initial_equity_with_sector(hh_with_investment_steps
     household._calc_initial_equity.assert_called_once_with("ANY")
 
 
-def test_invest_equity_collects_equity_shares_with_target(hh_with_investment_steps):
+def test_invest_equity_collects_equity_shares_with_target(before_investment):
     # Given
-    household = hh_with_investment_steps
+    household = before_investment
     household.desired_equity = 100
     household._calc_initial_equity.return_value = 250
 
@@ -925,10 +927,10 @@ def test_invest_equity_collects_equity_shares_with_target(hh_with_investment_ste
     household._collect_equity_shares.assert_called_once_with(250)
 
 
-def test_invest_equity_creates_company_with_sector_and_shares(hh_with_investment_steps):
+def test_invest_equity_creates_company_with_sector_and_size(before_investment):
     # Given
-    shares = [Mock()]
-    household = hh_with_investment_steps
+    shares = [dict(amount=100) for _ in range(2)]
+    household = before_investment
     household.desired_equity = 100
     household._collect_equity_shares.return_value = shares
     household._choose_investment_sector.return_value = "ANY"
@@ -937,12 +939,12 @@ def test_invest_equity_creates_company_with_sector_and_shares(hh_with_investment
     household.invest_equity()
 
     # Then
-    household._create_company.assert_called_once_with("ANY", shares)
+    household._create_company.assert_called_once_with("ANY", 200)
 
 
-def test_invest_equity_doesnt_create_company_if_no_shares(hh_with_investment_steps):
+def test_invest_equity_stop_process_if_no_shares(before_investment):
     # Given
-    household = hh_with_investment_steps
+    household = before_investment
     household.desired_equity = 100
     household._collect_equity_shares.return_value = None
     household._choose_investment_sector.return_value = "ANY"
@@ -952,13 +954,30 @@ def test_invest_equity_doesnt_create_company_if_no_shares(hh_with_investment_ste
 
     # Then
     household._create_company.assert_not_called()
+    household._fund_company.assert_not_called()
+
+
+def test_invest_equity_funds_company_with_new_agent_and_shares(before_investment):
+    # Given
+    shares = [dict(amount=100) for _ in range(2)]
+    household = before_investment
+    household.desired_equity = 100
+    household._collect_equity_shares.return_value = shares
+    household._choose_investment_sector.return_value = "ANY"
+    household._create_company.return_value = 5
+
+    # When
+    household.invest_equity()
+
+    # Then
+    household._fund_company.assert_called_once_with(5, shares)
 
 
 @pytest.fixture
-def hh_as_investor(hh_before_allocation):
+def hh_as_investor(before_allocation):
     # Given
     role = Mock()
-    household = hh_before_allocation
+    household = before_allocation
     household.model.nprandom = Mock()
     household.roles = {"citizen": role}
     return household, role
@@ -1170,25 +1189,20 @@ FakeFirm = Mock()
 def before_firm_creation(monkeypatch, hh_as_investor):
     # Given
     monkeypatch.setattr("model.agents.household.Firm", FakeFirm)
-    household, role = hh_as_investor
-    household.p.initial_wage = 1.0
-    household.p.initial_productivity = 1.0
+    equity_size = 100
+    household, _ = hh_as_investor
     household.model.union = Mock()
     household.model.firms = []
-    role.get_productivity_range.return_value = [0, 0]
-    role.get_price_range.return_value = [0, 0]
-    role.get_sales_range.return_value = [0, 0]
-    role.get_wage_range.return_value = [0, 0]
-    shares = [{"founder": role, "amount": 100}]
-    return household, role, shares
+    household._resize_new_firm = Mock()
+    return household, equity_size
 
 
 def test_create_company_creates_firm_with_model(before_firm_creation):
     # Given
-    household, _, shares = before_firm_creation
+    household, equity_size = before_firm_creation
 
     # When
-    household._create_company("ANY", shares)
+    household._create_company("ANY", equity_size)
 
     # Then
     FakeFirm.assert_called_with(household.model)
@@ -1198,11 +1212,11 @@ def test_create_company_sets_new_firm_country_pos(before_firm_creation):
     # Given
     firm = Mock()
     FakeFirm.return_value = firm
-    household, _, shares = before_firm_creation
+    household, equity_size = before_firm_creation
     household.country_pos = 5
 
     # When
-    household._create_company("ANY", shares)
+    household._create_company("ANY", equity_size)
 
     # Then
     assert firm.country_pos == 5
@@ -1213,180 +1227,184 @@ def test_create_company_sets_new_firm_tradable(before_firm_creation, sector, tra
     # Given
     firm = Mock()
     FakeFirm.return_value = firm
-    household, _, shares = before_firm_creation
+    household, equity_size = before_firm_creation
 
     # When
-    household._create_company(sector, shares)
+    household._create_company(sector, equity_size)
 
     # Then
     assert firm.tradable == tradable
 
 
-def test_create_company_sets_new_firm_productivity_from_range(before_firm_creation):
+def test_create_company_resizes_new_firm(before_firm_creation):
     # Given
     firm = Mock()
     FakeFirm.return_value = firm
-    household, role, shares = before_firm_creation
-    random = household.model.nprandom
-    random.uniform = lambda a, b: (a + b) / 2
-    role.get_productivity_range.return_value = (1.0, 2.0)
+    household, equity_size = before_firm_creation
 
     # When
-    household._create_company("ANY", shares)
+    household._create_company("ANY", equity_size)
 
     # Then
-    assert firm.initial_productivity == pytest.approx(1.5)
-
-
-def test_create_company_sets_new_firm_productivity_from_params(before_firm_creation):
-    # Given
-    firm = Mock()
-    FakeFirm.return_value = firm
-    household, role, shares = before_firm_creation
-    household.p.initial_productivity = 0.5
-    role.get_productivity_range.return_value = None
-
-    # When
-    household._create_company("ANY", shares)
-
-    # Then
-    assert firm.initial_productivity == pytest.approx(0.5)
-
-
-def test_create_company_sets_new_firm_price_from_range(before_firm_creation):
-    # Given
-    firm = Mock()
-    FakeFirm.return_value = firm
-    household, role, shares = before_firm_creation
-    random = household.model.nprandom
-    random.uniform = lambda a, b: (a + b) / 2
-    role.get_price_range.return_value = (5.0, 15.0)
-
-    # When
-    household._create_company("ANY", shares)
-
-    # Then
-    assert firm.price == pytest.approx(10.0)
-
-
-def test_create_company_sets_new_firm_price_from_params(before_firm_creation):
-    # Given
-    firm = Mock()
-    FakeFirm.return_value = firm
-    household, role, shares = before_firm_creation
-    household.p.initial_wage = 2.0
-    household.p.initial_productivity = 0.5
-    role.get_productivity_range.return_value = None
-
-    # When
-    household._create_company("ANY", shares)
-
-    # Then
-    assert firm.price == pytest.approx(2.0 / 0.5)
-
-
-def test_create_company_sets_new_firm_sales_from_range(before_firm_creation):
-    # Given
-    firm = Mock()
-    FakeFirm.return_value = firm
-    household, role, shares = before_firm_creation
-    random = household.model.nprandom
-    random.uniform = lambda a, b: (a + b) / 2
-    role.get_sales_range.return_value = (50.0, 100.0)
-
-    # When
-    household._create_company("ANY", shares)
-
-    # Then
-    assert firm.expected_sales == pytest.approx(75.0)
-
-
-def test_create_company_sets_new_firm_sales_from_params(before_firm_creation):
-    # Given
-    firm = Mock()
-    FakeFirm.return_value = firm
-    household, role, shares = before_firm_creation
-    household.p.initial_wage = 2.0
-    household.p.initial_productivity = 0.5
-    role.get_productivity_range.return_value = None
-
-    # When
-    household._create_company("ANY", shares)
-
-    # Then
-    assert firm.expected_sales == pytest.approx(0.5 * 100 / 2.0)
-
-
-def test_create_company_sets_new_firm_wage_from_range(before_firm_creation):
-    # Given
-    firm = Mock()
-    FakeFirm.return_value = firm
-    household, role, shares = before_firm_creation
-    random = household.model.nprandom
-    random.uniform = lambda a, b: (a + b) / 2
-    role.get_wage_range.return_value = (2.0, 4.0)
-
-    # When
-    household._create_company("ANY", shares)
-
-    # Then
-    assert firm.wage_offer == pytest.approx(3.0)
-
-
-def test_create_company_sets_new_firm_wage_from_params(before_firm_creation):
-    # Given
-    firm = Mock()
-    FakeFirm.return_value = firm
-    household, role, shares = before_firm_creation
-    household.p.initial_wage = 2.0
-    role.get_productivity_range.return_value = None
-
-    # When
-    household._create_company("ANY", shares)
-
-    # Then
-    assert firm.wage_offer == pytest.approx(2.0)
+    household._resize_new_firm.assert_called_with(firm, "ANY", equity_size)
 
 
 def test_create_company_adds_firm_into_union(before_firm_creation):
     # Given
     firm = Mock()
     FakeFirm.return_value = firm
-    household, _, shares = before_firm_creation
+    household, equity_size = before_firm_creation
     union = household.model.union
 
     # When
-    household._create_company("ANY", shares)
+    household._create_company("ANY", equity_size)
 
     # Then
-    union.add_firm.assert_called_once_with(firm)
+    union.add_agents.assert_called_once_with([firm])
 
 
 def test_create_company_appends_to_model_firms(before_firm_creation):
     # Given
     firm = Mock()
     FakeFirm.return_value = firm
-    household, _, shares = before_firm_creation
+    household, equity_size = before_firm_creation
 
     # When
-    household._create_company("ANY", shares)
+    household._create_company("ANY", equity_size)
 
     # Then
     assert firm in household.model.firms
 
 
-def test_create_company_funds_new_firm(before_firm_creation):
+@pytest.fixture
+def before_firm_resize(hh_as_investor):
     # Given
     firm = Mock()
-    FakeFirm.return_value = firm
-    household, _, shares = before_firm_creation
+    firm.roles = {"employer": Mock(), "producer": Mock()}
+    household, role = hh_as_investor
+    household.p.initial_wage = 1.0
+    household.p.initial_productivity = 1.0
+    role.get_productivity_range.return_value = [0, 0]
+    role.get_price_range.return_value = [0, 0]
+    role.get_sales_range.return_value = [0, 0]
+    role.get_wage_range.return_value = [0, 0]
+    return household, role, firm
+
+
+def test_resize_new_firm_sets_productivity_from_range(before_firm_resize):
+    # Given
+    household, citizen_role, firm = before_firm_resize
+    citizen_role.get_productivity_range.return_value = (1.0, 2.0)
+    producer_role = firm.roles["producer"]
+    random = household.model.nprandom
+    random.uniform = lambda a, b: (a + b) / 2
 
     # When
-    household._create_company("ANY", shares)
+    household._resize_new_firm(firm, "ANY", 100)
 
     # Then
-    for share in shares:
-        share["founder"].fund_company.assert_called_once_with(firm.id, share["amount"])
+    assert producer_role.productivity == pytest.approx(1.5)
+
+
+def test_resize_new_firm_sets_productivity_from_params(before_firm_resize):
+    # Given
+    household, citizen_role, firm = before_firm_resize
+    household.p.initial_productivity = 0.5
+    producer_role = firm.roles["producer"]
+    citizen_role.get_productivity_range.return_value = None
+
+    # When
+    household._resize_new_firm(firm, "ANY", 100)
+
+    # Then
+    assert producer_role.productivity == pytest.approx(0.5)
+
+
+def test_resize_new_firm_sets_price_from_range(before_firm_resize):
+    # Given
+    household, citizen_role, firm = before_firm_resize
+    citizen_role.get_price_range.return_value = (5.0, 15.0)
+    producer_role = firm.roles["producer"]
+    random = household.model.nprandom
+    random.uniform = lambda a, b: (a + b) / 2
+
+    # When
+    household._resize_new_firm(firm, "ANY", 100)
+
+    # Then
+    assert producer_role.price == pytest.approx(10.0)
+
+
+def test_resize_new_firm_sets_price_from_params(before_firm_resize):
+    # Given
+    household, citizen_role, firm = before_firm_resize
+    household.p.initial_wage = 2.0
+    household.p.initial_productivity = 0.5
+    producer_role = firm.roles["producer"]
+    citizen_role.get_productivity_range.return_value = None
+
+    # When
+    household._resize_new_firm(firm, "ANY", 100)
+
+    # Then
+    assert producer_role.price == pytest.approx(2.0 / 0.5)
+
+
+def test_resize_new_firm_sets_sales_from_range(before_firm_resize):
+    # Given
+    household, citizen_role, firm = before_firm_resize
+    citizen_role.get_sales_range.return_value = (50.0, 100.0)
+    random = household.model.nprandom
+    random.uniform = lambda a, b: (a + b) / 2
+
+    # When
+    household._resize_new_firm(firm, "ANY", 100)
+
+    # Then
+    assert firm.expected_sales == pytest.approx(75.0)
+
+
+def test_resize_new_firm_sets_sales_from_params(before_firm_resize):
+    # Given
+    household, citizen_role, firm = before_firm_resize
+    household.p.initial_wage = 2.0
+    household.p.initial_productivity = 0.5
+    citizen_role.get_productivity_range.return_value = None
+
+    # When
+    household._resize_new_firm(firm, "ANY", 100)
+
+    # Then
+    assert firm.expected_sales == pytest.approx(0.5 * 100 / 2.0)
+
+
+def test_resize_new_firm_sets_wage_from_range(before_firm_resize):
+    # Given
+    household, citizen_role, firm = before_firm_resize
+    citizen_role.get_wage_range.return_value = (2.0, 4.0)
+    employer_role = firm.roles["employer"]
+    random = household.model.nprandom
+    random.uniform = lambda a, b: (a + b) / 2
+
+    # When
+    household._resize_new_firm(firm, "ANY", 100)
+
+    # Then
+    assert employer_role.wage == pytest.approx(3.0)
+
+
+def test_resize_new_firm_sets_wage_from_params(before_firm_resize):
+    # Given
+    household, citizen_role, firm = before_firm_resize
+    household.p.initial_wage = 2.0
+    employer_role = firm.roles["employer"]
+    citizen_role.get_productivity_range.return_value = None
+
+    # When
+    household._resize_new_firm(firm, "ANY", 100)
+
+    # Then
+    assert employer_role.wage == pytest.approx(2.0)
 
 
 FakeBank = Mock()
@@ -1396,19 +1414,19 @@ FakeBank = Mock()
 def before_bank_creation(monkeypatch, hh_as_investor):
     # Given
     monkeypatch.setattr("model.agents.household.Bank", FakeBank)
-    household, role = hh_as_investor
+    equity_size = 150
+    household, _ = hh_as_investor
     household.model.union = Mock()
     household.model.banks = []
-    shares = [{"founder": role, "amount": 100}]
-    return household, shares
+    return household, equity_size
 
 
 def test_create_company_creates_bank_with_model(before_bank_creation):
     # Given
-    household, shares = before_bank_creation
+    household, equity_size = before_bank_creation
 
     # When
-    household._create_company("B", shares)
+    household._create_company("B", equity_size)
 
     # Then
     FakeBank.assert_called_with(household.model)
@@ -1418,11 +1436,11 @@ def test_create_company_sets_new_bank_country_pos(before_bank_creation):
     # Given
     bank = Mock()
     FakeBank.return_value = bank
-    household, shares = before_bank_creation
+    household, equity_size = before_bank_creation
     household.country_pos = 4
 
     # When
-    household._create_company("B", shares)
+    household._create_company("B", equity_size)
 
     # Then
     assert bank.country_pos == 4
@@ -1432,41 +1450,40 @@ def test_create_company_adds_bank_into_union(before_bank_creation):
     # Given
     bank = Mock()
     FakeBank.return_value = bank
-    household, shares = before_bank_creation
+    household, equity_size = before_bank_creation
     union = household.model.union
 
     # When
-    household._create_company("B", shares)
+    household._create_company("B", equity_size)
 
     # Then
-    union.add_bank.assert_called_once_with(bank)
+    union.add_agents.assert_called_once_with([bank])
 
 
 def test_create_company_appends_to_model_banks(before_bank_creation):
     # Given
     bank = Mock()
     FakeBank.return_value = bank
-    household, shares = before_bank_creation
+    household, equity_size = before_bank_creation
 
     # When
-    household._create_company("B", shares)
+    household._create_company("B", equity_size)
 
     # Then
     assert bank in household.model.banks
 
 
-def test_create_company_funds_new_bank(before_bank_creation):
+def test_fund_company_with_each_share(hh_as_investor):
     # Given
-    bank = Mock()
-    FakeBank.return_value = bank
-    household, shares = before_bank_creation
+    founder = Mock()
+    household, _ = hh_as_investor
+    shares = [{"founder": founder, "amount": 100}]
 
     # When
-    household._create_company("B", shares)
+    household._fund_company(4, shares)
 
     # Then
-    for share in shares:
-        share["founder"].fund_company.assert_called_once_with(bank.id, share["amount"])
+    founder.fund_company.assert_called_once_with(4, 100)
 
 
 # ---------------------------------------------------
