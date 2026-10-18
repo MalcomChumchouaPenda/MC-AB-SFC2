@@ -67,6 +67,7 @@ class EcoSpace(Network):
         self.roles = {}
         self.spaces = {}
         self.accounts = {}
+        self._method_cache = {}
 
     #
     # Space management
@@ -77,6 +78,17 @@ class EcoSpace(Network):
         subspace.env = self
         self.spaces[name] = subspace
         return subspace
+
+    #
+    # Agent management
+    #
+    def add_agents(self, agents):
+        kind_name = camel_to_snake(agents[0].__class__.__name__)
+        method_name = "add_" + kind_name
+        if hasattr(self, method_name):
+            method = getattr(self, method_name)
+            for agent in agents:
+                method(agent)
 
     #
     # Role management

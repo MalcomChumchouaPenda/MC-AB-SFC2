@@ -138,6 +138,28 @@ def test_add_space_registers_subspace(space_without_subspaces):
 
 
 # ---------------------------------------------------
+# AGENT MANAGEMENT TESTS
+# ----------------------------------------------------
+
+
+class FakeAgent:
+    pass
+
+
+def test_add_agents_uses_appropriate_method(space):
+    # Given
+    agents = [FakeAgent() for _ in range(2)]
+    space.add_fake_agent = Mock()
+
+    # When
+    space.add_agents(agents)
+
+    # Then
+    for agent in agents:
+        space.add_fake_agent.assert_any_call(agent)
+
+
+# ---------------------------------------------------
 # ROLE MANAGEMENT TESTS
 # ----------------------------------------------------
 

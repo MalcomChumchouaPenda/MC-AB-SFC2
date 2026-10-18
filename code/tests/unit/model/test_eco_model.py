@@ -69,23 +69,20 @@ def params():
     }
 
 
-FakeDList = Mock()
-
-
 @pytest.fixture
-def before_setup_call(monkeypatch):
+def before_setup(monkeypatch, params):
     # Given
-    monkeypatch.setattr("model.model.AgentDList", FakeDList)
     monkeypatch.setattr(EcoModel, "_create_union", Mock())
     monkeypatch.setattr(EcoModel, "_create_households", Mock())
     monkeypatch.setattr(EcoModel, "_create_governments", Mock())
     monkeypatch.setattr(EcoModel, "_create_central_banks", Mock())
-
-
-@pytest.mark.usefixtures("before_setup_call")
-def test_setup_calls_4_sub_procedures(params):
-    # Given
     model = EcoModel(params)
+    return model
+
+
+def test_setup_calls_4_sub_procedures(before_setup):
+    # Given
+    model = before_setup
 
     # When
     model.setup()
@@ -97,35 +94,42 @@ def test_setup_calls_4_sub_procedures(params):
     model._create_central_banks.assert_called_once_with()
 
 
-@pytest.mark.usefixtures("before_setup_call")
-def test_setup_creates_firms_as_empty_agent_dlist(params):
+def test_setup_creates_firms_as_empty_agent_dlist(before_setup):
     # Given
-    model = EcoModel(params)
+    model = before_setup
 
     # When
     model.setup()
 
     # Then
-    assert model.firms == FakeDList.return_value
+    assert isinstance(model.firms, AgentDList)
 
 
-@pytest.mark.usefixtures("before_setup_call")
-def test_setup_creates_banks_as_empty_agent_dlist(params):
+def test_setup_creates_banks_as_empty_agent_dlist(before_setup):
     # Given
-    model = EcoModel(params)
+    model = before_setup
 
     # When
     model.setup()
 
     # Then
-    assert model.banks == FakeDList.return_value
+    assert isinstance(model.banks, AgentDList)
 
 
-def test_create_union_creates_monetary_union(monkeypatch, params):
+FakeUnion = Mock()
+
+
+@pytest.fixture
+def before_union_creation(monkeypatch, params):
     # Given
-    FakeUnion = Mock()
     monkeypatch.setattr("model.model.MonetaryUnion", FakeUnion)
     model = EcoModel(params)
+    return model
+
+
+def test_create_union_creates_monetary_union(before_union_creation):
+    # Given
+    model = before_union_creation
 
     # When
     model._create_union()
@@ -135,43 +139,32 @@ def test_create_union_creates_monetary_union(monkeypatch, params):
     assert model.union is FakeUnion.return_value
 
 
-def test_create_union_creates_markets(monkeypatch, params):
+def test_create_union_creates_markets(before_union_creation):
     # Given
-    union = Mock()
-    FakeUnion = Mock(return_value=union)
-    monkeypatch.setattr("model.model.MonetaryUnion", FakeUnion)
-    model = EcoModel(params)
+    model = before_union_creation
 
     # When
     model._create_union()
 
     # Then
-    union.create_markets.assert_called_with()
+    model.union.create_markets.assert_called_with()
 
 
-def test_create_union_creates_countries(monkeypatch, params):
+def test_create_union_creates_countries(before_union_creation):
     # Given
-    union = Mock()
-    FakeUnion = Mock(return_value=union)
-    monkeypatch.setattr("model.model.MonetaryUnion", FakeUnion)
-    model = EcoModel(params)
+    model = before_union_creation
+    c_num = model.p.country_number
 
     # When
     model._create_union()
 
     # Then
-    union.create_countries.assert_called_with(params["country_number"])
+    model.union.create_countries.assert_called_with(c_num)
 
 
-FakeGovt = Mock()
-
-
-class FakeHousehold(MagicMock):
-    pass
-
-
-class FakeCBank(MagicMock):
-    pass
+FakeHousehold = MagicMock()
+FakeGovt = MagicMock()
+FakeCBank = MagicMock()
 
 
 @pytest.fixture
@@ -197,15 +190,15 @@ def test_create_households_creates_sufficient_agent_number(before_agents_creatio
     # Then
     assert len(model.households) == h_num * c_num
     for household in model.households:
-        assert isinstance(household, FakeHousehold)
+        assert household is FakeHousehold.return_value
 
 
 def test_create_households_sets_new_agents_country_pos(before_agents_creation):
     # Given
     model = before_agents_creation
-    h_num = model.p.household_number
-    c_num = model.p.country_number
-    expected = list(range(c_num)) * h_num
+    model.p.household_number = 2
+    model.p.country_number = 2
+    expected = [0, 1, 0, 1]
 
     # When
     model._create_households()
@@ -274,15 +267,16 @@ def test_create_central_banks_creates_sufficient_agent_number(before_agents_crea
 
     # Then
     assert len(model.national_cbs) == model.p.country_number
-    assert isinstance(model.union_cb, FakeCBank)
+    assert model.union_cb is FakeCBank.return_value
     for cb in model.national_cbs:
-        assert isinstance(cb, FakeCBank)
+        assert cb is FakeCBank.return_value
 
 
 def test_create_central_banks_sets_national_cbs_country_pos(before_agents_creation):
     # Given
     model = before_agents_creation
-    expected = list(range(model.p.country_number))
+    model.p.country_number = 3
+    expected = [0, 1, 2]
 
     # When
     model._create_central_banks()
@@ -294,6 +288,7 @@ def test_create_central_banks_sets_national_cbs_country_pos(before_agents_creati
 def test_create_central_banks_sets_new_agents_national_property(before_agents_creation):
     # Given
     model = before_agents_creation
+    FakeCBank.side_effect = lambda *a, **kw: Mock()
 
     # When
     model._create_central_banks()
