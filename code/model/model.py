@@ -108,7 +108,6 @@ class EcoModel(Model):
         self.firms.produce_goods()
         self.firms.execute_rd()
         self.firms.pay_dividends()
-        self.banks.update_deposit_rate()
         self.banks.pay_deposit_interests()
         self.banks.pay_dividends()
 

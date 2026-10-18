@@ -47,7 +47,9 @@ def params():
     }
 
 
-def test_create_initial_population(params):
+
+@pytest.mark.parametrize("seed", [0, 1, 2, 3])
+def test_create_initial_population(params, seed):
     # Given
     params["steps"] = 0
     params["household_number"] = 5
@@ -55,7 +57,7 @@ def test_create_initial_population(params):
     model = EcoModel(params)
 
     # When
-    model.run()
+    model.run(seed=seed)
 
     # Then
     assert len(model.firms) == 0
@@ -66,7 +68,8 @@ def test_create_initial_population(params):
     assert model.union_cb is not None
 
 
-def test_run_all_steps(params):
+@pytest.mark.parametrize("seed", [0, 1, 2, 3])
+def test_run_all_steps(params, seed):
     # Given
     params["steps"] = 100
     params["household_number"] = 5
@@ -74,7 +77,7 @@ def test_run_all_steps(params):
     model = EcoModel(params)
 
     # When
-    model.run()
+    model.run(seed=seed)
 
     # Then
     assert len(model.firms) > 0

@@ -214,6 +214,7 @@ class Household(EcoAgent):
             else:
                 minimum, maximum = range_
                 minimum = max(p.sigma * median_size, minimum)
+                maximum = max(minimum, maximum)
         else:
             if range_ is None:
                 return p.initial_equity
