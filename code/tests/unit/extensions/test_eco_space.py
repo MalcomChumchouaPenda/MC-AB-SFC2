@@ -142,21 +142,39 @@ def test_add_space_registers_subspace(space_without_subspaces):
 # ----------------------------------------------------
 
 
-class FakeAgent:
+class FooAgent:
     pass
 
 
-def test_add_agents_uses_appropriate_method(space):
+class BarAgent:
+    pass
+
+
+def test_add_agents_uses_appropriate_method_for_each_agent(space):
     # Given
-    agents = [FakeAgent() for _ in range(2)]
-    space.add_fake_agent = Mock()
+    space.add_foo_agent = Mock()
+    space.add_bar_agent = Mock()
+    agents = [FooAgent(), BarAgent()]
 
     # When
     space.add_agents(agents)
 
     # Then
-    for agent in agents:
-        space.add_fake_agent.assert_any_call(agent)
+    space.add_foo_agent.assert_any_call(agents[0])
+    space.add_bar_agent.assert_any_call(agents[1])
+
+
+def test_add_agents_uses_subspaces_methods_for_all_agents(space):
+    # Given
+    agents = [FooAgent(), BarAgent()]
+    space.spaces = {i: Mock() for i in range(2)}
+
+    # When
+    space.add_agents(agents)
+
+    # Then
+    for subspace in space.spaces.values():
+        subspace.add_agents.assert_called_with(agents)
 
 
 # ---------------------------------------------------

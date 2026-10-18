@@ -1,9 +1,12 @@
 import re
+import inspect
+import functools
 from agentpy import Agent, Network, AgentNode
 from agentpy import AgentList, AgentIter, AttrDict
 from model.accounts import FINANCIAL_ASSETS, REAL_ASSETS, TRANSACTIONS
 
 
+@functools.cache
 def camel_to_snake(name):
     s1 = re.sub("(.)([A-Z][a-z]+)", r"\1_\2", name)
     return re.sub("([a-z0-9])([A-Z])", r"\1_\2", s1).lower()
@@ -67,7 +70,6 @@ class EcoSpace(Network):
         self.roles = {}
         self.spaces = {}
         self.accounts = {}
-        self._method_cache = {}
 
     #
     # Space management
@@ -83,29 +85,43 @@ class EcoSpace(Network):
     # Agent management
     #
     def add_agents(self, agents):
-        kind_name = camel_to_snake(agents[0].__class__.__name__)
-        method_name = "add_" + kind_name
-        if hasattr(self, method_name):
-            method = getattr(self, method_name)
-            for agent in agents:
+        for agent in agents:
+            kind = agent.__class__
+            method = self._get_add_method(kind)
+            if method:
                 method(agent)
+        for subspace in self.spaces.values():
+            subspace.add_agents(agents)
+
+    @functools.cache
+    def _get_add_method(self, kind):
+        method_name = "add_" + camel_to_snake(kind.__name__)
+        if hasattr(self, method_name):
+            return getattr(self, method_name)
 
     #
     # Role management
     #
     def add_role(self, kind, agent, prefix=""):
+        role, key = self._create_role_and_key(kind, agent, prefix)
+        self._register_role(role, agent, key)
+        if agent.account is None:
+            self.add_account(agent)
+        return role
+
+    def _create_role_and_key(self, kind, agent, prefix):
         role = kind(agent, self)
         role.prefix = prefix
         key = role.name
         if prefix:
             key = prefix + "_" + key
+        return role, key
+
+    def _register_role(self, role, agent, key):
         agent.roles[key] = role
         self.roles[agent.id] = role
         self.positions[agent] = role
         self.graph.add_node(role)
-        if agent.account is None:
-            self.add_account(agent)
-        return role
 
     def remove_role(self, role):
         key = role.name
@@ -113,12 +129,15 @@ class EcoSpace(Network):
         if prefix:
             key = prefix + "_" + key
         agent = role.agent
+        self._unregister_role(role, agent, key)
+        if self.env is None:
+            self.remove_account(agent)
+
+    def _unregister_role(self, role, agent, key):
         agent.roles.pop(key)
         self.roles.pop(agent.id)
         self.positions.pop(agent)
         self.graph.remove_node(role)
-        if self.env is None:
-            self.remove_account(agent)
 
     def find_all_roles(self, pattern):
         selected = [role for role in self.roles.values() if pattern in role.name]

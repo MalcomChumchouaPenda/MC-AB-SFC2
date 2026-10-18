@@ -34,8 +34,7 @@ class EcoModel(Model):
         country_pos = list(range(c_num)) * h_num
         households = AgentList(self, c_num * h_num, Household)
         households.country_pos = AttrIter(country_pos)
-        for household in households:
-            self.union.add_household(household)
+        self.union.add_agents(households)
         self.households = households
 
     def _create_governments(self):
@@ -44,8 +43,7 @@ class EcoModel(Model):
         country_pos = list(range(c_num))
         govts = AgentList(self, c_num, Government)
         govts.country_pos = AttrIter(country_pos)
-        for govt in govts:
-            self.union.add_government(govt)
+        self.union.add_agents(govts)
         self.governments = govts
 
     def _create_central_banks(self):
@@ -59,15 +57,14 @@ class EcoModel(Model):
         cbs = AgentList(self, c_num, CentralBank)
         cbs.country_pos = AttrIter(country_pos)
         cbs.national = True
-        for cb in cbs:
-            self.union.add_central_bank(cb)
+        self.union.add_agents(cbs)
         self.national_cbs = cbs
 
     def _create_union_cb(self):
         cb = CentralBank(self)
         cb.national = False
         self.union_cb = cb
-        self.union.add_central_bank(cb)
+        self.union.add_agents([cb])
 
     def step(self):
         self._clear_defaults_and_transactions()

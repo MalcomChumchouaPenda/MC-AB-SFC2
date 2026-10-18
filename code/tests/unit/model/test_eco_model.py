@@ -207,7 +207,7 @@ def test_create_households_sets_new_agents_country_pos(before_agents_creation):
     assert model.households.country_pos == expected
 
 
-def test_create_households_adds_households_to_union(before_agents_creation):
+def test_create_households_adds_agents_to_union(before_agents_creation):
     # Given
     model = before_agents_creation
     union = model.union
@@ -216,8 +216,7 @@ def test_create_households_adds_households_to_union(before_agents_creation):
     model._create_households()
 
     # Then
-    for household in model.households:
-        union.add_household.assert_any_call(household)
+    union.add_agents.assert_any_call(model.households)
 
 
 def test_create_governments_creates_sufficient_agent_number(before_agents_creation):
@@ -245,7 +244,7 @@ def test_create_governments_sets_new_agents_country_pos(before_agents_creation):
     assert model.governments.country_pos == expected
 
 
-def test_create_governments_adds_governments_to_union(before_agents_creation):
+def test_create_governments_adds_agents_to_union(before_agents_creation):
     # Given
     model = before_agents_creation
     union = model.union
@@ -254,8 +253,7 @@ def test_create_governments_adds_governments_to_union(before_agents_creation):
     model._create_governments()
 
     # Then
-    for govt in model.governments:
-        union.add_government.assert_any_call(govt)
+    union.add_agents.assert_any_call(model.governments)
 
 
 def test_create_central_banks_creates_sufficient_agent_number(before_agents_creation):
@@ -298,7 +296,7 @@ def test_create_central_banks_sets_new_agents_national_property(before_agents_cr
     assert set(model.national_cbs.national) == {True}
 
 
-def test_create_central_banks_adds_central_banks_to_union(before_agents_creation):
+def test_create_central_banks_adds_agents_to_union(before_agents_creation):
     # Given
     model = before_agents_creation
     union = model.union
@@ -307,9 +305,8 @@ def test_create_central_banks_adds_central_banks_to_union(before_agents_creation
     model._create_central_banks()
 
     # Then
-    union.add_central_bank.assert_any_call(model.union_cb)
-    for cb in model.national_cbs:
-        union.add_central_bank.assert_any_call(cb)
+    union.add_agents.assert_any_call([model.union_cb])
+    union.add_agents.assert_any_call(model.national_cbs)
 
 
 # ---------------------------------------------------
