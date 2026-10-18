@@ -300,9 +300,9 @@ def test_reimburse_deposits_updates_accounts(market_with_depositor_amount):
     market.make_transaction.assert_any_call("loan_defaults", guarantee.id, bank_id, 50)
 
 
-def test_reimburse_deposits_remove_graph_edge(market_with_depositor_amount):
+def test_reimburse_deposits_update_graph_edge(market_with_depositor_amount):
     # Given
-    market, depositor, deposit_bank, _ = market_with_depositor_amount
+    market, depositor, deposit_bank, amount = market_with_depositor_amount
     graph = market.graph
     guarantee = Mock()
 
@@ -310,7 +310,7 @@ def test_reimburse_deposits_remove_graph_edge(market_with_depositor_amount):
     market.reimburse_deposits(guarantee, depositor, deposit_bank, 50)
 
     # Then
-    assert not graph.has_edge(depositor, deposit_bank)
+    assert graph[depositor][deposit_bank]["amount"] == amount - 50.0
 
 
 # ---------------------------------------------------

@@ -612,44 +612,48 @@ def test_pay_no_dividends(bank_with_roles_and_account):
 
 @pytest.fixture
 def bank_before_exit(bank_with_roles_and_account):
-    role = Mock()
-    role.get_average_wage.return_value = 100
-    bank, roles, _ = bank_with_roles_and_account
-    roles["company"] = role
-    return bank
-
-
-def test_exit_when_bankrupt(bank_before_exit):
     # Given
-    bank = bank_before_exit
-    bank.net_worth = 90
-    role = bank.roles["company"]
+    company_role = Mock()
+    company_role.get_average_wage.return_value = 100
+    bank, roles, account = bank_with_roles_and_account
+    roles["company"] = company_role
+    account["cash"] = 0
+    return bank, roles, account
+
+
+@pytest.mark.parametrize("net_worth, defaulted", [(90, True), (150, False)])
+def test_exit_when_bankrupt(bank_before_exit, net_worth, defaulted):
+    # Given
+    bank, *_ = bank_before_exit
+    bank.net_worth = net_worth
 
     # When
     bank.exit()
 
     # Then
-    role.close_bank.assert_called_once_with(bank)
+    assert bank.defaulted == defaulted
 
 
-def test_does_not_exit_when_not_bankrupt(bank_before_exit):
+def test_exit_transfer_residual_cash_to_founders(bank_before_exit):
     # Given
-    bank = bank_before_exit
-    bank.net_worth = 150
-    role = bank.roles["company"]
+    founder = object()
+    share = {"founder": founder, "value": 1000}
+    bank, roles, account = bank_before_exit
+    account["cash"] = 200
+    role = roles["company"]
+    role.get_equity_shares.return_value = [share]
 
     # When
     bank.exit()
 
     # Then
-    role.close_bank.assert_not_called()
+    role.transfer_residual_cash.assert_called_with(founder, 200)
 
 
 def test_exit_sets_all_roles_defaulted(bank_before_exit):
     # Given
-    bank = bank_before_exit
+    bank, roles, _ = bank_before_exit
     bank.net_worth = 90
-    roles = bank.roles
     roles["any"] = Mock()
 
     # When

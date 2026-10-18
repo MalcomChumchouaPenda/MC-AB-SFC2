@@ -47,7 +47,6 @@ def params():
     }
 
 
-
 @pytest.mark.parametrize("seed", [0, 1, 2, 3])
 def test_create_initial_population(params, seed):
     # Given

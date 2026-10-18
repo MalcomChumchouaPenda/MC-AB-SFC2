@@ -186,6 +186,18 @@ class Bank(EcoAgent):
         role = self.roles["company"]
         average_wage = role.get_average_wage()
         if self.net_worth < average_wage:
-            role.close_bank(self)
+            self.defaulted = True
             for role in self.roles.values():
                 role.defaulted = True
+            self._transfer_residual_cash()
+
+    def _transfer_residual_cash(self):
+        cash = self.account["cash"]
+        if cash > 0:
+            role = self.roles["company"]
+            shares = role.get_equity_shares()
+            total_shares = sum(share["value"] for share in shares)
+            for share in shares:
+                founder = share["founder"]
+                amount = share["value"] * cash / total_shares
+                role.transfer_residual_cash(founder, amount)

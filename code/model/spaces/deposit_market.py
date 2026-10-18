@@ -54,7 +54,7 @@ class DepositMarket(EcoSpace):
         self.transfer_stock("cash", guarantee.id, depositor.id, amount)
         self.transfer_stock("deposits", depositor.id, deposit_bank.id, amount)
         self.make_transaction("loan_defaults", guarantee.id, deposit_bank.id, amount)
-        self.graph.remove_edge(depositor, deposit_bank)
+        self.graph[depositor][deposit_bank]["amount"] -= amount
 
     def make_deposits(self, depositor, deposit_bank, amount):
         self.transfer_stock("cash", depositor.id, deposit_bank.id, amount)
