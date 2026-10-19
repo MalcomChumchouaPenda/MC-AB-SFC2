@@ -33,7 +33,7 @@ def params():
         "upsilon": 1.0,
         "omega": 0.1,
         "initial_wage": 1.0,
-        "initial_productivity": 1.0,
+        "initial_phi": 1.0,
         "initial_tax_rate": 0.4,
         "cy": 0.9,
         "cd": 0.2,

@@ -221,7 +221,7 @@ def test_calc_and_records_desired_public_spending(govt_as_authority):
     govt, role = govt_as_authority
     govt.prev_public_spending = 10
     role.get_average_price.return_value = 2
-    role.get_average_productivity.return_value = 3
+    role.get_average_phi.return_value = 3
 
     # When
     desired = govt._calc_desired_public_spending()

@@ -52,7 +52,7 @@ def test_initializes_previous_average_price(fake_model):
     assert market.average_price_prev == 0
 
 
-def test_initializes_average_productivity(fake_model):
+def test_initializes_average_phi(fake_model):
     # Given
     model = fake_model
 
@@ -192,7 +192,7 @@ def producers(make_dlist):
     producers = make_dlist(producers)
     producers.name = "producer"
     producers.price = 0
-    producers.productivity = 0
+    producers.phi = 0
     return producers
 
 
@@ -239,25 +239,25 @@ def test_calc_gdp(market_with_producers):
     assert gdp == 100 * len(producers)
 
 
-def test_calc_productivity_range_for_all_producers(market_with_producers):
+def test_calc_phi_range_for_all_producers(market_with_producers):
     # Given
     market, producers = market_with_producers
-    producers.productivity = 1.0
-    producers[2].productivity = 2.0
+    producers.phi = 1.0
+    producers[2].phi = 2.0
 
     # When
-    range_ = market.calc_productivity_range()
+    range_ = market.calc_phi_range()
 
     # Then
     assert range_ == (1.0, 2.0)
 
 
-def test_calc_productivity_range_if_no_producers(market_without_producers):
+def test_calc_phi_range_if_no_producers(market_without_producers):
     # Given
     market = market_without_producers
 
     # When
-    range_ = market.calc_productivity_range()
+    range_ = market.calc_phi_range()
 
     # Then
     assert range_ is None
@@ -379,13 +379,13 @@ def test_update_state_store_previous_average_price(market_before_update, produce
     assert market.average_price_prev == 6.0
 
 
-def test_update_state_recalc_average_productivity(market_before_update, producers):
+def test_update_state_recalc_average_phi(market_before_update, producers):
     # Given
     market = market_before_update
     market.average_price_prev = 0
     market.average_price = 0
     market.average_prod = 0
-    producers.productivity = 10
+    producers.phi = 10
 
     # When
     market.update_state()

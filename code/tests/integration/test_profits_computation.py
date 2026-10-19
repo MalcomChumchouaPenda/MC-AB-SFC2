@@ -34,7 +34,7 @@ def firm(model, country):
 @pytest.fixture
 def before_firm_computation(firm, country):
     # Given
-    firm.roles["producer"].productivity = 2
+    firm.roles["producer"].phi = 2
     firm.roles["producer"].inventories = 60
     firm.account["dep_interests"] = 30
     firm.account["consumption"] = 1000

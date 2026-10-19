@@ -264,15 +264,13 @@ class Household(EcoAgent):
         if citizen_role.get_sector_size(sector) <= 1:
             p = self.p
             employer_role.wage = p.initial_wage
-            producer_role.productivity = p.initial_productivity
-            producer_role.price = p.initial_wage / p.initial_productivity
-            firm.expected_sales = p.initial_productivity * equity_size / p.initial_wage
+            producer_role.phi = p.initial_phi
+            producer_role.price = p.initial_wage / p.initial_phi
+            firm.expected_sales = p.initial_phi * equity_size / p.initial_wage
         else:
             uniform = self.model.nprandom.uniform
             employer_role.wage = uniform(*citizen_role.get_wage_range(sector))
-            producer_role.productivity = uniform(
-                *citizen_role.get_productivity_range(sector)
-            )
+            producer_role.phi = uniform(*citizen_role.get_phi_range(sector))
             producer_role.price = uniform(*citizen_role.get_price_range(sector))
             firm.expected_sales = uniform(*citizen_role.get_sales_range(sector))
 

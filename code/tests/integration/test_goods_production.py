@@ -36,7 +36,7 @@ def test_production_planning_pipeline(firm):
     # Given
     firm.expected_sales = 150
     firm.roles["producer"].inventories = 30
-    firm.roles["producer"].productivity = 3
+    firm.roles["producer"].phi = 3
 
     # When
     firm.plan_production()
@@ -65,7 +65,7 @@ def workers(model, country, firm):
 def test_updates_producer_inventories(firm):
     # Given
     producer = firm.roles["producer"]
-    producer.productivity = 2.0
+    producer.phi = 2.0
 
     # When
     firm.produce_goods()

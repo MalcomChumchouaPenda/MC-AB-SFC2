@@ -12,7 +12,7 @@ class Producer(EcoRole):
         self.sales = 0
         self.price = 0
         self.rd = 0
-        self.productivity = 0
+        self.phi = 0
         self.inventories = 0
 
     #
@@ -21,14 +21,14 @@ class Producer(EcoRole):
     def get_average_price(self):
         return self.env.average_price
 
-    def get_average_productivity(self):
+    def get_average_phi(self):
         return self.env.average_prod
 
     #
     # Actions
     #
     def produce_goods(self, labor):
-        self.output = self.productivity * labor
+        self.output = self.phi * labor
         self.inventories += self.output
 
     def execute_rd(self, rd):
@@ -51,12 +51,12 @@ class Producer(EcoRole):
         env = self.env
         delta = env.p.delta
         random = env.model.nprandom
-        self.productivity *= 1 + random.uniform(0, delta)
+        self.phi *= 1 + random.uniform(0, delta)
 
     def _imitate(self):
         env = self.env
         random = env.model.nprandom
         avg_prod = env.average_prod
-        prod_diff = avg_prod - self.productivity
+        prod_diff = avg_prod - self.phi
         if prod_diff > 0:
-            self.productivity += random.uniform(0, prod_diff)
+            self.phi += random.uniform(0, prod_diff)

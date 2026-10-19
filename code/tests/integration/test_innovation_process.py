@@ -50,33 +50,33 @@ def random(monkeypatch, model):
     return random
 
 
-def test_increases_productivity_with_success(firm, random):
+def test_increases_phi_with_success(firm, random):
     # Given
-    firm.roles["producer"].productivity = 10
+    firm.roles["producer"].phi = 10
     random.uniform.return_value = 0.2
 
     # When
     firm.execute_rd()
 
     # Then
-    assert firm.roles["producer"].productivity == 12
+    assert firm.roles["producer"].phi == 12
 
 
-def test_dont_increases_productivity_without_success(firm, random):
+def test_dont_increases_phi_without_success(firm, random):
     # Given
-    firm.roles["producer"].productivity = 10
+    firm.roles["producer"].phi = 10
     random.choice.return_value = 0
 
     # When
     firm.execute_rd()
 
     # Then
-    assert firm.roles["producer"].productivity == 10
+    assert firm.roles["producer"].phi == 10
 
 
 def test_increases_prductivity_by_imitation(firm, country, random):
     # Given
-    firm.roles["producer"].productivity = 10
+    firm.roles["producer"].phi = 10
     country.spaces["goods_market"].average_prod = 15
     random.uniform = lambda a, b: b
 
@@ -84,4 +84,4 @@ def test_increases_prductivity_by_imitation(firm, country, random):
     firm.execute_rd()
 
     # Then
-    assert firm.roles["producer"].productivity == 15
+    assert firm.roles["producer"].phi == 15

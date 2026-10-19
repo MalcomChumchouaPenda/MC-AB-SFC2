@@ -1283,8 +1283,8 @@ def before_firm_resize(hh_as_investor):
     firm.roles = {"employer": Mock(), "producer": Mock()}
     household, role = hh_as_investor
     household.p.initial_wage = 1.0
-    household.p.initial_productivity = 1.0
-    role.get_productivity_range.return_value = [0, 0]
+    household.p.initial_phi = 1.0
+    role.get_phi_range.return_value = [0, 0]
     role.get_price_range.return_value = [0, 0]
     role.get_sales_range.return_value = [0, 0]
     role.get_wage_range.return_value = [0, 0]
@@ -1307,10 +1307,10 @@ def test_resize_new_firm_sets_variety_randomly(before_firm_resize):
     assert producer_role.variety == pytest.approx(max_variety / 2)
 
 
-def test_resize_new_firm_sets_productivity_from_range(before_firm_resize):
+def test_resize_new_firm_sets_phi_from_range(before_firm_resize):
     # Given
     household, citizen_role, firm = before_firm_resize
-    citizen_role.get_productivity_range.return_value = (1.0, 2.0)
+    citizen_role.get_phi_range.return_value = (1.0, 2.0)
     citizen_role.get_sector_size.return_value = 2
     producer_role = firm.roles["producer"]
 
@@ -1318,13 +1318,13 @@ def test_resize_new_firm_sets_productivity_from_range(before_firm_resize):
     household._resize_new_firm(firm, "ANY", 100)
 
     # Then
-    assert producer_role.productivity == pytest.approx(1.5)
+    assert producer_role.phi == pytest.approx(1.5)
 
 
-def test_resize_new_firm_sets_productivity_from_params(before_firm_resize):
+def test_resize_new_firm_sets_phi_from_params(before_firm_resize):
     # Given
     household, citizen_role, firm = before_firm_resize
-    household.p.initial_productivity = 0.5
+    household.p.initial_phi = 0.5
     producer_role = firm.roles["producer"]
     citizen_role.get_sector_size.return_value = 1
 
@@ -1332,7 +1332,7 @@ def test_resize_new_firm_sets_productivity_from_params(before_firm_resize):
     household._resize_new_firm(firm, "ANY", 100)
 
     # Then
-    assert producer_role.productivity == pytest.approx(0.5)
+    assert producer_role.phi == pytest.approx(0.5)
 
 
 def test_resize_new_firm_sets_price_from_range(before_firm_resize):
@@ -1353,7 +1353,7 @@ def test_resize_new_firm_sets_price_from_params(before_firm_resize):
     # Given
     household, citizen_role, firm = before_firm_resize
     household.p.initial_wage = 2.0
-    household.p.initial_productivity = 0.5
+    household.p.initial_phi = 0.5
     producer_role = firm.roles["producer"]
     citizen_role.get_sector_size.return_value = 1
 
@@ -1381,7 +1381,7 @@ def test_resize_new_firm_sets_sales_from_params(before_firm_resize):
     # Given
     household, citizen_role, firm = before_firm_resize
     household.p.initial_wage = 2.0
-    household.p.initial_productivity = 0.5
+    household.p.initial_phi = 0.5
     citizen_role.get_sector_size.return_value = 1
 
     # When

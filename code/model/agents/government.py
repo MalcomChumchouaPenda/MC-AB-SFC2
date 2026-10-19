@@ -78,7 +78,7 @@ class Government(EcoAgent):
     def _calc_desired_public_spending(self):
         role = self.roles["fiscal_authority"]
         average_price = role.get_average_price()
-        average_prod = role.get_average_productivity()
+        average_prod = role.get_average_phi()
         prev_spending = self.prev_public_spending
         desired_spending = average_price * average_prod * prev_spending
         self.desired_public_spending = desired_spending

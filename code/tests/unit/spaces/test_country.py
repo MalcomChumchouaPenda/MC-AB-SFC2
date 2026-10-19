@@ -575,30 +575,30 @@ def test_calc_equity_range_if_empty_sector(country_with_two_groups):
     assert range_ is None
 
 
-def test_calc_productivity_range_from_goods_market(country_without_roles):
+def test_calc_phi_range_from_goods_market(country_without_roles):
     # Given
     market = Mock()
     country = country_without_roles
     country.spaces = {"goods_market": market}
 
     # When
-    range_ = country.calc_productivity_range("FNT")
+    range_ = country.calc_phi_range("FNT")
 
     # Then
-    assert range_ == market.calc_productivity_range.return_value
+    assert range_ == market.calc_phi_range.return_value
 
 
-def test_calc_productivity_range_from_union(country_without_roles):
+def test_calc_phi_range_from_union(country_without_roles):
     # Given
     union = Mock()
     country = country_without_roles
     country.env = union
 
     # When
-    range_ = country.calc_productivity_range("FT")
+    range_ = country.calc_phi_range("FT")
 
     # Then
-    assert range_ == union.calc_productivity_range.return_value
+    assert range_ == union.calc_phi_range.return_value
 
 
 def test_calc_price_range_from_goods_market(country_without_roles):

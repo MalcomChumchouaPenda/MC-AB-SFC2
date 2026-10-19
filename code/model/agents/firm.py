@@ -47,7 +47,7 @@ class Firm(EcoAgent):
 
     def _calc_labor_demand(self):
         role = self.roles["producer"]
-        self.desired_labor = self.desired_output / role.productivity
+        self.desired_labor = self.desired_output / role.phi
         return self.desired_labor
 
     #
@@ -66,7 +66,7 @@ class Firm(EcoAgent):
             wage_bill = self.account["wages"]
             self.expected_sales *= 1 - random.uniform(0, delta)
             role.price *= 1 - random.uniform(0, delta)
-            role.price = max(wage_bill / role.productivity, role.price)
+            role.price = max(wage_bill / role.phi, role.price)
 
     #
     # Wage revision
@@ -197,7 +197,7 @@ class Firm(EcoAgent):
     def _calc_profit(self):
         employer_role = self.roles["employer"]
         producer_role = self.roles["producer"]
-        unit_cost = employer_role.wage / producer_role.productivity
+        unit_cost = employer_role.wage / producer_role.phi
         inv_variation = unit_cost * (producer_role.inventories - self.prev_inventories)
         return self.net_cash_flow + inv_variation
 

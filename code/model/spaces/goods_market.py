@@ -49,11 +49,11 @@ class GoodsMarket(EcoSpace):
         producers = self.find_all_roles("producer")
         return sum(self.get_stock("consumption", i) for i in producers.id)
 
-    def calc_productivity_range(self):
+    def calc_phi_range(self):
         producers = self.find_all_roles("producer")
         if len(producers) == 0:
             return None
-        values = producers.productivity
+        values = producers.phi
         return min(values), max(values)
 
     def calc_price_range(self):
@@ -77,7 +77,7 @@ class GoodsMarket(EcoSpace):
         producers = self.find_all_roles("producer")
         self.average_price_prev = self.average_price
         self.average_price = sum(producers.price) / max(1, len(producers))
-        self.average_prod = sum(producers.productivity) / max(1, len(producers))
+        self.average_prod = sum(producers.phi) / max(1, len(producers))
 
     def clear_defaults(self):
         roles = self.find_all_roles("producer")

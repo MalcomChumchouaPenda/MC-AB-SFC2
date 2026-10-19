@@ -36,8 +36,8 @@ class Citizen(EcoRole):
     def get_equity_range(self, sector):
         return self.env.calc_equity_range(sector)
 
-    def get_productivity_range(self, sector):
-        return self.env.calc_productivity_range(sector)
+    def get_phi_range(self, sector):
+        return self.env.calc_phi_range(sector)
 
     def get_price_range(self, sector):
         return self.env.calc_price_range(sector)

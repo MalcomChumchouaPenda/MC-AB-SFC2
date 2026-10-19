@@ -75,13 +75,13 @@ def test_get_average_price_from_env(role_with_goods_market):
     assert perceived == 1.5
 
 
-def test_get_average_productivity_from_env(role_with_goods_market):
+def test_get_average_phi_from_env(role_with_goods_market):
     # Given
     role, market = role_with_goods_market
     market.average_prod = 1.0
 
     # When
-    perceived = role.get_average_productivity()
+    perceived = role.get_average_phi()
 
     # Then
     assert perceived == 1.0

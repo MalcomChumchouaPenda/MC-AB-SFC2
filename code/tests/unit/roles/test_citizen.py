@@ -156,16 +156,16 @@ def test_get_equity_range_from_env(role):
     assert range_ == (100, 200)
 
 
-def test_get_productivity_range_from_env(role):
+def test_get_phi_range_from_env(role):
     # Given
     env = role.env
-    env.calc_productivity_range.return_value = (100, 200)
+    env.calc_phi_range.return_value = (100, 200)
 
     # When
-    range_ = role.get_productivity_range("X")
+    range_ = role.get_phi_range("X")
 
     # Then
-    env.calc_productivity_range.assert_called_with("X")
+    env.calc_phi_range.assert_called_with("X")
     assert range_ == (100, 200)
 
 

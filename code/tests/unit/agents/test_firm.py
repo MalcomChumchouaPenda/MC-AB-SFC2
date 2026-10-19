@@ -244,7 +244,7 @@ def test_calc_labor_demand(before_production):
     # Given
     firm = before_production
     firm.desired_output = 100
-    firm.roles["producer"].productivity = 2
+    firm.roles["producer"].phi = 2
 
     # When
     labor = firm._calc_labor_demand()
@@ -275,7 +275,7 @@ def test_calc_desired_output_cannot_be_negative(before_production):
 
 @pytest.fixture
 def before_pricing(firm_with_roles_and_account):
-    role = Mock(productivity=2, price=10)
+    role = Mock(phi=2, price=10)
     firm, roles, account = firm_with_roles_and_account
     firm.expected_sales = 100
     firm.p.delta = 0.1
@@ -837,7 +837,7 @@ def test_calc_profit(firm_with_roles_and_account):
     firm.net_cash_flow = 200
     firm.prev_inventories = 50
     roles["employer"] = Mock(wage=20)
-    roles["producer"] = Mock(inventories=60, productivity=2)
+    roles["producer"] = Mock(inventories=60, phi=2)
 
     # When
     profit = firm._calc_profit()

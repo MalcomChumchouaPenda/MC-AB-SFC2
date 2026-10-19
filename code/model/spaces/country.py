@@ -109,10 +109,10 @@ class Country(EcoSpace):
         equities = selected.equity
         return min(equities), max(equities)
 
-    def calc_productivity_range(self, sector):
+    def calc_phi_range(self, sector):
         if sector == "FNT":
-            return self.spaces["goods_market"].calc_productivity_range()
-        return self.env.calc_productivity_range()
+            return self.spaces["goods_market"].calc_phi_range()
+        return self.env.calc_phi_range()
 
     def calc_price_range(self, sector):
         if sector == "FNT":

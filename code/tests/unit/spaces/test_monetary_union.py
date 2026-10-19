@@ -368,17 +368,17 @@ def test_add_central_bank_into_bond_market_if_national(union_without_roles):
 # ----------------------------------------------------
 
 
-def test_calc_productivity_range_from_goods_market(union_without_roles):
+def test_calc_phi_range_from_goods_market(union_without_roles):
     # Given
     market = Mock()
     union = union_without_roles
     union.spaces = {"goods_market": market}
 
     # When
-    range_ = union.calc_productivity_range()
+    range_ = union.calc_phi_range()
 
     # Then
-    assert range_ == market.calc_productivity_range.return_value
+    assert range_ == market.calc_phi_range.return_value
 
 
 def test_calc_price_range_from_goods_market(union_without_roles):

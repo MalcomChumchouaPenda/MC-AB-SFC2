@@ -30,7 +30,7 @@ def test_initializes_price():
     assert role.price == 0
 
 
-def test_initializes_productivity():
+def test_initializes_phi():
     # Given
     agent, env = Mock(), Mock()
 
@@ -38,7 +38,7 @@ def test_initializes_productivity():
     role = Producer(agent, env)
 
     # Then
-    assert role.productivity == 0
+    assert role.phi == 0
 
 
 def test_initializes_inventories():
@@ -131,13 +131,13 @@ def test_get_average_price(role):
     assert average_price == 15
 
 
-def test_get_average_productivity(role):
+def test_get_average_phi(role):
     # Given
     env = role.env
     env.average_prod = 2.5
 
     # When
-    average_productiviy = role.get_average_productivity()
+    average_productiviy = role.get_average_phi()
 
     # Then
     assert average_productiviy == 2.5
@@ -150,7 +150,7 @@ def test_get_average_productivity(role):
 
 def test_produce_goods_increases_inventories(role):
     # Given
-    role.productivity = 2.0
+    role.phi = 2.0
     role.inventories = 5.0
 
     # When
@@ -162,7 +162,7 @@ def test_produce_goods_increases_inventories(role):
 
 def test_produce_goods_sets_output(role):
     # Given
-    role.productivity = 2.0
+    role.phi = 2.0
     role.output = 10.0
 
     # When
@@ -249,9 +249,9 @@ def test_calc_rd_success_probability(role):
     assert probability == pytest.approx(expected)
 
 
-def test_innovate_updates_randomly_productivity(role):
+def test_innovate_updates_randomly_phi(role):
     # Given
-    role.productivity = 10
+    role.phi = 10
     role.env.p.delta = 0.2
     role.env.average_prod = 10
     random = role.env.model.nprandom
@@ -261,12 +261,12 @@ def test_innovate_updates_randomly_productivity(role):
     role._innovate()
 
     # Then
-    assert role.productivity == 12
+    assert role.phi == 12
 
 
-def test_imitate_updates_randomly_productivity(role):
+def test_imitate_updates_randomly_phi(role):
     # Given
-    role.productivity = 10
+    role.phi = 10
     role.env.average_prod = 20
     random = role.env.model.nprandom
     random.uniform = lambda a, b: b
@@ -275,4 +275,4 @@ def test_imitate_updates_randomly_productivity(role):
     role._imitate()
 
     # Then
-    assert role.productivity == 20
+    assert role.phi == 20

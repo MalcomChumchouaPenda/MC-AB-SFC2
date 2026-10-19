@@ -63,8 +63,8 @@ class MonetaryUnion(EcoSpace):
     # Statitics
     #
 
-    def calc_productivity_range(self):
-        return self.spaces["goods_market"].calc_productivity_range()
+    def calc_phi_range(self):
+        return self.spaces["goods_market"].calc_phi_range()
 
     def calc_price_range(self):
         return self.spaces["goods_market"].calc_price_range()
