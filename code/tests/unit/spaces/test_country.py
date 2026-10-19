@@ -799,15 +799,14 @@ def test_pay_dividends_updates_accounts(country_with_company_and_founder):
 def test_update_equity_share_updates_accounts(country_with_company_and_founder):
     # Given
     country, company, founder = country_with_company_and_founder
+    source, target = company.id, founder.id
 
     # When
-    country.update_equity_share(company, founder, -10)
+    country.update_equity_share(company, founder, 10)
 
     # Then
-    country.transfer_stock.assert_any_call("equities", company.id, founder.id, -10)
-    country.make_transaction.assert_any_call(
-        "profit_transfers", company.id, founder.id, -10
-    )
+    country.transfer_stock.assert_any_call("equities", source, target, 10)
+    country.make_transaction.assert_any_call("profit_transfers", source, target, 10)
 
 
 def test_update_equity_share_updates_graph_edge(country_with_company_and_founder):
@@ -815,10 +814,10 @@ def test_update_equity_share_updates_graph_edge(country_with_company_and_founder
     country, company, founder = country_with_company_and_founder
 
     # When
-    country.update_equity_share(company, founder, -10)
+    country.update_equity_share(company, founder, 10)
 
     # Then
-    assert country.graph[company][founder]["value"] == -10
+    assert country.graph[company][founder]["value"] == 10
 
 
 # ---------------------------------------------------

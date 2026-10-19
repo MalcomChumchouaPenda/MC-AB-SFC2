@@ -99,14 +99,6 @@ def test_initializes_dividends_payable(model):
     assert firm.dividends_payable == 0
 
 
-def test_initializes_net_worth(model):
-    # When
-    firm = Firm(model)
-
-    # Then
-    assert firm.net_worth == 0.0
-
-
 def test_initializes_net_cash_flow(model):
     # When
     firm = Firm(model)
@@ -936,38 +928,18 @@ def test_update_production_history(firm_with_roles_and_account):
 
 def test_update_net_worth(firm_with_roles_and_account):
     # Given
-    firm, *_ = firm_with_roles_and_account
-    firm._update_equity_shares = Mock()
-    firm.net_worth = 1000
+    role = Mock()
+    firm, roles, _ = firm_with_roles_and_account
     firm.net_cash_flow = 500
     firm.taxes_payable = 100
     firm.dividends_payable = 200
-    firm.account["equities"] = -1000
+    roles["company"] = role
 
     # When
     firm.update_net_worth()
 
     # Then
-    firm._update_equity_shares.assert_called_once_with(200)
-    assert firm.net_worth == pytest.approx(1200)
-
-
-def test_update_equity_shares(firm_with_roles_and_account):
-    # Given
-    founder1, founder2 = Mock(), Mock()
-    share1 = {"founder": founder1, "value": 1000}
-    share2 = {"founder": founder2, "value": 3000}
-    role = Mock()
-    role.get_equity_shares.return_value = [share1, share2]
-    firm, roles, _ = firm_with_roles_and_account
-    roles["company"] = role
-
-    # When
-    firm._update_equity_shares(-100)
-
-    # Then
-    role.update_equity_share.assert_any_call(founder1, -25)
-    role.update_equity_share.assert_any_call(founder2, -75)
+    role.update_equity_shares.assert_called_once_with(200)
 
 
 # ---------------------------------------------------
@@ -1046,11 +1018,11 @@ def before_exit(firm_with_roles_and_account):
     borrower_role.find_loans.return_value = []
     company_role.get_equity_shares.return_value = []
     firm, roles, account = firm_with_roles_and_account
-    firm.net_worth = 50
     roles["company"] = company_role
     roles["borrower"] = borrower_role
     roles["employer"] = Mock(wage=100)
     roles["depositor"] = Mock()
+    account["equities"] = 50
     account["deposits"] = 0
     account["loans"] = 0
     account["cash"] = 0
@@ -1060,8 +1032,8 @@ def before_exit(firm_with_roles_and_account):
 @pytest.mark.parametrize("net_worth, defaulted", [(90, True), (150, False)])
 def test_exit_when_bankrupt(before_exit, net_worth, defaulted):
     # Given
-    firm, *_ = before_exit
-    firm.net_worth = net_worth
+    firm, _, account = before_exit
+    account["equities"] = net_worth
 
     # When
     firm.exit()
@@ -1142,8 +1114,8 @@ def test_exit_transfer_residual_cash_to_founders(before_exit):
 
 def test_exit_sets_all_roles_defaulted(before_exit):
     # Given
-    firm, roles, _ = before_exit
-    firm.net_worth = 90
+    firm, roles, account = before_exit
+    account["equities"] = 90
     roles["any"] = Mock()
 
     # When

@@ -12,7 +12,6 @@ class Bank(EcoAgent):
 
         # indicators
         self.profit = 0
-        self.net_worth = 0
         self.credit_capacity = 0
         self.defaulted = False
 
@@ -151,18 +150,8 @@ class Bank(EcoAgent):
         return self.p.rho * (self.profit - self.taxes_payable)
 
     def update_net_worth(self):
-        account = self.account
-        self.net_worth += self.profit - self.taxes_payable - self.dividends_payable
-        self._update_equity_shares(self.net_worth + account["equities"])
-        return self.net_worth
-
-    def _update_equity_shares(self, total_variation):
-        role = self.roles["company"]
-        shares = role.get_equity_shares()
-        total_shares = sum(share["value"] for share in shares)
-        for share in shares:
-            variation = share["value"] * total_variation / total_shares
-            role.update_equity_share(share["founder"], variation)
+        variation = self.profit - self.taxes_payable - self.dividends_payable
+        self.roles["company"].update_equity_shares(variation)
 
     def pay_taxes(self):
         if self.taxes_payable > 0:
@@ -183,9 +172,10 @@ class Bank(EcoAgent):
             self.dividends_payable = 0
 
     def exit(self):
+        account = self.account
         role = self.roles["company"]
         average_wage = role.get_average_wage()
-        if self.net_worth < average_wage:
+        if account["equities"] < average_wage:
             self.defaulted = True
             for role in self.roles.values():
                 role.defaulted = True

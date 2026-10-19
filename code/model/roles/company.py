@@ -37,8 +37,13 @@ class Company(EcoRole):
     #
     #  Actions methods
     #
-    def update_equity_share(self, founder, variation):
-        self.env.update_equity_share(self, founder, variation)
+    def update_equity_shares(self, total_variation):
+        env = self.env
+        shares = self.get_equity_shares()
+        total_shares = sum(share["value"] for share in shares)
+        for share in shares:
+            variation = share["value"] * total_variation / total_shares
+            env.update_equity_share(self, share["founder"], variation)
 
     def pay_dividends(self, founder, amount):
         self.env.pay_dividends(self, founder, amount)

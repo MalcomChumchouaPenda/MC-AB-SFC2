@@ -156,16 +156,21 @@ def test_pay_taxes_uses_env_method(role):
     env.pay_taxes.assert_called_with(role, 50)
 
 
-def test_update_equity_share_uses_env_method(role):
+def test_update_equity_shares(role):
     # Given
+    founder1, founder2 = Mock(), Mock()
+    share1 = {"founder": founder1, "value": 1000}
+    share2 = {"founder": founder2, "value": 3000}
+    shares = [share1, share2]
+    role.get_equity_shares = Mock(return_value=shares)
     env = role.env
-    founder = Mock()
 
     # When
-    role.update_equity_share(founder, -50)
+    role.update_equity_shares(-100)
 
     # Then
-    env.update_equity_share.assert_called_with(role, founder, -50)
+    env.update_equity_share.assert_any_call(role, founder1, -25)
+    env.update_equity_share.assert_any_call(role, founder2, -75)
 
 
 def test_transfer_residual_cash_uses_env_method(role):

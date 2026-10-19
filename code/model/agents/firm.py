@@ -10,7 +10,6 @@ class Firm(EcoAgent):
 
         # indicators
         self.net_cash_flow = 0.0
-        self.net_worth = 0.0
 
         # decisions
         self.expected_sales = 0
@@ -213,19 +212,8 @@ class Firm(EcoAgent):
         return self.p.rho * (self.net_cash_flow - self.taxes_payable)
 
     def update_net_worth(self):
-        account = self.account
         payable = self.taxes_payable + self.dividends_payable
-        self.net_worth += self.net_cash_flow - payable
-        self._update_equity_shares(self.net_worth + account["equities"])
-        return self.net_worth
-
-    def _update_equity_shares(self, total_variation):
-        role = self.roles["company"]
-        shares = role.get_equity_shares()
-        total_shares = sum(share["value"] for share in shares)
-        for share in shares:
-            variation = share["value"] * total_variation / total_shares
-            role.update_equity_share(share["founder"], variation)
+        self.roles["company"].update_equity_shares(self.net_cash_flow - payable)
 
     def pay_taxes(self):
         if self.taxes_payable > 0:
@@ -249,9 +237,11 @@ class Firm(EcoAgent):
     # Exit process
     #
     def exit(self):
-        if self.net_worth < self.roles["employer"].wage:
+        roles = self.roles
+        account = self.account
+        if account["equities"] < roles["employer"].wage:
             self.defaulted = True
-            for role in self.roles.values():
+            for role in roles.values():
                 role.defaulted = True
             self._make_loan_defaults()
             self._withdraw_residual_deposits()

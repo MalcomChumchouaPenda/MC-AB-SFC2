@@ -52,17 +52,6 @@ def test_initializes_credit_capacity(fake_model):
     assert bank.credit_capacity == 0
 
 
-def test_initializes_net_worth(fake_model):
-    # Given
-    model = fake_model
-
-    # When
-    bank = Bank(model)
-
-    # Then
-    assert bank.net_worth == 0
-
-
 def test_initializes_defaulted(fake_model):
     # Given
     model = fake_model
@@ -513,38 +502,18 @@ def test_compute_profit_distribution(bank):
 
 def test_update_net_worth(bank_with_roles_and_account):
     # Given
-    bank, *_ = bank_with_roles_and_account
-    bank._update_equity_shares = Mock()
+    role = Mock()
+    bank, roles, _ = bank_with_roles_and_account
     bank.profit = 500
-    bank.net_worth = 500
     bank.taxes_payable = 50
     bank.dividends_payable = 100
-    bank.account["equities"] = -500
+    roles["company"] = role
 
     # When
     bank.update_net_worth()
 
     # Then
-    bank._update_equity_shares.assert_called_once_with(350)
-    assert bank.net_worth == pytest.approx(850)
-
-
-def test_update_equity_shares(bank_with_roles_and_account):
-    # Given
-    founder1, founder2 = Mock(), Mock()
-    share1 = {"founder": founder1, "value": 1000}
-    share2 = {"founder": founder2, "value": 3000}
-    role = Mock()
-    role.get_equity_shares.return_value = [share1, share2]
-    bank, roles, _ = bank_with_roles_and_account
-    roles["company"] = role
-
-    # When
-    bank._update_equity_shares(-100)
-
-    # Then
-    role.update_equity_share.assert_any_call(founder1, -25)
-    role.update_equity_share.assert_any_call(founder2, -75)
+    role.update_equity_shares.assert_called_once_with(350)
 
 
 def test_pay_taxes(bank_as_taxpayer):
@@ -624,8 +593,8 @@ def bank_before_exit(bank_with_roles_and_account):
 @pytest.mark.parametrize("net_worth, defaulted", [(90, True), (150, False)])
 def test_exit_when_bankrupt(bank_before_exit, net_worth, defaulted):
     # Given
-    bank, *_ = bank_before_exit
-    bank.net_worth = net_worth
+    bank, _, account = bank_before_exit
+    account["equities"] = net_worth
 
     # When
     bank.exit()
@@ -637,8 +606,9 @@ def test_exit_when_bankrupt(bank_before_exit, net_worth, defaulted):
 def test_exit_transfer_residual_cash_to_founders(bank_before_exit):
     # Given
     founder = object()
-    share = {"founder": founder, "value": 1000}
+    share = {"founder": founder, "value": 90}
     bank, roles, account = bank_before_exit
+    account["equities"] = 90
     account["cash"] = 200
     role = roles["company"]
     role.get_equity_shares.return_value = [share]
@@ -652,8 +622,8 @@ def test_exit_transfer_residual_cash_to_founders(bank_before_exit):
 
 def test_exit_sets_all_roles_defaulted(bank_before_exit):
     # Given
-    bank, roles, _ = bank_before_exit
-    bank.net_worth = 90
+    bank, roles, account = bank_before_exit
+    account["equities"] = 90
     roles["any"] = Mock()
 
     # When
