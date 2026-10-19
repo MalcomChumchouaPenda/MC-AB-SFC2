@@ -8,6 +8,7 @@ class Producer(EcoRole):
         super().__init__(agent, env)
         self.defaulted = False
         self.variety = None
+        self.output = 0
         self.sales = 0
         self.price = 0
         self.rd = 0
@@ -27,7 +28,8 @@ class Producer(EcoRole):
     # Actions
     #
     def produce_goods(self, labor):
-        self.inventories += self.productivity * labor
+        self.output = self.productivity * labor
+        self.inventories += self.output
 
     def execute_rd(self, rd):
         self.rd = rd

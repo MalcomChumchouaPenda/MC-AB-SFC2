@@ -52,6 +52,17 @@ def test_initializes_inventories():
     assert role.inventories == 0
 
 
+def test_initializes_output():
+    # Given
+    agent, env = Mock(), Mock()
+
+    # When
+    role = Producer(agent, env)
+
+    # Then
+    assert role.output == 0
+
+
 def test_initializes_sales():
     # Given
     agent, env = Mock(), Mock()
@@ -147,6 +158,18 @@ def test_produce_goods_increases_inventories(role):
 
     # Then
     assert role.inventories == 25.0
+
+
+def test_produce_goods_sets_output(role):
+    # Given
+    role.productivity = 2.0
+    role.output = 10.0
+
+    # When
+    role.produce_goods(10)
+
+    # Then
+    assert role.output == 20.0
 
 
 @pytest.fixture

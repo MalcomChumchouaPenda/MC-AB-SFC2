@@ -88,3 +88,4 @@ class GoodsMarket(EcoSpace):
         super().clear_transactions()
         for role in self.find_all_roles("producer"):
             role.sales = 0
+            role.output = 0

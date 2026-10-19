@@ -329,6 +329,19 @@ def test_clear_transactions_resets_each_producer_sales(market_with_producers):
         assert producer.sales == 0
 
 
+def test_clear_transactions_resets_each_producer_output(market_with_producers):
+    # Given
+    market, producers = market_with_producers
+    producers.output = 50.0
+
+    # When
+    market.clear_transactions()
+
+    # Then
+    for producer in producers:
+        assert producer.output == 0
+
+
 @pytest.fixture
 def market_before_update(market_with_producers):
     # Given
