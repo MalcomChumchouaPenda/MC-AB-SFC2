@@ -260,8 +260,8 @@ class Household(EcoAgent):
     def _resize_new_firm(self, firm, sector, equity_size):
         p = self.p
         citizen_role = self.roles["citizen"]
-        producer_role = firm.roles["producer"]
-        employer_role = firm.roles["employer"]
+        producer_role, employer_role = firm.roles["producer"], firm.roles["employer"]
+        producer_role.variety = self.model.nprandom.uniform(0, math.radians(360))
         productivity_range = citizen_role.get_productivity_range(sector)
         if productivity_range is None:
             employer_role.wage = p.initial_wage

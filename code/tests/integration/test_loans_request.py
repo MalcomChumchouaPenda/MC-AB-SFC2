@@ -1,42 +1,46 @@
 import pytest
 from model.agents.bank import Bank
 from model.agents.firm import Firm
-from model.spaces.credit_market import CreditMarket
+from model.spaces.monetary_union import MonetaryUnion
 
 
 @pytest.fixture
 def model(fake_model):
     # Given
     model = fake_model
+    model.p.initial_tax_rate = 0.0
+    model.p.initial_discount_rate = 0.0
     return model
 
 
 @pytest.fixture
-def market(model):
+def union(model):
     # Given
-    market = CreditMarket(model)
-    return market
+    union = MonetaryUnion(model)
+    union.create_countries(1)
+    union.create_markets()
+    return union
 
 
 @pytest.fixture
-def bank(model, market):
+def bank(model, union):
     # Given
     bank = Bank(model)
-    market.add_bank(bank)
+    union.add_agents([bank])
     return bank
 
 
 @pytest.fixture
-def firm(model, market):
+def firm(model, union):
     # Given
     firm = Firm(model)
-    market.add_firm(firm)
+    union.add_agents([firm])
     return firm
 
 
 def test_creates_loan_application(firm, bank):
     # Given
-    firm.wage_offer = 4
+    firm.roles["employer"].wage = 4
     firm.desired_rd = 100
     firm.desired_labor = 100
     firm_role = firm.roles["borrower"]

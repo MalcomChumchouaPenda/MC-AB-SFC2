@@ -8,11 +8,6 @@ class Firm(EcoAgent):
         super().setup()
         self.tradable = False
 
-        # prices
-        self.price = 0.0
-        self.wage_offer = 0
-        self.initial_productivity = 0
-
         # indicators
         self.net_cash_flow = 0.0
         self.net_worth = 0.0
@@ -35,8 +30,6 @@ class Firm(EcoAgent):
         self.prev_desired_labor = 0
 
         # other props
-        random = self.model.nprandom
-        self.variety = random.uniform(0, math.radians(360))
         self.defaulted = False
 
     #
@@ -63,16 +56,17 @@ class Firm(EcoAgent):
     def adapt_expectations(self):
         delta = self.p.delta
         random = self.model.random
+        role = self.roles["producer"]
         if self.prev_sales >= self.prev_expected_sales:
             self.expected_sales *= 1 + random.uniform(0, delta)
-            self.price *= 1 + random.uniform(0, delta)
+            role.price *= 1 + random.uniform(0, delta)
 
         elif self.prev_output + self.prev_inventories > self.prev_sales:
             role = self.roles["producer"]
             wage_bill = self.account["wages"]
             self.expected_sales *= 1 - random.uniform(0, delta)
-            self.price *= 1 - random.uniform(0, delta)
-            self.price = max(wage_bill / role.productivity, self.price)
+            role.price *= 1 - random.uniform(0, delta)
+            role.price = max(wage_bill / role.productivity, role.price)
 
     #
     # Wage revision
@@ -80,13 +74,14 @@ class Firm(EcoAgent):
     def revise_wage_offer(self):
         p = self.p
         random = self.model.nprandom
+        role = self.roles["employer"]
         prob = self._calc_revision_probability()
         if self.prev_desired_labor > self.prev_labor:
             if random.choice([0, 1], p=[1 - prob, prob]):
-                self.wage_offer *= 1 + random.uniform(0, p.delta)
+                role.wage *= 1 + random.uniform(0, p.delta)
         else:
             if random.choice([0, 1], p=[prob, 1 - prob]):
-                self.wage_offer *= 1 - random.uniform(0, p.delta)
+                role.wage *= 1 - random.uniform(0, p.delta)
 
     def _calc_revision_probability(self):
         p = self.p
@@ -98,7 +93,8 @@ class Firm(EcoAgent):
     # Innovation and imitation process
     #
     def calc_desired_rd(self):
-        self.desired_wage_bill = self.wage_offer * self.desired_labor
+        role = self.roles["employer"]
+        self.desired_wage_bill = role.wage * self.desired_labor
         self.desired_rd = self.p.gamma * self.desired_wage_bill
         return self.desired_rd
 
@@ -127,8 +123,9 @@ class Firm(EcoAgent):
             role.request_loans(lender)
 
     def _calc_desired_loans(self):
+        role = self.roles["employer"]
         deposits = self.account["deposits"]
-        wage_bill = self.wage_offer * self.desired_labor
+        wage_bill = role.wage * self.desired_labor
         return max(0, wage_bill + self.desired_rd - deposits)
 
     def repay_loans(self):
@@ -198,9 +195,10 @@ class Firm(EcoAgent):
         )
 
     def _calc_profit(self):
-        role = self.roles["producer"]
-        unit_cost = self.wage_offer / role.productivity
-        inv_variation = unit_cost * (role.inventories - self.prev_inventories)
+        employer_role = self.roles["employer"]
+        producer_role = self.roles["producer"]
+        unit_cost = employer_role.wage / producer_role.productivity
+        inv_variation = unit_cost * (producer_role.inventories - self.prev_inventories)
         return self.net_cash_flow + inv_variation
 
     def _calc_taxes(self):
@@ -251,7 +249,7 @@ class Firm(EcoAgent):
     # Exit process
     #
     def exit(self):
-        if self.net_worth < self.wage_offer:
+        if self.net_worth < self.roles["employer"].wage:
             self.defaulted = True
             for role in self.roles.values():
                 role.defaulted = True

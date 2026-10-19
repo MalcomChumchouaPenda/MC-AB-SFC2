@@ -50,7 +50,7 @@ def firm(model, union, founders):
 
 def test_firm_exit_with_residual_cash(firm, founders):
     # Given
-    firm.wage_offer = 100
+    firm.roles["employer"].wage = 100
 
     # When
     firm.exit()

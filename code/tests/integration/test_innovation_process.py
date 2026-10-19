@@ -31,13 +31,13 @@ def country(model):
 def firm(model, country):
     # Given
     firm = Firm(model)
-    firm.wage_offer = 10
     firm.desired_rd = 100
     firm.desired_labor = 100
     firm.desired_loans = 100
-    country.add_firm(firm)
+    country.add_agents([firm])
     firm.account["loans"] = 100
     firm.roles["employer"].labor = 100
+    firm.roles["employer"].wage = 10
     return firm
 
 

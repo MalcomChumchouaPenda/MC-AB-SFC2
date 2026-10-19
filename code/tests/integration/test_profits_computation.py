@@ -41,7 +41,7 @@ def before_firm_computation(firm, country):
     firm.account["loan_interests"] = 30
     firm.account["wages"] = 400
     firm.prev_inventories = 50
-    firm.wage_offer = 20
+    firm.roles["employer"].wage = 20
     country.tax_rate = 0.25
 
 
