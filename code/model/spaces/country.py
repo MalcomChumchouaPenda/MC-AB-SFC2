@@ -96,6 +96,11 @@ class Country(EcoSpace):
         firm_sector = companies.select(companies.sector != "B")
         return float(np.median(firm_sector.equity))
 
+    def calc_sector_size(self, sector):
+        companies = self.find_all_roles("company")
+        selected = companies.select(companies.sector == sector)
+        return len(selected)
+
     def calc_equity_range(self, sector):
         companies = self.find_all_roles("company")
         selected = companies.select(companies.sector == sector)

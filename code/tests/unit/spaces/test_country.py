@@ -536,6 +536,18 @@ def test_calc_median_firm_size(country_with_two_groups):
     assert median_size == pytest.approx(50.0)
 
 
+def test_calc_sector_size(country_with_two_groups):
+    # Given
+    country, group1, group2 = country_with_two_groups
+    group1.sector, group2.sector = "X", "Y"
+
+    # When
+    sector_size = country.calc_sector_size("X")
+
+    # Then
+    assert sector_size == len(group1)
+
+
 def test_calc_equity_range_for_any_sector(country_with_two_groups):
     # Given
     country, group1, group2 = country_with_two_groups

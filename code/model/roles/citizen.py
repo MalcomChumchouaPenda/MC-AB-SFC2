@@ -30,6 +30,9 @@ class Citizen(EcoRole):
     def get_median_firm_size(self):
         return self.env.calc_median_firm_size()
 
+    def get_sector_size(self, sector):
+        return self.env.calc_sector_size(sector)
+
     def get_equity_range(self, sector):
         return self.env.calc_equity_range(sector)
 

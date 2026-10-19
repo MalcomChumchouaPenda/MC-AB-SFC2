@@ -1296,7 +1296,8 @@ def before_firm_resize(hh_as_investor):
 def test_resize_new_firm_sets_variety_randomly(before_firm_resize):
     # Given
     max_variety = math.radians(360)
-    household, _, firm = before_firm_resize
+    household, citizen_role, firm = before_firm_resize
+    citizen_role.get_sector_size.return_value = 0
     producer_role = firm.roles["producer"]
 
     # When
@@ -1310,6 +1311,7 @@ def test_resize_new_firm_sets_productivity_from_range(before_firm_resize):
     # Given
     household, citizen_role, firm = before_firm_resize
     citizen_role.get_productivity_range.return_value = (1.0, 2.0)
+    citizen_role.get_sector_size.return_value = 2
     producer_role = firm.roles["producer"]
 
     # When
@@ -1324,7 +1326,7 @@ def test_resize_new_firm_sets_productivity_from_params(before_firm_resize):
     household, citizen_role, firm = before_firm_resize
     household.p.initial_productivity = 0.5
     producer_role = firm.roles["producer"]
-    citizen_role.get_productivity_range.return_value = None
+    citizen_role.get_sector_size.return_value = 1
 
     # When
     household._resize_new_firm(firm, "ANY", 100)
@@ -1337,6 +1339,7 @@ def test_resize_new_firm_sets_price_from_range(before_firm_resize):
     # Given
     household, citizen_role, firm = before_firm_resize
     citizen_role.get_price_range.return_value = (5.0, 15.0)
+    citizen_role.get_sector_size.return_value = 2
     producer_role = firm.roles["producer"]
 
     # When
@@ -1352,7 +1355,7 @@ def test_resize_new_firm_sets_price_from_params(before_firm_resize):
     household.p.initial_wage = 2.0
     household.p.initial_productivity = 0.5
     producer_role = firm.roles["producer"]
-    citizen_role.get_productivity_range.return_value = None
+    citizen_role.get_sector_size.return_value = 1
 
     # When
     household._resize_new_firm(firm, "ANY", 100)
@@ -1365,6 +1368,7 @@ def test_resize_new_firm_sets_sales_from_range(before_firm_resize):
     # Given
     household, citizen_role, firm = before_firm_resize
     citizen_role.get_sales_range.return_value = (50.0, 100.0)
+    citizen_role.get_sector_size.return_value = 2
 
     # When
     household._resize_new_firm(firm, "ANY", 100)
@@ -1378,7 +1382,7 @@ def test_resize_new_firm_sets_sales_from_params(before_firm_resize):
     household, citizen_role, firm = before_firm_resize
     household.p.initial_wage = 2.0
     household.p.initial_productivity = 0.5
-    citizen_role.get_productivity_range.return_value = None
+    citizen_role.get_sector_size.return_value = 1
 
     # When
     household._resize_new_firm(firm, "ANY", 100)
@@ -1391,6 +1395,7 @@ def test_resize_new_firm_sets_wage_from_range(before_firm_resize):
     # Given
     household, citizen_role, firm = before_firm_resize
     citizen_role.get_wage_range.return_value = (2.0, 4.0)
+    citizen_role.get_sector_size.return_value = 2
     employer_role = firm.roles["employer"]
 
     # When
@@ -1405,7 +1410,7 @@ def test_resize_new_firm_sets_wage_from_params(before_firm_resize):
     household, citizen_role, firm = before_firm_resize
     household.p.initial_wage = 2.0
     employer_role = firm.roles["employer"]
-    citizen_role.get_productivity_range.return_value = None
+    citizen_role.get_sector_size.return_value = 1
 
     # When
     household._resize_new_firm(firm, "ANY", 100)

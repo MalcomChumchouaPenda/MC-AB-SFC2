@@ -258,12 +258,11 @@ class Household(EcoAgent):
             return firm.id
 
     def _resize_new_firm(self, firm, sector, equity_size):
-        p = self.p
         citizen_role = self.roles["citizen"]
         producer_role, employer_role = firm.roles["producer"], firm.roles["employer"]
         producer_role.variety = self.model.nprandom.uniform(0, math.radians(360))
-        productivity_range = citizen_role.get_productivity_range(sector)
-        if productivity_range is None:
+        if citizen_role.get_sector_size(sector) <= 1:
+            p = self.p
             employer_role.wage = p.initial_wage
             producer_role.productivity = p.initial_productivity
             producer_role.price = p.initial_wage / p.initial_productivity
@@ -271,7 +270,9 @@ class Household(EcoAgent):
         else:
             uniform = self.model.nprandom.uniform
             employer_role.wage = uniform(*citizen_role.get_wage_range(sector))
-            producer_role.productivity = uniform(*productivity_range)
+            producer_role.productivity = uniform(
+                *citizen_role.get_productivity_range(sector)
+            )
             producer_role.price = uniform(*citizen_role.get_price_range(sector))
             firm.expected_sales = uniform(*citizen_role.get_sales_range(sector))
 

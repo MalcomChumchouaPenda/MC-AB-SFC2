@@ -130,6 +130,19 @@ def test_get_median_firm_size_from_env(role):
     assert median_size == 150.0
 
 
+def test_get_sector_size_from_env(role):
+    # Given
+    env = role.env
+    env.calc_sector_size.return_value = 2
+
+    # When
+    sector_size = role.get_sector_size("X")
+
+    # Then
+    env.calc_sector_size.assert_called_with("X")
+    assert sector_size == 2
+
+
 def test_get_equity_range_from_env(role):
     # Given
     env = role.env
@@ -139,6 +152,7 @@ def test_get_equity_range_from_env(role):
     range_ = role.get_equity_range("X")
 
     # Then
+    env.calc_equity_range.assert_called_with("X")
     assert range_ == (100, 200)
 
 
@@ -151,6 +165,7 @@ def test_get_productivity_range_from_env(role):
     range_ = role.get_productivity_range("X")
 
     # Then
+    env.calc_productivity_range.assert_called_with("X")
     assert range_ == (100, 200)
 
 
@@ -163,6 +178,7 @@ def test_get_price_range_from_env(role):
     range_ = role.get_price_range("X")
 
     # Then
+    env.calc_price_range.assert_called_with("X")
     assert range_ == (100, 200)
 
 
@@ -175,6 +191,7 @@ def test_get_sales_range_from_env(role):
     range_ = role.get_sales_range("X")
 
     # Then
+    env.calc_sales_range.assert_called_with("X")
     assert range_ == (100, 200)
 
 
@@ -187,6 +204,7 @@ def test_get_wage_range_from_env(role):
     range_ = role.get_wage_range("X")
 
     # Then
+    env.calc_wage_range.assert_called_with("X")
     assert range_ == (100, 200)
 
 
