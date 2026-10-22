@@ -8,6 +8,7 @@ from model.spaces.monetary_union import MonetaryUnion
 def model(fake_model):
     # Given
     model = fake_model
+    model.p.country_number = 1
     model.p.initial_tax_rate = 0.0
     model.p.initial_discount_rate = 0.0
     return model
@@ -17,7 +18,7 @@ def model(fake_model):
 def union(model):
     # Given
     union = MonetaryUnion(model)
-    union.create_countries(1)
+    union.create_countries()
     union.create_markets()
     return union
 

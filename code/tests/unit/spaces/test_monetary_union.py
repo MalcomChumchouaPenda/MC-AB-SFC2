@@ -68,9 +68,10 @@ def union_without_countries(union_without_spaces, monkeypatch):
 def test_create_countries_adds_countries(union_without_countries):
     # Given
     union = union_without_countries
+    union.p.country_number = 2
 
     # When
-    union.create_countries(2)
+    union.create_countries()
 
     # Then
     union.add_space.assert_any_call(FakeCountry, "country_0")
@@ -83,9 +84,10 @@ def test_create_countries_creates_national_markets(union_without_countries):
     country = Mock()
     union = union_without_countries
     union.add_space.return_value = country
+    union.p.country_number = 1
 
     # When
-    union.create_countries(1)
+    union.create_countries()
 
     # Then
     country.create_markets.assert_called_once_with()

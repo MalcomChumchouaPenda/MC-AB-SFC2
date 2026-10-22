@@ -9,6 +9,7 @@ from model.agents.bank import Bank
 def model(fake_model, make_dlist):
     # Given
     model = fake_model
+    model.p.country_number = 1
     model.p.cT = 0.6
     model.p.eta = 0.3
     model.p.initial_equity = 400
@@ -29,7 +30,7 @@ def union(model):
     # Given
     union = MonetaryUnion(model)
     union.create_markets()
-    union.create_countries(1)
+    union.create_countries()
     model.union = union
     return union
 

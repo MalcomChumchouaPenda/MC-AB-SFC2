@@ -19,8 +19,8 @@ class MonetaryUnion(EcoSpace):
         self.add_space(CreditMarket, "credit_market")
         self.add_space(BondMarket, "bond_market")
 
-    def create_countries(self, number):
-        for k in range(number):
+    def create_countries(self):
+        for k in range(self.p.country_number):
             country = self.add_space(Country, f"country_{k}")
             country.create_markets()
 
