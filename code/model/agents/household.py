@@ -275,7 +275,6 @@ class Household(EcoAgent):
 
     def _fund_company(self, agent_id, shares):
         for share in shares:
-            print(share)
             founder = share["citizen"]
             founder.fund_company(agent_id, share["amount"])
 

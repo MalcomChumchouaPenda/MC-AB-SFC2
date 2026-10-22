@@ -23,7 +23,7 @@ class EcoModel(Model):
 
     def _create_union(self):
         union = MonetaryUnion(self)
-        union.create_countries(self.p.country_number)
+        union.create_countries()
         union.create_markets()
         self.union = union
 
@@ -148,8 +148,6 @@ class EcoModel(Model):
         self.banks.exit()
         self.households.choose_portfolio_allocation()
         self.households.invest_equity()
-        self.households.choose_deposit_bank()
-        self.households.make_deposits()
         self.governments.issue_deposit_guarantee_bonds()
         self.national_cbs.buy_bonds()
         self.governments.reimburse_deposits()

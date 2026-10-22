@@ -153,13 +153,12 @@ def test_create_union_creates_markets(before_union_creation):
 def test_create_union_creates_countries(before_union_creation):
     # Given
     model = before_union_creation
-    c_num = model.p.country_number
 
     # When
     model._create_union()
 
     # Then
-    model.union.create_countries.assert_called_with(c_num)
+    model.union.create_countries.assert_called_with()
 
 
 FakeHousehold = MagicMock()
@@ -544,8 +543,6 @@ def test_enter_exit(params):
     # Then
     model.households.choose_portfolio_allocation.assert_called_with()
     model.households.invest_equity.assert_called_with()
-    model.households.choose_deposit_bank.assert_called_with()
-    model.households.make_deposits.assert_called_with()
     model.firms.exit.assert_called_with()
     model.banks.exit.assert_called_with()
     model.governments.issue_deposit_guarantee_bonds.assert_called_with()
