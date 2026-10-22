@@ -649,7 +649,7 @@ def firm_as_borrower(firm_with_roles_and_account):
     role.find_lenders.return_value = []
     firm, roles, account = firm_with_roles_and_account
     firm._calc_desired_loans = Mock(return_value=10)
-    account["equities"] = 100
+    account["equities"] = -100
     roles["borrower"] = role
     return firm, role
 
@@ -1022,7 +1022,7 @@ def before_exit(firm_with_roles_and_account):
     roles["borrower"] = borrower_role
     roles["employer"] = Mock(wage=100)
     roles["depositor"] = Mock()
-    account["equities"] = 50
+    account["equities"] = -50
     account["deposits"] = 0
     account["loans"] = 0
     account["cash"] = 0
@@ -1033,7 +1033,7 @@ def before_exit(firm_with_roles_and_account):
 def test_exit_when_bankrupt(before_exit, net_worth, defaulted):
     # Given
     firm, _, account = before_exit
-    account["equities"] = net_worth
+    account["equities"] = -net_worth
 
     # When
     firm.exit()
@@ -1115,7 +1115,7 @@ def test_exit_transfer_residual_cash_to_founders(before_exit):
 def test_exit_sets_all_roles_defaulted(before_exit):
     # Given
     firm, roles, account = before_exit
-    account["equities"] = 90
+    account["equities"] = -90
     roles["any"] = Mock()
 
     # When

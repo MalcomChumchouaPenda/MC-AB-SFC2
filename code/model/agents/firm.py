@@ -239,8 +239,8 @@ class Firm(EcoAgent):
     #
     def exit(self):
         roles = self.roles
-        account = self.account
-        if account["equities"] < roles["employer"].wage:
+        equity = -self.account["equities"]
+        if equity < roles["employer"].wage:
             self.defaulted = True
             for role in roles.values():
                 role.defaulted = True
