@@ -117,3 +117,15 @@ def test_expose_agent_id():
 
     # Then
     assert exposed is agent.id
+
+
+def test_expose_agent_country_pos():
+    # Given
+    agent, env = Mock(), Mock()
+    role = EcoRole(agent, env)
+
+    # When
+    exposed = role.country_pos
+
+    # Then
+    assert exposed is agent.country_pos

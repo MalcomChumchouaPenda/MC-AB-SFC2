@@ -73,20 +73,6 @@ def test_add_government_add_issuer_role(market_without_roles):
     market.add_role.assert_called_with(FakeIssuer, govt)
 
 
-def test_add_government_sets_role_country_pos(market_without_roles):
-    # Given
-    role = Mock()
-    market = market_without_roles
-    market.add_role.return_value = role
-    govt = Mock()
-
-    # When
-    market.add_government(govt)
-
-    # Then
-    assert role.country_pos == govt.country_pos
-
-
 # ---------------------------------------------------
 # BONDS TRANSACTION
 # ----------------------------------------------------

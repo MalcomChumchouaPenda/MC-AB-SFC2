@@ -56,4 +56,4 @@ def test_initializes_country_pos(fake_model):
     agent = EcoAgent(model)
 
     # Then
-    assert agent.country_pos == 0
+    assert agent.country_pos is None
