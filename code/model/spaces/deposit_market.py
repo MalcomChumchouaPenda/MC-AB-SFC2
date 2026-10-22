@@ -44,6 +44,8 @@ class DepositMarket(EcoSpace):
         self.transfer_stock("cash", deposit_bank.id, depositor.id, amount)
         self.transfer_stock("deposits", depositor.id, deposit_bank.id, amount)
         self.graph.remove_edge(depositor, deposit_bank)
+        if self.graph.has_edge(deposit_bank, depositor):  # DEBUG NETWORKX
+            self.graph.remove_edge(deposit_bank, depositor)
 
     def pay_interests(self, deposit_bank, depositor, amount):
         self.transfer_stock("deposits", deposit_bank.id, depositor.id, amount)
