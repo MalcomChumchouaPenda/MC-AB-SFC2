@@ -48,6 +48,7 @@ def test_updates_discount_rate_via_union_cb_action(union, union_cb):
 @pytest.fixture
 def national_cb(model, union):
     cb = CentralBank(model)
+    cb.country_pos = 0
     cb.national = True
     union.add_central_bank(cb)
     return cb

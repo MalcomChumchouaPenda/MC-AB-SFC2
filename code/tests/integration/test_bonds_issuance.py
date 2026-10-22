@@ -36,6 +36,7 @@ def country(union):
 def govt(model, union):
     # Given
     govt = Government(model)
+    govt.country_pos = 0
     union.add_government(govt)
     return govt
 

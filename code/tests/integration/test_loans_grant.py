@@ -41,6 +41,7 @@ def markets(union):
 def bank(model, union):
     # Given
     bank = Bank(model)
+    bank.country_pos = 0
     union.add_bank(bank)
     bank.account["equities"] = -100
     return bank

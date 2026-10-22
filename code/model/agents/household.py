@@ -311,7 +311,7 @@ class Household(EcoAgent):
             amount = min(target, deposit["amount"])
             role.withdraw_deposits(bank_id, amount)
             target -= amount
-            
+
     #
     # History
     #

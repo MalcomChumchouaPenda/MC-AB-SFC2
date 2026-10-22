@@ -39,6 +39,7 @@ def deposit_market(union):
 def govt(model, union):
     # Given
     govt = Government(model)
+    govt.country_pos = 0
     union.add_government(govt)
     return govt
 
@@ -47,6 +48,7 @@ def govt(model, union):
 def bank(model, union):
     # Given
     bank = Bank(model)
+    bank.country_pos = 0
     union.add_bank(bank)
     deposit_bank = bank.roles["deposit_bank"]
     deposit_bank.defaulted = True
@@ -113,6 +115,7 @@ def test_clears_firm_deposits(firm, bank, govt, deposit_market):
 def household(model, union):
     # Given
     household = Household(model)
+    household.country_pos = 0
     union.add_agents([household])
     return household
 

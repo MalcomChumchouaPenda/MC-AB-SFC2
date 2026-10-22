@@ -27,6 +27,7 @@ def cb(model, union):
     # Given
     cb = CentralBank(model)
     cb.national = True
+    cb.country_pos = 0
     union.add_central_bank(cb)
     return cb
 
@@ -35,6 +36,7 @@ def cb(model, union):
 def bank(model, union):
     # Given
     bank = Bank(model)
+    bank.country_pos = 0
     union.add_bank(bank)
     return bank
 

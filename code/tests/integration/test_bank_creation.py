@@ -46,6 +46,7 @@ def founders(model, union):
     founders = []
     for i in range(2):
         household = Household(model)
+        household.country_pos = 0
         household.desired_equity = 300 - i * 100
         union.add_agents([household])
         founders.append(household)
@@ -95,7 +96,7 @@ def test_increases_new_bank_equities(founders, model):
 
 
 @pytest.mark.usefixtures("before_bank_creation")
-def test_transfers_cash_from_household_to_new_bank(founders, model):
+def test_transfers_some_cash_from_household_to_new_bank(founders, model):
     # Given
     initiator, partner = founders
     banks = model.banks
@@ -104,9 +105,23 @@ def test_transfers_cash_from_household_to_new_bank(founders, model):
     initiator.invest_equity()
 
     # Then
-    assert initiator.account["cash"] == 100
+    assert initiator.account["cash"] == 0
     assert partner.account["cash"] == 200
-    assert banks[0].account["cash"] == 500
+    assert banks[0].account["cash"] == 600
+
+
+@pytest.mark.usefixtures("before_bank_creation")
+def test_make_deposits_with_household_residual_cash(founders, model):
+    # Given
+    initiator = founders[0]
+    banks = model.banks
+
+    # # When
+    initiator.invest_equity()
+
+    # Then
+    assert initiator.account["deposits"] == 100
+    assert banks[0].account["deposits"] == -100
 
 
 @pytest.mark.usefixtures("before_bank_creation")

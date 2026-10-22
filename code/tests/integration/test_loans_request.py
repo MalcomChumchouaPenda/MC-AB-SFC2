@@ -26,6 +26,7 @@ def union(model):
 def bank(model, union):
     # Given
     bank = Bank(model)
+    bank.country_pos = 0
     union.add_agents([bank])
     return bank
 

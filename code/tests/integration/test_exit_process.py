@@ -31,6 +31,7 @@ def founders(model, union):
     founders = []
     for _ in range(2):
         household = Household(model)
+        household.country_pos = 0
         union.add_agents([household])
         founders.append(household)
     return founders

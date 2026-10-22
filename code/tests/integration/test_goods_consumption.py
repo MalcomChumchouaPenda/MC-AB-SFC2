@@ -39,6 +39,7 @@ def household(model, union):
     model.p.beta = 1
     model.p.cT = 0.6
     household = Household(model)
+    household.country_pos = 0
     union.add_agents([household])
     return household
 

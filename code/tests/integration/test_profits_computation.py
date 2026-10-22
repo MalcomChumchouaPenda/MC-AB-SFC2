@@ -27,6 +27,7 @@ def country(model):
 def firm(model, country):
     # Given
     firm = Firm(model)
+    firm.country_pos = 0
     country.add_firm(firm)
     return firm
 

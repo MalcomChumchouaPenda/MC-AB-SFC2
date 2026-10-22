@@ -29,6 +29,7 @@ def banks(model, union):
     banks = []
     for _ in range(2):
         bank = Bank(model)
+        bank.country_pos = 0
         banks.append(bank)
         union.add_bank(bank)
     return banks

@@ -1512,7 +1512,6 @@ def test_choose_deposit_bank_leave_old_deposit_bank(before_bank_choice):
     role.leave_deposit_bank.assert_called_once_with(4)
 
 
-
 def test_choose_deposit_bank_join_new_deposit_bank(before_bank_choice):
     # Given
     household, role, banks = before_bank_choice
