@@ -125,14 +125,6 @@ def test_initializes_incomes(model):
     assert household.disposable_income == 0
 
 
-def test_initializes_deposit_bank_id(model):
-    # When
-    household = Household(model)
-
-    # Then
-    assert household.deposit_bank_id is None
-
-
 # ----------------------------------------------------
 # JOB SEARCH
 # ----------------------------------------------------
@@ -591,12 +583,11 @@ def test_consume_good_with_monetary_constraints(hh_as_specific_consumer):
 def hh_as_general_consumer(hh_with_roles_and_account):
     # Given
     household, roles, account = hh_with_roles_and_account
+    household._withdraw_deposits = Mock()
     household._consume_good = Mock()
-    roles["depositor"] = Mock()
     roles["trad_consumer"] = Mock()
     roles["non_trad_consumer"] = Mock()
     account["cash"] = 0
-    account["deposits"] = 0
     return household, roles, account
 
 
@@ -628,58 +619,18 @@ def test_consume_randomizes_entry_order(hh_as_general_consumer):
     random.shuffle.assert_called_with(entry_order)
 
 
-def test_consume_withdraws_deposits(hh_as_general_consumer):
+def test_consume_withdraws_needed_deposits(hh_as_general_consumer):
     # Given
-    household, roles, account = hh_as_general_consumer
+    household, _, account = hh_as_general_consumer
     household.p.cT = 0.6
     household.desired_consumption = 100
-    household.deposit_bank_id = 5
-    account["deposits"] = 100
-    account["cash"] = 50
-    role = roles["depositor"]
+    account["cash"] = 40
 
     # When
     household.consume()
 
     # Then
-    role.withdraw_deposits.assert_called_with(5, 50)
-    assert household._consume_good.call_count == 2
-
-
-def test_consume_withdraws_sufficient_deposits(hh_as_general_consumer):
-    # Given
-    household, roles, account = hh_as_general_consumer
-    household.p.cT = 0.6
-    household.desired_consumption = 100
-    household.deposit_bank_id = 5
-    account["deposits"] = 25
-    account["cash"] = 50
-    role = roles["depositor"]
-
-    # When
-    household.consume()
-
-    # Then
-    role.withdraw_deposits.assert_called_with(5, 25)
-    assert household._consume_good.call_count == 2
-
-
-def test_consume_withdraws_no_deposits(hh_as_general_consumer):
-    # Given
-    household, roles, account = hh_as_general_consumer
-    household.p.cT = 0.6
-    household.desired_consumption = 100
-    household.deposit_bank_id = None
-    account["deposits"] = 25
-    account["cash"] = 50
-    role = roles["depositor"]
-
-    # When
-    household.consume()
-
-    # Then
-    role.withdraw_deposits.assert_not_called()
-    assert household._consume_good.call_count == 2
+    household._withdraw_deposits.assert_called_with(60)
 
 
 # ---------------------------------------------------
@@ -691,7 +642,6 @@ def test_consume_withdraws_no_deposits(hh_as_general_consumer):
 def before_allocation(hh_with_roles_and_account):
     # Given
     household, roles, _ = hh_with_roles_and_account
-    household.deposit_bank_id = 1
     roles["citizen"] = Mock()
     roles["depositor"] = Mock()
     return household
@@ -870,6 +820,8 @@ def before_investment(before_allocation):
     household._collect_equity_shares = Mock(return_value=None)
     household._create_company = Mock()
     household._fund_company = Mock()
+    household._choose_deposit_bank = Mock()
+    household._make_deposits = Mock()
     return household
 
 
@@ -942,7 +894,7 @@ def test_invest_equity_creates_company_with_sector_and_size(before_investment):
     household._create_company.assert_called_once_with("ANY", 200)
 
 
-def test_invest_equity_stop_process_if_no_shares(before_investment):
+def test_invest_equity_stop_creation_process_if_no_shares(before_investment):
     # Given
     household = before_investment
     household.desired_equity = 100
@@ -971,6 +923,32 @@ def test_invest_equity_funds_company_with_new_agent_and_shares(before_investment
 
     # Then
     household._fund_company.assert_called_once_with(5, shares)
+
+
+def test_invest_equity_make_deposits_with_residuals(before_investment):
+    # Given
+    bank_id = 5
+    household = before_investment
+    household._choose_deposit_bank.return_value = bank_id
+
+    # When
+    household.invest_equity()
+
+    # Then
+    household._choose_deposit_bank.assert_called_once_with()
+    household._make_deposits.assert_called_once_with(5)
+
+
+def test_invest_equity_doesnt_make_deposits_if_no_banks(before_investment):
+    # Given
+    household = before_investment
+    household._choose_deposit_bank.return_value = None
+
+    # When
+    household.invest_equity()
+
+    # Then
+    household._make_deposits.assert_not_called()
 
 
 @pytest.fixture
@@ -1499,8 +1477,74 @@ def test_fund_company_with_each_share(hh_as_investor):
 
 
 # ---------------------------------------------------
-# DEPOSIT BANK CHOICE
+# DEPOSIT MANAGEMENT
 # ----------------------------------------------------
+
+
+@pytest.fixture
+def banks(make_dlist):
+    # Given
+    return make_dlist([Mock(id=i, defaulted=False) for i in range(3)])
+
+
+@pytest.fixture
+def before_bank_choice(hh_with_roles_and_account, banks):
+    # Given
+    role = Mock()
+    role.find_deposits.return_value = []
+    role.find_deposit_banks.return_value = banks
+    household, roles, _ = hh_with_roles_and_account
+    household.model.random.choice.side_effect = lambda x: x[-1]
+    roles["depositor"] = role
+    return household, role, banks
+
+
+def test_choose_deposit_bank_leave_old_deposit_bank(before_bank_choice):
+    # Given
+    deposit = {"deposit_bank": Mock(id=4), " amount": 100}
+    household, role, _ = before_bank_choice
+    role.find_deposits.return_value = [deposit]
+
+    # When
+    household._choose_deposit_bank()
+
+    # Then
+    role.leave_deposit_bank.assert_called_once_with(4)
+
+
+
+def test_choose_deposit_bank_join_new_deposit_bank(before_bank_choice):
+    # Given
+    household, role, banks = before_bank_choice
+
+    # When
+    household._choose_deposit_bank()
+
+    # Then
+    role.join_deposit_bank.assert_called_once_with(banks[-1].id)
+
+
+def test_choose_deposit_bank_doesnt_join_defaulted_bank(before_bank_choice):
+    # Given
+    household, role, banks = before_bank_choice
+    banks.defaulted = True
+
+    # When
+    household._choose_deposit_bank()
+
+    # Then
+    role.join_deposit_bank.assert_not_called()
+
+
+def test_choose_deposit_bank_join_returns_choice_id(before_bank_choice):
+    # Given
+    household, _, banks = before_bank_choice
+
+    # When
+    bank_id = household._choose_deposit_bank()
+
+    # Then
+    assert bank_id == banks[-1].id
 
 
 @pytest.fixture
@@ -1514,103 +1558,29 @@ def before_deposits(hh_with_roles_and_account):
 
 def test_make_deposits_with_residual_cash(before_deposits):
     # Given
+    bank_id = 2
     household, role = before_deposits
     household.account["cash"] = 500
-    household.deposit_bank_id = 2
 
     # When
-    household.make_deposits()
+    household._make_deposits(bank_id)
 
     # Then
     role.make_deposits.assert_called_with(2, 500)
 
 
-def test_dont_make_deposits_without_deposit_bank_id(before_deposits):
+@pytest.mark.parametrize("target, expected", [(50, 50), (150, 100)])
+def test_withdraw_deposits_finds_and_uses_deposits(before_deposits, target, expected):
     # Given
+    deposit = {"deposit_bank": Mock(id=4), "amount": 100}
     household, role = before_deposits
-    household.account["cash"] = 500
-    household.deposit_bank_id = None
+    role.find_deposits.return_value = [deposit]
 
     # When
-    household.make_deposits()
+    household._withdraw_deposits(target)
 
     # Then
-    role.make_deposits.assert_not_called()
-
-
-@pytest.fixture
-def banks(make_dlist):
-    # Given
-    return make_dlist([Mock(id=i, defaulted=False) for i in range(3)])
-
-
-@pytest.fixture
-def before_bank_choice(hh_with_roles_and_account, banks):
-    # Given
-    role = Mock()
-    role.find_deposit_banks.return_value = banks
-    household, roles, _ = hh_with_roles_and_account
-    household.model.random.choice.side_effect = lambda x: x[-1]
-    roles["depositor"] = role
-    return household, role, banks
-
-
-def test_choose_deposit_bank_leave_old_deposit_bank(before_bank_choice):
-    # Given
-    household, role, _ = before_bank_choice
-    household.deposit_bank_id = 4
-
-    # When
-    household.choose_deposit_bank()
-
-    # Then
-    role.leave_deposit_bank.assert_called_once_with(4)
-
-
-def test_choose_deposit_bank_doesnt_leave_null_deposit_bank(before_bank_choice):
-    # Given
-    household, role, _ = before_bank_choice
-    household.deposit_bank_id = None
-
-    # When
-    household.choose_deposit_bank()
-
-    # Then
-    role.leave_deposit_bank.assert_not_called()
-
-
-def test_choose_deposit_bank_join_new_deposit_bank(before_bank_choice):
-    # Given
-    household, role, banks = before_bank_choice
-
-    # When
-    household.choose_deposit_bank()
-
-    # Then
-    role.join_deposit_bank.assert_called_once_with(banks[-1].id)
-
-
-def test_choose_deposit_bank_sets_deposit_bank_id(before_bank_choice):
-    # Given
-    household, _, banks = before_bank_choice
-
-    # When
-    household.choose_deposit_bank()
-
-    # Then
-    assert household.deposit_bank_id == banks[-1].id
-
-
-def test_choose_deposit_bank_doesnt_join_defaulted_bank(before_bank_choice):
-    # Given
-    household, role, banks = before_bank_choice
-    banks.defaulted = True
-
-    # When
-    household.choose_deposit_bank()
-
-    # Then
-    role.join_deposit_bank.assert_not_called()
+    role.withdraw_deposits.assert_called_once_with(4, expected)
 
 
 # ---------------------------------------------------

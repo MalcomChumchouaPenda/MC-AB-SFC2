@@ -10,6 +10,9 @@ class Depositor(EcoRole):
     #
     # Perceptions
     #
+    def find_deposits(self):
+        return self.env.links(self)
+
     def find_deposit_banks(self):
         return self.env.find_all_roles("deposit_bank")
 

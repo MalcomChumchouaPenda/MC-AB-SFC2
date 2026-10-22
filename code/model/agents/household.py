@@ -23,10 +23,9 @@ class Household(EcoAgent):
         self.desired_investment_sector = None
 
         # memory
-        self.prev_labor_sold = 0
         self.income = 0
         self.disposable_income = 0
-        self.deposit_bank_id = None
+        self.prev_labor_sold = 0
 
         # others props
         random = self.model.nprandom
@@ -106,12 +105,9 @@ class Household(EcoAgent):
 
     def _fund_consumption(self, desired_cons):
         account = self.account
-        bank_id = self.deposit_bank_id
-        if desired_cons > account["cash"] and bank_id is not None:
+        if desired_cons > account["cash"]:
             needs = desired_cons - account["cash"]
-            feasible = min(needs, account["deposits"])
-            role = self.roles["depositor"]
-            role.withdraw_deposits(bank_id, feasible)
+            self._withdraw_deposits(needs)
 
     def _consume_good(self, role, target_cons):
         cash = self.account["cash"]
@@ -188,6 +184,9 @@ class Household(EcoAgent):
                 equity_size = sum([share["amount"] for share in shares])
                 agent_id = self._create_company(sector, equity_size)
                 self._fund_company(agent_id, shares)
+        bank_id = self._choose_deposit_bank()
+        if bank_id is not None:
+            self._make_deposits(bank_id)
 
     def _choose_investment_sector(self):
         p = self.p
@@ -283,26 +282,36 @@ class Household(EcoAgent):
     #
     # Deposits management
     #
-    def make_deposits(self):
-        bank_id = self.deposit_bank_id
-        if bank_id is not None:
-            account = self.account
-            role = self.roles["depositor"]
-            role.make_deposits(bank_id, account["cash"])
-
-    def choose_deposit_bank(self):
+    def _choose_deposit_bank(self):
         role = self.roles["depositor"]
+        deposits = role.find_deposits()
+        for deposit in deposits:
+            bank_id = deposit["deposit_bank"].id
+            role.leave_deposit_bank(bank_id)
         banks = role.find_deposit_banks()
         selected = banks.select(banks.defaulted == False)
         if len(selected) > 0:
-            bank_id = self.deposit_bank_id
-            if bank_id is not None:
-                role.leave_deposit_bank(bank_id)
             random = self.model.random
             new_bank = random.choice(selected)
             role.join_deposit_bank(new_bank.id)
-            self.deposit_bank_id = new_bank.id
+            return new_bank.id
 
+    def _make_deposits(self, bank_id):
+        account = self.account
+        role = self.roles["depositor"]
+        role.make_deposits(bank_id, account["cash"])
+
+    def _withdraw_deposits(self, target):
+        role = self.roles["depositor"]
+        deposits = role.find_deposits()
+        for deposit in deposits:
+            if target <= 0:
+                break
+            bank_id = deposit["deposit_bank"].id
+            amount = min(target, deposit["amount"])
+            role.withdraw_deposits(bank_id, amount)
+            target -= amount
+            
     #
     # History
     #

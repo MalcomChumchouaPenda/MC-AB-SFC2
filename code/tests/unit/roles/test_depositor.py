@@ -31,6 +31,18 @@ def role():
 # ----------------------------------------------------
 
 
+def test_find_deposits_from_env(role):
+    # Given
+    env = role.env
+
+    # When
+    found = role.find_deposits()
+
+    # Then
+    env.links.assert_called_with(role)
+    assert found == env.links.return_value
+
+
 def test_find_deposit_banks_from_env(role):
     # Given
     env = role.env
