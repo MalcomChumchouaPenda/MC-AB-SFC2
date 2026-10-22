@@ -228,11 +228,11 @@ class Household(EcoAgent):
         initiator = self.roles["citizen"]
         collected_equity = initiator.resid_equity
         min_equity = p.omega * initiator.get_average_wage()
-        shares = [{"founder": initiator, "amount": initiator.resid_equity}]
+        shares = [{"citizen": initiator, "amount": initiator.resid_equity}]
         for investor in initiator.find_investors():
             if investor.resid_equity < min_equity or investor.company_number >= p.psi:
                 continue
-            shares.append({"founder": investor, "amount": investor.resid_equity})
+            shares.append({"citizen": investor, "amount": investor.resid_equity})
             collected_equity += investor.resid_equity
             if collected_equity > target:
                 break
@@ -276,7 +276,9 @@ class Household(EcoAgent):
 
     def _fund_company(self, agent_id, shares):
         for share in shares:
-            share["founder"].fund_company(agent_id, share["amount"])
+            print(share)
+            founder = share["citizen"]
+            founder.fund_company(agent_id, share["amount"])
 
     #
     # Deposits management

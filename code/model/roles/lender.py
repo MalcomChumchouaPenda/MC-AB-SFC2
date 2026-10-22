@@ -3,8 +3,8 @@ from model.extensions import EcoRole
 
 class Lender(EcoRole):
 
-    def __init__(self, agent, env):
-        super().__init__(agent, env)
+    def __init__(self, agent, env, prefix=""):
+        super().__init__(agent, env, prefix=prefix)
         self.loan_applicants = []
         self.defaulted = False
 

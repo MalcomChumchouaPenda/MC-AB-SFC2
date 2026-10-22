@@ -96,7 +96,7 @@ def test_find_bonds_returns_buyer_and_amount(role):
     result = role.find_bonds()
 
     # Then
-    env.links.assert_called_with(role, "buyer")
+    env.links.assert_called_with(role)
     assert result == [bond]
 
 

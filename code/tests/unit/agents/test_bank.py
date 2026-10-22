@@ -544,7 +544,7 @@ def test_pay_no_taxes(bank_as_taxpayer):
 def test_pay_dividends(bank_with_roles_and_account):
     # Given
     founder, role = Mock(), Mock()
-    share = {"founder": founder, "value": 1000}
+    share = {"citizen": founder, "value": 1000}
     role.get_equity_shares.return_value = [share]
     bank, roles, _ = bank_with_roles_and_account
     bank.dividends_payable = 100
@@ -606,7 +606,7 @@ def test_exit_when_bankrupt(bank_before_exit, net_worth, defaulted):
 def test_exit_transfer_residual_cash_to_founders(bank_before_exit):
     # Given
     founder = object()
-    share = {"founder": founder, "value": 90}
+    share = {"citizen": founder, "value": 90}
     bank, roles, account = bank_before_exit
     account["equities"] = 90
     account["cash"] = 200

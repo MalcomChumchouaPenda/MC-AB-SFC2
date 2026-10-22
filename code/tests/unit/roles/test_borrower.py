@@ -90,7 +90,7 @@ def test_find_loans(role):
     result = role.find_loans()
 
     # Then
-    env.links.assert_called_with(role, "lender")
+    env.links.assert_called_with(role)
     assert result == [loan]
 
 

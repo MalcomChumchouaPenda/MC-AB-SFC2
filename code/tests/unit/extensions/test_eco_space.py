@@ -221,7 +221,19 @@ def test_add_role_creates_role(space_and_agent, role_with_kind):
     space.add_role(role_kind, agent)
 
     # Then
-    role_kind.assert_called_with(agent, space)
+    role_kind.assert_called_with(agent, space, prefix="")
+
+
+def test_add_role_creates_role_with_prefix(space_and_agent, role_with_kind):
+    # Given
+    _, role_kind = role_with_kind
+    space, agent = space_and_agent
+
+    # When
+    space.add_role(role_kind, agent, prefix="any")
+
+    # Then
+    role_kind.assert_called_with(agent, space, prefix="any")
 
 
 def test_add_role_returns_role(space_and_agent, role_with_kind):
@@ -260,20 +272,7 @@ def test_add_role_registers_role(space_and_agent, role_with_kind):
 
     # Then
     assert role is space.roles[agent.id]
-    assert role is agent.roles["fake_role"]
-
-
-def test_add_role_with_prefix(space_and_agent, role_with_kind):
-    # Given
-    role, role_kind = role_with_kind
-    space, agent = space_and_agent
-
-    # When
-    space.add_role(role_kind, agent, prefix="any")
-
-    # Then
-    assert role.prefix == "any"
-    assert role is agent.roles["any_fake_role"]
+    assert role is agent.roles[role.key]
 
 
 def test_add_role_creates_account_if_no_account(space_and_agent, role_with_kind):
@@ -308,9 +307,9 @@ def space_with_role(space_and_agent):
     space, agent = space_and_agent
     role = Mock()
     role.agent = agent
-    role.prefix = ""
     role.name = "fake_role"
-    agent.roles["fake_role"] = role
+    role.key = "x_fake_role"
+    agent.roles["x_fake_role"] = role
     space.roles = {agent.id: role}
     space.positions[agent] = role
     space.graph.add_node(role)
@@ -348,15 +347,13 @@ def test_remove_role_unregisters_role(space_with_role):
 def test_remove_role_with_prefix(space_with_role):
     # Given
     space, role = space_with_role
-    role.prefix = "any"
     agent = role.agent
-    agent.roles["any_fake_role"] = role
 
     # When
     space.remove_role(role)
 
     # Then
-    assert "any_fake_role" not in agent.roles
+    assert role.key not in agent.roles
 
 
 def test_remove_role_removes_account_if_no_env(space_with_role):
@@ -489,9 +486,12 @@ def test_neighbors_returns_role_agent_iter(space_with_edges):
 def test_links_returns_edge_list(space_with_edges):
     # Given
     space, roles = space_with_edges
+    roles[0].name = "supplier"
+    roles[1].name = "demander"
+    roles[2].name = "demander"
 
     # When
-    result = space.links(roles[1], "supplier")
+    result = space.links(roles[1])
 
     # Then
     assert result == [{"supplier": roles[0], "variable": 10}]

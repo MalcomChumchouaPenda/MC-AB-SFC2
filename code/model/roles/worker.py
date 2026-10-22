@@ -3,8 +3,8 @@ from model.extensions import EcoRole
 
 class Worker(EcoRole):
 
-    def __init__(self, agent, env):
-        super().__init__(agent, env)
+    def __init__(self, agent, env, prefix=""):
+        super().__init__(agent, env, prefix=prefix)
         self.labor_supply = 1.0
 
     #

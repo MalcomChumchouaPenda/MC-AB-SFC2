@@ -94,7 +94,7 @@ def test_get_jobs(role):
     found = role.get_jobs()
 
     # Then
-    env.links.assert_called_with(role, "worker")
+    env.links.assert_called_with(role)
     assert found == env.links.return_value
 
 

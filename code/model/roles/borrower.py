@@ -3,8 +3,8 @@ from model.extensions import EcoRole
 
 class Borrower(EcoRole):
 
-    def __init__(self, agent, env):
-        super().__init__(agent, env)
+    def __init__(self, agent, env, prefix=""):
+        super().__init__(agent, env, prefix=prefix)
         self.loan_demand = 0
         self.defaulted = False
 
@@ -20,7 +20,7 @@ class Borrower(EcoRole):
         return self.env.find_all_roles("lender")
 
     def find_loans(self):
-        return self.env.links(self, "lender")
+        return self.env.links(self)
 
     #
     # Actions

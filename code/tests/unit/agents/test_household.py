@@ -1128,7 +1128,7 @@ def test_collect_equity_shares_builds_and_returns_shares(before_equity_collectio
     result = household._collect_equity_shares(30)
 
     # Then
-    assert result == [{"founder": founder, "amount": 10} for founder in founders]
+    assert result == [{"citizen": founder, "amount": 10} for founder in founders]
 
 
 def test_collect_equity_shares_with_an_minimum_equity_target(before_equity_collection):
@@ -1140,7 +1140,7 @@ def test_collect_equity_shares_with_an_minimum_equity_target(before_equity_colle
     result = household._collect_equity_shares(15.0)
 
     # Then
-    assert result == [{"founder": founder, "amount": 10} for founder in founders]
+    assert result == [{"citizen": founder, "amount": 10} for founder in founders]
 
 
 def test_collect_equity_shares_returns_none_if_low_funds(before_equity_collection):
@@ -1165,7 +1165,7 @@ def test_collect_equity_shares_with_minimum_level_of_equity(before_equity_collec
     result = household._collect_equity_shares(20)
 
     # Then
-    assert result == [{"founder": founder, "amount": 10} for founder in founders]
+    assert result == [{"citizen": founder, "amount": 10} for founder in founders]
 
 
 def test_collect_equity_shares_with_maximum_company_number(before_equity_collection):
@@ -1179,7 +1179,7 @@ def test_collect_equity_shares_with_maximum_company_number(before_equity_collect
     result = household._collect_equity_shares(20)
 
     # Then
-    assert result == [{"founder": founder, "amount": 10} for founder in founders]
+    assert result == [{"citizen": founder, "amount": 10} for founder in founders]
 
 
 FakeFirm = Mock()
@@ -1489,7 +1489,7 @@ def test_fund_company_with_each_share(hh_as_investor):
     # Given
     founder = Mock()
     household, _ = hh_as_investor
-    shares = [{"founder": founder, "amount": 100}]
+    shares = [{"citizen": founder, "amount": 100}]
 
     # When
     household._fund_company(4, shares)

@@ -85,6 +85,28 @@ def test_initializes_prefix():
     assert role.prefix == ""
 
 
+def test_initializes_key_with_name_and_no_prefix():
+    # Given
+    agent, env = Mock(), Mock()
+
+    # When
+    role = EcoRole(agent, env)
+
+    # Then
+    assert role.key == "eco_role"
+
+
+def test_initializes_key_with_name_and_prefix():
+    # Given
+    agent, env = Mock(), Mock()
+
+    # When
+    role = EcoRole(agent, env, prefix="fake")
+
+    # Then
+    assert role.key == "fake_eco_role"
+
+
 def test_expose_agent_id():
     # Given
     agent, env = Mock(), Mock()

@@ -129,9 +129,10 @@ class Government(EcoAgent):
         bond_rate = self.bond_rate
         role = self.roles["bond_issuer"]
         for bond in role.find_bonds():
+            buyer = bond["bond_buyer"]
             principal = bond["amount"]
             interests = bond_rate * principal
-            role.repay_bonds(bond["buyer"], principal, interests)
+            role.repay_bonds(buyer, principal, interests)
 
     def update_bond_rate(self):
         bonds = self.account["bonds"]

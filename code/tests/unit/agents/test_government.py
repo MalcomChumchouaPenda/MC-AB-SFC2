@@ -564,7 +564,7 @@ def test_dont_update_bond_rate_with_no_gdp(govt_before_repayment):
 def test_repay_bonds(govt_before_repayment):
     # Given
     buyer = object()
-    bonds = [{"buyer": buyer, "amount": 500}]
+    bonds = [{"bond_buyer": buyer, "amount": 500}]
     govt = govt_before_repayment
     govt.bond_rate = 0.01
     role = govt.roles["bond_issuer"]

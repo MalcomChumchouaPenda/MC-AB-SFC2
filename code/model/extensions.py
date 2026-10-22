@@ -33,12 +33,13 @@ class EcoRole(AgentNode):
     et un adaptateur vers un espace d'interaction.
     """
 
-    def __init__(self, agent, env):
+    def __init__(self, agent, env, prefix=""):
         super().__init__(label=agent.id)
         self.agent = agent
         self.env = env
-        self.prefix = ""
+        self.prefix = prefix
         self.name = camel_to_snake(self.__class__.__name__)
+        self.key = prefix + "_" + self.name if prefix else self.name
 
     def __repr__(self):
         return f"{self.__class__.__name__}-{self.label}"
@@ -106,41 +107,23 @@ class EcoSpace(Network):
     # Role management
     #
     def add_role(self, kind, agent, prefix=""):
-        role, key = self._create_role_and_key(kind, agent, prefix)
-        self._register_role(role, agent, key)
+        role = kind(agent, self, prefix=prefix)
+        agent.roles[role.key] = role
+        self.roles[agent.id] = role
+        self.positions[agent] = role
+        self.graph.add_node(role)
         if agent.account is None:
             self.add_account(agent)
         return role
 
-    def _create_role_and_key(self, kind, agent, prefix):
-        role = kind(agent, self)
-        role.prefix = prefix
-        key = role.name
-        if prefix:
-            key = prefix + "_" + key
-        return role, key
-
-    def _register_role(self, role, agent, key):
-        agent.roles[key] = role
-        self.roles[agent.id] = role
-        self.positions[agent] = role
-        self.graph.add_node(role)
-
     def remove_role(self, role):
-        key = role.name
-        prefix = role.prefix
-        if prefix:
-            key = prefix + "_" + key
         agent = role.agent
-        self._unregister_role(role, agent, key)
-        if self.env is None:
-            self.remove_account(agent)
-
-    def _unregister_role(self, role, agent, key):
-        agent.roles.pop(key)
+        agent.roles.pop(role.key)
         self.roles.pop(agent.id)
         self.positions.pop(agent)
         self.graph.remove_node(role)
+        if self.env is None:
+            self.remove_account(agent)
 
     def find_all_roles(self, pattern):
         selected = [role for role in self.roles.values() if pattern in role.name]
@@ -160,11 +143,11 @@ class EcoSpace(Network):
         neighbors = [neighbor for _, neighbor in edges]
         return AgentIter(self.model, neighbors)
 
-    def links(self, role, neighbor_name):
+    def links(self, role):
         links = []
         edges = self.graph.edges(role, data=True)
         for _, neighbor, data in edges:
-            link = {neighbor_name: neighbor}
+            link = {neighbor.name: neighbor}
             link.update(data)
             links.append(link)
         return links

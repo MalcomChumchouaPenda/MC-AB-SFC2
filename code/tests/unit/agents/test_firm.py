@@ -976,7 +976,7 @@ def test_pay_no_taxes(firm_as_tax_payer):
 def test_pay_dividends(firm_with_roles_and_account):
     # Given
     founder, role = Mock(), Mock()
-    share = {"founder": founder, "value": 1000}
+    share = {"citizen": founder, "value": 1000}
     role.get_equity_shares.return_value = [share]
     firm, roles, _ = firm_with_roles_and_account
     firm.dividends_payable = 200
@@ -1099,7 +1099,7 @@ def test_exit_doesnt_make_default_with_no_loans(before_exit):
 def test_exit_transfer_residual_cash_to_founders(before_exit):
     # Given
     founder = object()
-    share = {"founder": founder, "value": 1000}
+    share = {"citizen": founder, "value": 1000}
     firm, roles, account = before_exit
     account["cash"] = 200
     role = roles["company"]

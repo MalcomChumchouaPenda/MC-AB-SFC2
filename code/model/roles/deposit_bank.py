@@ -3,8 +3,8 @@ from model.extensions import EcoRole
 
 class DepositBank(EcoRole):
 
-    def __init__(self, agent, env):
-        super().__init__(agent, env)
+    def __init__(self, agent, env, prefix=""):
+        super().__init__(agent, env, prefix=prefix)
         self.defaulted = False
 
     #
@@ -14,7 +14,7 @@ class DepositBank(EcoRole):
         return self.env.deposit_rate
 
     def find_deposits(self):
-        return self.env.links(self, "depositor")
+        return self.env.links(self)
 
     def find_depositor(self, id):
         return self.env.roles[id]

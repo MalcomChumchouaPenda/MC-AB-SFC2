@@ -167,8 +167,9 @@ class Bank(EcoAgent):
             total_dividend = self.dividends_payable
             total_shares = sum(share["value"] for share in shares)
             for share in shares:
+                founder = share["citizen"]
                 dividend = share["value"] * total_dividend / total_shares
-                role.pay_dividends(share["founder"], dividend)
+                role.pay_dividends(founder, dividend)
             self.dividends_payable = 0
 
     def exit(self):
@@ -188,6 +189,6 @@ class Bank(EcoAgent):
             shares = role.get_equity_shares()
             total_shares = sum(share["value"] for share in shares)
             for share in shares:
-                founder = share["founder"]
+                founder = share["citizen"]
                 amount = share["value"] * cash / total_shares
                 role.transfer_residual_cash(founder, amount)

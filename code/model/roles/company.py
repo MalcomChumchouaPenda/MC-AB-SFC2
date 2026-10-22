@@ -3,8 +3,8 @@ from model.extensions import EcoRole
 
 class Company(EcoRole):
 
-    def __init__(self, agent, env):
-        super().__init__(agent, env)
+    def __init__(self, agent, env, prefix=""):
+        super().__init__(agent, env, prefix=prefix)
         self.sector = ""
         self.defaulted = False
 
@@ -23,7 +23,7 @@ class Company(EcoRole):
     #
 
     def get_equity_shares(self):
-        return self.env.links(self, "founder")
+        return self.env.links(self)
 
     def get_average_wage(self):
         return self.env.average_wage
@@ -42,8 +42,9 @@ class Company(EcoRole):
         shares = self.get_equity_shares()
         total_shares = sum(share["value"] for share in shares)
         for share in shares:
+            founder = share["citizen"]
             variation = share["value"] * total_variation / total_shares
-            env.update_equity_share(self, share["founder"], variation)
+            env.update_equity_share(self, founder, variation)
 
     def pay_dividends(self, founder, amount):
         self.env.pay_dividends(self, founder, amount)

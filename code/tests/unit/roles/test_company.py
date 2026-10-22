@@ -100,7 +100,7 @@ def test_get_equity_shares_from_env(role):
     found = role.get_equity_shares()
 
     # Then
-    env.links.assert_called_with(role, "founder")
+    env.links.assert_called_with(role)
     assert found == env.links.return_value
 
 
@@ -159,8 +159,8 @@ def test_pay_taxes_uses_env_method(role):
 def test_update_equity_shares(role):
     # Given
     founder1, founder2 = Mock(), Mock()
-    share1 = {"founder": founder1, "value": 1000}
-    share2 = {"founder": founder2, "value": 3000}
+    share1 = {"citizen": founder1, "value": 1000}
+    share2 = {"citizen": founder2, "value": 3000}
     shares = [share1, share2]
     role.get_equity_shares = Mock(return_value=shares)
     env = role.env
