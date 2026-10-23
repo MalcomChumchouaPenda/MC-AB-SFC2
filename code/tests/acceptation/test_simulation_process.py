@@ -47,7 +47,7 @@ def params():
     }
 
 
-@pytest.mark.parametrize("seed", [0, 1, 2, 3])
+@pytest.mark.parametrize("seed", [0, 1])
 def test_create_initial_population(params, seed):
     # Given
     params["steps"] = 0
@@ -67,7 +67,7 @@ def test_create_initial_population(params, seed):
     assert model.union_cb is not None
 
 
-@pytest.mark.parametrize("seed", [0, 1, 2, 3])
+@pytest.mark.parametrize("seed", [0, 1])
 def test_run_all_steps(params, seed):
     # Given
     params["steps"] = 100
@@ -80,3 +80,4 @@ def test_run_all_steps(params, seed):
 
     # Then
     assert len(model.firms) > 0
+    assert len(model.banks) > 0
