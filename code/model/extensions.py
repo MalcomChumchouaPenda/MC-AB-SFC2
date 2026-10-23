@@ -1,6 +1,5 @@
 import re
 import functools
-import networkx as nx
 from agentpy import Agent, Network, AgentNode
 from agentpy import AgentList, AgentIter, AttrDict
 from model.accounts import FINANCIAL_ASSETS, REAL_ASSETS, TRANSACTIONS
@@ -23,6 +22,11 @@ class EcoAgent(Agent):
         self.roles = {}
         self.account = None
         self.country_pos = None
+
+    def record_account(self):
+        if self.account is not None:
+            for key, value in self.account.items():
+                self.record(key, value)
 
 
 class EcoRole(AgentNode):

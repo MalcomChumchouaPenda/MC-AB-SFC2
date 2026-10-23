@@ -57,3 +57,39 @@ def test_initializes_country_pos(fake_model):
 
     # Then
     assert agent.country_pos is None
+
+
+# ---------------------------------------------------
+#  OBSERVATION
+# ----------------------------------------------------
+
+
+@pytest.fixture
+def agent(fake_model):
+    # Given
+    model = fake_model
+    agent = EcoAgent(model)
+    return agent
+
+
+def test_record_account_does_nothing_if_no_accounts(agent):
+    # Given
+    agent.account = None
+
+    # When
+    agent.record_account()
+
+    # Then
+    assert agent.log == {}
+
+
+def test_record_account_records_each_item(agent):
+    # Given
+    agent.account = {"x": 20, "y": -20}
+
+    # When
+    agent.record_account()
+
+    # Then
+    assert agent.log["x"][-1] == 20
+    assert agent.log["y"][-1] == -20
