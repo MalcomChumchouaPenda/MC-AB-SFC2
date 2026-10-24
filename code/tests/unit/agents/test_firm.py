@@ -271,7 +271,7 @@ def before_pricing(firm_with_roles_and_account):
     firm, roles, account = firm_with_roles_and_account
     firm.expected_sales = 100
     firm.p.delta = 0.1
-    account["wages"] = 10
+    account["wages"] = -10
     roles["producer"] = role
     return firm
 
@@ -520,7 +520,7 @@ def test_execute_rd_launchs_innovation_if_no_constraints(before_rd_investment):
     firm.desired_rd = 100
     firm.desired_labor = 50
     firm.desired_loans = 200
-    account["loans"] = 200
+    account["loans"] = -200
 
     # When
     firm.execute_rd()
@@ -535,7 +535,7 @@ def test_execute_rd_does_nothing_if_no_desire(before_rd_investment):
     firm.desired_rd = 0
     firm.desired_labor = 100
     firm.desired_loans = 200
-    account["loans"] = 200
+    account["loans"] = -200
 
     # When
     firm.execute_rd()
@@ -550,7 +550,7 @@ def test_execute_rd_does_nothing_if_labor_constraint(before_rd_investment):
     firm.desired_rd = 100
     firm.desired_labor = 100
     firm.desired_loans = 200
-    account["loans"] = 200
+    account["loans"] = -200
 
     # When
     firm.execute_rd()
@@ -565,7 +565,7 @@ def test_execute_rd_does_nothing_if_financial_constraint(before_rd_investment):
     firm.desired_rd = 100
     firm.desired_labor = 50
     firm.desired_loans = 200
-    account["loans"] = 100
+    account["loans"] = -100
 
     # When
     firm.execute_rd()
@@ -717,7 +717,7 @@ def firm_after_borrowing(firm_with_roles_and_account):
     role.find_loans.return_value = []
     firm, roles, account = firm_with_roles_and_account
     account["deposits"] = 100
-    account["loans"] = 100
+    account["loans"] = -100
     account["cash"] = 100
     roles["depositor"] = Mock()
     roles["borrower"] = role
@@ -730,7 +730,7 @@ def test_repay_loans_after_making_deposits(firm_after_borrowing, cash, expected)
     firm, roles, account = firm_after_borrowing
     account["deposits"] = 20
     account["cash"] = cash
-    account["loans"] = 100
+    account["loans"] = -100
     role = roles["depositor"]
 
     # When
@@ -812,8 +812,8 @@ def test_calc_net_cash_flow(firm_with_roles_and_account, sales, expected):
     # Given
     firm, _, account = firm_with_roles_and_account
     account["consumption"] = sales
-    account["loan_interests"] = 20
-    account["wages"] = 390
+    account["loan_interests"] = -20
+    account["wages"] = -390
     account["dep_interests"] = 10
 
     # When
@@ -852,7 +852,6 @@ def firm_as_tax_payer(firm_with_roles_and_account):
     # Given
     role = Mock()
     firm, roles, _ = firm_with_roles_and_account
-    firm.account["taxes"] = 0
     roles["company"] = role
     return firm, role
 
@@ -1029,11 +1028,11 @@ def before_exit(firm_with_roles_and_account):
     return firm, roles, account
 
 
-@pytest.mark.parametrize("net_worth, defaulted", [(90, True), (150, False)])
+@pytest.mark.parametrize("net_worth, defaulted", [(-90, True), (-150, False)])
 def test_exit_when_bankrupt(before_exit, net_worth, defaulted):
     # Given
     firm, _, account = before_exit
-    account["equities"] = -net_worth
+    account["equities"] = net_worth
 
     # When
     firm.exit()

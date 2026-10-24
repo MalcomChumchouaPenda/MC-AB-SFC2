@@ -71,7 +71,7 @@ class Bank(EcoAgent):
     #
     def request_cash_advances(self):
         account = self.account
-        required = self.p.mu2 * account["deposits"]
+        required = self.p.mu2 * -account["deposits"]
         shortage = max(required - account["cash"], 0)
         if shortage > 0:
             role = self.roles["company"]
@@ -112,7 +112,7 @@ class Bank(EcoAgent):
 
     def _calc_excess_reserves(self):
         account = self.account
-        required = self.p.mu2 * account["deposits"]
+        required = self.p.mu2 * -account["deposits"]
         return max(account["cash"] - required, 0)
 
     def _calc_bond_purchases_prob(self, issuer):
@@ -133,9 +133,9 @@ class Bank(EcoAgent):
             account["loan_interests"]
             + account["bond_interests"]
             + account["cash_interests"]
-            - account["loan_defaults"]
-            - account["dep_interests"]
-            - account["adv_interests"]
+            + account["loan_defaults"]
+            + account["dep_interests"]
+            + account["adv_interests"]
         )
 
     def _calc_taxes(self):
@@ -175,8 +175,9 @@ class Bank(EcoAgent):
     def exit(self):
         account = self.account
         role = self.roles["company"]
+        equity = -account["equities"]
         average_wage = role.get_average_wage()
-        if account["equities"] < average_wage:
+        if equity < average_wage:
             self.defaulted = True
             for role in self.roles.values():
                 role.defaulted = True

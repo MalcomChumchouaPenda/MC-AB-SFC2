@@ -198,7 +198,7 @@ def test_calc_profit(cb_as_authority):
     cb, _ = cb_as_authority
     cb.account["bond_interests"] = 100
     cb.account["adv_interests"] = 40
-    cb.account["cash_interests"] = 20
+    cb.account["cash_interests"] = -20
 
     # When
     profit = cb._calc_profit()

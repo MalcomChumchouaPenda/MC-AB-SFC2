@@ -194,6 +194,17 @@ class EcoSpace(Network):
             self.accounts[source][category] -= amount
             self.accounts[target][category] += amount
 
+    def check_cash(self, step="unknown", print_all=True):
+        if self.env is not None:
+            self.env.check_cash(step=step)
+        else:
+            total = 0
+            for account in self.accounts.values():
+                total += account["cash"]
+            total = round(total, 4)
+            if total != 0 or print_all:
+                print(step, "check cash", total)
+
     #
     # Evolution
     #

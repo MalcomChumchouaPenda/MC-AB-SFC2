@@ -39,8 +39,8 @@ def before_firm_computation(firm, country):
     firm.roles["producer"].inventories = 60
     firm.account["dep_interests"] = 30
     firm.account["consumption"] = 1000
-    firm.account["loan_interests"] = 30
-    firm.account["wages"] = 400
+    firm.account["loan_interests"] = -30
+    firm.account["wages"] = -400
     firm.prev_inventories = 50
     firm.roles["employer"].wage = 20
     country.tax_rate = 0.25
@@ -94,11 +94,11 @@ def bank(model, country):
 def before_bank_computation(bank, country):
     # Given
     bank.account["bond_interests"] = 20
-    bank.account["dep_interests"] = 30
+    bank.account["dep_interests"] = -30
     bank.account["loan_interests"] = 100
     bank.account["cash_interests"] = 10
-    bank.account["loan_defaults"] = 10
-    bank.account["adv_interests"] = 10
+    bank.account["loan_defaults"] = -10
+    bank.account["adv_interests"] = -10
     country.tax_rate = 0.25
 
 

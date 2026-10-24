@@ -154,3 +154,11 @@ class EcoModel(Model):
 
     def _update_union_state(self):
         self.union.update_state()
+
+    def update(self):
+        self.households.record_account()
+        self.firms.record_account()
+        self.banks.record_account()
+        self.governments.record_account()
+        self.national_cbs.record_account()
+        self.union_cb.record_account()

@@ -560,3 +560,88 @@ def test_update_union_state(params):
 
     # Then
     model.union.update_state.assert_called_with()
+
+
+# ---------------------------------------------------
+# UPDATE PROCESS
+# ----------------------------------------------------
+
+
+@pytest.fixture
+def before_update(params):
+    # Given
+    model = EcoModel(params)
+    model.households = Mock()
+    model.firms = Mock()
+    model.banks = Mock()
+    model.governments = Mock()
+    model.national_cbs = Mock()
+    model.union_cb = Mock()
+    model.union = Mock()
+    return model
+
+
+def test_update_records_households_account(before_update):
+    # Given
+    model = before_update
+
+    # When
+    model.update()
+
+    # Then
+    model.households.record_account.assert_called_with()
+
+
+def test_update_records_firms_account(before_update):
+    # Given
+    model = before_update
+
+    # When
+    model.update()
+
+    # Then
+    model.firms.record_account.assert_called_with()
+
+
+def test_update_records_banks_account(before_update):
+    # Given
+    model = before_update
+
+    # When
+    model.update()
+
+    # Then
+    model.banks.record_account.assert_called_with()
+
+
+def test_update_records_governments_account(before_update):
+    # Given
+    model = before_update
+
+    # When
+    model.update()
+
+    # Then
+    model.governments.record_account.assert_called_with()
+
+
+def test_update_records_national_cbs_account(before_update):
+    # Given
+    model = before_update
+
+    # When
+    model.update()
+
+    # Then
+    model.national_cbs.record_account.assert_called_with()
+
+
+def test_update_records_union_cb_account(before_update):
+    # Given
+    model = before_update
+
+    # When
+    model.update()
+
+    # Then
+    model.union_cb.record_account.assert_called_with()

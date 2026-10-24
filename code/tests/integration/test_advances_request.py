@@ -46,7 +46,7 @@ def test_increases_advances(bank, cb):
     # Given
     bank.p.mu2 = 0.10
     bank.account["cash"] = 40
-    bank.account["deposits"] = 1000
+    bank.account["deposits"] = -1000
 
     # When
     bank.request_cash_advances()
@@ -60,7 +60,7 @@ def test_transfers_cash(bank, cb):
     # Given
     bank.p.mu2 = 0.10
     bank.account["cash"] = 40
-    bank.account["deposits"] = 1000
+    bank.account["deposits"] = -1000
 
     # When
     bank.request_cash_advances()

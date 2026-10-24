@@ -42,9 +42,10 @@ class Government(EcoAgent):
     #
     def calc_budget_balance(self):
         account = self.account
-        balance = (
-            account["taxes"] - account["public_transfers"] - account["bond_interests"]
-        )
+        taxes = account["taxes"]
+        transfers = -account["public_transfers"]
+        interests = -account["bond_interests"]
+        balance = taxes - transfers - interests
         self.budget_deficit = max(0, -balance)
         self.budget_surplus = max(0, balance)
         return balance
@@ -113,13 +114,13 @@ class Government(EcoAgent):
         role.debt_ratio = self.bond_supply / gdp if gdp > 0 else float("inf")
 
     def _calc_new_debt(self):
-        bonds = self.account["bonds"]
+        bonds = -self.account["bonds"]
         new_debt = bonds + self.budget_deficit - self.prev_budget_surplus
         self.new_public_debt = new_debt
         return new_debt
 
     def _calc_new_bonds(self):
-        bonds = self.account["bonds"]
+        bonds = -self.account["bonds"]
         return max(0, self.new_public_debt - bonds)
 
     #
@@ -135,7 +136,7 @@ class Government(EcoAgent):
             role.repay_bonds(buyer, principal, interests)
 
     def update_bond_rate(self):
-        bonds = self.account["bonds"]
+        bonds = -self.account["bonds"]
         role = self.roles["fiscal_authority"]
         gdp = role.get_gdp()
         if gdp > 0:

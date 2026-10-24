@@ -30,7 +30,7 @@ class CentralBank(EcoAgent):
         return (
             account["bond_interests"]
             + account["adv_interests"]
-            - account["cash_interests"]
+            + account["cash_interests"]
         )
 
     #

@@ -39,7 +39,7 @@ def test_sets_govt_bond_rate(govt, country):
     country.discount_rate = 0.04
     country.gdp = 1000
     govt.p.chi = 0.02
-    govt.account["bonds"] = 100
+    govt.account["bonds"] = -100
 
     # When
     govt.update_bond_rate()

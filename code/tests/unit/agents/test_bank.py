@@ -260,7 +260,7 @@ def test_grant_loans_and_make_deposits(bank_as_lender):
 def bank_before_advance(bank_with_roles_and_account):
     bank, roles, account = bank_with_roles_and_account
     bank.p.mu2 = 0.1
-    account["deposits"] = 1000
+    account["deposits"] = -1000
     account["advances"] = 0
     account["cash"] = 0
     roles["lender"] = Mock()
@@ -433,9 +433,9 @@ def test_calc_profit(bank_with_roles_and_account):
     bank, _, account = bank_with_roles_and_account
     account["loan_interests"] = 100
     account["cash_interests"] = 10
-    account["loan_defaults"] = 20
-    account["adv_interests"] = 10
-    account["dep_interests"] = 40
+    account["loan_defaults"] = -20
+    account["adv_interests"] = -10
+    account["dep_interests"] = -40
     account["bond_interests"] = 30
 
     # When
@@ -449,9 +449,7 @@ def test_calc_profit(bank_with_roles_and_account):
 def bank_as_taxpayer(bank_with_roles_and_account):
     # Given
     role = Mock()
-    bank, roles, account = bank_with_roles_and_account
-    account["taxes"] = 0
-    account["cash"] = 0
+    bank, roles, _ = bank_with_roles_and_account
     roles["company"] = role
     return bank, role
 
@@ -590,7 +588,7 @@ def bank_before_exit(bank_with_roles_and_account):
     return bank, roles, account
 
 
-@pytest.mark.parametrize("net_worth, defaulted", [(90, True), (150, False)])
+@pytest.mark.parametrize("net_worth, defaulted", [(-90, True), (-150, False)])
 def test_exit_when_bankrupt(bank_before_exit, net_worth, defaulted):
     # Given
     bank, _, account = bank_before_exit
@@ -608,7 +606,7 @@ def test_exit_transfer_residual_cash_to_founders(bank_before_exit):
     founder = object()
     share = {"citizen": founder, "value": 90}
     bank, roles, account = bank_before_exit
-    account["equities"] = 90
+    account["equities"] = -90
     account["cash"] = 200
     role = roles["company"]
     role.get_equity_shares.return_value = [share]
@@ -623,7 +621,7 @@ def test_exit_transfer_residual_cash_to_founders(bank_before_exit):
 def test_exit_sets_all_roles_defaulted(bank_before_exit):
     # Given
     bank, roles, account = bank_before_exit
-    account["equities"] = 90
+    account["equities"] = -90
     roles["any"] = Mock()
 
     # When

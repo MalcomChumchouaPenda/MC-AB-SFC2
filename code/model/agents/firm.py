@@ -62,7 +62,7 @@ class Firm(EcoAgent):
 
         elif self.prev_output + self.prev_inventories > self.prev_sales:
             role = self.roles["producer"]
-            wage_bill = self.account["wages"]
+            wage_bill = -self.account["wages"]
             self.expected_sales *= 1 - random.uniform(0, delta)
             role.price *= 1 - random.uniform(0, delta)
             role.price = max(wage_bill / role.phi, role.price)
@@ -103,7 +103,7 @@ class Firm(EcoAgent):
         roles = self.roles
         account = self.account
         labor_constraint = roles["employer"].labor < self.desired_labor
-        financial_constraint = account["loans"] < self.desired_loans
+        financial_constraint = -account["loans"] < self.desired_loans
         if labor_constraint or financial_constraint:
             return
         roles["producer"].execute_rd(self.desired_rd)
@@ -137,9 +137,12 @@ class Firm(EcoAgent):
 
     def _fund_repayments(self):
         account = self.account
-        needs = max(0, account["loans"] - account["deposits"])
+        loans = -account["loans"]
+        deposits = account["deposits"]
+        needs = max(0, loans - deposits)
         if needs > 0:
-            feasible = min(account["cash"], needs)
+            cash = account["cash"]
+            feasible = min(cash, needs)
             role = self.roles["depositor"]
             role.make_deposits(feasible)
 
@@ -189,8 +192,8 @@ class Firm(EcoAgent):
         return (
             account["consumption"]
             + account["dep_interests"]
-            - account["wages"]
-            - account["loan_interests"]
+            + account["wages"]
+            + account["loan_interests"]
         )
 
     def _calc_profit(self):

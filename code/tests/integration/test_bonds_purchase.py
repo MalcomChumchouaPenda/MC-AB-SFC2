@@ -51,7 +51,7 @@ def bank(model, market):
 def test_decreases_bond_number_with_bank_purchase(govt, bank):
     # Given
     bank.account["cash"] = 150
-    bank.account["deposits"] = 1000
+    bank.account["deposits"] = -1000
     issuer_role = govt.roles["bond_issuer"]
     issuer_role.bond_value = 5.0
     issuer_role.bond_number = 100
@@ -66,7 +66,7 @@ def test_decreases_bond_number_with_bank_purchase(govt, bank):
 def test_creates_link_with_bank_purchase(market, govt, bank):
     # Given
     bank.account["cash"] = 150
-    bank.account["deposits"] = 1000
+    bank.account["deposits"] = -1000
     buyer_role = bank.roles["bond_buyer"]
     issuer_role = govt.roles["bond_issuer"]
     issuer_role.bond_value = 5.0
@@ -82,7 +82,7 @@ def test_creates_link_with_bank_purchase(market, govt, bank):
 def test_increases_bonds_with_bank_purchase(govt, bank):
     # Given
     bank.account["cash"] = 150
-    bank.account["deposits"] = 1000
+    bank.account["deposits"] = -1000
     issuer_role = govt.roles["bond_issuer"]
     issuer_role.bond_value = 5.0
     issuer_role.bond_number = 100
@@ -98,7 +98,7 @@ def test_increases_bonds_with_bank_purchase(govt, bank):
 def test_transfers_cash_from_bank(govt, bank):
     # Given
     bank.account["cash"] = 150
-    bank.account["deposits"] = 1000
+    bank.account["deposits"] = -1000
     issuer_role = govt.roles["bond_issuer"]
     issuer_role.bond_value = 5.0
     issuer_role.bond_number = 100
