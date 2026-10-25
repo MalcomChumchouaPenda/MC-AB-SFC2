@@ -711,43 +711,43 @@ def test_dont_request_unneccessary_loans(firm_as_borrower, desired):
 
 
 @pytest.fixture
-def firm_after_borrowing(firm_with_roles_and_account):
+def after_borrowing(firm_with_roles_and_account):
     # Given
-    role = Mock()
-    role.find_loans.return_value = []
+    bank_role = Mock(country_pos=1)
+    loan = {"lender": bank_role, "amount": 100, "rate": 0.1}
+    deposit = {"deposit_bank": bank_role, "amount": 100}
+    borrower_role, depositor_role = Mock(), Mock()
+    borrower_role.find_loans.return_value = [loan]
+    depositor_role.find_deposits.return_value = [deposit]
     firm, roles, account = firm_with_roles_and_account
-    account["deposits"] = 100
-    account["loans"] = -100
+    roles["country_1_depositor"] = depositor_role
+    roles["borrower"] = borrower_role
     account["cash"] = 100
-    roles["depositor"] = Mock()
-    roles["borrower"] = role
-    return firm, roles, account
+    return firm, roles, account, loan, deposit
 
 
 @pytest.mark.parametrize("cash, expected", [(100, 80), (50, 50), (0, 0)])
-def test_repay_loans_after_making_deposits(firm_after_borrowing, cash, expected):
+def test_repay_loans_after_making_deposits(after_borrowing, cash, expected):
     # Given
-    firm, roles, account = firm_after_borrowing
-    account["deposits"] = 20
+    firm, roles, account, loan, deposit = after_borrowing
+    role = roles["country_1_depositor"]
+    deposit["amount"] = 20
     account["cash"] = cash
-    account["loans"] = -100
-    role = roles["depositor"]
+    lender = loan["lender"]
 
     # When
     firm.repay_loans()
 
     # Then
-    role.make_deposits.assert_called_once_with(expected)
+    role.make_deposits.assert_called_once_with(lender.id, expected)
 
 
-def test_repay_loans_to_all_lenders(firm_after_borrowing):
+def test_repay_loans_to_all_lenders(after_borrowing):
     # Given
-    lender = object()
-    loan = {"lender": lender, "amount": 100, "rate": 0.1}
-    firm, roles, account = firm_after_borrowing
-    account["deposits"] = 200
+    firm, roles, _, loan, deposit = after_borrowing
+    deposit["amount"] = 200
     role = roles["borrower"]
-    role.find_loans.return_value = [loan]
+    lender = loan["lender"]
 
     # When
     firm.repay_loans()
@@ -757,14 +757,13 @@ def test_repay_loans_to_all_lenders(firm_after_borrowing):
 
 
 @pytest.mark.parametrize("fund, default", [(100, 0), (80, 20), (0, 100)])
-def test_repay_loans_with_available_deposits(firm_after_borrowing, fund, default):
+def test_repay_loans_with_available_deposits(after_borrowing, fund, default):
     # Given
-    lender = object()
-    loan = {"lender": lender, "amount": 100, "rate": 0.1}
-    firm, roles, account = firm_after_borrowing
-    account["deposits"] = fund
+    firm, roles, account, loan, deposit = after_borrowing
+    deposit["amount"] = fund
     role = roles["borrower"]
-    role.find_loans.return_value = [loan]
+    lender = loan["lender"]
+    account["cash"] = 0
 
     # When
     firm.repay_loans()
@@ -1020,7 +1019,6 @@ def before_exit(firm_with_roles_and_account):
     roles["company"] = company_role
     roles["borrower"] = borrower_role
     roles["employer"] = Mock(wage=100)
-    roles["depositor"] = Mock()
     account["equities"] = -50
     account["deposits"] = 0
     account["loans"] = 0
@@ -1043,22 +1041,26 @@ def test_exit_when_bankrupt(before_exit, net_worth, defaulted):
 
 def test_exit_withdraws_residual_deposits(before_exit):
     # Given
+    deposit_bank, role = Mock(), Mock()
+    deposit = {"deposit_bank": deposit_bank, "amount": 100}
+    role.find_deposits.return_value = [deposit]
     firm, roles, account = before_exit
     account["deposits"] = 100
-    role = roles["depositor"]
+    roles["country_1_depositor"] = role
 
     # When
     firm.exit()
 
     # Then
-    role.withdraw_deposits.assert_called_with(100)
+    role.withdraw_deposits.assert_called_with(deposit_bank.id, 100)
 
 
 def test_exit_doesnt_withdraw_with_no_deposit(before_exit):
     # Given
+    role = Mock()
     firm, roles, account = before_exit
+    roles["country_1_depositor"] = role
     account["deposits"] = 0
-    role = roles["depositor"]
 
     # When
     firm.exit()

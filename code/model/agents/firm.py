@@ -128,33 +128,38 @@ class Firm(EcoAgent):
         return max(0, wage_bill + self.desired_rd - deposits)
 
     def repay_loans(self):
-        role = self.roles["borrower"]
-        account = self.account
-        self._fund_repayments()
-        for loan in role.find_loans():
-            deposits = account["deposits"]
-            self._pay_lender(role, loan, deposits)
+        borrower_role = self.roles["borrower"]
+        for loan in borrower_role.find_loans():
+            lender = loan["lender"]
+            c = lender.country_pos
+            depositor_role = self.roles[f"country_{c}_depositor"]
+            deposits = depositor_role.find_deposits()
+            for deposit in deposits:
+                if lender.id == deposit["deposit_bank"].id:
+                    funds = self._fund_repayments(depositor_role, loan, deposit)
+                    self._pay_lender(borrower_role, loan, funds)
+                    break
 
-    def _fund_repayments(self):
+
+    def _fund_repayments(self, role, loan, deposit):
         account = self.account
-        loans = -account["loans"]
-        deposits = account["deposits"]
-        needs = max(0, loans - deposits)
+        funds = deposit["amount"]
+        needs = max(0, loan["amount"] - funds)
         if needs > 0:
-            cash = account["cash"]
-            feasible = min(cash, needs)
-            role = self.roles["depositor"]
-            role.make_deposits(feasible)
+            feasible = min(account["cash"], needs)
+            role.make_deposits(loan["lender"].id, feasible)
+            funds += feasible
+        return funds
 
-    def _pay_lender(self, role, loan, deposits):
+    def _pay_lender(self, role, loan, funds):
         lender = loan["lender"]
         principal = loan["amount"]
         interests = principal * loan["rate"]
         total = principal + interests
-        if total <= deposits:
+        if total <= funds:
             role.repay_loans(lender, principal, interests)
         else:
-            amount = min(principal, deposits)
+            amount = min(principal, funds)
             default = principal - amount
             role.make_defaults(lender, default)
             role.repay_loans(lender, amount, 0.0)
@@ -254,8 +259,12 @@ class Firm(EcoAgent):
     def _withdraw_residual_deposits(self):
         amount = self.account["deposits"]
         if amount > 0:
-            role = self.roles["depositor"]
-            role.withdraw_deposits(amount)
+            for key, role in self.roles.items():
+                if "depositor" not in key:
+                    continue
+                for deposit in role.find_deposits():
+                    bank_id = deposit["deposit_bank"].id
+                    role.withdraw_deposits(bank_id, deposit["amount"])
 
     def _make_loan_defaults(self):
         role = self.roles["borrower"]
@@ -274,6 +283,10 @@ class Firm(EcoAgent):
                 founder = share["citizen"]
                 amount = share["value"] * cash / total_shares
                 role.transfer_residual_cash(founder, amount)
+
+    #
+    # Deposits management
+    #
 
     #
     # History

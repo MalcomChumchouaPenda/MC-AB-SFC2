@@ -25,15 +25,12 @@ def union(model):
 
 
 @pytest.fixture
-def banks(model, union):
+def bank(model, union):
     # Given
-    banks = []
-    for _ in range(2):
-        bank = Bank(model)
-        bank.country_pos = 0
-        banks.append(bank)
-        union.add_bank(bank)
-    return banks
+    bank = Bank(model)
+    bank.country_pos = 0
+    union.add_bank(bank)
+    return bank
 
 
 @pytest.fixture
@@ -54,27 +51,28 @@ def markets(union):
 
 
 @pytest.fixture
-def firm_with_deposit_bank(firm, banks, markets):
+def firm_with_deposit(firm, bank, markets):
     # Given
+    amount = 100
+    deposit_bank = bank.roles["deposit_bank"]
     depositor = firm.roles["country_0_depositor"]
-    deposit_bank = banks[1].roles["deposit_bank"]
-    markets[1].join_deposit_bank(depositor, deposit_bank, amount=100)
-    return firm, banks[1]
+    markets[1].join_deposit_bank(depositor, deposit_bank, amount=amount)
+    return firm, amount
 
 
 @pytest.fixture
-def bank_with_loan(firm, banks, markets):
+def bank_with_loan(firm, bank, markets):
     # Given
     amount, rate = 50, 0.1
+    lender = bank.roles["lender"]
     borrower = firm.roles["borrower"]
-    lender = banks[0].roles["lender"]
     markets[0].grant_loan(lender, borrower, amount, rate)
-    return banks[0], amount, rate
+    return bank, amount, rate
 
 
-def test_increases_loan_interests(firm_with_deposit_bank, bank_with_loan):
+def test_increases_loan_interests(firm_with_deposit, bank_with_loan):
     # Given
-    firm, _ = firm_with_deposit_bank
+    firm, _ = firm_with_deposit
     bank, amount, rate = bank_with_loan
     interests = amount * rate
 
@@ -86,10 +84,10 @@ def test_increases_loan_interests(firm_with_deposit_bank, bank_with_loan):
     assert firm.account["loan_interests"] == -interests
 
 
-def test_decreases_loans_as_stock(firm_with_deposit_bank, bank_with_loan):
+def test_decreases_loans_as_stock(firm_with_deposit, bank_with_loan):
     # Given
     bank, *_ = bank_with_loan
-    firm, _ = firm_with_deposit_bank
+    firm, _ = firm_with_deposit
 
     # When
     firm.repay_loans()
@@ -99,10 +97,10 @@ def test_decreases_loans_as_stock(firm_with_deposit_bank, bank_with_loan):
     assert bank.account["loans"] == 0
 
 
-def test_decreases_loan_as_link(markets, firm_with_deposit_bank, bank_with_loan):
+def test_decreases_loan_as_link(markets, firm_with_deposit, bank_with_loan):
     # Given
     bank, *_ = bank_with_loan
-    firm, _ = firm_with_deposit_bank
+    firm, _ = firm_with_deposit
     firm_role = firm.roles["borrower"]
     bank_role = bank.roles["lender"]
 
@@ -113,11 +111,11 @@ def test_decreases_loan_as_link(markets, firm_with_deposit_bank, bank_with_loan)
     assert markets[0].graph[firm_role][bank_role]["amount"] == 0
 
 
-def test_decreases_firm_cash(firm_with_deposit_bank, bank_with_loan):
+def test_decreases_firm_cash(firm_with_deposit, bank_with_loan):
     # Given
     bank, amount, rate = bank_with_loan
     repayment = amount * (1 + rate)
-    firm, _ = firm_with_deposit_bank
+    firm, _ = firm_with_deposit
     firm_cash = firm.account["cash"]
     bank_cash = bank.account["cash"]
 
