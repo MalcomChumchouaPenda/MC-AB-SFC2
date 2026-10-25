@@ -54,8 +54,8 @@ class Bank(EcoAgent):
         deposit_bank.make_deposits(depositor, amount)
 
     def _calc_credit_capacity(self):
-        equity = -1 * self.account["equities"]
-        return equity * self.p.mu1
+        equities = -self.account["equities"]
+        return equities * self.p.mu1
 
     def _calc_loan_probability(self, borrower):
         leverage = borrower.loan_demand / borrower.net_worth
@@ -71,8 +71,10 @@ class Bank(EcoAgent):
     #
     def request_cash_advances(self):
         account = self.account
-        required = self.p.mu2 * -account["deposits"]
-        shortage = max(required - account["cash"], 0)
+        cash = account["cash"]
+        deposits = account["deposits"]
+        required = self.p.mu2 * -deposits
+        shortage = max(required - cash, 0)
         if shortage > 0:
             role = self.roles["company"]
             role.request_advances(shortage)
@@ -80,10 +82,10 @@ class Bank(EcoAgent):
     def repay_cash_advances(self):
         role = self.roles["company"]
         discount_rate = role.get_discount_rate()
-        principal = abs(self.account["advances"])
-        if principal > 0:
-            interests = discount_rate * principal
-            role.repay_advances(principal, interests)
+        advances = -self.account["advances"]
+        if advances > 0:
+            interests = discount_rate * advances
+            role.repay_advances(advances, interests)
 
     #
     # Bonds transactions
@@ -112,8 +114,10 @@ class Bank(EcoAgent):
 
     def _calc_excess_reserves(self):
         account = self.account
-        required = self.p.mu2 * -account["deposits"]
-        return max(account["cash"] - required, 0)
+        cash = account["cash"]
+        deposits = -account["deposits"]
+        required = self.p.mu2 * deposits
+        return max(cash - required, 0)
 
     def _calc_bond_purchases_prob(self, issuer):
         return math.exp(-self.p.iota_b * issuer.debt_ratio)
@@ -129,14 +133,13 @@ class Bank(EcoAgent):
 
     def _calc_profit(self):
         account = self.account
-        return (
-            account["loan_interests"]
-            + account["bond_interests"]
-            + account["cash_interests"]
-            + account["loan_defaults"]
-            + account["dep_interests"]
-            + account["adv_interests"]
-        )
+        loan_ints = account["loan_interests"]
+        bond_ints = account["bond_interests"]
+        cash_ints = account["cash_interests"]
+        loan_defts = -account["loan_defaults"]
+        dep_ints = -account["dep_interests"]
+        adv_ints = -account["adv_interests"]
+        return loan_ints + bond_ints + cash_ints - loan_defts - dep_ints - adv_ints
 
     def _calc_taxes(self):
         if self.profit <= 0:
@@ -175,9 +178,9 @@ class Bank(EcoAgent):
     def exit(self):
         account = self.account
         role = self.roles["company"]
-        equity = -account["equities"]
+        equities = -account["equities"]
         average_wage = role.get_average_wage()
-        if equity < average_wage:
+        if equities < average_wage:
             self.defaulted = True
             for role in self.roles.values():
                 role.defaulted = True

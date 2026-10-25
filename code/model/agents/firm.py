@@ -101,9 +101,9 @@ class Firm(EcoAgent):
         if self.desired_rd <= 0:
             return
         roles = self.roles
-        account = self.account
+        loans = -self.account["loans"]
         labor_constraint = roles["employer"].labor < self.desired_labor
-        financial_constraint = -account["loans"] < self.desired_loans
+        financial_constraint = loans < self.desired_loans
         if labor_constraint or financial_constraint:
             return
         roles["producer"].execute_rd(self.desired_rd)
@@ -141,11 +141,11 @@ class Firm(EcoAgent):
                     break
 
     def _fund_repayments(self, role, loan, deposit):
-        account = self.account
         funds = deposit["amount"]
         needs = max(0, loan["amount"] - funds)
         if needs > 0:
-            feasible = min(account["cash"], needs)
+            cash = self.account["cash"]
+            feasible = min(cash, needs)
             role.make_deposits(loan["lender"].id, feasible)
             funds += feasible
         return funds
@@ -193,12 +193,11 @@ class Firm(EcoAgent):
 
     def _calc_net_cash_flow(self):
         account = self.account
-        return (
-            account["consumption"]
-            + account["dep_interests"]
-            + account["wages"]
-            + account["loan_interests"]
-        )
+        cons = account["consumption"]
+        wages = -account["wages"]
+        dep_ints = account["dep_interests"]
+        loan_ints = -account["loan_interests"]
+        return cons + dep_ints - wages - loan_ints
 
     def _calc_profit(self):
         employer_role = self.roles["employer"]
@@ -246,8 +245,8 @@ class Firm(EcoAgent):
     #
     def exit(self):
         roles = self.roles
-        equity = -self.account["equities"]
-        if equity < roles["employer"].wage:
+        equities = -self.account["equities"]
+        if equities < roles["employer"].wage:
             self.defaulted = True
             for role in roles.values():
                 role.defaulted = True

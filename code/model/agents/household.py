@@ -74,7 +74,10 @@ class Household(EcoAgent):
 
     def _calc_income(self):
         account = self.account
-        return account["wages"] + account["dep_interests"] + account["dividends"]
+        wages = account["wages"] 
+        dividends = account["dividends"]
+        dep_ints = account["dep_interests"]
+        return wages + dep_ints + dividends
 
     def _calc_disposable_income(self):
         tax_rate = self.roles["citizen"].get_tax_rate()
@@ -104,9 +107,9 @@ class Household(EcoAgent):
             self._consume_good(role, target_cons)
 
     def _fund_consumption(self, desired_cons):
-        account = self.account
-        if desired_cons > account["cash"]:
-            needs = desired_cons - account["cash"]
+        cash = self.account["cash"]
+        if desired_cons > cash:
+            needs = desired_cons - cash
             self._withdraw_deposits(needs)
 
     def _consume_good(self, role, target_cons):
@@ -146,28 +149,31 @@ class Household(EcoAgent):
     #
     def choose_portfolio_allocation(self):
         self._calc_net_worth()
+        equities = self.account["equities"]
         lp = self._calc_liquidity_preference()
-        equity = self.account["equities"]
         expected_worth = self._calc_expected_net_worth()
-        self.desired_equity = max(equity, (1 - lp) * expected_worth)
-        self.desired_deposits = expected_worth - (self.desired_equity - equity)
+        self.desired_equity = max(equities, (1 - lp) * expected_worth)
+        self.desired_deposits = expected_worth - (self.desired_equity - equities)
         self.roles["citizen"].resid_equity = self.desired_equity
 
     def _calc_liquidity_preference(self):
         p = self.p
         roles = self.roles
-        equity = self.account["equities"]
+        equities = self.account["equities"]
         dividends = self.account["dividends"]
         default_prob = roles["citizen"].get_prob_failure()
         deposit_rate = roles["depositor"].get_deposit_rate()
-        profit_ratio = dividends / equity if equity else 0
-        if profit_ratio < deposit_rate or equity <= 0:
+        profit_ratio = dividends / equities if equities else 0
+        if profit_ratio < deposit_rate or equities <= 0:
             return p.lambda_
         return p.lambda_ * math.exp(profit_ratio * (1 - default_prob) - deposit_rate)
 
     def _calc_net_worth(self):
         account = self.account
-        self.net_worth = account["deposits"] + account["equities"] + account["cash"]
+        cash = account["cash"]
+        deposits = account["deposits"] 
+        equities = account["equities"] 
+        self.net_worth = deposits + equities + cash
 
     def _calc_expected_net_worth(self):
         return self.net_worth + self.disposable_income - self.expected_consumption
@@ -296,9 +302,9 @@ class Household(EcoAgent):
             return new_bank.id
 
     def _make_deposits(self, bank_id):
-        account = self.account
+        cash = self.account["cash"]
         role = self.roles["depositor"]
-        role.make_deposits(bank_id, account["cash"])
+        role.make_deposits(bank_id, cash)
 
     def _withdraw_deposits(self, target):
         role = self.roles["depositor"]
