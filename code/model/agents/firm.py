@@ -140,7 +140,6 @@ class Firm(EcoAgent):
                     self._pay_lender(borrower_role, loan, funds)
                     break
 
-
     def _fund_repayments(self, role, loan, deposit):
         account = self.account
         funds = deposit["amount"]
