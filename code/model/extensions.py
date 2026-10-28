@@ -27,6 +27,16 @@ class EcoAgent(Agent):
         if self.account is not None:
             for key, value in self.account.items():
                 self.record(key, value)
+        if len(self.log) > 0:
+            self._record_stock_changes(self.log)
+
+    def _record_stock_changes(self, log):
+        if len(log["t"]) == 1:
+            for name in FINANCIAL_ASSETS:
+                self.record(f"delta_{name}", - log[name][-1])
+        else:
+            for name in FINANCIAL_ASSETS:
+                self.record(f"delta_{name}", log[name][-2] - log[name][-1])
 
 
 class EcoRole(AgentNode):
@@ -194,16 +204,6 @@ class EcoSpace(Network):
             self.accounts[source][category] -= amount
             self.accounts[target][category] += amount
 
-    def check_cash(self, step="unknown", print_all=True):
-        if self.env is not None:
-            self.env.check_cash(step=step)
-        else:
-            total = 0
-            for account in self.accounts.values():
-                total += account["cash"]
-            total = round(total, 4)
-            if total != 0 or print_all:
-                print(step, "check cash", total)
 
     #
     # Evolution

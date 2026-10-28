@@ -65,10 +65,11 @@ def test_initializes_country_pos(fake_model):
 
 
 @pytest.fixture
-def agent(fake_model):
+def agent(fake_model, monkeypatch):
     # Given
     model = fake_model
     agent = EcoAgent(model)
+    monkeypatch.setattr("model.extensions.FINANCIAL_ASSETS", ["x"])
     return agent
 
 
@@ -93,3 +94,29 @@ def test_record_account_records_each_item(agent):
     # Then
     assert agent.log["x"][-1] == 20
     assert agent.log["y"][-1] == -20
+
+
+
+def test_record_account_records_financial_asset_changes(agent):
+    # Given
+    agent.account = {"x": 20, "y": -20}
+    agent.record("x", 10)
+    agent.model.t = 1
+
+    # When
+    agent.record_account()
+
+    # Then
+    assert agent.log["delta_x"][-1] == -10
+
+
+def test_record_account_records_initial_asset_changes(agent):
+    # Given
+    agent.account = {"x": 20, "y": -20}
+    agent.model.t = 0
+
+    # When
+    agent.record_account()
+
+    # Then
+    assert agent.log["delta_x"][-1] == -20
