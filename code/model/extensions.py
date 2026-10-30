@@ -27,13 +27,17 @@ class EcoAgent(Agent):
         if self.account is not None:
             for key, value in self.account.items():
                 self.record(key, value)
+        self._record_stock_items()
         if len(self.log) > 0:
             self._record_stock_changes(self.log)
+
+    def _record_stock_items(self):
+        pass
 
     def _record_stock_changes(self, log):
         if len(log["t"]) == 1:
             for name in FINANCIAL_ASSETS:
-                self.record(f"delta_{name}", - log[name][-1])
+                self.record(f"delta_{name}", -log[name][-1])
         else:
             for name in FINANCIAL_ASSETS:
                 self.record(f"delta_{name}", log[name][-2] - log[name][-1])
@@ -126,6 +130,8 @@ class EcoSpace(Network):
     #
     def add_role(self, kind, agent, prefix=""):
         role = kind(agent, self, prefix=prefix)
+        if role.key in agent.roles:
+            raise RuntimeError(f"Duplicated Role: {role.key} for {agent}")
         agent.roles[role.key] = role
         self.roles[agent.id] = role
         self.positions[agent] = role
@@ -203,7 +209,6 @@ class EcoSpace(Network):
         else:
             self.accounts[source][category] -= amount
             self.accounts[target][category] += amount
-
 
     #
     # Evolution

@@ -1,7 +1,6 @@
 from unittest.mock import Mock
 import pytest
-from agentpy import AttrIter
-from model.spaces.labor_market import LaborMarket
+from model.spaces.country import Country
 from model.agents.household import Household
 from model.agents.firm import Firm
 
@@ -20,29 +19,39 @@ def model(fake_model):
 
 
 @pytest.fixture
-def market(model):
+def country(model):
     # Given
-    market = LaborMarket(model)
+    country = Country(model)
+    country.create_markets()
+    return country
+
+
+@pytest.fixture
+def market(country):
+    # Given
+    market = country.spaces["labor_market"]
     return market
 
 
 @pytest.fixture
-def household(model, market):
+def household(model, country):
     # Given
     household = Household(model)
-    market.add_household(household)
+    household.country_pos = 0
+    country.add_agents([household])
     return household
 
 
 @pytest.fixture
-def employers(model, market, make_dlist):
+def employers(model, country, make_dlist):
     # Given
     employers = make_dlist()
     wages = [20, 15, 16]
     demands = [0.4, 0.8, 0.8]
     for wage, demand in zip(wages, demands):
         firm = Firm(model)
-        market.add_firm(firm)
+        firm.country_pos = 0
+        country.add_agents([firm])
         employer = firm.roles["employer"]
         employer.labor_demand = demand
         employer.wage = wage

@@ -36,7 +36,7 @@ def cb(model, union):
     cb = CentralBank(model)
     cb.national = True
     cb.country_pos = 0
-    union.add_central_bank(cb)
+    union.add_agents([cb])
     return cb
 
 
@@ -45,7 +45,7 @@ def bank(model, union):
     # Given
     bank = Bank(model)
     bank.country_pos = 0
-    union.add_bank(bank)
+    union.add_agents([bank])
     return bank
 
 
@@ -82,10 +82,10 @@ def test_transfers_cash(bank, cb, country):
     bank.account["advances"] = -100
     cb.account["advances"] = 100
     country.discount_rate = 0.05
+    cash = country.cash
 
     # When
     bank.repay_cash_advances()
 
     # Then
-    assert bank.account["cash"] == -105
-    assert cb.account["cash"] == 105
+    assert cash[bank.id].amount == -105

@@ -1,4 +1,3 @@
-from unittest.mock import Mock
 import pytest
 from model.agents.government import Government
 from model.spaces.monetary_union import MonetaryUnion
@@ -38,7 +37,7 @@ def govt(model, union):
     # Given
     govt = Government(model)
     govt.country_pos = 0
-    union.add_government(govt)
+    union.add_agents([govt])
     return govt
 
 

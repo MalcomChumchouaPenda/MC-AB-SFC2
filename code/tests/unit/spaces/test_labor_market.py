@@ -55,14 +55,16 @@ def market_without_roles(monkeypatch, fake_model):
     monkeypatch.setattr("model.spaces.labor_market.Employer", FakeEmployer)
     monkeypatch.setattr("model.spaces.labor_market.Worker", FakeWorker)
     market = LaborMarket(fake_model)
+    market.env = Mock(pos=1)
     market.add_role = Mock()
     return market
 
 
-def test_add_household_add_worker_role(market_without_roles):
+def test_add_household_add_worker_role_if_domestic(market_without_roles):
     # Given
-    household = Mock()
+    household = Mock(country_pos=2)
     market = market_without_roles
+    market.env.pos = 2
 
     # When
     market.add_household(household)
@@ -71,16 +73,43 @@ def test_add_household_add_worker_role(market_without_roles):
     market.add_role.assert_called_with(FakeWorker, household)
 
 
-def test_add_firm_add_employer_role(market_without_roles):
+def test_add_household_does_nothing_if_not_domestic(market_without_roles):
     # Given
-    firm = Mock()
+    household = Mock(country_pos=2)
     market = market_without_roles
+    market.env.pos = 1
+
+    # When
+    market.add_household(household)
+
+    # Then
+    market.add_role.assert_not_called()
+
+
+def test_add_firm_add_employer_role_if_domestic(market_without_roles):
+    # Given
+    firm = Mock(country_pos=2)
+    market = market_without_roles
+    market.env.pos = 2
 
     # When
     market.add_firm(firm)
 
     # Then
     market.add_role.assert_called_with(FakeEmployer, firm)
+
+
+def test_add_firm_does_nothing_if_not_domestic(market_without_roles):
+    # Given
+    firm = Mock(country_pos=2)
+    market = market_without_roles
+    market.env.pos = 1
+
+    # When
+    market.add_firm(firm)
+
+    # Then
+    market.add_role.assert_not_called()
 
 
 # ---------------------------------------------------
@@ -168,6 +197,7 @@ def market_with_jobs(market_without_roles):
     worker = Mock()
     employer = Mock()
     market = market_without_roles
+    market.env = Mock()
     market.transfer_stock = Mock()
     market.make_transaction = Mock()
     market.graph.add_edge(employer, worker, wages=0.0)
@@ -186,6 +216,19 @@ def test_pay_wages_update_edge(market_with_jobs):
     assert graph[worker][employer]["wages"] == 3.0
 
 
+def test_pay_wages_transfers_cash(market_with_jobs):
+    # Given
+    market, employer, worker = market_with_jobs
+    env = market.env
+
+    # When
+    market.pay_wages(employer, worker, 3.0)
+
+    # Then
+    env.decrease_cash.assert_called_with(employer, 3.0)
+    env.increase_cash.assert_called_with(worker, 3.0)
+
+
 def test_pay_wages_updates_accounts(market_with_jobs):
     # Given
     market, employer, worker = market_with_jobs
@@ -194,7 +237,6 @@ def test_pay_wages_updates_accounts(market_with_jobs):
     market.pay_wages(employer, worker, 3.0)
 
     # Then
-    market.transfer_stock.assert_any_call("cash", employer.id, worker.id, 3.0)
     market.make_transaction.assert_any_call("wages", employer.id, worker.id, 3.0)
 
 

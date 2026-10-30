@@ -27,7 +27,8 @@ def country(model):
 def bank(model, country):
     # Given
     bank = Bank(model)
-    country.add_bank(bank)
+    bank.country_pos = country.pos
+    country.add_agents([bank])
     return bank
 
 
@@ -35,14 +36,15 @@ def bank(model, country):
 def household(model, country, bank):
     # Given
     household = Household(model)
+    household.country_pos = country.pos
     household.deposit_bank_id = bank.id
-    country.add_household(household)
+    country.add_agents([household])
     role = household.roles["depositor"]
     role.join_deposit_bank(bank.id)
     return household
 
 
-def test_household_portfolio_allocation(country, household, bank):
+def test_household_portfolio_allocation(country, household):
     # Given
     country.p.zeta = 1.0  # for deposit rate computaion
     country.discount_rate = 0.05
@@ -53,7 +55,6 @@ def test_household_portfolio_allocation(country, household, bank):
     household.account["dividends"] = 2.5
     household.account["equities"] = 50
     household.account["deposits"] = 0
-    household.account["cash"] = 0
 
     # When
     household.choose_portfolio_allocation()

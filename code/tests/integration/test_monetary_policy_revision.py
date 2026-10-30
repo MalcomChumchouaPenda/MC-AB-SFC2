@@ -30,7 +30,7 @@ def union(model):
 def union_cb(model, union):
     cb = CentralBank(model)
     cb.national = False
-    union.add_central_bank(cb)
+    union.add_agents([cb])
     return cb
 
 
@@ -51,7 +51,7 @@ def national_cb(model, union):
     cb = CentralBank(model)
     cb.country_pos = 0
     cb.national = True
-    union.add_central_bank(cb)
+    union.add_agents([cb])
     return cb
 
 

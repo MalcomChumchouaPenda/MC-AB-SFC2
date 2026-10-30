@@ -31,7 +31,8 @@ def country(model):
 def govt(model, country):
     # Given
     govt = Government(model)
-    country.add_government(govt)
+    govt.country_pos = country.pos
+    country.add_agents([govt])
     return govt
 
 
@@ -39,8 +40,9 @@ def govt(model, country):
 def household(model, country):
     # Given
     household = Household(model)
-    country.add_household(household)
-    household.account["cash"] = 1000
+    household.country_pos = country.pos
+    country.add_agents([household])
+    country.cash[household.id].amount = 1000
     household.account["wages"] = 550
     household.account["dividends"] = 50
     household.account["public_transfers"] = 50
@@ -56,22 +58,26 @@ def test_increases_taxes_from_household(household, govt):
     assert govt.account["taxes"] == 60
 
 
-def test_transfers_cash_from_household_to_govt(household, govt):
+def test_transfers_cash_from_household_to_govt(household, govt, country):
+    # Given
+    cash = country.cash
+
     # When
     household.pay_taxes()
 
     # Then
-    assert household.account["cash"] == 940
-    assert govt.account["cash"] == 60
+    assert cash[household.id].amount == 940
+    assert cash[govt.id].amount == 60
 
 
 @pytest.fixture
 def firm(model, country):
     # Given
     firm = Firm(model)
-    country.add_firm(firm)
     firm.taxes_payable = 100
-    firm.account["cash"] = 1000
+    firm.country_pos = country.pos
+    country.add_agents([firm])
+    country.cash[firm.id].amount = 1000
     return firm
 
 
@@ -85,22 +91,26 @@ def test_increases_taxes_from_firm(firm, govt):
     assert govt.account["taxes"] == 100
 
 
-def test_tansfers_cash_from_firm_to_govt(firm, govt):
+def test_tansfers_cash_from_firm_to_govt(firm, govt, country):
+    # Given
+    cash = country.cash
+
     # When
     firm.pay_taxes()
 
     # Then
-    assert firm.account["cash"] == 900
-    assert govt.account["cash"] == 100
+    assert cash[firm.id].amount == 900
+    assert cash[govt.id].amount == 100
 
 
 @pytest.fixture
 def bank(model, country):
     # Given
     bank = Bank(model)
-    country.add_bank(bank)
+    bank.country_pos = country.pos
     bank.taxes_payable = 100
-    bank.account["cash"] = 1000
+    country.add_agents([bank])
+    country.cash[bank.id].amount = 1000
     return bank
 
 
@@ -114,10 +124,13 @@ def test_increases_taxes_from_bank(bank, govt):
     assert govt.account["taxes"] == 100
 
 
-def test_transfers_cash_from_bank_govt(bank, govt):
+def test_transfers_cash_from_bank_govt(bank, govt, country):
+    # Given
+    cash = country.cash
+
     # When
     bank.pay_taxes()
 
     # Then
-    assert bank.account["cash"] == 900
-    assert govt.account["cash"] == 100
+    assert cash[bank.id].amount == 900
+    assert cash[govt.id].amount == 100

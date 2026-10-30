@@ -60,3 +60,12 @@ class CentralBank(EcoAgent):
         auth_role = self.roles["monetary_authority"]
         auth_role.set_discount_rate(discount_rate)
         self.prev_discount_rate = discount_rate
+
+    #
+    # Observation
+    #
+    def _record_stock_items(self):
+        super()._record_stock_items()
+        roles = self.roles
+        if self.national:
+            self.record("cash", -roles["monetary_authority"].get_cash())

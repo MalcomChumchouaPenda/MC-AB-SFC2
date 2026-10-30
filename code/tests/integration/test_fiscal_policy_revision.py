@@ -37,11 +37,12 @@ def country(model):
 def govt(model, country):
     # Given
     govt = Government(model)
+    govt.country_pos = 0
     govt.prev_public_spending = 10
     govt.public_spending = 100
     govt.budget_deficit = 100
     govt.next_tax_rate = 0.20
-    country.add_government(govt)
+    country.add_agents([govt])
     return govt
 
 

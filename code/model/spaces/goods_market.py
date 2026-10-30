@@ -17,12 +17,18 @@ class GoodsMarket(EcoSpace):
     #
 
     def add_household(self, household):
-        prefix = "trad" if self.tradable else "non_trad"
-        self.add_role(Consumer, household, prefix=prefix)
+        if self.tradable:
+            self.add_role(Consumer, household, prefix="trad")
+        elif household.country_pos == self.env.pos:
+            self.add_role(Consumer, household, prefix="non_trad")
 
     def add_firm(self, firm):
-        if firm.tradable == self.tradable:
-            self.add_role(Producer, firm)
+        if self.tradable:
+            if firm.tradable:
+                self.add_role(Producer, firm)
+        else:
+            if not firm.tradable and self.env.pos == firm.country_pos:
+                self.add_role(Producer, firm)
 
     #
     # Reactions
@@ -31,7 +37,8 @@ class GoodsMarket(EcoSpace):
         amount = quantity * producer.price
         producer.inventories -= quantity
         producer.sales += amount
-        self.transfer_stock("cash", consumer.id, producer.id, amount)
+        self.env.decrease_cash(consumer, amount)
+        self.env.increase_cash(producer, amount)
         self.make_transaction("consumption", consumer.id, producer.id, amount)
 
     #

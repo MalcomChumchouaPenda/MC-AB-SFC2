@@ -35,7 +35,8 @@ def market(country):
 def bank(model, country):
     # Given
     bank = Bank(model)
-    country.add_bank(bank)
+    bank.country_pos = 0
+    country.add_agents([bank])
     return bank
 
 
@@ -43,7 +44,8 @@ def bank(model, country):
 def firm(model, country):
     # Given
     firm = Firm(model)
-    country.add_firm(firm)
+    firm.country_pos = 0
+    country.add_agents([firm])
     return firm
 
 
@@ -76,10 +78,11 @@ def test_increases_firm_deposit_interests(firm, bank, market):
 
 
 @pytest.fixture
-def household(model, market):
+def household(model, country):
     # Given
     household = Household(model)
-    market.add_household(household)
+    household.country_pos = 0
+    country.add_agents([household])
     return household
 
 

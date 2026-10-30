@@ -74,7 +74,7 @@ class Household(EcoAgent):
 
     def _calc_income(self):
         account = self.account
-        wages = account["wages"] 
+        wages = account["wages"]
         dividends = account["dividends"]
         dep_ints = account["dep_interests"]
         return wages + dep_ints + dividends
@@ -107,13 +107,13 @@ class Household(EcoAgent):
             self._consume_good(role, target_cons)
 
     def _fund_consumption(self, desired_cons):
-        cash = self.account["cash"]
+        cash = self.roles["citizen"].get_cash()
         if desired_cons > cash:
             needs = desired_cons - cash
             self._withdraw_deposits(needs)
 
     def _consume_good(self, role, target_cons):
-        cash = self.account["cash"]
+        cash = self.roles["citizen"].get_cash()
         for supplier in self._list_suppliers(role):
             if target_cons <= 0 or cash <= 0:
                 break
@@ -169,10 +169,10 @@ class Household(EcoAgent):
         return p.lambda_ * math.exp(profit_ratio * (1 - default_prob) - deposit_rate)
 
     def _calc_net_worth(self):
+        cash = self.roles["citizen"].get_cash()
         account = self.account
-        cash = account["cash"]
-        deposits = account["deposits"] 
-        equities = account["equities"] 
+        deposits = account["deposits"]
+        equities = account["equities"]
         self.net_worth = deposits + equities + cash
 
     def _calc_expected_net_worth(self):
@@ -302,9 +302,10 @@ class Household(EcoAgent):
             return new_bank.id
 
     def _make_deposits(self, bank_id):
-        cash = self.account["cash"]
-        role = self.roles["depositor"]
-        role.make_deposits(bank_id, cash)
+        roles = self.roles
+        cash = roles["citizen"].get_cash()
+        depositor_role = self.roles["depositor"]
+        depositor_role.make_deposits(bank_id, cash)
 
     def _withdraw_deposits(self, target):
         role = self.roles["depositor"]
@@ -322,3 +323,11 @@ class Household(EcoAgent):
     #
     def update_labor_history(self):
         self.prev_labor_sold = self.roles["worker"].labor_sold
+
+    #
+    # Observation
+    #
+    def _record_stock_items(self):
+        super()._record_stock_items()
+        roles = self.roles
+        self.record("cash", roles["citizen"].get_cash())

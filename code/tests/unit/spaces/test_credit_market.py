@@ -84,6 +84,7 @@ def market_with_participants(market_without_roles):
     lender = Mock()
     borrower = Mock(loan_demand=0)
     market = market_without_roles
+    market.env = Mock()
     market.transfer_stock = Mock()
     market.make_transaction = Mock()
     market.graph.add_nodes_from([borrower, lender])
@@ -104,6 +105,19 @@ def test_grant_loan_creates_graph_edge(market_with_participants):
     assert graph[borrower][lender]["rate"] == 0.05
 
 
+def test_grant_loan_transfers_cash(market_with_participants):
+    # Given
+    market, borrower, lender = market_with_participants
+    env = market.env
+
+    # When
+    market.grant_loan(lender, borrower, 500, 0.05)
+
+    # Then
+    env.decrease_cash.assert_called_with(lender, 500)
+    env.increase_cash.assert_called_with(borrower, 500)
+
+
 def test_grant_loan_updates_accounts(market_with_participants):
     # Given
     market, borrower, lender = market_with_participants
@@ -113,7 +127,6 @@ def test_grant_loan_updates_accounts(market_with_participants):
 
     # Then
     market.transfer_stock.assert_any_call("loans", borrower.id, lender.id, 500)
-    market.transfer_stock.assert_any_call("cash", lender.id, borrower.id, 500)
 
 
 def test_grant_loan_reduces_loan_demand(market_with_participants):
@@ -154,6 +167,19 @@ def test_repay_loans_updates_graph_edge(market_with_loan):
     assert graph[borrower][lender]["amount"] == 200
 
 
+def test_repay_loans_transfers_cash(market_with_loan):
+    # Given
+    market, borrower, lender = market_with_loan
+    env = market.env
+
+    # When
+    market.repay_loans(borrower, lender, 100, 10)
+
+    # Then
+    env.increase_cash.assert_called_with(lender, 110)
+    env.decrease_cash.assert_called_with(borrower, 110)
+
+
 def test_repay_loans_updates_accounts(market_with_loan):
     # Given
     market, borrower, lender = market_with_loan
@@ -164,7 +190,6 @@ def test_repay_loans_updates_accounts(market_with_loan):
 
     # Then
     market.transfer_stock.assert_any_call("loans", bank_id, borrower.id, 100)
-    market.transfer_stock.assert_any_call("cash", borrower.id, bank_id, 110)
     market.make_transaction.assert_any_call("loan_interests", borrower.id, bank_id, 10)
 
 

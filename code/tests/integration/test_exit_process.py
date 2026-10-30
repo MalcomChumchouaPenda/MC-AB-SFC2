@@ -1,4 +1,3 @@
-from unittest.mock import Mock
 import pytest
 from model.spaces.monetary_union import MonetaryUnion
 from model.agents.household import Household
@@ -42,24 +41,27 @@ def founders(model, union):
 def firm(model, union, founders):
     # Given
     firm = Firm(model)
+    firm.country_pos = 0
     union.add_agents([firm])
+    country = union.spaces["country_0"]
     for household in founders:
-        household.account["cash"] = 50
+        country.cash[household.id].amount = 50
         citizen = household.roles["citizen"]
         citizen.fund_company(firm.id, 50)
     return firm
 
 
-def test_firm_exit_with_residual_cash(firm, founders):
+def test_firm_exit_with_residual_cash(firm, founders, union):
     # Given
     firm.roles["employer"].wage = 150
+    cash = union.spaces["country_0"].cash
 
     # When
     firm.exit()
 
     # Then
-    assert firm.account["cash"] == 0
+    assert cash[firm.id].amount == 0
     assert firm.account["equities"] == 0
     for founder in founders:
-        assert founder.account["cash"] == 50
+        assert cash[founder.id].amount == 50
         assert founder.account["equities"] == 0

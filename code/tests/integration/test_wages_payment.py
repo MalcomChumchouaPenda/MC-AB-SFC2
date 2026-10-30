@@ -1,5 +1,5 @@
 import pytest
-from model.spaces.labor_market import LaborMarket
+from model.spaces.country import Country
 from model.agents.household import Household
 from model.agents.firm import Firm
 
@@ -15,36 +15,52 @@ def model(fake_model):
 
 
 @pytest.fixture
-def market(model):
+def country(model):
     # Given
-    market = LaborMarket(model)
+    country = Country(model)
+    country.create_markets()
+    return country
+
+
+@pytest.fixture
+def market(country):
+    # Given
+    market = country.spaces["labor_market"]
     return market
 
 
 @pytest.fixture
-def firm(model, market):
+def firm(model, country):
     # Given
     firm = Firm(model)
-    market.add_firm(firm)
-    employer = firm.roles["employer"]
-    employer.wage = 10.0
+    firm.country_pos = country.pos
+    country.add_agents([firm])
     return firm
 
 
 @pytest.fixture
-def households(model, market, firm):
+def households(model, country):
     # Given
     households = []
-    employer = firm.roles["employer"]
     for _ in range(2):
         household = Household(model)
-        market.add_household(household)
-        worker = household.roles["worker"]
-        market.hire_worker(worker, employer, 1.0)
+        household.country_pos = country.pos
+        country.add_agents([household])
         households.append(household)
     return households
 
 
+@pytest.fixture
+def before_payment(market, firm, households):
+    # Given
+    employer = firm.roles["employer"]
+    employer.wage = 10.0
+    for household in households:
+        worker = household.roles["worker"]
+        market.hire_worker(worker, employer, 1.0)
+
+
+@pytest.mark.usefixtures("before_payment")
 def test_increases_wages_from_firm(firm, households):
     # When
     firm.pay_wages()
@@ -55,11 +71,15 @@ def test_increases_wages_from_firm(firm, households):
     assert households[1].account["wages"] == 10.0
 
 
-def test_transfers_cash_from_firm_to_household(firm, households):
+@pytest.mark.usefixtures("before_payment")
+def test_transfers_cash_from_firm_to_household(firm, households, country):
+    # Given
+    cash = country.cash
+
     # When
     firm.pay_wages()
 
     # Then
-    assert firm.account["cash"] == -20.0
-    assert households[0].account["cash"] == 10.0
-    assert households[1].account["cash"] == 10.0
+    assert cash[firm.id].amount == -20.0
+    assert cash[households[0].id].amount == 10.0
+    assert cash[households[1].id].amount == 10.0

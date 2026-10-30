@@ -96,7 +96,6 @@ def test_record_account_records_each_item(agent):
     assert agent.log["y"][-1] == -20
 
 
-
 def test_record_account_records_financial_asset_changes(agent):
     # Given
     agent.account = {"x": 20, "y": -20}

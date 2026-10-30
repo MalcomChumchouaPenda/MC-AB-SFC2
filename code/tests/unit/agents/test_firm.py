@@ -714,63 +714,69 @@ def test_dont_request_unneccessary_loans(firm_as_borrower, desired):
 def after_borrowing(firm_with_roles_and_account):
     # Given
     bank_role = Mock(country_pos=1)
+    company_role = Mock()
+    borrower_role = Mock()
+    depositor_role = Mock()
     loan = {"lender": bank_role, "amount": 100, "rate": 0.1}
     deposit = {"deposit_bank": bank_role, "amount": 100}
-    borrower_role, depositor_role = Mock(), Mock()
     borrower_role.find_loans.return_value = [loan]
     depositor_role.find_deposits.return_value = [deposit]
-    firm, roles, account = firm_with_roles_and_account
+    firm, roles, _ = firm_with_roles_and_account
     roles["country_1_depositor"] = depositor_role
     roles["borrower"] = borrower_role
-    account["cash"] = 100
-    return firm, roles, account, loan, deposit
+    roles["company"] = company_role
+    return firm, roles, loan, deposit
 
 
 @pytest.mark.parametrize("cash, expected", [(100, 80), (50, 50), (0, 0)])
 def test_repay_loans_after_making_deposits(after_borrowing, cash, expected):
     # Given
-    firm, roles, account, loan, deposit = after_borrowing
-    role = roles["country_1_depositor"]
+    firm, roles, loan, deposit = after_borrowing
     deposit["amount"] = 20
-    account["cash"] = cash
     lender = loan["lender"]
+    company_role = roles["company"]
+    company_role.get_cash.return_value = cash
+    depositor_role = roles["country_1_depositor"]
 
     # When
     firm.repay_loans()
 
     # Then
-    role.make_deposits.assert_called_once_with(lender.id, expected)
+    depositor_role.make_deposits.assert_called_once_with(lender.id, expected)
 
 
 def test_repay_loans_to_all_lenders(after_borrowing):
     # Given
-    firm, roles, _, loan, deposit = after_borrowing
+    firm, roles, loan, deposit = after_borrowing
     deposit["amount"] = 200
-    role = roles["borrower"]
     lender = loan["lender"]
+    borrower_role = roles["borrower"]
+    company_role = roles["company"]
+    company_role.get_cash.return_value = 100
 
     # When
     firm.repay_loans()
 
     # Then
-    role.repay_loans.assert_called_once_with(lender, 100, 10.0)
+    borrower_role.repay_loans.assert_called_once_with(lender, 100, 10.0)
 
 
 @pytest.mark.parametrize("fund, default", [(100, 0), (80, 20), (0, 100)])
 def test_repay_loans_with_available_deposits(after_borrowing, fund, default):
     # Given
-    firm, roles, account, loan, deposit = after_borrowing
+    firm, roles, loan, deposit = after_borrowing
     deposit["amount"] = fund
-    role = roles["borrower"]
     lender = loan["lender"]
-    account["cash"] = 0
+    borrower_role = roles["borrower"]
+    company_role = roles["company"]
+    company_role.get_cash.return_value = 0
 
     # When
     firm.repay_loans()
 
     # Then
-    role.repay_loans.assert_called_once_with(lender, fund, 0.0)
-    role.make_defaults.assert_called_once_with(lender, default)
+    borrower_role.repay_loans.assert_called_once_with(lender, fund, 0.0)
+    borrower_role.make_defaults.assert_called_once_with(lender, default)
 
 
 # ---------------------------------------------------
@@ -1014,6 +1020,7 @@ def before_exit(firm_with_roles_and_account):
     # Given
     borrower_role, company_role = Mock(), Mock()
     borrower_role.find_loans.return_value = []
+    company_role.get_cash.return_value = 0
     company_role.get_equity_shares.return_value = []
     firm, roles, account = firm_with_roles_and_account
     roles["company"] = company_role
@@ -1022,7 +1029,6 @@ def before_exit(firm_with_roles_and_account):
     account["equities"] = -50
     account["deposits"] = 0
     account["loans"] = 0
-    account["cash"] = 0
     return firm, roles, account
 
 
@@ -1101,9 +1107,9 @@ def test_exit_transfer_residual_cash_to_founders(before_exit):
     # Given
     founder = object()
     share = {"citizen": founder, "value": 1000}
-    firm, roles, account = before_exit
-    account["cash"] = 200
+    firm, roles, _ = before_exit
     role = roles["company"]
+    role.get_cash.return_value = 200
     role.get_equity_shares.return_value = [share]
 
     # When

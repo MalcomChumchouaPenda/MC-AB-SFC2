@@ -11,6 +11,9 @@ class Citizen(EcoRole):
     #
     # Perception methods
     #
+    def get_cash(self):
+        return self.env.cash[self.id].amount
+
     def get_prob_failure(self):
         return self.env.prob_failure
 

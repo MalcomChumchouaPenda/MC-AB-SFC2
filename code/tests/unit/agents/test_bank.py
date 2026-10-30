@@ -262,17 +262,17 @@ def bank_before_advance(bank_with_roles_and_account):
     bank.p.mu2 = 0.1
     account["deposits"] = -1000
     account["advances"] = 0
-    account["cash"] = 0
     roles["lender"] = Mock()
     roles["company"] = Mock()
+    roles["company"].get_cash.return_value = 0
     return bank
 
 
 def test_doesnot_request_advance_when_sufficient_reserves(bank_before_advance):
     # Given
     bank = bank_before_advance
-    bank.account["cash"] = 200
     role = bank.roles["company"]
+    role.get_cash.return_value = 200
 
     # When
     bank.request_cash_advances()
@@ -284,8 +284,8 @@ def test_doesnot_request_advance_when_sufficient_reserves(bank_before_advance):
 def test_request_advance_when_insufficient_reserves(bank_before_advance):
     # Given
     bank = bank_before_advance
-    bank.account["cash"] = 50
     role = bank.roles["company"]
+    role.get_cash.return_value = 50
 
     # When
     bank.request_cash_advances()
@@ -331,8 +331,9 @@ def test_calc_bond_purchases_prob():
 def test_calc_excess_reserves(bank_before_advance, reserves, expected):
     # Given
     bank = bank_before_advance
-    bank.account["cash"] = reserves
     bank.p.mu2 = 0.1
+    role = bank.roles["company"]
+    role.get_cash.return_value = reserves
 
     # When
     excess_reserves = bank._calc_excess_reserves()
@@ -581,10 +582,10 @@ def test_pay_no_dividends(bank_with_roles_and_account):
 def bank_before_exit(bank_with_roles_and_account):
     # Given
     company_role = Mock()
+    company_role.get_cash.return_value = 0
     company_role.get_average_wage.return_value = 100
     bank, roles, account = bank_with_roles_and_account
     roles["company"] = company_role
-    account["cash"] = 0
     return bank, roles, account
 
 
@@ -607,8 +608,8 @@ def test_exit_transfer_residual_cash_to_founders(bank_before_exit):
     share = {"citizen": founder, "value": 90}
     bank, roles, account = bank_before_exit
     account["equities"] = -90
-    account["cash"] = 200
     role = roles["company"]
+    role.get_cash.return_value = 200
     role.get_equity_shares.return_value = [share]
 
     # When

@@ -43,7 +43,7 @@ def bank(model, union):
     # Given
     bank = Bank(model)
     bank.country_pos = 0
-    union.add_bank(bank)
+    union.add_agents([bank])
     bank.account["equities"] = -100
     return bank
 
@@ -52,6 +52,7 @@ def bank(model, union):
 def firm(model, union):
     # Given
     firm = Firm(model)
+    firm.country_pos = 0
     union.add_agents([firm])
     firm.account["equities"] = -100
     return firm

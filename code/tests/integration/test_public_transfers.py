@@ -31,7 +31,8 @@ def country(model):
 def govt(model, country):
     # Given
     govt = Government(model)
-    country.add_government(govt)
+    govt.country_pos = country.pos
+    country.add_agents([govt])
     return govt
 
 
@@ -40,24 +41,25 @@ def cb(model, country):
     # Given
     cb = CentralBank(model)
     cb.national = True
+    cb.country_pos = country.pos
     country.add_central_bank(cb)
     return cb
 
 
-def test_central_bank_transfer_profits(govt, cb):
+def test_central_bank_transfer_profits(govt, cb, country):
     # Given
     cb.account["adv_interests"] = 50
     cb.account["cash_interests"] = -20
     cb.account["bond_interests"] = 100
+    cash = country.cash
 
     # When
     cb.transfer_profit()
 
     # Then
     assert cb.account["profit_transfers"] == -130
-    assert cb.account["cash"] == -130
     assert govt.account["profit_transfers"] == 130
-    assert govt.account["cash"] == 130
+    assert cash[govt.id].amount == 130
 
 
 @pytest.fixture
@@ -66,21 +68,23 @@ def households(model, country):
     households = []
     for _ in range(4):
         household = Household(model)
+        household.country_pos = country.pos
         households.append(household)
-        country.add_household(household)
+        country.add_agents([household])
     return households
 
 
-def test_government_pay_public_transfer_equally(govt, households):
+def test_government_pay_public_transfer_equally(govt, households, country):
     # Given
     govt.public_spending = 400
+    cash = country.cash
 
     # When
     govt.pay_public_transfers()
 
     # Then
-    assert govt.account["cash"] == -400
+    assert cash[govt.id].amount == -400
     assert govt.account["public_transfers"] == -400
     for household in households:
-        assert household.account["cash"] == 100
+        assert cash[household.id].amount == 100
         assert household.account["public_transfers"] == 100

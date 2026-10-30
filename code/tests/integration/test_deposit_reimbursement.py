@@ -41,7 +41,7 @@ def govt(model, union):
     # Given
     govt = Government(model)
     govt.country_pos = 0
-    union.add_government(govt)
+    union.add_agents([govt])
     return govt
 
 
@@ -50,7 +50,7 @@ def bank(model, union):
     # Given
     bank = Bank(model)
     bank.country_pos = 0
-    union.add_bank(bank)
+    union.add_agents([bank])
     deposit_bank = bank.roles["deposit_bank"]
     deposit_bank.defaulted = True
     return bank
@@ -60,17 +60,24 @@ def bank(model, union):
 def firm(model, union):
     # Given
     firm = Firm(model)
+    firm.country_pos = 0
     union.add_agents([firm])
     return firm
 
 
-def test_issues_bonds_for_reimbursement(firm, bank, govt, deposit_market):
+@pytest.fixture
+def before_firm_reimbursement(firm, bank, union):
     # Given
-    firm.account["cash"] = 1000
+    country = union.spaces["country_0"]
+    country.cash[firm.id].amount = 1000
     depositor = firm.roles["country_0_depositor"]
     deposit_bank = bank.roles["deposit_bank"]
+    deposit_market = country.spaces["deposit_market"]
     deposit_market.join_deposit_bank(depositor, deposit_bank, 500)
 
+
+@pytest.mark.usefixtures("before_firm_reimbursement")
+def test_issues_bonds_for_reimbursement(govt):
     # When
     govt.issue_deposit_guarantee_bonds()
     govt.reimburse_deposits()
@@ -80,29 +87,24 @@ def test_issues_bonds_for_reimbursement(firm, bank, govt, deposit_market):
     assert govt.roles["bond_issuer"].bond_number == 100
 
 
-def test_increases_firm_cash(firm, bank, govt, deposit_market):
+@pytest.mark.usefixtures("before_firm_reimbursement")
+def test_increases_firm_cash(firm, govt, union):
     # Given
-    firm.account["cash"] = 1000
-    depositor = firm.roles["country_0_depositor"]
-    deposit_bank = bank.roles["deposit_bank"]
-    deposit_market.join_deposit_bank(depositor, deposit_bank, 500)
+    country = union.spaces["country_0"]
+    govt_cash = country.cash[govt.id]
+    firm_cash = country.cash[firm.id]
 
     # When
     govt.issue_deposit_guarantee_bonds()
     govt.reimburse_deposits()
 
     # Then
-    assert govt.account["cash"] == -500
-    assert firm.account["cash"] == 1000
+    assert govt_cash.amount == -500
+    assert firm_cash.amount == 1000
 
 
-def test_clears_firm_deposits(firm, bank, govt, deposit_market):
-    # Given
-    firm.account["cash"] = 1000
-    depositor = firm.roles["country_0_depositor"]
-    deposit_bank = bank.roles["deposit_bank"]
-    deposit_market.join_deposit_bank(depositor, deposit_bank, 500)
-
+@pytest.mark.usefixtures("before_firm_reimbursement")
+def test_clears_firm_deposits(firm, bank, govt):
     # When
     govt.issue_deposit_guarantee_bonds()
     govt.reimburse_deposits()
@@ -121,29 +123,35 @@ def household(model, union):
     return household
 
 
-def test_increases_household_cash(household, bank, govt, deposit_market):
+@pytest.fixture
+def before_household_reimbursement(household, bank, union):
     # Given
-    household.account["cash"] = 1000
+    country = union.spaces["country_0"]
+    country.cash[household.id].amount = 1000
     depositor = household.roles["depositor"]
     deposit_bank = bank.roles["deposit_bank"]
+    deposit_market = country.spaces["deposit_market"]
     deposit_market.join_deposit_bank(depositor, deposit_bank, 500)
+
+
+@pytest.mark.usefixtures("before_household_reimbursement")
+def test_increases_household_cash(household, govt, union):
+    # Given
+    country = union.spaces["country_0"]
+    household_cash = country.cash[household.id]
+    govt_cash = country.cash[govt.id]
 
     # When
     govt.issue_deposit_guarantee_bonds()
     govt.reimburse_deposits()
 
     # Then
-    assert household.account["cash"] == 1000
-    assert govt.account["cash"] == -500
+    assert household_cash.amount == 1000
+    assert govt_cash.amount == -500
 
 
-def test_clears_household_deposits(household, bank, govt, deposit_market):
-    # Given
-    household.account["cash"] = 1000
-    depositor = household.roles["depositor"]
-    deposit_bank = bank.roles["deposit_bank"]
-    deposit_market.join_deposit_bank(depositor, deposit_bank, 500)
-
+@pytest.mark.usefixtures("before_household_reimbursement")
+def test_clears_household_deposits(household, bank, govt):
     # When
     govt.issue_deposit_guarantee_bonds()
     govt.reimburse_deposits()

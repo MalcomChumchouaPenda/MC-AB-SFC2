@@ -84,6 +84,7 @@ def market_with_participants(market_without_roles):
     buyer = Mock()
     issuer = Mock()
     market = market_without_roles
+    market.env = Mock()
     market.transfer_stock = Mock()
     market.make_transaction = Mock()
     return market, issuer, buyer
@@ -105,6 +106,22 @@ def test_buy_bonds_creates_graph_edge(market_with_participants):
     assert graph[buyer][issuer]["amount"] == 200
 
 
+def test_buy_bonds_transfers_cash(market_with_participants):
+    # Given
+    market, issuer, buyer = market_with_participants
+    issuer.bond_value = 100
+    issuer.bond_number = 1
+    issuer.debt_ratio = 0
+    env = market.env
+
+    # When
+    market.buy_bonds(buyer, issuer, 2)
+
+    # Then
+    env.decrease_cash.assert_called_with(buyer, 200)
+    env.increase_cash.assert_called_with(issuer, 200)
+
+
 def test_buy_bonds_updates_accounts(market_with_participants):
     # Given
     market, issuer, buyer = market_with_participants
@@ -117,7 +134,6 @@ def test_buy_bonds_updates_accounts(market_with_participants):
 
     # Then
     market.transfer_stock.assert_any_call("bonds", issuer.id, buyer.id, 200)
-    market.transfer_stock.assert_any_call("cash", buyer.id, issuer.id, 200)
 
 
 def test_buy_bonds_reduces_bond_supply(market_with_participants):
@@ -155,6 +171,19 @@ def test_repay_bond_creates_graph_edge(market_with_purchase):
     assert graph[buyer][issuer]["amount"] == -100
 
 
+def test_repay_bond_transfers_cash(market_with_purchase):
+    # Given
+    market, issuer, buyer = market_with_purchase
+    env = market.env
+
+    # When
+    market.repay_bonds(buyer, issuer, 100, 10)
+
+    # Then
+    env.decrease_cash.assert_called_with(issuer, 110)
+    env.increase_cash.assert_called_with(buyer, 110)
+
+
 def test_repay_bond_updates_accounts(market_with_purchase):
     # Given
     market, issuer, buyer = market_with_purchase
@@ -164,7 +193,6 @@ def test_repay_bond_updates_accounts(market_with_purchase):
 
     # Then
     market.transfer_stock.assert_any_call("bonds", buyer.id, issuer.id, 100)
-    market.transfer_stock.assert_any_call("cash", issuer.id, buyer.id, 110)
     market.make_transaction.assert_any_call("bond_interests", issuer.id, buyer.id, 10)
 
 

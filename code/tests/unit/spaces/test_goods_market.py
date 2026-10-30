@@ -78,30 +78,59 @@ def market_without_roles(monkeypatch, fake_model):
     monkeypatch.setattr("model.spaces.goods_market.Consumer", FakeConsumer)
     monkeypatch.setattr("model.spaces.goods_market.Producer", FakeProducer)
     market = GoodsMarket(fake_model)
+    market.env = Mock()
     market.add_role = Mock()
     return market
 
 
-@pytest.mark.parametrize("tradable, prefix", [(True, "trad"), (False, "non_trad")])
-def test_add_household_adds_consumer_role(market_without_roles, tradable, prefix):
+def test_add_household_adds_consumer_role_for_any_if_tradable(market_without_roles):
     # Given
     market = market_without_roles
-    market.tradable = tradable
+    market.tradable = True
     household = Mock()
 
     # When
     market.add_household(household)
 
     # Then
-    market.add_role.assert_called_with(FakeConsumer, household, prefix=prefix)
+    market.add_role.assert_called_with(FakeConsumer, household, prefix="trad")
 
 
-@pytest.mark.parametrize("tradable", [True, False])
-def test_add_firm_adds_producer_role_for_compliers(market_without_roles, tradable):
+def test_add_household_adds_consumer_role_for_domestic_only(market_without_roles):
     # Given
-    firm = Mock(tradable=tradable)
     market = market_without_roles
-    market.tradable = tradable
+    market.tradable = False
+    market.env.pos = 2
+    household = Mock(country_pos=2)
+
+    # When
+    market.add_household(household)
+
+    # Then
+    market.add_role.assert_called_with(FakeConsumer, household, prefix="non_trad")
+
+
+def test_add_household_does_nothing_for_foreigners(market_without_roles):
+    # Given
+    market = market_without_roles
+    market.tradable = False
+    market.env.pos = 1
+    household = Mock(country_pos=2)
+
+    # When
+    market.add_household(household)
+
+    # Then
+    market.add_role.assert_not_called()
+
+
+def test_add_firm_adds_producer_role_for_tradable_firm_if_tradable(
+    market_without_roles,
+):
+    # Given
+    firm = Mock(tradable=True)
+    market = market_without_roles
+    market.tradable = True
 
     # When
     market.add_firm(firm)
@@ -110,12 +139,45 @@ def test_add_firm_adds_producer_role_for_compliers(market_without_roles, tradabl
     market.add_role.assert_called_with(FakeProducer, firm)
 
 
-@pytest.mark.parametrize("tradable", [True, False])
-def test_add_firm_doesnt_add_role_for_no_compliers(market_without_roles, tradable):
+def test_add_firm_doesnt_add_role_for_non_tradable_firm_if_tradable(
+    market_without_roles,
+):
     # Given
-    firm = Mock(tradable=tradable)
+    firm = Mock(tradable=False)
     market = market_without_roles
-    market.tradable = not tradable
+    market.tradable = True
+
+    # When
+    market.add_firm(firm)
+
+    # Then
+    market.add_role.assert_not_called()
+
+
+def test_add_firm_adds_producer_role_for_domestic_firm_if_non_tradable(
+    market_without_roles,
+):
+    # Given
+    firm = Mock(tradable=False, country_pos=2)
+    market = market_without_roles
+    market.tradable = False
+    market.env.pos = 2
+
+    # When
+    market.add_firm(firm)
+
+    # Then
+    market.add_role.assert_called_with(FakeProducer, firm)
+
+
+def test_add_firm_doesnt_add_role_for_foreigners_firm_if_non_tradable(
+    market_without_roles,
+):
+    # Given
+    firm = Mock(tradable=False, country_pos=2)
+    market = market_without_roles
+    market.tradable = False
+    market.env.pos = 1
 
     # When
     market.add_firm(firm)
@@ -133,11 +195,27 @@ def test_add_firm_doesnt_add_role_for_no_compliers(market_without_roles, tradabl
 def market_before_transaction(market_without_roles):
     # Given
     market = market_without_roles
+    market.env = Mock()
     market.transfer_stock = Mock()
     market.make_transaction = Mock()
     random = market.model.random
     random.sample = Mock(side_effect=lambda pop, k: pop[:k])
     return market
+
+
+def test_buy_goods_transfers_cash(market_before_transaction):
+    # Given
+    consumer = Mock()
+    producer = Mock(price=10, inventories=100, sales=0)
+    market = market_before_transaction
+    env = market.env
+
+    # When
+    market.buy_goods(consumer, producer, 5)
+
+    # Then
+    env.decrease_cash.assert_called_with(consumer, 50)
+    env.increase_cash.assert_called_with(producer, 50)
 
 
 def test_buy_goods_updates_accounts(market_before_transaction):
@@ -150,7 +228,6 @@ def test_buy_goods_updates_accounts(market_before_transaction):
     market.buy_goods(consumer, producer, 5)
 
     # Then
-    market.transfer_stock.assert_any_call("cash", consumer.id, producer.id, 50)
     market.make_transaction.assert_any_call("consumption", consumer.id, producer.id, 50)
 
 

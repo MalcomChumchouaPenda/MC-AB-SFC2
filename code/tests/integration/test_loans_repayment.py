@@ -29,7 +29,7 @@ def bank(model, union):
     # Given
     bank = Bank(model)
     bank.country_pos = 0
-    union.add_bank(bank)
+    union.add_agents([bank])
     return bank
 
 
@@ -37,6 +37,7 @@ def bank(model, union):
 def firm(model, union):
     # Given
     firm = Firm(model)
+    firm.country_pos = 0
     union.add_agents([firm])
     return firm
 
@@ -51,44 +52,28 @@ def markets(union):
 
 
 @pytest.fixture
-def firm_with_deposit(firm, bank, markets):
+def before_repayment(firm, bank, markets):
     # Given
-    amount = 100
-    deposit_bank = bank.roles["deposit_bank"]
-    depositor = firm.roles["country_0_depositor"]
-    markets[1].join_deposit_bank(depositor, deposit_bank, amount=amount)
-    return firm, amount
-
-
-@pytest.fixture
-def bank_with_loan(firm, bank, markets):
-    # Given
-    amount, rate = 50, 0.1
     lender = bank.roles["lender"]
     borrower = firm.roles["borrower"]
-    markets[0].grant_loan(lender, borrower, amount, rate)
-    return bank, amount, rate
+    deposit_bank = bank.roles["deposit_bank"]
+    depositor = firm.roles["country_0_depositor"]
+    markets[0].grant_loan(lender, borrower, 50, 0.1)
+    markets[1].join_deposit_bank(depositor, deposit_bank, amount=100)
 
 
-def test_increases_loan_interests(firm_with_deposit, bank_with_loan):
-    # Given
-    firm, _ = firm_with_deposit
-    bank, amount, rate = bank_with_loan
-    interests = amount * rate
-
+@pytest.mark.usefixtures("before_repayment")
+def test_increases_loan_interests(firm, bank):
     # When
     firm.repay_loans()
 
     # Then
-    assert bank.account["loan_interests"] == interests
-    assert firm.account["loan_interests"] == -interests
+    assert bank.account["loan_interests"] == 50 * 0.1
+    assert firm.account["loan_interests"] == -50 * 0.1
 
 
-def test_decreases_loans_as_stock(firm_with_deposit, bank_with_loan):
-    # Given
-    bank, *_ = bank_with_loan
-    firm, _ = firm_with_deposit
-
+@pytest.mark.usefixtures("before_repayment")
+def test_decreases_loans_as_stock(firm, bank):
     # When
     firm.repay_loans()
 
@@ -97,10 +82,9 @@ def test_decreases_loans_as_stock(firm_with_deposit, bank_with_loan):
     assert bank.account["loans"] == 0
 
 
-def test_decreases_loan_as_link(markets, firm_with_deposit, bank_with_loan):
+@pytest.mark.usefixtures("before_repayment")
+def test_decreases_loan_as_link(markets, firm, bank):
     # Given
-    bank, *_ = bank_with_loan
-    firm, _ = firm_with_deposit
     firm_role = firm.roles["borrower"]
     bank_role = bank.roles["lender"]
 
@@ -111,17 +95,18 @@ def test_decreases_loan_as_link(markets, firm_with_deposit, bank_with_loan):
     assert markets[0].graph[firm_role][bank_role]["amount"] == 0
 
 
-def test_decreases_firm_cash(firm_with_deposit, bank_with_loan):
+@pytest.mark.usefixtures("before_repayment")
+def test_decreases_firm_cash(firm, bank, union):
     # Given
-    bank, amount, rate = bank_with_loan
-    repayment = amount * (1 + rate)
-    firm, _ = firm_with_deposit
-    firm_cash = firm.account["cash"]
-    bank_cash = bank.account["cash"]
+    country = union.spaces["country_0"]
+    cash = country.cash
+    cash[firm.id].amount = 200
+    cash[bank.id].amount = 200
+    repayment = 50 * (1 + 0.1)
 
     # When
     firm.repay_loans()
 
     # Then
-    assert firm.account["cash"] == pytest.approx(firm_cash - repayment)
-    assert bank.account["cash"] == pytest.approx(bank_cash + repayment)
+    assert cash[firm.id].amount == pytest.approx(200 - repayment)
+    assert cash[bank.id].amount == pytest.approx(200 + repayment)

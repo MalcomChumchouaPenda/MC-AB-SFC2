@@ -1,3 +1,4 @@
+import math
 from agentpy import Model
 from agentpy import AgentList, AgentDList, AttrIter
 from model.spaces.monetary_union import MonetaryUnion
@@ -162,3 +163,29 @@ class EcoModel(Model):
         self.governments.record_account()
         self.national_cbs.record_account()
         self.union_cb.record_account()
+
+    def _check_consistent(self):
+        t = self.model.t
+        cash1 = 0
+        ncash1 = 0
+        for agent in self.households + self.firms + self.banks + self.governments:
+            cash1 += agent.log["cash"][-1]
+            ncash1 += 1
+
+        cash2 = 0
+        for agent in self.national_cbs + [self.union_cb]:
+            cash2 += agent.log["cash"][-1]
+
+        ncash2 = 0
+        cash3 = 0
+        for space in self.union.spaces.values():
+            if hasattr(space, "cash"):
+                ncash2 += len(space.cash)
+                cash3 += sum([c.amount for c in space.cash.values()])
+
+        msg = (
+            f"inconsistent at {t} with: \n\tcash amount {cash1} and {cash2} and {cash3}"
+        )
+        msg += f"\n\t number of cash {ncash1} and {ncash2}"
+        # msg += f"\n\n{lcash1}\n\n{lcash2}"
+        # assert cash1 + cash2 < 1, msg

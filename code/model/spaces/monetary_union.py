@@ -22,42 +22,29 @@ class MonetaryUnion(EcoSpace):
     def create_countries(self):
         for k in range(self.p.country_number):
             country = self.add_space(Country, f"country_{k}")
+            country.pos = k
             country.create_markets()
 
     #
     # Role management
     #
-    def add_household(self, household):
-        c = household.country_pos
-        self.spaces[f"country_{c}"].add_household(household)
-        self.spaces["goods_market"].add_household(household)
-
-    def add_firm(self, firm):
-        for name, space in self.spaces.items():
-            if name.startswith("country_"):
-                space.add_firm(firm)
-            elif name == "credit_market":
-                space.add_firm(firm)
-            elif name == "goods_market" and firm.tradable:
-                space.add_firm(firm)
-
-    def add_bank(self, bank):
-        c = bank.country_pos
-        self.spaces[f"country_{c}"].add_bank(bank)
-        self.spaces["credit_market"].add_bank(bank)
-        self.spaces["bond_market"].add_bank(bank)
-
-    def add_government(self, govt):
-        c = govt.country_pos
-        self.spaces[f"country_{c}"].add_government(govt)
-        self.spaces["bond_market"].add_government(govt)
 
     def add_central_bank(self, cb):
         self.add_role(PolicyMaker, cb)
-        self.spaces["bond_market"].add_central_bank(cb)
-        if cb.national:
-            c = cb.country_pos
-            self.spaces[f"country_{c}"].add_central_bank(cb)
+
+    #
+    # Cash operations
+    #
+
+    def decrease_cash(self, agent, amount):
+        pos = agent.country_pos
+        country = self.spaces[f"country_{pos}"]
+        country.decrease_cash(agent, amount)
+
+    def increase_cash(self, agent, amount):
+        pos = agent.country_pos
+        country = self.spaces[f"country_{pos}"]
+        country.increase_cash(agent, amount)
 
     #
     # Statitics

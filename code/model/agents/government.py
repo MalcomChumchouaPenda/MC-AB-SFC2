@@ -172,3 +172,11 @@ class Government(EcoAgent):
     def update_budget_history(self):
         self.prev_budget_surplus = self.budget_surplus
         self.prev_public_spending = self.public_spending
+
+    #
+    # Observation
+    #
+    def _record_stock_items(self):
+        super()._record_stock_items()
+        roles = self.roles
+        self.record("cash", roles["fiscal_authority"].get_cash())

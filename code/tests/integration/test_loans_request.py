@@ -36,6 +36,7 @@ def bank(model, union):
 def firm(model, union):
     # Given
     firm = Firm(model)
+    firm.country_pos = 0
     union.add_agents([firm])
     return firm
 

@@ -31,6 +31,7 @@ def country(model):
 def firm(model, country):
     # Given
     firm = Firm(model)
+    firm.country_pos = 0
     firm.desired_rd = 100
     firm.desired_labor = 100
     firm.desired_loans = 100

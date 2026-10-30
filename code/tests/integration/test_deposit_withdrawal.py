@@ -2,7 +2,7 @@ import pytest
 from model.agents.bank import Bank
 from model.agents.firm import Firm
 from model.agents.household import Household
-from model.spaces.deposit_market import DepositMarket
+from model.spaces.country import Country
 
 
 @pytest.fixture
@@ -10,53 +10,75 @@ def model(fake_model):
     # Given
     model = fake_model
     model.p.initial_wage = 0.0
+    model.p.initial_tax_rate = 0.0
+    model.p.initial_discount_rate = 0.02
     return model
 
 
 @pytest.fixture
-def market(model):
+def country(model):
     # Given
-    market = DepositMarket(model)
+    country = Country(model)
+    country.create_markets()
+    return country
+
+
+@pytest.fixture
+def market(country):
+    # Given
+    market = country.spaces["deposit_market"]
     return market
 
 
 @pytest.fixture
-def bank(model, market):
+def bank(model, country):
     # Given
     bank = Bank(model)
-    market.add_bank(bank)
+    bank.country_pos = 0
+    country.add_agents([bank])
     return bank
 
 
 @pytest.fixture
-def firm(model, market):
+def firm(model, country):
     # Given
     firm = Firm(model)
-    market.add_firm(firm)
+    firm.country_pos = country.pos
+    country.add_agents([firm])
     return firm
 
 
-def test_increases_firm_cash(firm, bank, market):
+@pytest.fixture
+def before_firm_withdrawal(firm, bank, country):
     # Given
-    firm.account["cash"] = 1000
+    country.cash[firm.id].amount = 1000
     depositor = firm.roles["country_0_depositor"]
     deposit_bank = bank.roles["deposit_bank"]
+    market = country.spaces["deposit_market"]
     market.join_deposit_bank(depositor, deposit_bank, 500)
+
+
+@pytest.mark.usefixtures("before_firm_withdrawal")
+def test_increases_firm_cash(firm, bank, country):
+    # Given
+    firm_cash = country.cash[firm.id]
+    bank_cash = country.cash[bank.id]
+    depositor = firm.roles["country_0_depositor"]
+    deposit_bank = bank.roles["deposit_bank"]
 
     # When
     depositor.withdraw_deposits(deposit_bank.id, 100)
 
     # Then
-    assert firm.account["cash"] == 600
-    assert bank.account["cash"] == 400
+    assert firm_cash.amount == 600
+    assert bank_cash.amount == 400
 
 
-def test_decreases_firm_deposits(firm, bank, market):
+@pytest.mark.usefixtures("before_firm_withdrawal")
+def test_decreases_firm_deposits(firm, bank):
     # Given
-    firm.account["cash"] = 1000
     depositor = firm.roles["country_0_depositor"]
     deposit_bank = bank.roles["deposit_bank"]
-    market.join_deposit_bank(depositor, deposit_bank, 500)
 
     # When
     depositor.withdraw_deposits(deposit_bank.id, 100)
@@ -67,34 +89,45 @@ def test_decreases_firm_deposits(firm, bank, market):
 
 
 @pytest.fixture
-def household(model, market):
+def household(model, country):
     # Given
     household = Household(model)
-    market.add_household(household)
+    household.country_pos = country.pos
+    country.add_agents([household])
     return household
 
 
-def test_increases_household_cash(household, bank, market):
+@pytest.fixture
+def before_household_withdrawal(household, bank, country):
     # Given
-    household.account["cash"] = 1000
+    country.cash[household.id].amount = 1000
     depositor = household.roles["depositor"]
     deposit_bank = bank.roles["deposit_bank"]
+    market = country.spaces["deposit_market"]
     market.join_deposit_bank(depositor, deposit_bank, 500)
+
+
+@pytest.mark.usefixtures("before_household_withdrawal")
+def test_increases_household_cash(household, bank, country):
+    # Given
+    household_cash = country.cash[household.id]
+    bank_cash = country.cash[bank.id]
+    depositor = household.roles["depositor"]
+    deposit_bank = bank.roles["deposit_bank"]
 
     # When
     depositor.withdraw_deposits(deposit_bank.id, 400)
 
     # Then
-    assert household.account["cash"] == 900
-    assert bank.account["cash"] == 100
+    assert household_cash.amount == 900
+    assert bank_cash.amount == 100
 
 
-def test_decreases_household_deposits(household, bank, market):
+@pytest.mark.usefixtures("before_household_withdrawal")
+def test_decreases_household_deposits(household, bank):
     # Given
-    household.account["cash"] = 1000
     depositor = household.roles["depositor"]
     deposit_bank = bank.roles["deposit_bank"]
-    market.join_deposit_bank(depositor, deposit_bank, 500)
 
     # When
     depositor.withdraw_deposits(deposit_bank.id, 400)

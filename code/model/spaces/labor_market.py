@@ -15,10 +15,12 @@ class LaborMarket(EcoSpace):
     # roles management
     #
     def add_household(self, household):
-        self.add_role(Worker, household)
+        if household.country_pos == self.env.pos:
+            self.add_role(Worker, household)
 
     def add_firm(self, firm):
-        self.add_role(Employer, firm)
+        if firm.country_pos == self.env.pos:
+            self.add_role(Employer, firm)
 
     #
     # labor matching
@@ -33,7 +35,8 @@ class LaborMarket(EcoSpace):
     # wages payment
     #
     def pay_wages(self, employer, worker, amount):
-        self.transfer_stock("cash", employer.id, worker.id, amount)
+        self.env.decrease_cash(employer, amount)
+        self.env.increase_cash(worker, amount)
         self.make_transaction("wages", employer.id, worker.id, amount)
         self.graph[employer][worker]["wages"] += amount
 

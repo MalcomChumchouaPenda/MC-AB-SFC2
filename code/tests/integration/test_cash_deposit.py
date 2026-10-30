@@ -2,7 +2,7 @@ import pytest
 from model.agents.bank import Bank
 from model.agents.firm import Firm
 from model.agents.household import Household
-from model.spaces.deposit_market import DepositMarket
+from model.spaces.country import Country
 
 
 @pytest.fixture
@@ -10,53 +10,65 @@ def model(fake_model):
     # Given
     model = fake_model
     model.p.initial_wage = 0.0
+    model.p.country_number = 1
+    model.p.household_number = 0
+    model.p.initial_public_transfer = 0.0
+    model.p.initial_tax_rate = 0.0
+    model.p.initial_discount_rate = 0.0
+    model.p.initial_bond_rate = 0.0
     return model
 
 
 @pytest.fixture
-def market(model):
+def country(model):
     # Given
-    market = DepositMarket(model)
-    return market
+    country = Country(model)
+    country.create_markets()
+    return country
 
 
 @pytest.fixture
-def bank(model, market):
+def bank(model, country):
     # Given
     bank = Bank(model)
-    market.add_bank(bank)
+    bank.country_pos = 0
+    country.add_agents([bank])
     return bank
 
 
 @pytest.fixture
-def firm(model, market):
+def firm(model, country, bank):
     # Given
     firm = Firm(model)
-    market.add_firm(firm)
+    firm.country_pos = 0
+    country.add_agents([firm])
+    country.cash[firm.id].amount = 1000
+    depositor = firm.roles["country_0_depositor"]
+    deposit_bank = bank.roles["deposit_bank"]
+    market = country.spaces["deposit_market"]
+    market.join_deposit_bank(depositor, deposit_bank)
     return firm
 
 
-def test_decreases_firm_cash(firm, bank, market):
+def test_decreases_firm_cash(firm, bank, country):
     # Given
-    firm.account["cash"] = 1000
     depositor = firm.roles["country_0_depositor"]
     deposit_bank = bank.roles["deposit_bank"]
-    market.join_deposit_bank(depositor, deposit_bank)
+    firm_cash = country.cash[firm.id]
+    bank_cash = country.cash[bank.id]
 
     # When
     depositor.make_deposits(deposit_bank.id, 200)
 
     # Then
-    assert firm.account["cash"] == 800
-    assert bank.account["cash"] == 200
+    assert firm_cash.amount == 800
+    assert bank_cash.amount == 200
 
 
-def test_increases_firm_deposits(firm, bank, market):
+def test_increases_firm_deposits(firm, bank):
     # Given
-    firm.account["cash"] = 1000
     depositor = firm.roles["country_0_depositor"]
     deposit_bank = bank.roles["deposit_bank"]
-    market.join_deposit_bank(depositor, deposit_bank)
 
     # When
     depositor.make_deposits(deposit_bank.id, 200)
@@ -67,34 +79,38 @@ def test_increases_firm_deposits(firm, bank, market):
 
 
 @pytest.fixture
-def household(model, market):
+def household(model, country, bank):
     # Given
     household = Household(model)
-    market.add_household(household)
+    household.country_pos = 0
+    country.add_agents([household])
+    country.cash[household.id].amount = 1000
+    depositor = household.roles["depositor"]
+    deposit_bank = bank.roles["deposit_bank"]
+    market = country.spaces["deposit_market"]
+    market.join_deposit_bank(depositor, deposit_bank)
     return household
 
 
-def test_decreases_household_cash(household, bank, market):
+def test_decreases_household_cash(household, bank, country):
     # Given
-    household.account["cash"] = 1000
     depositor = household.roles["depositor"]
     deposit_bank = bank.roles["deposit_bank"]
-    market.join_deposit_bank(depositor, deposit_bank)
+    household_cash = country.cash[household.id]
+    bank_cash = country.cash[bank.id]
 
     # When
     depositor.make_deposits(deposit_bank.id, 400)
 
     # Then
-    assert household.account["cash"] == 600
-    assert bank.account["cash"] == 400
+    assert household_cash.amount == 600
+    assert bank_cash.amount == 400
 
 
-def test_increases_household_deposits(household, bank, market):
+def test_increases_household_deposits(household, bank):
     # Given
-    household.account["cash"] = 1000
     depositor = household.roles["depositor"]
     deposit_bank = bank.roles["deposit_bank"]
-    market.join_deposit_bank(depositor, deposit_bank)
 
     # When
     depositor.make_deposits(deposit_bank.id, 400)

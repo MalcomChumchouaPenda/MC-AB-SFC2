@@ -79,6 +79,20 @@ def test_create_countries_adds_countries(union_without_countries):
     assert union.add_space.call_count == 2
 
 
+def test_create_countries_sets_countries_pos(union_without_countries):
+    # Given
+    space = Mock()
+    union = union_without_countries
+    union.add_space.return_value = space
+    union.p.country_number = 1
+
+    # When
+    union.create_countries()
+
+    # Then
+    assert space.pos == 0
+
+
 def test_create_countries_creates_national_markets(union_without_countries):
     # Given
     country = Mock()
@@ -149,171 +163,19 @@ FakeMaker = Mock()
 
 
 @pytest.fixture
-def union_without_roles(monkeypatch, fake_model):
+def before_adding_agent(monkeypatch, fake_model):
     # Given
     monkeypatch.setattr("model.spaces.monetary_union.PolicyMaker", FakeMaker)
     union = MonetaryUnion(fake_model)
     union.add_role = Mock()
-    union.spaces["goods_market"] = Mock()
-    union.spaces["credit_market"] = Mock()
-    union.spaces["bond_market"] = Mock()
-    union.spaces["country_0"] = Mock()
-    union.spaces["country_1"] = Mock()
     return union
 
 
-def test_add_household_places_agent_into_goods_market(union_without_roles):
-    # Given
-    union = union_without_roles
-    market = union.spaces["goods_market"]
-    household = Mock(country_pos=1)
-
-    # When
-    union.add_household(household)
-
-    # Then
-    market.add_household.assert_called_with(household)
-
-
-def test_add_household_places_agent_into_its_country(union_without_roles):
-    # Given
-    union = union_without_roles
-    country = union.spaces["country_1"]
-    household = Mock(country_pos=1)
-
-    # When
-    union.add_household(household)
-
-    # Then
-    country.add_household.assert_called_with(household)
-
-
-def test_add_firm_in_goods_market_if_tradable(union_without_roles):
-    # Given
-    firm = Mock(tradable=True)
-    union = union_without_roles
-    market = union.spaces["goods_market"]
-
-    # When
-    union.add_firm(firm)
-
-    # Then
-    market.add_firm.assert_called_with(firm)
-
-
-def test_dont_add_firm_in_goods_market_if_not_tradable(union_without_roles):
-    # Given
-    firm = Mock(tradable=False)
-    union = union_without_roles
-    market = union.spaces["goods_market"]
-
-    # When
-    union.add_firm(firm)
-
-    # Then
-    market.add_firm.assert_not_called()
-
-
-@pytest.mark.parametrize("tradable", [True, False])
-def test_add_firm_into_credit_market(union_without_roles, tradable):
-    # Given
-    firm = Mock(tradable=tradable)
-    union = union_without_roles
-    market = union.spaces["credit_market"]
-
-    # When
-    union.add_firm(firm)
-
-    # Then
-    market.add_firm.assert_called_with(firm)
-
-
-@pytest.mark.parametrize("tradable", [True, False])
-def test_add_firm_into_all_countries(union_without_roles, tradable):
-    # Given
-    firm = Mock(tradable=tradable)
-    union = union_without_roles
-    country0 = union.spaces["country_0"]
-    country1 = union.spaces["country_1"]
-
-    # When
-    union.add_firm(firm)
-
-    # Then
-    country0.add_firm.assert_called_with(firm)
-    country1.add_firm.assert_called_with(firm)
-
-
-def test_add_bank_into_bond_market(union_without_roles):
-    # Given
-    bank = Mock(country_pos=1)
-    union = union_without_roles
-    market = union.spaces["bond_market"]
-
-    # When
-    union.add_bank(bank)
-
-    # Then
-    market.add_bank.assert_called_with(bank)
-
-
-def test_add_bank_into_credit_market(union_without_roles):
-    # Given
-    bank = Mock(country_pos=1)
-    union = union_without_roles
-    market = union.spaces["credit_market"]
-
-    # When
-    union.add_bank(bank)
-
-    # Then
-    market.add_bank.assert_called_with(bank)
-
-
-def test_add_bank_into_one_country(union_without_roles):
-    # Given
-    bank = Mock(country_pos=1)
-    union = union_without_roles
-    country = union.spaces["country_1"]
-
-    # When
-    union.add_bank(bank)
-
-    # Then
-    country.add_bank.assert_called_with(bank)
-
-
-def test_add_government_into_bond_market(union_without_roles):
-    # Given
-    govt = Mock(country_pos=1)
-    union = union_without_roles
-    market = union.spaces["bond_market"]
-
-    # When
-    union.add_government(govt)
-
-    # Then
-    market.add_government.assert_called_with(govt)
-
-
-def test_add_government_into_one_country(union_without_roles):
-    # Given
-    govt = Mock(country_pos=1)
-    union = union_without_roles
-    country = union.spaces["country_1"]
-
-    # When
-    union.add_government(govt)
-
-    # Then
-    country.add_government.assert_called_with(govt)
-
-
 @pytest.mark.parametrize("national", [True, False])
-def test_add_central_bank_add_policy_maker_role(union_without_roles, national):
+def test_add_central_bank_add_policy_maker_role(before_adding_agent, national):
     # Given
     cb = Mock(national=national, country_pos=0)
-    union = union_without_roles
+    union = before_adding_agent
 
     # When
     union.add_central_bank(cb)
@@ -322,47 +184,44 @@ def test_add_central_bank_add_policy_maker_role(union_without_roles, national):
     union.add_role.assert_called_with(FakeMaker, cb)
 
 
-def test_add_central_bank_into_country_if_national(union_without_roles):
+# ---------------------------------------------------
+# CASH OPERATIONS
+# ----------------------------------------------------
+
+
+@pytest.fixture
+def before_cash_operations(union_without_spaces):
     # Given
-    cb = Mock(national=True, country_pos=1)
-    union = union_without_roles
-    country0 = union.spaces["country_0"]
-    country1 = union.spaces["country_1"]
+    union = union_without_spaces
+    union.spaces["country_0"] = Mock()
+    union.spaces["country_1"] = Mock()
+    return union
+
+
+def test_decrease_cash_calls_country_method(before_cash_operations):
+    # Given
+    union = before_cash_operations
+    country = union.spaces["country_1"]
+    agent = Mock(country_pos=1)
 
     # When
-    union.add_central_bank(cb)
+    union.decrease_cash(agent, 10)
 
     # Then
-    country0.add_central_bank.assert_not_called()
-    country1.add_central_bank.assert_called_with(cb)
+    country.decrease_cash.assert_called_with(agent, 10)
 
 
-def test_dont_add_central_bank_into_country_if_not_national(union_without_roles):
+def test_increase_cash_calls_country_method(before_cash_operations):
     # Given
-    cb = Mock(national=False, country_pos=0)
-    union = union_without_roles
-    country0 = union.spaces["country_0"]
-    country1 = union.spaces["country_1"]
+    union = before_cash_operations
+    country = union.spaces["country_0"]
+    agent = Mock(country_pos=0)
 
     # When
-    union.add_central_bank(cb)
+    union.increase_cash(agent, 10)
 
     # Then
-    country0.add_central_bank.assert_not_called()
-    country1.add_central_bank.assert_not_called()
-
-
-def test_add_central_bank_into_bond_market_if_national(union_without_roles):
-    # Given
-    cb = Mock(national=True, country_pos=1)
-    union = union_without_roles
-    market = union.spaces["bond_market"]
-
-    # When
-    union.add_central_bank(cb)
-
-    # Then
-    market.add_central_bank.assert_called_with(cb)
+    country.increase_cash.assert_called_with(agent, 10)
 
 
 # ---------------------------------------------------
@@ -370,10 +229,10 @@ def test_add_central_bank_into_bond_market_if_national(union_without_roles):
 # ----------------------------------------------------
 
 
-def test_calc_phi_range_from_goods_market(union_without_roles):
+def test_calc_phi_range_from_goods_market(union_without_spaces):
     # Given
     market = Mock()
-    union = union_without_roles
+    union = union_without_spaces
     union.spaces = {"goods_market": market}
 
     # When
@@ -383,10 +242,10 @@ def test_calc_phi_range_from_goods_market(union_without_roles):
     assert range_ == market.calc_phi_range.return_value
 
 
-def test_calc_price_range_from_goods_market(union_without_roles):
+def test_calc_price_range_from_goods_market(union_without_spaces):
     # Given
     market = Mock()
-    union = union_without_roles
+    union = union_without_spaces
     union.spaces = {"goods_market": market}
 
     # When
@@ -396,10 +255,10 @@ def test_calc_price_range_from_goods_market(union_without_roles):
     assert range_ == market.calc_price_range.return_value
 
 
-def test_calc_sales_range_from_goods_market(union_without_roles):
+def test_calc_sales_range_from_goods_market(union_without_spaces):
     # Given
     market = Mock()
-    union = union_without_roles
+    union = union_without_spaces
     union.spaces = {"goods_market": market}
 
     # When

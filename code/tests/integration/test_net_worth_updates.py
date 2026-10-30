@@ -32,7 +32,8 @@ def country(model):
 def household(model, country):
     # Given
     household = Household(model)
-    country.add_household(household)
+    household.country_pos = country.pos
+    country.add_agents([household])
     return household
 
 
@@ -40,7 +41,8 @@ def household(model, country):
 def firm(model, country, household):
     # Given
     firm = Firm(model)
-    country.add_firm(firm)
+    firm.country_pos = country.pos
+    country.add_agents([firm])
     citizen = household.roles["citizen"]
     citizen.fund_company(firm.id, 500)
     return firm
@@ -66,7 +68,8 @@ def test_firm_update_net_worth(firm, household):
 def bank(model, country, household):
     # Given
     bank = Bank(model)
-    country.add_bank(bank)
+    bank.country_pos = country.pos
+    country.add_agents([bank])
     citizen = household.roles["citizen"]
     citizen.fund_company(bank.id, 500)
     return bank

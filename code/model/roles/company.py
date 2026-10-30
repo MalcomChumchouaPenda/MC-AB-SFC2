@@ -22,6 +22,9 @@ class Company(EcoRole):
     # perceptions method
     #
 
+    def get_cash(self):
+        return self.env.cash[self.id].amount
+
     def get_equity_shares(self):
         return self.env.links(self)
 

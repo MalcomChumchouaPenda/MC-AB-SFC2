@@ -30,7 +30,8 @@ def country(model):
 def govt(model, country):
     # Given
     govt = Government(model)
-    country.add_government(govt)
+    govt.country_pos = 0
+    country.add_agents([govt])
     return govt
 
 

@@ -51,6 +51,7 @@ def firms(model, union):
     firms = []
     for tradable in [True, False]:
         firm = Firm(model)
+        firm.country_pos = 0
         firm.tradable = tradable
         union.add_agents([firm])
         role = firm.roles["producer"]
@@ -61,12 +62,17 @@ def firms(model, union):
     return firms
 
 
-def test_increases_consumption_of_all_goods(household, firms, markets):
+@pytest.fixture
+def before_consumption(household, union, markets):
     # Given
     markets.average_price = 10
+    country = union.spaces["country_0"]
+    country.cash[household.id].amount = 100
     household.desired_consumption = 100
-    household.account["cash"] = 100
 
+
+@pytest.mark.usefixtures("before_consumption")
+def test_increases_consumption_of_all_goods(household, firms):
     # When
     household.consume()
 
@@ -76,27 +82,23 @@ def test_increases_consumption_of_all_goods(household, firms, markets):
     assert firms[1].account["consumption"] == 40
 
 
-def test_transfers_cash_for_all_consumptions(household, firms, markets):
+@pytest.mark.usefixtures("before_consumption")
+def test_transfers_cash_for_all_consumptions(household, firms, union):
     # Given
-    markets.average_price = 10
-    household.desired_consumption = 100
-    household.account["cash"] = 100
+    country = union.spaces["country_0"]
+    cash = country.cash
 
     # When
     household.consume()
 
     # Then
-    assert household.account["cash"] == 0
-    assert firms[0].account["cash"] == 60
-    assert firms[1].account["cash"] == 40
+    assert cash[household.id].amount == 0
+    assert cash[firms[0].id].amount == 60
+    assert cash[firms[1].id].amount == 40
 
 
-def test_reduces_inventories_of_firms(household, firms, markets):
-    # Given
-    markets.average_price = 10
-    household.desired_consumption = 100
-    household.account["cash"] = 100
-
+@pytest.mark.usefixtures("before_consumption")
+def test_reduces_inventories_of_firms(household, firms):
     # When
     household.consume()
 

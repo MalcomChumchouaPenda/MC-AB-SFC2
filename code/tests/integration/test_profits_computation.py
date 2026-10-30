@@ -28,7 +28,7 @@ def firm(model, country):
     # Given
     firm = Firm(model)
     firm.country_pos = 0
-    country.add_firm(firm)
+    country.add_agents([firm])
     return firm
 
 
@@ -86,7 +86,8 @@ def test_sets_firm_payable_dividends(firm):
 def bank(model, country):
     # Given
     bank = Bank(model)
-    country.add_bank(bank)
+    bank.country_pos = 0
+    country.add_agents([bank])
     return bank
 
 

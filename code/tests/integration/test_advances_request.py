@@ -29,7 +29,7 @@ def cb(model, union):
     cb = CentralBank(model)
     cb.national = True
     cb.country_pos = 0
-    union.add_central_bank(cb)
+    union.add_agents([cb])
     return cb
 
 
@@ -38,14 +38,15 @@ def bank(model, union):
     # Given
     bank = Bank(model)
     bank.country_pos = 0
-    union.add_bank(bank)
+    union.add_agents([bank])
+    country = union.spaces["country_0"]
+    country.cash[bank.id].amount = 40
     return bank
 
 
 def test_increases_advances(bank, cb):
     # Given
     bank.p.mu2 = 0.10
-    bank.account["cash"] = 40
     bank.account["deposits"] = -1000
 
     # When
@@ -56,15 +57,15 @@ def test_increases_advances(bank, cb):
     assert cb.account["advances"] == 60
 
 
-def test_transfers_cash(bank, cb):
+@pytest.mark.usefixtures("cb")
+def test_transfers_cash(bank, union):
     # Given
     bank.p.mu2 = 0.10
-    bank.account["cash"] = 40
     bank.account["deposits"] = -1000
+    cash = union.spaces["country_0"].cash
 
     # When
     bank.request_cash_advances()
 
     # Then
-    assert bank.account["cash"] == 100
-    assert cb.account["cash"] == -60
+    assert cash[bank.id].amount == 100

@@ -1,7 +1,7 @@
 from unittest.mock import Mock
 import pytest
 from model.agents.household import Household
-from model.spaces.labor_market import LaborMarket
+from model.spaces.country import Country
 
 
 @pytest.fixture
@@ -17,22 +17,33 @@ def model(fake_model, monkeypatch):
 
 
 @pytest.fixture
-def market(model):
-    market = LaborMarket(model)
+def country(model):
+    # Given
+    country = Country(model)
+    country.create_markets()
+    return country
+
+
+@pytest.fixture
+def market(country):
+    # Given
+    market = country.spaces["labor_market"]
     return market
 
 
 @pytest.fixture
-def household(model):
+def household(model, country):
+    # Given
     household = Household(model)
+    household.country_pos = country.pos
     household.reservation_wage = 100
+    country.add_agents([household])
     return household
 
 
 def test_household_revises_reservation_wage_when_fully_employed(household, market):
     # Given
     market.unemployment_rate = 0.05
-    market.add_household(household)
     household.prev_labor_sold = 1.0
     household.model.nprandom.choice.return_value = 1
     household.model.nprandom.uniform.return_value = 0.05
@@ -47,7 +58,6 @@ def test_household_revises_reservation_wage_when_fully_employed(household, marke
 def test_household_revises_reservation_wage_when_not_fully_employed(household, market):
     # Given
     market.unemployment_rate = 0.30
-    market.add_household(household)
     household.prev_labor_sold = 0.0
     household.model.nprandom.choice.return_value = 1
     household.model.nprandom.uniform.return_value = 0.05
@@ -62,7 +72,6 @@ def test_household_revises_reservation_wage_when_not_fully_employed(household, m
 def test_household_dont_revises_reservation_wage(household, market):
     # Given
     market.unemployment_rate = 0.30
-    market.add_household(household)
     household.prev_labor_sold = 0.0
     household.model.nprandom.choice.return_value = 0
     household.model.nprandom.uniform.return_value = 0.05
