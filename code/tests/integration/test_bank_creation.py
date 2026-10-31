@@ -60,7 +60,7 @@ def before_bank_creation(founders, country):
     for household in founders:
         country.cash[household.id].amount = 400
         citizen_role = household.roles["citizen"]
-        citizen_role.resid_equity = household.desired_equity
+        citizen_role.desired_investment = household.desired_equity
     for i in range(5):
         company_role = Mock(equity=100, sector="F")
         company_role.name = "company"

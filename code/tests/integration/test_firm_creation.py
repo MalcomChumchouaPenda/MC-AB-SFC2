@@ -59,7 +59,7 @@ def before_firm_creation(founders, country):
     for household in founders:
         country.cash[household.id].amount = 400
         citizen_role = household.roles["citizen"]
-        citizen_role.resid_equity = household.desired_equity
+        citizen_role.desired_investment = household.desired_equity
 
 
 @pytest.mark.usefixtures("before_firm_creation")

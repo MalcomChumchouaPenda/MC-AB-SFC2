@@ -5,8 +5,13 @@ class Citizen(EcoRole):
 
     def __init__(self, agent, env, prefix=""):
         super().__init__(agent, env, prefix=prefix)
-        self.resid_equity = 0
+        self.desired_investment = 0
         self.company_number = 0
+
+    @property
+    def feasible_investment(self):
+        cash = self.env.cash[self.id].amount
+        return min(cash, self.desired_investment)
 
     #
     # Perception methods
@@ -19,7 +24,7 @@ class Citizen(EcoRole):
 
     def find_investors(self):
         citizens = self.env.find_all_roles("citizen")
-        investors = citizens.select(citizens.resid_equity > 0)
+        investors = citizens.select(citizens.desired_investment > 0)
         if self in investors:
             investors.remove(self)
         return investors

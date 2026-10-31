@@ -799,7 +799,7 @@ def test_choose_portfolio_allocation_updates_citizen_role(before_allocation):
     household.choose_portfolio_allocation()
 
     # Then
-    assert role.resid_equity == 80
+    assert role.desired_investment == 80
 
 
 # ---------------------------------------------------
@@ -1076,9 +1076,9 @@ def test_calc_initial_equity_uses_median_firm_size_if_no_bank_sector(hh_as_inves
 @pytest.fixture
 def investors(hh_as_investor):
     # Given
-    investors = [Mock(resid_equity=10, company_number=i) for i in range(2)]
+    investors = [Mock(feasible_investment=10, company_number=i) for i in range(2)]
     _, role = hh_as_investor
-    role.resid_equity = 10
+    role.feasible_investment = 10
     role.find_investors.return_value = investors
     return investors
 
@@ -1132,7 +1132,7 @@ def test_collect_equity_shares_with_minimum_level_of_equity(before_equity_collec
     # Given
     household, role, investors = before_equity_collection
     ineligible, eligible = investors
-    ineligible.resid_equity = 0.5
+    ineligible.feasible_investment = 0.5
     founders = [role, eligible]
 
     # When

@@ -864,7 +864,7 @@ def test_pay_public_transfers_updates_accounts(before_transaction):
 def country_with_company_and_founder(before_transaction):
     # Given
     company = Mock()
-    founder = Mock(resid_equity=0, company_number=0)
+    founder = Mock(desired_investment=0, company_number=0)
     country = before_transaction
     country.graph.add_edge(company, founder, value=0)
     return country, company, founder
@@ -918,16 +918,16 @@ def test_fund_company_updates_graph_edge(country_with_company_and_founder):
     assert country.graph[company][founder]["value"] == 150
 
 
-def test_fund_company_reduces_resid_equity(country_with_company_and_founder):
+def test_fund_company_reduces_desired_investment(country_with_company_and_founder):
     # Given
     country, company, founder = country_with_company_and_founder
-    founder.resid_equity = 150
+    founder.desired_investment = 150
 
     # When
     country.fund_company(company, founder, 100)
 
     # Then
-    assert founder.resid_equity == 50
+    assert founder.desired_investment == 50
 
 
 def test_fund_company_increases_company_number(country_with_company_and_founder):

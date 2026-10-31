@@ -154,7 +154,7 @@ class Household(EcoAgent):
         expected_worth = self._calc_expected_net_worth()
         self.desired_equity = max(equities, (1 - lp) * expected_worth)
         self.desired_deposits = expected_worth - (self.desired_equity - equities)
-        self.roles["citizen"].resid_equity = self.desired_equity
+        self.roles["citizen"].desired_investment = self.desired_equity
 
     def _calc_liquidity_preference(self):
         p = self.p
@@ -231,14 +231,15 @@ class Household(EcoAgent):
     def _collect_equity_shares(self, target):
         p = self.p
         initiator = self.roles["citizen"]
-        collected_equity = initiator.resid_equity
+        collected_equity = initiator.feasible_investment
         min_equity = p.omega * initiator.get_average_wage()
-        shares = [{"citizen": initiator, "amount": initiator.resid_equity}]
+        shares = [{"citizen": initiator, "amount": initiator.feasible_investment}]
         for investor in initiator.find_investors():
-            if investor.resid_equity < min_equity or investor.company_number >= p.psi:
+            investment = investor.feasible_investment
+            if investment < min_equity or investor.company_number >= p.psi:
                 continue
-            shares.append({"citizen": investor, "amount": investor.resid_equity})
-            collected_equity += investor.resid_equity
+            shares.append({"citizen": investor, "amount": investment})
+            collected_equity += investment
             if collected_equity > target:
                 break
         if collected_equity < target:

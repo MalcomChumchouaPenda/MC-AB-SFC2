@@ -18,7 +18,7 @@ def test_inherits_from_eco_role():
     assert is_derived
 
 
-def test_initializes_residual_equity():
+def test_initializes_desired_investment():
     # Given
     agent, env = Mock(), Mock()
 
@@ -26,7 +26,7 @@ def test_initializes_residual_equity():
     role = Citizen(agent, env)
 
     # Then
-    assert role.resid_equity == 0
+    assert role.desired_investment == 0
 
 
 def test_initializes_company_number():
@@ -38,6 +38,21 @@ def test_initializes_company_number():
 
     # Then
     assert role.company_number == 0
+
+
+@pytest.mark.parametrize("desired, expected", [(0, 0), (100, 100), (150, 100)])
+def test_exposes_feasible_investment(desired, expected):
+    # Given
+    agent, env = Mock(), Mock()
+    role = Citizen(agent, env)
+    role.desired_investment = desired
+    env.cash = {role.id: Mock(amount=100)}
+
+    # When
+    exposed = role.feasible_investment
+
+    # Then
+    assert exposed == expected
 
 
 # ---------------------------------------------------
@@ -76,10 +91,10 @@ def test_get_prob_failure(role):
     assert perceived == 0.12
 
 
-def test_find_investors_with_residual_equity(role, make_dlist):
+def test_find_investors_with_desired_investment(role, make_dlist):
     # Given
-    eligible = Mock(resid_equity=10)
-    ineligible = Mock(resid_equity=0)
+    eligible = Mock(desired_investment=10)
+    ineligible = Mock(desired_investment=0)
     citizens = make_dlist([eligible, ineligible])
     env = role.env
     env.find_all_roles = Mock(return_value=citizens)
@@ -94,7 +109,7 @@ def test_find_investors_with_residual_equity(role, make_dlist):
 
 def test_find_investors_excludes_initiator(role, make_dlist):
     # Given
-    eligible = Mock(resid_equity=10)
+    eligible = Mock(desired_investment=10)
     citizens = make_dlist([eligible, role])
     env = role.env
     env.find_all_roles = Mock(return_value=citizens)

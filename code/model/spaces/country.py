@@ -153,7 +153,7 @@ class Country(EcoSpace):
     #
 
     def fund_company(self, company, founder, amount):
-        founder.resid_equity -= amount
+        founder.desired_investment -= amount
         founder.company_number += 1
         if self.graph.has_edge(company, founder):
             self.graph[company][founder]["value"] += amount
