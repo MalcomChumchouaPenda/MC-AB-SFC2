@@ -10,14 +10,15 @@ class Citizen(EcoRole):
 
     @property
     def feasible_investment(self):
-        cash = self.env.cash[self.id].amount
-        return min(cash, self.desired_investment)
+        cash = self.env.cash[self.id]
+        return min(cash.amount, self.desired_investment)
 
     #
     # Perception methods
     #
     def get_cash(self):
-        return self.env.cash[self.id].amount
+        cash = self.env.cash[self.id]
+        return cash.amount
 
     def get_prob_failure(self):
         return self.env.prob_failure

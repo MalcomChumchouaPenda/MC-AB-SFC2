@@ -23,7 +23,8 @@ class Company(EcoRole):
     #
 
     def get_cash(self):
-        return self.env.cash[self.id].amount
+        cash = self.env.cash[self.id]
+        return cash.amount
 
     def get_equity_shares(self):
         return self.env.links(self)

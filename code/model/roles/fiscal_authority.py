@@ -8,7 +8,8 @@ class FiscalAuthority(EcoRole):
     #
 
     def get_cash(self):
-        return self.env.cash[self.id].amount
+        cash = self.env.cash[self.id]
+        return cash.amount
 
     def get_gdp(self):
         return self.env.gdp
