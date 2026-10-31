@@ -92,6 +92,18 @@ def test_get_cash_from_env(role):
     assert perceived == 100
 
 
+def test_get_cash_interests_from_env(role):
+    # Given
+    env = role.env
+    env.cash = {role.id: Mock(interests=10)}
+
+    # When
+    perceived = role.get_cash_interests()
+
+    # Then
+    assert perceived == 10
+
+
 def test_get_average_wage(role):
     # Given
     env = role.env

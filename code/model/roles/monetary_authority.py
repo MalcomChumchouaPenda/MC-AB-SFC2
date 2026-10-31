@@ -11,6 +11,9 @@ class MonetaryAuthority(EcoRole):
     def get_cash(self):
         return math.fsum([cash.amount for cash in self.env.cash.values()])
 
+    def get_cash_interests(self):
+        return math.fsum([cash.interests for cash in self.env.cash.values()])
+
     #
     # Actions
     #

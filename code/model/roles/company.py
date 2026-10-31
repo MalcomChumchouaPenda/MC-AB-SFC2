@@ -26,6 +26,10 @@ class Company(EcoRole):
         cash = self.env.cash[self.id]
         return cash.amount
 
+    def get_cash_interests(self):
+        cash = self.env.cash[self.id]
+        return cash.interests
+
     def get_equity_shares(self):
         return self.env.links(self)
 

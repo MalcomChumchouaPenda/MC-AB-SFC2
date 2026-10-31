@@ -130,10 +130,11 @@ class Bank(EcoAgent):
         self.dividends_payable = self._calc_dividends()
 
     def _calc_profit(self):
+        role = self.roles["company"]
         account = self.account
         loan_ints = account["loan_interests"]
         bond_ints = account["bond_interests"]
-        cash_ints = account["cash_interests"]
+        cash_ints = role.get_cash_interests()
         loan_defts = -account["loan_defaults"]
         dep_ints = -account["dep_interests"]
         adv_ints = -account["adv_interests"]
@@ -200,5 +201,6 @@ class Bank(EcoAgent):
     #
     def _record_stock_items(self):
         super()._record_stock_items()
-        roles = self.roles
-        self.record("cash", roles["company"].get_cash())
+        company_role = self.roles["company"]
+        self.record("cash", company_role.get_cash())
+        self.record("cash_interests", company_role.get_cash_interests())

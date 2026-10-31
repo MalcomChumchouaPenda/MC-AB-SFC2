@@ -19,6 +19,35 @@ def test_inherits_from_eco_role():
 
 
 # ---------------------------------------------------
+#  PERCEPTIONS
+# ----------------------------------------------------
+
+
+def test_get_cash_from_env(role):
+    # Given
+    env = role.env
+    env.cash = {i: Mock(amount=100.0) for i in range(5)}
+
+    # When
+    perceived = role.get_cash()
+
+    # Then
+    assert perceived == pytest.approx(500.0)
+
+
+def test_get_cash_interests_from_env(role):
+    # Given
+    env = role.env
+    env.cash = {i: Mock(interests=10.0) for i in range(5)}
+
+    # When
+    perceived = role.get_cash_interests()
+
+    # Then
+    assert perceived == pytest.approx(50.0)
+
+
+# ---------------------------------------------------
 # ACTIONS TESTS
 # ----------------------------------------------------
 

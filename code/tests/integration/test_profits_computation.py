@@ -97,10 +97,10 @@ def before_bank_computation(bank, country):
     bank.account["bond_interests"] = 20
     bank.account["dep_interests"] = -30
     bank.account["loan_interests"] = 100
-    bank.account["cash_interests"] = 10
     bank.account["loan_defaults"] = -10
     bank.account["adv_interests"] = -10
     country.tax_rate = 0.25
+    country.cash[bank.id].interests = 10
 
 
 @pytest.mark.usefixtures("before_bank_computation")

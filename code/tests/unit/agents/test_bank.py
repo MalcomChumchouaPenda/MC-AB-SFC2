@@ -431,9 +431,11 @@ def test_dont_buy_bonds_with_insufficient_reserves(bank_as_bond_buyer, bond_issu
 
 def test_calc_profit(bank_with_roles_and_account):
     # Given
-    bank, _, account = bank_with_roles_and_account
+    company_role = Mock()
+    company_role.get_cash_interests.return_value = 10
+    bank, roles, account = bank_with_roles_and_account
+    roles["company"] = company_role
     account["loan_interests"] = 100
-    account["cash_interests"] = 10
     account["loan_defaults"] = -20
     account["adv_interests"] = -10
     account["dep_interests"] = -40

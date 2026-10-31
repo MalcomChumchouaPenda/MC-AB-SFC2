@@ -49,9 +49,9 @@ def cb(model, country):
 def test_central_bank_transfer_profits(govt, cb, country):
     # Given
     cb.account["adv_interests"] = 50
-    cb.account["cash_interests"] = -20
     cb.account["bond_interests"] = 100
     cash = country.cash
+    cash[govt.id].interests = 20
 
     # When
     cb.transfer_profit()

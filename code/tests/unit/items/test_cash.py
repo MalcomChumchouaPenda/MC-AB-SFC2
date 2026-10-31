@@ -26,3 +26,14 @@ def test_initializes_with_default_amount():
 
     # Then
     assert default == 100
+
+
+def test_initializes_with_zero_interest():
+    # Given
+    cash = Cash()
+
+    # When
+    default = cash.interests
+
+    # Then
+    assert default == 0.0
