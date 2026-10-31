@@ -116,9 +116,10 @@ class EcoModel(Model):
         self.households.pay_taxes()
         self.firms.pay_taxes()
         self.banks.pay_taxes()
+        self.governments.pay_public_transfers()
+        self.governments.repay_bonds()
         self.governments.calc_budget_balance()
         self.governments.update_fiscal_policy()
-        self.governments.repay_bonds()
         self.governments.issue_bonds()
         self.governments.update_bond_rate()
         self.governments.update_budget_history()
@@ -128,7 +129,6 @@ class EcoModel(Model):
         self.national_cbs.buy_bonds()
 
     def _goods_consumption(self):
-        self.governments.pay_public_transfers()
         self.households.calc_consumption()
         self.households.consume()
 

@@ -467,9 +467,10 @@ def test_tax_collection_and_public_expenditures(params):
     model.households.pay_taxes.assert_called_with()
     model.firms.pay_taxes.assert_called_with()
     model.banks.pay_taxes.assert_called_with()
+    model.governments.repay_bonds.assert_called_with()
+    model.governments.pay_public_transfers.assert_called_with()
     model.governments.calc_budget_balance.assert_called_with()
     model.governments.update_fiscal_policy.assert_called_with()
-    model.governments.repay_bonds.assert_called_with()
     model.governments.issue_bonds.assert_called_with()
     model.governments.update_bond_rate.assert_called_with()
     model.governments.update_budget_history.assert_called_with()
@@ -499,7 +500,6 @@ def test_goods_consumption(params):
     model._goods_consumption()
 
     # Then
-    model.governments.pay_public_transfers.assert_called_with()
     model.households.calc_consumption.assert_called_with()
     model.households.consume.assert_called_with()
 
