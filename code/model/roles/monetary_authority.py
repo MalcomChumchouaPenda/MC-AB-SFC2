@@ -1,4 +1,3 @@
-import math
 from model.extensions import EcoRole
 
 
@@ -8,11 +7,12 @@ class MonetaryAuthority(EcoRole):
     # Perceptions
     #
 
-    def get_cash(self):
-        return math.fsum([cash.amount for cash in self.env.cash.values()])
-
-    def get_cash_interests(self):
-        return math.fsum([cash.interests for cash in self.env.cash.values()])
+    @property
+    def cash(self):
+        return [
+            {"amount": cash.amount, "interests": cash.interests}
+            for cash in self.env.cash.values()
+        ]
 
     #
     # Actions

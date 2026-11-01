@@ -468,7 +468,7 @@ def hh_as_specific_consumer(hh_with_roles_and_account):
     consumer_role.get_average_price.return_value = 1
     consumer_role.find_suppliers.return_value = []
     citizen_role = Mock()
-    citizen_role.get_cash.return_value = 1000
+    citizen_role.cash = dict(amount=1000)
     household, roles, _ = hh_with_roles_and_account
     household.p.psi = 1
     roles["citizen"] = citizen_role
@@ -569,21 +569,24 @@ def test_consume_good_with_supply_constraints(hh_as_specific_consumer):
 def test_consume_good_with_monetary_constraints(hh_as_specific_consumer):
     # Given
     ranked = [Mock(price=5, inventories=10) for _ in range(2)]
-    household, role = hh_as_specific_consumer
+    household, consumer_role = hh_as_specific_consumer
     household._rank_suppliers = Mock(return_value=ranked)
-    household.roles["citizen"].get_cash.return_value = 50
+    citizen_role = household.roles["citizen"]
+    citizen_role.cash = dict(amount=50)
 
     # When
-    household._consume_good(role, 100)
+    household._consume_good(consumer_role, 100)
 
     # Then
-    role.buy_goods.assert_any_call(ranked[0], 10)
-    assert role.buy_goods.call_count == 1
+    consumer_role.buy_goods.assert_any_call(ranked[0], 10)
+    assert consumer_role.buy_goods.call_count == 1
 
 
 @pytest.fixture
 def hh_as_general_consumer(hh_with_roles_and_account):
     # Given
+    citizen_role = Mock()
+    citizen_role.cash = dict(amount=100)
     household, roles, _ = hh_with_roles_and_account
     household.p.cT = 0.6
     household.desired_consumption = 100
@@ -591,8 +594,7 @@ def hh_as_general_consumer(hh_with_roles_and_account):
     household._consume_good = Mock()
     roles["trad_consumer"] = Mock()
     roles["non_trad_consumer"] = Mock()
-    roles["citizen"] = Mock()
-    roles["citizen"].get_cash.return_value = 100
+    roles["citizen"] = citizen_role
     return household, roles
 
 
@@ -624,7 +626,8 @@ def test_consume_randomizes_entry_order(hh_as_general_consumer):
 def test_consume_withdraws_needed_deposits(hh_as_general_consumer):
     # Given
     household, roles = hh_as_general_consumer
-    roles["citizen"].get_cash.return_value = 40
+    citizen_role = roles["citizen"]
+    citizen_role.cash = dict(amount=40)
 
     # When
     household.consume()
@@ -652,7 +655,8 @@ def test_calc_net_worth(before_allocation):
     household, roles = before_allocation
     household.account["deposits"] = 200
     household.account["equities"] = 300
-    roles["citizen"].get_cash.return_value = 500
+    citizen_role = roles["citizen"]
+    citizen_role.cash = dict(amount=500)
 
     # When
     household._calc_net_worth()
@@ -1557,7 +1561,7 @@ def test_make_deposits_with_residual_cash(before_deposits):
     household, roles = before_deposits
     depositor_role = roles["depositor"]
     company_role = roles["citizen"]
-    company_role.get_cash.return_value = 500
+    company_role.cash = dict(amount=500)
 
     # When
     household._make_deposits(bank_id)

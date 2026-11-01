@@ -23,28 +23,16 @@ def test_inherits_from_eco_role():
 # ----------------------------------------------------
 
 
-def test_get_cash_from_env(role):
+def test_get_cash_from_env_as_dict(role):
     # Given
     env = role.env
-    env.cash = {i: Mock(amount=100.0) for i in range(5)}
+    env.cash = {i: Mock(amount=100.0, interests=10.0) for i in range(5)}
 
     # When
-    perceived = role.get_cash()
+    perceived = role.cash
 
     # Then
-    assert perceived == pytest.approx(500.0)
-
-
-def test_get_cash_interests_from_env(role):
-    # Given
-    env = role.env
-    env.cash = {i: Mock(interests=10.0) for i in range(5)}
-
-    # When
-    perceived = role.get_cash_interests()
-
-    # Then
-    assert perceived == pytest.approx(50.0)
+    assert perceived == [{"amount": 100.0, "interests": 10.0} for _ in range(5)]
 
 
 # ---------------------------------------------------

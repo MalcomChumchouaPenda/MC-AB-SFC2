@@ -196,7 +196,7 @@ def cb_as_authority(cb_with_roles_and_account):
 def test_calc_profit(cb_as_authority):
     # Given
     cb, role = cb_as_authority
-    role.get_cash_interests.return_value = 20
+    role.cash = [dict(interests=10) for _ in range(2)]
     cb.account["bond_interests"] = 100
     cb.account["adv_interests"] = 40
 

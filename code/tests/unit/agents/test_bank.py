@@ -258,21 +258,23 @@ def test_grant_loans_and_make_deposits(bank_as_lender):
 
 @pytest.fixture
 def bank_before_advance(bank_with_roles_and_account):
+    # Given
+    company_role = Mock()
+    company_role.cash = dict(amount=0)
     bank, roles, account = bank_with_roles_and_account
     bank.p.mu2 = 0.1
     account["deposits"] = -1000
     account["advances"] = 0
     roles["lender"] = Mock()
-    roles["company"] = Mock()
-    roles["company"].get_cash.return_value = 0
+    roles["company"] = company_role
     return bank
 
 
-def test_doesnot_request_advance_when_sufficient_reserves(bank_before_advance):
+def test_request_advance_when_sufficient_reserves(bank_before_advance):
     # Given
     bank = bank_before_advance
     role = bank.roles["company"]
-    role.get_cash.return_value = 200
+    role.cash = dict(amount=200)
 
     # When
     bank.request_cash_advances()
@@ -285,7 +287,7 @@ def test_request_advance_when_insufficient_reserves(bank_before_advance):
     # Given
     bank = bank_before_advance
     role = bank.roles["company"]
-    role.get_cash.return_value = 50
+    role.cash = dict(amount=50)
 
     # When
     bank.request_cash_advances()
@@ -327,13 +329,13 @@ def test_calc_bond_purchases_prob():
     assert probability == math.exp(-1)
 
 
-@pytest.mark.parametrize("reserves, expected", [(150, 50), (100, 0)])
-def test_calc_excess_reserves(bank_before_advance, reserves, expected):
+@pytest.mark.parametrize("cash, expected", [(150, 50), (100, 0)])
+def test_calc_excess_reserves(bank_before_advance, cash, expected):
     # Given
     bank = bank_before_advance
     bank.p.mu2 = 0.1
     role = bank.roles["company"]
-    role.get_cash.return_value = reserves
+    role.cash = dict(amount=cash)
 
     # When
     excess_reserves = bank._calc_excess_reserves()
@@ -432,7 +434,7 @@ def test_dont_buy_bonds_with_insufficient_reserves(bank_as_bond_buyer, bond_issu
 def test_calc_profit(bank_with_roles_and_account):
     # Given
     company_role = Mock()
-    company_role.get_cash_interests.return_value = 10
+    company_role.cash = dict(interests=10)
     bank, roles, account = bank_with_roles_and_account
     roles["company"] = company_role
     account["loan_interests"] = 100
@@ -584,7 +586,7 @@ def test_pay_no_dividends(bank_with_roles_and_account):
 def bank_before_exit(bank_with_roles_and_account):
     # Given
     company_role = Mock()
-    company_role.get_cash.return_value = 0
+    company_role.cash = dict(amount=0)
     company_role.get_average_wage.return_value = 100
     bank, roles, account = bank_with_roles_and_account
     roles["company"] = company_role
@@ -611,7 +613,7 @@ def test_exit_transfer_residual_cash_to_founders(bank_before_exit):
     bank, roles, account = bank_before_exit
     account["equities"] = -90
     role = roles["company"]
-    role.get_cash.return_value = 200
+    role.cash = dict(amount=200)
     role.get_equity_shares.return_value = [share]
 
     # When

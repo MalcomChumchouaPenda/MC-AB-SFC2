@@ -67,16 +67,16 @@ def role():
     return Citizen(agent, env)
 
 
-def test_get_cash_from_env(role):
+def test_get_cash_from_env_as_dict(role):
     # Given
     env = role.env
     env.cash = {role.id: Mock(amount=100)}
 
     # When
-    perceived = role.get_cash()
+    perceived = role.cash
 
     # Then
-    assert perceived == 100
+    assert perceived == {"amount": 100}
 
 
 def test_get_prob_failure(role):

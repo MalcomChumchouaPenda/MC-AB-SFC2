@@ -80,28 +80,16 @@ def role():
     return Company(agent, env)
 
 
-def test_get_cash_from_env(role):
+def test_get_cash_from_env_as_dict(role):
     # Given
     env = role.env
-    env.cash = {role.id: Mock(amount=100)}
+    env.cash = {role.id: Mock(amount=100, interests=10)}
 
     # When
-    perceived = role.get_cash()
+    perceived = role.cash
 
     # Then
-    assert perceived == 100
-
-
-def test_get_cash_interests_from_env(role):
-    # Given
-    env = role.env
-    env.cash = {role.id: Mock(interests=10)}
-
-    # When
-    perceived = role.get_cash_interests()
-
-    # Then
-    assert perceived == 10
+    assert perceived == {"amount": 100, "interests": 10}
 
 
 def test_get_average_wage(role):

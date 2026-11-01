@@ -1,3 +1,4 @@
+import math
 from model.extensions import EcoAgent
 
 
@@ -28,10 +29,10 @@ class CentralBank(EcoAgent):
     def _calc_profit(self):
         role = self.roles["monetary_authority"]
         account = self.account
-        bond_ints = account["bond_interests"]
-        adv_ints = account["adv_interests"]
-        cash_ints = role.get_cash_interests()
-        return bond_ints + adv_ints - cash_ints
+        bond_interests = account["bond_interests"]
+        adv_interests = account["adv_interests"]
+        cash_interests = sum([cash["interests"] for cash in role.cash])
+        return bond_interests + adv_interests - cash_interests
 
     #
     # Monetary policy
@@ -69,6 +70,6 @@ class CentralBank(EcoAgent):
         super()._record_stock_items()
         roles = self.roles
         if self.national:
-            auth_role = roles["monetary_authority"]
-            self.record("cash", -auth_role.get_cash())
-            self.record("cash_interests", -auth_role.get_cash_interests())
+            cash = roles["monetary_authority"].cash
+            self.record("cash", -math.fsum([c["amount"] for c in cash]))
+            self.record("cash_interests", -math.fsum([c["interests"] for c in cash]))

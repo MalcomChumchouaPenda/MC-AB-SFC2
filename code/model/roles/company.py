@@ -22,13 +22,10 @@ class Company(EcoRole):
     # perceptions method
     #
 
-    def get_cash(self):
+    @property
+    def cash(self):
         cash = self.env.cash[self.id]
-        return cash.amount
-
-    def get_cash_interests(self):
-        cash = self.env.cash[self.id]
-        return cash.interests
+        return {"amount": cash.amount, "interests": cash.interests}
 
     def get_equity_shares(self):
         return self.env.links(self)

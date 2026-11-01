@@ -735,7 +735,7 @@ def test_repay_loans_after_making_deposits(after_borrowing, cash, expected):
     deposit["amount"] = 20
     lender = loan["lender"]
     company_role = roles["company"]
-    company_role.get_cash.return_value = cash
+    company_role.cash = dict(amount=cash)
     depositor_role = roles["country_1_depositor"]
 
     # When
@@ -752,7 +752,7 @@ def test_repay_loans_to_all_lenders(after_borrowing):
     lender = loan["lender"]
     borrower_role = roles["borrower"]
     company_role = roles["company"]
-    company_role.get_cash.return_value = 100
+    company_role.cash = dict(amount=100)
 
     # When
     firm.repay_loans()
@@ -769,7 +769,7 @@ def test_repay_loans_with_available_deposits(after_borrowing, fund, default):
     lender = loan["lender"]
     borrower_role = roles["borrower"]
     company_role = roles["company"]
-    company_role.get_cash.return_value = 0
+    company_role.cash = dict(amount=0)
 
     # When
     firm.repay_loans()
@@ -1020,7 +1020,7 @@ def before_exit(firm_with_roles_and_account):
     # Given
     borrower_role, company_role = Mock(), Mock()
     borrower_role.find_loans.return_value = []
-    company_role.get_cash.return_value = 0
+    company_role.cash = dict(amount=0)
     company_role.get_equity_shares.return_value = []
     firm, roles, account = firm_with_roles_and_account
     roles["company"] = company_role
@@ -1109,7 +1109,7 @@ def test_exit_transfer_residual_cash_to_founders(before_exit):
     share = {"citizen": founder, "value": 1000}
     firm, roles, _ = before_exit
     role = roles["company"]
-    role.get_cash.return_value = 200
+    role.cash = dict(amount=200)
     role.get_equity_shares.return_value = [share]
 
     # When

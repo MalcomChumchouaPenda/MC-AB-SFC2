@@ -107,31 +107,28 @@ class Household(EcoAgent):
             self._consume_good(role, target_cons)
 
     def _fund_consumption(self, desired_cons):
-        cash = self.roles["citizen"].get_cash()
-        if desired_cons > cash:
-            needs = desired_cons - cash
+        cash = self.roles["citizen"].cash
+        if desired_cons > cash["amount"]:
+            needs = desired_cons - cash["amount"]
             self._withdraw_deposits(needs)
 
     def _consume_good(self, role, target_cons):
-        cash = self.roles["citizen"].get_cash()
+        cash = self.roles["citizen"].cash
         for supplier in self._list_suppliers(role):
-            if target_cons <= 0 or cash <= 0:
+            if target_cons <= 0 or cash["amount"] <= 0:
                 break
-            amount = self._buy_supplier_goods(role, supplier, target_cons, cash)
+            price = supplier.price
+            quantity = min(supplier.inventories, target_cons / price)
+            quantity = min(quantity, cash["amount"] / price)
+            role.buy_goods(supplier, quantity)
+            amount = price * quantity
+            cash["amount"] -= amount
             target_cons -= amount
-            cash -= amount
 
     def _list_suppliers(self, role):
         average_price = role.get_average_price()
         suppliers = role.find_suppliers(self.p.psi)
         return self._rank_suppliers(suppliers, average_price=average_price)
-
-    def _buy_supplier_goods(self, role, supplier, target_cons, cash):
-        price = supplier.price
-        quantity = min(supplier.inventories, target_cons / price)
-        quantity = min(quantity, cash / price)
-        role.buy_goods(supplier, quantity)
-        return price * quantity
 
     def _rank_suppliers(self, suppliers, average_price):
         key = partial(self._calc_supplier_score, average_price=average_price)
@@ -169,11 +166,11 @@ class Household(EcoAgent):
         return p.lambda_ * math.exp(profit_ratio * (1 - default_prob) - deposit_rate)
 
     def _calc_net_worth(self):
-        cash = self.roles["citizen"].get_cash()
+        cash = self.roles["citizen"].cash
         account = self.account
         deposits = account["deposits"]
         equities = account["equities"]
-        self.net_worth = deposits + equities + cash
+        self.net_worth = deposits + equities + cash["amount"]
 
     def _calc_expected_net_worth(self):
         return self.net_worth + self.disposable_income - self.expected_consumption
@@ -304,9 +301,9 @@ class Household(EcoAgent):
 
     def _make_deposits(self, bank_id):
         roles = self.roles
-        cash = roles["citizen"].get_cash()
+        cash = roles["citizen"].cash
         depositor_role = self.roles["depositor"]
-        depositor_role.make_deposits(bank_id, cash)
+        depositor_role.make_deposits(bank_id, cash["amount"])
 
     def _withdraw_deposits(self, target):
         role = self.roles["depositor"]
@@ -331,4 +328,5 @@ class Household(EcoAgent):
     def _record_stock_items(self):
         super()._record_stock_items()
         roles = self.roles
-        self.record("cash", roles["citizen"].get_cash())
+        cash = roles["citizen"].cash
+        self.record("cash", cash["amount"])

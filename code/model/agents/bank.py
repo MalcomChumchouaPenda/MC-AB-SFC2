@@ -71,10 +71,10 @@ class Bank(EcoAgent):
     #
     def request_cash_advances(self):
         role = self.roles["company"]
-        cash = role.get_cash()
+        cash = role.cash
         deposits = self.account["deposits"]
         required = self.p.mu2 * -deposits
-        shortage = max(required - cash, 0)
+        shortage = max(required - cash["amount"], 0)
         if shortage > 0:
             role.request_advances(shortage)
 
@@ -112,10 +112,10 @@ class Bank(EcoAgent):
         return bond_issuers
 
     def _calc_excess_reserves(self):
-        cash = self.roles["company"].get_cash()
+        cash = self.roles["company"].cash
         deposits = -self.account["deposits"]
         required = self.p.mu2 * deposits
-        return max(cash - required, 0)
+        return max(cash["amount"] - required, 0)
 
     def _calc_bond_purchases_prob(self, issuer):
         return math.exp(-self.p.iota_b * issuer.debt_ratio)
@@ -130,15 +130,21 @@ class Bank(EcoAgent):
         self.dividends_payable = self._calc_dividends()
 
     def _calc_profit(self):
-        role = self.roles["company"]
+        cash = self.roles["company"].cash
         account = self.account
-        loan_ints = account["loan_interests"]
-        bond_ints = account["bond_interests"]
-        cash_ints = role.get_cash_interests()
+        loan_interests = account["loan_interests"]
+        bond_interests = account["bond_interests"]
         loan_defts = -account["loan_defaults"]
-        dep_ints = -account["dep_interests"]
-        adv_ints = -account["adv_interests"]
-        return loan_ints + bond_ints + cash_ints - loan_defts - dep_ints - adv_ints
+        dep_interests = -account["dep_interests"]
+        adv_interests = -account["adv_interests"]
+        return (
+            loan_interests
+            + bond_interests
+            + cash["interests"]
+            - loan_defts
+            - dep_interests
+            - adv_interests
+        )
 
     def _calc_taxes(self):
         if self.profit <= 0:
@@ -187,13 +193,13 @@ class Bank(EcoAgent):
 
     def _transfer_residual_cash(self):
         role = self.roles["company"]
-        cash = role.get_cash()
-        if cash > 0:
+        cash = role.cash
+        if cash["amount"] > 0:
             shares = role.get_equity_shares()
             total_shares = sum(share["value"] for share in shares)
             for share in shares:
                 founder = share["citizen"]
-                amount = share["value"] * cash / total_shares
+                amount = share["value"] * cash["amount"] / total_shares
                 role.transfer_residual_cash(founder, amount)
 
     #
@@ -201,6 +207,7 @@ class Bank(EcoAgent):
     #
     def _record_stock_items(self):
         super()._record_stock_items()
-        company_role = self.roles["company"]
-        self.record("cash", company_role.get_cash())
-        self.record("cash_interests", company_role.get_cash_interests())
+        roles = self.roles
+        cash = roles["company"].cash
+        self.record("cash", cash["amount"])
+        self.record("cash_interests", -cash["interests"])
