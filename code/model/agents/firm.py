@@ -140,14 +140,15 @@ class Firm(EcoAgent):
                     self._pay_lender(borrower_role, loan, funds)
                     break
 
-    def _fund_repayments(self, role, loan, deposit):
+    def _fund_repayments(self, depositor_role, loan, deposit):
         funds = deposit["amount"]
         needs = max(0, loan["amount"] - funds)
         if needs > 0:
-            cash = self.roles["company"].cash
-            feasible = min(cash["amount"], needs)
+            company_role = self.roles["company"]
+            cash = company_role.get_cash_amount()
+            feasible = min(cash, needs)
             lender_id = loan["lender"].id
-            role.make_deposits(lender_id, feasible)
+            depositor_role.make_deposits(lender_id, feasible)
             funds += feasible
         return funds
 
@@ -274,13 +275,13 @@ class Firm(EcoAgent):
 
     def _transfer_residual_cash(self):
         role = self.roles["company"]
-        cash = role.cash
-        if cash["amount"] > 0:
+        cash = role.get_cash_amount()
+        if cash > 0:
             shares = role.get_equity_shares()
             total_shares = sum(share["value"] for share in shares)
             for share in shares:
                 founder = share["citizen"]
-                amount = share["value"] * cash["amount"] / total_shares
+                amount = share["value"] * cash / total_shares
                 role.transfer_residual_cash(founder, amount)
 
     #
@@ -300,8 +301,8 @@ class Firm(EcoAgent):
     #
     # Observation
     #
-    def _record_stock_items(self):
-        super()._record_stock_items()
+    def record_items(self):
+        super().record_items()
         roles = self.roles
-        cash = roles["company"].cash
-        self.record("cash", cash["amount"])
+        company_role = roles["company"]
+        self.record("cash", company_role.get_cash_amount())

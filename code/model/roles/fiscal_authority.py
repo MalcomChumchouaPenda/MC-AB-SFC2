@@ -7,10 +7,8 @@ class FiscalAuthority(EcoRole):
     # Perceptions
     #
 
-    @property
-    def cash(self):
-        cash = self.env.cash[self.id]
-        return {"amount": cash.amount}
+    def get_cash_amount(self):
+        return self.env.cash[self.id].amount
 
     def get_gdp(self):
         return self.env.gdp

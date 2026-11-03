@@ -31,7 +31,7 @@ class CentralBank(EcoAgent):
         account = self.account
         bond_interests = account["bond_interests"]
         adv_interests = account["adv_interests"]
-        cash_interests = sum([cash["interests"] for cash in role.cash])
+        cash_interests = role.get_cash_interests()
         return bond_interests + adv_interests - cash_interests
 
     #
@@ -66,10 +66,10 @@ class CentralBank(EcoAgent):
     #
     # Observation
     #
-    def _record_stock_items(self):
-        super()._record_stock_items()
+    def record_items(self):
+        super().record_items()
         roles = self.roles
         if self.national:
-            cash = roles["monetary_authority"].cash
-            self.record("cash", -math.fsum([c["amount"] for c in cash]))
-            self.record("cash_interests", -math.fsum([c["interests"] for c in cash]))
+            auth_role = roles["monetary_authority"]
+            self.record("cash", -auth_role.get_cash_amount())
+            self.record("cash_interests", -auth_role.get_cash_interests())

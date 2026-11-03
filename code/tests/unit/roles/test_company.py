@@ -80,16 +80,34 @@ def role():
     return Company(agent, env)
 
 
-def test_get_cash_from_env_as_dict(role):
+@pytest.fixture
+def cash():
+    # Given
+    return Mock(amount=100, interests=10)
+
+
+def test_get_cash_amount(role, cash):
     # Given
     env = role.env
-    env.cash = {role.id: Mock(amount=100, interests=10)}
+    env.cash = {role.id: cash}
 
     # When
-    perceived = role.cash
+    perceived = role.get_cash_amount()
 
     # Then
-    assert perceived == {"amount": 100, "interests": 10}
+    assert perceived == 100
+
+
+def test_get_cash_interests(role, cash):
+    # Given
+    env = role.env
+    env.cash = {role.id: cash}
+
+    # When
+    perceived = role.get_cash_interests()
+
+    # Then
+    assert perceived == 10
 
 
 def test_get_average_wage(role):

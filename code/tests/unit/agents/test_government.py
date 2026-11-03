@@ -662,3 +662,28 @@ def test_update_budget_history(govt):
 
     # Then
     assert govt.prev_budget_surplus == 100
+
+
+# ---------------------------------------------------
+#  OBSERVATION
+# ----------------------------------------------------
+
+
+@pytest.fixture
+def govt_before_record(govt):
+    # Given
+    auth_role = Mock()
+    auth_role.get_cash_amount.return_value = 100
+    govt.roles = {"fiscal_authority": auth_role}
+    return govt
+
+
+def test_record_items_records_cash_amount(govt_before_record):
+    # Given
+    govt = govt_before_record
+
+    # When
+    govt.record_items()
+
+    # Then
+    assert govt.log["cash"][-1] == 100

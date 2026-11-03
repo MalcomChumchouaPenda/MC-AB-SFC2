@@ -27,11 +27,11 @@ class EcoAgent(Agent):
         if self.account is not None:
             for key, value in self.account.items():
                 self.record(key, value)
-        self._record_stock_items()
+        self.record_items()
         if len(self.log) > 0:
             self._record_stock_changes(self.log)
 
-    def _record_stock_items(self):
+    def record_items(self):
         pass
 
     def _record_stock_changes(self, log):

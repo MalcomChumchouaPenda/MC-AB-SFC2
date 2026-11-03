@@ -7,12 +7,11 @@ class MonetaryAuthority(EcoRole):
     # Perceptions
     #
 
-    @property
-    def cash(self):
-        return [
-            {"amount": cash.amount, "interests": cash.interests}
-            for cash in self.env.cash.values()
-        ]
+    def get_cash_amount(self):
+        return sum(cash.amount for cash in self.env.cash.values())
+
+    def get_cash_interests(self):
+        return sum(cash.interests for cash in self.env.cash.values())
 
     #
     # Actions

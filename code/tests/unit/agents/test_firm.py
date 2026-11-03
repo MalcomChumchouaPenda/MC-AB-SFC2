@@ -735,7 +735,7 @@ def test_repay_loans_after_making_deposits(after_borrowing, cash, expected):
     deposit["amount"] = 20
     lender = loan["lender"]
     company_role = roles["company"]
-    company_role.cash = dict(amount=cash)
+    company_role.get_cash_amount.return_value = cash
     depositor_role = roles["country_1_depositor"]
 
     # When
@@ -752,7 +752,7 @@ def test_repay_loans_to_all_lenders(after_borrowing):
     lender = loan["lender"]
     borrower_role = roles["borrower"]
     company_role = roles["company"]
-    company_role.cash = dict(amount=100)
+    company_role.get_cash_amount.return_value = 100
 
     # When
     firm.repay_loans()
@@ -769,7 +769,7 @@ def test_repay_loans_with_available_deposits(after_borrowing, fund, default):
     lender = loan["lender"]
     borrower_role = roles["borrower"]
     company_role = roles["company"]
-    company_role.cash = dict(amount=0)
+    company_role.get_cash_amount.return_value = 0
 
     # When
     firm.repay_loans()
@@ -1020,7 +1020,7 @@ def before_exit(firm_with_roles_and_account):
     # Given
     borrower_role, company_role = Mock(), Mock()
     borrower_role.find_loans.return_value = []
-    company_role.cash = dict(amount=0)
+    company_role.get_cash_amount.return_value = 0
     company_role.get_equity_shares.return_value = []
     firm, roles, account = firm_with_roles_and_account
     roles["company"] = company_role
@@ -1109,7 +1109,7 @@ def test_exit_transfer_residual_cash_to_founders(before_exit):
     share = {"citizen": founder, "value": 1000}
     firm, roles, _ = before_exit
     role = roles["company"]
-    role.cash = dict(amount=200)
+    role.get_cash_amount.return_value = 200
     role.get_equity_shares.return_value = [share]
 
     # When
@@ -1131,3 +1131,28 @@ def test_exit_sets_all_roles_defaulted(before_exit):
     # Then
     for role in roles.values():
         assert role.defaulted is True
+
+
+# ---------------------------------------------------
+#  OBSERVATION
+# ----------------------------------------------------
+
+
+@pytest.fixture
+def firm_before_record(firm):
+    # Given
+    company_role = Mock()
+    company_role.get_cash_amount.return_value = 100
+    firm.roles = {"company": company_role}
+    return firm
+
+
+def test_record_items_records_cash_amount(firm_before_record):
+    # Given
+    firm = firm_before_record
+
+    # When
+    firm.record_items()
+
+    # Then
+    assert firm.log["cash"][-1] == 100

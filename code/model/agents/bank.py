@@ -71,10 +71,10 @@ class Bank(EcoAgent):
     #
     def request_cash_advances(self):
         role = self.roles["company"]
-        cash = role.cash
+        cash = role.get_cash_amount()
         deposits = self.account["deposits"]
         required = self.p.mu2 * -deposits
-        shortage = max(required - cash["amount"], 0)
+        shortage = max(required - cash, 0)
         if shortage > 0:
             role.request_advances(shortage)
 
@@ -112,10 +112,11 @@ class Bank(EcoAgent):
         return bond_issuers
 
     def _calc_excess_reserves(self):
-        cash = self.roles["company"].cash
+        company_role = self.roles["company"]
+        cash = company_role.get_cash_amount()
         deposits = -self.account["deposits"]
         required = self.p.mu2 * deposits
-        return max(cash["amount"] - required, 0)
+        return max(cash - required, 0)
 
     def _calc_bond_purchases_prob(self, issuer):
         return math.exp(-self.p.iota_b * issuer.debt_ratio)
@@ -130,7 +131,8 @@ class Bank(EcoAgent):
         self.dividends_payable = self._calc_dividends()
 
     def _calc_profit(self):
-        cash = self.roles["company"].cash
+        company_role = self.roles["company"]
+        cash_interests = company_role.get_cash_interests()
         account = self.account
         loan_interests = account["loan_interests"]
         bond_interests = account["bond_interests"]
@@ -140,7 +142,7 @@ class Bank(EcoAgent):
         return (
             loan_interests
             + bond_interests
-            + cash["interests"]
+            + cash_interests
             - loan_defts
             - dep_interests
             - adv_interests
@@ -193,21 +195,21 @@ class Bank(EcoAgent):
 
     def _transfer_residual_cash(self):
         role = self.roles["company"]
-        cash = role.cash
-        if cash["amount"] > 0:
+        cash = role.get_cash_amount()
+        if cash > 0:
             shares = role.get_equity_shares()
             total_shares = sum(share["value"] for share in shares)
             for share in shares:
                 founder = share["citizen"]
-                amount = share["value"] * cash["amount"] / total_shares
+                amount = share["value"] * cash / total_shares
                 role.transfer_residual_cash(founder, amount)
 
     #
     # Observation
     #
-    def _record_stock_items(self):
-        super()._record_stock_items()
+    def record_items(self):
+        super().record_items()
         roles = self.roles
-        cash = roles["company"].cash
-        self.record("cash", cash["amount"])
-        self.record("cash_interests", -cash["interests"])
+        company_role = roles["company"]
+        self.record("cash", company_role.get_cash_amount())
+        self.record("cash_interests", company_role.get_cash_interests())
