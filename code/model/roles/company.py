@@ -28,6 +28,12 @@ class Company(EcoRole):
     def get_cash_interests(self):
         return self.env.cash[self.id].interests
 
+    def get_equity_amount(self):
+        return -self.agent.account["equities"]
+
+    def get_dividends(self):
+        return -self.agent.account["dividends"]
+
     def get_equity_shares(self):
         return self.env.links(self)
 

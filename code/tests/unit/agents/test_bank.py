@@ -107,11 +107,18 @@ def bank_with_roles_and_account(bank):
     return bank, roles, account
 
 
-def test_calc_credit_capacity(bank_with_roles_and_account):
+@pytest.fixture
+def company_role(bank):
     # Given
-    bank, _, account = bank_with_roles_and_account
+    role = Mock()
+    bank.roles["company"] = role
+    return role
+
+
+def test_calc_credit_capacity(bank, company_role):
+    # Given
     bank.p.mu1 = 10
-    account["equities"] = -100
+    company_role.get_equity_amount.return_value = 100
 
     # When
     result = bank._calc_credit_capacity()
@@ -132,12 +139,10 @@ def test_calc_loan_probability(bank):
     assert probability == pytest.approx(math.exp(-0.5))
 
 
-def test_calc_loan_rate(bank):
+def test_calc_loan_rate(bank, company_role):
     # Given
-    company = Mock()
-    company.get_discount_rate.return_value = 0.05
     bank.p.chi = 0.02
-    bank.roles["company"] = company
+    company_role.get_discount_rate.return_value = 0.05
     borrower = Mock(loan_demand=100, net_worth=200)
 
     # When
@@ -583,21 +588,18 @@ def test_pay_no_dividends(bank_with_roles_and_account):
 
 
 @pytest.fixture
-def bank_before_exit(bank_with_roles_and_account):
+def bank_before_exit(bank, company_role):
     # Given
-    company_role = Mock()
     company_role.get_cash_amount.return_value = 0
     company_role.get_average_wage.return_value = 100
-    bank, roles, account = bank_with_roles_and_account
-    roles["company"] = company_role
-    return bank, roles, account
+    return bank
 
 
-@pytest.mark.parametrize("net_worth, defaulted", [(-90, True), (-150, False)])
-def test_exit_when_bankrupt(bank_before_exit, net_worth, defaulted):
+@pytest.mark.parametrize("net_worth, defaulted", [(90, True), (150, False)])
+def test_exit_when_bankrupt(bank_before_exit, company_role, net_worth, defaulted):
     # Given
-    bank, _, account = bank_before_exit
-    account["equities"] = net_worth
+    bank = bank_before_exit
+    company_role.get_equity_amount.return_value = net_worth
 
     # When
     bank.exit()
@@ -606,34 +608,33 @@ def test_exit_when_bankrupt(bank_before_exit, net_worth, defaulted):
     assert bank.defaulted == defaulted
 
 
-def test_exit_transfer_residual_cash_to_founders(bank_before_exit):
+def test_exit_transfer_residual_cash_to_founders(bank_before_exit, company_role):
     # Given
     founder = object()
     share = {"citizen": founder, "value": 90}
-    bank, roles, account = bank_before_exit
-    account["equities"] = -90
-    role = roles["company"]
-    role.get_cash_amount.return_value = 200
-    role.get_equity_shares.return_value = [share]
+    bank = bank_before_exit
+    company_role.get_cash_amount.return_value = 200
+    company_role.get_equity_amount.return_value = 90
+    company_role.get_equity_shares.return_value = [share]
 
     # When
     bank.exit()
 
     # Then
-    role.transfer_residual_cash.assert_called_with(founder, 200)
+    company_role.transfer_residual_cash.assert_called_with(founder, 200)
 
 
-def test_exit_sets_all_roles_defaulted(bank_before_exit):
+def test_exit_sets_all_roles_defaulted(bank_before_exit, company_role):
     # Given
-    bank, roles, account = bank_before_exit
-    account["equities"] = -90
-    roles["any"] = Mock()
+    bank = bank_before_exit
+    bank.roles["any"] = Mock()
+    company_role.get_equity_amount.return_value = 90
 
     # When
     bank.exit()
 
     # Then
-    for role in roles.values():
+    for role in bank.roles.values():
         assert role.defaulted is True
 
 
@@ -643,12 +644,12 @@ def test_exit_sets_all_roles_defaulted(bank_before_exit):
 
 
 @pytest.fixture
-def bank_before_record(bank):
+def bank_before_record(bank, company_role):
     # Given
-    company_role = Mock()
     company_role.get_cash_amount.return_value = 100
     company_role.get_cash_interests.return_value = 10
-    bank.roles = {"company": company_role}
+    company_role.get_equity_amount.return_value = 200
+    company_role.get_dividends.return_value = 20
     return bank
 
 
@@ -672,3 +673,25 @@ def test_record_items_records_cash_interests(bank_before_record):
 
     # Then
     assert bank.log["cash_interests"][-1] == 10
+
+
+def test_record_items_records_equities(bank_before_record):
+    # Given
+    bank = bank_before_record
+
+    # When
+    bank.record_items()
+
+    # Then
+    assert bank.log["equities"][-1] == -200
+
+
+def test_record_items_records_dividends(bank_before_record):
+    # Given
+    bank = bank_before_record
+
+    # When
+    bank.record_items()
+
+    # Then
+    assert bank.log["dividends"][-1] == -20

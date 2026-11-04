@@ -110,6 +110,30 @@ def test_get_cash_interests(role, cash):
     assert perceived == 10
 
 
+def test_get_equity_amount(role):
+    # Given
+    agent = role.agent
+    agent.account = {"equities": -150.0}
+
+    # When
+    perceived = role.get_equity_amount()
+
+    # Then
+    assert perceived == 150.0
+
+
+def test_get_dividends(role):
+    # Given
+    agent = role.agent
+    agent.account = {"dividends": -15.0}
+
+    # When
+    perceived = role.get_dividends()
+
+    # Then
+    assert perceived == 15.0
+
+
 def test_get_average_wage(role):
     # Given
     env = role.env

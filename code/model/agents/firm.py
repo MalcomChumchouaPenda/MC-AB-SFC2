@@ -246,11 +246,12 @@ class Firm(EcoAgent):
     # Exit process
     #
     def exit(self):
-        roles = self.roles
-        equities = -self.account["equities"]
-        if equities < roles["employer"].wage:
+        company_role = self.roles["company"]
+        employer_role = self.roles["employer"]
+        equities = company_role.get_equity_amount()
+        if equities < employer_role.wage:
             self.defaulted = True
-            for role in roles.values():
+            for role in self.roles.values():
                 role.defaulted = True
             self._make_loan_defaults()
             self._withdraw_residual_deposits()
@@ -306,3 +307,5 @@ class Firm(EcoAgent):
         roles = self.roles
         company_role = roles["company"]
         self.record("cash", company_role.get_cash_amount())
+        self.record("equities", -company_role.get_equity_amount())
+        self.record("dividends", -company_role.get_dividends())

@@ -643,46 +643,59 @@ def test_calc_desired_loans_when_internal_funds_are_sufficient(before_borrowing)
 
 
 @pytest.fixture
-def firm_as_borrower(firm_with_roles_and_account):
+def company_role(firm):
     # Given
     role = Mock()
-    role.find_lenders.return_value = []
-    firm, roles, account = firm_with_roles_and_account
+    firm.roles["company"] = role
+    return role
+
+
+@pytest.fixture
+def borrower_role(firm):
+    # Given
+    role = Mock()
+    firm.roles["borrower"] = role
+    return role
+
+
+@pytest.fixture
+def firm_before_credit(firm, borrower_role, company_role):
+    # Given
+    borrower_role.find_lenders.return_value = []
+    company_role.get_equity_amount.return_value = 100
     firm._calc_desired_loans = Mock(return_value=10)
-    account["equities"] = -100
-    roles["borrower"] = role
-    return firm, role
+    return firm
 
 
-def test_request_loans_to_all_lenders(firm_as_borrower):
+def test_request_loans_to_all_lenders(firm_before_credit, borrower_role):
     # Given
     lender = Mock()
-    firm, role = firm_as_borrower
-    role.find_lenders.return_value = [lender]
+    firm = firm_before_credit
+    borrower_role.find_lenders.return_value = [lender]
 
     # When
     firm.request_loans()
 
     # Then
-    role.request_loans.assert_any_call(lender)
+    borrower_role.request_loans.assert_any_call(lender)
 
 
-def test_request_loans_and_set_loan_demand(firm_as_borrower):
+def test_request_loans_and_set_loan_demand(firm_before_credit, borrower_role):
     # Given
-    firm, role = firm_as_borrower
+    firm = firm_before_credit
     firm._calc_desired_loans.return_value = 100
-    role.find_lenders.return_value = [Mock()]
+    borrower_role.find_lenders.return_value = [Mock()]
 
     # When
     firm.request_loans()
 
     # Then
-    assert role.loan_demand == 100
+    assert borrower_role.loan_demand == 100
 
 
-def test_request_loans_and_registers_desired_loans(firm_as_borrower):
+def test_request_loans_and_registers_desired_loans(firm_before_credit):
     # Given
-    firm, _ = firm_as_borrower
+    firm = firm_before_credit
     firm._calc_desired_loans.return_value = 100
 
     # When
@@ -693,16 +706,16 @@ def test_request_loans_and_registers_desired_loans(firm_as_borrower):
 
 
 @pytest.mark.parametrize("desired", [0, -100])
-def test_dont_request_unneccessary_loans(firm_as_borrower, desired):
+def test_dont_request_unneccessary_loans(firm_before_credit, borrower_role, desired):
     # Given
-    firm, role = firm_as_borrower
+    firm = firm_before_credit
     firm._calc_desired_loans.return_value = desired
 
     # When
     firm.request_loans()
 
     # Then
-    role.request_loans.assert_not_called()
+    borrower_role.request_loans.assert_not_called()
 
 
 # ---------------------------------------------------
@@ -1016,27 +1029,22 @@ def test_pay_no_dividends(firm_with_roles_and_account):
 
 
 @pytest.fixture
-def before_exit(firm_with_roles_and_account):
+def firm_before_exit(firm, borrower_role, company_role):
     # Given
-    borrower_role, company_role = Mock(), Mock()
     borrower_role.find_loans.return_value = []
     company_role.get_cash_amount.return_value = 0
+    company_role.get_equity_amount.return_value = 50
     company_role.get_equity_shares.return_value = []
-    firm, roles, account = firm_with_roles_and_account
-    roles["company"] = company_role
-    roles["borrower"] = borrower_role
-    roles["employer"] = Mock(wage=100)
-    account["equities"] = -50
-    account["deposits"] = 0
-    account["loans"] = 0
-    return firm, roles, account
+    firm.roles["employer"] = Mock(wage=100)
+    firm.account = {"deposits": 0, "loans": 0}
+    return firm
 
 
-@pytest.mark.parametrize("net_worth, defaulted", [(-90, True), (-150, False)])
-def test_exit_when_bankrupt(before_exit, net_worth, defaulted):
+@pytest.mark.parametrize("net_worth, defaulted", [(90, True), (150, False)])
+def test_exit_when_bankrupt(firm_before_exit, company_role, net_worth, defaulted):
     # Given
-    firm, _, account = before_exit
-    account["equities"] = net_worth
+    firm = firm_before_exit
+    company_role.get_equity_amount.return_value = net_worth
 
     # When
     firm.exit()
@@ -1045,14 +1053,14 @@ def test_exit_when_bankrupt(before_exit, net_worth, defaulted):
     assert firm.defaulted == defaulted
 
 
-def test_exit_withdraws_residual_deposits(before_exit):
+def test_exit_withdraws_residual_deposits(firm_before_exit):
     # Given
     deposit_bank, role = Mock(), Mock()
     deposit = {"deposit_bank": deposit_bank, "amount": 100}
     role.find_deposits.return_value = [deposit]
-    firm, roles, account = before_exit
-    account["deposits"] = 100
-    roles["country_1_depositor"] = role
+    firm = firm_before_exit
+    firm.account["deposits"] = 100
+    firm.roles["country_1_depositor"] = role
 
     # When
     firm.exit()
@@ -1061,12 +1069,12 @@ def test_exit_withdraws_residual_deposits(before_exit):
     role.withdraw_deposits.assert_called_with(deposit_bank.id, 100)
 
 
-def test_exit_doesnt_withdraw_with_no_deposit(before_exit):
+def test_exit_doesnt_withdraw_with_no_deposit(firm_before_exit):
     # Given
     role = Mock()
-    firm, roles, account = before_exit
-    roles["country_1_depositor"] = role
-    account["deposits"] = 0
+    firm = firm_before_exit
+    firm.roles["country_1_depositor"] = role
+    firm.account["deposits"] = 0
 
     # When
     firm.exit()
@@ -1075,61 +1083,57 @@ def test_exit_doesnt_withdraw_with_no_deposit(before_exit):
     role.withdraw_deposits.assert_not_called()
 
 
-def test_exit_makes_default_on_all_loans(before_exit):
+def test_exit_makes_default_on_all_loans(firm_before_exit, borrower_role):
     # Given
     lender = object()
     loan = {"lender": lender, "amount": 100, "rate": 0.1}
-    firm, roles, _ = before_exit
-    role = roles["borrower"]
-    role.find_loans.return_value = [loan]
+    firm = firm_before_exit
+    borrower_role.find_loans.return_value = [loan]
 
     # When
     firm.exit()
 
     # Then
-    role.make_defaults.assert_called_with(lender, 100)
+    borrower_role.make_defaults.assert_called_with(lender, 100)
 
 
-def test_exit_doesnt_make_default_with_no_loans(before_exit):
+def test_exit_doesnt_make_default_with_no_loans(firm_before_exit, borrower_role):
     # Given
-    firm, roles, _ = before_exit
-    role = roles["borrower"]
-    role.find_loans.return_value = []
+    firm = firm_before_exit
+    borrower_role.find_loans.return_value = []
 
     # When
     firm.exit()
 
     # Then
-    role.make_defaults.assert_not_called()
+    borrower_role.make_defaults.assert_not_called()
 
 
-def test_exit_transfer_residual_cash_to_founders(before_exit):
+def test_exit_transfer_residual_cash_to_founders(firm_before_exit, company_role):
     # Given
     founder = object()
     share = {"citizen": founder, "value": 1000}
-    firm, roles, _ = before_exit
-    role = roles["company"]
-    role.get_cash_amount.return_value = 200
-    role.get_equity_shares.return_value = [share]
+    firm = firm_before_exit
+    company_role.get_cash_amount.return_value = 200
+    company_role.get_equity_shares.return_value = [share]
 
     # When
     firm.exit()
 
     # Then
-    role.transfer_residual_cash.assert_called_with(founder, 200)
+    company_role.transfer_residual_cash.assert_called_with(founder, 200)
 
 
-def test_exit_sets_all_roles_defaulted(before_exit):
+def test_exit_sets_all_roles_defaulted(firm_before_exit):
     # Given
-    firm, roles, account = before_exit
-    account["equities"] = -90
-    roles["any"] = Mock()
+    firm = firm_before_exit
+    firm.roles["any"] = Mock()
 
     # When
     firm.exit()
 
     # Then
-    for role in roles.values():
+    for role in firm.roles.values():
         assert role.defaulted is True
 
 
@@ -1139,11 +1143,11 @@ def test_exit_sets_all_roles_defaulted(before_exit):
 
 
 @pytest.fixture
-def firm_before_record(firm):
+def firm_before_record(firm, company_role):
     # Given
-    company_role = Mock()
     company_role.get_cash_amount.return_value = 100
-    firm.roles = {"company": company_role}
+    company_role.get_equity_amount.return_value = 200
+    company_role.get_dividends.return_value = 20
     return firm
 
 
@@ -1156,3 +1160,25 @@ def test_record_items_records_cash_amount(firm_before_record):
 
     # Then
     assert firm.log["cash"][-1] == 100
+
+
+def test_record_items_records_equities(firm_before_record):
+    # Given
+    firm = firm_before_record
+
+    # When
+    firm.record_items()
+
+    # Then
+    assert firm.log["equities"][-1] == -200
+
+
+def test_record_items_records_dividends(firm_before_record):
+    # Given
+    firm = firm_before_record
+
+    # When
+    firm.record_items()
+
+    # Then
+    assert firm.log["dividends"][-1] == -20
