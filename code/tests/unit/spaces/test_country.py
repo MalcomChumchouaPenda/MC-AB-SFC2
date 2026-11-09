@@ -249,19 +249,17 @@ def test_add_central_bank_does_nothing_for_foreign(before_adding_central_bank):
 @pytest.fixture
 def before_adding_government(monkeypatch, before_adding_agent):
     # Given
-    FakeCash = Mock()
     FakeRole = Mock()
     monkeypatch.setattr("model.spaces.country.FiscalAuthority", FakeRole)
-    monkeypatch.setattr("model.spaces.country.Cash", FakeCash)
     country = before_adding_agent
     country.monetary_authority = Mock(id=1)
-    return country, FakeRole, FakeCash
+    return country, FakeRole
 
 
 def test_add_government_add_fiscal_authority_role(before_adding_government):
     # Given
     govt = Mock(country_pos=2)
-    country, FakeRole, _ = before_adding_government
+    country, FakeRole = before_adding_government
 
     # When
     country.add_government(govt)
@@ -334,20 +332,18 @@ def test_add_household_does_nothing_if_foreigner(before_adding_household):
 @pytest.fixture
 def before_adding_firm(monkeypatch, before_adding_agent):
     # Given
-    FakeCash = Mock()
     FakeRole = Mock()
     monkeypatch.setattr("model.spaces.country.Company", FakeRole)
-    monkeypatch.setattr("model.spaces.country.Cash", FakeCash)
     country = before_adding_agent
     country.monetary_authority = Mock(id=1)
-    return country, FakeRole, FakeCash
+    return country, FakeRole
 
 
 @pytest.mark.parametrize("tradable", [True, False])
 def test_add_firm_add_company_role(before_adding_firm, tradable):
     # Given
     firm = Mock(tradable=tradable, country_pos=2)
-    country, FakeRole, _ = before_adding_firm
+    country, FakeRole = before_adding_firm
 
     # When
     country.add_firm(firm)
@@ -387,19 +383,17 @@ def test_add_firm_does_nothing_if_foreigner(before_adding_firm, tradable):
 @pytest.fixture
 def before_adding_bank(monkeypatch, before_adding_agent):
     # Given
-    FakeCash = Mock()
     FakeRole = Mock()
     monkeypatch.setattr("model.spaces.country.Company", FakeRole)
-    monkeypatch.setattr("model.spaces.country.Cash", FakeCash)
     country = before_adding_agent
     country.monetary_authority = Mock(id=1)
-    return country, FakeRole, FakeCash
+    return country, FakeRole
 
 
 def test_add_bank_add_company_role(before_adding_bank):
     # Given
     bank = Mock(id=2, country_pos=2)
-    country, FakeRole, _ = before_adding_bank
+    country, FakeRole = before_adding_bank
 
     # When
     country.add_bank(bank)

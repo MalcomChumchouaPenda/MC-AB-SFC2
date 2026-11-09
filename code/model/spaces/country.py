@@ -7,7 +7,6 @@ from model.roles.fiscal_authority import FiscalAuthority
 from model.spaces.goods_market import GoodsMarket
 from model.spaces.labor_market import LaborMarket
 from model.spaces.deposit_market import DepositMarket
-from model.items import Cash
 
 
 class Country(EcoSpace):
