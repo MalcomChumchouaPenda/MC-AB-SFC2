@@ -740,7 +740,7 @@ def test_calc_liquidity_preference_when_no_equity(before_allocation):
     assert lp == 0.8
 
 
-def test_choose_portfolio_allocation_calc_net_worth(before_allocation):
+def test_choose_portfolio_calc_net_worth(before_allocation):
     # Given
     household, _ = before_allocation
     household.account["equities"] = 80
@@ -749,13 +749,13 @@ def test_choose_portfolio_allocation_calc_net_worth(before_allocation):
     household._calc_net_worth = Mock()
 
     # When
-    household.choose_portfolio_allocation()
+    household.choose_portfolio()
 
     # Then
     household._calc_net_worth.assert_called_once_with()
 
 
-def test_choose_portfolio_allocation_updates_desired_assets(before_allocation):
+def test_choose_portfolio_updates_desired_assets(before_allocation):
     # Given
     household, _ = before_allocation
     household.account["equities"] = 20
@@ -764,14 +764,14 @@ def test_choose_portfolio_allocation_updates_desired_assets(before_allocation):
     household._calc_net_worth = Mock()
 
     # When
-    household.choose_portfolio_allocation()
+    household.choose_portfolio()
 
     # Then
     assert household.desired_equity == 60
     assert household.desired_deposits == 60
 
 
-def test_choose_portfolio_allocation_preserves_existing_equity(before_allocation):
+def test_choose_portfolio_preserves_existing_equity(before_allocation):
     # Given
     household, _ = before_allocation
     household.account["equities"] = 80
@@ -780,16 +780,14 @@ def test_choose_portfolio_allocation_preserves_existing_equity(before_allocation
     household._calc_net_worth = Mock()
 
     # When
-    household.choose_portfolio_allocation()
+    household.choose_portfolio()
 
     # Then
     assert household.desired_equity == 80
 
 
 @pytest.mark.parametrize("cash, expected", [(0, 0), (50, 50), (100, 80)])
-def test_choose_portfolio_allocation_exposes_investment(
-    before_allocation, cash, expected
-):
+def test_choose_portfolio_exposes_investment(before_allocation, cash, expected):
     # Given
     household, roles = before_allocation
     household.account["equities"] = 80
@@ -800,7 +798,7 @@ def test_choose_portfolio_allocation_exposes_investment(
     role = roles["citizen"]
 
     # When
-    household.choose_portfolio_allocation()
+    household.choose_portfolio()
 
     # Then
     assert role.desired_investment == expected

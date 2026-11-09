@@ -144,7 +144,7 @@ class Household(EcoAgent):
     #
     # Equity investment
     #
-    def choose_portfolio_allocation(self):
+    def choose_portfolio(self):
         self._calc_net_worth()
         cash = self.account["cash"]
         equities = self.account["equities"]

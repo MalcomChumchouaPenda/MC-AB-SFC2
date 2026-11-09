@@ -57,7 +57,7 @@ def test_household_portfolio_allocation(country, household):
     household.account["deposits"] = 0
 
     # When
-    household.choose_portfolio_allocation()
+    household.choose_portfolio()
 
     # Then
     assert household.desired_equity == pytest.approx(60.0)

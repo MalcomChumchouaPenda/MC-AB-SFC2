@@ -147,7 +147,7 @@ class EcoModel(Model):
     def _enter_exit(self):
         self.firms.exit()
         self.banks.exit()
-        self.households.choose_portfolio_allocation()
+        self.households.choose_portfolio()
         self.households.invest_equity()
         self.governments.issue_deposit_guarantee_bonds()
         self.national_cbs.buy_bonds()

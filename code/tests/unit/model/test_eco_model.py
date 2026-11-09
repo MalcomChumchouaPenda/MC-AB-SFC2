@@ -541,7 +541,7 @@ def test_enter_exit(params):
     model._enter_exit()
 
     # Then
-    model.households.choose_portfolio_allocation.assert_called_with()
+    model.households.choose_portfolio.assert_called_with()
     model.households.invest_equity.assert_called_with()
     model.firms.exit.assert_called_with()
     model.banks.exit.assert_called_with()
