@@ -214,8 +214,7 @@ def test_buy_goods_transfers_cash(market_before_transaction):
     market.buy_goods(consumer, producer, 5)
 
     # Then
-    env.decrease_cash.assert_called_with(consumer, 50)
-    env.increase_cash.assert_called_with(producer, 50)
+    market.transfer_stock.assert_any_call("cash", consumer.id, producer.id, 50)
 
 
 def test_buy_goods_updates_accounts(market_before_transaction):

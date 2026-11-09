@@ -51,7 +51,7 @@ def firm(model, country):
 @pytest.fixture
 def before_firm_withdrawal(firm, bank, country):
     # Given
-    country.cash[firm.id].amount = 1000
+    firm.account["cash"] = 1000
     depositor = firm.roles["country_0_depositor"]
     deposit_bank = bank.roles["deposit_bank"]
     market = country.spaces["deposit_market"]
@@ -61,8 +61,6 @@ def before_firm_withdrawal(firm, bank, country):
 @pytest.mark.usefixtures("before_firm_withdrawal")
 def test_increases_firm_cash(firm, bank, country):
     # Given
-    firm_cash = country.cash[firm.id]
-    bank_cash = country.cash[bank.id]
     depositor = firm.roles["country_0_depositor"]
     deposit_bank = bank.roles["deposit_bank"]
 
@@ -70,8 +68,8 @@ def test_increases_firm_cash(firm, bank, country):
     depositor.withdraw_deposits(deposit_bank.id, 100)
 
     # Then
-    assert firm_cash.amount == 600
-    assert bank_cash.amount == 400
+    assert firm.account["cash"] == 600
+    assert bank.account["cash"] == 400
 
 
 @pytest.mark.usefixtures("before_firm_withdrawal")
@@ -100,7 +98,7 @@ def household(model, country):
 @pytest.fixture
 def before_household_withdrawal(household, bank, country):
     # Given
-    country.cash[household.id].amount = 1000
+    household.account["cash"] = 1000
     depositor = household.roles["depositor"]
     deposit_bank = bank.roles["deposit_bank"]
     market = country.spaces["deposit_market"]
@@ -108,10 +106,8 @@ def before_household_withdrawal(household, bank, country):
 
 
 @pytest.mark.usefixtures("before_household_withdrawal")
-def test_increases_household_cash(household, bank, country):
+def test_increases_household_cash(household, bank):
     # Given
-    household_cash = country.cash[household.id]
-    bank_cash = country.cash[bank.id]
     depositor = household.roles["depositor"]
     deposit_bank = bank.roles["deposit_bank"]
 
@@ -119,8 +115,8 @@ def test_increases_household_cash(household, bank, country):
     depositor.withdraw_deposits(deposit_bank.id, 400)
 
     # Then
-    assert household_cash.amount == 900
-    assert bank_cash.amount == 100
+    assert household.account["cash"] == 900
+    assert bank.account["cash"] == 100
 
 
 @pytest.mark.usefixtures("before_household_withdrawal")

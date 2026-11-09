@@ -176,8 +176,3 @@ class Government(EcoAgent):
     #
     # Observation
     #
-    def record_items(self):
-        super().record_items()
-        roles = self.roles
-        auth_role = roles["fiscal_authority"]
-        self.record("cash", auth_role.get_cash_amount())

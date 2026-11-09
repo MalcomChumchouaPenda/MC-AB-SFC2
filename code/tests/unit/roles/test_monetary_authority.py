@@ -23,36 +23,6 @@ def test_inherits_from_eco_role():
 # ----------------------------------------------------
 
 
-@pytest.fixture
-def cash():
-    # Given
-    return {i: Mock(amount=100.0, interests=10.0) for i in range(5)}
-
-
-def test_get_cash_amount(role, cash):
-    # Given
-    env = role.env
-    env.cash = cash
-
-    # When
-    perceived = role.get_cash_amount()
-
-    # Then
-    assert perceived == pytest.approx(500.0)
-
-
-def test_get_cash_interests(role, cash):
-    # Given
-    env = role.env
-    env.cash = cash
-
-    # When
-    perceived = role.get_cash_interests()
-
-    # Then
-    assert perceived == pytest.approx(50.0)
-
-
 # ---------------------------------------------------
 # ACTIONS TESTS
 # ----------------------------------------------------

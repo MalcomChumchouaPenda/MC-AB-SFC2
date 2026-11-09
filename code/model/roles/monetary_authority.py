@@ -7,12 +7,6 @@ class MonetaryAuthority(EcoRole):
     # Perceptions
     #
 
-    def get_cash_amount(self):
-        return sum(cash.amount for cash in self.env.cash.values())
-
-    def get_cash_interests(self):
-        return sum(cash.interests for cash in self.env.cash.values())
-
     #
     # Actions
     #

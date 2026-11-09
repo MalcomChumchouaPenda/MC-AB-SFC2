@@ -98,14 +98,6 @@ def test_initializes_monetary_authority(model):
     assert country.monetary_authority is None
 
 
-def test_initializes_cash_dict(model):
-    # When
-    country = Country(model)
-
-    # Then
-    assert country.cash == {}
-
-
 def test_exposes_average_wage_from_labor_market(model):
     # Given
     country = Country(model)
@@ -201,7 +193,6 @@ def test_create_markets_sets_deposit_market_country_pos(country_without_markets)
 def before_adding_agent(country):
     # Given
     country.add_role = Mock()
-    country.cash = {}
     return country
 
 
@@ -267,19 +258,6 @@ def before_adding_government(monkeypatch, before_adding_agent):
     return country, FakeRole, FakeCash
 
 
-def test_add_government_add_cash_item(before_adding_government):
-    # Given
-    govt = Mock(id=2, country_pos=2)
-    country, _, FakeCash = before_adding_government
-
-    # When
-    country.add_government(govt)
-
-    # Then
-    FakeCash.assert_called_once_with()
-    assert country.cash[govt.id] == FakeCash.return_value
-
-
 def test_add_government_add_fiscal_authority_role(before_adding_government):
     # Given
     govt = Mock(country_pos=2)
@@ -316,39 +294,23 @@ def test_add_government_does_nothing_if_foreigner(before_adding_government):
 
     # Then
     assert not country.add_role.called
-    assert not govt.id in country.cash
     assert country.fiscal_authority is None
 
 
 @pytest.fixture
 def before_adding_household(monkeypatch, before_adding_agent):
     # Given
-    FakeCash = Mock()
     FakeRole = Mock()
     monkeypatch.setattr("model.spaces.country.Citizen", FakeRole)
-    monkeypatch.setattr("model.spaces.country.Cash", FakeCash)
     country = before_adding_agent
     country.monetary_authority = Mock(id=1)
-    return country, FakeRole, FakeCash
-
-
-def test_add_household_add_cash_item(before_adding_household):
-    # Given
-    household = Mock(id=2, country_pos=2)
-    country, _, FakeCash = before_adding_household
-
-    # When
-    country.add_household(household)
-
-    # Then
-    FakeCash.assert_called_once_with()
-    assert country.cash[household.id] == FakeCash.return_value
+    return country, FakeRole
 
 
 def test_add_household_add_citizen_role(before_adding_household):
     # Given
     household = Mock(country_pos=2)
-    country, FakeRole, _ = before_adding_household
+    country, FakeRole = before_adding_household
 
     # When
     country.add_household(household)
@@ -367,7 +329,6 @@ def test_add_household_does_nothing_if_foreigner(before_adding_household):
 
     # Then
     assert not country.add_role.called
-    assert not household.id in country.cash
 
 
 @pytest.fixture
@@ -380,20 +341,6 @@ def before_adding_firm(monkeypatch, before_adding_agent):
     country = before_adding_agent
     country.monetary_authority = Mock(id=1)
     return country, FakeRole, FakeCash
-
-
-@pytest.mark.parametrize("tradable", [True, False])
-def test_add_firm_add_cash_item(before_adding_firm, tradable):
-    # Given
-    firm = Mock(id=2, tradable=tradable, country_pos=2)
-    country, _, FakeCash = before_adding_firm
-
-    # When
-    country.add_firm(firm)
-
-    # Then
-    FakeCash.assert_called_once_with()
-    assert country.cash[firm.id] == FakeCash.return_value
 
 
 @pytest.mark.parametrize("tradable", [True, False])
@@ -435,7 +382,6 @@ def test_add_firm_does_nothing_if_foreigner(before_adding_firm, tradable):
 
     # Then
     assert not country.add_role.called
-    assert not firm.id in country.cash
 
 
 @pytest.fixture
@@ -448,19 +394,6 @@ def before_adding_bank(monkeypatch, before_adding_agent):
     country = before_adding_agent
     country.monetary_authority = Mock(id=1)
     return country, FakeRole, FakeCash
-
-
-def test_add_bank_add_cash_item(before_adding_bank):
-    # Given
-    bank = Mock(id=2, country_pos=2)
-    country, _, FakeCash = before_adding_bank
-
-    # When
-    country.add_bank(bank)
-
-    # Then
-    FakeCash.assert_called_once_with()
-    assert country.cash[bank.id] == FakeCash.return_value
 
 
 def test_add_bank_add_company_role(before_adding_bank):
@@ -499,7 +432,6 @@ def test_add_bank_does_nothing_if_foreigner(before_adding_bank):
 
     # Then
     assert not country.add_role.called
-    assert not bank.id in country.cash
 
 
 # ---------------------------------------------------
@@ -723,100 +655,6 @@ def test_calc_wage_range_from_labor_market(country_with_two_groups):
 
 
 # ---------------------------------------------------
-# CASH OPERATIONS
-# ----------------------------------------------------
-
-
-@pytest.fixture
-def before_cash_operations(country):
-    # Given
-    country.pos = 1
-    country.env = Mock()
-    country.cash = defaultdict(lambda: Mock(amount=0))
-    return country
-
-
-def test_decrease_cash_updates_domestic_agent_cash(before_cash_operations):
-    # Given
-    agent_role = Mock(id=3, country_pos=1)
-    country = before_cash_operations
-    cash = country.cash
-
-    # When
-    country.decrease_cash(agent_role, 10)
-
-    # Then
-    assert cash[3].amount == -10
-
-
-def test_decrease_cash_calls_env_method_with_foreign_agent(before_cash_operations):
-    # Given
-    agent_role = Mock(id=3, country_pos=2)
-    country = before_cash_operations
-    env = country.env
-
-    # When
-    country.decrease_cash(agent_role, 10)
-
-    # Then
-    env.decrease_cash.assert_called_with(agent_role, 10)
-
-
-def test_decrease_cash_does_nothing_if_monetary_auth(before_cash_operations):
-    # Given
-    agent_role = Mock(id=1)
-    country = before_cash_operations
-    country.monetary_authority = Mock(id=1)
-    env = country.env
-
-    # When
-    country.decrease_cash(agent_role, 10)
-
-    # Then
-    env.decrease_cash.assert_not_called()
-
-
-def test_increase_cash_updates_domestic_agent_cash(before_cash_operations):
-    # Given
-    agent_role = Mock(id=3, country_pos=1)
-    country = before_cash_operations
-    cash = country.cash
-
-    # When
-    country.increase_cash(agent_role, 10)
-
-    # Then
-    assert cash[3].amount == 10
-
-
-def test_increase_cash_calls_env_method_with_foreign_agent(before_cash_operations):
-    # Given
-    agent_role = Mock(id=3, country_pos=2)
-    country = before_cash_operations
-    env = country.env
-
-    # When
-    country.increase_cash(agent_role, 10)
-
-    # Then
-    env.increase_cash.assert_called_with(agent_role, 10)
-
-
-def test_increase_cash_does_nothing_if_monetary_auth(before_cash_operations):
-    # Given
-    agent_role = Mock(id=1)
-    country = before_cash_operations
-    country.monetary_authority = Mock(id=1)
-    env = country.env
-
-    # When
-    country.increase_cash(agent_role, 10)
-
-    # Then
-    env.increase_cash.assert_not_called()
-
-
-# ---------------------------------------------------
 # EQUITY INVESTMENT
 # ----------------------------------------------------
 
@@ -825,8 +663,6 @@ def test_increase_cash_does_nothing_if_monetary_auth(before_cash_operations):
 def before_transaction(country_with_two_groups):
     # Given
     country, *_ = country_with_two_groups
-    country.increase_cash = Mock()
-    country.decrease_cash = Mock()
     country.transfer_stock = Mock()
     country.make_transaction = Mock()
     return country
@@ -842,14 +678,12 @@ def test_pay_public_transfers_calls_cash_transfer(before_transaction):
     country.pay_public_transfers(auth, citizen, 10)
 
     # Then
-    country.decrease_cash.assert_called_with(auth, 10)
-    country.increase_cash.assert_called_with(citizen, 10)
+    country.transfer_stock.assert_any_call("cash", auth.id, citizen.id, 10)
 
 
 def test_pay_public_transfers_updates_accounts(before_transaction):
     # Given
     country = before_transaction
-    country.cash = {1: Mock(amount=0), 2: Mock(amount=0)}
     citizen = Mock(id=1)
     auth = Mock(id=2)
 
@@ -878,8 +712,7 @@ def test_fund_company_calls_cash_transfer(country_with_company_and_founder):
     country.fund_company(company, founder, 100)
 
     # Then
-    country.decrease_cash.assert_called_with(founder, 100)
-    country.increase_cash.assert_called_with(company, 100)
+    country.transfer_stock.assert_any_call("cash", founder.id, company.id, 100)
 
 
 def test_fund_company_updates_accounts(country_with_company_and_founder):
@@ -957,8 +790,7 @@ def test_pay_taxes_calls_cash_transfer(before_transaction):
     country.pay_taxes(payer, 10)
 
     # Then
-    country.decrease_cash.assert_called_with(payer, 10)
-    country.increase_cash.assert_called_with(auth, 10)
+    country.transfer_stock.assert_any_call("cash", payer.id, auth.id, 10)
 
 
 def test_pay_taxes_updates_accounts(before_transaction):
@@ -982,8 +814,7 @@ def test_pay_dividends_calls_cash_transfer(country_with_company_and_founder):
     country.pay_dividends(company, founder, 10)
 
     # Then
-    country.decrease_cash.assert_called_with(company, 10)
-    country.increase_cash.assert_called_with(founder, 10)
+    country.transfer_stock.assert_any_call("cash", company.id, founder.id, 10)
 
 
 def test_pay_dividends_updates_accounts(country_with_company_and_founder):
@@ -1030,13 +861,13 @@ def test_transfer_cb_profits_increases_govt_cash(before_transaction):
     # Given
     country = before_transaction
     country.monetary_authority = Mock(id=2)
-    auth = country.fiscal_authority = Mock(id=1)
+    country.fiscal_authority = Mock(id=1)
 
     # When
     country.transfer_central_bank_profits(100)
 
     # Then
-    country.increase_cash.assert_called_with(auth, 100)
+    country.transfer_stock.assert_any_call("cash", 2, 1, 100)
 
 
 def test_transfer_profits_to_government(before_transaction):
@@ -1061,8 +892,7 @@ def test_transfer_residual_cash_calls_cash_transfer(before_transaction):
     country.transfer_residual_cash(company, founder, 100)
 
     # Then
-    country.decrease_cash.assert_called_with(company, 100)
-    country.increase_cash.assert_called_with(founder, 100)
+    country.transfer_stock.assert_any_call("cash", company.id, founder.id, 100)
 
 
 def test_transfer_residual_cash_of_company(before_transaction):
@@ -1092,7 +922,7 @@ def test_request_advances_increases_company_cash(before_transaction):
     country.request_advances(company, 100)
 
     # Then
-    country.increase_cash.assert_called_with(company, 100)
+    country.transfer_stock.assert_any_call("cash", 1, 2, 100)
 
 
 def test_request_advances_updates_accounts(before_transaction):
@@ -1118,7 +948,7 @@ def test_repay_advances_decreases_cash(before_transaction):
     country.repay_advances(company, 100, 10)
 
     # Then
-    country.decrease_cash.assert_called_with(company, 110)
+    country.transfer_stock.assert_any_call("cash", 2, 1, 110)
 
 
 def test_repay_advances_updates_accounts(before_transaction):
@@ -1213,7 +1043,6 @@ def country_with_defaults(country_with_roles):
         company.name = "company"
         roles[company.agent.id] = company
         country.graph.add_edge(company, citizen)
-        country.cash[company.id] = Mock()
     country.spaces = {n: Mock() for n in range(10)}
     country.remove_role = Mock()
     return country, companies, citizens
@@ -1242,18 +1071,6 @@ def test_clear_defaults_reduces_company_number(country_with_defaults):
     # Then
     assert citizens[0].company_number == 0
     assert citizens[1].company_number == 2
-
-
-def test_clear_defaults_removes_cash(country_with_defaults):
-    # Given
-    country, companies, _ = country_with_defaults
-
-    # When
-    country.clear_defaults()
-
-    # Then
-    assert companies[0].id not in country.cash
-    assert companies[1].id in country.cash
 
 
 def test_clear_defaults_uses_spaces_method(country_with_defaults):

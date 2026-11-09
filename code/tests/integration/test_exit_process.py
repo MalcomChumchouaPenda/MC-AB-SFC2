@@ -43,25 +43,23 @@ def firm(model, union, founders):
     firm = Firm(model)
     firm.country_pos = 0
     union.add_agents([firm])
-    country = union.spaces["country_0"]
     for household in founders:
-        country.cash[household.id].amount = 50
+        household.account["cash"] = 50
         citizen = household.roles["citizen"]
         citizen.fund_company(firm.id, 50)
     return firm
 
 
-def test_firm_exit_with_residual_cash(firm, founders, union):
+def test_firm_exit_with_residual_cash(firm, founders):
     # Given
     firm.roles["employer"].wage = 150
-    cash = union.spaces["country_0"].cash
 
     # When
     firm.exit()
 
     # Then
-    assert cash[firm.id].amount == 0
+    assert firm.account["cash"] == 0
     assert firm.account["equities"] == 0
     for founder in founders:
-        assert cash[founder.id].amount == 50
+        assert founder.account["cash"] == 50
         assert founder.account["equities"] == 0

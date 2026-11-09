@@ -203,7 +203,7 @@ def cb_as_authority(cb_with_roles_and_account):
 def test_calc_profit(cb_as_authority):
     # Given
     cb, role = cb_as_authority
-    role.get_cash_interests.return_value = 20
+    cb.account["cash_interests"] = -20
     cb.account["bond_interests"] = 100
     cb.account["adv_interests"] = 40
 
@@ -229,50 +229,3 @@ def test_transfer_profit_to_government(cb_as_authority):
 # ---------------------------------------------------
 #  OBSERVATION
 # ----------------------------------------------------
-
-
-@pytest.fixture
-def cb_before_record(cb):
-    # Given
-    auth_role = Mock()
-    auth_role.get_cash_amount.return_value = 100
-    auth_role.get_cash_interests.return_value = 10
-    cb.roles = {"monetary_authority": auth_role}
-    return cb
-
-
-def test_record_items_records_cash_amount(cb_before_record):
-    # Given
-    cb = cb_before_record
-    cb.national = True
-
-    # When
-    cb.record_items()
-
-    # Then
-    assert cb.log["cash"][-1] == -100
-
-
-def test_record_items_records_cash_interests(cb_before_record):
-    # Given
-    cb = cb_before_record
-    cb.national = True
-
-    # When
-    cb.record_items()
-
-    # Then
-    assert cb.log["cash_interests"][-1] == -10
-
-
-def test_record_items_ignores_cash_if_not_national(cb_before_record):
-    # Given
-    cb = cb_before_record
-    cb.national = False
-
-    # When
-    cb.record_items()
-
-    # Then
-    assert "cash" not in cb.log
-    assert "cash_interests" not in cb.log

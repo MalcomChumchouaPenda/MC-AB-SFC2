@@ -42,7 +42,7 @@ def firm(model, country, bank):
     firm = Firm(model)
     firm.country_pos = 0
     country.add_agents([firm])
-    country.cash[firm.id].amount = 1000
+    firm.account["cash"] = 1000
     depositor = firm.roles["country_0_depositor"]
     deposit_bank = bank.roles["deposit_bank"]
     market = country.spaces["deposit_market"]
@@ -50,19 +50,17 @@ def firm(model, country, bank):
     return firm
 
 
-def test_decreases_firm_cash(firm, bank, country):
+def test_decreases_firm_cash(firm, bank):
     # Given
     depositor = firm.roles["country_0_depositor"]
     deposit_bank = bank.roles["deposit_bank"]
-    firm_cash = country.cash[firm.id]
-    bank_cash = country.cash[bank.id]
 
     # When
     depositor.make_deposits(deposit_bank.id, 200)
 
     # Then
-    assert firm_cash.amount == 800
-    assert bank_cash.amount == 200
+    assert firm.account["cash"] == 800
+    assert bank.account["cash"] == 200
 
 
 def test_increases_firm_deposits(firm, bank):
@@ -84,7 +82,7 @@ def household(model, country, bank):
     household = Household(model)
     household.country_pos = 0
     country.add_agents([household])
-    country.cash[household.id].amount = 1000
+    household.account["cash"] = 1000
     depositor = household.roles["depositor"]
     deposit_bank = bank.roles["deposit_bank"]
     market = country.spaces["deposit_market"]
@@ -96,15 +94,13 @@ def test_decreases_household_cash(household, bank, country):
     # Given
     depositor = household.roles["depositor"]
     deposit_bank = bank.roles["deposit_bank"]
-    household_cash = country.cash[household.id]
-    bank_cash = country.cash[bank.id]
 
     # When
     depositor.make_deposits(deposit_bank.id, 400)
 
     # Then
-    assert household_cash.amount == 600
-    assert bank_cash.amount == 400
+    assert household.account["cash"] == 600
+    assert bank.account["cash"] == 400
 
 
 def test_increases_household_deposits(household, bank):

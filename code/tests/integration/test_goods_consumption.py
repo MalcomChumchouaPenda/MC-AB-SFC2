@@ -63,12 +63,11 @@ def firms(model, union):
 
 
 @pytest.fixture
-def before_consumption(household, union, markets):
+def before_consumption(household, markets):
     # Given
     markets.average_price = 10
-    country = union.spaces["country_0"]
-    country.cash[household.id].amount = 100
     household.desired_consumption = 100
+    household.account["cash"] = 100
 
 
 @pytest.mark.usefixtures("before_consumption")
@@ -83,18 +82,14 @@ def test_increases_consumption_of_all_goods(household, firms):
 
 
 @pytest.mark.usefixtures("before_consumption")
-def test_transfers_cash_for_all_consumptions(household, firms, union):
-    # Given
-    country = union.spaces["country_0"]
-    cash = country.cash
-
+def test_transfers_cash_for_all_consumptions(household, firms):
     # When
     household.consume()
 
     # Then
-    assert cash[household.id].amount == 0
-    assert cash[firms[0].id].amount == 60
-    assert cash[firms[1].id].amount == 40
+    assert household.account["cash"] == 0
+    assert firms[0].account["cash"] == 60
+    assert firms[1].account["cash"] == 40
 
 
 @pytest.mark.usefixtures("before_consumption")

@@ -27,11 +27,10 @@ class CentralBank(EcoAgent):
         role.transfer_profit(profit)
 
     def _calc_profit(self):
-        role = self.roles["monetary_authority"]
         account = self.account
         bond_interests = account["bond_interests"]
         adv_interests = account["adv_interests"]
-        cash_interests = role.get_cash_interests()
+        cash_interests = -account["cash_interests"]
         return bond_interests + adv_interests - cash_interests
 
     #
@@ -66,10 +65,3 @@ class CentralBank(EcoAgent):
     #
     # Observation
     #
-    def record_items(self):
-        super().record_items()
-        roles = self.roles
-        if self.national:
-            auth_role = roles["monetary_authority"]
-            self.record("cash", -auth_role.get_cash_amount())
-            self.record("cash_interests", -auth_role.get_cash_interests())

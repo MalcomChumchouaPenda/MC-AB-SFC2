@@ -72,9 +72,9 @@ class Bank(EcoAgent):
     #
     def request_cash_advances(self):
         role = self.roles["company"]
-        cash = role.get_cash_amount()
-        deposits = self.account["deposits"]
-        required = self.p.mu2 * -deposits
+        cash = self.account["cash"]
+        deposits = -self.account["deposits"]
+        required = self.p.mu2 * deposits
         shortage = max(required - cash, 0)
         if shortage > 0:
             role.request_advances(shortage)
@@ -113,8 +113,7 @@ class Bank(EcoAgent):
         return bond_issuers
 
     def _calc_excess_reserves(self):
-        company_role = self.roles["company"]
-        cash = company_role.get_cash_amount()
+        cash = self.account["cash"]
         deposits = -self.account["deposits"]
         required = self.p.mu2 * deposits
         return max(cash - required, 0)
@@ -132,9 +131,8 @@ class Bank(EcoAgent):
         self.dividends_payable = self._calc_dividends()
 
     def _calc_profit(self):
-        company_role = self.roles["company"]
-        cash_interests = company_role.get_cash_interests()
         account = self.account
+        cash_interests = account["cash_interests"]
         loan_interests = account["loan_interests"]
         bond_interests = account["bond_interests"]
         loan_defts = -account["loan_defaults"]
@@ -195,7 +193,7 @@ class Bank(EcoAgent):
 
     def _transfer_residual_cash(self):
         role = self.roles["company"]
-        cash = role.get_cash_amount()
+        cash = self.account["cash"]
         if cash > 0:
             shares = role.get_equity_shares()
             total_shares = sum(share["value"] for share in shares)
@@ -211,7 +209,5 @@ class Bank(EcoAgent):
         super().record_items()
         roles = self.roles
         company_role = roles["company"]
-        self.record("cash", company_role.get_cash_amount())
-        self.record("cash_interests", company_role.get_cash_interests())
         self.record("equities", -company_role.get_equity_amount())
         self.record("dividends", -company_role.get_dividends())

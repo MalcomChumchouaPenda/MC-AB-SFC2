@@ -27,8 +27,7 @@ class CreditMarket(EcoSpace):
 
     def grant_loan(self, lender, borrower, amount, rate):
         borrower.loan_demand -= amount
-        self.env.decrease_cash(lender, amount)
-        self.env.increase_cash(borrower, amount)
+        self.transfer_stock("cash", lender.id, borrower.id, amount)
         self.transfer_stock("loans", borrower.id, lender.id, amount)
         self.graph.add_edge(borrower, lender, amount=amount, rate=rate)
 
@@ -37,8 +36,7 @@ class CreditMarket(EcoSpace):
     #
     def repay_loans(self, borrower, lender, principal, interests):
         total = principal + interests
-        self.env.increase_cash(lender, total)
-        self.env.decrease_cash(borrower, total)
+        self.transfer_stock("cash", borrower.id, lender.id, total)
         self.transfer_stock("loans", lender.id, borrower.id, principal)
         self.make_transaction("loan_interests", borrower.id, lender.id, interests)
         self.graph[borrower][lender]["amount"] -= principal

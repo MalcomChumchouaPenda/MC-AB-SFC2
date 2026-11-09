@@ -39,8 +39,7 @@ def bank(model, union):
     bank = Bank(model)
     bank.country_pos = 0
     union.add_agents([bank])
-    country = union.spaces["country_0"]
-    country.cash[bank.id].amount = 40
+    bank.account["cash"] = 40
     return bank
 
 
@@ -58,14 +57,13 @@ def test_increases_advances(bank, cb):
 
 
 @pytest.mark.usefixtures("cb")
-def test_transfers_cash(bank, union):
+def test_transfers_cash(bank):
     # Given
     bank.p.mu2 = 0.10
     bank.account["deposits"] = -1000
-    cash = union.spaces["country_0"].cash
 
     # When
     bank.request_cash_advances()
 
     # Then
-    assert cash[bank.id].amount == 100
+    assert bank.account["cash"] == 100

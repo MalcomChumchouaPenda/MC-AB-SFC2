@@ -40,21 +40,6 @@ def test_initializes_company_number():
     assert role.company_number == 0
 
 
-@pytest.mark.parametrize("desired, expected", [(0, 0), (100, 100), (150, 100)])
-def test_exposes_feasible_investment(desired, expected):
-    # Given
-    agent, env = Mock(), Mock()
-    role = Citizen(agent, env)
-    role.desired_investment = desired
-    env.cash = {role.id: Mock(amount=100)}
-
-    # When
-    exposed = role.feasible_investment
-
-    # Then
-    assert exposed == expected
-
-
 # ---------------------------------------------------
 # PERCEPTION TESTS
 # ----------------------------------------------------
@@ -65,18 +50,6 @@ def role():
     # Given
     agent, env = Mock(), Mock()
     return Citizen(agent, env)
-
-
-def test_get_cash_amount(role):
-    # Given
-    env = role.env
-    env.cash = {role.id: Mock(amount=100)}
-
-    # When
-    perceived = role.get_cash_amount()
-
-    # Then
-    assert perceived == 100
 
 
 def test_get_prob_failure(role):

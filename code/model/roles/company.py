@@ -22,12 +22,6 @@ class Company(EcoRole):
     # perceptions method
     #
 
-    def get_cash_amount(self):
-        return self.env.cash[self.id].amount
-
-    def get_cash_interests(self):
-        return self.env.cash[self.id].interests
-
     def get_equity_amount(self):
         return -self.agent.account["equities"]
 

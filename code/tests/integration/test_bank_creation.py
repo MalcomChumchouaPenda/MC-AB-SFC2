@@ -58,7 +58,7 @@ def founders(model, union):
 def before_bank_creation(founders, country):
     # Given
     for household in founders:
-        country.cash[household.id].amount = 400
+        household.account["cash"] = 400
         citizen_role = household.roles["citizen"]
         citizen_role.desired_investment = household.desired_equity
     for i in range(5):
@@ -106,9 +106,9 @@ def test_transfers_some_cash_from_household_to_new_bank(founders, model, country
     initiator.invest_equity()
 
     # Then
-    assert country.cash[initiator.id].amount == 0
-    assert country.cash[partner.id].amount == 200
-    assert country.cash[banks[0].id].amount == 600
+    assert initiator.account["cash"] == 0
+    assert partner.account["cash"] == 200
+    assert banks[0].account["cash"] == 600
 
 
 @pytest.mark.usefixtures("before_bank_creation")

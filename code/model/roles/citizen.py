@@ -8,17 +8,9 @@ class Citizen(EcoRole):
         self.desired_investment = 0
         self.company_number = 0
 
-    @property
-    def feasible_investment(self):
-        cash = self.env.cash[self.id]
-        return min(cash.amount, self.desired_investment)
-
     #
     # Perception methods
     #
-
-    def get_cash_amount(self):
-        return self.env.cash[self.id].amount
 
     def get_prob_failure(self):
         return self.env.prob_failure

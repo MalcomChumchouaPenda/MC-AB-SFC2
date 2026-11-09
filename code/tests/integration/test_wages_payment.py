@@ -72,14 +72,11 @@ def test_increases_wages_from_firm(firm, households):
 
 
 @pytest.mark.usefixtures("before_payment")
-def test_transfers_cash_from_firm_to_household(firm, households, country):
-    # Given
-    cash = country.cash
-
+def test_transfers_cash_from_firm_to_household(firm, households):
     # When
     firm.pay_wages()
 
     # Then
-    assert cash[firm.id].amount == -20.0
-    assert cash[households[0].id].amount == 10.0
-    assert cash[households[1].id].amount == 10.0
+    assert firm.account["cash"] == -20.0
+    assert households[0].account["cash"] == 10.0
+    assert households[1].account["cash"] == 10.0

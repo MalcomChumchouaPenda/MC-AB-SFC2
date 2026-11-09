@@ -37,8 +37,7 @@ class GoodsMarket(EcoSpace):
         amount = quantity * producer.price
         producer.inventories -= quantity
         producer.sales += amount
-        self.env.decrease_cash(consumer, amount)
-        self.env.increase_cash(producer, amount)
+        self.transfer_stock("cash", consumer.id, producer.id, amount)
         self.make_transaction("consumption", consumer.id, producer.id, amount)
 
     #

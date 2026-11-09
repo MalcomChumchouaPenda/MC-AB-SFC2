@@ -43,12 +43,12 @@ def firm(model, country):
 
 
 @pytest.fixture
-def before_firm_payment(firm, household, country):
+def before_firm_payment(firm, household):
     # Given
     citizen = household.roles["citizen"]
     citizen.fund_company(firm.id, 500)
-    country.cash[household.id].amount = 0
-    country.cash[firm.id].amount = 1000
+    household.account["cash"] = 0
+    firm.account["cash"] = 1000
     firm.dividends_payable = 200
 
 
@@ -64,17 +64,13 @@ def test_increases_household_dividends_from_firm(firm, household):
 
 
 @pytest.mark.usefixtures("before_firm_payment")
-def test_decreases_firm_cash(firm, household, country):
-    # Given
-    firm_cash = country.cash[firm.id]
-    household_cash = country.cash[household.id]
-
+def test_decreases_firm_cash(firm, household):
     # When
     firm.pay_dividends()
 
     # Then
-    assert firm_cash.amount == 800
-    assert household_cash.amount == 200
+    assert firm.account["cash"] == 800
+    assert household.account["cash"] == 200
 
 
 @pytest.fixture
@@ -87,12 +83,12 @@ def bank(model, country):
 
 
 @pytest.fixture
-def before_bank_payment(bank, household, country):
+def before_bank_payment(bank, household):
     # Given
     citizen = household.roles["citizen"]
     citizen.fund_company(bank.id, 500)
-    country.cash[household.id].amount = 0
-    country.cash[bank.id].amount = 500
+    household.account["cash"] = 0
+    bank.account["cash"] = 500
     bank.dividends_payable = 100
 
 
@@ -108,14 +104,10 @@ def test_increases_household_dividends_from_bank(bank, household):
 
 
 @pytest.mark.usefixtures("before_bank_payment")
-def test_decreases_bank_cash(bank, household, country):
-    # Given
-    bank_cash = country.cash[bank.id]
-    household_cash = country.cash[household.id]
-
+def test_decreases_bank_cash(bank, household):
     # When
     bank.pay_dividends()
 
     # Then
-    assert bank_cash.amount == 400
-    assert household_cash.amount == 100
+    assert bank.account["cash"] == 400
+    assert household.account["cash"] == 100

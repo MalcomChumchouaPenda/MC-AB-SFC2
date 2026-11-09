@@ -467,11 +467,10 @@ def hh_as_specific_consumer(hh_with_roles_and_account):
     consumer_role = Mock()
     consumer_role.get_average_price.return_value = 1
     consumer_role.find_suppliers.return_value = []
-    citizen_role = Mock()
-    citizen_role.get_cash_amount.return_value = 1000
-    household, roles, _ = hh_with_roles_and_account
+    household, roles, account = hh_with_roles_and_account
     household.p.psi = 1
-    roles["citizen"] = citizen_role
+    roles["citizen"] = Mock()
+    account["cash"] = 1000
     return household, consumer_role
 
 
@@ -571,8 +570,7 @@ def test_consume_good_with_monetary_constraints(hh_as_specific_consumer):
     ranked = [Mock(price=5, inventories=10) for _ in range(2)]
     household, consumer_role = hh_as_specific_consumer
     household._rank_suppliers = Mock(return_value=ranked)
-    citizen_role = household.roles["citizen"]
-    citizen_role.get_cash_amount.return_value = 50
+    household.account["cash"] = 50
 
     # When
     household._consume_good(consumer_role, 100)
@@ -585,16 +583,15 @@ def test_consume_good_with_monetary_constraints(hh_as_specific_consumer):
 @pytest.fixture
 def hh_as_general_consumer(hh_with_roles_and_account):
     # Given
-    citizen_role = Mock()
-    citizen_role.get_cash_amount.return_value = 100
-    household, roles, _ = hh_with_roles_and_account
+    household, roles, account = hh_with_roles_and_account
     household.p.cT = 0.6
     household.desired_consumption = 100
     household._withdraw_deposits = Mock()
     household._consume_good = Mock()
     roles["trad_consumer"] = Mock()
     roles["non_trad_consumer"] = Mock()
-    roles["citizen"] = citizen_role
+    roles["citizen"] = Mock()
+    account["cash"] = 100
     return household, roles
 
 
@@ -625,9 +622,8 @@ def test_consume_randomizes_entry_order(hh_as_general_consumer):
 
 def test_consume_withdraws_needed_deposits(hh_as_general_consumer):
     # Given
-    household, roles = hh_as_general_consumer
-    citizen_role = roles["citizen"]
-    citizen_role.get_cash_amount.return_value = 40
+    household, _ = hh_as_general_consumer
+    household.account["cash"] = 40
 
     # When
     household.consume()
@@ -644,7 +640,8 @@ def test_consume_withdraws_needed_deposits(hh_as_general_consumer):
 @pytest.fixture
 def before_allocation(hh_with_roles_and_account):
     # Given
-    household, roles, _ = hh_with_roles_and_account
+    household, roles, account = hh_with_roles_and_account
+    account["cash"] = 1000
     roles["citizen"] = Mock()
     roles["depositor"] = Mock()
     return household, roles
@@ -652,11 +649,10 @@ def before_allocation(hh_with_roles_and_account):
 
 def test_calc_net_worth(before_allocation):
     # Given
-    household, roles = before_allocation
+    household, _ = before_allocation
     household.account["deposits"] = 200
     household.account["equities"] = 300
-    citizen_role = roles["citizen"]
-    citizen_role.get_cash_amount.return_value = 500
+    household.account["cash"] = 500
 
     # When
     household._calc_net_worth()
@@ -790,10 +786,14 @@ def test_choose_portfolio_allocation_preserves_existing_equity(before_allocation
     assert household.desired_equity == 80
 
 
-def test_choose_portfolio_allocation_updates_citizen_role(before_allocation):
+@pytest.mark.parametrize("cash, expected", [(0, 0), (50, 50), (100, 80)])
+def test_choose_portfolio_allocation_exposes_investment(
+    before_allocation, cash, expected
+):
     # Given
     household, roles = before_allocation
     household.account["equities"] = 80
+    household.account["cash"] = cash
     household._calc_liquidity_preference = Mock(return_value=0.80)
     household._calc_expected_net_worth = Mock(return_value=100)
     household._calc_net_worth = Mock()
@@ -803,7 +803,7 @@ def test_choose_portfolio_allocation_updates_citizen_role(before_allocation):
     household.choose_portfolio_allocation()
 
     # Then
-    assert role.desired_investment == 80
+    assert role.desired_investment == expected
 
 
 # ---------------------------------------------------
@@ -1080,9 +1080,9 @@ def test_calc_initial_equity_uses_median_firm_size_if_no_bank_sector(hh_as_inves
 @pytest.fixture
 def investors(hh_as_investor):
     # Given
-    investors = [Mock(feasible_investment=10, company_number=i) for i in range(2)]
+    investors = [Mock(desired_investment=10, company_number=i) for i in range(2)]
     _, role = hh_as_investor
-    role.feasible_investment = 10
+    role.desired_investment = 10
     role.find_investors.return_value = investors
     return investors
 
@@ -1136,7 +1136,7 @@ def test_collect_equity_shares_with_minimum_level_of_equity(before_equity_collec
     # Given
     household, role, investors = before_equity_collection
     ineligible, eligible = investors
-    ineligible.feasible_investment = 0.5
+    ineligible.desired_investment = 0.5
     founders = [role, eligible]
 
     # When
@@ -1559,9 +1559,8 @@ def test_make_deposits_with_residual_cash(before_deposits):
     # Given
     bank_id = 2
     household, roles = before_deposits
+    household.account["cash"] = 500
     depositor_role = roles["depositor"]
-    citizen_role = roles["citizen"]
-    citizen_role.get_cash_amount.return_value = 500
 
     # When
     household._make_deposits(bank_id)
@@ -1606,23 +1605,3 @@ def test_update_labor_history_sets_prev_labor_sold(hh_with_roles_and_account):
 # ---------------------------------------------------
 #  OBSERVATION
 # ----------------------------------------------------
-
-
-@pytest.fixture
-def household_before_record(household):
-    # Given
-    citizen_role = Mock()
-    citizen_role.get_cash_amount.return_value = 100
-    household.roles = {"citizen": citizen_role}
-    return household
-
-
-def test_record_items_records_cash_amount(household_before_record):
-    # Given
-    household = household_before_record
-
-    # When
-    household.record_items()
-
-    # Then
-    assert household.log["cash"][-1] == 100

@@ -69,7 +69,7 @@ def firm(model, union):
 def before_firm_reimbursement(firm, bank, union):
     # Given
     country = union.spaces["country_0"]
-    country.cash[firm.id].amount = 1000
+    firm.account["cash"] = 1000
     depositor = firm.roles["country_0_depositor"]
     deposit_bank = bank.roles["deposit_bank"]
     deposit_market = country.spaces["deposit_market"]
@@ -88,19 +88,14 @@ def test_issues_bonds_for_reimbursement(govt):
 
 
 @pytest.mark.usefixtures("before_firm_reimbursement")
-def test_increases_firm_cash(firm, govt, union):
-    # Given
-    country = union.spaces["country_0"]
-    govt_cash = country.cash[govt.id]
-    firm_cash = country.cash[firm.id]
-
+def test_increases_firm_cash(firm, govt):
     # When
     govt.issue_deposit_guarantee_bonds()
     govt.reimburse_deposits()
 
     # Then
-    assert govt_cash.amount == -500
-    assert firm_cash.amount == 1000
+    assert govt.account["cash"] == -500
+    assert firm.account["cash"] == 1000
 
 
 @pytest.mark.usefixtures("before_firm_reimbursement")
@@ -127,7 +122,7 @@ def household(model, union):
 def before_household_reimbursement(household, bank, union):
     # Given
     country = union.spaces["country_0"]
-    country.cash[household.id].amount = 1000
+    household.account["cash"] = 1000
     depositor = household.roles["depositor"]
     deposit_bank = bank.roles["deposit_bank"]
     deposit_market = country.spaces["deposit_market"]
@@ -135,19 +130,14 @@ def before_household_reimbursement(household, bank, union):
 
 
 @pytest.mark.usefixtures("before_household_reimbursement")
-def test_increases_household_cash(household, govt, union):
-    # Given
-    country = union.spaces["country_0"]
-    household_cash = country.cash[household.id]
-    govt_cash = country.cash[govt.id]
-
+def test_increases_household_cash(household, govt):
     # When
     govt.issue_deposit_guarantee_bonds()
     govt.reimburse_deposits()
 
     # Then
-    assert household_cash.amount == 1000
-    assert govt_cash.amount == -500
+    assert household.account["cash"] == 1000
+    assert govt.account["cash"] == -500
 
 
 @pytest.mark.usefixtures("before_household_reimbursement")

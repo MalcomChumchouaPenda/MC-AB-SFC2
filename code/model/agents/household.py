@@ -107,15 +107,13 @@ class Household(EcoAgent):
             self._consume_good(role, target_cons)
 
     def _fund_consumption(self, desired_cons):
-        role = self.roles["citizen"]
-        cash = role.get_cash_amount()
+        cash = self.account["cash"]
         if desired_cons > cash:
             needs = desired_cons - cash
             self._withdraw_deposits(needs)
 
     def _consume_good(self, consumer_role, target_cons):
-        citizen_role = self.roles["citizen"]
-        cash = citizen_role.get_cash_amount()
+        cash = self.account["cash"]
         for supplier in self._list_suppliers(consumer_role):
             if target_cons <= 0 or cash <= 0:
                 break
@@ -148,12 +146,13 @@ class Household(EcoAgent):
     #
     def choose_portfolio_allocation(self):
         self._calc_net_worth()
+        cash = self.account["cash"]
         equities = self.account["equities"]
         lp = self._calc_liquidity_preference()
         expected_worth = self._calc_expected_net_worth()
         self.desired_equity = max(equities, (1 - lp) * expected_worth)
         self.desired_deposits = expected_worth - (self.desired_equity - equities)
-        self.roles["citizen"].desired_investment = self.desired_equity
+        self.roles["citizen"].desired_investment = min(cash, self.desired_equity)
 
     def _calc_liquidity_preference(self):
         p = self.p
@@ -168,9 +167,8 @@ class Household(EcoAgent):
         return p.lambda_ * math.exp(profit_ratio * (1 - default_prob) - deposit_rate)
 
     def _calc_net_worth(self):
-        role = self.roles["citizen"]
-        cash = role.get_cash_amount()
         account = self.account
+        cash = account["cash"]
         deposits = account["deposits"]
         equities = account["equities"]
         self.net_worth = deposits + equities + cash
@@ -231,11 +229,11 @@ class Household(EcoAgent):
     def _collect_equity_shares(self, target):
         p = self.p
         initiator = self.roles["citizen"]
-        collected_equity = initiator.feasible_investment
+        collected_equity = initiator.desired_investment
         min_equity = p.omega * initiator.get_average_wage()
-        shares = [{"citizen": initiator, "amount": initiator.feasible_investment}]
+        shares = [{"citizen": initiator, "amount": initiator.desired_investment}]
         for investor in initiator.find_investors():
-            investment = investor.feasible_investment
+            investment = investor.desired_investment
             if investment < min_equity or investor.company_number >= p.psi:
                 continue
             shares.append({"citizen": investor, "amount": investment})
@@ -303,8 +301,7 @@ class Household(EcoAgent):
             return new_bank.id
 
     def _make_deposits(self, bank_id):
-        citizen_role = self.roles["citizen"]
-        cash = citizen_role.get_cash_amount()
+        cash = self.account["cash"]
         depositor_role = self.roles["depositor"]
         depositor_role.make_deposits(bank_id, cash)
 
@@ -328,8 +325,3 @@ class Household(EcoAgent):
     #
     # Observation
     #
-    def record_items(self):
-        super().record_items()
-        roles = self.roles
-        citizen_role = roles["citizen"]
-        self.record("cash", citizen_role.get_cash_amount())

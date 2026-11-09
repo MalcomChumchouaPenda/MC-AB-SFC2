@@ -96,17 +96,15 @@ def test_decreases_loan_as_link(markets, firm, bank):
 
 
 @pytest.mark.usefixtures("before_repayment")
-def test_decreases_firm_cash(firm, bank, union):
+def test_decreases_firm_cash(firm, bank):
     # Given
-    country = union.spaces["country_0"]
-    cash = country.cash
-    cash[firm.id].amount = 200
-    cash[bank.id].amount = 200
+    firm.account["cash"] = 200
+    bank.account["cash"] = 200
     repayment = 50 * (1 + 0.1)
 
     # When
     firm.repay_loans()
 
     # Then
-    assert cash[firm.id].amount == pytest.approx(200 - repayment)
-    assert cash[bank.id].amount == pytest.approx(200 + repayment)
+    assert firm.account["cash"] == pytest.approx(200 - repayment)
+    assert bank.account["cash"] == pytest.approx(200 + repayment)

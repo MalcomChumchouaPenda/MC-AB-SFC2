@@ -54,16 +54,14 @@ def bank(model, union):
     bank = Bank(model)
     bank.country_pos = 0
     union.add_agents([bank])
-    country = union.spaces["country_0"]
-    country.cash[bank.id].amount = 150
+    bank.account["cash"] = 150
     return bank
 
 
 @pytest.fixture
-def before_bonds_purchase(govt, bank, union):
+def before_bonds_purchase(govt, bank):
     # Given
-    country = union.spaces["country_0"]
-    country.cash[bank.id].amount = 150
+    bank.account["cash"] = 150
     bank.account["deposits"] = -1000
     issuer_role = govt.roles["bond_issuer"]
     issuer_role.bond_value = 5.0
@@ -107,16 +105,13 @@ def test_increases_bonds_with_bank_purchase(govt, bank):
 
 
 @pytest.mark.usefixtures("before_bonds_purchase")
-def test_transfers_cash_from_bank(govt, bank, union):
-    # Given
-    cash = union.spaces["country_0"].cash
-
+def test_transfers_cash_from_bank(govt, bank):
     # When
     bank.buy_bonds()
 
     # Then
-    assert cash[govt.id].amount == 50
-    assert cash[bank.id].amount == 100
+    assert govt.account["cash"] == 50
+    assert bank.account["cash"] == 100
 
 
 @pytest.mark.usefixtures("before_bonds_purchase")
@@ -156,12 +151,9 @@ def test_increases_bonds_with_central_bank_purchase(govt, cb):
 
 
 @pytest.mark.usefixtures("before_bonds_purchase")
-def test_transfers_cash_from_central_bank(govt, cb, union):
-    # Given
-    cash = union.spaces["country_0"].cash
-
+def test_transfers_cash_from_central_bank(govt, cb):
     # When
     cb.buy_bonds()
 
     # Then
-    assert cash[govt.id].amount == 500
+    assert govt.account["cash"] == 500

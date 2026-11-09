@@ -745,10 +745,9 @@ def after_borrowing(firm_with_roles_and_account):
 def test_repay_loans_after_making_deposits(after_borrowing, cash, expected):
     # Given
     firm, roles, loan, deposit = after_borrowing
+    firm.account["cash"] = cash
     deposit["amount"] = 20
     lender = loan["lender"]
-    company_role = roles["company"]
-    company_role.get_cash_amount.return_value = cash
     depositor_role = roles["country_1_depositor"]
 
     # When
@@ -761,11 +760,10 @@ def test_repay_loans_after_making_deposits(after_borrowing, cash, expected):
 def test_repay_loans_to_all_lenders(after_borrowing):
     # Given
     firm, roles, loan, deposit = after_borrowing
+    firm.account["cash"] = 100
     deposit["amount"] = 200
     lender = loan["lender"]
     borrower_role = roles["borrower"]
-    company_role = roles["company"]
-    company_role.get_cash_amount.return_value = 100
 
     # When
     firm.repay_loans()
@@ -778,11 +776,10 @@ def test_repay_loans_to_all_lenders(after_borrowing):
 def test_repay_loans_with_available_deposits(after_borrowing, fund, default):
     # Given
     firm, roles, loan, deposit = after_borrowing
+    firm.account["cash"] = 0
     deposit["amount"] = fund
     lender = loan["lender"]
     borrower_role = roles["borrower"]
-    company_role = roles["company"]
-    company_role.get_cash_amount.return_value = 0
 
     # When
     firm.repay_loans()
@@ -1032,11 +1029,10 @@ def test_pay_no_dividends(firm_with_roles_and_account):
 def firm_before_exit(firm, borrower_role, company_role):
     # Given
     borrower_role.find_loans.return_value = []
-    company_role.get_cash_amount.return_value = 0
     company_role.get_equity_amount.return_value = 50
     company_role.get_equity_shares.return_value = []
     firm.roles["employer"] = Mock(wage=100)
-    firm.account = {"deposits": 0, "loans": 0}
+    firm.account = {"deposits": 0, "loans": 0, "cash": 0}
     return firm
 
 
@@ -1114,7 +1110,7 @@ def test_exit_transfer_residual_cash_to_founders(firm_before_exit, company_role)
     founder = object()
     share = {"citizen": founder, "value": 1000}
     firm = firm_before_exit
-    company_role.get_cash_amount.return_value = 200
+    firm.account["cash"] = 200
     company_role.get_equity_shares.return_value = [share]
 
     # When
@@ -1145,21 +1141,9 @@ def test_exit_sets_all_roles_defaulted(firm_before_exit):
 @pytest.fixture
 def firm_before_record(firm, company_role):
     # Given
-    company_role.get_cash_amount.return_value = 100
     company_role.get_equity_amount.return_value = 200
     company_role.get_dividends.return_value = 20
     return firm
-
-
-def test_record_items_records_cash_amount(firm_before_record):
-    # Given
-    firm = firm_before_record
-
-    # When
-    firm.record_items()
-
-    # Then
-    assert firm.log["cash"][-1] == 100
 
 
 def test_record_items_records_equities(firm_before_record):

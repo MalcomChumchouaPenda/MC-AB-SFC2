@@ -54,10 +54,10 @@ def founders(model, union):
 
 
 @pytest.fixture
-def before_firm_creation(founders, country):
+def before_firm_creation(founders):
     # Given
     for household in founders:
-        country.cash[household.id].amount = 400
+        household.account["cash"] = 400
         citizen_role = household.roles["citizen"]
         citizen_role.desired_investment = household.desired_equity
 
@@ -96,15 +96,14 @@ def test_transfers_cash_from_households_to_firm(founders, model, country):
     # Given
     initiator, partner = founders
     firms = model.firms
-    cash = country.cash
 
     # When
     initiator.invest_equity()
 
     # Then
-    assert cash[initiator.id].amount == 100
-    assert cash[partner.id].amount == 200
-    assert cash[firms[0].id].amount == 500
+    assert initiator.account["cash"] == 100
+    assert partner.account["cash"] == 200
+    assert firms[0].account["cash"] == 500
 
 
 @pytest.mark.usefixtures("before_firm_creation")

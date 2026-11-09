@@ -200,14 +200,12 @@ def test_join_deposit_bank_with_initial_amount(market_with_participants):
 def test_join_deposit_bank_transfers_cash(market_with_participants):
     # Given
     market, depositor, deposit_bank = market_with_participants
-    env = market.env
 
     # When
     market.join_deposit_bank(depositor, deposit_bank, amount=500)
 
     # Then
-    env.decrease_cash.assert_called_with(depositor, 500)
-    env.increase_cash.assert_called_with(deposit_bank, 500)
+    market.transfer_stock.assert_any_call("cash", depositor.id, deposit_bank.id, 500)
 
 
 def test_join_deposit_bank_updates_accounts(market_with_participants):
@@ -245,14 +243,12 @@ def test_leave_deposit_bank_remove_graph_edge(market_with_depositor_amount):
 def test_leave_deposit_bank_transfers_cash(market_with_depositor_amount):
     # Given
     market, depositor, deposit_bank, amount = market_with_depositor_amount
-    env = market.env
 
     # When
     market.leave_deposit_bank(depositor, deposit_bank)
 
     # Then
-    env.increase_cash.assert_called_with(depositor, amount)
-    env.decrease_cash.assert_called_with(deposit_bank, amount)
+    market.transfer_stock.assert_any_call("cash", deposit_bank.id, depositor.id, amount)
 
 
 def test_leave_deposit_bank_updates_accounts(market_with_depositor_amount):
@@ -275,14 +271,12 @@ def test_leave_deposit_bank_updates_accounts(market_with_depositor_amount):
 def test_make_deposits_transfers_cash(market_with_depositor_amount):
     # Given
     market, depositor, deposit_bank, _ = market_with_depositor_amount
-    env = market.env
 
     # When
     market.make_deposits(depositor, deposit_bank, 500)
 
     # Then
-    env.decrease_cash.assert_called_with(depositor, 500)
-    env.increase_cash.assert_called_with(deposit_bank, 500)
+    market.transfer_stock.assert_any_call("cash", depositor.id, deposit_bank.id, 500)
 
 
 def test_make_deposits_updates_accounts(market_with_depositor_amount):
@@ -312,14 +306,12 @@ def test_make_deposits_updates_edge(market_with_depositor_amount):
 def test_withdraw_deposits_transfers_cash(market_with_depositor_amount):
     # Given
     market, depositor, deposit_bank, _ = market_with_depositor_amount
-    env = market.env
 
     # When
     market.withdraw_deposits(depositor, deposit_bank, 500)
 
     # Then
-    env.increase_cash.assert_called_with(depositor, 500)
-    env.decrease_cash.assert_called_with(deposit_bank, 500)
+    market.transfer_stock.assert_any_call("cash", deposit_bank.id, depositor.id, 500)
 
 
 def test_withdraw_deposits_updates_accounts(market_with_depositor_amount):
@@ -381,14 +373,12 @@ def test_reimburse_deposits_transfers_cash(market_with_depositor_amount):
     # Given
     market, depositor, deposit_bank, _ = market_with_depositor_amount
     guarantee = Mock()
-    env = market.env
 
     # When
     market.reimburse_deposits(guarantee, depositor, deposit_bank, 50)
 
     # Then
-    env.decrease_cash.assert_called_with(guarantee, 50)
-    env.increase_cash.assert_called_with(depositor, 50)
+    market.transfer_stock.assert_any_call("cash", guarantee.id, depositor.id, 50)
 
 
 def test_reimburse_deposits_updates_accounts(market_with_depositor_amount):

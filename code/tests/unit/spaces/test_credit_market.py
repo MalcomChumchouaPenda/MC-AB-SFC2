@@ -108,14 +108,12 @@ def test_grant_loan_creates_graph_edge(market_with_participants):
 def test_grant_loan_transfers_cash(market_with_participants):
     # Given
     market, borrower, lender = market_with_participants
-    env = market.env
 
     # When
     market.grant_loan(lender, borrower, 500, 0.05)
 
     # Then
-    env.decrease_cash.assert_called_with(lender, 500)
-    env.increase_cash.assert_called_with(borrower, 500)
+    market.transfer_stock.assert_any_call("cash", lender.id, borrower.id, 500)
 
 
 def test_grant_loan_updates_accounts(market_with_participants):
@@ -170,14 +168,12 @@ def test_repay_loans_updates_graph_edge(market_with_loan):
 def test_repay_loans_transfers_cash(market_with_loan):
     # Given
     market, borrower, lender = market_with_loan
-    env = market.env
 
     # When
     market.repay_loans(borrower, lender, 100, 10)
 
     # Then
-    env.increase_cash.assert_called_with(lender, 110)
-    env.decrease_cash.assert_called_with(borrower, 110)
+    market.transfer_stock.assert_any_call("cash", borrower.id, lender.id, 110)
 
 
 def test_repay_loans_updates_accounts(market_with_loan):

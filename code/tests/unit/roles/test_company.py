@@ -80,36 +80,6 @@ def role():
     return Company(agent, env)
 
 
-@pytest.fixture
-def cash():
-    # Given
-    return Mock(amount=100, interests=10)
-
-
-def test_get_cash_amount(role, cash):
-    # Given
-    env = role.env
-    env.cash = {role.id: cash}
-
-    # When
-    perceived = role.get_cash_amount()
-
-    # Then
-    assert perceived == 100
-
-
-def test_get_cash_interests(role, cash):
-    # Given
-    env = role.env
-    env.cash = {role.id: cash}
-
-    # When
-    perceived = role.get_cash_interests()
-
-    # Then
-    assert perceived == 10
-
-
 def test_get_equity_amount(role):
     # Given
     agent = role.agent

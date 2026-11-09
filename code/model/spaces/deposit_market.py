@@ -38,15 +38,13 @@ class DepositMarket(EcoSpace):
     #
 
     def join_deposit_bank(self, depositor, deposit_bank, amount=0):
-        self.env.decrease_cash(depositor, amount)
-        self.env.increase_cash(deposit_bank, amount)
+        self.transfer_stock("cash", depositor.id, deposit_bank.id, amount)
         self.transfer_stock("deposits", deposit_bank.id, depositor.id, amount)
         self.graph.add_edge(depositor, deposit_bank, amount=amount)
 
     def leave_deposit_bank(self, depositor, deposit_bank):
         amount = self.graph[depositor][deposit_bank]["amount"]
-        self.env.increase_cash(depositor, amount)
-        self.env.decrease_cash(deposit_bank, amount)
+        self.transfer_stock("cash", deposit_bank.id, depositor.id, amount)
         self.transfer_stock("deposits", depositor.id, deposit_bank.id, amount)
         self.graph.remove_edge(depositor, deposit_bank)
         if self.graph.has_edge(deposit_bank, depositor):  # DEBUG NETWORKX
@@ -58,21 +56,18 @@ class DepositMarket(EcoSpace):
         self.graph[depositor][deposit_bank]["amount"] += amount
 
     def reimburse_deposits(self, guarantee, depositor, deposit_bank, amount):
-        self.env.decrease_cash(guarantee, amount)
-        self.env.increase_cash(depositor, amount)
+        self.transfer_stock("cash", guarantee.id, depositor.id, amount)
         self.transfer_stock("deposits", depositor.id, deposit_bank.id, amount)
         self.make_transaction("loan_defaults", guarantee.id, deposit_bank.id, amount)
         self.graph[depositor][deposit_bank]["amount"] -= amount
 
     def make_deposits(self, depositor, deposit_bank, amount):
-        self.env.decrease_cash(depositor, amount)
-        self.env.increase_cash(deposit_bank, amount)
+        self.transfer_stock("cash", depositor.id, deposit_bank.id, amount)
         self.transfer_stock("deposits", deposit_bank.id, depositor.id, amount)
         self.graph[depositor][deposit_bank]["amount"] += amount
 
     def withdraw_deposits(self, depositor, deposit_bank, amount):
-        self.env.increase_cash(depositor, amount)
-        self.env.decrease_cash(deposit_bank, amount)
+        self.transfer_stock("cash", deposit_bank.id, depositor.id, amount)
         self.transfer_stock("deposits", depositor.id, deposit_bank.id, amount)
         self.graph[depositor][deposit_bank]["amount"] -= amount
 

@@ -82,10 +82,10 @@ def test_transfers_cash(bank, cb, country):
     bank.account["advances"] = -100
     cb.account["advances"] = 100
     country.discount_rate = 0.05
-    cash = country.cash
 
     # When
     bank.repay_cash_advances()
 
     # Then
-    assert cash[bank.id].amount == -105
+    assert bank.account["cash"] == -105
+    assert cb.account["cash"] == 105

@@ -219,14 +219,12 @@ def test_pay_wages_update_edge(market_with_jobs):
 def test_pay_wages_transfers_cash(market_with_jobs):
     # Given
     market, employer, worker = market_with_jobs
-    env = market.env
 
     # When
     market.pay_wages(employer, worker, 3.0)
 
     # Then
-    env.decrease_cash.assert_called_with(employer, 3.0)
-    env.increase_cash.assert_called_with(worker, 3.0)
+    market.transfer_stock.assert_any_call("cash", employer.id, worker.id, 3.0)
 
 
 def test_pay_wages_updates_accounts(market_with_jobs):

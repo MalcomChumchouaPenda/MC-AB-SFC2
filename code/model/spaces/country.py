@@ -23,7 +23,6 @@ class Country(EcoSpace):
         self.discount_rate = p.initial_discount_rate
         self.monetary_authority = None
         self.fiscal_authority = None
-        self.cash = {}
 
     @property
     def average_wage(self):
@@ -49,25 +48,21 @@ class Country(EcoSpace):
         if govt.country_pos == self.pos:
             role = self.add_role(FiscalAuthority, govt)
             self.fiscal_authority = role
-            self.cash[govt.id] = Cash()
 
     def add_household(self, household):
         if household.country_pos == self.pos:
             self.add_role(Citizen, household)
-            self.cash[household.id] = Cash()
 
     def add_firm(self, firm):
         if firm.country_pos == self.pos:
             sector = "FT" if firm.tradable else "FNT"
             role = self.add_role(Company, firm)
             role.sector = sector
-            self.cash[firm.id] = Cash()
 
     def add_bank(self, bank):
         if bank.country_pos == self.pos:
             role = self.add_role(Company, bank)
             role.sector = "B"
-            self.cash[bank.id] = Cash()
 
     #
     # Current indicators
@@ -127,28 +122,6 @@ class Country(EcoSpace):
         return self.spaces["labor_market"].calc_wage_range()
 
     #
-    # Cash operations
-    #
-
-    def decrease_cash(self, role, amount):
-        auth = self.monetary_authority
-        if auth is not None and role.id is auth.id:
-            return
-        if role.country_pos == self.pos:
-            self.cash[role.id].amount -= amount
-        else:
-            self.env.decrease_cash(role, amount)
-
-    def increase_cash(self, role, amount):
-        auth = self.monetary_authority
-        if auth is not None and role.id is auth.id:
-            return
-        if role.country_pos == self.pos:
-            self.cash[role.id].amount += amount
-        else:
-            self.env.increase_cash(role, amount)
-
-    #
     # Equity investment
     #
 
@@ -159,8 +132,7 @@ class Country(EcoSpace):
             self.graph[company][founder]["value"] += amount
         else:
             self.graph.add_edge(company, founder, value=amount)
-        self.decrease_cash(founder, amount)
-        self.increase_cash(company, amount)
+        self.transfer_stock("cash", founder.id, company.id, amount)
         self.transfer_stock("equities", company.id, founder.id, amount)
 
     #
@@ -173,14 +145,12 @@ class Country(EcoSpace):
         self.graph[company][founder]["value"] += variation
 
     def pay_dividends(self, company, founder, amount):
-        self.decrease_cash(company, amount)
-        self.increase_cash(founder, amount)
+        self.transfer_stock("cash", company.id, founder.id, amount)
         self.make_transaction("dividends", company.id, founder.id, amount)
 
     def pay_taxes(self, payer, amount):
         auth = self.fiscal_authority
-        self.increase_cash(auth, amount)
-        self.decrease_cash(payer, amount)
+        self.transfer_stock("cash", payer.id, auth.id, amount)
         self.make_transaction("taxes", payer.id, auth.id, amount)
 
     #
@@ -189,23 +159,21 @@ class Country(EcoSpace):
     def transfer_central_bank_profits(self, amount):
         source = self.monetary_authority
         target = self.fiscal_authority
-        self.increase_cash(target, amount)
+        self.transfer_stock("cash", source.id, target.id, amount)
         self.make_transaction("profit_transfers", source.id, target.id, amount)
 
     #
     # Public transfers
     #
     def pay_public_transfers(self, authority, citizen, amount):
-        self.increase_cash(citizen, amount)
-        self.decrease_cash(authority, amount)
+        self.transfer_stock("cash", authority.id, citizen.id, amount)
         self.make_transaction("public_transfers", authority.id, citizen.id, amount)
 
     #
     # Residual transfers
     #
     def transfer_residual_cash(self, company, founder, amount):
-        self.decrease_cash(company, amount)
-        self.increase_cash(founder, amount)
+        self.transfer_stock("cash", company.id, founder.id, amount)
         self.transfer_stock("equities", founder.id, company.id, amount)
 
     #
@@ -213,13 +181,13 @@ class Country(EcoSpace):
     #
     def request_advances(self, lender, amount):
         cb_id = self.monetary_authority.id
-        self.increase_cash(lender, amount)
+        self.transfer_stock("cash", cb_id, lender.id, amount)
         self.transfer_stock("advances", lender.id, cb_id, amount)
 
     def repay_advances(self, lender, principal, interests):
         cb_id = self.monetary_authority.id
         total = principal + interests
-        self.decrease_cash(lender, total)
+        self.transfer_stock("cash", lender.id, cb_id, total)
         self.transfer_stock("advances", cb_id, lender.id, principal)
         self.make_transaction("adv_interests", lender.id, cb_id, interests)
 
@@ -241,4 +209,3 @@ class Country(EcoSpace):
             for founder in self.neighbors(company):
                 founder.company_number -= 1
             self.remove_role(company)
-            self.cash.pop(company.id)

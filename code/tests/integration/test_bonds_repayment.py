@@ -102,17 +102,13 @@ def test_increases_bond_interests_for_bank(govt, bank):
 
 
 @pytest.mark.usefixtures("before_bank_repayment")
-def test_transfers_cash_to_bank(union, govt, bank):
-    # Given
-    country = union.spaces["country_0"]
-    cash = country.cash
-
+def test_transfers_cash_to_bank(govt, bank):
     # When
     govt.repay_bonds()
 
     # Then
-    assert cash[govt.id].amount == -104.2
-    assert cash[bank.id].amount == 104.2
+    assert govt.account["cash"] == -104.2
+    assert bank.account["cash"] == 104.2
 
 
 @pytest.fixture
@@ -162,13 +158,9 @@ def test_increases_bond_interests_for_central_bank(govt, cb):
 
 
 @pytest.mark.usefixtures("before_cb_repayment")
-def test_transfers_cash_to_central_bank(union, govt):
-    # Given
-    country = union.spaces["country_0"]
-    cash = country.cash
-
+def test_transfers_cash_to_central_bank(govt):
     # When
     govt.repay_bonds()
 
     # Then
-    assert cash[govt.id].amount == -104.2
+    assert govt.account["cash"] == -104.2

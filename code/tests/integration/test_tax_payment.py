@@ -42,7 +42,7 @@ def household(model, country):
     household = Household(model)
     household.country_pos = country.pos
     country.add_agents([household])
-    country.cash[household.id].amount = 1000
+    household.account["cash"] = 1000
     household.account["wages"] = 550
     household.account["dividends"] = 50
     household.account["public_transfers"] = 50
@@ -59,15 +59,12 @@ def test_increases_taxes_from_household(household, govt):
 
 
 def test_transfers_cash_from_household_to_govt(household, govt, country):
-    # Given
-    cash = country.cash
-
     # When
     household.pay_taxes()
 
     # Then
-    assert cash[household.id].amount == 940
-    assert cash[govt.id].amount == 60
+    assert household.account["cash"] == 940
+    assert govt.account["cash"] == 60
 
 
 @pytest.fixture
@@ -77,7 +74,7 @@ def firm(model, country):
     firm.taxes_payable = 100
     firm.country_pos = country.pos
     country.add_agents([firm])
-    country.cash[firm.id].amount = 1000
+    firm.account["cash"] = 1000
     return firm
 
 
@@ -91,16 +88,13 @@ def test_increases_taxes_from_firm(firm, govt):
     assert govt.account["taxes"] == 100
 
 
-def test_tansfers_cash_from_firm_to_govt(firm, govt, country):
-    # Given
-    cash = country.cash
-
+def test_tansfers_cash_from_firm_to_govt(firm, govt):
     # When
     firm.pay_taxes()
 
     # Then
-    assert cash[firm.id].amount == 900
-    assert cash[govt.id].amount == 100
+    assert firm.account["cash"] == 900
+    assert govt.account["cash"] == 100
 
 
 @pytest.fixture
@@ -110,7 +104,7 @@ def bank(model, country):
     bank.country_pos = country.pos
     bank.taxes_payable = 100
     country.add_agents([bank])
-    country.cash[bank.id].amount = 1000
+    bank.account["cash"] = 1000
     return bank
 
 
@@ -124,13 +118,10 @@ def test_increases_taxes_from_bank(bank, govt):
     assert govt.account["taxes"] == 100
 
 
-def test_transfers_cash_from_bank_govt(bank, govt, country):
-    # Given
-    cash = country.cash
-
+def test_transfers_cash_from_bank_govt(bank, govt):
     # When
     bank.pay_taxes()
 
     # Then
-    assert cash[bank.id].amount == 900
-    assert cash[govt.id].amount == 100
+    assert bank.account["cash"] == 900
+    assert govt.account["cash"] == 100

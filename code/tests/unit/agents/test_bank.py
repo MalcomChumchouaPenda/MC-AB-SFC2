@@ -264,22 +264,21 @@ def test_grant_loans_and_make_deposits(bank_as_lender):
 @pytest.fixture
 def bank_before_advance(bank_with_roles_and_account):
     # Given
-    company_role = Mock()
-    company_role.get_cash_amount.return_value = 0
     bank, roles, account = bank_with_roles_and_account
     bank.p.mu2 = 0.1
+    account["cash"] = 0
     account["deposits"] = -1000
     account["advances"] = 0
     roles["lender"] = Mock()
-    roles["company"] = company_role
+    roles["company"] = Mock()
     return bank
 
 
 def test_request_advance_when_sufficient_reserves(bank_before_advance):
     # Given
     bank = bank_before_advance
+    bank.account["cash"] = 200
     role = bank.roles["company"]
-    role.get_cash_amount.return_value = 200
 
     # When
     bank.request_cash_advances()
@@ -291,8 +290,8 @@ def test_request_advance_when_sufficient_reserves(bank_before_advance):
 def test_request_advance_when_insufficient_reserves(bank_before_advance):
     # Given
     bank = bank_before_advance
+    bank.account["cash"] = 50
     role = bank.roles["company"]
-    role.get_cash_amount.return_value = 50
 
     # When
     bank.request_cash_advances()
@@ -339,8 +338,7 @@ def test_calc_excess_reserves(bank_before_advance, cash, expected):
     # Given
     bank = bank_before_advance
     bank.p.mu2 = 0.1
-    role = bank.roles["company"]
-    role.get_cash_amount.return_value = cash
+    bank.account["cash"] = cash
 
     # When
     excess_reserves = bank._calc_excess_reserves()
@@ -438,10 +436,9 @@ def test_dont_buy_bonds_with_insufficient_reserves(bank_as_bond_buyer, bond_issu
 
 def test_calc_profit(bank_with_roles_and_account):
     # Given
-    company_role = Mock()
-    company_role.get_cash_interests.return_value = 10
     bank, roles, account = bank_with_roles_and_account
     roles["company"] = company_role
+    account["cash_interests"] = 10
     account["loan_interests"] = 100
     account["loan_defaults"] = -20
     account["adv_interests"] = -10
@@ -590,7 +587,7 @@ def test_pay_no_dividends(bank_with_roles_and_account):
 @pytest.fixture
 def bank_before_exit(bank, company_role):
     # Given
-    company_role.get_cash_amount.return_value = 0
+    bank.account = {"cash": 0}
     company_role.get_average_wage.return_value = 100
     return bank
 
@@ -613,7 +610,7 @@ def test_exit_transfer_residual_cash_to_founders(bank_before_exit, company_role)
     founder = object()
     share = {"citizen": founder, "value": 90}
     bank = bank_before_exit
-    company_role.get_cash_amount.return_value = 200
+    bank.account["cash"] = 200
     company_role.get_equity_amount.return_value = 90
     company_role.get_equity_shares.return_value = [share]
 
@@ -646,33 +643,9 @@ def test_exit_sets_all_roles_defaulted(bank_before_exit, company_role):
 @pytest.fixture
 def bank_before_record(bank, company_role):
     # Given
-    company_role.get_cash_amount.return_value = 100
-    company_role.get_cash_interests.return_value = 10
     company_role.get_equity_amount.return_value = 200
     company_role.get_dividends.return_value = 20
     return bank
-
-
-def test_record_items_records_cash_amount(bank_before_record):
-    # Given
-    bank = bank_before_record
-
-    # When
-    bank.record_items()
-
-    # Then
-    assert bank.log["cash"][-1] == 100
-
-
-def test_record_items_records_cash_interests(bank_before_record):
-    # Given
-    bank = bank_before_record
-
-    # When
-    bank.record_items()
-
-    # Then
-    assert bank.log["cash_interests"][-1] == 10
 
 
 def test_record_items_records_equities(bank_before_record):
