@@ -31,8 +31,7 @@ class Country(EcoSpace):
     def create_markets(self):
         self.add_space(GoodsMarket, "goods_market", tradable=False)
         self.add_space(LaborMarket, "labor_market")
-        market = self.add_space(DepositMarket, "deposit_market")
-        market.country_pos = self.pos
+        self.add_space(DepositMarket, "deposit_market")
 
     #
     # Role management

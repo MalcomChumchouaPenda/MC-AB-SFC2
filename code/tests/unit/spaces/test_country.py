@@ -123,65 +123,59 @@ def country(model):
     return country
 
 
-FakeGoodMarket = Mock()
-FakeLaborMarket = Mock()
-FakeDepositMarket = Mock()
+@pytest.fixture
+def market_types(monkeypatch):
+    # Given
+    types = {}
+    for name in ("GoodsMarket", "LaborMarket", "DepositMarket"):
+        mock_cls = Mock(name=name)
+        monkeypatch.setattr(f"model.spaces.country.{name}", mock_cls)
+        types[name] = mock_cls
+    return types
 
 
 @pytest.fixture
-def country_without_markets(monkeypatch, country):
+def country_without_markets(country):
     # Given
-    monkeypatch.setattr("model.spaces.country.GoodsMarket", FakeGoodMarket)
-    monkeypatch.setattr("model.spaces.country.LaborMarket", FakeLaborMarket)
-    monkeypatch.setattr("model.spaces.country.DepositMarket", FakeDepositMarket)
     country.add_space = Mock()
     return country
 
 
-def test_create_markets_adds_goods_market(country_without_markets):
+def test_create_markets_adds_goods_market(country_without_markets, market_types):
     # Given
     country = country_without_markets
+    market_cls = market_types["GoodsMarket"]
 
     # When
     country.create_markets()
 
     # Then
-    country.add_space.assert_any_call(FakeGoodMarket, "goods_market", tradable=False)
+    country.add_space.assert_any_call(market_cls, "goods_market", tradable=False)
 
 
-def test_create_markets_adds_labor_market(country_without_markets):
+def test_create_markets_adds_labor_market(country_without_markets, market_types):
     # Given
     country = country_without_markets
+    market_cls = market_types["LaborMarket"]
 
     # When
     country.create_markets()
 
     # Then
-    country.add_space.assert_any_call(FakeLaborMarket, "labor_market")
+    country.add_space.assert_any_call(market_cls, "labor_market")
 
 
-def test_create_markets_adds_deposit_market(country_without_markets):
+def test_create_markets_adds_deposit_market(country_without_markets, market_types):
     # Given
     country = country_without_markets
+    market_cls = market_types["DepositMarket"]
 
     # When
     country.create_markets()
 
     # Then
-    country.add_space.assert_any_call(FakeDepositMarket, "deposit_market")
+    country.add_space.assert_any_call(market_cls, "deposit_market")
 
-
-def test_create_markets_sets_deposit_market_country_pos(country_without_markets):
-    # Given
-    market = Mock()
-    country = country_without_markets
-    country.add_space = lambda a, *b, **c: market if a is FakeDepositMarket else Mock()
-
-    # When
-    country.create_markets()
-
-    # Then
-    assert market.country_pos == country.pos
 
 
 # ---------------------------------------------------

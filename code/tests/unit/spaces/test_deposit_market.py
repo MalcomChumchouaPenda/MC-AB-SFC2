@@ -18,17 +18,6 @@ def test_inherits_from_eco_space():
     assert is_derived
 
 
-def test_initializes_country_pos(fake_model):
-    # Given
-    model = fake_model
-
-    # When
-    market = DepositMarket(model)
-
-    # Then
-    assert market.country_pos == 0
-
-
 def test_exposes_deposit_rate_as_fraction_of_discount_rate(fake_model):
     # Given
     model = fake_model
@@ -41,6 +30,19 @@ def test_exposes_deposit_rate_as_fraction_of_discount_rate(fake_model):
 
     # Then
     assert exposed == pytest.approx(0.6 * 0.05)
+
+
+def test_exposes_country_pos_from_env(fake_model):
+    # Given
+    model = fake_model
+    market = DepositMarket(model)
+    market.env = Mock(pos=3)
+
+    # When
+    exposed = market.country_pos
+
+    # Then
+    assert exposed == 3
 
 
 # ---------------------------------------------------
@@ -95,7 +97,7 @@ def test_add_firm_add_depositor_role(market_without_roles):
     # Given
     firm = Mock()
     market = market_without_roles
-    market.country_pos = 2
+    market.env.pos = 2
 
     # When
     market.add_firm(firm)

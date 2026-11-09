@@ -6,13 +6,13 @@ from model.roles.deposit_guarantee import DepositGuarantee
 
 class DepositMarket(EcoSpace):
 
-    def setup(self):
-        super().setup()
-        self.country_pos = 0
-
     @property
     def deposit_rate(self):
         return self.p.zeta * self.env.discount_rate
+
+    @property
+    def country_pos(self):
+        return self.env.pos
 
     #
     # Roles management
