@@ -32,19 +32,6 @@ class MonetaryUnion(EcoSpace):
     def add_central_bank(self, cb):
         self.add_role(PolicyMaker, cb)
 
-    #
-    # Cash operations
-    #
-
-    def decrease_cash(self, agent, amount):
-        pos = agent.country_pos
-        country = self.spaces[f"country_{pos}"]
-        country.decrease_cash(agent, amount)
-
-    def increase_cash(self, agent, amount):
-        pos = agent.country_pos
-        country = self.spaces[f"country_{pos}"]
-        country.increase_cash(agent, amount)
 
     #
     # Statitics

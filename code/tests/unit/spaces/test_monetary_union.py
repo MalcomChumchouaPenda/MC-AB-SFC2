@@ -173,45 +173,6 @@ def test_add_central_bank_adds_policy_maker(union_without_cb, monkeypatch, natio
     union.add_role.assert_called_with(role_cls, cb)
 
 
-# ---------------------------------------------------
-# CASH OPERATIONS
-# ----------------------------------------------------
-
-
-@pytest.fixture
-def before_cash_operations(union_without_spaces):
-    # Given
-    union = union_without_spaces
-    union.spaces["country_0"] = Mock()
-    union.spaces["country_1"] = Mock()
-    return union
-
-
-def test_decrease_cash_calls_country_method(before_cash_operations):
-    # Given
-    union = before_cash_operations
-    country = union.spaces["country_1"]
-    agent = Mock(country_pos=1)
-
-    # When
-    union.decrease_cash(agent, 10)
-
-    # Then
-    country.decrease_cash.assert_called_with(agent, 10)
-
-
-def test_increase_cash_calls_country_method(before_cash_operations):
-    # Given
-    union = before_cash_operations
-    country = union.spaces["country_0"]
-    agent = Mock(country_pos=0)
-
-    # When
-    union.increase_cash(agent, 10)
-
-    # Then
-    country.increase_cash.assert_called_with(agent, 10)
-
 
 # ---------------------------------------------------
 # CURRENT INDICATORS
