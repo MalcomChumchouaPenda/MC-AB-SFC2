@@ -23,54 +23,54 @@ def test_inherits_from_eco_space():
 # ----------------------------------------------------
 
 
-FakeBuyer = Mock()
-FakeIssuer = Mock()
-
-
 @pytest.fixture
-def market_without_roles(monkeypatch, fake_model):
+def market_without_roles(fake_model):
     # Given
-    monkeypatch.setattr("model.spaces.bond_market.BondBuyer", FakeBuyer)
-    monkeypatch.setattr("model.spaces.bond_market.BondIssuer", FakeIssuer)
     market = BondMarket(fake_model)
     market.add_role = Mock()
     return market
 
 
-def test_add_bank_add_buyer_role(market_without_roles):
+def test_add_bank_add_buyer_role(market_without_roles, monkeypatch):
     # Given
     bank = Mock()
+    role_cls = Mock(name="BondBuyer")
+    monkeypatch.setattr("model.spaces.bond_market.BondBuyer", role_cls)
     market = market_without_roles
 
     # When
     market.add_bank(bank)
 
     # Then
-    market.add_role.assert_called_with(FakeBuyer, bank)
+    market.add_role.assert_called_with(role_cls, bank)
 
 
-def test_add_central_bank_add_buyer_role(market_without_roles):
+def test_add_central_bank_add_buyer_role(market_without_roles, monkeypatch):
     # Given
     cb = Mock()
+    role_cls = Mock(name="BondBuyer")
+    monkeypatch.setattr("model.spaces.bond_market.BondBuyer", role_cls)
     market = market_without_roles
 
     # When
     market.add_central_bank(cb)
 
     # Then
-    market.add_role.assert_called_with(FakeBuyer, cb)
+    market.add_role.assert_called_with(role_cls, cb)
 
 
-def test_add_government_add_issuer_role(market_without_roles):
+def test_add_government_add_issuer_role(market_without_roles, monkeypatch):
     # Given
     govt = Mock()
+    role_cls = Mock(name="BondIssuer")
+    monkeypatch.setattr("model.spaces.bond_market.BondIssuer", role_cls)
     market = market_without_roles
 
     # When
     market.add_government(govt)
 
     # Then
-    market.add_role.assert_called_with(FakeIssuer, govt)
+    market.add_role.assert_called_with(role_cls, govt)
 
 
 # ---------------------------------------------------
@@ -79,23 +79,30 @@ def test_add_government_add_issuer_role(market_without_roles):
 
 
 @pytest.fixture
-def market_with_participants(market_without_roles):
+def buyer():
     # Given
-    buyer = Mock()
-    issuer = Mock()
+    return Mock()
+
+
+@pytest.fixture
+def issuer():
+    # Given
+    return Mock(bond_value=100, bond_number=1, debt_ratio=0)
+
+
+@pytest.fixture
+def market_without_purchase(market_without_roles):
+    # Given
     market = market_without_roles
-    market.env = Mock()
     market.transfer_stock = Mock()
     market.make_transaction = Mock()
-    return market, issuer, buyer
+    market.env = Mock()
+    return market
 
 
-def test_buy_bonds_creates_graph_edge(market_with_participants):
+def test_buy_bonds_creates_graph_edge(market_without_purchase, buyer, issuer):
     # Given
-    market, issuer, buyer = market_with_participants
-    issuer.bond_value = 100
-    issuer.bond_number = 1
-    issuer.debt_ratio = 0
+    market = market_without_purchase
     graph = market.graph
 
     # When
@@ -106,12 +113,9 @@ def test_buy_bonds_creates_graph_edge(market_with_participants):
     assert graph[buyer][issuer]["amount"] == 200
 
 
-def test_buy_bonds_transfers_cash(market_with_participants):
+def test_buy_bonds_transfers_cash(market_without_purchase, buyer, issuer):
     # Given
-    market, issuer, buyer = market_with_participants
-    issuer.bond_value = 100
-    issuer.bond_number = 1
-    issuer.debt_ratio = 0
+    market = market_without_purchase
 
     # When
     market.buy_bonds(buyer, issuer, 2)
@@ -120,12 +124,9 @@ def test_buy_bonds_transfers_cash(market_with_participants):
     market.transfer_stock.assert_any_call("cash", buyer.id, issuer.id, 200)
 
 
-def test_buy_bonds_updates_accounts(market_with_participants):
+def test_buy_bonds_updates_accounts(market_without_purchase, buyer, issuer):
     # Given
-    market, issuer, buyer = market_with_participants
-    issuer.bond_value = 100
-    issuer.bond_number = 1
-    issuer.debt_ratio = 0
+    market = market_without_purchase
 
     # When
     market.buy_bonds(buyer, issuer, 2)
@@ -134,12 +135,10 @@ def test_buy_bonds_updates_accounts(market_with_participants):
     market.transfer_stock.assert_any_call("bonds", issuer.id, buyer.id, 200)
 
 
-def test_buy_bonds_reduces_bond_supply(market_with_participants):
+def test_buy_bonds_reduces_bond_supply(market_without_purchase, buyer, issuer):
     # Given
-    market, issuer, buyer = market_with_participants
-    issuer.bond_value = 100
     issuer.bond_number = 2
-    issuer.debt_ratio = 0
+    market = market_without_purchase
 
     # When
     market.buy_bonds(buyer, issuer, 2)
@@ -149,16 +148,16 @@ def test_buy_bonds_reduces_bond_supply(market_with_participants):
 
 
 @pytest.fixture
-def market_with_purchase(market_with_participants):
+def market_with_purchase(market_without_purchase, buyer, issuer):
     # Given
-    market, issuer, buyer = market_with_participants
+    market = market_without_purchase
     market.graph.add_edge(buyer, issuer, amount=0)
-    return market, issuer, buyer
+    return market
 
 
-def test_repay_bond_creates_graph_edge(market_with_purchase):
+def test_repay_bond_creates_graph_edge(market_with_purchase, buyer, issuer):
     # Given
-    market, issuer, buyer = market_with_purchase
+    market = market_with_purchase
     graph = market.graph
 
     # When
@@ -169,9 +168,9 @@ def test_repay_bond_creates_graph_edge(market_with_purchase):
     assert graph[buyer][issuer]["amount"] == -100
 
 
-def test_repay_bond_transfers_cash(market_with_purchase):
+def test_repay_bond_transfers_cash(market_with_purchase, buyer, issuer):
     # Given
-    market, issuer, buyer = market_with_purchase
+    market = market_with_purchase
 
     # When
     market.repay_bonds(buyer, issuer, 100, 10)
@@ -180,9 +179,9 @@ def test_repay_bond_transfers_cash(market_with_purchase):
     market.transfer_stock.assert_any_call("cash", issuer.id, buyer.id, 110)
 
 
-def test_repay_bond_updates_accounts(market_with_purchase):
+def test_repay_bond_updates_accounts(market_with_purchase, buyer, issuer):
     # Given
-    market, issuer, buyer = market_with_purchase
+    market = market_with_purchase
 
     # When
     market.repay_bonds(buyer, issuer, 100, 10)
@@ -198,19 +197,29 @@ def test_repay_bond_updates_accounts(market_with_purchase):
 
 
 @pytest.fixture
-def market_with_defaults(market_without_roles):
-    buyers = [Mock(defaulted=val) for val in [True, False]]
+def buyers():
+    # Given
+    buyers = []
+    for defaulted in (True, False):
+        role = Mock(defaulted=defaulted)
+        role.name = "bond_buyer"
+        buyers.append(role)
+    return buyers
+
+
+@pytest.fixture
+def market_with_defaults(market_without_roles, buyers):
+    # Given
     market = market_without_roles
     for role in buyers:
-        role.name = "bond_buyer"
         market.roles[role.agent.id] = role
     market.remove_role = Mock()
-    return market, buyers
+    return market
 
 
-def test_clear_defaults_removes_defaulted_buyers(market_with_defaults):
+def test_clear_defaults_removes_defaulted_buyers(market_with_defaults, buyers):
     # Given
-    market, buyers = market_with_defaults
+    market = market_with_defaults
 
     # When
     market.clear_defaults()
