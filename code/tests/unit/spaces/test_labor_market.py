@@ -18,26 +18,26 @@ def test_inherits_from_eco_space():
     assert is_derived
 
 
-def test_initializes_average_wage(fake_model):
+@pytest.fixture
+def market(fake_model):
     # Given
-    model = fake_model
+    return LaborMarket(fake_model)
 
+
+def test_initializes_average_wage(market):
     # When
-    market = LaborMarket(model)
+    default_value = market.average_wage
 
     # Then
-    assert market.average_wage == 0
+    assert default_value == 0
 
 
-def test_initializes_unemployment(fake_model):
-    # Given
-    model = fake_model
-
+def test_initializes_unemployment(market):
     # When
-    market = LaborMarket(model)
+    default_value = market.unemployment
 
     # Then
-    assert market.unemployment == 0.0
+    assert default_value == 0
 
 
 # ---------------------------------------------------
@@ -45,39 +45,32 @@ def test_initializes_unemployment(fake_model):
 # ----------------------------------------------------
 
 
-FakeWorker = Mock()
-FakeEmployer = Mock()
-
-
 @pytest.fixture
-def market_without_roles(monkeypatch, fake_model):
+def market_without_roles(market):
     # Given
-    monkeypatch.setattr("model.spaces.labor_market.Employer", FakeEmployer)
-    monkeypatch.setattr("model.spaces.labor_market.Worker", FakeWorker)
-    market = LaborMarket(fake_model)
     market.env = Mock(pos=1)
     market.add_role = Mock()
     return market
 
 
-def test_add_household_add_worker_role_if_domestic(market_without_roles):
+def test_add_household_add_domestic_worker(market_without_roles, monkeypatch):
     # Given
-    household = Mock(country_pos=2)
+    role_cls = Mock(name="Worker")
+    monkeypatch.setattr("model.spaces.labor_market.Worker", role_cls)
+    household = Mock(country_pos=1)
     market = market_without_roles
-    market.env.pos = 2
 
     # When
     market.add_household(household)
 
     # Then
-    market.add_role.assert_called_with(FakeWorker, household)
+    market.add_role.assert_called_with(role_cls, household)
 
 
-def test_add_household_does_nothing_if_not_domestic(market_without_roles):
+def test_add_household_does_nothing_for_foreigner(market_without_roles):
     # Given
     household = Mock(country_pos=2)
     market = market_without_roles
-    market.env.pos = 1
 
     # When
     market.add_household(household)
@@ -86,24 +79,24 @@ def test_add_household_does_nothing_if_not_domestic(market_without_roles):
     market.add_role.assert_not_called()
 
 
-def test_add_firm_add_employer_role_if_domestic(market_without_roles):
+def test_add_firm_add_domestic_employer(market_without_roles, monkeypatch):
     # Given
-    firm = Mock(country_pos=2)
+    firm = Mock(country_pos=1)
+    role_cls = Mock(name="Employer")
+    monkeypatch.setattr("model.spaces.labor_market.Employer", role_cls)
     market = market_without_roles
-    market.env.pos = 2
 
     # When
     market.add_firm(firm)
 
     # Then
-    market.add_role.assert_called_with(FakeEmployer, firm)
+    market.add_role.assert_called_with(role_cls, firm)
 
 
-def test_add_firm_does_nothing_if_not_domestic(market_without_roles):
+def test_add_firm_does_nothing_for_foreigner(market_without_roles):
     # Given
     firm = Mock(country_pos=2)
     market = market_without_roles
-    market.env.pos = 1
 
     # When
     market.add_firm(firm)
@@ -118,21 +111,19 @@ def test_add_firm_does_nothing_if_not_domestic(market_without_roles):
 
 
 @pytest.fixture
-def market_with_participants(market_without_roles):
+def worker():
     # Given
-    worker = Mock()
-    employer = Mock()
-    market = market_without_roles
-    market.graph.add_nodes_from([employer, worker])
-    return market, employer, worker
+    return Mock(labor_supply=1.0)
 
 
-def test_hire_worker_add_edge(market_with_participants):
+@pytest.fixture
+def employer():
     # Given
-    market, employer, worker = market_with_participants
-    worker.labor_supply = 1.0
-    employer.labor_demand = 10
-    employer.labor = 0.0
+    return Mock(labor_demand=10, labor=0.0)
+
+
+def test_hire_worker_add_edge(market, employer, worker):
+    # Given
     graph = market.graph
 
     # When
@@ -144,13 +135,7 @@ def test_hire_worker_add_edge(market_with_participants):
     assert graph[worker][employer]["quantity"] == 0.9
 
 
-def test_hire_worker_reduces_labor_demand(market_with_participants):
-    # Given
-    market, employer, worker = market_with_participants
-    worker.labor_supply = 1.0
-    employer.labor_demand = 10
-    employer.labor = 0.0
-
+def test_hire_worker_reduces_labor_demand(market, employer, worker):
     # When
     market.hire_worker(worker, employer, 0.9)
 
@@ -158,13 +143,7 @@ def test_hire_worker_reduces_labor_demand(market_with_participants):
     assert employer.labor_demand == pytest.approx(9.1)
 
 
-def test_hire_worker_reduces_labor_supply(market_with_participants):
-    # Given
-    market, employer, worker = market_with_participants
-    worker.labor_supply = 1.0
-    employer.labor_demand = 10
-    employer.labor = 0.0
-
+def test_hire_worker_reduces_labor_supply(market, employer, worker):
     # When
     market.hire_worker(worker, employer, 0.9)
 
@@ -172,13 +151,7 @@ def test_hire_worker_reduces_labor_supply(market_with_participants):
     assert worker.labor_supply == pytest.approx(0.1)
 
 
-def test_hire_worker_increases_labor(market_with_participants):
-    # Given
-    market, employer, worker = market_with_participants
-    worker.labor_supply = 1.0
-    employer.labor_demand = 10
-    employer.labor = 0.0
-
+def test_hire_worker_increases_labor(market, employer, worker):
     # When
     market.hire_worker(worker, employer, 0.9)
 
@@ -192,21 +165,18 @@ def test_hire_worker_increases_labor(market_with_participants):
 
 
 @pytest.fixture
-def market_with_jobs(market_without_roles):
+def market_with_jobs(market, employer, worker):
     # Given
-    worker = Mock()
-    employer = Mock()
-    market = market_without_roles
     market.env = Mock()
     market.transfer_stock = Mock()
     market.make_transaction = Mock()
     market.graph.add_edge(employer, worker, wages=0.0)
-    return market, employer, worker
+    return market
 
 
-def test_pay_wages_update_edge(market_with_jobs):
+def test_pay_wages_update_edge(market_with_jobs, employer, worker):
     # Given
-    market, employer, worker = market_with_jobs
+    market = market_with_jobs
     graph = market.graph
 
     # When
@@ -216,9 +186,9 @@ def test_pay_wages_update_edge(market_with_jobs):
     assert graph[worker][employer]["wages"] == 3.0
 
 
-def test_pay_wages_transfers_cash(market_with_jobs):
+def test_pay_wages_transfers_cash(market_with_jobs, employer, worker):
     # Given
-    market, employer, worker = market_with_jobs
+    market = market_with_jobs
 
     # When
     market.pay_wages(employer, worker, 3.0)
@@ -227,9 +197,9 @@ def test_pay_wages_transfers_cash(market_with_jobs):
     market.transfer_stock.assert_any_call("cash", employer.id, worker.id, 3.0)
 
 
-def test_pay_wages_updates_accounts(market_with_jobs):
+def test_pay_wages_updates_accounts(market_with_jobs, employer, worker):
     # Given
-    market, employer, worker = market_with_jobs
+    market = market_with_jobs
 
     # When
     market.pay_wages(employer, worker, 3.0)
@@ -243,14 +213,22 @@ def test_pay_wages_updates_accounts(market_with_jobs):
 # ----------------------------------------------------
 
 
-def test_calc_wage_range_for_all_employers(market_without_roles, make_dlist):
+@pytest.fixture
+def employers(market, make_dlist):
     # Given
-    employers = [Mock(id=i, wage=10.0) for i in range(4)]
-    employers = make_dlist(employers)
-    employers.name = "employer"
+    employers = make_dlist()
+    for _ in range(2):
+        role = Mock(wage=5.0)
+        role.name = "employer"
+        market.roles[role.id] = role
+        employers.append(role)
+    return employers
+
+
+def test_calc_wage_range_for_all_employers(market, employers):
+    # Given
+    employers[0].wage = 10.0
     employers[1].wage = 15.0
-    market = market_without_roles
-    market.roles = {role.id: role for role in employers}
 
     # When
     range_ = market.calc_wage_range()
@@ -259,11 +237,7 @@ def test_calc_wage_range_for_all_employers(market_without_roles, make_dlist):
     assert range_ == (10.0, 15.0)
 
 
-def test_calc_wage_range_if_no_employers(market_without_roles):
-    # Given
-    market = market_without_roles
-    market.roles = {}
-
+def test_calc_wage_range_if_no_employers(market):
     # When
     range_ = market.calc_wage_range()
 
@@ -274,17 +248,6 @@ def test_calc_wage_range_if_no_employers(market_without_roles):
 # ---------------------------------------------------
 # EVOLUTION
 # ----------------------------------------------------
-
-
-@pytest.fixture
-def employers(make_dlist):
-    # Given
-    roles = make_dlist()
-    for _ in range(5):
-        role = Mock(wage=5.0)
-        role.name = "employer"
-        roles.append(role)
-    return roles
 
 
 @pytest.fixture
@@ -316,9 +279,8 @@ def workers(employed, unemployed):
 
 
 @pytest.fixture
-def market_before_update(market_without_roles, employers, workers):
+def market_before_update(market, employers, workers):
     # Given
-    market = market_without_roles
     market.roles = {role.id: role for role in employers + workers}
     market.average_wage = 0
     market.unemployment = 0
@@ -348,19 +310,16 @@ def test_update_state_updates_unemployment_rate(market_before_update):
 
 
 @pytest.fixture
-def market_with_defaults(market_without_roles):
-    employers = [Mock(defaulted=val) for val in [True, False]]
-    market = market_without_roles
-    for role in employers:
-        role.name = "employer"
-        market.roles[role.agent.id] = role
+def market_with_defaults(market, employers):
+    employers[0].defaulted = True
+    employers[1].defaulted = False
     market.remove_role = Mock()
-    return market, employers
+    return market
 
 
-def test_clear_defaults_removes_defaulted_employers(market_with_defaults):
+def test_clear_defaults_removes_defaulted_employers(market_with_defaults, employers):
     # Given
-    market, employers = market_with_defaults
+    market = market_with_defaults
 
     # When
     market.clear_defaults()
