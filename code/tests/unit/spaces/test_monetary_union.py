@@ -18,26 +18,26 @@ def test_inherits_from_eco_space():
     assert is_derived
 
 
-def test_initializes_average_inflation(fake_model):
+@pytest.fixture
+def union(fake_model):
     # Given
-    model = fake_model
+    return MonetaryUnion(fake_model)
 
+
+def test_initializes_average_inflation(union):
     # When
-    union = MonetaryUnion(model)
+    default_value = union.average_inflation
 
     # Then
-    assert union.average_inflation == 0.0
+    assert default_value == 0.0
 
 
-def test_initializes_discount_rate(fake_model):
-    # Given
-    model = fake_model
-
+def test_initializes_discount_rate(union):
     # When
-    union = MonetaryUnion(model)
+    default_value = union.discount_rate
 
     # Then
-    assert union.discount_rate == 0.0
+    assert default_value == 0.0
 
 
 # ---------------------------------------------------
@@ -46,43 +46,32 @@ def test_initializes_discount_rate(fake_model):
 
 
 @pytest.fixture
-def union_without_spaces(fake_model, monkeypatch):
+def union_without_spaces(union):
     # Given
-    monkeypatch.setattr(MonetaryUnion, "add_space", Mock())
-    union = MonetaryUnion(fake_model)
-    union.spaces = {}
+    union.add_space = Mock()
     return union
 
 
-FakeCountry = Mock()
-
-
-@pytest.fixture
-def union_without_countries(union_without_spaces, monkeypatch):
+def test_create_countries_adds_countries(union_without_spaces, monkeypatch):
     # Given
-    monkeypatch.setattr("model.spaces.monetary_union.Country", FakeCountry)
+    country_cls = Mock(name="Country")
+    monkeypatch.setattr("model.spaces.monetary_union.Country", country_cls)
     union = union_without_spaces
-    return union
-
-
-def test_create_countries_adds_countries(union_without_countries):
-    # Given
-    union = union_without_countries
     union.p.country_number = 2
 
     # When
     union.create_countries()
 
     # Then
-    union.add_space.assert_any_call(FakeCountry, "country_0")
-    union.add_space.assert_any_call(FakeCountry, "country_1")
+    union.add_space.assert_any_call(country_cls, "country_0")
+    union.add_space.assert_any_call(country_cls, "country_1")
     assert union.add_space.call_count == 2
 
 
-def test_create_countries_sets_countries_pos(union_without_countries):
+def test_create_countries_sets_countries_pos(union_without_spaces):
     # Given
     space = Mock()
-    union = union_without_countries
+    union = union_without_spaces
     union.add_space.return_value = space
     union.p.country_number = 1
 
@@ -93,10 +82,10 @@ def test_create_countries_sets_countries_pos(union_without_countries):
     assert space.pos == 0
 
 
-def test_create_countries_creates_national_markets(union_without_countries):
+def test_create_countries_creates_national_markets(union_without_spaces):
     # Given
     country = Mock()
-    union = union_without_countries
+    union = union_without_spaces
     union.add_space.return_value = country
     union.p.country_number = 1
 
@@ -107,81 +96,81 @@ def test_create_countries_creates_national_markets(union_without_countries):
     country.create_markets.assert_called_once_with()
 
 
-FakeGoodMarket = Mock()
-FakeCreditMarket = Mock()
-FakeBondMarket = Mock()
-
-
 @pytest.fixture
-def union_without_markets(union_without_spaces, monkeypatch):
+def market_types(monkeypatch):
     # Given
-    monkeypatch.setattr("model.spaces.monetary_union.GoodsMarket", FakeGoodMarket)
-    monkeypatch.setattr("model.spaces.monetary_union.CreditMarket", FakeCreditMarket)
-    monkeypatch.setattr("model.spaces.monetary_union.BondMarket", FakeBondMarket)
+    types = {}
+    for name in ("GoodsMarket", "CreditMarket", "BondMarket"):
+        market_cls = Mock(name=name)
+        monkeypatch.setattr(f"model.spaces.country.{name}", market_cls)
+        types[name] = market_cls
+    return types
+
+
+def test_create_markets_adds_tradable_goods_market(union_without_spaces, monkeypatch):
+    # Given
     union = union_without_spaces
-    return union
-
-
-def test_create_markets_adds_tradable_goods_market(union_without_markets):
-    # Given
-    union = union_without_markets
+    market_cls = Mock(name="GoodsMarket")
+    monkeypatch.setattr("model.spaces.monetary_union.GoodsMarket", market_cls)
 
     # When
     union.create_markets()
 
     # Then
-    union.add_space.assert_any_call(FakeGoodMarket, "goods_market", tradable=True)
+    union.add_space.assert_any_call(market_cls, "goods_market", tradable=True)
 
 
-def test_create_markets_adds_credit_market(union_without_markets):
+def test_create_markets_adds_credit_market(union_without_spaces, monkeypatch):
     # Given
-    union = union_without_markets
+    union = union_without_spaces
+    market_cls = Mock(name="CreditMarket")
+    monkeypatch.setattr("model.spaces.monetary_union.CreditMarket", market_cls)
 
     # When
     union.create_markets()
 
     # Then
-    union.add_space.assert_any_call(FakeCreditMarket, "credit_market")
+    union.add_space.assert_any_call(market_cls, "credit_market")
 
 
-def test_create_markets_adds_bond_market(union_without_markets):
+def test_create_markets_adds_bond_market(union_without_spaces, monkeypatch):
     # Given
-    union = union_without_markets
+    union = union_without_spaces
+    market_cls = Mock(name="BondMarket")
+    monkeypatch.setattr("model.spaces.monetary_union.BondMarket", market_cls)
 
     # When
     union.create_markets()
 
     # Then
-    union.add_space.assert_any_call(FakeBondMarket, "bond_market")
+    union.add_space.assert_any_call(market_cls, "bond_market")
 
 
 # ---------------------------------------------------
 # ROLES MANAGEMENT
 # ----------------------------------------------------
 
-FakeMaker = Mock()
-
 
 @pytest.fixture
-def before_adding_agent(monkeypatch, fake_model):
+def union_without_cb(union):
     # Given
-    monkeypatch.setattr("model.spaces.monetary_union.PolicyMaker", FakeMaker)
-    union = MonetaryUnion(fake_model)
     union.add_role = Mock()
     return union
 
 
 @pytest.mark.parametrize("national", [True, False])
-def test_add_central_bank_add_policy_maker_role(before_adding_agent, national):
+def test_add_central_bank_adds_policy_maker(union_without_cb, monkeypatch, national):
     # Given
+    role_cls = Mock(name="PolicyMaker")
+    monkeypatch.setattr("model.spaces.monetary_union.PolicyMaker", role_cls)
     cb = Mock(national=national, country_pos=0)
-    union = before_adding_agent
+    union = union_without_cb
 
     # When
     union.add_central_bank(cb)
 
     # Then
-    union.add_role.assert_called_with(FakeMaker, cb)
+    union.add_role.assert_called_with(role_cls, cb)
 
 
 # ---------------------------------------------------
@@ -229,10 +218,9 @@ def test_increase_cash_calls_country_method(before_cash_operations):
 # ----------------------------------------------------
 
 
-def test_calc_phi_range_from_goods_market(union_without_spaces):
+def test_calc_phi_range_from_goods_market(union):
     # Given
     market = Mock()
-    union = union_without_spaces
     union.spaces = {"goods_market": market}
 
     # When
@@ -242,10 +230,9 @@ def test_calc_phi_range_from_goods_market(union_without_spaces):
     assert range_ == market.calc_phi_range.return_value
 
 
-def test_calc_price_range_from_goods_market(union_without_spaces):
+def test_calc_price_range_from_goods_market(union):
     # Given
     market = Mock()
-    union = union_without_spaces
     union.spaces = {"goods_market": market}
 
     # When
@@ -255,10 +242,9 @@ def test_calc_price_range_from_goods_market(union_without_spaces):
     assert range_ == market.calc_price_range.return_value
 
 
-def test_calc_sales_range_from_goods_market(union_without_spaces):
+def test_calc_sales_range_from_goods_market(union):
     # Given
     market = Mock()
-    union = union_without_spaces
     union.spaces = {"goods_market": market}
 
     # When
@@ -274,12 +260,17 @@ def test_calc_sales_range_from_goods_market(union_without_spaces):
 
 
 @pytest.fixture
-def union_before_update(fake_model):
+def countries():
     # Given
-    countries = {f"country_{i}": Mock(inflation=0.05, gdp=100) for i in range(5)}
-    union = MonetaryUnion(fake_model)
-    union.spaces = {"any": Mock()}
-    union.spaces.update(countries)
+    return [Mock(pos=i, inflation=0.05, gdp=100) for i in range(5)]
+
+
+@pytest.fixture
+def union_before_update(union, countries):
+    # Given
+    for country in countries:
+        union.spaces[f"country_{country.pos}"] = country
+    union.spaces["any"] = Mock()
     return union
 
 
