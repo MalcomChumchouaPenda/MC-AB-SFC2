@@ -252,8 +252,7 @@ def borrowers():
 
 
 @pytest.fixture
-def market_with_defaults(market_without_roles, lenders, borrowers):
-    market = market_without_roles
+def market_with_defaults(market, lenders, borrowers):
     for role in lenders + borrowers:
         market.roles[role.id] = role
     market.remove_role = Mock()
