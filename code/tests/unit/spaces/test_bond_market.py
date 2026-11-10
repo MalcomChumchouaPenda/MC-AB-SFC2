@@ -28,6 +28,7 @@ def market(fake_model):
     # Given
     return BondMarket(fake_model)
 
+
 @pytest.fixture
 def market_without_roles(market):
     # Given

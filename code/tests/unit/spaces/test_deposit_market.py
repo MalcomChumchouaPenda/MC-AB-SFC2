@@ -18,11 +18,15 @@ def test_inherits_from_eco_space():
     assert is_derived
 
 
-def test_exposes_deposit_rate_as_fraction_of_discount_rate(fake_model):
+@pytest.fixture
+def market(fake_model):
     # Given
-    model = fake_model
-    model.p.zeta = 0.6
-    market = DepositMarket(model)
+    return DepositMarket(fake_model)
+
+
+def test_exposes_deposit_rate_as_fraction_of_discount_rate(market):
+    # Given
+    market.p.zeta = 0.6
     market.env = Mock(discount_rate=0.05)
 
     # When
@@ -32,10 +36,8 @@ def test_exposes_deposit_rate_as_fraction_of_discount_rate(fake_model):
     assert exposed == pytest.approx(0.6 * 0.05)
 
 
-def test_exposes_country_pos_from_env(fake_model):
+def test_exposes_country_pos_from_env(market):
     # Given
-    model = fake_model
-    market = DepositMarket(model)
     market.env = Mock(pos=3)
 
     # When
@@ -50,26 +52,19 @@ def test_exposes_country_pos_from_env(fake_model):
 # ----------------------------------------------------
 
 
-FakeBank = Mock()
-FakeDepositor = Mock()
-FakeGuarantee = Mock()
-
-
 @pytest.fixture
-def market_without_roles(monkeypatch, fake_model):
+def market_without_roles(market):
     # Given
-    monkeypatch.setattr("model.spaces.deposit_market.DepositBank", FakeBank)
-    monkeypatch.setattr("model.spaces.deposit_market.Depositor", FakeDepositor)
-    monkeypatch.setattr("model.spaces.deposit_market.DepositGuarantee", FakeGuarantee)
-    market = DepositMarket(fake_model)
     market.add_role = Mock()
     market.env = Mock()
     return market
 
 
-def test_add_bank_add_deposit_bank_role_if_domestic(market_without_roles):
+def test_add_bank_add_deposit_bank_role_if_domestic(market_without_roles, monkeypatch):
     # Given
     bank = Mock(country_pos=2)
+    role_cls = Mock(name="DepositBank")
+    monkeypatch.setattr("model.spaces.deposit_market.DepositBank", role_cls)
     market = market_without_roles
     market.env.pos = 2
 
@@ -77,7 +72,7 @@ def test_add_bank_add_deposit_bank_role_if_domestic(market_without_roles):
     market.add_bank(bank)
 
     # Then
-    market.add_role.assert_called_with(FakeBank, bank)
+    market.add_role.assert_called_with(role_cls, bank)
 
 
 def test_add_bank_doesnt_add_role_for_foreigners(market_without_roles):
@@ -93,9 +88,11 @@ def test_add_bank_doesnt_add_role_for_foreigners(market_without_roles):
     market.add_role.assert_not_called()
 
 
-def test_add_firm_add_depositor_role(market_without_roles):
+def test_add_firm_add_depositor_role(market_without_roles, monkeypatch):
     # Given
     firm = Mock()
+    role_cls = Mock(name="Depositor")
+    monkeypatch.setattr("model.spaces.deposit_market.Depositor", role_cls)
     market = market_without_roles
     market.env.pos = 2
 
@@ -103,12 +100,14 @@ def test_add_firm_add_depositor_role(market_without_roles):
     market.add_firm(firm)
 
     # Then
-    market.add_role.assert_called_with(FakeDepositor, firm, prefix="country_2")
+    market.add_role.assert_called_with(role_cls, firm, prefix="country_2")
 
 
-def test_add_household_add_depositor_role_if_domestic(market_without_roles):
+def test_add_household_add_depositor_if_domestic(market_without_roles, monkeypatch):
     # Given
     household = Mock(country_pos=2)
+    role_cls = Mock(name="Depositor")
+    monkeypatch.setattr("model.spaces.deposit_market.Depositor", role_cls)
     market = market_without_roles
     market.env.pos = 2
 
@@ -116,7 +115,7 @@ def test_add_household_add_depositor_role_if_domestic(market_without_roles):
     market.add_household(household)
 
     # Then
-    market.add_role.assert_called_with(FakeDepositor, household)
+    market.add_role.assert_called_with(role_cls, household)
 
 
 def test_add_household_doesnt_add_role_for_foreigners(market_without_roles):
@@ -132,9 +131,11 @@ def test_add_household_doesnt_add_role_for_foreigners(market_without_roles):
     market.add_role.assert_not_called()
 
 
-def test_add_government_add_guarantee_role_if_domestic(market_without_roles):
+def test_add_government_add_guarantee_if_domestic(market_without_roles, monkeypatch):
     # Given
     govt = Mock(country_pos=2)
+    role_cls = Mock(name="DepositGuarantee")
+    monkeypatch.setattr("model.spaces.deposit_market.DepositGuarantee", role_cls)
     market = market_without_roles
     market.env.pos = 2
 
@@ -142,7 +143,7 @@ def test_add_government_add_guarantee_role_if_domestic(market_without_roles):
     market.add_government(govt)
 
     # Then
-    market.add_role.assert_called_with(FakeGuarantee, govt)
+    market.add_role.assert_called_with(role_cls, govt)
 
 
 def test_add_government_doesnt_add_role_for_foreigners(market_without_roles):
@@ -164,20 +165,33 @@ def test_add_government_doesnt_add_role_for_foreigners(market_without_roles):
 
 
 @pytest.fixture
-def market_with_participants(market_without_roles):
+def depositor():
     # Given
-    depositor, deposit_bank = Mock(), Mock()
-    market = market_without_roles
+    return Mock()
+
+
+@pytest.fixture
+def deposit_bank():
+    # Given
+    return Mock()
+
+
+@pytest.fixture
+def market_without_deposit(market):
+    # Given
     market.env = Mock()
     market.transfer_stock = Mock()
     market.make_transaction = Mock()
-    market.graph.add_nodes_from([depositor, deposit_bank])
-    return market, depositor, deposit_bank
+    return market
 
 
-def test_join_deposit_bank_creates_graph_edge(market_with_participants):
+def test_join_deposit_bank_creates_graph_edge(
+    market_without_deposit,
+    depositor,
+    deposit_bank,
+):
     # Given
-    market, depositor, deposit_bank = market_with_participants
+    market = market_without_deposit
     graph = market.graph
 
     # When
@@ -187,9 +201,13 @@ def test_join_deposit_bank_creates_graph_edge(market_with_participants):
     assert graph.has_edge(depositor, deposit_bank)
 
 
-def test_join_deposit_bank_with_initial_amount(market_with_participants):
+def test_join_deposit_bank_with_initial_amount(
+    market_without_deposit,
+    depositor,
+    deposit_bank,
+):
     # Given
-    market, depositor, deposit_bank = market_with_participants
+    market = market_without_deposit
     graph = market.graph
 
     # When
@@ -199,9 +217,13 @@ def test_join_deposit_bank_with_initial_amount(market_with_participants):
     assert graph[depositor][deposit_bank]["amount"] == 500
 
 
-def test_join_deposit_bank_transfers_cash(market_with_participants):
+def test_join_deposit_bank_transfers_cash(
+    market_without_deposit,
+    depositor,
+    deposit_bank,
+):
     # Given
-    market, depositor, deposit_bank = market_with_participants
+    market = market_without_deposit
 
     # When
     market.join_deposit_bank(depositor, deposit_bank, amount=500)
@@ -210,9 +232,13 @@ def test_join_deposit_bank_transfers_cash(market_with_participants):
     market.transfer_stock.assert_any_call("cash", depositor.id, deposit_bank.id, 500)
 
 
-def test_join_deposit_bank_updates_accounts(market_with_participants):
+def test_join_deposit_bank_updates_accounts(
+    market_without_deposit,
+    depositor,
+    deposit_bank,
+):
     # Given
-    market, depositor, deposit_bank = market_with_participants
+    market = market_without_deposit
     bank_id = deposit_bank.id
 
     # When
@@ -223,16 +249,20 @@ def test_join_deposit_bank_updates_accounts(market_with_participants):
 
 
 @pytest.fixture
-def market_with_depositor_amount(market_with_participants):
+def market_with_deposit(market_without_deposit, depositor, deposit_bank):
     # Given
-    market, depositor, deposit_bank = market_with_participants
+    market = market_without_deposit
     market.graph.add_edge(depositor, deposit_bank, amount=100)
-    return market, depositor, deposit_bank, 100
+    return market
 
 
-def test_leave_deposit_bank_remove_graph_edge(market_with_depositor_amount):
+def test_leave_deposit_bank_remove_graph_edge(
+    market_with_deposit,
+    depositor,
+    deposit_bank,
+):
     # Given
-    market, depositor, deposit_bank, _ = market_with_depositor_amount
+    market = market_with_deposit
     graph = market.graph
 
     # When
@@ -242,27 +272,35 @@ def test_leave_deposit_bank_remove_graph_edge(market_with_depositor_amount):
     assert not graph.has_edge(depositor, deposit_bank)
 
 
-def test_leave_deposit_bank_transfers_cash(market_with_depositor_amount):
+def test_leave_deposit_bank_transfers_cash(
+    market_with_deposit,
+    depositor,
+    deposit_bank,
+):
     # Given
-    market, depositor, deposit_bank, amount = market_with_depositor_amount
+    market = market_with_deposit
 
     # When
     market.leave_deposit_bank(depositor, deposit_bank)
 
     # Then
-    market.transfer_stock.assert_any_call("cash", deposit_bank.id, depositor.id, amount)
+    market.transfer_stock.assert_any_call("cash", deposit_bank.id, depositor.id, 100)
 
 
-def test_leave_deposit_bank_updates_accounts(market_with_depositor_amount):
+def test_leave_deposit_bank_updates_accounts(
+    market_with_deposit,
+    depositor,
+    deposit_bank,
+):
     # Given
-    market, depositor, deposit_bank, amount = market_with_depositor_amount
+    market = market_with_deposit
     bank_id = deposit_bank.id
 
     # When
     market.leave_deposit_bank(depositor, deposit_bank)
 
     # Then
-    market.transfer_stock.assert_any_call("deposits", depositor.id, bank_id, amount)
+    market.transfer_stock.assert_any_call("deposits", depositor.id, bank_id, 100)
 
 
 # ---------------------------------------------------
@@ -270,74 +308,78 @@ def test_leave_deposit_bank_updates_accounts(market_with_depositor_amount):
 # ----------------------------------------------------
 
 
-def test_make_deposits_transfers_cash(market_with_depositor_amount):
+def test_make_deposits_transfers_cash(market_with_deposit, depositor, deposit_bank):
     # Given
-    market, depositor, deposit_bank, _ = market_with_depositor_amount
+    market = market_with_deposit
 
     # When
-    market.make_deposits(depositor, deposit_bank, 500)
+    market.make_deposits(depositor, deposit_bank, 50)
 
     # Then
-    market.transfer_stock.assert_any_call("cash", depositor.id, deposit_bank.id, 500)
+    market.transfer_stock.assert_any_call("cash", depositor.id, deposit_bank.id, 50)
 
 
-def test_make_deposits_updates_accounts(market_with_depositor_amount):
+def test_make_deposits_updates_accounts(market_with_deposit, depositor, deposit_bank):
     # Given
-    market, depositor, deposit_bank, _ = market_with_depositor_amount
+    market = market_with_deposit
     bank_id = deposit_bank.id
 
     # When
-    market.make_deposits(depositor, deposit_bank, 500)
+    market.make_deposits(depositor, deposit_bank, 50)
 
     # Then
-    market.transfer_stock.assert_any_call("deposits", bank_id, depositor.id, 500)
+    market.transfer_stock.assert_any_call("deposits", bank_id, depositor.id, 50)
 
 
-def test_make_deposits_updates_edge(market_with_depositor_amount):
+def test_make_deposits_updates_edge(market_with_deposit, depositor, deposit_bank):
     # Given
-    market, depositor, deposit_bank, amount = market_with_depositor_amount
+    market = market_with_deposit
     graph = market.graph
 
     # When
-    market.make_deposits(depositor, deposit_bank, 500)
+    market.make_deposits(depositor, deposit_bank, 50)
 
     # Then
-    assert graph[depositor][deposit_bank]["amount"] == amount + 500
+    assert graph[depositor][deposit_bank]["amount"] == 150
 
 
-def test_withdraw_deposits_transfers_cash(market_with_depositor_amount):
+def test_withdraw_deposits_transfers_cash(market_with_deposit, depositor, deposit_bank):
     # Given
-    market, depositor, deposit_bank, _ = market_with_depositor_amount
+    market = market_with_deposit
 
     # When
-    market.withdraw_deposits(depositor, deposit_bank, 500)
+    market.withdraw_deposits(depositor, deposit_bank, 50)
 
     # Then
-    market.transfer_stock.assert_any_call("cash", deposit_bank.id, depositor.id, 500)
+    market.transfer_stock.assert_any_call("cash", deposit_bank.id, depositor.id, 50)
 
 
-def test_withdraw_deposits_updates_accounts(market_with_depositor_amount):
+def test_withdraw_deposits_updates_accounts(
+    market_with_deposit,
+    depositor,
+    deposit_bank,
+):
     # Given
-    market, depositor, deposit_bank, _ = market_with_depositor_amount
+    market = market_with_deposit
     bank_id = deposit_bank.id
 
     # When
-    market.withdraw_deposits(depositor, deposit_bank, 500)
+    market.withdraw_deposits(depositor, deposit_bank, 50)
 
     # Then
-    market.transfer_stock.assert_any_call("deposits", depositor.id, bank_id, 500)
+    market.transfer_stock.assert_any_call("deposits", depositor.id, bank_id, 50)
 
 
-def test_withdraw_deposits_updates_edge(market_with_depositor_amount):
+def test_withdraw_deposits_updates_edge(market_with_deposit, depositor, deposit_bank):
     # Given
-    market, depositor, deposit_bank, amount = market_with_depositor_amount
+    market = market_with_deposit
     graph = market.graph
 
     # When
-    market.withdraw_deposits(depositor, deposit_bank, 500)
+    market.withdraw_deposits(depositor, deposit_bank, 50)
 
     # Then
-    assert graph[depositor][deposit_bank]["amount"] == amount - 500
+    assert graph[depositor][deposit_bank]["amount"] == 50
 
 
 # ---------------------------------------------------
@@ -345,9 +387,9 @@ def test_withdraw_deposits_updates_edge(market_with_depositor_amount):
 # ----------------------------------------------------
 
 
-def test_pay_interests_updates_accounts(market_with_depositor_amount):
+def test_pay_interests_updates_accounts(market_with_deposit, depositor, deposit_bank):
     # Given
-    market, depositor, deposit_bank, _ = market_with_depositor_amount
+    market = market_with_deposit
     source = deposit_bank.id
     target = depositor.id
 
@@ -359,21 +401,25 @@ def test_pay_interests_updates_accounts(market_with_depositor_amount):
     market.make_transaction.assert_any_call("dep_interests", source, target, 10.0)
 
 
-def test_pay_interests_updates_graph_edge(market_with_depositor_amount):
+def test_pay_interests_updates_graph_edge(market_with_deposit, depositor, deposit_bank):
     # Given
-    market, depositor, deposit_bank, amount = market_with_depositor_amount
+    market = market_with_deposit
     graph = market.graph
 
     # When
     market.pay_interests(deposit_bank, depositor, 10.0)
 
     # Then
-    assert graph[depositor][deposit_bank]["amount"] == amount + 10.0
+    assert graph[depositor][deposit_bank]["amount"] == pytest.approx(110.0)
 
 
-def test_reimburse_deposits_transfers_cash(market_with_depositor_amount):
+def test_reimburse_deposits_transfers_cash(
+    market_with_deposit,
+    depositor,
+    deposit_bank,
+):
     # Given
-    market, depositor, deposit_bank, _ = market_with_depositor_amount
+    market = market_with_deposit
     guarantee = Mock()
 
     # When
@@ -383,9 +429,13 @@ def test_reimburse_deposits_transfers_cash(market_with_depositor_amount):
     market.transfer_stock.assert_any_call("cash", guarantee.id, depositor.id, 50)
 
 
-def test_reimburse_deposits_updates_accounts(market_with_depositor_amount):
+def test_reimburse_deposits_updates_accounts(
+    market_with_deposit,
+    depositor,
+    deposit_bank,
+):
     # Given
-    market, depositor, deposit_bank, _ = market_with_depositor_amount
+    market = market_with_deposit
     bank_id = deposit_bank.id
     guarantee = Mock()
 
@@ -397,9 +447,13 @@ def test_reimburse_deposits_updates_accounts(market_with_depositor_amount):
     market.make_transaction.assert_any_call("loan_defaults", guarantee.id, bank_id, 50)
 
 
-def test_reimburse_deposits_update_graph_edge(market_with_depositor_amount):
+def test_reimburse_deposits_update_graph_edge(
+    market_with_deposit,
+    depositor,
+    deposit_bank,
+):
     # Given
-    market, depositor, deposit_bank, amount = market_with_depositor_amount
+    market = market_with_deposit
     graph = market.graph
     guarantee = Mock()
 
@@ -407,7 +461,7 @@ def test_reimburse_deposits_update_graph_edge(market_with_depositor_amount):
     market.reimburse_deposits(guarantee, depositor, deposit_bank, 50)
 
     # Then
-    assert graph[depositor][deposit_bank]["amount"] == amount - 50.0
+    assert graph[depositor][deposit_bank]["amount"] == pytest.approx(50.0)
 
 
 # ---------------------------------------------------
@@ -416,22 +470,38 @@ def test_reimburse_deposits_update_graph_edge(market_with_depositor_amount):
 
 
 @pytest.fixture
-def market_with_defaults(market_without_roles):
-    deposit_banks = [Mock(defaulted=val) for val in [True, False]]
-    depositors = [Mock(defaulted=val) for val in [True, False]]
-    market = market_without_roles
-    for role1, role2 in zip(deposit_banks, depositors):
-        role1.name = "deposit_bank"
-        role2.name = "depositor"
-        market.roles[role1.agent.id] = role1
-        market.roles[role2.agent.id] = role2
-    market.remove_role = Mock()
-    return market, deposit_banks, depositors
-
-
-def test_clear_defaults_removes_defaulted_deposit_banks(market_with_defaults):
+def depositors():
     # Given
-    market, deposit_banks, _ = market_with_defaults
+    depositors = []
+    for defaulted in (True, False):
+        role = Mock(defaulted=defaulted)
+        role.name = "depositor"
+        depositors.append(role)
+    return depositors
+
+
+@pytest.fixture
+def deposit_banks():
+    # Given
+    deposit_banks = []
+    for defaulted in (True, False):
+        role = Mock(defaulted=defaulted)
+        role.name = "deposit_bank"
+        deposit_banks.append(role)
+    return deposit_banks
+
+
+@pytest.fixture
+def market_with_defaults(market, depositors, deposit_banks):
+    for role in depositors + deposit_banks:
+        market.roles[role.id] = role
+    market.remove_role = Mock()
+    return market
+
+
+def test_clear_defaults_removes_defaulted_banks(market_with_defaults, deposit_banks):
+    # Given
+    market = market_with_defaults
 
     # When
     market.clear_defaults()
@@ -441,9 +511,9 @@ def test_clear_defaults_removes_defaulted_deposit_banks(market_with_defaults):
     assert call(deposit_banks[1]) not in market.remove_role.call_args_list
 
 
-def test_clear_defaults_removes_defaulted_depositors(market_with_defaults):
+def test_clear_defaults_removes_defaulted_depositors(market_with_defaults, depositors):
     # Given
-    market, _, depositors = market_with_defaults
+    market = market_with_defaults
 
     # When
     market.clear_defaults()
