@@ -32,7 +32,6 @@ class MonetaryUnion(EcoSpace):
     def add_central_bank(self, cb):
         self.add_role(PolicyMaker, cb)
 
-
     #
     # Statitics
     #

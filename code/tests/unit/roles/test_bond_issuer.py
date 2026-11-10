@@ -18,49 +18,40 @@ def test_inherits_from_eco_role():
     assert is_derived
 
 
-def test_initializes_debt_ratio():
-    # Given
-    agent, env = Mock(), Mock()
-
-    # When
-    role = BondIssuer(agent, env)
-
-    # Then
-    assert role.debt_ratio == 0.0
-
-
-def test_initializes_bond_number():
-    # Given
-    agent, env = Mock(), Mock()
-
-    # When
-    role = BondIssuer(agent, env)
-
-    # Then
-    assert role.bond_number == 0.0
-
-
-def test_initializes_bond_value():
-    # Given
-    agent, env = Mock(), Mock()
-
-    # When
-    role = BondIssuer(agent, env)
-
-    # Then
-    assert role.bond_value == 0.0
-
-
-# ---------------------------------------------------
-# PERCEPTIONS
-# ----------------------------------------------------
-
-
 @pytest.fixture
 def role():
     # Given
     agent, env = Mock(), Mock()
     return BondIssuer(agent, env)
+
+
+def test_initializes_debt_ratio(role):
+    # When
+    default_value = role.debt_ratio
+
+    # Then
+    assert default_value == 0.0
+
+
+def test_initializes_bond_number(role):
+    # When
+    default_value = role.bond_number
+
+    # Then
+    assert default_value == 0.0
+
+
+def test_initializes_bond_value(role):
+    # When
+    default_value = role.bond_value
+
+    # Then
+    assert default_value == 0.0
+
+
+# ---------------------------------------------------
+# PERCEPTIONS
+# ----------------------------------------------------
 
 
 def test_get_discount_rate(role):

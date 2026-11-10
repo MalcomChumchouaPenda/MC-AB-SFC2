@@ -18,15 +18,19 @@ def test_inherits_from_eco_role():
     assert is_derived
 
 
-def test_initializes_defaulted():
+@pytest.fixture
+def role():
     # Given
     agent, env = Mock(), Mock()
+    return BondBuyer(agent, env)
 
+
+def test_initializes_defaulted(role):
     # When
-    role = BondBuyer(agent, env)
+    default_value = role.defaulted
 
     # Then
-    assert role.defaulted is False
+    assert default_value is False
 
 
 # ---------------------------------------------------
@@ -35,19 +39,19 @@ def test_initializes_defaulted():
 
 
 @pytest.fixture
-def role():
-    # Given
-    agent, env = Mock(), Mock()
-    return BondBuyer(agent, env)
-
-
-def test_find_issuers_with_positive_bond_number(role, make_dlist):
+def issuers(make_dlist):
     # Given
     eligible = Mock(bond_number=1)
     ineligible = Mock(bond_number=0)
     issuers = make_dlist([eligible, ineligible])
+    return issuers
+
+
+def test_find_issuers_with_positive_bond_number(role, issuers):
+    # Given
     env = role.env
     env.find_all_roles = Mock(return_value=issuers)
+    eligible = issuers[0]
 
     # When
     result = role.find_issuers()

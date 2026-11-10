@@ -173,7 +173,6 @@ def test_add_central_bank_adds_policy_maker(union_without_cb, monkeypatch, natio
     union.add_role.assert_called_with(role_cls, cb)
 
 
-
 # ---------------------------------------------------
 # CURRENT INDICATORS
 # ----------------------------------------------------
