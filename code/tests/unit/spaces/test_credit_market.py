@@ -18,9 +18,14 @@ def test_inherits_from_eco_space():
     assert is_derived
 
 
-def test_expose_discount_rate(fake_model):
+@pytest.fixture
+def market(fake_model):
     # Given
-    market = CreditMarket(fake_model)
+    return CreditMarket(fake_model)
+
+
+def test_expose_discount_rate(market):
+    # Given
     market.env = Mock(discount_rate=0.05)
 
     # When
@@ -35,42 +40,39 @@ def test_expose_discount_rate(fake_model):
 # ----------------------------------------------------
 
 
-FakeLender = Mock()
-FakeBorrower = Mock()
-
-
 @pytest.fixture
-def market_without_roles(monkeypatch, fake_model):
+def market_without_roles(market):
     # Given
-    monkeypatch.setattr("model.spaces.credit_market.Borrower", FakeBorrower)
-    monkeypatch.setattr("model.spaces.credit_market.Lender", FakeLender)
-    market = CreditMarket(fake_model)
     market.add_role = Mock()
     return market
 
 
-def test_add_bank_add_lender_role(market_without_roles):
+def test_add_bank_add_lender_role(market_without_roles, monkeypatch):
     # Given
     bank = Mock()
+    role_cls = Mock(name="Lender")
+    monkeypatch.setattr("model.spaces.credit_market.Lender", role_cls)
     market = market_without_roles
 
     # When
     market.add_bank(bank)
 
     # Then
-    market.add_role.assert_called_with(FakeLender, bank)
+    market.add_role.assert_called_with(role_cls, bank)
 
 
-def test_add_firm_add_borrower_role(market_without_roles):
+def test_add_firm_add_borrower_role(market_without_roles, monkeypatch):
     # Given
     firm = Mock()
+    role_cls = Mock(name="Borrower")
+    monkeypatch.setattr("model.spaces.credit_market.Borrower", role_cls)
     market = market_without_roles
 
     # When
     market.add_firm(firm)
 
     # Then
-    market.add_role.assert_called_with(FakeBorrower, firm)
+    market.add_role.assert_called_with(role_cls, firm)
 
 
 # ---------------------------------------------------
@@ -79,21 +81,28 @@ def test_add_firm_add_borrower_role(market_without_roles):
 
 
 @pytest.fixture
-def market_with_participants(market_without_roles):
+def lender():
     # Given
-    lender = Mock()
-    borrower = Mock(loan_demand=0)
-    market = market_without_roles
-    market.env = Mock()
+    return Mock()
+
+
+@pytest.fixture
+def borrower():
+    # Given
+    return Mock(loan_demand=0)
+
+
+@pytest.fixture
+def market_without_loan(market):
+    # Given
     market.transfer_stock = Mock()
     market.make_transaction = Mock()
-    market.graph.add_nodes_from([borrower, lender])
-    return market, borrower, lender
+    return market
 
 
-def test_grant_loan_creates_graph_edge(market_with_participants):
+def test_grant_loan_creates_graph_edge(market_without_loan, lender, borrower):
     # Given
-    market, borrower, lender = market_with_participants
+    market = market_without_loan
     graph = market.graph
 
     # When
@@ -105,9 +114,9 @@ def test_grant_loan_creates_graph_edge(market_with_participants):
     assert graph[borrower][lender]["rate"] == 0.05
 
 
-def test_grant_loan_transfers_cash(market_with_participants):
+def test_grant_loan_transfers_cash(market_without_loan, lender, borrower):
     # Given
-    market, borrower, lender = market_with_participants
+    market = market_without_loan
 
     # When
     market.grant_loan(lender, borrower, 500, 0.05)
@@ -116,9 +125,9 @@ def test_grant_loan_transfers_cash(market_with_participants):
     market.transfer_stock.assert_any_call("cash", lender.id, borrower.id, 500)
 
 
-def test_grant_loan_updates_accounts(market_with_participants):
+def test_grant_loan_updates_accounts(market_without_loan, lender, borrower):
     # Given
-    market, borrower, lender = market_with_participants
+    market = market_without_loan
 
     # When
     market.grant_loan(lender, borrower, 500, 0.05)
@@ -127,9 +136,9 @@ def test_grant_loan_updates_accounts(market_with_participants):
     market.transfer_stock.assert_any_call("loans", borrower.id, lender.id, 500)
 
 
-def test_grant_loan_reduces_loan_demand(market_with_participants):
+def test_grant_loan_reduces_loan_demand(market_without_loan, lender, borrower):
     # Given
-    market, borrower, lender = market_with_participants
+    market = market_without_loan
     borrower.loan_demand = 900
 
     # When
@@ -145,16 +154,16 @@ def test_grant_loan_reduces_loan_demand(market_with_participants):
 
 
 @pytest.fixture
-def market_with_loan(market_with_participants):
+def market_with_loan(market_without_loan, lender, borrower):
     # Given
-    market, borrower, lender = market_with_participants
+    market = market_without_loan
     market.graph.add_edge(borrower, lender, amount=100, rate=0.1)
-    return market, borrower, lender
+    return market
 
 
-def test_repay_loans_updates_graph_edge(market_with_loan):
+def test_repay_loans_updates_graph_edge(market_with_loan, lender, borrower):
     # Given
-    market, borrower, lender = market_with_loan
+    market = market_with_loan
     graph = market.graph
     graph[borrower][lender]["amount"] = 300
 
@@ -165,9 +174,9 @@ def test_repay_loans_updates_graph_edge(market_with_loan):
     assert graph[borrower][lender]["amount"] == 200
 
 
-def test_repay_loans_transfers_cash(market_with_loan):
+def test_repay_loans_transfers_cash(market_with_loan, lender, borrower):
     # Given
-    market, borrower, lender = market_with_loan
+    market = market_with_loan
 
     # When
     market.repay_loans(borrower, lender, 100, 10)
@@ -176,9 +185,9 @@ def test_repay_loans_transfers_cash(market_with_loan):
     market.transfer_stock.assert_any_call("cash", borrower.id, lender.id, 110)
 
 
-def test_repay_loans_updates_accounts(market_with_loan):
+def test_repay_loans_updates_accounts(market_with_loan, lender, borrower):
     # Given
-    market, borrower, lender = market_with_loan
+    market = market_with_loan
     bank_id = lender.id
 
     # When
@@ -189,9 +198,9 @@ def test_repay_loans_updates_accounts(market_with_loan):
     market.make_transaction.assert_any_call("loan_interests", borrower.id, bank_id, 10)
 
 
-def test_make_defaults_updates_graph_edge(market_with_loan):
+def test_make_defaults_updates_graph_edge(market_with_loan, lender, borrower):
     # Given
-    market, borrower, lender = market_with_loan
+    market = market_with_loan
     graph = market.graph
     graph[borrower][lender]["amount"] = 300
 
@@ -202,9 +211,9 @@ def test_make_defaults_updates_graph_edge(market_with_loan):
     assert graph[borrower][lender]["amount"] == 200
 
 
-def test_make_defaults_updates_accounts(market_with_loan):
+def test_make_defaults_updates_accounts(market_with_loan, lender, borrower):
     # Given
-    market, borrower, lender = market_with_loan
+    market = market_with_loan
     bank_id = lender.id
 
     # When
@@ -221,22 +230,39 @@ def test_make_defaults_updates_accounts(market_with_loan):
 
 
 @pytest.fixture
-def market_with_defaults(market_without_roles):
-    lenders = [Mock(defaulted=val) for val in [True, False]]
-    borrowers = [Mock(defaulted=val) for val in [True, False]]
-    market = market_without_roles
-    for role1, role2 in zip(lenders, borrowers):
-        role1.name = "lender"
-        role2.name = "borrower"
-        market.roles[role1.agent.id] = role1
-        market.roles[role2.agent.id] = role2
-    market.remove_role = Mock()
-    return market, lenders, borrowers
-
-
-def test_clear_defaults_removes_defaulted_lenders(market_with_defaults):
+def lenders():
     # Given
-    market, lenders, _ = market_with_defaults
+    lenders = []
+    for defaulted in (True, False):
+        role = Mock(defaulted=defaulted)
+        role.name = "lender"
+        lenders.append(role)
+    return lenders
+
+
+@pytest.fixture
+def borrowers():
+    # Given
+    borrowers = []
+    for defaulted in (True, False):
+        role = Mock(defaulted=defaulted)
+        role.name = "borrower"
+        borrowers.append(role)
+    return borrowers
+
+
+@pytest.fixture
+def market_with_defaults(market_without_roles, lenders, borrowers):
+    market = market_without_roles
+    for role in lenders + borrowers:
+        market.roles[role.id] = role
+    market.remove_role = Mock()
+    return market
+
+
+def test_clear_defaults_removes_defaulted_lenders(market_with_defaults, lenders):
+    # Given
+    market = market_with_defaults
 
     # When
     market.clear_defaults()
@@ -246,9 +272,9 @@ def test_clear_defaults_removes_defaulted_lenders(market_with_defaults):
     assert call(lenders[1]) not in market.remove_role.call_args_list
 
 
-def test_clear_defaults_removes_defaulted_borrowers(market_with_defaults):
+def test_clear_defaults_removes_defaulted_borrowers(market_with_defaults, borrowers):
     # Given
-    market, _, borrowers = market_with_defaults
+    market = market_with_defaults
 
     # When
     market.clear_defaults()
