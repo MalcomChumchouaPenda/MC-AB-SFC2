@@ -24,9 +24,13 @@ def test_inherits_from_eco_space():
 
 
 @pytest.fixture
-def market_without_roles(fake_model):
+def market(fake_model):
     # Given
-    market = BondMarket(fake_model)
+    return BondMarket(fake_model)
+
+@pytest.fixture
+def market_without_roles(market):
+    # Given
     market.add_role = Mock()
     return market
 
@@ -91,12 +95,10 @@ def issuer():
 
 
 @pytest.fixture
-def market_without_purchase(market_without_roles):
+def market_without_purchase(market):
     # Given
-    market = market_without_roles
     market.transfer_stock = Mock()
     market.make_transaction = Mock()
-    market.env = Mock()
     return market
 
 
@@ -208,9 +210,8 @@ def buyers():
 
 
 @pytest.fixture
-def market_with_defaults(market_without_roles, buyers):
+def market_with_defaults(market, buyers):
     # Given
-    market = market_without_roles
     for role in buyers:
         market.roles[role.agent.id] = role
     market.remove_role = Mock()
