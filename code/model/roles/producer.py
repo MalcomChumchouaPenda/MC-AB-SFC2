@@ -22,7 +22,7 @@ class Producer(EcoRole):
         return self.env.average_price
 
     def get_average_phi(self):
-        return self.env.average_prod
+        return self.env.average_phi
 
     #
     # Actions
@@ -43,7 +43,7 @@ class Producer(EcoRole):
     def _calc_rd_success_probability(self):
         env = self.env
         avg_price = env.average_price
-        avg_prod = env.average_prod
+        avg_prod = env.average_phi
         prob = 1 - math.exp(-env.p.nu * self.rd / (avg_price * avg_prod))
         return prob
 
@@ -56,7 +56,7 @@ class Producer(EcoRole):
     def _imitate(self):
         env = self.env
         random = env.model.nprandom
-        avg_prod = env.average_prod
+        avg_prod = env.average_phi
         prod_diff = avg_prod - self.phi
         if prod_diff > 0:
             self.phi += random.uniform(0, prod_diff)

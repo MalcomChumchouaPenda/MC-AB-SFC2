@@ -22,7 +22,7 @@ def country(model):
     country = Country(model)
     country.create_markets()
     market = country.spaces["goods_market"]
-    market.average_prod = 10
+    market.average_phi = 10
     market.average_price = 10
     return country
 
@@ -78,7 +78,7 @@ def test_dont_increases_phi_without_success(firm, random):
 def test_increases_prductivity_by_imitation(firm, country, random):
     # Given
     firm.roles["producer"].phi = 10
-    country.spaces["goods_market"].average_prod = 15
+    country.spaces["goods_market"].average_phi = 15
     random.uniform = lambda a, b: b
 
     # When

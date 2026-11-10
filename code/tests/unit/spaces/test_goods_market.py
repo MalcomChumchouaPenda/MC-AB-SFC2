@@ -30,37 +30,34 @@ def test_initializes_tradable_arg(arg):
     assert market.tradable is arg
 
 
-def test_initializes_average_price(fake_model):
+@pytest.fixture
+def market(fake_model):
     # Given
-    model = fake_model
+    return GoodsMarket(fake_model)
 
+
+def test_initializes_average_price(market):
     # When
-    market = GoodsMarket(model)
+    default_value = market.average_price
 
     # Then
-    assert market.average_price == 0
+    assert default_value == 0
 
 
-def test_initializes_previous_average_price(fake_model):
-    # Given
-    model = fake_model
-
+def test_initializes_previous_average_price(market):
     # When
-    market = GoodsMarket(model)
+    default_value = market.average_price_prev
 
     # Then
-    assert market.average_price_prev == 0
+    assert default_value == 0
 
 
-def test_initializes_average_phi(fake_model):
-    # Given
-    model = fake_model
-
+def test_initializes_average_phi(market):
     # When
-    market = GoodsMarket(model)
+    default_value = market.average_phi
 
     # Then
-    assert market.average_prod == 0
+    assert default_value == 0
 
 
 # ---------------------------------------------------
@@ -68,54 +65,63 @@ def test_initializes_average_phi(fake_model):
 # ----------------------------------------------------
 
 
-FakeConsumer = Mock()
-FakeProducer = Mock()
-
-
 @pytest.fixture
-def market_without_roles(monkeypatch, fake_model):
+def market_without_roles(market):
     # Given
-    monkeypatch.setattr("model.spaces.goods_market.Consumer", FakeConsumer)
-    monkeypatch.setattr("model.spaces.goods_market.Producer", FakeProducer)
-    market = GoodsMarket(fake_model)
     market.env = Mock()
     market.add_role = Mock()
     return market
 
 
-def test_add_household_adds_consumer_role_for_any_if_tradable(market_without_roles):
+@pytest.fixture
+def tradable_market(market_without_roles):
     # Given
     market = market_without_roles
     market.tradable = True
+    return market
+
+
+@pytest.fixture
+def local_market(market_without_roles):
+    # Given
+    market = market_without_roles
+    market.tradable = False
+    market.env.pos = 2
+    return market
+
+
+def test_add_household_adds_any_consumer_if_tradable(tradable_market, monkeypatch):
+    # Given
+    role_cls = Mock(name="Consumer")
+    monkeypatch.setattr("model.spaces.goods_market.Consumer", role_cls)
+    market = tradable_market
     household = Mock()
 
     # When
     market.add_household(household)
 
     # Then
-    market.add_role.assert_called_with(FakeConsumer, household, prefix="trad")
+    market.add_role.assert_called_with(role_cls, household, prefix="trad")
 
 
-def test_add_household_adds_consumer_role_for_domestic_only(market_without_roles):
+def test_add_household_add_domestic_consumer_if_non_tradable(local_market, monkeypatch):
     # Given
-    market = market_without_roles
-    market.tradable = False
-    market.env.pos = 2
     household = Mock(country_pos=2)
+    role_cls = Mock(name="Consumer")
+    monkeypatch.setattr("model.spaces.goods_market.Consumer", role_cls)
+    market = local_market
 
     # When
     market.add_household(household)
 
     # Then
-    market.add_role.assert_called_with(FakeConsumer, household, prefix="non_trad")
+    market.add_role.assert_called_with(role_cls, household, prefix="non_trad")
 
 
-def test_add_household_does_nothing_for_foreigners(market_without_roles):
+def test_add_household_does_nothing_for_foreigners_if_non_tradable(local_market):
     # Given
-    market = market_without_roles
-    market.tradable = False
-    market.env.pos = 1
-    household = Mock(country_pos=2)
+    household = Mock(country_pos=3)
+    market = local_market
 
     # When
     market.add_household(household)
@@ -124,28 +130,24 @@ def test_add_household_does_nothing_for_foreigners(market_without_roles):
     market.add_role.assert_not_called()
 
 
-def test_add_firm_adds_producer_role_for_tradable_firm_if_tradable(
-    market_without_roles,
-):
+def test_add_firm_adds_producer_for_complier_if_tradable(tradable_market, monkeypatch):
     # Given
     firm = Mock(tradable=True)
-    market = market_without_roles
-    market.tradable = True
+    role_cls = Mock(name="Producer")
+    monkeypatch.setattr("model.spaces.goods_market.Producer", role_cls)
+    market = tradable_market
 
     # When
     market.add_firm(firm)
 
     # Then
-    market.add_role.assert_called_with(FakeProducer, firm)
+    market.add_role.assert_called_with(role_cls, firm)
 
 
-def test_add_firm_doesnt_add_role_for_non_tradable_firm_if_tradable(
-    market_without_roles,
-):
+def test_add_firm_doesnt_add_role_for_non_complier_if_tradable(tradable_market):
     # Given
     firm = Mock(tradable=False)
-    market = market_without_roles
-    market.tradable = True
+    market = tradable_market
 
     # When
     market.add_firm(firm)
@@ -154,30 +156,24 @@ def test_add_firm_doesnt_add_role_for_non_tradable_firm_if_tradable(
     market.add_role.assert_not_called()
 
 
-def test_add_firm_adds_producer_role_for_domestic_firm_if_non_tradable(
-    market_without_roles,
-):
+def test_add_firm_adds_domestic_producer_if_non_tradable(local_market, monkeypatch):
     # Given
+    role_cls = Mock(name="Producer")
+    monkeypatch.setattr("model.spaces.goods_market.Producer", role_cls)
     firm = Mock(tradable=False, country_pos=2)
-    market = market_without_roles
-    market.tradable = False
-    market.env.pos = 2
+    market = local_market
 
     # When
     market.add_firm(firm)
 
     # Then
-    market.add_role.assert_called_with(FakeProducer, firm)
+    market.add_role.assert_called_with(role_cls, firm)
 
 
-def test_add_firm_doesnt_add_role_for_foreigners_firm_if_non_tradable(
-    market_without_roles,
-):
+def test_add_firm_doesnt_add_role_for_foreigners_if_non_tradable(local_market):
     # Given
-    firm = Mock(tradable=False, country_pos=2)
-    market = market_without_roles
-    market.tradable = False
-    market.env.pos = 1
+    firm = Mock(tradable=False, country_pos=3)
+    market = local_market
 
     # When
     market.add_firm(firm)
@@ -192,9 +188,20 @@ def test_add_firm_doesnt_add_role_for_foreigners_firm_if_non_tradable(
 
 
 @pytest.fixture
-def market_before_transaction(market_without_roles):
+def consumer():
     # Given
-    market = market_without_roles
+    return Mock()
+
+
+@pytest.fixture
+def producer():
+    # Given
+    return Mock(price=10, inventories=100, sales=0)
+
+
+@pytest.fixture
+def market_before_transact(market):
+    # Given
     market.env = Mock()
     market.transfer_stock = Mock()
     market.make_transaction = Mock()
@@ -203,12 +210,9 @@ def market_before_transaction(market_without_roles):
     return market
 
 
-def test_buy_goods_transfers_cash(market_before_transaction):
+def test_buy_goods_transfers_cash(market_before_transact, consumer, producer):
     # Given
-    consumer = Mock()
-    producer = Mock(price=10, inventories=100, sales=0)
-    market = market_before_transaction
-    env = market.env
+    market = market_before_transact
 
     # When
     market.buy_goods(consumer, producer, 5)
@@ -217,11 +221,9 @@ def test_buy_goods_transfers_cash(market_before_transaction):
     market.transfer_stock.assert_any_call("cash", consumer.id, producer.id, 50)
 
 
-def test_buy_goods_updates_accounts(market_before_transaction):
+def test_buy_goods_updates_accounts(market_before_transact, consumer, producer):
     # Given
-    consumer = Mock()
-    producer = Mock(price=10, inventories=100, sales=0)
-    market = market_before_transaction
+    market = market_before_transact
 
     # When
     market.buy_goods(consumer, producer, 5)
@@ -230,11 +232,9 @@ def test_buy_goods_updates_accounts(market_before_transaction):
     market.make_transaction.assert_any_call("consumption", consumer.id, producer.id, 50)
 
 
-def test_buy_goods_decrease_inventories(market_before_transaction):
+def test_buy_goods_decrease_inventories(market_before_transact, consumer, producer):
     # Given
-    consumer = Mock()
-    producer = Mock(price=10, inventories=100, sales=0)
-    market = market_before_transaction
+    market = market_before_transact
 
     # When
     market.buy_goods(consumer, producer, 5)
@@ -243,11 +243,9 @@ def test_buy_goods_decrease_inventories(market_before_transaction):
     assert producer.inventories == 95.0
 
 
-def test_buy_goods_increases_sales(market_before_transaction):
+def test_buy_goods_increases_sales(market_before_transact, consumer, producer):
     # Given
-    consumer = Mock()
-    producer = Mock(price=10, inventories=100, sales=0)
-    market = market_before_transaction
+    market = market_before_transact
 
     # When
     market.buy_goods(consumer, producer, 5)
@@ -264,7 +262,7 @@ def test_buy_goods_increases_sales(market_before_transaction):
 @pytest.fixture
 def producers(make_dlist):
     # Given
-    producers = [Mock(id=i) for i in range(5)]
+    producers = [Mock(id=i) for i in range(2)]
     producers = make_dlist(producers)
     producers.name = "producer"
     producers.price = 0
@@ -273,21 +271,18 @@ def producers(make_dlist):
 
 
 @pytest.fixture
-def market_without_producers(market_without_roles, make_dlist):
+def others(make_dlist):
     # Given
     others = make_dlist([Mock(id=i) for i in range(5)])
     others.name = "other"
-    market = market_without_roles
-    market.roles = {r.id: r for r in others}
-    return market
+    return others
 
 
 @pytest.fixture
-def market_with_producers(market_without_producers, producers):
+def market_without_producers(market, others):
     # Given
-    market = market_without_producers
-    market.roles.update({r.id: r for r in producers})
-    return market, producers
+    market.roles = {r.id: r for r in others}
+    return market
 
 
 def test_calc_inflation(market_without_producers):
@@ -303,9 +298,17 @@ def test_calc_inflation(market_without_producers):
     assert inflation == pytest.approx(0.2)
 
 
-def test_calc_gdp(market_with_producers):
+@pytest.fixture
+def market_with_producers(market_without_producers, producers):
     # Given
-    market, producers = market_with_producers
+    market = market_without_producers
+    market.roles.update({r.id: r for r in producers})
+    return market
+
+
+def test_calc_gdp(market_with_producers, producers):
+    # Given
+    market = market_with_producers
     market.get_stock = lambda x, y: 100 if x == "consumption" else 0
 
     # When
@@ -315,11 +318,11 @@ def test_calc_gdp(market_with_producers):
     assert gdp == 100 * len(producers)
 
 
-def test_calc_phi_range_for_all_producers(market_with_producers):
+def test_calc_phi_range_for_all_producers(market_with_producers, producers):
     # Given
-    market, producers = market_with_producers
-    producers.phi = 1.0
-    producers[2].phi = 2.0
+    market = market_with_producers
+    producers[0].phi = 1.0
+    producers[1].phi = 2.0
 
     # When
     range_ = market.calc_phi_range()
@@ -339,10 +342,10 @@ def test_calc_phi_range_if_no_producers(market_without_producers):
     assert range_ is None
 
 
-def test_calc_price_range_for_all_producers(market_with_producers):
+def test_calc_price_range_for_all_producers(market_with_producers, producers):
     # Given
-    market, producers = market_with_producers
-    producers.price = 10.0
+    market = market_with_producers
+    producers[0].price = 10.0
     producers[1].price = 15.0
 
     # When
@@ -363,10 +366,10 @@ def test_calc_price_range_if_no_producers(market_without_producers):
     assert range_ is None
 
 
-def test_calc_sales_range_for_all_producers(market_with_producers):
+def test_calc_sales_range_for_all_producers(market_with_producers, producers):
     # Given
-    market, producers = market_with_producers
-    producers.sales = 100.0
+    market = market_with_producers
+    producers[0].sales = 100.0
     producers[1].sales = 150.0
 
     # When
@@ -392,9 +395,9 @@ def test_calc_sales_range_if_no_producers(market_without_producers):
 # ----------------------------------------------------
 
 
-def test_clear_transactions_resets_each_producer_sales(market_with_producers):
+def test_clear_transactions_resets_producer_sales(market_with_producers, producers):
     # Given
-    market, producers = market_with_producers
+    market = market_with_producers
     producers.sales = 100.0
 
     # When
@@ -405,9 +408,9 @@ def test_clear_transactions_resets_each_producer_sales(market_with_producers):
         assert producer.sales == 0
 
 
-def test_clear_transactions_resets_each_producer_output(market_with_producers):
+def test_clear_transactions_resets_producer_output(market_with_producers, producers):
     # Given
-    market, producers = market_with_producers
+    market = market_with_producers
     producers.output = 50.0
 
     # When
@@ -418,19 +421,12 @@ def test_clear_transactions_resets_each_producer_output(market_with_producers):
         assert producer.output == 0
 
 
-@pytest.fixture
-def market_before_update(market_with_producers):
+def test_update_state_recalc_average_price(market_with_producers, producers):
     # Given
-    market, _ = market_with_producers
-    return market
-
-
-def test_update_state_recalc_average_price(market_before_update, producers):
-    # Given
-    market = market_before_update
+    market = market_with_producers
     market.average_price_prev = 0
     market.average_price = 0
-    market.average_prod = 0
+    market.average_phi = 0
     producers.price = 5
 
     # When
@@ -440,12 +436,12 @@ def test_update_state_recalc_average_price(market_before_update, producers):
     assert market.average_price == pytest.approx(5.0)
 
 
-def test_update_state_store_previous_average_price(market_before_update, producers):
+def test_update_state_store_previous_average_price(market_with_producers, producers):
     # Given
-    market = market_before_update
+    market = market_with_producers
     market.average_price_prev = 0
     market.average_price = 6.0
-    market.average_prod = 0
+    market.average_phi = 0
     producers.price = 5
 
     # When
@@ -455,35 +451,34 @@ def test_update_state_store_previous_average_price(market_before_update, produce
     assert market.average_price_prev == 6.0
 
 
-def test_update_state_recalc_average_phi(market_before_update, producers):
+def test_update_state_recalc_average_phi(market_with_producers, producers):
     # Given
-    market = market_before_update
+    market = market_with_producers
     market.average_price_prev = 0
     market.average_price = 0
-    market.average_prod = 0
+    market.average_phi = 0
     producers.phi = 10
 
     # When
     market.update_state()
 
     # Then
-    assert market.average_prod == pytest.approx(10.0)
+    assert market.average_phi == pytest.approx(10.0)
 
 
 @pytest.fixture
-def market_with_defaults(market_without_roles):
-    producers = [Mock(defaulted=val) for val in [True, False]]
-    market = market_without_roles
+def market_with_defaults(market, producers):
+    producers[0].defaulted = True
+    producers[1].defaulted = False
     for role in producers:
-        role.name = "producer"
-        market.roles[role.agent.id] = role
+        market.roles[role.id] = role
     market.remove_role = Mock()
-    return market, producers
+    return market
 
 
-def test_clear_defaults_removes_defaulted_producers(market_with_defaults):
+def test_clear_defaults_removes_defaulted_producers(market_with_defaults, producers):
     # Given
-    market, producers = market_with_defaults
+    market = market_with_defaults
 
     # When
     market.clear_defaults()

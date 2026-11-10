@@ -134,13 +134,13 @@ def test_get_average_price(role):
 def test_get_average_phi(role):
     # Given
     env = role.env
-    env.average_prod = 2.5
+    env.average_phi = 2.5
 
     # When
-    average_productiviy = role.get_average_phi()
+    average_phi = role.get_average_phi()
 
     # Then
-    assert average_productiviy == 2.5
+    assert average_phi == 2.5
 
 
 # ---------------------------------------------------
@@ -239,7 +239,7 @@ def test_calc_rd_success_probability(role):
     role.rd = 100
     role.env.p.nu = 0.5
     role.env.average_price = 20
-    role.env.average_prod = 10
+    role.env.average_phi = 10
     expected = 1 - math.exp(-0.5 * 100 / (20 * 10))
 
     # When
@@ -253,7 +253,7 @@ def test_innovate_updates_randomly_phi(role):
     # Given
     role.phi = 10
     role.env.p.delta = 0.2
-    role.env.average_prod = 10
+    role.env.average_phi = 10
     random = role.env.model.nprandom
     random.uniform = lambda a, b: b
 
@@ -267,7 +267,7 @@ def test_innovate_updates_randomly_phi(role):
 def test_imitate_updates_randomly_phi(role):
     # Given
     role.phi = 10
-    role.env.average_prod = 20
+    role.env.average_phi = 20
     random = role.env.model.nprandom
     random.uniform = lambda a, b: b
 

@@ -10,7 +10,7 @@ class GoodsMarket(EcoSpace):
         self.tradable = tradable
         self.average_price_prev = 0
         self.average_price = 0
-        self.average_prod = 0
+        self.average_phi = 0
 
     #
     # Roles management
@@ -83,7 +83,7 @@ class GoodsMarket(EcoSpace):
         producers = self.find_all_roles("producer")
         self.average_price_prev = self.average_price
         self.average_price = sum(producers.price) / max(1, len(producers))
-        self.average_prod = sum(producers.phi) / max(1, len(producers))
+        self.average_phi = sum(producers.phi) / max(1, len(producers))
 
     def clear_defaults(self):
         roles = self.find_all_roles("producer")

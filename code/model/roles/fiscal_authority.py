@@ -17,7 +17,7 @@ class FiscalAuthority(EcoRole):
         return self.env.spaces["goods_market"].average_price
 
     def get_average_phi(self):
-        return self.env.spaces["goods_market"].average_prod
+        return self.env.spaces["goods_market"].average_phi
 
     def find_citizens(self):
         return self.env.find_all_roles("citizen")

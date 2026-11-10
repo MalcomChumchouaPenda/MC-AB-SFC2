@@ -28,7 +28,7 @@ def country(model):
     country = Country(model)
     country.create_markets()
     country.spaces["goods_market"].average_price = 2
-    country.spaces["goods_market"].average_prod = 3
+    country.spaces["goods_market"].average_phi = 3
     country.gdp = 1000
     return country
 
