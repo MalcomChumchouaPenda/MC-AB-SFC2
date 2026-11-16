@@ -18,38 +18,33 @@ def test_inherits_from_eco_role():
     assert is_derived
 
 
-def test_initializes_defaulted():
-    # Given
-    agent, env = Mock(), Mock()
-
-    # When
-    role = Lender(agent, env)
-
-    # Then
-    assert role.defaulted is False
-
-
-def test_initializes_loan_applicants_list():
-    # Given
-    agent, env = Mock(), Mock()
-
-    # When
-    role = Lender(agent, env)
-
-    # Then
-    assert role.loan_applicants == []
-
-
-# ---------------------------------------------------
-#  ACTIONS
-# ----------------------------------------------------
-
 
 @pytest.fixture
 def role():
     # Given
     agent, env = Mock(), Mock()
     return Lender(agent, env)
+
+
+def test_initializes_defaulted(role):
+    # When
+    default_value = role.defaulted
+
+    # Then
+    assert default_value is False
+
+
+def test_initializes_loan_applicants_list(role):
+    # When
+    default_value = role.loan_applicants
+
+    # Then
+    assert default_value == []
+
+
+# ---------------------------------------------------
+#  ACTIONS
+# ----------------------------------------------------
 
 
 def test_receive_request(role):

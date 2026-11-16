@@ -18,52 +18,44 @@ def test_inherits_from_eco_role():
     assert is_derived
 
 
-def test_initializes_loan_demand():
+@pytest.fixture
+def role():
     # Given
     agent, env = Mock(), Mock()
+    return Borrower(agent, env)
 
+
+def test_initializes_loan_demand(role):
     # When
-    role = Borrower(agent, env)
+    default_value = role.loan_demand
 
     # Then
-    assert role.loan_demand == 0.0
+    assert default_value == 0.0
 
 
-def test_initializes_defaulted():
-    # Given
-    agent, env = Mock(), Mock()
-
+def test_initializes_defaulted(role):
     # When
-    role = Borrower(agent, env)
+    default_value = role.defaulted
 
     # Then
-    assert role.defaulted is False
+    assert default_value is False
 
 
-def test_exposes_net_worth_from_env():
+def test_exposes_net_worth_from_agent(role):
     # Given
-    agent, env = Mock(), Mock()
-    role = Borrower(agent, env)
-    env.get_stock.return_value = -100
+    agent = role.agent
+    agent.account = {"equities":-100}
 
     # When
     exposed = role.net_worth
 
     # Then
-    env.get_stock.assert_called_with("equities", agent.id)
     assert exposed == 100
 
 
 # ---------------------------------------------------
 # PERCEPTIONS
 # ----------------------------------------------------
-
-
-@pytest.fixture
-def role():
-    # Given
-    agent, env = Mock(), Mock()
-    return Borrower(agent, env)
 
 
 def test_find_lenders(role, make_dlist):
