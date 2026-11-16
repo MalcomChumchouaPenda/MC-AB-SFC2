@@ -18,53 +18,50 @@ def test_inherits_from_eco_role():
     assert is_derived
 
 
-def test_initializes_sector():
+@pytest.fixture
+def role():
     # Given
     agent, env = Mock(), Mock()
+    return Company(agent, env)
 
+
+def test_initializes_sector(role):
     # When
-    role = Company(agent, env)
+    default_value = role.sector
 
     # Then
-    assert role.sector == ""
+    assert default_value == ""
 
 
-def test_initializes_defaulted():
-    # Given
-    agent, env = Mock(), Mock()
-
+def test_initializes_defaulted(role):
     # When
-    role = Company(agent, env)
+    default_value = role.defaulted
 
     # Then
-    assert role.defaulted is False
+    assert default_value is False
 
 
-def test_exposes_equity_from_env():
+def test_exposes_equity_from_agent(role):
     # Given
-    agent, env = Mock(), Mock()
-    role = Company(agent, env)
-    env.get_stock.return_value = -100
+    agent = role.agent
+    agent.account = {"equities":-100}
 
     # When
     exposed = role.equity
 
     # Then
-    env.get_stock.assert_called_with("equities", agent.id)
     assert exposed == 100
 
 
-def test_exposes_net_worth_from_env():
+def test_exposes_net_worth_from_agent(role):
     # Given
-    agent, env = Mock(), Mock()
-    role = Company(agent, env)
-    env.get_stock.return_value = -100
+    agent = role.agent
+    agent.account = {"equities":-100}
 
     # When
     exposed = role.net_worth
 
     # Then
-    env.get_stock.assert_called_with("equities", agent.id)
     assert exposed == 100
 
 
@@ -72,12 +69,6 @@ def test_exposes_net_worth_from_env():
 #  PERCEPTIONS
 # ----------------------------------------------------
 
-
-@pytest.fixture
-def role():
-    # Given
-    agent, env = Mock(), Mock()
-    return Company(agent, env)
 
 
 def test_get_equity_amount(role):

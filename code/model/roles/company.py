@@ -10,13 +10,11 @@ class Company(EcoRole):
 
     @property
     def equity(self):
-        amount = self.env.get_stock("equities", self.agent.id)
-        return -1 * amount
+        return -1 * self.agent.account["equities"]
 
     @property
     def net_worth(self):
-        amount = self.env.get_stock("equities", self.agent.id)
-        return -1 * amount
+        return -1 * self.agent.account["equities"]
 
     #
     # perceptions method

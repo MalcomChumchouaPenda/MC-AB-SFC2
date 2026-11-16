@@ -18,38 +18,33 @@ def test_inherits_from_eco_role():
     assert is_derived
 
 
-def test_initializes_desired_investment():
-    # Given
-    agent, env = Mock(), Mock()
-
-    # When
-    role = Citizen(agent, env)
-
-    # Then
-    assert role.desired_investment == 0
-
-
-def test_initializes_company_number():
-    # Given
-    agent, env = Mock(), Mock()
-
-    # When
-    role = Citizen(agent, env)
-
-    # Then
-    assert role.company_number == 0
-
-
-# ---------------------------------------------------
-# PERCEPTION TESTS
-# ----------------------------------------------------
-
-
 @pytest.fixture
 def role():
     # Given
     agent, env = Mock(), Mock()
     return Citizen(agent, env)
+
+
+
+def test_initializes_desired_investment(role):
+    # When
+    default_value = role.desired_investment
+
+    # Then
+    assert default_value == 0
+
+
+def test_initializes_company_number(role):
+    # When
+    default_value = role.company_number
+
+    # Then
+    assert default_value == 0
+
+
+# ---------------------------------------------------
+# PERCEPTION TESTS
+# ----------------------------------------------------
 
 
 def test_get_prob_failure(role):
