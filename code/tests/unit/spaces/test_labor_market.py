@@ -11,11 +11,8 @@ def test_inherits_from_eco_space():
     # Given
     from model.extensions import EcoSpace
 
-    # When
-    is_derived = issubclass(LaborMarket, EcoSpace)
-
     # Then
-    assert is_derived
+    assert issubclass(LaborMarket, EcoSpace)
 
 
 @pytest.fixture
@@ -25,19 +22,13 @@ def market(fake_model):
 
 
 def test_initializes_average_wage(market):
-    # When
-    default_value = market.average_wage
-
     # Then
-    assert default_value == 0
+    assert market.average_wage == 0
 
 
 def test_initializes_unemployment(market):
-    # When
-    default_value = market.unemployment
-
     # Then
-    assert default_value == 0
+    assert market.unemployment == 0
 
 
 # ---------------------------------------------------

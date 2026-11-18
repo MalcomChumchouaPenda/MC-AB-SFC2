@@ -11,11 +11,8 @@ def test_inherits_from_eco_agent():
     # Given
     from model.extensions import EcoAgent
 
-    # When
-    is_derived = issubclass(CentralBank, EcoAgent)
-
     # Then
-    assert is_derived
+    assert issubclass(CentralBank, EcoAgent)
 
 
 def test_initializes_previous_discount_rate(fake_model):

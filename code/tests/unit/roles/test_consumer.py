@@ -11,11 +11,27 @@ def test_inherits_from_eco_role():
     # Given
     from model.extensions import EcoRole
 
-    # When
-    is_derived = issubclass(Consumer, EcoRole)
-
     # Then
-    assert is_derived
+    assert issubclass(Consumer, EcoRole)
+
+
+@pytest.fixture
+def agent():
+    # Given
+    return Mock()
+
+
+@pytest.fixture
+def env():
+    # Given
+    return Mock()
+
+
+
+@pytest.fixture
+def role(agent, env):
+    # Given
+    return Consumer(agent, env)
 
 
 def test_initializes_preference(role):
@@ -33,12 +49,6 @@ def test_initializes_preference(role):
 # PERCEPTION TESTS
 # ----------------------------------------------------
 
-
-@pytest.fixture
-def role():
-    # Given
-    agent, env = Mock(), Mock()
-    return Consumer(agent, env)
 
 
 def test_get_average_price(role):

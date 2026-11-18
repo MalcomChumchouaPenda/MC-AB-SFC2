@@ -11,34 +11,37 @@ def test_inherits_from_eco_role():
     # Given
     from model.extensions import EcoRole
 
-    # When
-    is_derived = issubclass(Company, EcoRole)
-
     # Then
-    assert is_derived
+    assert issubclass(Company, EcoRole)
 
 
 @pytest.fixture
-def role():
+def agent():
     # Given
-    agent, env = Mock(), Mock()
+    return Mock()
+
+
+@pytest.fixture
+def env():
+    # Given
+    return Mock()
+
+
+
+@pytest.fixture
+def role(agent, env):
+    # Given
     return Company(agent, env)
 
 
 def test_initializes_sector(role):
-    # When
-    default_value = role.sector
-
     # Then
-    assert default_value == ""
+    assert role.sector == ""
 
 
 def test_initializes_defaulted(role):
-    # When
-    default_value = role.defaulted
-
     # Then
-    assert default_value is False
+    assert role.defaulted is False
 
 
 def test_exposes_equity_from_agent(role):

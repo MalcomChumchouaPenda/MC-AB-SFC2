@@ -11,11 +11,8 @@ def test_inherits_from_agentpy_agent():
     # Given
     from agentpy import Agent
 
-    # When
-    is_derived = issubclass(EcoAgent, Agent)
-
     # Then
-    assert is_derived
+    assert issubclass(EcoAgent, Agent)
 
 
 @pytest.fixture

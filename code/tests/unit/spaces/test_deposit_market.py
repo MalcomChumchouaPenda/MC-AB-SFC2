@@ -10,12 +10,9 @@ from model.spaces.deposit_market import DepositMarket
 def test_inherits_from_eco_space():
     # Given
     from model.extensions import EcoSpace
-
-    # When
-    is_derived = issubclass(DepositMarket, EcoSpace)
-
+    
     # Then
-    assert is_derived
+    assert issubclass(DepositMarket, EcoSpace)
 
 
 @pytest.fixture

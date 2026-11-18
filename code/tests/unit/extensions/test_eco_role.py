@@ -10,12 +10,9 @@ from model.extensions import EcoRole
 def test_inherits_from_agentpy_agentnode():
     # Given
     from agentpy import AgentNode
-
-    # When
-    is_derived = issubclass(EcoRole, AgentNode)
-
+    
     # Then
-    assert is_derived
+    assert issubclass(EcoRole, AgentNode)
 
 
 def test_requires_agent_and_env():

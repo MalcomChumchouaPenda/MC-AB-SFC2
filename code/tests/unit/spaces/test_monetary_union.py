@@ -11,11 +11,8 @@ def test_inherits_from_eco_space():
     # Given
     from model.extensions import EcoSpace
 
-    # When
-    is_derived = issubclass(MonetaryUnion, EcoSpace)
-
     # Then
-    assert is_derived
+    assert issubclass(MonetaryUnion, EcoSpace)
 
 
 @pytest.fixture
@@ -25,19 +22,13 @@ def union(fake_model):
 
 
 def test_initializes_average_inflation(union):
-    # When
-    default_value = union.average_inflation
-
     # Then
-    assert default_value == 0.0
+    assert union.average_inflation == 0.0
 
 
 def test_initializes_discount_rate(union):
-    # When
-    default_value = union.discount_rate
-
     # Then
-    assert default_value == 0.0
+    assert union.discount_rate == 0.0
 
 
 # ---------------------------------------------------

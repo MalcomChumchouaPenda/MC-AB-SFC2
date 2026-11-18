@@ -10,11 +10,8 @@ def test_inherit_from_agentpy_attrdict():
     # Given
     from agentpy import AttrDict
 
-    # When
-    is_derived = issubclass(EcoAccount, AttrDict)
-
     # Then
-    assert is_derived
+    assert issubclass(EcoAccount, AttrDict)
 
 
 def test_creates_default_value_for_financial_assets(monkeypatch):

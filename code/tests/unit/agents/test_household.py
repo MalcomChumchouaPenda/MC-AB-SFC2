@@ -12,11 +12,8 @@ def test_inherits_from_eco_agent():
     # Given
     from model.extensions import EcoAgent
 
-    # When
-    is_derived = issubclass(Household, EcoAgent)
-
     # Then
-    assert is_derived
+    assert issubclass(Household, EcoAgent)
 
 
 @pytest.fixture

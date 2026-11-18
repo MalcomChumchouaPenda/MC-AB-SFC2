@@ -11,11 +11,8 @@ def test_inherits_from_eco_space():
     # Given
     from model.extensions import EcoSpace
 
-    # When
-    is_derived = issubclass(GoodsMarket, EcoSpace)
-
     # Then
-    assert is_derived
+    assert issubclass(GoodsMarket, EcoSpace)
 
 
 @pytest.mark.parametrize("arg", [True, False])
@@ -37,27 +34,18 @@ def market(fake_model):
 
 
 def test_initializes_average_price(market):
-    # When
-    default_value = market.average_price
-
     # Then
-    assert default_value == 0
+    assert market.average_price == 0
 
 
 def test_initializes_previous_average_price(market):
-    # When
-    default_value = market.average_price_prev
-
     # Then
-    assert default_value == 0
+    assert market.average_price_prev == 0
 
 
 def test_initializes_average_phi(market):
-    # When
-    default_value = market.average_phi
-
     # Then
-    assert default_value == 0
+    assert market.average_phi == 0
 
 
 # ---------------------------------------------------

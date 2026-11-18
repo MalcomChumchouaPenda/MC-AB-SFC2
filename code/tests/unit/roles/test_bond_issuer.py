@@ -11,42 +11,42 @@ def test_inherits_from_eco_role():
     # Given
     from model.extensions import EcoRole
 
-    # When
-    is_derived = issubclass(BondIssuer, EcoRole)
-
     # Then
-    assert is_derived
+    assert issubclass(BondIssuer, EcoRole)
 
 
 @pytest.fixture
-def role():
+def agent():
     # Given
-    agent, env = Mock(), Mock()
+    return Mock()
+
+
+@pytest.fixture
+def env():
+    # Given
+    return Mock()
+
+
+
+@pytest.fixture
+def role(agent, env):
+    # Given
     return BondIssuer(agent, env)
 
 
 def test_initializes_debt_ratio(role):
-    # When
-    default_value = role.debt_ratio
-
     # Then
-    assert default_value == 0.0
+    assert role.debt_ratio == 0.0
 
 
 def test_initializes_bond_number(role):
-    # When
-    default_value = role.bond_number
-
     # Then
-    assert default_value == 0.0
+    assert role.bond_number == 0.0
 
 
 def test_initializes_bond_value(role):
-    # When
-    default_value = role.bond_value
-
     # Then
-    assert default_value == 0.0
+    assert role.bond_value == 0.0
 
 
 # ---------------------------------------------------

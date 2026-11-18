@@ -12,11 +12,8 @@ def test_inherits_from_agentpy_network():
     # Given
     from agentpy import Network
 
-    # When
-    is_derived = issubclass(EcoSpace, Network)
-
     # Then
-    assert is_derived
+    assert issubclass(EcoSpace, Network)
 
 
 def test_initializes_env(fake_model):

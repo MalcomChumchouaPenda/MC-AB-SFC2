@@ -21,11 +21,8 @@ def test_inherits_from_eco_agent():
     # Given
     from model.extensions import EcoAgent
 
-    # When
-    is_derived = issubclass(Government, EcoAgent)
-
     # Then
-    assert is_derived
+    assert issubclass(Government, EcoAgent)
 
 
 def test_initializes_next_tax_rate(model):

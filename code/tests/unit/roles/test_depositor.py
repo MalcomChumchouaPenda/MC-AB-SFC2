@@ -12,17 +12,26 @@ def test_inherits_from_eco_role():
     # Given
     from model.extensions import EcoRole
 
-    # When
-    is_derived = issubclass(Depositor, EcoRole)
-
     # Then
-    assert is_derived
+    assert issubclass(Depositor, EcoRole)
 
 
 @pytest.fixture
-def role():
+def agent():
     # Given
-    agent, env = Mock(), Mock()
+    return Mock()
+
+
+@pytest.fixture
+def env():
+    # Given
+    return Mock()
+
+
+
+@pytest.fixture
+def role(agent, env):
+    # Given
     return Depositor(agent, env)
 
 

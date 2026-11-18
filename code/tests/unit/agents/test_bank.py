@@ -12,11 +12,8 @@ def test_inherits_from_eco_agent():
     # Given
     from model.extensions import EcoAgent
 
-    # When
-    is_derived = issubclass(Bank, EcoAgent)
-
     # Then
-    assert is_derived
+    assert issubclass(Bank, EcoAgent)
 
 
 def test_initializes_taxes_payable(fake_model):
