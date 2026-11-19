@@ -26,9 +26,8 @@ def test_initializes_defaulted():
     assert role.defaulted is False
 
 
-def test_get_deposit_rate_from_env(role):
+def test_get_deposit_rate_from_env(role, env):
     # Given
-    env = role.env
     env.deposit_rate = 0.01
 
     # When
@@ -55,16 +54,14 @@ def env():
     return Mock()
 
 
-
 @pytest.fixture
 def role(agent, env):
     # Given
     return DepositBank(agent, env)
 
 
-def test_find_deposits_from_env(role):
+def test_find_deposits_from_env(role, env):
     # Given
-    env = role.env
 
     # When
     found = role.find_deposits()
@@ -74,10 +71,9 @@ def test_find_deposits_from_env(role):
     assert found == env.links.return_value
 
 
-def test_find_depositor_returns_roles_from_env(role):
+def test_find_depositor_returns_roles_from_env(role, env):
     # Given
     roles = {i: Mock() for i in range(5)}
-    env = role.env
     env.roles = roles
 
     # When
@@ -92,9 +88,8 @@ def test_find_depositor_returns_roles_from_env(role):
 # ----------------------------------------------------
 
 
-def test_pay_interests_into_env(role):
+def test_pay_interests_into_env(role, env):
     # Given
-    env = role.env
     depositor = Mock()
 
     # When
@@ -104,9 +99,8 @@ def test_pay_interests_into_env(role):
     env.pay_interests.assert_called_with(role, depositor, 200)
 
 
-def test_make_deposits_call_join_deposit_bank_from_env(role):
+def test_make_deposits_call_join_deposit_bank_from_env(role, env):
     # Given
-    env = role.env
     depositor = Mock()
 
     # When

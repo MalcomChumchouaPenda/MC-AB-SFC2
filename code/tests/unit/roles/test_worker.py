@@ -43,7 +43,6 @@ def env():
     return Mock()
 
 
-
 @pytest.fixture
 def role(agent, env):
     # Given
@@ -61,9 +60,8 @@ def test_get_labor_sold(role):
     assert result == 0.4
 
 
-def test_get_unemployment(role):
+def test_get_unemployment(role, env):
     # Given
-    env = role.env
     env.unemployment = 0.12
 
     # When
@@ -73,10 +71,9 @@ def test_get_unemployment(role):
     assert perceived == 0.12
 
 
-def test_find_employers_get_random_founders(role):
+def test_find_employers_get_random_founders(role, env):
     # Given
     employers = Mock()
-    env = role.env
     env.find_random_roles.return_value = employers
 
     # When
@@ -92,10 +89,9 @@ def test_find_employers_get_random_founders(role):
 # ----------------------------------------------------
 
 
-def test_accept_job_uses_hire_method(role):
+def test_accept_job_uses_hire_method(role, env):
     # Given
     employer = Mock()
-    env = role.env
 
     # When
     role.accept_job(employer, 0.5)

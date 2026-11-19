@@ -27,12 +27,10 @@ def env():
     return Mock()
 
 
-
 @pytest.fixture
 def role(agent, env):
     # Given
     return Citizen(agent, env)
-
 
 
 def test_initializes_desired_investment(role):
@@ -50,9 +48,8 @@ def test_initializes_company_number(role):
 # ----------------------------------------------------
 
 
-def test_get_prob_failure(role):
+def test_get_prob_failure(role, env):
     # Given
-    env = role.env
     env.prob_failure = 0.12
 
     # When
@@ -62,28 +59,29 @@ def test_get_prob_failure(role):
     assert perceived == 0.12
 
 
-def test_find_investors_with_desired_investment(role, make_dlist):
+@pytest.fixture
+def citizens(role, make_dlist):
     # Given
     eligible = Mock(desired_investment=10)
     ineligible = Mock(desired_investment=0)
-    citizens = make_dlist([eligible, ineligible])
-    env = role.env
-    env.find_all_roles = Mock(return_value=citizens)
+    return make_dlist([eligible, ineligible, role])
+
+
+def test_find_investors_uses_env_find_method(role, env, citizens):
+    # Given
+    env.find_all_roles.return_value = citizens
 
     # When
-    investors = role.find_investors()
+    role.find_investors()
 
     # Then
     env.find_all_roles.assert_called_with("citizen")
-    assert list(investors) == [eligible]
 
 
-def test_find_investors_excludes_initiator(role, make_dlist):
+def test_find_investors_returns_roles_with_desired_investment(role, env, citizens):
     # Given
-    eligible = Mock(desired_investment=10)
-    citizens = make_dlist([eligible, role])
-    env = role.env
-    env.find_all_roles = Mock(return_value=citizens)
+    eligible = citizens[0]
+    env.find_all_roles.return_value = citizens
 
     # When
     investors = role.find_investors()
@@ -92,9 +90,19 @@ def test_find_investors_excludes_initiator(role, make_dlist):
     assert list(investors) == [eligible]
 
 
-def test_get_bank_number_ratio_from_env(role):
+def test_find_investors_excludes_initiator(role, env, citizens):
     # Given
-    env = role.env
+    env.find_all_roles.return_value = citizens
+
+    # When
+    investors = role.find_investors()
+
+    # Then
+    assert role not in investors
+
+
+def test_get_bank_number_ratio_from_env(role, env):
+    # Given
     env.calc_bank_number_ratio.return_value = 0.5
 
     # When
@@ -104,9 +112,8 @@ def test_get_bank_number_ratio_from_env(role):
     assert ratio == 0.5
 
 
-def test_get_bank_equity_ratio_from_env(role):
+def test_get_bank_equity_ratio_from_env(role, env):
     # Given
-    env = role.env
     env.calc_bank_equity_ratio.return_value = 0.6
 
     # When
@@ -116,9 +123,8 @@ def test_get_bank_equity_ratio_from_env(role):
     assert ratio == 0.6
 
 
-def test_get_median_firm_size_from_env(role):
+def test_get_median_firm_size_from_env(role, env):
     # Given
-    env = role.env
     env.calc_median_firm_size.return_value = 150.0
 
     # When
@@ -128,9 +134,8 @@ def test_get_median_firm_size_from_env(role):
     assert median_size == 150.0
 
 
-def test_get_sector_size_from_env(role):
+def test_get_sector_size_from_env(role, env):
     # Given
-    env = role.env
     env.calc_sector_size.return_value = 2
 
     # When
@@ -141,9 +146,8 @@ def test_get_sector_size_from_env(role):
     assert sector_size == 2
 
 
-def test_get_equity_range_from_env(role):
+def test_get_equity_range_from_env(role, env):
     # Given
-    env = role.env
     env.calc_equity_range.return_value = (100, 200)
 
     # When
@@ -154,9 +158,8 @@ def test_get_equity_range_from_env(role):
     assert range_ == (100, 200)
 
 
-def test_get_phi_range_from_env(role):
+def test_get_phi_range_from_env(role, env):
     # Given
-    env = role.env
     env.calc_phi_range.return_value = (100, 200)
 
     # When
@@ -167,9 +170,8 @@ def test_get_phi_range_from_env(role):
     assert range_ == (100, 200)
 
 
-def test_get_price_range_from_env(role):
+def test_get_price_range_from_env(role, env):
     # Given
-    env = role.env
     env.calc_price_range.return_value = (100, 200)
 
     # When
@@ -180,9 +182,8 @@ def test_get_price_range_from_env(role):
     assert range_ == (100, 200)
 
 
-def test_get_sales_range_from_env(role):
+def test_get_sales_range_from_env(role, env):
     # Given
-    env = role.env
     env.calc_sales_range.return_value = (100, 200)
 
     # When
@@ -193,9 +194,8 @@ def test_get_sales_range_from_env(role):
     assert range_ == (100, 200)
 
 
-def test_get_wage_range_from_env(role):
+def test_get_wage_range_from_env(role, env):
     # Given
-    env = role.env
     env.calc_wage_range.return_value = (100, 200)
 
     # When
@@ -206,9 +206,8 @@ def test_get_wage_range_from_env(role):
     assert range_ == (100, 200)
 
 
-def test_get_tax_rate(role):
+def test_get_tax_rate(role, env):
     # Given
-    env = role.env
     env.tax_rate = 0.2
 
     # When
@@ -218,9 +217,8 @@ def test_get_tax_rate(role):
     assert perceived == 0.2
 
 
-def test_get_average_wage(role):
+def test_get_average_wage(role, env):
     # Given
-    env = role.env
     env.average_wage = 15.0
 
     # When
@@ -235,10 +233,9 @@ def test_get_average_wage(role):
 # ----------------------------------------------------
 
 
-def test_fund_company_uses_env_method(role):
+def test_fund_company_uses_env_method(role, env):
     # Given
     company = Mock(id=2)
-    env = role.env
     env.roles = {2: company}
 
     # When
@@ -248,9 +245,8 @@ def test_fund_company_uses_env_method(role):
     env.fund_company.assert_called_with(company, role, 200)
 
 
-def test_pay_taxes_uses_env_method(role):
+def test_pay_taxes_uses_env_method(role, env):
     # Given
-    env = role.env
 
     # When
     role.pay_taxes(100)

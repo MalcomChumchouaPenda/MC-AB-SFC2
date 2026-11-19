@@ -28,7 +28,6 @@ def env():
     return Mock()
 
 
-
 @pytest.fixture
 def role(agent, env):
     # Given
@@ -40,9 +39,8 @@ def role(agent, env):
 # ----------------------------------------------------
 
 
-def test_find_deposits_from_env(role):
+def test_find_deposits_from_env(role, env):
     # Given
-    env = role.env
 
     # When
     found = role.find_deposits()
@@ -52,9 +50,8 @@ def test_find_deposits_from_env(role):
     assert found == env.links.return_value
 
 
-def test_find_deposit_banks_from_env(role):
+def test_find_deposit_banks_from_env(role, env):
     # Given
-    env = role.env
 
     # When
     found = role.find_deposit_banks()
@@ -64,9 +61,8 @@ def test_find_deposit_banks_from_env(role):
     assert found == env.find_all_roles.return_value
 
 
-def test_get_deposit_rate_from_env(role):
+def test_get_deposit_rate_from_env(role, env):
     # Given
-    env = role.env
     env.deposit_rate = 0.01
 
     # When
@@ -89,10 +85,7 @@ def banks(role):
     return banks
 
 
-def test_make_deposits_uses_env_method(role, banks):
-    # Given
-    env = role.env
-
+def test_make_deposits_uses_env_method(role, env, banks):
     # When
     role.make_deposits(2, 200)
 
@@ -100,10 +93,7 @@ def test_make_deposits_uses_env_method(role, banks):
     env.make_deposits.assert_called_with(role, banks[2], 200)
 
 
-def test_withdraw_deposits_uses_env_method(role, banks):
-    # Given
-    env = role.env
-
+def test_withdraw_deposits_uses_env_method(role, env, banks):
     # When
     role.withdraw_deposits(2, 200)
 
@@ -111,10 +101,7 @@ def test_withdraw_deposits_uses_env_method(role, banks):
     env.withdraw_deposits.assert_called_with(role, banks[2], 200)
 
 
-def test_join_deposit_bank_uses_env_method(role, banks):
-    # Given
-    env = role.env
-
+def test_join_deposit_bank_uses_env_method(role, env, banks):
     # When
     role.join_deposit_bank(1)
 
@@ -122,10 +109,7 @@ def test_join_deposit_bank_uses_env_method(role, banks):
     env.join_deposit_bank.assert_called_with(role, banks[1], 0)
 
 
-def test_leave_deposit_bank_uses_env_method(role, banks):
-    # Given
-    env = role.env
-
+def test_leave_deposit_bank_uses_env_method(role, env, banks):
     # When
     role.leave_deposit_bank(1)
 

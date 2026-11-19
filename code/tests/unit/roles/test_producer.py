@@ -121,16 +121,14 @@ def env():
     return Mock()
 
 
-
 @pytest.fixture
 def role(agent, env):
     # Given
     return Producer(agent, env)
 
 
-def test_get_average_price(role):
+def test_get_average_price(role, env):
     # Given
-    env = role.env
     env.average_price = 15
 
     # When
@@ -140,9 +138,8 @@ def test_get_average_price(role):
     assert average_price == 15
 
 
-def test_get_average_phi(role):
+def test_get_average_phi(role, env):
     # Given
-    env = role.env
     env.average_phi = 2.5
 
     # When

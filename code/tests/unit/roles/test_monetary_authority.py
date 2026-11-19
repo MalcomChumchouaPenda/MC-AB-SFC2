@@ -37,16 +37,14 @@ def env():
     return Mock()
 
 
-
 @pytest.fixture
 def role(agent, env):
     # Given
     return MonetaryAuthority(agent, env)
 
 
-def test_transfer_profits_with_env(role):
+def test_transfer_profits_with_env(role, env):
     # Given
-    env = role.env
 
     # When
     role.transfer_profit(200)
@@ -55,9 +53,8 @@ def test_transfer_profits_with_env(role):
     env.transfer_central_bank_profits.assert_called_with(200)
 
 
-def test_set_discount_rate_into_env(role):
+def test_set_discount_rate_into_env(role, env):
     # Given
-    env = role.env
     env.discount_rate = 0.0
 
     # When

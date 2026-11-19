@@ -27,7 +27,6 @@ def env():
     return Mock()
 
 
-
 @pytest.fixture
 def role(agent, env):
     # Given
@@ -39,9 +38,8 @@ def role(agent, env):
 # ----------------------------------------------------
 
 
-def test_get_average_inflation_from_env(role):
+def test_get_average_inflation_from_env(role, env):
     # Given
-    env = role.env
     env.average_inflation = 0.03
 
     # When
@@ -51,9 +49,8 @@ def test_get_average_inflation_from_env(role):
     assert perceived == 0.03
 
 
-def test_get_discount_rate_from_env(role):
+def test_get_discount_rate_from_env(role, env):
     # Given
-    env = role.env
     env.discount_rate = 0.03
 
     # When
@@ -68,9 +65,8 @@ def test_get_discount_rate_from_env(role):
 # ----------------------------------------------------
 
 
-def test_set_discount_rate_into_env(role):
+def test_set_discount_rate_into_env(role, env):
     # Given
-    env = role.env
     env.discount_rate = 0.0
 
     # When

@@ -27,7 +27,6 @@ def env():
     return Mock()
 
 
-
 @pytest.fixture
 def role(agent, env):
     # Given
@@ -47,7 +46,7 @@ def test_initializes_defaulted(role):
 def test_exposes_equity_from_agent(role):
     # Given
     agent = role.agent
-    agent.account = {"equities":-100}
+    agent.account = {"equities": -100}
 
     # When
     exposed = role.equity
@@ -59,7 +58,7 @@ def test_exposes_equity_from_agent(role):
 def test_exposes_net_worth_from_agent(role):
     # Given
     agent = role.agent
-    agent.account = {"equities":-100}
+    agent.account = {"equities": -100}
 
     # When
     exposed = role.net_worth
@@ -71,7 +70,6 @@ def test_exposes_net_worth_from_agent(role):
 # ---------------------------------------------------
 #  PERCEPTIONS
 # ----------------------------------------------------
-
 
 
 def test_get_equity_amount(role):
@@ -98,9 +96,8 @@ def test_get_dividends(role):
     assert perceived == 15.0
 
 
-def test_get_average_wage(role):
+def test_get_average_wage(role, env):
     # Given
-    env = role.env
     env.average_wage = 15.0
 
     # When
@@ -110,9 +107,8 @@ def test_get_average_wage(role):
     assert perceived == 15.0
 
 
-def test_get_equity_shares_from_env(role):
+def test_get_equity_shares_from_env(role, env):
     # Given
-    env = role.env
 
     # When
     found = role.get_equity_shares()
@@ -122,9 +118,8 @@ def test_get_equity_shares_from_env(role):
     assert found == env.links.return_value
 
 
-def test_get_tax_rate(role):
+def test_get_tax_rate(role, env):
     # Given
-    env = role.env
     env.tax_rate = 0.2
 
     # When
@@ -134,9 +129,8 @@ def test_get_tax_rate(role):
     assert perceived == 0.2
 
 
-def test_get_discount_rate(role):
+def test_get_discount_rate(role, env):
     # Given
-    env = role.env
     env.discount_rate = 0.05
 
     # When
@@ -151,9 +145,8 @@ def test_get_discount_rate(role):
 # ----------------------------------------------------
 
 
-def test_pay_dividends(role):
+def test_pay_dividends(role, env):
     # Given
-    env = role.env
     founder = Mock()
 
     # When
@@ -163,9 +156,8 @@ def test_pay_dividends(role):
     env.pay_dividends.assert_called_with(role, founder, 50)
 
 
-def test_pay_taxes_uses_env_method(role):
+def test_pay_taxes_uses_env_method(role, env):
     # Given
-    env = role.env
 
     # When
     role.pay_taxes(50)
@@ -174,14 +166,13 @@ def test_pay_taxes_uses_env_method(role):
     env.pay_taxes.assert_called_with(role, 50)
 
 
-def test_update_equity_shares(role):
+def test_update_equity_shares(role, env):
     # Given
     founder1, founder2 = Mock(), Mock()
     share1 = {"citizen": founder1, "value": 1000}
     share2 = {"citizen": founder2, "value": 3000}
     shares = [share1, share2]
     role.get_equity_shares = Mock(return_value=shares)
-    env = role.env
 
     # When
     role.update_equity_shares(-100)
@@ -191,9 +182,8 @@ def test_update_equity_shares(role):
     env.update_equity_share.assert_any_call(role, founder2, -75)
 
 
-def test_transfer_residual_cash_uses_env_method(role):
+def test_transfer_residual_cash_uses_env_method(role, env):
     # Given
-    env = role.env
     founder = Mock()
 
     # When
@@ -203,9 +193,8 @@ def test_transfer_residual_cash_uses_env_method(role):
     env.transfer_residual_cash.assert_called_with(role, founder, 50)
 
 
-def test_request_advances_uses_env_method(role):
+def test_request_advances_uses_env_method(role, env):
     # Given
-    env = role.env
 
     # When
     role.request_advances(100)
@@ -214,9 +203,8 @@ def test_request_advances_uses_env_method(role):
     env.request_advances.assert_called_with(role, 100)
 
 
-def test_repay_advances_uses_env_method(role):
+def test_repay_advances_uses_env_method(role, env):
     # Given
-    env = role.env
 
     # When
     role.repay_advances(100, 10)

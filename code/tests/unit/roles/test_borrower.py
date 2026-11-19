@@ -27,7 +27,6 @@ def env():
     return Mock()
 
 
-
 @pytest.fixture
 def role(agent, env):
     # Given
@@ -47,7 +46,7 @@ def test_initializes_defaulted(role):
 def test_exposes_net_worth_from_agent(role):
     # Given
     agent = role.agent
-    agent.account = {"equities":-100}
+    agent.account = {"equities": -100}
 
     # When
     exposed = role.net_worth
@@ -61,32 +60,60 @@ def test_exposes_net_worth_from_agent(role):
 # ----------------------------------------------------
 
 
-def test_find_lenders(role, make_dlist):
+@pytest.fixture
+def lenders(make_dlist):
     # Given
-    lender = Mock()
-    env = role.env
-    env.find_all_roles.return_value = make_dlist([lender])
+    return make_dlist([Mock() for _ in range(5)])
+
+
+def test_find_lenders_uses_env_find_method(role, env, lenders):
+    # Given
+    env.find_all_roles.return_value = lenders
+
+    # When
+    role.find_lenders()
+
+    # Then
+    env.find_all_roles.assert_called_with("lender")
+
+
+def test_find_lenders_returns_found_roles(role, env, lenders):
+    # Given
+    env.find_all_roles.return_value = lenders
 
     # When
     result = role.find_lenders()
 
     # Then
-    env.find_all_roles.assert_called_with("lender")
-    assert list(result) == [lender]
+    assert list(result) == list(lenders)
 
 
-def test_find_loans(role):
+@pytest.fixture
+def loans(make_dlist):
     # Given
-    loan = Mock()
-    env = role.env
-    env.links.return_value = [loan]
+    return make_dlist([Mock() for _ in range(5)])
+
+
+def test_find_loans_uses_env_links(role, env, loans):
+    # Given
+    env.links.return_value = loans
+
+    # When
+    role.find_loans()
+
+    # Then
+    env.links.assert_called_with(role)
+
+
+def test_find_loans_returns_found_links(role, env, loans):
+    # Given
+    env.links.return_value = loans
 
     # When
     result = role.find_loans()
 
     # Then
-    env.links.assert_called_with(role)
-    assert result == [loan]
+    assert result == loans
 
 
 # ---------------------------------------------------
@@ -105,10 +132,9 @@ def test_request_loans_use_lender_method(role):
     lender.receive_request.assert_called_with(role)
 
 
-def test_repay_loans_use_env_method(role):
+def test_repay_loans_use_env_method(role, env):
     # Given
     lender = Mock()
-    env = role.env
 
     # When
     role.repay_loans(lender, 100, 10)
@@ -117,10 +143,9 @@ def test_repay_loans_use_env_method(role):
     env.repay_loans.assert_called_with(role, lender, 100, 10)
 
 
-def test_make_defaults_use_env_method(role):
+def test_make_defaults_use_env_method(role, env):
     # Given
     lender = Mock()
-    env = role.env
 
     # When
     role.make_defaults(lender, 100)

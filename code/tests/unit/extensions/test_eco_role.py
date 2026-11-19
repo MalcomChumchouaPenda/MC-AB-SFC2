@@ -10,7 +10,7 @@ from model.extensions import EcoRole
 def test_inherits_from_agentpy_agentnode():
     # Given
     from agentpy import AgentNode
-    
+
     # Then
     assert issubclass(EcoRole, AgentNode)
 

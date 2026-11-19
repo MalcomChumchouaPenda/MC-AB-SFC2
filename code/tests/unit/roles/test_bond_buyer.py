@@ -27,7 +27,6 @@ def env():
     return Mock()
 
 
-
 @pytest.fixture
 def role(agent, env):
     # Given
@@ -49,21 +48,29 @@ def issuers(make_dlist):
     # Given
     eligible = Mock(bond_number=1)
     ineligible = Mock(bond_number=0)
-    issuers = make_dlist([eligible, ineligible])
-    return issuers
+    return make_dlist([eligible, ineligible])
 
 
-def test_find_issuers_with_positive_bond_number(role, issuers):
+def test_find_issuers_uses_env_find_method(role, env, issuers):
     # Given
-    env = role.env
     env.find_all_roles = Mock(return_value=issuers)
+
+    # When
+    role.find_issuers()
+
+    # Then
+    env.find_all_roles.assert_called_with("bond_issuer")
+
+
+def test_find_issuers_returns_roles_with_positive_bond_number(role, env, issuers):
+    # Given
     eligible = issuers[0]
+    env.find_all_roles = Mock(return_value=issuers)
 
     # When
     result = role.find_issuers()
 
     # Then
-    env.find_all_roles.assert_called_with("bond_issuer")
     assert list(result) == [eligible]
 
 
@@ -72,10 +79,9 @@ def test_find_issuers_with_positive_bond_number(role, issuers):
 # ----------------------------------------------------
 
 
-def test_buy_bonds(role):
+def test_buy_bonds(role, env):
     # Given
     issuer = Mock()
-    env = role.env
 
     # When
     role.buy_bonds(issuer, 2)

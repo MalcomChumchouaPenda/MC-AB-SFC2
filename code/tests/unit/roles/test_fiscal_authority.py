@@ -32,16 +32,14 @@ def env():
     return Mock()
 
 
-
 @pytest.fixture
 def role(agent, env):
     # Given
     return FiscalAuthority(agent, env)
 
 
-def test_get_gdp_from_env(role):
+def test_get_gdp_from_env(role, env):
     # Given
-    env = role.env
     env.gdp = 500
 
     # When
@@ -51,9 +49,8 @@ def test_get_gdp_from_env(role):
     assert perceived == 500
 
 
-def test_get_discount_rate_within_env(role):
+def test_get_discount_rate_within_env(role, env):
     # Given
-    env = role.env
     env.discount_rate = 0.02
 
     # When
@@ -64,10 +61,9 @@ def test_get_discount_rate_within_env(role):
 
 
 @pytest.fixture
-def goods_market(role):
+def goods_market(env):
     # Given
     market = Mock()
-    env = role.env
     env.spaces = {"goods_market": market}
     return market
 
@@ -94,9 +90,8 @@ def test_get_average_phi_from_env(role, goods_market):
     assert perceived == 1.0
 
 
-def test_find_citizens_from_env(role):
+def test_find_citizens_from_env(role, env):
     # Given
-    env = role.env
 
     # When
     perceived = role.find_citizens()
@@ -111,10 +106,9 @@ def test_find_citizens_from_env(role):
 # ----------------------------------------------------
 
 
-def test_pay_public_transfers_from_env(role):
+def test_pay_public_transfers_from_env(role, env):
     # Given
     citizen = Mock()
-    env = role.env
 
     # When
     role.pay_public_transfers(citizen, 100)
@@ -123,9 +117,8 @@ def test_pay_public_transfers_from_env(role):
     env.pay_public_transfers(role, citizen, 100)
 
 
-def test_set_tax_rate_into_env(role):
+def test_set_tax_rate_into_env(role, env):
     # Given
-    env = role.env
     env.tax_rate = 0.0
 
     # When

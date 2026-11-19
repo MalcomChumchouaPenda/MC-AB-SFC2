@@ -15,7 +15,6 @@ def test_inherits_from_eco_role():
     assert issubclass(Lender, EcoRole)
 
 
-
 @pytest.fixture
 def agent():
     # Given
@@ -26,7 +25,6 @@ def agent():
 def env():
     # Given
     return Mock()
-
 
 
 @pytest.fixture
@@ -62,10 +60,9 @@ def test_receive_request(role):
     assert role.loan_applicants == [borrower]
 
 
-def test_grant_loan(role):
+def test_grant_loan(role, env):
     # Given
     borrower = Mock()
-    env = role.env
 
     # When
     role.grant_loan(borrower, 100, 0.04)

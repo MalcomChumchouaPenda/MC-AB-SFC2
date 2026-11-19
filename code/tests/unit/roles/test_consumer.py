@@ -27,7 +27,6 @@ def env():
     return Mock()
 
 
-
 @pytest.fixture
 def role(agent, env):
     # Given
@@ -50,10 +49,8 @@ def test_initializes_preference(role):
 # ----------------------------------------------------
 
 
-
-def test_get_average_price(role):
+def test_get_average_price(role, env):
     # Given
-    env = role.env
     env.average_price = 25
 
     # When
@@ -63,9 +60,8 @@ def test_get_average_price(role):
     assert average_price == 25
 
 
-def test_find_suppliers_get_random_founders(role):
+def test_find_suppliers_get_random_founders(role, env):
     # Given
-    env = role.env
 
     # When
     found = role.find_suppliers(5)
@@ -80,10 +76,9 @@ def test_find_suppliers_get_random_founders(role):
 # ----------------------------------------------------
 
 
-def test_buy_goods_uses_env_method(role):
+def test_buy_goods_uses_env_method(role, env):
     # Given
     supplier = Mock()
-    env = role.env
 
     # When
     role.buy_goods(supplier, 10)

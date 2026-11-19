@@ -27,7 +27,6 @@ def env():
     return Mock()
 
 
-
 @pytest.fixture
 def role(agent, env):
     # Given
@@ -54,9 +53,8 @@ def test_initializes_bond_value(role):
 # ----------------------------------------------------
 
 
-def test_get_discount_rate(role):
+def test_get_discount_rate(role, env):
     # Given
-    env = role.env
     env.discount_rate = 0.05
 
     # When
@@ -66,10 +64,9 @@ def test_get_discount_rate(role):
     assert result == 0.05
 
 
-def test_find_bonds_returns_buyer_and_amount(role):
+def test_find_bonds_returns_buyer_and_amount(role, env):
     # Given
     bond = Mock()
-    env = role.env
     env.links.return_value = [bond]
 
     # When
@@ -85,10 +82,9 @@ def test_find_bonds_returns_buyer_and_amount(role):
 # ----------------------------------------------------
 
 
-def test_repay_bond_use_env_method(role):
+def test_repay_bond_use_env_method(role, env):
     # Given
     buyer = Mock()
-    env = role.env
 
     # When
     role.repay_bonds(buyer, 100, 10)

@@ -27,7 +27,6 @@ def env():
     return Mock()
 
 
-
 @pytest.fixture
 def role(agent, env):
     # Given
@@ -39,32 +38,57 @@ def role(agent, env):
 # ----------------------------------------------------
 
 
-def test_find_defaults_from_env(role, make_dlist):
+@pytest.fixture
+def bank_roles(make_dlist):
     # Given
     bad = Mock(defaulted=True, id=1)
     good = Mock(defaulted=False, id=2)
-    env = role.env
-    env.find_all_roles.return_value = make_dlist([bad, good])
+    return make_dlist([bad, good])
+
+
+def test_find_defaults_uses_env_find_methods(role, env, bank_roles):
+    # Given
+    env.find_all_roles.return_value = bank_roles
+
+    # When
+    role.find_defaults()
+
+    # Then
+    env.find_all_roles.assert_called_with("deposit_bank")
+
+
+def test_find_defaults_returns_roles_with_deposits(role, env, bank_roles):
+    # Given
+    bad = bank_roles[0]
+    env.find_all_roles.return_value = bank_roles
     env.get_stock = lambda x, y: -100 * y if x == "deposits" else 0
 
     # When
     found = role.find_defaults()
 
     # Then
-    env.find_all_roles.assert_called_with("deposit_bank")
     assert found == [{"bank": bad, "amount": -100}]
 
 
-def test_find_deposits_from_env(role):
+def test_find_deposits_uses_env_links(role, env):
     # Given
     bank = Mock()
-    env = role.env
+
+    # When
+    role.find_deposits(bank)
+
+    # Then
+    env.links.assert_called_with(bank)
+
+
+def test_find_deposits_returns_found_links(role, env):
+    # Given
+    bank = Mock()
 
     # When
     found = role.find_deposits(bank)
 
     # Then
-    env.links.assert_called_with(bank)
     assert found == env.links.return_value
 
 
@@ -73,9 +97,8 @@ def test_find_deposits_from_env(role):
 # ----------------------------------------------------
 
 
-def test_reimburse_deposits_into_env(role):
+def test_reimburse_deposits_into_env(role, env):
     # Given
-    env = role.env
     depositor = Mock()
     deposit_bank = Mock()
 

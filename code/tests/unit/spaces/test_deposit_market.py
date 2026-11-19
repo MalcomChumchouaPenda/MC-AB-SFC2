@@ -10,7 +10,7 @@ from model.spaces.deposit_market import DepositMarket
 def test_inherits_from_eco_space():
     # Given
     from model.extensions import EcoSpace
-    
+
     # Then
     assert issubclass(DepositMarket, EcoSpace)
 
