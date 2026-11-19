@@ -72,18 +72,6 @@ def test_exposes_net_worth_from_agent(role):
 # ----------------------------------------------------
 
 
-def test_get_equity_amount(role):
-    # Given
-    agent = role.agent
-    agent.account = {"equities": -150.0}
-
-    # When
-    perceived = role.get_equity_amount()
-
-    # Then
-    assert perceived == 150.0
-
-
 def test_get_dividends(role):
     # Given
     agent = role.agent

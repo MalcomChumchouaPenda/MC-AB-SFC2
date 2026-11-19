@@ -95,13 +95,11 @@ def test_pay_deposit_interests_to_all_clients(bank):
 
 
 @pytest.fixture
-def bank_with_roles_and_account(bank):
+def account(bank):
     # Given
-    roles = {}
     account = {}
     bank.account = account
-    bank.roles = roles
-    return bank, roles, account
+    return account
 
 
 @pytest.fixture
@@ -112,10 +110,10 @@ def company_role(bank):
     return role
 
 
-def test_calc_credit_capacity(bank, company_role):
+def test_calc_credit_capacity(bank, account):
     # Given
     bank.p.mu1 = 10
-    company_role.get_equity_amount.return_value = 100
+    account["equities"] = -100
 
     # When
     result = bank._calc_credit_capacity()
@@ -150,27 +148,45 @@ def test_calc_loan_rate(bank, company_role):
 
 
 @pytest.fixture
-def bank_as_lender(bank_with_roles_and_account):
+def lender_role(bank):
     # Given
-    borrowers = [Mock(id=i, loan_demand=100) for i in range(5)]
-    lender = Mock(loan_applicants=borrowers)
-    bank, roles, _ = bank_with_roles_and_account
+    role = Mock()
+    bank.roles["lender"] = role
+    return role
+
+
+@pytest.fixture
+def deposit_bank_role(bank):
+    # Given
+    role = Mock()
+    bank.roles["deposit_bank"] = role
+    return role
+
+
+@pytest.fixture
+def borrowers():
+    # Given
+    return [Mock(id=i, loan_demand=100) for i in range(5)]
+
+
+@pytest.fixture
+def bank_before_loan(bank, lender_role, deposit_bank_role, borrowers):
+    # Given
+    _ = deposit_bank_role
+    lender_role.loan_applicants = borrowers
     bank._calc_loan_rate = Mock(return_value=0.02)
     bank._calc_loan_probability = Mock(return_value=0.4)
     bank._calc_credit_capacity = Mock(return_value=500)
     random = bank.model.nprandom
     random.choice.return_value = 0
-    roles["deposit_bank"] = Mock()
-    roles["lender"] = lender
     return bank
 
 
-def test_grant_loans_and_processes_all_loan_applicants(bank_as_lender):
+def test_grant_loans_and_processes_all_loan_applicants(bank_before_loan, lender_role):
     # Given
-    bank = bank_as_lender
+    bank = bank_before_loan
     bank.credit_capacity = 500
-    lender = bank.roles["lender"]
-    applicants = lender.loan_applicants
+    applicants = lender_role.loan_applicants
     random = bank.model.random
 
     # When
@@ -183,12 +199,11 @@ def test_grant_loans_and_processes_all_loan_applicants(bank_as_lender):
         bank._calc_loan_probability.assert_any_call(borrower)
 
 
-def test_grant_loans_with_computed_probability(bank_as_lender):
+def test_grant_loans_with_computed_probability(bank_before_loan, lender_role):
     # Given
-    bank = bank_as_lender
+    bank = bank_before_loan
     bank.credit_capacity = 500
-    lender = bank.roles["lender"]
-    applicants = lender.loan_applicants
+    applicants = lender_role.loan_applicants
     random = bank.model.nprandom
     random.choice.side_effect = iter([1, 0, 0, 0, 0])
 
@@ -197,16 +212,15 @@ def test_grant_loans_with_computed_probability(bank_as_lender):
 
     # Then
     random.choice.assert_called_with([0, 1], p=[0.6, 0.4])
-    lender.grant_loan.assert_called_with(applicants[0], 100, 0.02)
-    assert lender.grant_loan.call_count == 1
+    lender_role.grant_loan.assert_called_with(applicants[0], 100, 0.02)
+    assert lender_role.grant_loan.call_count == 1
 
 
-def test_grant_loans_in_regards_of_credit_capacity(bank_as_lender):
+def test_grant_loans_in_regards_of_credit_capacity(bank_before_loan, lender_role):
     # Given
-    bank = bank_as_lender
+    bank = bank_before_loan
     bank._calc_credit_capacity.return_value = 200
-    lender = bank.roles["lender"]
-    applicants = lender.loan_applicants
+    applicants = lender_role.loan_applicants
     random = bank.model.nprandom
     random.choice.return_value = 1
 
@@ -214,16 +228,15 @@ def test_grant_loans_in_regards_of_credit_capacity(bank_as_lender):
     bank.grant_loans()
 
     # Then
-    lender.grant_loan.assert_any_call(applicants[0], 100, 0.02)
-    lender.grant_loan.assert_any_call(applicants[1], 100, 0.02)
-    assert lender.grant_loan.call_count == 2
+    lender_role.grant_loan.assert_any_call(applicants[0], 100, 0.02)
+    lender_role.grant_loan.assert_any_call(applicants[1], 100, 0.02)
+    assert lender_role.grant_loan.call_count == 2
 
 
-def test_grant_loans_cleans_loan_applicants_list(bank_as_lender):
+def test_grant_loans_cleans_loan_applicants_list(bank_before_loan, lender_role):
     # Given
-    bank = bank_as_lender
+    bank = bank_before_loan
     bank._calc_credit_capacity.return_value = 200
-    lender = bank.roles["lender"]
     random = bank.model.nprandom
     random.choice.return_value = 1
 
@@ -231,13 +244,13 @@ def test_grant_loans_cleans_loan_applicants_list(bank_as_lender):
     bank.grant_loans()
 
     # Then
-    assert len(lender.loan_applicants) == 0
+    assert len(lender_role.loan_applicants) == 0
 
 
-def test_grant_loans_and_make_deposits(bank_as_lender):
+def test_grant_loans_and_make_deposits(bank_before_loan, lender_role):
     # Given
-    bank = bank_as_lender
-    applicants = bank.roles["lender"].loan_applicants
+    bank = bank_before_loan
+    applicants = lender_role.loan_applicants
     depositors = {a.id: Mock() for a in applicants}
     deposit_bank = bank.roles["deposit_bank"]
     deposit_bank.find_depositor.side_effect = lambda i: depositors[i]
@@ -259,56 +272,50 @@ def test_grant_loans_and_make_deposits(bank_as_lender):
 
 
 @pytest.fixture
-def bank_before_advance(bank_with_roles_and_account):
+def bank_before_advance(bank, account):
     # Given
-    bank, roles, account = bank_with_roles_and_account
     bank.p.mu2 = 0.1
     account["cash"] = 0
     account["deposits"] = -1000
     account["advances"] = 0
-    roles["lender"] = Mock()
-    roles["company"] = Mock()
     return bank
 
 
-def test_request_advance_when_sufficient_reserves(bank_before_advance):
+def test_request_advance_when_sufficient_reserves(bank_before_advance, company_role):
     # Given
     bank = bank_before_advance
     bank.account["cash"] = 200
-    role = bank.roles["company"]
 
     # When
     bank.request_cash_advances()
 
     # Then
-    role.request_advances.assert_not_called()
+    company_role.request_advances.assert_not_called()
 
 
-def test_request_advance_when_insufficient_reserves(bank_before_advance):
+def test_request_advance_when_insufficient_reserves(bank_before_advance, company_role):
     # Given
     bank = bank_before_advance
     bank.account["cash"] = 50
-    role = bank.roles["company"]
 
     # When
     bank.request_cash_advances()
 
     # Then
-    role.request_advances.assert_called_with(50)
+    company_role.request_advances.assert_called_with(50)
 
 
-def test_repay_advance_when_insufficient_reserves(bank_before_advance):
+def test_repay_advance_when_insufficient_reserves(bank_before_advance, company_role):
     # Given
     bank = bank_before_advance
     bank.account["advances"] = -100
-    role = bank.roles["company"]
-    role.get_discount_rate.return_value = 0.02
+    company_role.get_discount_rate.return_value = 0.02
 
     # When
     bank.repay_cash_advances()
 
     # Then
-    role.repay_advances.assert_called_with(100, 2)
+    company_role.repay_advances.assert_called_with(100, 2)
 
 
 # ---------------------------------------------------
@@ -345,30 +352,37 @@ def test_calc_excess_reserves(bank_before_advance, cash, expected):
 
 
 @pytest.fixture
-def bank_as_bond_buyer(bank_with_roles_and_account):
+def bond_buyer_role(bank):
     # Given
     role = Mock()
-    role.find_issuers = Mock(return_value=[])
-    bank, roles, _ = bank_with_roles_and_account
+    bank.roles["bond_buyer"] = role
+    return role
+
+
+@pytest.fixture
+def bank_without_bonds(bank, bond_buyer_role):
+    # Given
+    bond_buyer_role.find_issuers = Mock(return_value=[])
     bank._calc_bond_purchases_prob = Mock(return_value=0)
     bank._calc_excess_reserves = Mock(return_value=0)
     bank.model.nprandom.choice.return_value = 1
-    roles["bond_buyer"] = role
-    return bank, role
+    return bank
 
 
-def test_find_bond_suppliers_gets_and_shuffles_issuers(bank_as_bond_buyer):
+def test_find_bond_suppliers_gets_and_shuffles_issuers(
+    bank_without_bonds, bond_buyer_role
+):
     # Given
-    bond_issuers = [Mock() for _ in range(3)]
-    bank, role = bank_as_bond_buyer
+    bank = bank_without_bonds
     random = bank.model.random
-    role.find_issuers.return_value = bond_issuers
+    bond_issuers = [Mock() for _ in range(3)]
+    bond_buyer_role.find_issuers.return_value = bond_issuers
 
     # When
     result = bank._find_bond_issuers()
 
     # Then
-    role.find_issuers.assert_called_with()
+    bond_buyer_role.find_issuers.assert_called_with()
     random.shuffle.assert_called_with(bond_issuers)
     assert result == bond_issuers
 
@@ -381,14 +395,16 @@ def bond_issuers():
     ]
 
 
-def test_buy_bonds_with_purchases_probability(bank_as_bond_buyer, bond_issuers):
+def test_buy_bonds_with_purchases_probability(
+    bank_without_bonds, bond_issuers, bond_buyer_role
+):
     # Given
-    bank, role = bank_as_bond_buyer
+    bank = bank_without_bonds
     bank._calc_excess_reserves.return_value = 1000
+    bond_buyer_role.find_issuers.return_value = bond_issuers
     calc_prob = bank._calc_bond_purchases_prob
     calc_prob.return_value = 0.4
     random = bank.model.nprandom
-    role.find_issuers.return_value = bond_issuers
 
     # When
     bank.buy_bonds()
@@ -400,30 +416,34 @@ def test_buy_bonds_with_purchases_probability(bank_as_bond_buyer, bond_issuers):
         calc_prob.assert_any_call(bond_issuer)
 
 
-def test_buy_bonds_with_excess_reserves(bank_as_bond_buyer, bond_issuers):
+def test_buy_bonds_with_excess_reserves(
+    bank_without_bonds, bond_issuers, bond_buyer_role
+):
     # Given
-    bank, role = bank_as_bond_buyer
+    bank = bank_without_bonds
     bank._calc_excess_reserves.return_value = 50
-    role.find_issuers.return_value = bond_issuers
+    bond_buyer_role.find_issuers.return_value = bond_issuers
 
     # When
     bank.buy_bonds()
 
     # Then
-    role.buy_bonds.assert_called_once_with(bond_issuers[0], 1)
+    bond_buyer_role.buy_bonds.assert_called_once_with(bond_issuers[0], 1)
 
 
-def test_dont_buy_bonds_with_insufficient_reserves(bank_as_bond_buyer, bond_issuers):
+def test_dont_buy_bonds_with_insufficient_reserves(
+    bank_without_bonds, bond_issuers, bond_buyer_role
+):
     # Given
-    bank, role = bank_as_bond_buyer
+    bank = bank_without_bonds
     bank._calc_excess_reserves.return_value = 50
-    role.find_issuers.return_value = bond_issuers
+    bond_buyer_role.find_issuers.return_value = bond_issuers
 
     # When
     bank.buy_bonds()
 
     # Then
-    role.buy_bonds.assert_called_once_with(bond_issuers[0], 1)
+    bond_buyer_role.buy_bonds.assert_called_once_with(bond_issuers[0], 1)
 
 
 # ---------------------------------------------------
@@ -431,10 +451,8 @@ def test_dont_buy_bonds_with_insufficient_reserves(bank_as_bond_buyer, bond_issu
 # ----------------------------------------------------
 
 
-def test_calc_profit(bank_with_roles_and_account):
+def test_calc_profit(bank, account):
     # Given
-    bank, roles, account = bank_with_roles_and_account
-    roles["company"] = company_role
     account["cash_interests"] = 10
     account["loan_interests"] = 100
     account["loan_defaults"] = -20
@@ -449,21 +467,11 @@ def test_calc_profit(bank_with_roles_and_account):
     assert profit == 70
 
 
-@pytest.fixture
-def bank_as_taxpayer(bank_with_roles_and_account):
-    # Given
-    role = Mock()
-    bank, roles, _ = bank_with_roles_and_account
-    roles["company"] = role
-    return bank, role
-
-
 @pytest.mark.parametrize("profit, expected", [(100, 20), (0, 0), (-50, 0)])
-def test_calc_taxes(bank_as_taxpayer, profit, expected):
+def test_calc_taxes(bank, company_role, profit, expected):
     # Given
-    bank, role = bank_as_taxpayer
     bank.profit = profit
-    role.get_tax_rate.return_value = 0.20
+    company_role.get_tax_rate.return_value = 0.20
 
     # When
     taxes = bank._calc_taxes()
@@ -473,9 +481,8 @@ def test_calc_taxes(bank_as_taxpayer, profit, expected):
 
 
 @pytest.mark.parametrize("profit, expected", [(100, 40), (-100, 0)])
-def test_calc_dividends(bank_as_taxpayer, profit, expected):
+def test_calc_dividends(bank, profit, expected):
     # Given
-    bank, _ = bank_as_taxpayer
     bank.p.rho = 0.5
     bank.profit = profit
     bank.taxes_payable = 20
@@ -502,78 +509,68 @@ def test_compute_profit_distribution(bank):
     assert bank.dividends_payable == 30
 
 
-def test_update_net_worth(bank_with_roles_and_account):
+def test_update_net_worth(bank, company_role):
     # Given
-    role = Mock()
-    bank, roles, _ = bank_with_roles_and_account
     bank.profit = 500
     bank.taxes_payable = 50
     bank.dividends_payable = 100
-    roles["company"] = role
 
     # When
     bank.update_net_worth()
 
     # Then
-    role.update_equity_shares.assert_called_once_with(350)
+    company_role.update_equity_shares.assert_called_once_with(350)
 
 
-def test_pay_taxes(bank_as_taxpayer):
+def test_pay_taxes(bank, company_role):
     # Given
-    bank, role = bank_as_taxpayer
     bank.taxes_payable = 50
 
     # When
     bank.pay_taxes()
 
     # Then
-    role.pay_taxes.assert_called_with(50)
+    company_role.pay_taxes.assert_called_with(50)
     assert bank.taxes_payable == 0
 
 
-def test_pay_no_taxes(bank_as_taxpayer):
+def test_pay_no_taxes(bank, company_role):
     # Given
-    bank, role = bank_as_taxpayer
     bank.taxes_payable = 0
 
     # When
     bank.pay_taxes()
 
     # Then
-    role.pay_taxes.assert_not_called()
+    company_role.pay_taxes.assert_not_called()
 
 
-def test_pay_dividends(bank_with_roles_and_account):
+def test_pay_dividends(bank, company_role):
     # Given
-    founder, role = Mock(), Mock()
+    founder = Mock()
     share = {"citizen": founder, "value": 1000}
-    role.get_equity_shares.return_value = [share]
-    bank, roles, _ = bank_with_roles_and_account
+    company_role.get_equity_shares.return_value = [share]
     bank.dividends_payable = 100
-    roles["company"] = role
 
     # When
     bank.pay_dividends()
 
     # Then
-    role.pay_dividends.assert_called_once_with(founder, 100)
+    company_role.pay_dividends.assert_called_once_with(founder, 100)
     assert bank.dividends_payable == 0
 
 
-def test_pay_no_dividends(bank_with_roles_and_account):
+def test_pay_no_dividends(bank, company_role):
     # Given
-    role = Mock()
-    role.get_equity_shares.return_value = []
-    bank, roles, _ = bank_with_roles_and_account
+    company_role.get_equity_shares.return_value = []
     bank.dividends_payable = 0
-    roles["company"] = role
 
     # When
     bank.pay_dividends()
 
     # Then
-    role.get_equity_shares.assert_not_called()
-    role.pay_dividends.assert_not_called()
+    company_role.get_equity_shares.assert_not_called()
+    company_role.pay_dividends.assert_not_called()
 
 
 # ---------------------------------------------------
@@ -582,18 +579,18 @@ def test_pay_no_dividends(bank_with_roles_and_account):
 
 
 @pytest.fixture
-def bank_before_exit(bank, company_role):
+def bank_before_exit(bank, company_role, account):
     # Given
-    bank.account = {"cash": 0}
+    account["cash"] = 0
     company_role.get_average_wage.return_value = 100
     return bank
 
 
 @pytest.mark.parametrize("net_worth, defaulted", [(90, True), (150, False)])
-def test_exit_when_bankrupt(bank_before_exit, company_role, net_worth, defaulted):
+def test_exit_when_bankrupt(bank_before_exit, net_worth, defaulted):
     # Given
     bank = bank_before_exit
-    company_role.get_equity_amount.return_value = net_worth
+    bank.account["equities"] = -net_worth
 
     # When
     bank.exit()
@@ -608,7 +605,7 @@ def test_exit_transfer_residual_cash_to_founders(bank_before_exit, company_role)
     share = {"citizen": founder, "value": 90}
     bank = bank_before_exit
     bank.account["cash"] = 200
-    company_role.get_equity_amount.return_value = 90
+    bank.account["equities"] = -90
     company_role.get_equity_shares.return_value = [share]
 
     # When
@@ -618,11 +615,11 @@ def test_exit_transfer_residual_cash_to_founders(bank_before_exit, company_role)
     company_role.transfer_residual_cash.assert_called_with(founder, 200)
 
 
-def test_exit_sets_all_roles_defaulted(bank_before_exit, company_role):
+def test_exit_sets_all_roles_defaulted(bank_before_exit):
     # Given
     bank = bank_before_exit
     bank.roles["any"] = Mock()
-    company_role.get_equity_amount.return_value = 90
+    bank.account["equities"] = -90
 
     # When
     bank.exit()
@@ -638,22 +635,11 @@ def test_exit_sets_all_roles_defaulted(bank_before_exit, company_role):
 
 
 @pytest.fixture
-def bank_before_record(bank, company_role):
+def bank_before_record(bank, company_role, account):
     # Given
-    company_role.get_equity_amount.return_value = 200
+    account["equities"] = -200
     company_role.get_dividends.return_value = 20
     return bank
-
-
-def test_record_items_records_equities(bank_before_record):
-    # Given
-    bank = bank_before_record
-
-    # When
-    bank.record_items()
-
-    # Then
-    assert bank.log["equities"][-1] == -200
 
 
 def test_record_items_records_dividends(bank_before_record):

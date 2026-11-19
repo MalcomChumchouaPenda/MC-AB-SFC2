@@ -54,8 +54,7 @@ class Bank(EcoAgent):
         deposit_bank.make_deposits(depositor, amount)
 
     def _calc_credit_capacity(self):
-        company_role = self.roles["company"]
-        equities = company_role.get_equity_amount()
+        equities = -self.account["equities"]
         return equities * self.p.mu1
 
     def _calc_loan_probability(self, borrower):
@@ -183,8 +182,8 @@ class Bank(EcoAgent):
 
     def exit(self):
         role = self.roles["company"]
-        equities = role.get_equity_amount()
         average_wage = role.get_average_wage()
+        equities = -self.account["equities"]
         if equities < average_wage:
             self.defaulted = True
             for role in self.roles.values():
@@ -209,5 +208,4 @@ class Bank(EcoAgent):
         super().record_items()
         roles = self.roles
         company_role = roles["company"]
-        self.record("equities", -company_role.get_equity_amount())
         self.record("dividends", -company_role.get_dividends())

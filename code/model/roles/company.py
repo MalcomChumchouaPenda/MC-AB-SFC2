@@ -20,9 +20,6 @@ class Company(EcoRole):
     # perceptions method
     #
 
-    def get_equity_amount(self):
-        return -self.agent.account["equities"]
-
     def get_dividends(self):
         return -self.agent.account["dividends"]
 

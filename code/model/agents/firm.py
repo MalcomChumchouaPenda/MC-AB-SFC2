@@ -245,9 +245,8 @@ class Firm(EcoAgent):
     # Exit process
     #
     def exit(self):
-        company_role = self.roles["company"]
         employer_role = self.roles["employer"]
-        equities = company_role.get_equity_amount()
+        equities = -self.account["equities"]
         if equities < employer_role.wage:
             self.defaulted = True
             for role in self.roles.values():
@@ -305,5 +304,4 @@ class Firm(EcoAgent):
         super().record_items()
         roles = self.roles
         company_role = roles["company"]
-        self.record("equities", -company_role.get_equity_amount())
         self.record("dividends", -company_role.get_dividends())
