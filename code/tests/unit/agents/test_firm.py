@@ -20,134 +20,93 @@ def test_inherits_from_eco_agent():
 def model(fake_model):
     # Given
     model = fake_model
+    model.random = Mock()
     model.nprandom = Mock()
     return model
 
 
-def test_initializes_tradable(model):
-    # When
-    firm = Firm(model)
+@pytest.fixture
+def firm(model):
+    # Given
+    return Firm(model)
 
+
+def test_initializes_tradable(firm):
     # Then
     assert firm.tradable is False
 
 
-def test_initializes_defaulted(model):
-    # When
-    firm = Firm(model)
-
+def test_initializes_defaulted(firm):
     # Then
     assert firm.defaulted is False
 
 
-def test_initializes_expected_sales(model):
-    # When
-    firm = Firm(model)
-
+def test_initializes_expected_sales(firm):
     # Then
     assert firm.expected_sales == 0
 
 
-def test_initializes_desired_labor(model):
-    # When
-    firm = Firm(model)
-
+def test_initializes_desired_labor(firm):
     # Then
     assert firm.desired_labor == 0
 
 
-def test_initializes_desired_output(model):
-    # When
-    firm = Firm(model)
-
+def test_initializes_desired_output(firm):
     # Then
     assert firm.desired_output == 0
 
 
-def test_initializes_desired_loans(model):
-    # When
-    firm = Firm(model)
-
+def test_initializes_desired_loans(firm):
     # Then
     assert firm.desired_loans == 0
 
 
-def test_initializes_desired_rd_expense(model):
-    # When
-    firm = Firm(model)
-
+def test_initializes_desired_rd_expense(firm):
     # Then
     assert firm.desired_rd == 0
 
 
-def test_initializes_taxes_payable(model):
-    # When
-    firm = Firm(model)
-
+def test_initializes_taxes_payable(firm):
     # Then
     assert firm.taxes_payable == 0
 
 
-def test_initializes_dividends_payable(model):
-    # When
-    firm = Firm(model)
-
+def test_initializes_dividends_payable(firm):
     # Then
     assert firm.dividends_payable == 0
 
 
-def test_initializes_net_cash_flow(model):
-    # When
-    firm = Firm(model)
-
+def test_initializes_net_cash_flow(firm):
     # Then
     assert firm.net_cash_flow == 0.0
 
 
-def test_initializes_prev_sales(model):
-    # When
-    firm = Firm(model)
-
+def test_initializes_prev_sales(firm):
     # Then
     assert firm.prev_sales == 0
 
 
-def test_initializes_prev_output(model):
-    # When
-    firm = Firm(model)
-
+def test_initializes_prev_output(firm):
     # Then
     assert firm.prev_output == 0
 
 
-def test_initializes_prev_expected_sales(model):
-    # When
-    firm = Firm(model)
-
+def test_initializes_prev_expected_sales(firm):
     # Then
     assert firm.prev_expected_sales == 0
 
 
-def test_initializes_prev_inventories(model):
-    # When
-    firm = Firm(model)
-
+def test_initializes_prev_inventories(firm):
     # Then
     assert firm.prev_inventories == 0
 
 
-def test_initializes_prev_labor(model):
-    # When
-    firm = Firm(model)
-
+def test_initializes_prev_labor(firm):
     # Then
     assert firm.prev_labor == 0
 
 
-def test_initializes_prev_desired_labor(model):
-    # When
-    firm = Firm(model)
-
+def test_initializes_prev_desired_labor(firm):
     # Then
     assert firm.prev_desired_labor == 0
 
@@ -155,15 +114,6 @@ def test_initializes_prev_desired_labor(model):
 # ---------------------------------------------------
 # PRODUCTION PLANNING
 # ----------------------------------------------------
-
-
-@pytest.fixture
-def firm(fake_model):
-    # Given
-    model = fake_model
-    model.random = Mock()
-    model.nprandom = Mock()
-    return Firm(model)
 
 
 def test_plan_production_by_two_steps(firm):
@@ -1104,3 +1054,27 @@ def test_exit_sets_all_roles_defaulted(firm_before_exit):
 # ---------------------------------------------------
 #  OBSERVATION
 # ----------------------------------------------------
+
+
+@pytest.fixture
+def firm_before_record(
+    firm,
+    borrower_role,
+    company_role,
+    employer_role,
+    producer_role,
+):
+    # Given
+    producer_role.phi = 1.5
+    return firm
+
+
+def test_record_indicators_records_productivity(firm_before_record, producer_role):
+    # Given
+    firm = firm_before_record
+
+    # When
+    firm.record_indicators()
+
+    # Then
+    assert firm.log["phi"][-1] == producer_role.phi

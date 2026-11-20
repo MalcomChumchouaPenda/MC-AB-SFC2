@@ -300,3 +300,7 @@ class Firm(EcoAgent):
     #
     # Observation
     #
+
+    def record_indicators(self):
+        producer_role = self.roles["producer"]
+        self.record("phi", producer_role.phi)
