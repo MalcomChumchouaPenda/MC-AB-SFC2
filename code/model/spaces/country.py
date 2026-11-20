@@ -207,3 +207,10 @@ class Country(EcoSpace):
             for founder in self.neighbors(company):
                 founder.company_number -= 1
             self.remove_role(company)
+
+    #
+    # Observation
+    #
+    def record_indicators(self):
+        self.record("gdp")
+        self.record("inflation")

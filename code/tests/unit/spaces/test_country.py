@@ -1,5 +1,4 @@
 import pytest
-from collections import defaultdict
 from unittest.mock import Mock, call
 from model.spaces.country import Country
 
@@ -929,7 +928,8 @@ def country_before_update(country):
 def test_update_state_updates_gdp(country_before_update):
     # Given
     country = country_before_update
-    country.spaces["goods_market"].calc_gdp.return_value = 100
+    market = country.spaces["goods_market"]
+    market.calc_gdp.return_value = 100
 
     # When
     country.update_state()
@@ -941,7 +941,8 @@ def test_update_state_updates_gdp(country_before_update):
 def test_update_state_updates_inflation(country_before_update):
     # Given
     country = country_before_update
-    country.spaces["goods_market"].calc_inflation.return_value = 0.2
+    market = country.spaces["goods_market"]
+    market.calc_inflation.return_value = 0.2
 
     # When
     country.update_state()
@@ -1041,3 +1042,40 @@ def test_clear_defaults_uses_spaces_method(country_with_defaults):
     # Then
     for subspace in country.spaces.values():
         subspace.clear_defaults.assert_called_with()
+
+
+# ---------------------------------------------------
+#  OBSERVATION
+# ----------------------------------------------------
+
+
+@pytest.fixture
+def country_before_record(country):
+    # Given
+    country.gdp = 100
+    country.inflation = 0.3
+    return country
+
+
+def test_record_indicators_records_nominal_gdp(country_before_record):
+    # Given
+    country = country_before_record
+    country.gdp = 100
+
+    # When
+    country.record_indicators()
+
+    # Then
+    assert country.log["gdp"][-1] == 100
+
+
+def test_record_indicators_records_nominal_gdp(country_before_record):
+    # Given
+    country = country_before_record
+    country.inflation = 0.3
+
+    # When
+    country.record_indicators()
+
+    # Then
+    assert country.log["inflation"][-1] == 0.3
