@@ -43,9 +43,8 @@ def test_initializes_defaulted(role):
     assert role.defaulted is False
 
 
-def test_exposes_net_worth_from_agent(role):
+def test_exposes_net_worth_from_agent(role, agent):
     # Given
-    agent = role.agent
     agent.account = {"equities": -100}
 
     # When

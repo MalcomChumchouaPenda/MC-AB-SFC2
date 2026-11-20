@@ -75,16 +75,15 @@ def space(fake_model):
 @pytest.fixture
 def space_without_subspaces(space):
     # Given
-    subspaces = {}
-    space.spaces = subspaces
-    return space, subspaces
+    space.spaces = {}
+    return space
 
 
 def test_add_space_creates_space(space_without_subspaces):
     # Given
     fake_space = Mock()
     fake_kind = Mock(return_value=fake_space)
-    space, _ = space_without_subspaces
+    space = space_without_subspaces
 
     # When
     space.add_space(fake_kind, "fake_space")
@@ -98,7 +97,7 @@ def test_add_space_creates_with_kwargs(space_without_subspaces):
     # Given
     fake_space = Mock()
     fake_kind = Mock(return_value=fake_space)
-    space, _ = space_without_subspaces
+    space = space_without_subspaces
 
     # When
     space.add_space(fake_kind, "fake_space", x=1, y=2)
@@ -112,7 +111,7 @@ def test_add_space_returns_new_space(space_without_subspaces):
     # Given
     fake_space = Mock()
     fake_kind = Mock(return_value=fake_space)
-    space, _ = space_without_subspaces
+    space = space_without_subspaces
 
     # When
     result = space.add_space(fake_kind, "fake_space")
@@ -125,13 +124,13 @@ def test_add_space_registers_subspace(space_without_subspaces):
     # Given
     fake_space = Mock()
     fake_kind = Mock(return_value=fake_space)
-    space, subspaces = space_without_subspaces
+    space = space_without_subspaces
 
     # When
     space.add_space(fake_kind, "fake_space")
 
     # Then
-    assert subspaces["fake_space"] == fake_space
+    assert space.spaces["fake_space"] == fake_space
 
 
 # ---------------------------------------------------
@@ -180,27 +179,36 @@ def test_add_agents_uses_subspaces_methods_for_all_agents(space):
 
 
 @pytest.fixture
-def role_with_kind():
+def role():
     # Given
     role = Mock()
     role.name = "fake_role"
-    role_kind = Mock(return_value=role)
-    return role, role_kind
+    return role
 
 
 @pytest.fixture
-def space_and_agent(space):
+def role_kind(role):
+    # Given
+    return Mock(return_value=role)
+
+
+@pytest.fixture
+def agent():
+    # Given
+    return Mock(id=1, roles={})
+
+
+@pytest.fixture
+def space_without_roles(space):
     # Given
     space.roles = {}
     space.add_account = Mock()
-    agent = Mock(roles={})
-    return space, agent
+    return space
 
 
-def test_add_role_creates_role(space_and_agent, role_with_kind):
+def test_add_role_creates_role(space_without_roles, agent, role_kind):
     # Given
-    _, role_kind = role_with_kind
-    space, agent = space_and_agent
+    space = space_without_roles
 
     # When
     space.add_role(role_kind, agent)
@@ -209,10 +217,9 @@ def test_add_role_creates_role(space_and_agent, role_with_kind):
     role_kind.assert_called_with(agent, space)
 
 
-def test_add_role_creates_role(space_and_agent, role_with_kind):
+def test_add_role_creates_role(space_without_roles, agent, role_kind):
     # Given
-    _, role_kind = role_with_kind
-    space, agent = space_and_agent
+    space = space_without_roles
 
     # When
     space.add_role(role_kind, agent)
@@ -221,10 +228,9 @@ def test_add_role_creates_role(space_and_agent, role_with_kind):
     role_kind.assert_called_with(agent, space, prefix="")
 
 
-def test_add_role_creates_role_with_prefix(space_and_agent, role_with_kind):
+def test_add_role_creates_role_with_prefix(space_without_roles, agent, role_kind):
     # Given
-    _, role_kind = role_with_kind
-    space, agent = space_and_agent
+    space = space_without_roles
 
     # When
     space.add_role(role_kind, agent, prefix="any")
@@ -233,10 +239,9 @@ def test_add_role_creates_role_with_prefix(space_and_agent, role_with_kind):
     role_kind.assert_called_with(agent, space, prefix="any")
 
 
-def test_add_role_returns_role(space_and_agent, role_with_kind):
+def test_add_role_returns_role(space_without_roles, agent, role_kind, role):
     # Given
-    role, role_kind = role_with_kind
-    space, agent = space_and_agent
+    space = space_without_roles
 
     # When
     result = space.add_role(role_kind, agent)
@@ -245,10 +250,9 @@ def test_add_role_returns_role(space_and_agent, role_with_kind):
     assert result is role
 
 
-def test_add_role_add_graph_node(space_and_agent, role_with_kind):
+def test_add_role_add_graph_node(space_without_roles, agent, role_kind, role):
     # Given
-    role, role_kind = role_with_kind
-    space, agent = space_and_agent
+    space = space_without_roles
     graph = space.graph
 
     # When
@@ -259,10 +263,9 @@ def test_add_role_add_graph_node(space_and_agent, role_with_kind):
     assert space.positions[agent] is role
 
 
-def test_add_role_registers_role(space_and_agent, role_with_kind):
+def test_add_role_registers_role(space_without_roles, agent, role_kind, role):
     # Given
-    role, role_kind = role_with_kind
-    space, agent = space_and_agent
+    space = space_without_roles
 
     # When
     space.add_role(role_kind, agent)
@@ -272,10 +275,9 @@ def test_add_role_registers_role(space_and_agent, role_with_kind):
     assert role is agent.roles[role.key]
 
 
-def test_add_role_creates_account_if_no_account(space_and_agent, role_with_kind):
+def test_add_role_creates_account_if_no_account(space_without_roles, agent, role_kind):
     # Given
-    _, role_kind = role_with_kind
-    space, agent = space_and_agent
+    space = space_without_roles
     agent.account = None
 
     # When
@@ -285,10 +287,11 @@ def test_add_role_creates_account_if_no_account(space_and_agent, role_with_kind)
     space.add_account.assert_called_with(agent)
 
 
-def test_add_role_doesnt_create_account_if_account(space_and_agent, role_with_kind):
+def test_add_role_doesnt_create_account_if_account(
+    space_without_roles, agent, role_kind
+):
     # Given
-    _, role_kind = role_with_kind
-    space, agent = space_and_agent
+    space = space_without_roles
     agent.account = Mock()
 
     # When
@@ -299,26 +302,23 @@ def test_add_role_doesnt_create_account_if_account(space_and_agent, role_with_ki
 
 
 @pytest.fixture
-def space_with_role(space_and_agent):
+def space_with_role(space_without_roles, agent, role):
     # Given
-    space, agent = space_and_agent
-    role = Mock()
+    space = space_without_roles
     role.agent = agent
-    role.name = "fake_role"
     role.key = "x_fake_role"
     agent.roles["x_fake_role"] = role
     space.roles = {agent.id: role}
     space.positions[agent] = role
     space.graph.add_node(role)
     space.remove_account = Mock()
-    return space, role
+    return space
 
 
-def test_remove_role_removes_graph_node(space_with_role):
+def test_remove_role_removes_graph_node(space_with_role, role, agent):
     # Given
-    space, role = space_with_role
+    space = space_with_role
     graph = space.graph
-    agent = role.agent
 
     # When
     space.remove_role(role)
@@ -328,10 +328,9 @@ def test_remove_role_removes_graph_node(space_with_role):
     assert not agent in space.positions
 
 
-def test_remove_role_unregisters_role(space_with_role):
+def test_remove_role_unregisters_role(space_with_role, role, agent):
     # Given
-    space, role = space_with_role
-    agent = role.agent
+    space = space_with_role
 
     # When
     space.remove_role(role)
@@ -341,10 +340,9 @@ def test_remove_role_unregisters_role(space_with_role):
     assert len(space.roles) == 0
 
 
-def test_remove_role_with_prefix(space_with_role):
+def test_remove_role_with_prefix(space_with_role, role, agent):
     # Given
-    space, role = space_with_role
-    agent = role.agent
+    space = space_with_role
 
     # When
     space.remove_role(role)
@@ -353,11 +351,10 @@ def test_remove_role_with_prefix(space_with_role):
     assert role.key not in agent.roles
 
 
-def test_remove_role_removes_account_if_no_env(space_with_role):
+def test_remove_role_removes_account_if_no_env(space_with_role, role, agent):
     # Given
-    space, role = space_with_role
+    space = space_with_role
     space.env = None
-    agent = role.agent
 
     # When
     space.remove_role(role)
@@ -366,11 +363,10 @@ def test_remove_role_removes_account_if_no_env(space_with_role):
     space.remove_account.assert_called_with(agent)
 
 
-def test_remove_role_doesnt_remove_account_if_env(space_with_role):
+def test_remove_role_doesnt_remove_account_if_env(space_with_role, role):
     # Given
-    env = Mock()
-    space, role = space_with_role
-    space.env = env
+    space = space_with_role
+    space.env = Mock()
 
     # When
     space.remove_role(role)
@@ -380,16 +376,15 @@ def test_remove_role_doesnt_remove_account_if_env(space_with_role):
 
 
 @pytest.fixture
-def space_with_roles(space):
+def roles(space):
     # Given
     roles = [Mock(id=i) for i in range(2)]
     space.roles = {role.id: role for role in roles}
-    return space, roles
+    return roles
 
 
-def test_find_all_roles_filter_by_pattern(space_with_roles):
+def test_find_all_roles_filter_by_pattern(space, roles):
     # Given
-    space, roles = space_with_roles
     roles[0].name = "other_role"
     roles[1].name = "fake_role"
 
@@ -400,9 +395,8 @@ def test_find_all_roles_filter_by_pattern(space_with_roles):
     assert list(result) == [roles[1]]
 
 
-def test_find_all_roles_returns_agent_list(space_with_roles):
+def test_find_all_roles_returns_agent_list(space, roles):
     # Given
-    space, roles = space_with_roles
     roles[0].name = "other_role"
     roles[1].name = "fake_role"
 
@@ -413,9 +407,8 @@ def test_find_all_roles_returns_agent_list(space_with_roles):
     assert isinstance(result, AgentList)
 
 
-def test_find_random_roles_filter_by_pattern(space_with_roles):
+def test_find_random_roles_filter_by_pattern(space, roles):
     # Given
-    space, roles = space_with_roles
     roles[0].name = "other_role"
     roles[1].name = "fake_role"
 
@@ -427,9 +420,8 @@ def test_find_random_roles_filter_by_pattern(space_with_roles):
 
 
 @pytest.mark.parametrize("size, expected", [(1, 1), (2, 2), (3, 2)])
-def test_find_random_roles_with_various_size(space_with_roles, size, expected):
+def test_find_random_roles_with_various_size(space, roles, size, expected):
     # Given
-    space, roles = space_with_roles
     roles[0].name = "fake_role"
     roles[1].name = "fake_role"
 
@@ -440,9 +432,8 @@ def test_find_random_roles_with_various_size(space_with_roles, size, expected):
     assert len(result) == expected
 
 
-def test_find_random_roles_returns_agent_list(space_with_roles):
+def test_find_random_roles_returns_agent_list(space, roles):
     # Given
-    space, roles = space_with_roles
     roles[0].name = "fake_role"
     roles[1].name = "fake_role"
 
@@ -459,18 +450,16 @@ def test_find_random_roles_returns_agent_list(space_with_roles):
 
 
 @pytest.fixture
-def space_with_edges(space):
+def space_with_edges(space, roles):
     # Given
-    roles = [Mock() for _ in range(3)]
     graph = space.graph
     graph.add_edge(roles[0], roles[1], variable=10)
-    graph.add_edge(roles[0], roles[2], variable=20)
-    return space, roles
+    return space
 
 
-def test_neighbors_returns_role_agent_iter(space_with_edges):
+def test_neighbors_returns_role_agent_iter(space_with_edges, roles):
     # Given
-    space, roles = space_with_edges
+    space = space_with_edges
 
     # When
     result = space.neighbors(roles[1])
@@ -480,12 +469,11 @@ def test_neighbors_returns_role_agent_iter(space_with_edges):
     assert list(result) == [roles[0]]
 
 
-def test_links_returns_edge_list(space_with_edges):
+def test_links_returns_edge_list(space_with_edges, roles):
     # Given
-    space, roles = space_with_edges
+    space = space_with_edges
     roles[0].name = "supplier"
     roles[1].name = "demander"
-    roles[2].name = "demander"
 
     # When
     result = space.links(roles[1])
@@ -509,10 +497,9 @@ def space_without_accounts(monkeypatch, space):
     return space
 
 
-def test_add_account_create_new_account(space_without_accounts):
+def test_add_account_create_new_account(space_without_accounts, agent):
     # Given
     space = space_without_accounts
-    agent = Mock(id=1)
 
     # When
     account = space.add_account(agent)
@@ -522,9 +509,8 @@ def test_add_account_create_new_account(space_without_accounts):
     assert account is FakeAccount.return_value
 
 
-def test_add_account_registers_new_account(space_without_accounts):
+def test_add_account_registers_new_account(space_without_accounts, agent):
     # Given
-    agent = Mock(id=1)
     space = space_without_accounts
 
     # When
@@ -535,9 +521,9 @@ def test_add_account_registers_new_account(space_without_accounts):
     assert account is agent.account
 
 
-def test_add_account_delegates_process_to_env(space_without_accounts):
+def test_add_account_delegates_process_to_env(space_without_accounts, agent):
     # Given
-    env, agent = Mock(), Mock(id=1)
+    env = Mock()
     space = space_without_accounts
     space.env = env
 
@@ -549,9 +535,9 @@ def test_add_account_delegates_process_to_env(space_without_accounts):
     assert env.add_account.return_value is account
 
 
-def test_add_account_doesnt_register_env_account(space_without_accounts):
+def test_add_account_doesnt_register_env_account(space_without_accounts, agent):
     # Given
-    env, agent = Mock(), Mock(id=1)
+    env = Mock()
     space = space_without_accounts
     space.env = env
 
@@ -563,34 +549,31 @@ def test_add_account_doesnt_register_env_account(space_without_accounts):
 
 
 @pytest.fixture
-def space_with_accounts(space):
+def accounts(space):
     # Given
     accounts = {}
     for i in range(2):
         account = dict(x=0)
         accounts[i] = account
     space.accounts = accounts
-    return space, accounts
+    return accounts
 
 
-def test_remove_account_unregisters_agent_account(space_with_accounts):
+def test_remove_account_unregisters_agent_account(space, accounts, agent):
     # Given
-    agent = Mock(id=1)
-    space, accounts = space_with_accounts
-    agent = Mock(id=1, account=accounts[1])
+    agent.account = accounts[1]
 
     # When
     space.remove_account(agent)
 
     # Then
-    assert agent.id not in accounts
+    assert agent.id not in space.accounts
     assert agent.account is None
 
 
-def test_transfer_stock_decr_source_account_stock(space_with_accounts):
+def test_transfer_stock_decr_source_account_stock(space, accounts):
     # Given
     source, target = 0, 1
-    space, accounts = space_with_accounts
 
     # When
     space.transfer_stock("x", source, target, 100)
@@ -599,10 +582,9 @@ def test_transfer_stock_decr_source_account_stock(space_with_accounts):
     assert accounts[source]["x"] == -100
 
 
-def test_transfer_stock_incr_target_account_stock(space_with_accounts):
+def test_transfer_stock_incr_target_account_stock(space, accounts):
     # Given
     source, target = 0, 1
-    space, accounts = space_with_accounts
 
     # When
     space.transfer_stock("x", source, target, 100)
@@ -611,10 +593,9 @@ def test_transfer_stock_incr_target_account_stock(space_with_accounts):
     assert accounts[target]["x"] == 100
 
 
-def test_transfer_stock_uses_env_method(space_with_accounts):
+def test_transfer_stock_uses_env_method(space):
     # Given
     env = Mock()
-    space, _ = space_with_accounts
     space.env = env
 
     # When
@@ -624,10 +605,9 @@ def test_transfer_stock_uses_env_method(space_with_accounts):
     env.transfer_stock.assert_called_with("x", 1, 2, 100)
 
 
-def test_get_stock_returns_identified_account_stock(space_with_accounts):
+def test_get_stock_returns_identified_account_stock(space, accounts):
     # Given
     account_id = 1
-    space, accounts = space_with_accounts
     accounts[account_id]["x"] = 100
 
     # When
@@ -637,10 +617,9 @@ def test_get_stock_returns_identified_account_stock(space_with_accounts):
     assert value == 100
 
 
-def test_get_stock_uses_env_method(space_with_accounts):
+def test_get_stock_uses_env_method(space):
     # Given
     env = Mock()
-    space, _ = space_with_accounts
     space.env = env
     account_id = 1
 
@@ -652,10 +631,9 @@ def test_get_stock_uses_env_method(space_with_accounts):
     assert value == env.get_stock.return_value
 
 
-def test_make_transaction_decr_source_account_flow(space_with_accounts):
+def test_make_transaction_decr_source_account_flow(space, accounts):
     # Given
     source, target = 0, 1
-    space, accounts = space_with_accounts
 
     # When
     space.make_transaction("x", source, target, 100)
@@ -664,10 +642,9 @@ def test_make_transaction_decr_source_account_flow(space_with_accounts):
     assert accounts[source]["x"] == -100
 
 
-def test_make_transaction_incr_target_account_flow(space_with_accounts):
+def test_make_transaction_incr_target_account_flow(space, accounts):
     # Given
     source, target = 0, 1
-    space, accounts = space_with_accounts
 
     # When
     space.make_transaction("x", source, target, 100)
@@ -676,11 +653,10 @@ def test_make_transaction_incr_target_account_flow(space_with_accounts):
     assert accounts[target]["x"] == 100
 
 
-def test_make_transaction_uses_available_env_method(space_with_accounts):
+def test_make_transaction_uses_available_env_method(space):
     # Given
     env = Mock()
     source, target = 0, 1
-    space, _ = space_with_accounts
     space.env = env
 
     # When
