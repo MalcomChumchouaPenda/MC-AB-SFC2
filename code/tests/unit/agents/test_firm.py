@@ -1060,6 +1060,7 @@ def test_exit_sets_all_roles_defaulted(firm_before_exit):
 def firm_before_record(firm, producer_role):
     # Given
     producer_role.phi = 1.5
+    producer_role.sales = 500
     return firm
 
 
@@ -1072,3 +1073,30 @@ def test_record_indicators_records_productivity(firm_before_record, producer_rol
 
     # Then
     assert firm.log["phi"][-1] == producer_role.phi
+
+
+def test_record_indicators_records_exports_if_tradable(
+    firm_before_record,
+    producer_role,
+):
+    # Given
+    firm = firm_before_record
+    firm.tradable = True
+
+    # When
+    firm.record_indicators()
+
+    # Then
+    assert firm.log["exports"][-1] == producer_role.sales
+
+
+def test_record_indicators_records_zero_exports_if_not_tradable(firm_before_record):
+    # Given
+    firm = firm_before_record
+    firm.tradable = False
+
+    # When
+    firm.record_indicators()
+
+    # Then
+    assert firm.log["exports"][-1] == 0

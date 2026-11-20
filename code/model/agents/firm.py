@@ -303,4 +303,6 @@ class Firm(EcoAgent):
 
     def record_indicators(self):
         producer_role = self.roles["producer"]
+        exports = 0 if not self.tradable else producer_role.sales
         self.record("phi", producer_role.phi)
+        self.record("exports", exports)
