@@ -96,3 +96,5 @@ class GoodsMarket(EcoSpace):
         for role in self.find_all_roles("producer"):
             role.sales = 0
             role.output = 0
+        for role in self.find_all_roles("consumer"):
+            role.purchases = 0

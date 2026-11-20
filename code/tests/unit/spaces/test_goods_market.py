@@ -428,6 +428,28 @@ def test_clear_transactions_resets_producer_output(market_with_producers, produc
         assert producer.output == 0
 
 
+@pytest.fixture
+def consumers(make_dlist):
+    # Given
+    consumers = [Mock(id=i) for i in range(2)]
+    consumers = make_dlist(consumers)
+    consumers.name = "consumer"
+    return consumers
+
+
+def test_clear_transactions_resets_consumer_purchases(market, consumers):
+    # Given
+    consumers.purchases = 100.0
+    market.roles.update({role.id: role for role in consumers})
+
+    # When
+    market.clear_transactions()
+
+    # Then
+    for consumer in consumers:
+        assert consumer.purchases == 0
+
+
 def test_update_state_recalc_average_price(market_with_producers, producers):
     # Given
     market = market_with_producers
