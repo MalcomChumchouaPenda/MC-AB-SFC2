@@ -632,22 +632,3 @@ def test_exit_sets_all_roles_defaulted(bank_before_exit):
 # ---------------------------------------------------
 #  OBSERVATION
 # ----------------------------------------------------
-
-
-@pytest.fixture
-def bank_before_record(bank, company_role, account):
-    # Given
-    account["equities"] = -200
-    company_role.get_dividends.return_value = 20
-    return bank
-
-
-def test_record_items_records_dividends(bank_before_record):
-    # Given
-    bank = bank_before_record
-
-    # When
-    bank.record_items()
-
-    # Then
-    assert bank.log["dividends"][-1] == -20

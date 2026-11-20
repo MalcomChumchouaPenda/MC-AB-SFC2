@@ -204,8 +204,3 @@ class Bank(EcoAgent):
     #
     # Observation
     #
-    def record_items(self):
-        super().record_items()
-        roles = self.roles
-        company_role = roles["company"]
-        self.record("dividends", -company_role.get_dividends())

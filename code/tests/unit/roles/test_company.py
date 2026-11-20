@@ -72,18 +72,6 @@ def test_exposes_net_worth_from_agent(role):
 # ----------------------------------------------------
 
 
-def test_get_dividends(role):
-    # Given
-    agent = role.agent
-    agent.account = {"dividends": -15.0}
-
-    # When
-    perceived = role.get_dividends()
-
-    # Then
-    assert perceived == 15.0
-
-
 def test_get_average_wage(role, env):
     # Given
     env.average_wage = 15.0
