@@ -38,6 +38,11 @@ def test_initializes_preference(role):
     assert role.preference is None
 
 
+def test_initializes_purchases(role):
+    # Then
+    assert role.purchases == 0.0
+
+
 # ---------------------------------------------------
 # PERCEPTION TESTS
 # ----------------------------------------------------

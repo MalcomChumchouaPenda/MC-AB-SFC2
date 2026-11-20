@@ -20,28 +20,29 @@ def test_inherits_from_eco_agent():
 def model(fake_model):
     # Given
     model = fake_model
-    model.p.initial_wage = 0.0
+    model.p.initial_wage = 5.0
     model.nprandom = Mock()
+    model.random = Mock()
     return model
 
 
-def test_initializes_labor_supply(model):
-    # When
-    household = Household(model)
+@pytest.fixture
+def household(model):
+    # Given
+    return Household(model)
 
+
+def test_initializes_labor_supply(household):
     # Then
     assert household.labor_supply == 1.0
 
 
-def test_initializes_prev_labor_sold(model):
-    # When
-    household = Household(model)
-
+def test_initializes_prev_labor_sold(household):
     # Then
     assert household.prev_labor_sold == 0.0
 
 
-def test_initializes_preference_randomly(model):
+def test_initializes_preference_randomly(household, model):
     # Given
     random = model.nprandom
     random.uniform.return_value = 0.4
@@ -54,69 +55,42 @@ def test_initializes_preference_randomly(model):
     assert household.preference == 0.4
 
 
-def test_initializes_reservation_wage(model):
-    # Given
-    model.p.initial_wage = 10
-
-    # When
-    household = Household(model)
-
+def test_initializes_reservation_wage(household, model):
     # Then
-    assert household.reservation_wage == 10
+    assert household.reservation_wage == model.p.initial_wage
 
 
-def test_initializes_expected_consumption(model):
-    # When
-    household = Household(model)
-
+def test_initializes_expected_consumption(household):
     # Then
     assert household.expected_consumption == 0
 
 
-def test_initializes_desired_consumption(model):
-    # When
-    household = Household(model)
-
+def test_initializes_desired_consumption(household):
     # Then
     assert household.desired_consumption == 0
 
 
-def test_initializes_desired_equity(model):
-    # When
-    household = Household(model)
-
+def test_initializes_desired_equity(household):
     # Then
     assert household.desired_equity == 0
 
 
-def test_initializes_desired_deposits(model):
-    # When
-    household = Household(model)
-
+def test_initializes_desired_deposits(household):
     # Then
     assert household.desired_deposits == 0
 
 
-def test_initializes_desired_investment_sector(model):
-    # When
-    household = Household(model)
-
+def test_initializes_desired_investment_sector(household):
     # Then
     assert household.desired_investment_sector is None
 
 
-def test_initializes_net_worth(model):
-    # When
-    household = Household(model)
-
+def test_initializes_net_worth(household):
     # Then
     assert household.net_worth == 0
 
 
-def test_initializes_incomes(model):
-    # When
-    household = Household(model)
-
+def test_initializes_incomes(household):
     # Then
     assert household.income == 0
     assert household.disposable_income == 0
@@ -128,108 +102,99 @@ def test_initializes_incomes(model):
 
 
 @pytest.fixture
-def household(model):
+def account(household):
     # Given
-    model.random = Mock()
-    model.nprandom = Mock()
-    return Household(model)
-
-
-@pytest.fixture
-def hh_with_roles_and_account(household):
-    # Given
-    roles = {}
     account = {}
-    household.roles = roles
     household.account = account
-    return household, roles, account
+    return account
 
 
 @pytest.fixture
-def hh_unemployed(hh_with_roles_and_account):
+def worker_role(household):
     # Given
-    household, roles, _ = hh_with_roles_and_account
+    role = Mock(labor_supply=1.0, labor_sold=0.0)
+    household.roles["worker"] = role
+    return role
+
+
+@pytest.fixture
+def unemployed(household, worker_role):
+    # Given
     household.p.psi = 6
     household.labor_supply = 1.0
     household.reservation_wage = 10
-    role = Mock(labor_supply=1.0, labor_sold=0.0)
-    role.find_employers.return_value = []
-    roles["worker"] = role
+    worker_role.find_employers.return_value = []
     return household
 
 
-def test_search_jobs_with_limited_size(hh_unemployed):
+def test_search_jobs_with_limited_size(unemployed, worker_role):
     # Given
-    household = hh_unemployed
-    role = household.roles["worker"]
+    household = unemployed
 
     # When
     household.search_jobs()
 
     # Then
-    role.find_employers.assert_called_with(household.p.psi)
+    worker_role.find_employers.assert_called_with(household.p.psi)
 
 
-def test_search_jobs_with_highest_wage(hh_unemployed):
+def test_search_jobs_with_highest_wage(unemployed, worker_role):
     # Given
+    household = unemployed
     employer1 = Mock(wage=15, labor_demand=1.0)
     employer2 = Mock(wage=20, labor_demand=1.0)
-    household = hh_unemployed
-    role = household.roles["worker"]
-    role.find_employers.return_value = [employer1, employer2]
+    worker_role.find_employers.return_value = [employer1, employer2]
 
     # When
     household.search_jobs()
 
     # Then
-    role.accept_job.assert_called_with(employer2, pytest.approx(1.0))
+    worker_role.accept_job.assert_called_with(employer2, pytest.approx(1.0))
 
 
-def test_search_jobs_with_sufficient_wage_offered(hh_unemployed):
+def test_search_jobs_with_sufficient_wage_offered(unemployed, worker_role):
     # Given
+    household = unemployed
     employer1 = Mock(wage=8, labor_demand=1.0)
     employer2 = Mock(wage=9, labor_demand=1.0)
-    household = hh_unemployed
-    role = household.roles["worker"]
-    role.find_employers.return_value = [employer1, employer2]
+    worker_role.find_employers.return_value = [employer1, employer2]
 
     # When
     household.search_jobs()
 
     # Then
-    role.accept_job.assert_not_called()
+    worker_role.accept_job.assert_not_called()
 
 
-def test_search_jobs_and_split_labor_between_employers(hh_unemployed):
+def test_search_jobs_and_split_labor_between_employers(unemployed, worker_role):
     # Given
+    household = unemployed
     employer1 = Mock(wage=20, labor_demand=0.4)
     employer2 = Mock(wage=15, labor_demand=0.6)
-    household = hh_unemployed
-    role = household.roles["worker"]
-    role.find_employers.return_value = [employer1, employer2]
+    household = unemployed
+    worker_role.find_employers.return_value = [employer1, employer2]
 
     # When
     household.search_jobs()
 
     # Then
-    role.accept_job.assert_any_call(employer1, pytest.approx(0.4))
-    role.accept_job.assert_any_call(employer2, pytest.approx(0.6))
+    worker_role.accept_job.assert_any_call(employer1, pytest.approx(0.4))
+    worker_role.accept_job.assert_any_call(employer2, pytest.approx(0.6))
 
 
-def test_search_jobs_while_labor_supply_is_remaining(hh_unemployed):
+def test_search_jobs_while_labor_supply_is_remaining(unemployed, worker_role):
     # Given
+    household = unemployed
     employer1 = Mock(wage=25, labor_demand=0.7)
     employer2 = Mock(wage=20, labor_demand=0.7)
-    household = hh_unemployed
-    role = household.roles["worker"]
-    role.labor_supply = 0.5
-    role.find_employers.return_value = [employer1, employer2]
+    worker_role.find_employers.return_value = [employer1, employer2]
+    worker_role.labor_supply = 0.5
 
     # When
     household.search_jobs()
 
     # Then
-    role.accept_job.assert_any_call(employer1, pytest.approx(0.5))
+    worker_role.accept_job.assert_any_call(employer1, pytest.approx(0.5))
 
 
 # ---------------------------------------------------
@@ -237,13 +202,10 @@ def test_search_jobs_while_labor_supply_is_remaining(hh_unemployed):
 # ----------------------------------------------------
 
 
-def test_calc_revision_probability(hh_with_roles_and_account):
+def test_calc_revision_probability(household, worker_role):
     # Given
-    role = Mock()
-    role.get_unemployment.return_value = 0.1
-    household, roles, _ = hh_with_roles_and_account
     household.p.upsilon = 1.0
-    roles["worker"] = role
+    worker_role.get_unemployment.return_value = 0.1
 
     # When
     result = household._calc_revision_probability()
@@ -253,9 +215,8 @@ def test_calc_revision_probability(hh_with_roles_and_account):
 
 
 @pytest.fixture
-def fully_employed_before(hh_with_roles_and_account):
+def fully_employed_before(household):
     # Given
-    household, *_ = hh_with_roles_and_account
     household.model.nprandom = Mock()
     household.p.delta = 0.9
     household.prev_labor_sold = 1.0
@@ -311,9 +272,8 @@ def test_can_choose_to_not_increases_reserv_wage(fully_employed_before):
 
 
 @pytest.fixture
-def part_employed_before(hh_with_roles_and_account):
+def part_employed_before(household):
     # Given
-    household, *_ = hh_with_roles_and_account
     household.model.nprandom = Mock()
     household.p.delta = 0.9
     household.prev_labor_sold = 0.5
@@ -374,21 +334,26 @@ def test_can_choose_to_not_decreases_reserv_wage(part_employed_before):
 
 
 @pytest.fixture
-def hh_as_taxpayer(hh_with_roles_and_account):
+def citizen_role(household):
     # Given
     role = Mock()
-    role.get_tax_rate.return_value = 0.2
-    household, roles, _ = hh_with_roles_and_account
-    roles["citizen"] = role
-    return household, role
+    household.roles["citizen"] = role
+    return role
 
 
-def test_calc_income(hh_as_taxpayer):
+@pytest.fixture
+def household_before_tax(household, citizen_role):
     # Given
-    household, _ = hh_as_taxpayer
-    household.account["wages"] = 110
-    household.account["dep_interests"] = 20
-    household.account["dividends"] = 30
+    citizen_role.get_tax_rate.return_value = 0.2
+    return household
+
+
+def test_calc_income(household_before_tax, account):
+    # Given
+    household = household_before_tax
+    account["wages"] = 110
+    account["dep_interests"] = 20
+    account["dividends"] = 30
 
     # When
     income = household._calc_income()
@@ -397,11 +362,11 @@ def test_calc_income(hh_as_taxpayer):
     assert income == 160
 
 
-def test_calc_disposable_income(hh_as_taxpayer):
+def test_calc_disposable_income(household_before_tax, account):
     # Given
-    household, _ = hh_as_taxpayer
+    household = household_before_tax
     household.income = 200
-    household.account["public_transfers"] = 50
+    account["public_transfers"] = 50
 
     # When
     disposable_income = household._calc_disposable_income()
@@ -410,9 +375,9 @@ def test_calc_disposable_income(hh_as_taxpayer):
     assert disposable_income == 210
 
 
-def test_pay_taxes_transfers_cash(hh_as_taxpayer):
+def test_pay_taxes_transfers_cash(household_before_tax, citizen_role):
     # Given
-    household, role = hh_as_taxpayer
+    household = household_before_tax
     household._calc_income = Mock(return_value=100)
     household._calc_disposable_income = Mock(return_value=110)
 
@@ -420,12 +385,12 @@ def test_pay_taxes_transfers_cash(hh_as_taxpayer):
     household.pay_taxes()
 
     # Then
-    role.pay_taxes.assert_called_with(20)
+    citizen_role.pay_taxes.assert_called_with(20)
 
 
-def test_pay_taxes_updates_indicators(hh_as_taxpayer):
+def test_pay_taxes_updates_indicators(household_before_tax):
     # Given
-    household, _ = hh_as_taxpayer
+    household = household_before_tax
     household._calc_income = Mock(return_value=100)
     household._calc_disposable_income = Mock(return_value=110)
 
@@ -442,9 +407,8 @@ def test_pay_taxes_updates_indicators(hh_as_taxpayer):
 # ----------------------------------------------------
 
 
-def test_calc_consumption_updates_choice(hh_with_roles_and_account):
+def test_calc_consumption_updates_choice(household, account):
     # Given
-    household, _, account = hh_with_roles_and_account
     household.p.cy = 0.8
     household.p.cd = 0.1
     household.disposable_income = 1000
@@ -459,21 +423,24 @@ def test_calc_consumption_updates_choice(hh_with_roles_and_account):
 
 
 @pytest.fixture
-def hh_as_specific_consumer(hh_with_roles_and_account):
+def any_consumer_role():
     # Given
-    consumer_role = Mock()
-    consumer_role.get_average_price.return_value = 1
-    consumer_role.find_suppliers.return_value = []
-    household, roles, account = hh_with_roles_and_account
+    role = Mock()
+    role.get_average_price.return_value = 1
+    role.find_suppliers.return_value = []
+    return role
+
+
+@pytest.fixture
+def household_before_any_cons(household, account):
+    # Given
     household.p.psi = 1
-    roles["citizen"] = Mock()
     account["cash"] = 1000
-    return household, consumer_role
+    return household
 
 
-def test_calc_supplier_score_with_salop_formula(hh_as_specific_consumer):
+def test_calc_supplier_score_with_salop_formula(household):
     # Given
-    household, _ = hh_as_specific_consumer
     household.p.beta = 1
     household.preference = 0
     supplier = Mock(variety=0.5, price=10)
@@ -486,12 +453,11 @@ def test_calc_supplier_score_with_salop_formula(hh_as_specific_consumer):
     assert score == (1 / expected_distance) * (20 / 10)
 
 
-def test_rank_suppliers_using_supplier_score(hh_as_specific_consumer):
+def test_rank_suppliers_using_supplier_score(household):
     # Given
-    method = lambda supplier, average_price: average_price / supplier.price
-    household, _ = hh_as_specific_consumer
-    household._calc_supplier_score = method
     suppliers = [Mock(price=i, variety=1) for i in range(1, 3)]
+    method = lambda supplier, average_price: average_price / supplier.price
+    household._calc_supplier_score = method
 
     # When
     ranked = household._rank_suppliers(suppliers, average_price=10)
@@ -501,113 +467,153 @@ def test_rank_suppliers_using_supplier_score(hh_as_specific_consumer):
     assert ranked[1].price == 2
 
 
-def test_consume_good_with_found_suppliers(hh_as_specific_consumer):
+def test_consume_good_with_found_suppliers(
+    household_before_any_cons,
+    any_consumer_role,
+):
     # Given
     found = [Mock(price=5, inventories=10) for _ in range(5)]
-    household, role = hh_as_specific_consumer
+    household = household_before_any_cons
     household.p.psi = 5
     household._rank_suppliers = Mock(return_value=found)
-    role.find_suppliers.return_value = found
-    role.get_average_price.return_value = 20
+    any_consumer_role.find_suppliers.return_value = found
+    any_consumer_role.get_average_price.return_value = 20
 
     # When
-    household._consume_good(role, 100)
+    household._consume_good(any_consumer_role, 100)
 
     # Then
-    role.find_suppliers.assert_called_with(5)
+    any_consumer_role.find_suppliers.assert_called_with(5)
     household._rank_suppliers.assert_any_call(found, average_price=20)
 
 
-def test_consume_good_with_ranked_suppliers(hh_as_specific_consumer):
+def test_consume_good_with_ranked_suppliers(
+    household_before_any_cons, any_consumer_role
+):
     # Given
     ranked = [Mock(price=5, inventories=10) for _ in range(2)]
-    household, role = hh_as_specific_consumer
+    household = household_before_any_cons
+    household.p.psi = 1
     household._rank_suppliers = Mock(return_value=ranked)
 
     # When
-    household._consume_good(role, 100)
+    household._consume_good(any_consumer_role, 100)
 
     # Then
-    role.buy_goods.assert_any_call(ranked[0], 10)
-    role.buy_goods.assert_any_call(ranked[1], 10)
-    assert role.buy_goods.call_count == 2
+    any_consumer_role.buy_goods.assert_any_call(ranked[0], 10)
+    any_consumer_role.buy_goods.assert_any_call(ranked[1], 10)
+    assert any_consumer_role.buy_goods.call_count == 2
 
 
-def test_consume_good_with_desired_consumption(hh_as_specific_consumer):
+def test_consume_good_with_desired_consumption(
+    household_before_any_cons,
+    any_consumer_role,
+):
     # Given
     ranked = [Mock(price=5, inventories=10) for _ in range(2)]
-    household, role = hh_as_specific_consumer
+    household = household_before_any_cons
+    household.p.psi = 1
     household._rank_suppliers = Mock(return_value=ranked)
 
     # When
-    household._consume_good(role, 50)
+    household._consume_good(any_consumer_role, 50)
 
     # Then
-    role.buy_goods.assert_any_call(ranked[0], 10)
-    assert role.buy_goods.call_count == 1
+    any_consumer_role.buy_goods.assert_any_call(ranked[0], 10)
+    assert any_consumer_role.buy_goods.call_count == 1
 
 
-def test_consume_good_with_supply_constraints(hh_as_specific_consumer):
+def test_consume_good_with_supply_constraints(
+    household_before_any_cons,
+    any_consumer_role,
+):
     # Given
     ranked = [Mock(price=5, inventories=5) for _ in range(2)]
-    household, role = hh_as_specific_consumer
+    household = household_before_any_cons
+    household.p.psi = 1
     household._rank_suppliers = Mock(return_value=ranked)
 
     # When
-    household._consume_good(role, 100)
+    household._consume_good(any_consumer_role, 100)
 
     # Then
-    role.buy_goods.assert_any_call(ranked[0], 5)
-    role.buy_goods.assert_any_call(ranked[1], 5)
-    assert role.buy_goods.call_count == 2
+    any_consumer_role.buy_goods.assert_any_call(ranked[0], 5)
+    any_consumer_role.buy_goods.assert_any_call(ranked[1], 5)
+    assert any_consumer_role.buy_goods.call_count == 2
 
 
-def test_consume_good_with_monetary_constraints(hh_as_specific_consumer):
+def test_consume_good_with_monetary_constraints(
+    household_before_any_cons,
+    any_consumer_role,
+):
     # Given
     ranked = [Mock(price=5, inventories=10) for _ in range(2)]
-    household, consumer_role = hh_as_specific_consumer
-    household._rank_suppliers = Mock(return_value=ranked)
+    household = household_before_any_cons
     household.account["cash"] = 50
+    household._rank_suppliers = Mock(return_value=ranked)
 
     # When
-    household._consume_good(consumer_role, 100)
+    household._consume_good(any_consumer_role, 100)
 
     # Then
-    consumer_role.buy_goods.assert_any_call(ranked[0], 10)
-    assert consumer_role.buy_goods.call_count == 1
+    any_consumer_role.buy_goods.assert_any_call(ranked[0], 10)
+    assert any_consumer_role.buy_goods.call_count == 1
 
 
 @pytest.fixture
-def hh_as_general_consumer(hh_with_roles_and_account):
+def trad_consumer_role(household):
     # Given
-    household, roles, account = hh_with_roles_and_account
+    role = Mock()
+    household.roles["trad_consumer"] = role
+    return role
+
+
+@pytest.fixture
+def non_trad_consumer_role(household):
+    # Given
+    role = Mock()
+    household.roles["non_trad_consumer"] = role
+    return role
+
+
+@pytest.fixture
+def household_before_all_cons(
+    household,
+    account,
+    trad_consumer_role,
+    non_trad_consumer_role,
+):
+    # Given
+    _ = trad_consumer_role
+    _ = non_trad_consumer_role
     household.p.cT = 0.6
     household.desired_consumption = 100
     household._withdraw_deposits = Mock()
     household._consume_good = Mock()
-    roles["trad_consumer"] = Mock()
-    roles["non_trad_consumer"] = Mock()
-    roles["citizen"] = Mock()
     account["cash"] = 100
-    return household, roles
+    return household
 
 
-def test_consume_each_good_type(hh_as_general_consumer):
+def test_consume_each_good_type(
+    household_before_all_cons,
+    trad_consumer_role,
+    non_trad_consumer_role,
+):
     # Given
-    household, roles = hh_as_general_consumer
+    household = household_before_all_cons
 
     # When
     household.consume()
 
     # Then
-    household._consume_good.assert_any_call(roles["trad_consumer"], 60.0)
-    household._consume_good.assert_any_call(roles["non_trad_consumer"], 40.0)
+    household._consume_good.assert_any_call(trad_consumer_role, 60.0)
+    household._consume_good.assert_any_call(non_trad_consumer_role, 40.0)
 
 
-def test_consume_randomizes_entry_order(hh_as_general_consumer):
+def test_consume_randomizes_entry_order(household_before_all_cons):
     # Given
     entry_order = [("trad_consumer", 0.6), ("non_trad_consumer", 0.4)]
-    household, _ = hh_as_general_consumer
+    household = household_before_all_cons
     random = household.model.random
 
     # When
@@ -617,9 +623,9 @@ def test_consume_randomizes_entry_order(hh_as_general_consumer):
     random.shuffle.assert_called_with(entry_order)
 
 
-def test_consume_withdraws_needed_deposits(hh_as_general_consumer):
+def test_consume_withdraws_needed_deposits(household_before_all_cons):
     # Given
-    household, _ = hh_as_general_consumer
+    household = household_before_all_cons
     household.account["cash"] = 40
 
     # When
@@ -635,18 +641,24 @@ def test_consume_withdraws_needed_deposits(hh_as_general_consumer):
 
 
 @pytest.fixture
-def before_allocation(hh_with_roles_and_account):
+def depositor_role(household):
     # Given
-    household, roles, account = hh_with_roles_and_account
+    role = Mock()
+    household.roles["depositor"] = role
+    return role
+
+
+@pytest.fixture
+def household_before_allocation(household, account, citizen_role):
+    # Given
+    _ = citizen_role
     account["cash"] = 1000
-    roles["citizen"] = Mock()
-    roles["depositor"] = Mock()
-    return household, roles
+    return household
 
 
-def test_calc_net_worth(before_allocation):
+def test_calc_net_worth(household_before_allocation):
     # Given
-    household, _ = before_allocation
+    household = household_before_allocation
     household.account["deposits"] = 200
     household.account["equities"] = 300
     household.account["cash"] = 500
@@ -658,9 +670,9 @@ def test_calc_net_worth(before_allocation):
     assert household.net_worth == 1000
 
 
-def test_calc_expected_net_worth(before_allocation):
+def test_calc_expected_net_worth(household_before_allocation):
     # Given
-    household, _ = before_allocation
+    household = household_before_allocation
     household.net_worth = 1000
     household.disposable_income = 300
     household.expected_consumption = 200
@@ -672,30 +684,38 @@ def test_calc_expected_net_worth(before_allocation):
     assert expected_worth == 1100
 
 
-def test_calc_liquidity_pref_with_deposit_bank_rate(before_allocation):
+def test_calc_liquidity_pref_with_deposit_bank_rate(
+    household_before_allocation,
+    citizen_role,
+    depositor_role,
+):
     # Given
-    household, roles = before_allocation
+    household = household_before_allocation
     household.account["dividends"] = 10
     household.account["equities"] = 100
     household.p.lambda_ = 0.6
-    roles["citizen"].get_prob_failure.return_value = 0.10
-    roles["depositor"].get_deposit_rate.return_value = 0.05
+    citizen_role.get_prob_failure.return_value = 0.10
+    depositor_role.get_deposit_rate.return_value = 0.05
 
     # When
     household._calc_liquidity_preference()
 
     # Then
-    roles["depositor"].get_deposit_rate.assert_called_with()
+    depositor_role.get_deposit_rate.assert_called_with()
 
 
-def test_calc_liquidity_pref_when_equity_is_more_profitable(before_allocation):
+def test_calc_liquidity_pref_when_equity_is_more_profitable(
+    household_before_allocation,
+    citizen_role,
+    depositor_role,
+):
     # Given
-    household, roles = before_allocation
+    household = household_before_allocation
     household.account["dividends"] = 10
     household.account["equities"] = 100
     household.p.lambda_ = 0.6
-    roles["citizen"].get_prob_failure.return_value = 0.10
-    roles["depositor"].get_deposit_rate.return_value = 0.05
+    citizen_role.get_prob_failure.return_value = 0.10
+    depositor_role.get_deposit_rate.return_value = 0.05
     expected = 0.6 * math.exp(((10 * (1 - 0.10)) / 100) - 0.05)
 
     # When
@@ -705,14 +725,18 @@ def test_calc_liquidity_pref_when_equity_is_more_profitable(before_allocation):
     assert lp == pytest.approx(expected)
 
 
-def test_calc_liquidity_pref_when_equity_is_less_profitable(before_allocation):
+def test_calc_liquidity_pref_when_equity_is_less_profitable(
+    household_before_allocation,
+    citizen_role,
+    depositor_role,
+):
     # Given
-    household, roles = before_allocation
+    household = household_before_allocation
     household.account["dividends"] = 2
     household.account["equities"] = 100
     household.p.lambda_ = 0.7
-    roles["citizen"].get_prob_failure.return_value = 0.10
-    roles["depositor"].get_deposit_rate.return_value = 0.05
+    citizen_role.get_prob_failure.return_value = 0.10
+    depositor_role.get_deposit_rate.return_value = 0.05
 
     # When
     lp = household._calc_liquidity_preference()
@@ -721,14 +745,18 @@ def test_calc_liquidity_pref_when_equity_is_less_profitable(before_allocation):
     assert lp == 0.7
 
 
-def test_calc_liquidity_preference_when_no_equity(before_allocation):
+def test_calc_liquidity_preference_when_no_equity(
+    household_before_allocation,
+    citizen_role,
+    depositor_role,
+):
     # Given
-    household, roles = before_allocation
+    household = household_before_allocation
     household.account["dividends"] = 0
     household.account["equities"] = 0
     household.p.lambda_ = 0.8
-    roles["citizen"].get_prob_failure.return_value = 0.10
-    roles["depositor"].get_deposit_rate.return_value = 0.05
+    citizen_role.get_prob_failure.return_value = 0.10
+    depositor_role.get_deposit_rate.return_value = 0.05
 
     # When
     lp = household._calc_liquidity_preference()
@@ -737,9 +765,9 @@ def test_calc_liquidity_preference_when_no_equity(before_allocation):
     assert lp == 0.8
 
 
-def test_choose_portfolio_calc_net_worth(before_allocation):
+def test_choose_portfolio_calc_net_worth(household_before_allocation):
     # Given
-    household, _ = before_allocation
+    household = household_before_allocation
     household.account["equities"] = 80
     household._calc_liquidity_preference = Mock(return_value=0.80)
     household._calc_expected_net_worth = Mock(return_value=100)
@@ -752,9 +780,9 @@ def test_choose_portfolio_calc_net_worth(before_allocation):
     household._calc_net_worth.assert_called_once_with()
 
 
-def test_choose_portfolio_updates_desired_assets(before_allocation):
+def test_choose_portfolio_updates_desired_assets(household_before_allocation):
     # Given
-    household, _ = before_allocation
+    household = household_before_allocation
     household.account["equities"] = 20
     household._calc_liquidity_preference = Mock(return_value=0.40)
     household._calc_expected_net_worth = Mock(return_value=100)
@@ -768,9 +796,9 @@ def test_choose_portfolio_updates_desired_assets(before_allocation):
     assert household.desired_deposits == 60
 
 
-def test_choose_portfolio_preserves_existing_equity(before_allocation):
+def test_choose_portfolio_preserves_existing_equity(household_before_allocation):
     # Given
-    household, _ = before_allocation
+    household = household_before_allocation
     household.account["equities"] = 80
     household._calc_liquidity_preference = Mock(return_value=0.80)
     household._calc_expected_net_worth = Mock(return_value=100)
@@ -784,21 +812,25 @@ def test_choose_portfolio_preserves_existing_equity(before_allocation):
 
 
 @pytest.mark.parametrize("cash, expected", [(0, 0), (50, 50), (100, 80)])
-def test_choose_portfolio_exposes_investment(before_allocation, cash, expected):
+def test_choose_portfolio_exposes_investment(
+    household_before_allocation,
+    citizen_role,
+    cash,
+    expected,
+):
     # Given
-    household, roles = before_allocation
+    household = household_before_allocation
     household.account["equities"] = 80
     household.account["cash"] = cash
     household._calc_liquidity_preference = Mock(return_value=0.80)
     household._calc_expected_net_worth = Mock(return_value=100)
     household._calc_net_worth = Mock()
-    role = roles["citizen"]
 
     # When
     household.choose_portfolio()
 
     # Then
-    assert role.desired_investment == expected
+    assert citizen_role.desired_investment == expected
 
 
 # ---------------------------------------------------
@@ -807,9 +839,9 @@ def test_choose_portfolio_exposes_investment(before_allocation, cash, expected):
 
 
 @pytest.fixture
-def before_investment(before_allocation):
+def before_investment(household_before_allocation):
     # Given
-    household, _ = before_allocation
+    household = household_before_allocation
     household._choose_investment_sector = Mock()
     household._calc_initial_equity = Mock()
     household._collect_equity_shares = Mock(return_value=None)
@@ -947,23 +979,26 @@ def test_invest_equity_doesnt_make_deposits_if_no_banks(before_investment):
 
 
 @pytest.fixture
-def hh_as_investor(before_allocation):
+def household_after_allocation(household_before_allocation):
     # Given
-    role = Mock()
-    household, roles = before_allocation
+    household = household_before_allocation
     household.model.nprandom = Mock()
-    roles["citizen"] = role
-    return household, role
+    return household
 
 
 @pytest.mark.parametrize("ratio1, ratio2", [(0.2, 0.5), (0.5, 0.2)])
-def test_choose_investment_sector_returns_bank_sector(hh_as_investor, ratio1, ratio2):
+def test_choose_investment_sector_returns_bank_sector(
+    household_after_allocation,
+    citizen_role,
+    ratio1,
+    ratio2,
+):
     # Given
-    household, role = hh_as_investor
+    household = household_after_allocation
     household.p.cT = 0.6
     household.p.eta = 0.3
-    role.get_bank_number_ratio.return_value = ratio1
-    role.get_bank_equity_ratio.return_value = ratio2
+    citizen_role.get_bank_number_ratio.return_value = ratio1
+    citizen_role.get_bank_equity_ratio.return_value = ratio2
 
     # When
     sector = household._choose_investment_sector()
@@ -972,13 +1007,16 @@ def test_choose_investment_sector_returns_bank_sector(hh_as_investor, ratio1, ra
     assert sector == "B"
 
 
-def test_choose_investment_sector_returns_random_firm_sector(hh_as_investor):
+def test_choose_investment_sector_returns_random_firm_sector(
+    household_after_allocation,
+    citizen_role,
+):
     # Given
-    household, role = hh_as_investor
+    household = household_after_allocation
     household.p.cT = 0.6
     household.p.eta = 0.3
-    role.get_bank_number_ratio.return_value = 0.6
-    role.get_bank_equity_ratio.return_value = 0.6
+    citizen_role.get_bank_number_ratio.return_value = 0.6
+    citizen_role.get_bank_equity_ratio.return_value = 0.6
     random = household.model.nprandom
 
     # When
@@ -990,13 +1028,17 @@ def test_choose_investment_sector_returns_random_firm_sector(hh_as_investor):
 
 
 @pytest.mark.parametrize("ratio", [0.2, 0.5, 0.6])
-def test_choose_investment_sector_registers_desired_sector(hh_as_investor, ratio):
+def test_choose_investment_sector_registers_desired_sector(
+    household_after_allocation,
+    citizen_role,
+    ratio,
+):
     # Given
-    household, role = hh_as_investor
+    household = household_after_allocation
     household.p.cT = 0.6
     household.p.eta = 0.3
-    role.get_bank_number_ratio.return_value = ratio
-    role.get_bank_equity_ratio.return_value = ratio
+    citizen_role.get_bank_number_ratio.return_value = ratio
+    citizen_role.get_bank_equity_ratio.return_value = ratio
 
     # When
     sector = household._choose_investment_sector()
@@ -1005,29 +1047,35 @@ def test_choose_investment_sector_registers_desired_sector(hh_as_investor, ratio
     assert household.desired_investment_sector == sector
 
 
-def test_calc_initial_equity_chooses_equity_between_current_range(hh_as_investor):
+def test_calc_initial_equity_chooses_equity_between_current_range(
+    household_after_allocation,
+    citizen_role,
+):
     # Given
-    household, role = hh_as_investor
+    household = household_after_allocation
     household.p.sigma = 1.0
     random = household.model.nprandom
-    role.get_equity_range.return_value = (100, 500)
+    citizen_role.get_equity_range.return_value = (100, 500)
 
     # When
     equity = household._calc_initial_equity("ANY")
 
     # Then
-    role.get_equity_range.assert_called_with("ANY")
+    citizen_role.get_equity_range.assert_called_with("ANY")
     random.uniform.assert_called_once_with(100, 500)
     assert equity == random.uniform.return_value
 
 
-def test_calc_initial_equity_returns_initial_equity_if_no_current_range(hh_as_investor):
+def test_calc_initial_equity_returns_initial_equity_if_no_current_range(
+    household_after_allocation,
+    citizen_role,
+):
     # Given
-    household, role = hh_as_investor
+    household = household_after_allocation
     household.p.sigma = 1.0
     household.p.initial_equity = 1000
     random = household.model.nprandom
-    role.get_equity_range.return_value = None
+    citizen_role.get_equity_range.return_value = None
 
     # When
     equity = household._calc_initial_equity("ANY")
@@ -1037,65 +1085,75 @@ def test_calc_initial_equity_returns_initial_equity_if_no_current_range(hh_as_in
     assert equity == household.p.initial_equity
 
 
-def test_calc_initial_equity_includes_median_firm_size_for_bank_sector(hh_as_investor):
+def test_calc_initial_equity_includes_median_firm_size_for_bank_sector(
+    household_after_allocation,
+    citizen_role,
+):
     # Given
-    household, role = hh_as_investor
+    household = household_after_allocation
     household.p.sigma = 0.5
     random = household.model.nprandom
-    role.get_median_firm_size.return_value = 500
-    role.get_equity_range.return_value = (100, 500)
+    citizen_role.get_median_firm_size.return_value = 500
+    citizen_role.get_equity_range.return_value = (100, 500)
 
     # When
     equity = household._calc_initial_equity("B")
 
     # Then
-    role.get_median_firm_size.assert_called_once_with()
+    citizen_role.get_median_firm_size.assert_called_once_with()
     random.uniform.assert_called_once_with(250, 500)
     assert equity == random.uniform.return_value
 
 
-def test_calc_initial_equity_uses_median_firm_size_if_no_bank_sector(hh_as_investor):
+def test_calc_initial_equity_uses_median_firm_size_if_no_bank_sector(
+    household_after_allocation,
+    citizen_role,
+):
     # Given
-    household, role = hh_as_investor
+    household = household_after_allocation
     household.p.sigma = 0.5
     household.p.initial_equity = 1000
     random = household.model.nprandom
-    role.get_median_firm_size.return_value = 500
-    role.get_equity_range.return_value = None
+    citizen_role.get_median_firm_size.return_value = 500
+    citizen_role.get_equity_range.return_value = None
 
     # When
     equity = household._calc_initial_equity("B")
 
     # Then
-    role.get_median_firm_size.assert_called_once_with()
+    citizen_role.get_median_firm_size.assert_called_once_with()
     random.uniform.assert_called_once_with(250, 1000)
     assert equity == random.uniform.return_value
 
 
 @pytest.fixture
-def investors(hh_as_investor):
+def investors(citizen_role):
     # Given
     investors = [Mock(desired_investment=10, company_number=i) for i in range(2)]
-    _, role = hh_as_investor
-    role.desired_investment = 10
-    role.find_investors.return_value = investors
+    citizen_role.desired_investment = 10
+    citizen_role.find_investors.return_value = investors
     return investors
 
 
 @pytest.fixture
-def before_equity_collection(hh_as_investor, investors):
+def household_before_invest(household_after_allocation, citizen_role, investors):
     # Given
-    household, role = hh_as_investor
+    _ = investors
+    citizen_role.get_average_wage.return_value = 15.0
+    household = household_after_allocation
     household.p.omega = 0.1
     household.p.psi = 5
-    role.get_average_wage.return_value = 15.0
-    return household, role, investors
+    return household
 
 
-def test_collect_equity_shares_builds_and_returns_shares(before_equity_collection):
+def test_collect_equity_shares_builds_and_returns_shares(
+    household_before_invest,
+    citizen_role,
+    investors,
+):
     # Given
-    household, role, investors = before_equity_collection
-    founders = [role] + investors
+    household = household_before_invest
+    founders = [citizen_role] + investors
 
     # When
     result = household._collect_equity_shares(30)
@@ -1104,10 +1162,14 @@ def test_collect_equity_shares_builds_and_returns_shares(before_equity_collectio
     assert result == [{"citizen": founder, "amount": 10} for founder in founders]
 
 
-def test_collect_equity_shares_with_an_minimum_equity_target(before_equity_collection):
+def test_collect_equity_shares_with_an_minimum_equity_target(
+    household_before_invest,
+    citizen_role,
+    investors,
+):
     # Given
-    household, role, investors = before_equity_collection
-    founders = [role, investors[0]]
+    household = household_before_invest
+    founders = [citizen_role, investors[0]]
 
     # When
     result = household._collect_equity_shares(15.0)
@@ -1116,9 +1178,9 @@ def test_collect_equity_shares_with_an_minimum_equity_target(before_equity_colle
     assert result == [{"citizen": founder, "amount": 10} for founder in founders]
 
 
-def test_collect_equity_shares_returns_none_if_low_funds(before_equity_collection):
+def test_collect_equity_shares_returns_none_if_low_funds(household_before_invest):
     # Given
-    household, *_ = before_equity_collection
+    household = household_before_invest
 
     # When
     result = household._collect_equity_shares(100.0)
@@ -1127,12 +1189,16 @@ def test_collect_equity_shares_returns_none_if_low_funds(before_equity_collectio
     assert result is None
 
 
-def test_collect_equity_shares_with_minimum_level_of_equity(before_equity_collection):
+def test_collect_equity_shares_with_minimum_level_of_equity(
+    household_before_invest,
+    citizen_role,
+    investors,
+):
     # Given
-    household, role, investors = before_equity_collection
+    household = household_before_invest
     ineligible, eligible = investors
     ineligible.desired_investment = 0.5
-    founders = [role, eligible]
+    founders = [citizen_role, eligible]
 
     # When
     result = household._collect_equity_shares(20)
@@ -1141,12 +1207,16 @@ def test_collect_equity_shares_with_minimum_level_of_equity(before_equity_collec
     assert result == [{"citizen": founder, "amount": 10} for founder in founders]
 
 
-def test_collect_equity_shares_with_maximum_company_number(before_equity_collection):
+def test_collect_equity_shares_with_maximum_company_number(
+    household_before_invest,
+    citizen_role,
+    investors,
+):
     # Given
-    household, role, investors = before_equity_collection
+    household = household_before_invest
     ineligible, eligible = investors
     ineligible.company_number = 6
-    founders = [role, eligible]
+    founders = [citizen_role, eligible]
 
     # When
     result = household._collect_equity_shares(20)
@@ -1159,11 +1229,11 @@ FakeFirm = Mock()
 
 
 @pytest.fixture
-def before_firm_creation(monkeypatch, hh_as_investor):
+def before_firm_creation(monkeypatch, household_after_allocation):
     # Given
     monkeypatch.setattr("model.agents.household.Firm", FakeFirm)
     equity_size = 100
-    household, _ = hh_as_investor
+    household = household_after_allocation
     household.model.union = Mock()
     household.model.firms = []
     household._resize_new_firm = Mock()
@@ -1250,20 +1320,20 @@ def test_create_company_appends_to_model_firms(before_firm_creation):
 
 
 @pytest.fixture
-def before_firm_resize(hh_as_investor):
+def before_firm_resize(household_after_allocation, citizen_role):
     # Given
     firm = Mock()
     firm.roles = {"employer": Mock(), "producer": Mock()}
-    household, role = hh_as_investor
+    household = household_after_allocation
     household.p.initial_wage = 1.0
     household.p.initial_phi = 1.0
-    role.get_phi_range.return_value = [0, 0]
-    role.get_price_range.return_value = [0, 0]
-    role.get_sales_range.return_value = [0, 0]
-    role.get_wage_range.return_value = [0, 0]
+    citizen_role.get_phi_range.return_value = [0, 0]
+    citizen_role.get_price_range.return_value = [0, 0]
+    citizen_role.get_sales_range.return_value = [0, 0]
+    citizen_role.get_wage_range.return_value = [0, 0]
     random = household.model.nprandom
     random.uniform = lambda a, b: (a + b) / 2
-    return household, role, firm
+    return household, citizen_role, firm
 
 
 def test_resize_new_firm_sets_variety_randomly(before_firm_resize):
@@ -1396,11 +1466,11 @@ FakeBank = Mock()
 
 
 @pytest.fixture
-def before_bank_creation(monkeypatch, hh_as_investor):
+def before_bank_creation(monkeypatch, household_after_allocation):
     # Given
     monkeypatch.setattr("model.agents.household.Bank", FakeBank)
     equity_size = 150
-    household, _ = hh_as_investor
+    household = household_after_allocation
     household.model.union = Mock()
     household.model.banks = []
     return household, equity_size
@@ -1458,10 +1528,10 @@ def test_create_company_appends_to_model_banks(before_bank_creation):
     assert bank in household.model.banks
 
 
-def test_fund_company_with_each_share(hh_as_investor):
+def test_fund_company_with_each_share(household_after_allocation):
     # Given
     founder = Mock()
-    household, _ = hh_as_investor
+    household = household_after_allocation
     shares = [{"citizen": founder, "amount": 100}]
 
     # When
@@ -1483,56 +1553,66 @@ def banks(make_dlist):
 
 
 @pytest.fixture
-def before_bank_choice(hh_with_roles_and_account, banks):
+def household_before_bank_choice(household, model, depositor_role, banks):
     # Given
-    role = Mock()
-    role.find_deposits.return_value = []
-    role.find_deposit_banks.return_value = banks
-    household, roles, _ = hh_with_roles_and_account
-    household.model.random.choice.side_effect = lambda x: x[-1]
-    roles["depositor"] = role
-    return household, role, banks
+    depositor_role.find_deposits.return_value = []
+    depositor_role.find_deposit_banks.return_value = banks
+    model.random.choice.side_effect = lambda x: x[-1]
+    return household
 
 
-def test_choose_deposit_bank_leave_old_deposit_bank(before_bank_choice):
+def test_choose_deposit_bank_leave_old_deposit_bank(
+    household_before_bank_choice,
+    depositor_role,
+):
     # Given
     deposit = {"deposit_bank": Mock(id=4), " amount": 100}
-    household, role, _ = before_bank_choice
-    role.find_deposits.return_value = [deposit]
+    household = household_before_bank_choice
+    depositor_role.find_deposits.return_value = [deposit]
 
     # When
     household._choose_deposit_bank()
 
     # Then
-    role.leave_deposit_bank.assert_called_once_with(4)
+    depositor_role.leave_deposit_bank.assert_called_once_with(4)
 
 
-def test_choose_deposit_bank_join_new_deposit_bank(before_bank_choice):
+def test_choose_deposit_bank_join_new_deposit_bank(
+    household_before_bank_choice,
+    depositor_role,
+    banks,
+):
     # Given
-    household, role, banks = before_bank_choice
+    household = household_before_bank_choice
 
     # When
     household._choose_deposit_bank()
 
     # Then
-    role.join_deposit_bank.assert_called_once_with(banks[-1].id)
+    depositor_role.join_deposit_bank.assert_called_once_with(banks[-1].id)
 
 
-def test_choose_deposit_bank_doesnt_join_defaulted_bank(before_bank_choice):
+def test_choose_deposit_bank_doesnt_join_defaulted_bank(
+    household_before_bank_choice,
+    depositor_role,
+    banks,
+):
     # Given
-    household, role, banks = before_bank_choice
+    household = household_before_bank_choice
     banks.defaulted = True
 
     # When
     household._choose_deposit_bank()
 
     # Then
-    role.join_deposit_bank.assert_not_called()
+    depositor_role.join_deposit_bank.assert_not_called()
 
 
-def test_choose_deposit_bank_join_returns_choice_id(before_bank_choice):
+def test_choose_deposit_bank_join_returns_choice_id(
+    household_before_bank_choice, banks
+):
     # Given
-    household, _, banks = before_bank_choice
+    household = household_before_bank_choice
 
     # When
     bank_id = household._choose_deposit_bank()
@@ -1541,21 +1621,10 @@ def test_choose_deposit_bank_join_returns_choice_id(before_bank_choice):
     assert bank_id == banks[-1].id
 
 
-@pytest.fixture
-def before_deposits(hh_with_roles_and_account):
-    # Given
-    household, roles, _ = hh_with_roles_and_account
-    roles["depositor"] = Mock()
-    roles["citizen"] = Mock()
-    return household, roles
-
-
-def test_make_deposits_with_residual_cash(before_deposits):
+def test_make_deposits_with_residual_cash(household, account, depositor_role):
     # Given
     bank_id = 2
-    household, roles = before_deposits
-    household.account["cash"] = 500
-    depositor_role = roles["depositor"]
+    account["cash"] = 500
 
     # When
     household._make_deposits(bank_id)
@@ -1565,18 +1634,21 @@ def test_make_deposits_with_residual_cash(before_deposits):
 
 
 @pytest.mark.parametrize("target, expected", [(50, 50), (150, 100)])
-def test_withdraw_deposits_finds_and_uses_deposits(before_deposits, target, expected):
+def test_withdraw_deposits_finds_and_uses_deposits(
+    household,
+    depositor_role,
+    target,
+    expected,
+):
     # Given
     deposit = {"deposit_bank": Mock(id=4), "amount": 100}
-    household, roles = before_deposits
-    role = roles["depositor"]
-    role.find_deposits.return_value = [deposit]
+    depositor_role.find_deposits.return_value = [deposit]
 
     # When
     household._withdraw_deposits(target)
 
     # Then
-    role.withdraw_deposits.assert_called_once_with(4, expected)
+    depositor_role.withdraw_deposits.assert_called_once_with(4, expected)
 
 
 # ---------------------------------------------------
@@ -1584,19 +1656,38 @@ def test_withdraw_deposits_finds_and_uses_deposits(before_deposits, target, expe
 # ----------------------------------------------------
 
 
-def test_update_labor_history_sets_prev_labor_sold(hh_with_roles_and_account):
+def test_update_labor_history_sets_prev_labor_sold(household, worker_role):
     # Given
-    role = Mock(labor_sold=0.9)
-    household, roles, _ = hh_with_roles_and_account
-    roles["worker"] = role
+    worker_role.labor_sold = 0.9
 
     # When
     household.update_labor_history()
 
     # Then
-    assert household.prev_labor_sold == role.labor_sold
+    assert household.prev_labor_sold == worker_role.labor_sold
 
 
 # ---------------------------------------------------
 #  OBSERVATION
 # ----------------------------------------------------
+
+
+@pytest.fixture
+def household_before_record(household, trad_consumer_role, non_trad_consumer_role):
+    # Given
+    trad_consumer_role.purchases = 100
+    non_trad_consumer_role.purchases = 200
+    return household
+
+
+def test_record_indicators_records_exports_if_tradable(
+    household_before_record, trad_consumer_role
+):
+    # Given
+    household = household_before_record
+
+    # When
+    household.record_indicators()
+
+    # Then
+    assert household.log["imports"][-1] == trad_consumer_role.purchases

@@ -325,3 +325,7 @@ class Household(EcoAgent):
     #
     # Observation
     #
+
+    def record_indicators(self):
+        roles = self.roles
+        self.record("imports", roles["trad_consumer"].purchases)

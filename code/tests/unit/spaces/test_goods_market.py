@@ -178,7 +178,7 @@ def test_add_firm_doesnt_add_role_for_foreigners_if_non_tradable(local_market):
 @pytest.fixture
 def consumer():
     # Given
-    return Mock()
+    return Mock(purchases=0)
 
 
 @pytest.fixture
@@ -231,7 +231,11 @@ def test_buy_goods_decrease_inventories(market_before_transact, consumer, produc
     assert producer.inventories == 95.0
 
 
-def test_buy_goods_increases_sales(market_before_transact, consumer, producer):
+def test_buy_goods_increases_producer_sales(
+    market_before_transact,
+    consumer,
+    producer,
+):
     # Given
     market = market_before_transact
 
@@ -240,6 +244,21 @@ def test_buy_goods_increases_sales(market_before_transact, consumer, producer):
 
     # Then
     assert producer.sales == 50.0
+
+
+def test_buy_goods_increases_consumer_purchases(
+    market_before_transact,
+    consumer,
+    producer,
+):
+    # Given
+    market = market_before_transact
+
+    # When
+    market.buy_goods(consumer, producer, 5)
+
+    # Then
+    assert consumer.purchases == 50.0
 
 
 # ---------------------------------------------------

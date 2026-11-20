@@ -6,6 +6,7 @@ class Consumer(EcoRole):
     def __init__(self, agent, env, prefix=""):
         super().__init__(agent, env, prefix=prefix)
         self.preference = None
+        self.purchases = 0.0
 
     #
     # perception
