@@ -212,5 +212,7 @@ class Country(EcoSpace):
     # Observation
     #
     def record_indicators(self):
+        spaces = self.spaces
         self.record("gdp")
         self.record("inflation")
+        self.record("unemployment", spaces["labor_market"].unemployment)

@@ -1054,28 +1054,40 @@ def country_before_record(country):
     # Given
     country.gdp = 100
     country.inflation = 0.3
+    country.spaces["labor_market"] = Mock(unemployment=0.5)
     return country
 
 
 def test_record_indicators_records_nominal_gdp(country_before_record):
     # Given
     country = country_before_record
-    country.gdp = 100
 
     # When
     country.record_indicators()
 
     # Then
-    assert country.log["gdp"][-1] == 100
+    assert country.log["gdp"][-1] == country.gdp
 
 
 def test_record_indicators_records_nominal_gdp(country_before_record):
     # Given
     country = country_before_record
-    country.inflation = 0.3
 
     # When
     country.record_indicators()
 
     # Then
-    assert country.log["inflation"][-1] == 0.3
+    assert country.log["inflation"][-1] == country.inflation
+
+
+def test_record_indicators_records_unemployment(country_before_record):
+    # Given
+    country = country_before_record
+    market = country.spaces["labor_market"]
+
+    # When
+    country.record_indicators()
+
+    # Then
+    assert country.log["unemployment"][-1] == market.unemployment
+
