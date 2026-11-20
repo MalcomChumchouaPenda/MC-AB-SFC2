@@ -664,3 +664,21 @@ def test_update_budget_history(govt):
 # ---------------------------------------------------
 #  OBSERVATION
 # ----------------------------------------------------
+
+
+@pytest.fixture
+def govt_before_record(govt):
+    # Given
+    govt.budget_deficit = 100
+    return govt
+
+
+def test_record_indicators_records_productivity(govt_before_record):
+    # Given
+    govt = govt_before_record
+
+    # When
+    govt.record_indicators()
+
+    # Then
+    assert govt.log["public_deficit"][-1] == govt.budget_deficit

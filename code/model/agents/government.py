@@ -176,3 +176,6 @@ class Government(EcoAgent):
     #
     # Observation
     #
+
+    def record_indicators(self):
+        self.record("public_deficit", self.budget_deficit)

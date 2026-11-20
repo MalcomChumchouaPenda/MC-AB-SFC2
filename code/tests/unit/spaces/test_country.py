@@ -1090,4 +1090,3 @@ def test_record_indicators_records_unemployment(country_before_record):
 
     # Then
     assert country.log["unemployment"][-1] == market.unemployment
-

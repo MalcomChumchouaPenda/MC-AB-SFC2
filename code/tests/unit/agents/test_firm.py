@@ -1057,13 +1057,7 @@ def test_exit_sets_all_roles_defaulted(firm_before_exit):
 
 
 @pytest.fixture
-def firm_before_record(
-    firm,
-    borrower_role,
-    company_role,
-    employer_role,
-    producer_role,
-):
+def firm_before_record(firm, producer_role):
     # Given
     producer_role.phi = 1.5
     return firm
