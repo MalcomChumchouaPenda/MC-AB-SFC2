@@ -15,55 +15,6 @@ def test_inherits_from_eco_role():
     assert issubclass(Employer, EcoRole)
 
 
-def test_initializes_wage():
-    # Given
-    agent, env = Mock(), Mock()
-
-    # When
-    role = Employer(agent, env)
-
-    # Then
-    assert role.wage == 0
-
-
-def test_initializes_labor():
-    # Given
-    agent, env = Mock(), Mock()
-
-    # When
-    role = Employer(agent, env)
-
-    # Then
-    assert role.labor == 0
-
-
-def test_initializes_labor_demand():
-    # Given
-    agent, env = Mock(), Mock()
-
-    # When
-    role = Employer(agent, env)
-
-    # Then
-    assert role.labor_demand == 0
-
-
-def test_initializes_defaulted():
-    # Given
-    agent, env = Mock(), Mock()
-
-    # When
-    role = Employer(agent, env)
-
-    # Then
-    assert role.defaulted is False
-
-
-# ---------------------------------------------------
-# PERCEPTION TESTS
-# ----------------------------------------------------
-
-
 @pytest.fixture
 def agent():
     # Given
@@ -80,6 +31,31 @@ def env():
 def role(agent, env):
     # Given
     return Employer(agent, env)
+
+
+def test_initializes_wage(role):
+    # Then
+    assert role.wage == 0
+
+
+def test_initializes_labor(role):
+    # Then
+    assert role.labor == 0
+
+
+def test_initializes_labor_demand(role):
+    # Then
+    assert role.labor_demand == 0
+
+
+def test_initializes_defaulted(role):
+    # Then
+    assert role.defaulted is False
+
+
+# ---------------------------------------------------
+# PERCEPTION TESTS
+# ----------------------------------------------------
 
 
 def test_get_unemployment(role, env):

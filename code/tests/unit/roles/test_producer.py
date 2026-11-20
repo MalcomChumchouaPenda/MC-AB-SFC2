@@ -16,99 +16,6 @@ def test_inherits_from_eco_role():
     assert issubclass(Producer, EcoRole)
 
 
-def test_initializes_price():
-    # Given
-    agent, env = Mock(), Mock()
-
-    # When
-    role = Producer(agent, env)
-
-    # Then
-    assert role.price == 0
-
-
-def test_initializes_phi():
-    # Given
-    agent, env = Mock(), Mock()
-
-    # When
-    role = Producer(agent, env)
-
-    # Then
-    assert role.phi == 0
-
-
-def test_initializes_inventories():
-    # Given
-    agent, env = Mock(), Mock()
-
-    # When
-    role = Producer(agent, env)
-
-    # Then
-    assert role.inventories == 0
-
-
-def test_initializes_output():
-    # Given
-    agent, env = Mock(), Mock()
-
-    # When
-    role = Producer(agent, env)
-
-    # Then
-    assert role.output == 0
-
-
-def test_initializes_sales():
-    # Given
-    agent, env = Mock(), Mock()
-
-    # When
-    role = Producer(agent, env)
-
-    # Then
-    assert role.sales == 0
-
-
-def test_initializes_variety():
-    # Given
-    agent, env = Mock(), Mock()
-
-    # When
-    role = Producer(agent, env)
-
-    # Then
-    assert role.variety is None
-
-
-def test_initializes_defaulted():
-    # Given
-    agent, env = Mock(), Mock()
-
-    # When
-    role = Producer(agent, env)
-
-    # Then
-    assert role.defaulted is False
-
-
-def test_initializes_rd_expenditure():
-    # Given
-    agent, env = Mock(), Mock()
-
-    # When
-    role = Producer(agent, env)
-
-    # Then
-    assert role.rd == 0
-
-
-# ---------------------------------------------------
-# PERCEPTIONS TESTS
-# ----------------------------------------------------
-
-
 @pytest.fixture
 def agent():
     # Given
@@ -125,6 +32,51 @@ def env():
 def role(agent, env):
     # Given
     return Producer(agent, env)
+
+
+def test_initializes_price(role):
+    # Then
+    assert role.price == 0
+
+
+def test_initializes_phi(role):
+    # Then
+    assert role.phi == 0
+
+
+def test_initializes_inventories(role):
+    # Then
+    assert role.inventories == 0
+
+
+def test_initializes_output(role):
+    # Then
+    assert role.output == 0
+
+
+def test_initializes_sales(role):
+    # Then
+    assert role.sales == 0
+
+
+def test_initializes_variety(role):
+    # Then
+    assert role.variety is None
+
+
+def test_initializes_defaulted(role):
+    # Then
+    assert role.defaulted is False
+
+
+def test_initializes_rd_expenditure(role):
+    # Then
+    assert role.rd == 0
+
+
+# ---------------------------------------------------
+# PERCEPTIONS TESTS
+# ----------------------------------------------------
 
 
 def test_get_average_price(role, env):

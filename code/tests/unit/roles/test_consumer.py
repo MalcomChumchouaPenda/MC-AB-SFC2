@@ -34,12 +34,6 @@ def role(agent, env):
 
 
 def test_initializes_preference(role):
-    # Given
-    agent, env = Mock(), Mock()
-
-    # When
-    role = Consumer(agent, env)
-
     # Then
     assert role.preference is None
 

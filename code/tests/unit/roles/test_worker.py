@@ -15,22 +15,6 @@ def test_inherits_from_eco_role():
     assert issubclass(Worker, EcoRole)
 
 
-def test_initializes_unit_labor_supply():
-    # Given
-    agent, env = Mock(), Mock()
-
-    # When
-    role = Worker(agent, env)
-
-    # Then
-    assert role.labor_supply == 1.0
-
-
-# ---------------------------------------------------
-# PERCEPTION TESTS
-# ----------------------------------------------------
-
-
 @pytest.fixture
 def agent():
     # Given
@@ -47,6 +31,16 @@ def env():
 def role(agent, env):
     # Given
     return Worker(agent, env)
+
+
+def test_initializes_unit_labor_supply(role):
+    # Then
+    assert role.labor_supply == 1.0
+
+
+# ---------------------------------------------------
+# PERCEPTION TESTS
+# ----------------------------------------------------
 
 
 def test_get_labor_sold(role):

@@ -15,33 +15,6 @@ def test_inherits_from_eco_role():
     assert issubclass(DepositBank, EcoRole)
 
 
-def test_initializes_defaulted():
-    # Given
-    agent, env = Mock(), Mock()
-
-    # When
-    role = DepositBank(agent, env)
-
-    # Then
-    assert role.defaulted is False
-
-
-def test_get_deposit_rate_from_env(role, env):
-    # Given
-    env.deposit_rate = 0.01
-
-    # When
-    perceived = role.get_deposit_rate()
-
-    # Then
-    assert perceived == 0.01
-
-
-# ---------------------------------------------------
-# PERCEPTION TESTS
-# ----------------------------------------------------
-
-
 @pytest.fixture
 def agent():
     # Given
@@ -58,6 +31,27 @@ def env():
 def role(agent, env):
     # Given
     return DepositBank(agent, env)
+
+
+def test_initializes_defaulted(role):
+    # Then
+    assert role.defaulted is False
+
+
+# ---------------------------------------------------
+# PERCEPTION TESTS
+# ----------------------------------------------------
+
+
+def test_get_deposit_rate_from_env(role, env):
+    # Given
+    env.deposit_rate = 0.01
+
+    # When
+    perceived = role.get_deposit_rate()
+
+    # Then
+    assert perceived == 0.01
 
 
 def test_find_deposits_from_env(role, env):
